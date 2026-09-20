@@ -1,0 +1,488 @@
+{
+  "model": "local/qwen#fast",
+  "update": "disable",
+  "share": "disabled",
+  "providers": {
+    "local": {
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://127.0.0.1:8000/v1"
+      },
+      "models": {
+        "qwen": {
+          "modelID": "Qwen3.8-27B-oQ5e-mtp",
+          "compatibility": {
+            "reasoningField": "reasoning_content",
+            "maxTokensField": "max_tokens"
+          },
+          "capabilities": {
+            "tools": true,
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          },
+          "body": {
+            "max_tokens": 8192,
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0.0,
+            "presence_penalty": 0.0,
+            "repetition_penalty": 1.0,
+            "chat_template_kwargs": {
+              "enable_thinking": true,
+              "preserve_thinking": true,
+              "reasoning_effort": "xhigh"
+            }
+          },
+          "variants": [
+            {
+              "id": "low",
+              "body": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "low"
+                }
+              },
+              "settings": {
+                "baseURL": "http://127.0.0.1:8000/v1"
+              }
+            },
+            {
+              "id": "medium",
+              "body": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "medium"
+                }
+              },
+              "settings": {
+                "baseURL": "http://127.0.0.1:8000/v1"
+              }
+            },
+            {
+              "id": "xhigh",
+              "body": {
+                "chat_template_kwargs": {
+                  "reasoning_effort": "xhigh"
+                }
+              },
+              "settings": {
+                "baseURL": "http://127.0.0.1:8000/v1"
+              }
+            },
+            {
+              "id": "fast",
+              "body": {
+                "temperature": 0.7,
+                "top_p": 0.8,
+                "presence_penalty": 1.5,
+                "chat_template_kwargs": {
+                  "enable_thinking": false
+                }
+              },
+              "settings": {
+                "baseURL": "http://127.0.0.1:8000/v1"
+              }
+            }
+          ],
+          "settings": {
+            "baseURL": "http://127.0.0.1:8000/v1"
+          },
+          "package": "@opencode/ai/providers/openai-compatible",
+          "name": "Qwen3.8-27B-oQ5e-mtp"
+        }
+      }
+    }
+  },
+  "compaction": {
+    "auto": true,
+    "buffer": 12288,
+    "keep": {
+      "tokens": 4096
+    }
+  },
+  "permissions": [
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "subagent",
+      "resource": "*",
+      "effect": "deny"
+    },
+    {
+      "action": "webfetch",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "search_*",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "browser_*",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "browser_browser_snapshot",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "browser_browser_find",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "browser_browser_take_screenshot",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "browser_browser_run_code_unsafe",
+      "resource": "*",
+      "effect": "deny"
+    },
+    {
+      "action": "peekaboo_*",
+      "resource": "*",
+      "effect": "ask"
+    }
+  ],
+  "default_agent": "plan",
+  "websearch": false,
+  "snapshots": true,
+  "mcp": {
+    "servers": {
+      "search": {
+        "type": "remote",
+        "url": "https://mcp.exa.ai/mcp?tools=web_search_exa,web_fetch_exa,web_search_advanced_exa",
+        "oauth": false,
+        "codemode": false
+      },
+      "browser": {
+        "type": "local",
+        "command": [
+          "__NODE__",
+          "__ROOT__/browser/node_modules/@playwright/mcp/cli.js",
+          "--browser",
+          "chrome",
+          "--isolated",
+          "--caps",
+          "vision,pdf",
+          "--no-webmcp",
+          "--image-responses",
+          "allow",
+          "--output-dir",
+          "__ROOT__/browser-output",
+          "--file-paths",
+          "absolute"
+        ],
+        "codemode": false
+      }
+    }
+  },
+  "agents": {
+    "build": {
+      "model": "local/qwen#fast",
+      "permissions": [
+        {
+          "action": "subagent",
+          "resource": "explore",
+          "effect": "allow"
+        },
+        {
+          "action": "subagent",
+          "resource": "general",
+          "effect": "allow"
+        },
+        {
+          "action": "subagent",
+          "resource": "reviewer",
+          "effect": "allow"
+        },
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "search_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "execute",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+    "plan": {
+      "model": "local/qwen#fast",
+      "permissions": [
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "browser",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "peekaboo_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "shell",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "explore",
+          "effect": "allow"
+        },
+        {
+          "action": "execute",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+    "explore": {
+      "model": "local/qwen#medium",
+      "permissions": [
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "browser",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "peekaboo_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "shell",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "search_*",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "execute",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+    "general": {
+      "model": "local/qwen#medium",
+      "permissions": [
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "browser",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "peekaboo_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+    "reviewer": {
+      "mode": "all",
+      "description": "Read-only review for correctness and regressions",
+      "model": "local/qwen#xhigh",
+      "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
+      "permissions": [
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "browser",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "peekaboo_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "shell",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "search_*",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "execute",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+    "title": {
+      "model": "local/qwen#low"
+    },
+    "browse": {
+      "model": "local/qwen#fast",
+      "permissions": [
+        {
+          "action": "subagent",
+          "resource": "explore",
+          "effect": "allow"
+        },
+        {
+          "action": "subagent",
+          "resource": "general",
+          "effect": "allow"
+        },
+        {
+          "action": "subagent",
+          "resource": "reviewer",
+          "effect": "allow"
+        },
+        {
+          "action": "question",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "execute",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ],
+      "mode": "primary",
+      "description": "Browser interaction and research using configured tools"
+    }
+  },
+  "commands": {
+    "research": {
+      "agent": "plan",
+      "model": "local/qwen#xhigh",
+      "subagent": false,
+      "template": "Research $ARGUMENTS using keyless search and webfetch. Open primary sources, compare evidence and dates, cite URLs, and identify uncertainty. If search is rate limited, stop and explain; do not authenticate a paid provider."
+    },
+    "review": {
+      "agent": "reviewer",
+      "model": "local/qwen#xhigh",
+      "subagent": false,
+      "template": "Review current changes for correctness, regressions and missing tests. Report actionable findings with file and line references. Do not edit files. $ARGUMENTS"
+    },
+    "deliver": {
+      "agent": "build",
+      "model": "local/qwen#xhigh",
+      "subagent": false,
+      "template": "Deliver $ARGUMENTS. First state the smallest useful milestone and observable acceptance criteria. Inspect relevant code and tests, implement that milestone, run suitable checks, and inspect the real output or browser UI when relevant. Preserve user changes. After two repair cycles without new evidence, summarize the blocker and next hypothesis instead of repeating the same attempt. Use one foreground child at a time. Report actual results and unresolved risks; never weaken tests just to pass. This is a workflow instruction, not an enforced execution budget."
+    },
+    "handoff": {
+      "agent": "build",
+      "model": "local/qwen#medium",
+      "subagent": false,
+      "template": "Write or update a concise TASK.md when file edits are authorized; otherwise return the handoff in chat. Include goal, acceptance checks, completed work, actual test results, failed approaches, current blocker and single next step. Preserve useful existing content and omit secrets. Do not change implementation files. $ARGUMENTS"
+    },
+    "audit": {
+      "agent": "build",
+      "model": "local/qwen#xhigh",
+      "subagent": false,
+      "template": "Audit $ARGUMENTS without modifying files. Launch exactly one new reviewer subagent with background:false and no sessionID. Supply acceptance criteria, changed paths, the raw diff and actual check results. Wait for its result. Report actionable findings with file and line references; do not fix them."
+    }
+  },
+  "plugins": [
+    "-opencode.models.dev",
+    "-opencode.provider.*",
+    "opencode.config.policy",
+    "-opencode.config.compatibility",
+    "-opencode.browser"
+  ],
+  "experimental": {
+    "policies": [
+      {
+        "action": "provider.use",
+        "resource": "*",
+        "effect": "deny"
+      },
+      {
+        "action": "provider.use",
+        "resource": "local",
+        "effect": "allow"
+      }
+    ]
+  },
+  "skills": [
+    ".agents/skills",
+    ".claude/skills"
+  ]
+}

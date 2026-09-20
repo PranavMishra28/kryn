@@ -1,0 +1,35 @@
+#!/bin/sh
+# Source-kit entry point: the existing installer owns all installation behavior.
+set -eu
+kryn_source=$(CDPATH= cd -P "$(dirname "$0")" && pwd)
+[ -f "$kryn_source/tools/localai.py" ] && [ -f "$kryn_source/setup/accepted-profile.json" ] || {
+  echo 'KRYN: run bootstrap from the complete source kit.' >&2; exit 1;
+}
+kryn_value=
+for kryn_arg do
+  if [ -n "$kryn_value" ]; then kryn_value=; continue; fi
+  case "$kryn_arg" in
+    --apply|--help) ;;
+    --node|--uv) kryn_value=required ;;
+    --node=*|--uv=*) ;;
+    *) echo 'Usage: bootstrap [--apply] [--node PATH] [--uv PATH]' >&2; exit 2 ;;
+  esac
+done
+[ -z "$kryn_value" ] || { echo 'KRYN: missing dependency path.' >&2; exit 2; }
+kryn_python=${KRYN_PYTHON:-}
+if [ -n "$kryn_python" ]; then
+  "$kryn_python" -E -B -c 'import sys; raise SystemExit(sys.version_info < (3, 13))' || {
+    echo 'KRYN: KRYN_PYTHON must name a working Python 3.13+ executable.' >&2; exit 1;
+  }
+else
+  for kryn_candidate in python3.13 python3.14 python3; do
+    kryn_found=$(command -v "$kryn_candidate" || true)
+    if [ -n "$kryn_found" ] && "$kryn_found" -E -B -c 'import sys; raise SystemExit(sys.version_info < (3, 13))' 2>/dev/null; then
+      kryn_python=$kryn_found; break
+    fi
+  done
+  [ -n "$kryn_python" ] || {
+    echo 'KRYN: install Python 3.13+ or set KRYN_PYTHON to its executable path.' >&2; exit 1;
+  }
+fi
+exec "$kryn_python" -E -B "$kryn_source/tools/localai.py" init --profile "$kryn_source/setup/accepted-profile.json" "$@"

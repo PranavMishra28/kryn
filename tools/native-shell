@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "${LOCALAI_SHELL_PYTHON:?missing owned interpreter}" -B "${LOCALAI_SHELL_HELPER:?missing owned helper}" --guarded-shell "$@"

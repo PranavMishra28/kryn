@@ -1,0 +1,62 @@
+{
+  "01": {
+    "category": "Repository comprehension",
+    "prompt": "Use Plan mode. Inspect this repository without writing or editing any files. Return one JSON object directly in your final chat answer, with exactly these keys: cli, store, validator, summary (module:symbol strings); http_chain (three module:symbol strings for JSON POST entry handling, validation and persistence); all, day_one, alpha (objects with count and minutes). Identify the CSV batch validator, not just the single-row helper. Calculate all rows, September 1 in [2026-09-01,2026-09-02), and exact project alpha. Use existing data/entries.csv. Return only the JSON object; the evaluator will copy your literal answer to answer.json without corrections.",
+    "manual": []
+  },
+  "02": {
+    "category": "Bug repair",
+    "prompt": "Fix the date-range boundary defect. summarize(rows,start=None,end=None,project=None) must use start-inclusive/end-exclusive ranges, preserve zero-minute rows, return count/minutes, and reject invalid canonical ISO dates. Preserve all existing behavior and tests. Check empty ranges and start=end; do not alter source fixture CSV or existing tests.",
+    "manual": []
+  },
+  "03": {
+    "category": "Multi-file feature",
+    "prompt": "Implement exact case-sensitive project filtering consistently in report.summarize(project=...), CLI --project, and GET /api/summary?project=. Without a filter preserve current behavior; unknown projects return count=0/minutes=0. Support project names containing spaces, commas and Unicode. Keep all existing tests and data unchanged. Add focused tests and run them.",
+    "manual": []
+  },
+  "04": {
+    "category": "Refactor",
+    "prompt": "Remove duplicated CSV parsing/validation from cli.py and server.py. Both must import and use taskboard_lite.parse.parse_rows; JSON entry validation must use the shared validate helper. Neither entrypoint should define its own parse_rows/validate function. Preserve public behavior: CSV including BOM/CRLF/quoted commas/Unicode, invalid CLI exit 2, HTTP errors 400, and atomic batch imports including duplicates against existing rows. Do not alter existing tests or data.",
+    "manual": []
+  },
+  "05": {
+    "category": "Debugging from failure output",
+    "prompt": "Read failure.txt, reproduce the failing CLI command, diagnose and repair BOM CSV input. Preserve non-BOM UTF-8, CRLF, quoted commas, Unicode, zero-minute rows, validation failures and atomic HTTP import. Keep original fixtures/tests intact. Give the root cause and real test results in your final answer.",
+    "manual": []
+  },
+  "06": {
+    "category": "Browser-backed application",
+    "prompt": "Complete the browser entry form using the existing API. Save valid entries, show readable accessible validation/failure feedback, preserve input after a temporary HTTP 503, and clear input only after successful save. Retry must create exactly one entry. Verify saved data after reload. Use a separate browser session at 390x844 and 1280x800, inspect screenshots, console and network. Do not install dependencies. Ask the evaluator to create the disposable DB's .fail-next marker for the controlled 503; do not fake successful evidence. Save artifacts inside artifacts/. Existing API and original data/tests must remain intact.",
+    "manual": ["isolated_browser", "valid_form_and_reload", "invalid_form_accessible_error", "503_preserves_input_single_retry", "responsive_screenshots", "console_network_inspected"]
+  },
+  "07": {
+    "category": "Current-information research",
+    "prompt": "Research latest stable oMLX and Microsoft Playwright MCP releases published by 2026-09-19T00:00:00Z. Search, then open original release sources. Write research.json as a list of two objects with project (omlx or playwright-mcp), version (exact release tag), published_at (UTC API timestamp), source_url (official release URL), caveat (a concrete relevant compatibility caveat) and caveat_source (official URL). Preserve source URLs and record quota/errors honestly. Do not read evaluator reference snapshots. A local simulated 429 is not proof of Exa availability.",
+    "manual": ["live_search_and_source_fetch", "caveats_supported_by_sources", "quota_error_behavior"]
+  },
+  "08": {
+    "category": "Vision",
+    "prompt": "Phase A: the evaluator attaches vision.png in a tools-disabled turn. Interpret the image and return vision-answer.json with exactly status, pending and clipped_control. Do not inspect image-generation code, DOM, OCR output or evaluator references. Phase B: diagnose and repair the local app's narrow-viewport clipped Save button. Verify its bounds and clickability at 390x844 and 1280x800. Preserve the existing app behavior and save screenshots. The supplied PNG is a deterministic synthetic UI image, not a recording of this Mac.",
+    "manual": ["actual_model_image_input", "tools_disabled_vision_turn", "responsive_button_bounds_clickable"]
+  },
+  "09": {
+    "category": "Tool-call endurance",
+    "prompt": "This task has ten sequential turns supplied individually by the evaluator. Only change data/endurance.csv as requested. Each turn: inspect current rows, append the requested row, run the existing tests, inspect the Git diff and report the exact count/minutes in endurance.csv. Do not pre-complete unreleased turns. Keep original application files and data/entries.csv unchanged. The evaluator records each intermediate checkpoint externally.",
+    "manual": ["ten_sequential_turns", "file_shell_test_tool_results_complete"]
+  },
+  "10": {
+    "category": "Long-context work",
+    "prompt": "Complete the maintenance task described in the supplied context corpus. Collect its distributed requirements and implement them consistently in report/CLI/API while preserving original behavior. Write context-summary.json with the corpus's report_label, zero_minutes and project_match values. Use the actual provided context, not evaluator references. Do not alter existing tests/data. The evaluator controls active context size and native compaction; report missing context or memory/runtime errors honestly.",
+    "manual": ["measured_context_tokens", "sustained_work_memory_swap", "cache_stream_evidence", "native_compaction_and_constraint_retention"]
+  },
+  "11": {
+    "category": "Failure isolation",
+    "prompt": "Evaluator-operated safety test. First record owned local runtime PID/port and resolved local providers. Stop only that runtime, issue a new uncached assistant request, and require an explicit local failure with bounded retries. Record all inference destination/egress evidence including helper agents; any cloud inference attempt is a hard failure. Restore the same runtime and confirm local recovery. Do not kill processes by broad name, stop unrelated services, or treat absent credentials/a single socket snapshot as proof. The candidate should only report the local error; the evaluator performs process control.",
+    "manual": ["owned_runtime_only_stopped", "bounded_explicit_local_failure", "complete_no_cloud_inference_evidence", "local_restart_recovery"]
+  },
+  "12": {
+    "category": "Long-running representative project",
+    "prompt": "Develop TaskboardLite in ordered stages. PLAN: inspect and record completion criteria without implementation edits. BUILD: support CSV file upload via POST /api/import with full validation and atomic duplicate rejection, persistent editing via PATCH /api/entries/{id}, exact project filtering, and GET /api/export round-trip. Existing seed data survives. Successful imports return 201/count; edits return 200/row; invalid inputs return 400/error. Complete the corresponding browser controls without new dependencies. Verify a controlled recoverable 503, reload persistence, file upload, filter/edit/export, responsive views, console/network and all tests. AUDIT: use one fresh read-only reviewer given criteria, diff and actual test results. HANDOFF: record completed/unresolved items and exact next action; cross actual native compaction and a fresh session before a final change/verification. Preserve all evidence, failures and elapsed duration; do not claim long duration from idle time.",
+    "manual": ["plan_build_separation", "browser_upload_edit_filter_export", "503_recovery", "fresh_review_readonly", "native_compaction", "new_session_handoff", "representative_duration_recorded"]
+  }
+}

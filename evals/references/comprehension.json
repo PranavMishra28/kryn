@@ -1,0 +1,23 @@
+{
+  "cli": "taskboard_lite.cli:main",
+  "store": "taskboard_lite.store:Store",
+  "validator": "taskboard_lite.parse:parse_rows",
+  "summary": "taskboard_lite.report:summarize",
+  "http_chain": [
+    "taskboard_lite.server:Handler.do_POST",
+    "taskboard_lite.parse:validate",
+    "taskboard_lite.store:Store.add"
+  ],
+  "all": {
+    "count": 3,
+    "minutes": 75
+  },
+  "day_one": {
+    "count": 2,
+    "minutes": 30
+  },
+  "alpha": {
+    "count": 2,
+    "minutes": 75
+  }
+}

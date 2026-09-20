@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "release_status": "NOT_READY",
+  "scope": "Preserved historical model trials, offline source checks and actual installed command startup/outage/recovery checks. Final representative model workflow did not pass; no frontier parity.",
+  "profile": {
+    "model": "Qwen3.8-27B-oQ5e-mtp",
+    "revision": "fb646bbfbdce4caa26fa2262f0ef7953708f66d9",
+    "memory_gib": 30,
+    "context": 32768,
+    "max_output": 8192,
+    "mtp": false
+  },
+  "endurance": {
+    "status": "PASS_WITH_ONE_PREDISPATCH_OPERATOR_RECOVERY",
+    "turns": 10,
+    "evidence_sha256": "11182bc94a23e8cae0893897711c161befe12a229ff6e2c15d2f4676cf62d521",
+    "sum_model_turn_driver_wall_seconds": 744.212,
+    "including_failed_predispatch_driver_wall_seconds": 744.742,
+    "operator_launch_failures": 1,
+    "operator_recoveries": 1,
+    "model_trajectory_interventions": 0,
+    "tool_calls": 45,
+    "tool_errors": 0,
+    "resource_samples": 363,
+    "max_swap_growth_bytes": 0,
+    "max_sampled_phys_footprint_bytes": 28151234688,
+    "generations": {
+      "primary": 54,
+      "compaction": 1
+    }
+  },
+  "stages": [
+    {
+      "case": "coding_tests",
+      "status": "COMPLETED_28_TESTS_WITH_REPORTING_LIMITATIONS",
+      "evidence_sha256": "0a8908c18e88ea43aa65809ae0f3265760f9db05f033d829e934d21a3bc27c1b",
+      "wall_seconds": 834.018,
+      "completed": true,
+      "model_completed": true,
+      "operator_interventions": 0,
+      "automatic_interventions": 0,
+      "sample_count": 401,
+      "max_sampled_listener_phys_footprint_bytes": 28292104488,
+      "swap_peak_growth_bytes": 0,
+      "actual_tests_passed": 28
+    },
+    {
+      "case": "mobile_browser",
+      "status": "COMPLETED_SCOPED_MOBILE_RECOVERY",
+      "evidence_sha256": "cd9cafe3b64aa9cb0999752d8009a33d432bdaf42aedd76583f33b6aef5df59b",
+      "wall_seconds": 698.952,
+      "completed": true,
+      "model_completed": true,
+      "operator_interventions": 0,
+      "automatic_interventions": 0,
+      "sample_count": 336,
+      "max_sampled_listener_phys_footprint_bytes": 28786376880,
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "case": "desktop_30_gib",
+      "status": "FAIL_RESOURCE_ABORT",
+      "evidence_sha256": "d3f8d695d4e9f9f013df8a8063d7d52656589a8b1073245c0e381d399e939fd7",
+      "wall_seconds": 391.248,
+      "completed": false,
+      "model_completed": false,
+      "operator_interventions": 0,
+      "automatic_interventions": 1,
+      "sample_count": 188,
+      "max_sampled_listener_phys_footprint_bytes": 29019177064,
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "case": "desktop_28_gib",
+      "status": "FAIL_RESOURCE_ABORT",
+      "evidence_sha256": "0f1658f8c9cb601d129c4e9b6827bb568d0d2be0292ae130ece8f7b86454dbc2",
+      "wall_seconds": 688.897,
+      "completed": false,
+      "model_completed": false,
+      "operator_interventions": 0,
+      "automatic_interventions": 1,
+      "sample_count": 331,
+      "max_sampled_listener_phys_footprint_bytes": 28532391872,
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "case": "mtp_off_initial",
+      "status": "FAIL_RESOURCE_ABORT_NO_ON",
+      "condition": "Original observed foreground workload",
+      "evidence_sha256": "840fe32dac375cf379fd3c81407bf7dcfbd7ce49962e0d378270604c047b0b8d",
+      "wall_seconds": 14.833,
+      "tools": 0,
+      "swap_growth_bytes": 0,
+      "automatic_interventions": 1
+    },
+    {
+      "case": "mtp_off_reduced_foreground",
+      "status": "FAIL_RESOURCE_ABORT_NO_ON",
+      "condition": "After the user reduced foreground applications",
+      "evidence_sha256": "c9979fa111867399f65f53c5ada16cd2cc45dbd9449e1bdb955e087953a21ab3",
+      "wall_seconds": 16.175,
+      "tools": 0,
+      "swap_growth_bytes": 0,
+      "automatic_interventions": 1
+    }
+  ],
+  "mtp_comparison": {
+    "status": "INCOMPLETE",
+    "on_runs": 0,
+    "acceleration_claim": false,
+    "scope": "Two OFF arms aborted under separate host conditions. No completed OFF/ON comparison."
+  },
+  "offline_validation": {
+    "status": "PASS",
+    "tests": 97,
+    "wall_seconds": 6.533,
+    "scope": "Copied-kit installer/launcher/bootstrap/improvement controls, with fake accounts and deterministic frozen-checker fixtures. No runtime, browser or model inference.",
+    "test_receipt_sha256": "8db686291349c48bb7cd23e2d61a97ed33518d36ef14094e29449a3244b94946",
+    "source_set_sha256": "828285956d2d82944f3c9ed190c5d34660541467cc95a573afd356e46966af3b",
+    "code_unchanged_since_tested_copy": true
+  },
+  "limits": [
+    "Sampled memory peaks are process-wide and may miss transients.",
+    "A completed driver does not establish every task criterion.",
+    "No sustained desktop-browser profile is qualified; both tested ceilings encountered pressure.",
+    "Historical failures are preserved; no safe cache/native tier or MTP acceleration is claimed.",
+    "Actual UI recovery sent no model prompt and does not close representative-workflow acceptance.",
+    "Controlled503 outage tested startup metadata unavailability, not an in-flight model stream.",
+    "Continuous improvement is not active; tested manual controls are not a complete automated loop."
+  ],
+  "installed_product_checks": {
+    "fresh_product_start": {
+      "evidence_sha256": "b6d8d095cecda1ae5ac6da01415653f4bedd219ccd3cc21bf5ee8e42caca0201",
+      "status": "FAIL_RESOURCE_PREFLIGHT",
+      "wall_seconds": 1.977,
+      "pressure_warning_samples": 1,
+      "swap_growth_bytes": 0,
+      "tui_started": false,
+      "prompt_sent": false,
+      "seed_files_unchanged": 16
+    },
+    "local_outage": {
+      "evidence_sha256": "8bdf7619bd47f991442214b5b4433b44344e3516ac72c380ecbdb85180ea8905",
+      "status": "PASS_SCOPED_PREINFERENCE_FAILURE",
+      "actual_commands": [
+        "kryn",
+        "kryn bench"
+      ],
+      "http_requests": {
+        "GET_health": 2,
+        "POST": 0
+      },
+      "autostart_prevented": true,
+      "test_listener_removed": true
+    },
+    "ui_recovery": {
+      "evidence_sha256": "174d7816d739ade0f0eef5063cddc4266ed03c5364fea12907ed26d474fda191",
+      "status": "PASS_NO_GENERATION_UI_RECOVERY",
+      "autostart_verified": true,
+      "normal_tui_exit_code": 0,
+      "recorded_task_status": "incomplete",
+      "model_requests": 0,
+      "known_client_pids_gone": 4,
+      "seed_files_unchanged": 16
+    },
+    "deep_doctor": {
+      "evidence_sha256": "049572975ecb8b4f9650a356d58f13bb3f5aeccb9fa9c57a8afbb74b87ae5c09",
+      "status": "PASS",
+      "wall_seconds": 10.176,
+      "model_files_rehashed": 17,
+      "local_inventory": "pass",
+      "browser_mcp": "connected",
+      "search_mcp": "connected"
+    },
+    "final_state": {
+      "evidence_sha256": "e020b822d129b0cc513994628d8172cdb59d18a80f11d5f71754978667b6b4c7",
+      "status": "STOPPED_RECOVERABLE",
+      "runtime_port_closed": true,
+      "pressure_level": 1,
+      "backup_bytes_verified": true,
+      "unrelated_ollama_preserved": true
+    },
+    "independent_product_review": {
+      "evidence_sha256": "afaf41a84a6516fe2e7128c5f4c5b518f1f3d5cbd65115e9c96fedc538333683"
+    }
+  },
+  "continuous_improvement": {
+    "status": "INCOMPLETE",
+    "outcome_collection_verified": true,
+    "unsupported_proposal_refusal_verified": true,
+    "fixture_promotion_rejection_rollback_verified": true,
+    "active_skill": false,
+    "autonomous_reflection": false,
+    "automatic_evaluation_dispatch": false,
+    "continuous_regression_monitoring": false,
+    "foreground_preemption": false,
+    "live_matched_skill_benefit": false
+  },
+  "unresolved_mandatory_gates": [
+    "cold_load_and_sustained_resource_stability",
+    "fresh_representative_daily_coding_browser_review_handoff",
+    "sustained_32k_context",
+    "completed_mtp_off_on_comparison",
+    "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+  ]
+}
