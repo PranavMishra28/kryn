@@ -19,7 +19,7 @@ import urllib.request
 ROOT = Path.home() / "Library/Application Support/LocalAI"
 PROJECT = Path(__file__).resolve().parents[1]
 BINARY = ROOT / "opencode/2.0.10/package/bin/opencode"
-MODEL_ID = "Qwen3.8-27B-oQ5e-mtp"
+MODEL_ID = "Qwen3.8-27B-oQ4e-mtp"
 SHELL_SHIM = Path(__file__).absolute().with_name("native-shell")
 SHELL_SHIM_BYTES = b'#!/bin/sh\nexec "${LOCALAI_SHELL_PYTHON:?missing owned interpreter}" -B "${LOCALAI_SHELL_HELPER:?missing owned helper}" --guarded-shell "$@"\n'
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reviewed setup recipe, not an agent harness. Default: read-only preflight.
 
-Python 3.13+, macOS 26/27 ARM64, at least 48 GiB RAM. See plan.md.
+Python 3.13+, macOS 26/27 ARM64, at least 48 GiB RAM. See README.md.
 No sudo, shell startup edits, service launches or automatic removal of existing files.
 Core --apply copies only the verified user-space app and deploys the daily client.
 """
@@ -200,17 +200,18 @@ def runtime_settings(root, profile=None):
             "model_fallback": False}, "scheduler": {"max_concurrent_requests": 1},
             "memory": {"prefill_memory_guard": True, "memory_guard_tier": "custom",
             "memory_guard_custom_ceiling_gb": profile["memory_gib"], "soft_threshold": 0.85, "hard_threshold": 0.95},
+            "idle_timeout": {"idle_timeout_seconds": 300},
             "cache": {"enabled": True, "hot_cache_only": False,
             "ssd_cache_max_size": "8GB", "hot_cache_max_size": "0"},
             "huggingface": {"hf_cache_enabled": False}}
 
 
 def model_settings(profile=None):
-    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 32768, "max_tokens": 8192,
+    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 16384, "max_tokens": 4096,
             "enable_thinking": True, "preserve_thinking": True, "mtp_enabled": False,
             "mtp_num_draft_tokens": 3, "vlm_mtp_enabled": False, "dflash_enabled": False,
             "specprefill_enabled": False, "turboquant_kv_enabled": False,
-            "qwen35_ane_prefill_enabled": False, "is_pinned": False}}}
+            "qwen35_ane_prefill_enabled": False, "is_pinned": False, "is_default": True}}}
 
 
 def launcher(root):
@@ -429,7 +430,7 @@ def main():
     if not args.apply:
         print("READ-ONLY preflight passed. No downloads, writes or installations performed.")
         print("With --apply and --profile: core verifies/downloads the selected model, installs the user app and daily client.")
-        print("Documents/desktop phases install only their named optional packages. Read plan.md first.")
+        print("Documents/desktop phases install only their named optional packages. Read README.md first.")
         return
     env = os.environ.copy()
     env.update({"PATH": str(node.parent) + os.pathsep + env.get("PATH", ""),

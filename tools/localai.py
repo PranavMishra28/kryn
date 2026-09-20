@@ -28,11 +28,11 @@ RUNTIME = "http://127.0.0.1:8000"
 BASE_URL = RUNTIME + "/v1"
 PACKAGE = "@opencode/ai/providers/openai-compatible"
 VARIANTS = {"fast", "low", "medium", "xhigh"}
-REVISION = "fb646bbfbdce4caa26fa2262f0ef7953708f66d9"
+REVISION = "c41ed507f1b16320942a1e9ce340e71d2692dee2"
 REPOSITORY = "gcoli/" + MODEL_ID
-MODEL_PARENT = "challenger/models"
-SERVER_CONTEXT = 32768
-MEMORY_GIB = 30
+MODEL_PARENT = "daily/models"
+SERVER_CONTEXT = 16384
+MEMORY_GIB = 24
 OMLX = Path.home() / "Applications/oMLX.app/Contents/MacOS/omlx-cli"
 CONTROL = Path.home() / "Library/Application Support/oMLX/control.sock"
 POLICY = [{"action": "provider.use", "resource": "*", "effect": "deny"},
@@ -99,7 +99,6 @@ def validate_owned_config(config):
     require(set(models) == {"qwen"}, "Owned config must contain only model local/qwen")
     validate_route(providers["local"], models["qwen"])
     require(local_reference(config.get("model")), "Default model must be local/qwen")
-    require(config.get("default_agent") == "plan", "Default agent must be Plan")
     validate_defaults(config, expected_profile)
     rules = [p for p in config.get("experimental", {}).get("policies", [])
              if p.get("action") == "provider.use"]

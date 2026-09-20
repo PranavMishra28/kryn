@@ -1,23 +1,44 @@
 {
-  "schema": 1,
-  "snapshot": "kryn-2026-09-20-audit",
+  "schema": 2,
+  "snapshot": "kryn-2026-09-20-daily-q4",
   "release_status": "NOT_READY",
-  "created_utc": "2026-09-20T20:39:06.541943+00:00",
-  "immutable_scope": "This file binds the exact source snapshot. The Git commit binds this manifest; future changes require a new snapshot. No signature or qualified release is implied.",
-  "release_window": {
-    "start_utc": "2026-09-20T19:54:29Z",
-    "deadline_utc": "2026-09-20T21:24:29Z"
+  "daily_use_status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
+  "unresolved_mandatory_gates": [
+    "sustained_32k_context",
+    "completed_mtp_off_on_comparison",
+    "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+  ],
+  "created_utc": "2026-09-20T22:01:43.731697+00:00",
+  "scope": "Installed supervised local coding on the tested host, with interventions and limits recorded. Not a qualification of the older complete frontier/automation target.",
+  "immutable_scope": "The Git commit binds this manifest and its exact source hashes. Subsequent changes require another snapshot. No signature is implied.",
+  "previous_snapshot": {
+    "commit": "d0a3f6e81c7e664cfc69631885796c22083b486f",
+    "manifest_sha256": "d677dd9ece20ed5ce3489c943752a41df4cc3803d604ac2f0358c20407e7b928",
+    "release_status": "NOT_READY",
+    "closed_historical_release_window": {
+      "start_utc": "2026-09-20T19:54:29Z",
+      "deadline_utc": "2026-09-20T21:24:29Z"
+    }
   },
-  "installed_client_release": "156185af1a020a28",
+  "installed_client_release": "77b098cefea64a1b",
   "tested_hardware": {
     "chip": "Apple M4 Max",
     "gpu_cores": 40,
     "unified_memory_gib": 48,
     "macos": "26.6.2",
     "build": "25G83",
-    "qualification": "FAILED_RESOURCE_GATES"
+    "qualification": "SUPERVISED_DAILY_CODING_WITH_RECORDED_INTERVENTIONS"
   },
-  "qualified_hardware": [],
+  "qualified_hardware": [
+    {
+      "chip": "Apple M4 Max",
+      "gpu_cores": 40,
+      "unified_memory_gib": 48,
+      "macos": "26.6.2",
+      "build": "25G83",
+      "scope": "Recorded daily Q4 checks only; other applications and workloads affect headroom."
+    }
+  ],
   "dependencies": {
     "opencode": "2.0.10",
     "omlx": "0.6.4",
@@ -28,43 +49,45 @@
     "search": "Exa remote keyless MCP; service not version-pinned"
   },
   "model_profile": {
-    "model": "Qwen3.8-27B-oQ5e-mtp",
-    "revision": "fb646bbfbdce4caa26fa2262f0ef7953708f66d9",
-    "memory_gib": 30,
-    "context": 32768,
-    "max_output": 8192,
-    "mtp": false
+    "model": "Qwen3.8-27B-oQ4e-mtp",
+    "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
+    "memory_gib": 24,
+    "context": 16384,
+    "max_output": 4096,
+    "mtp": false,
+    "idle_unload_seconds": 300
   },
   "runtime_profile": {
-    "memory_limit_gib": 30,
+    "memory_limit_gib": 24,
     "ssd_prefix_cache_gib": 8,
     "hot_cache_gib": 0,
     "concurrent_generation_limit": 1,
+    "default_agent": "build",
     "default_variant": "fast",
-    "compaction_buffer": 12288,
-    "compaction_keep": 4096,
-    "mtp_on": false
+    "compaction_buffer": 2048,
+    "compaction_keep": 2048,
+    "mtp_on": false,
+    "idle_timeout_seconds": 300
   },
-  "runtime_settings_sha256": {
-    "global": "bb01a806bb64988566d2bafb29127ec264563e34cb85ac868ac87d667f8a2905",
-    "model": "d9679d7b0ac268ada4f73e0be97076a108cb5df902480299b057209cf07cb53b",
-    "owned_client": "cd391776a3a387e427d0b046f1d26d553aca451edbcc4af4eee56d1dfaa2a7ed",
-    "install_profile": "4d0969f980cd6603312fe81d7a87f0c645aad6a0837cad4cd4bcf73a7577e633",
-    "guidance": "aa4132d915328c667493369a0dac6dcc41760688f4916790e6f1cd72471b76a6"
+  "runtime_settings_at_adoption_sha256": {
+    "config": "bd63e7ac08c6d1637de00ad19e96418c432f5355c4f9e9fc5bfb57d0c9ff7d08",
+    "profile": "178e9306b2755927097b99fe34c52c43d20b9aea1bdf3579794d618ba2c9a85f",
+    "global": "39756883534ef1108c4887fe5598ba8b7f32f8c9231facd539b2f9a8527f5e26",
+    "model": "e3f6433b72a15819d9f3c2d21e4f2bd68a3f5911b9d5684646b4df3f10277df2"
   },
+  "runtime_settings_hash_scope": "Hashes of exact owned settings immediately after adoption. Native runtime bookkeeping can later rewrite model_dir; configured profile compatibility is independently checked by doctor.",
   "evaluation": {
     "suite": "2026-09-19.2",
     "frozen_manifest_sha256": "186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6",
     "offline_tests": 97,
     "live_improvement_qualified": false,
-    "results_sha256": "788f71d05d90f656c3a2e0f3b35fb7f17acff8a8a89020c6cf020e92a4ff70ef"
+    "results_sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb"
   },
-  "unresolved_mandatory_gates": [
-    "cold_load_and_sustained_resource_stability",
-    "fresh_representative_daily_coding_browser_review_handoff",
-    "sustained_32k_context",
-    "completed_mtp_off_on_comparison",
-    "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+  "broader_scope_remaining": [
+    "Unattended sustained coding/browser sessions and sustained 32K/64K qualification",
+    "Completed matched MTP acceleration comparison",
+    "Autonomous improvement cycle and live matched skill benefit",
+    "Optional computer-control, office and image-generation modules"
   ],
   "source_files": {
     ".gitignore": {
@@ -78,17 +101,17 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "63a755e4be0ab07b57ad5a5250cb37ac311fb096a087abdbed4c9276926d7b11",
-      "bytes": 19130,
+      "sha256": "9b60cde9adf3c849a9e3137d61cd87e8a570accb9b037077741bfc0ee0d0d71e",
+      "bytes": 14726,
       "executable": false
     },
     "RESULTS.json": {
-      "sha256": "788f71d05d90f656c3a2e0f3b35fb7f17acff8a8a89020c6cf020e92a4ff70ef",
-      "bytes": 7781,
+      "sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb",
+      "bytes": 18328,
       "executable": false
     },
     "THIRD_PARTY_NOTICES.md": {
-      "sha256": "98093881183752d9860cf4e3db960ce5ae75c2f837c930b45fa05a03f64295ec",
+      "sha256": "cffdc9b64889fd746bf7090563005ee0432c380541db2481d4d40f4962afd6f3",
       "bytes": 1553,
       "executable": false
     },
@@ -218,8 +241,8 @@
       "executable": false
     },
     "setup/accepted-profile.json": {
-      "sha256": "4d0969f980cd6603312fe81d7a87f0c645aad6a0837cad4cd4bcf73a7577e633",
-      "bytes": 1839,
+      "sha256": "178e9306b2755927097b99fe34c52c43d20b9aea1bdf3579794d618ba2c9a85f",
+      "bytes": 1726,
       "executable": false
     },
     "setup/browser-package-lock.json": {
@@ -238,17 +261,17 @@
       "executable": false
     },
     "setup/opencode.template.json": {
-      "sha256": "703528773fd06f96fa234fe9b872359e57d11717656ef244903cffd8ecd5cd4a",
+      "sha256": "74a6aef3f423dddf711d2b888a2930918448266ee9031247520edd92ef51c7bf",
       "bytes": 12583,
       "executable": false
     },
     "setup/setup.py": {
-      "sha256": "854de6fc4c56f912172fe5d90651e99fed27680e88cc800540865a873fc977c1",
-      "bytes": 25763,
+      "sha256": "3a850699bacf233555f28c4aded501e5cf5e5f9fc1f73a4b1c12adf7f8df797f",
+      "bytes": 25846,
       "executable": false
     },
     "setup/test_bootstrap.py": {
-      "sha256": "1702def5d6b7f7e2d6dbc3450edb9b80d6ff7a16a300e8d38896348a741ea243",
+      "sha256": "57167122921a239a0f5146447159805dcf61a290c5233abb292a91eb97c2f5ca",
       "bytes": 6865,
       "executable": false
     },
@@ -263,8 +286,8 @@
       "executable": false
     },
     "setup/test_setup.py": {
-      "sha256": "1b1cc203064964e3e4ea6aa2047daafd6873603ef0ba0c7896cb9762379c1111",
-      "bytes": 72134,
+      "sha256": "73397dbe6602b90e0ad007e9b0d2450c4512bf4adf8aa8edb9be214d4194f350",
+      "bytes": 72375,
       "executable": false
     },
     "tools/browser_check.mjs": {
@@ -298,8 +321,8 @@
       "executable": false
     },
     "tools/localai.py": {
-      "sha256": "3f1e3a60bd0f5a7107a55dc15339d43b43ee09d42325c16d126f768728a91b68",
-      "bytes": 39634,
+      "sha256": "93ce77625e0d2b32416a8f343cda4b08f4bf89308da44dabc061ad84d2a7cc18",
+      "bytes": 39548,
       "executable": false
     },
     "tools/native-shell": {
@@ -308,7 +331,7 @@
       "executable": true
     },
     "tools/native_client.py": {
-      "sha256": "dfc1178c947113147cb4a084931e0b02198c9f13f66612643a1903ac5fc019e6",
+      "sha256": "30e6f51682a44d5707dbdc6b25bc6cb73dbcdaa26c2708d41633aeca3dcebd26",
       "bytes": 27724,
       "executable": false
     },
@@ -332,6 +355,5 @@
       "bytes": 16722,
       "executable": false
     }
-  },
-  "source_file_set_sha256": "c009db0f639c95c826ffe485388c7c6ab79f765933d06b09c898d17a9786cff3"
+  }
 }

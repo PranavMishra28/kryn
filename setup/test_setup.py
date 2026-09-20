@@ -111,7 +111,7 @@ class SetupChecks(unittest.TestCase):
         self.assertIn("REPOSITORY = 'gcoli/Qwen3.8-27B-oQ5e-mtp'", localai)
         self.assertIn("MODEL_PARENT = 'challenger/models'", localai)
         self.assertIn("MEMORY_GIB = 32", localai)
-        self.assertIn("SERVER_CONTEXT = 24576", localai)  # Independent of the 32K client context.
+        self.assertIn("SERVER_CONTEXT = 24576", localai)  # Independent of the 16K client context.
         result = subprocess.run([sys.executable, "-B", directory / "tools/localai.py", "--self-check"],
                                 env={**setup.os.environ, "HOME": str(self.root)}, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -175,7 +175,7 @@ class SetupChecks(unittest.TestCase):
             (("models", "data", 0, "settings", "baseURL"), "https://example.invalid/v1"),
             (("agents", "data", 0, "model", "variant"), "low"),
             (("config", 2, "info", "compaction", "buffer"), 1),
-            (("config", 2, "info", "default_agent"), "build"),
+            (("config", 2, "info", "default_agent"), "plan"),
             (("config", 2, "info", "model", "variant"), "low"),
             (("config", 2, "info", "commands", "review", "model", "variant"), "fast"),
         ]
@@ -985,9 +985,10 @@ class SetupChecks(unittest.TestCase):
         root = self.root / 'A space and "quote"'
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
-        self.assertEqual(model["limit"], {"context": 32768, "output": 8192})
+        self.assertEqual(cfg["default_agent"], "build")
+        self.assertEqual(model["limit"], {"context": 16384, "output": 4096})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
-        self.assertEqual(cfg["compaction"]["buffer"], 12288)
+        self.assertEqual(cfg["compaction"]["buffer"], 2048)
         self.assertEqual(cfg["providers"]["local"]["settings"]["baseURL"], "http://127.0.0.1:8000/v1")
         self.assertTrue(all(a["model"].startswith("local/qwen#") for a in cfg["agents"].values()))
         self.assertTrue(all(c["model"].startswith("local/qwen#") for c in cfg["commands"].values()))
@@ -995,8 +996,10 @@ class SetupChecks(unittest.TestCase):
         self.assertNotIn("agent_run", cfg["mcp"]["servers"]["search"]["url"])
         self.assertIn(str(root / "browser/node_modules/@playwright/mcp/cli.js"), cfg["mcp"]["servers"]["browser"]["command"])
         self.assertEqual(setup.runtime_settings(root)["scheduler"]["max_concurrent_requests"], 1)
+        self.assertEqual(setup.runtime_settings(root)["idle_timeout"], {"idle_timeout_seconds": 300})
         self.assertFalse(setup.runtime_settings(root)["server"]["auto_start_on_launch"])
-        self.assertEqual(setup.model_settings()["models"][setup.MODEL]["max_tokens"], 8192)
+        self.assertEqual(setup.model_settings()["models"][setup.MODEL]["max_tokens"], 4096)
+        self.assertTrue(setup.model_settings()["models"][setup.MODEL]["is_default"])
         self.assertNotIn("__ROOT__", json.dumps(cfg))
 
     def test_reruns_preserve_changed_files_and_reject_symlinks(self):

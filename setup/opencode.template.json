@@ -10,7 +10,7 @@
       },
       "models": {
         "qwen": {
-          "modelID": "Qwen3.8-27B-oQ5e-mtp",
+          "modelID": "Qwen3.8-27B-oQ4e-mtp",
           "compatibility": {
             "reasoningField": "reasoning_content",
             "maxTokensField": "max_tokens"
@@ -26,11 +26,11 @@
             ]
           },
           "limit": {
-            "context": 32768,
-            "output": 8192
+            "context": 16384,
+            "output": 4096
           },
           "body": {
-            "max_tokens": 8192,
+            "max_tokens": 4096,
             "temperature": 1.0,
             "top_p": 0.95,
             "top_k": 20,
@@ -96,16 +96,16 @@
             "baseURL": "http://127.0.0.1:8000/v1"
           },
           "package": "@opencode/ai/providers/openai-compatible",
-          "name": "Qwen3.8-27B-oQ5e-mtp"
+          "name": "Qwen3.8-27B-oQ4e-mtp"
         }
       }
     }
   },
   "compaction": {
     "auto": true,
-    "buffer": 12288,
+    "buffer": 2048,
     "keep": {
-      "tokens": 4096
+      "tokens": 2048
     }
   },
   "permissions": [
@@ -165,7 +165,7 @@
       "effect": "ask"
     }
   ],
-  "default_agent": "plan",
+  "default_agent": "build",
   "websearch": false,
   "snapshots": true,
   "mcp": {

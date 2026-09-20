@@ -1,200 +1,149 @@
 # KRYN
 
-**Release status: NOT READY.** The launcher is installed and its source kit is tested, but the selected model repeatedly hit the memory guard on the 48 GiB Mac. The representative daily coding workflow could not start under its required resource condition. Sustained context qualification, the completed MTP comparison, and continuous improvement also remain incomplete. This is an experimental source snapshot, not a qualified release or a frontier-equivalent assistant.
+**Daily coding: ready with explicit limitations on this Mac.** The installed Q4 profile completed coding, tests, browser/search/image use and a cold restart through the actual application. No further installation is needed here. Work remains supervised: permission approvals and occasional follow-ups are required.
 
-KRYN is a small launcher, configuration, verification and improvement layer around OpenCode. OpenCode remains the interactive coding agent; oMLX runs the model on this Mac. There is no replacement agent loop or new TUI.
+**Full original release: incomplete.** Autonomous improvement, sustained 32K work and a completed MTP comparison remain unqualified. These mandatory requirements are preserved in the machine-readable release status; daily readiness does not turn them into passes.
 
-## Daily use
+## Start coding
 
-The experimental installed command is:
+On the configured Mac:
 
-~~~sh
+```sh
 cd /path/to/your/project
-kryn
-~~~
+~/.local/bin/kryn
+```
 
-If the existing PATH does not include your user bin directory, use "$HOME/.local/bin/kryn". No shell profile edit is required. Start in an ordinary project directory, rather than your home folder.
+If your PATH includes `~/.local/bin`, use `kryn`. It checks the installation, starts the owned oMLX runtime, verifies local routing and tools, and opens OpenCode in **Build** mode. Enter a task, review permission requests, and let it edit and run tests. No model account or API key is required.
 
-| Command | Behavior |
+Use **Ctrl+X, A** to select a native agent, or Shift+Tab to cycle. **Plan** inspects and discusses; **Build** edits and tests; **Reviewer** has edit/shell/execute permissions denied; **Browse** exposes browser and research tools. Use **Ctrl+P** for native commands. `/review`, `/audit`, `/research` and `/handoff` are configured shortcuts. Native sessions, project instructions, skills, Git and supported undo remain OpenCode features.
+
+Work in bounded milestones and inspect the diff and actual test results. Supply the raw diff when asking Reviewer to assess a change; it cannot run Git commands. The default Fast variant disables thinking; Low, Medium and Xhigh request reasoning-effort hints, not guaranteed compute budgets. `/review` uses Xhigh and can take longer. A handoff saves useful task state; compaction is not perfect memory.
+
+Close the native interface normally when finished. oMLX unloads an idle, unpinned model after five minutes; its small server can remain running. `kryn stop` stops the verified owned, idle runtime. This does not target existing Ollama or personal applications.
+
+| Command | Purpose |
 |---|---|
-| kryn | Check the exact local profile, start oMLX if needed, check native routing/tools, then open OpenCode in Plan. |
-| kryn init | Verify an existing installation; before first installation, use the source kit's bootstrap instead. |
-| kryn doctor | Check release integrity, runtime/profile compatibility, dependencies, disk and MCP readiness. No model generation. |
-| kryn doctor --deep | Also stream through every pinned model file and verify SHA256. |
-| kryn status | Show local runtime and improvement status. A stopped runtime is reported as unavailable. |
-| kryn stop | Stop only the verified owned, idle oMLX runtime. |
-| kryn bench | Run guarded local protocol smoke. This makes real model requests and does not establish coding quality. |
-| kryn improve status | Show local outcome retention, inactive/active skill and incomplete automation status. |
-| kryn improve | Show improvement status. Use `kryn improve --help` for explicit operator controls. |
+| `kryn init` | Verify the existing installation without overwriting it. |
+| `kryn doctor` | Check exact release/profile, dependencies, runtime and MCP readiness; no generation. |
+| `kryn doctor --deep` | Also rehash every pinned model file. |
+| `kryn status` | Show runtime and improvement state; a stopped runtime is unavailable. |
+| `kryn stop` | Stop the owned, idle oMLX server. |
+| `kryn bench` | Run real, guarded model protocol smoke; this is not a coding-quality benchmark. |
+| `kryn improve status` | Inspect local outcomes and improvement controls. |
 
-Close OpenCode normally when finished. The private native client and browser children should exit; the model server can remain warm until stopped. KRYN blocks overlapping foreground sessions. Never work around a memory stop by disabling the guard.
+## What is installed
 
-This release pass ends with the model server stopped to free memory. `kryn` can start it again, but successful UI startup does not establish that a model request will meet the resource guard. No further app closing or installation action is required from you to complete this handoff.
-
-## First installation and reproduction
-
-The tested machine is an Apple M4 Max, 40 GPU cores, 48 GiB unified memory, macOS 26.6.2 build 25G83. Other hardware is unqualified. The installer checks native Apple Silicon, macOS 26/27, at least 48 GiB memory and 140 GiB free disk. More memory does not by itself establish compatibility.
-
-Prerequisites are native Python 3.13+, ARM64 Node 22.23.1 with adjacent npm, uv, Git, Google Chrome, and internet access. The currently tested Chrome is 153.0.8010.53. The repository contains setup code and dependency hashes, not applications or model weights.
-
-~~~sh
-./bootstrap
-./bootstrap --apply
-~~~
-
-The first command checks installation prerequisites and may record compact metadata in KRYN's owned outcome directory; it does not install dependencies or replace configuration. The second explicitly applies the existing installer. Set KRYN_PYTHON to a Python 3.13+ executable if needed; pass --node and --uv for existing nondefault installations. Downloads use exact revisions and verified cached artifacts. A changed or unowned destination is refused, rather than silently overwritten.
-
-On this already installed Mac, init verifies the owned installation. Do not rerun the core installer over customized runtime settings. A first-open macOS approval may still be required on another Mac. Disposable configuration tests are distinct from a complete second-machine installation. The existing Mac has approximately 115 GiB free after retaining both model versions and evidence; it does not currently meet the installer's 140 GiB fresh-install threshold. The existing-installation preflight passed without downloading or overwriting anything.
-
-Offline source checks:
-
-~~~sh
-python3.13 -E -B -m unittest discover -s setup -p 'test_*.py'
-python3.13 -E -B tools/localai.py --self-check
-~~~
-
-The frozen evaluation suite is in evals/. Keep its checks and original failed outcomes. Use fresh disposable projects for model trials.
-
-## Architecture and exact profile
-
-~~~mermaid
+```mermaid
 flowchart LR
-    User[You] --> K[KRYN launcher and guard]
-    K --> O[OpenCode native TUI]
+    U[You] --> K[KRYN checks and resource guard]
+    K --> O[OpenCode native interface]
     O --> L[oMLX on loopback]
     L --> Q[Local Qwen 27B]
-    O --> P[Project files, Git, shell and tests]
+    O --> P[Project files, shell, Git and tests]
     O --> S[Exa search and source fetch]
-    O --> B[Playwright with isolated Chrome]
-    K --> R[Local outcome records]
-~~~
+    O --> B[Playwright and isolated Chrome]
+```
 
-| Component | Selected version |
+KRYN is a launcher and configuration layer, not a new agent loop, TUI or tool proxy.
+
+| Component | Exact selection |
 |---|---|
 | Harness | OpenCode 2.0.10 ARM64 |
 | Runtime | oMLX 0.6.4, app build 2529 |
-| Model | gcoli/Qwen3.8-27B-oQ5e-mtp |
-| Exact model revision | fb646bbfbdce4caa26fa2262f0ef7953708f66d9 |
-| Browser tools | Playwright MCP 0.0.82; its pinned dependency includes Playwright 1.64.0-alpha-1789764292000 |
-| Search | Exa keyless MCP: search, advanced search and fetch |
+| Model | `gcoli/Qwen3.8-27B-oQ4e-mtp` |
+| Model revision | `c41ed507f1b16320942a1e9ce340e71d2692dee2` |
+| Context / output | 16,384 context; at most 4,096 output tokens |
+| Default | Build / Fast; one generation at a time |
+| Memory and cache | 24 GiB runtime ceiling; 8 GiB SSD prefix cache; no extra hot cache |
+| Compaction | Native automatic compaction; 2,048-token buffer and keep setting |
+| Idle unload / MTP | 300 seconds; MTP off |
+| Browser | Playwright MCP 0.0.82; pinned Playwright dependency; isolated Chrome |
+| Search | Exa keyless remote MCP: search, advanced search and fetch |
 | Node | 22.23.1 ARM64 |
 
-The experimental profile is Fast by default, nominal 32K harness context, up to 8K output, early native compaction, one active generation, a 30 GiB oMLX application ceiling, 8 GiB SSD prefix cache and no extra hot cache. **32K sustained work is not qualified. 64K is deliberately rejected for this release.** The runtime checks text input and output limits separately; image tokens and helper prompts also consume memory. The application ceiling is not a system-wide memory reservation.
+This keeps the same 27B base model and reduces weight precision to obtain memory headroom. Its 16 pinned files total 15.828 GiB. Q4 quality equivalence to Q5 is not assumed. Q5 repeatedly failed this Mac's memory guard, including after foreground apps were reduced. A usable measured profile takes priority over a larger setting that cannot complete work.
 
-MTP is OFF. Small earlier activation tests do not prove a useful task speedup. The latest coding comparison failed in its OFF baseline, so the ON arm was not admitted and the required A/B remains incomplete.
+The configured context is not a promise of unlimited history or sustained long-context quality. Images, tool schemas and helper prompts also consume context and memory. **32K/64K sustained work, MTP acceleration and frontier parity are not qualified.** MTP remains off because the earlier OFF arm failed before an ON comparison was admitted.
 
-Fast disables thinking. Low, Medium and Xhigh request different reasoning-effort hints; they are not numeric compute guarantees. Helper agents may have separate presets. More reasoning can be slower without improving correctness.
+## Installation on another Mac
 
-## Working with OpenCode
+The tested host is an M4 Max with 40 GPU cores and 48 GiB unified memory, macOS 26.6.2 build 25G83. Other hardware is unqualified. Fresh installation requires native Apple Silicon, macOS 26/27, at least 48 GiB memory and 140 GiB free disk, plus Python 3.13+, ARM64 Node 22.23.1 with adjacent npm, uv, Git and Google Chrome. Tested Chrome: 153.0.8010.53.
 
-Use Plan to inspect and discuss a change; use Build to edit and test. Browse is a separate native primary agent with browser/search tools. Build exposes the smaller coding tool set. Switch roles using OpenCode's native agent control.
+```sh
+git clone https://github.com/PranavMishra28/kryn.git
+cd kryn
+./bootstrap
+./bootstrap --apply
+```
 
-The native commands /review, /audit, /research and /handoff request read-only review, a fresh reviewer, cited research and persistent task state respectively. Actual tests and observed browser behavior remain authoritative. Fresh review is supplementary, and project configuration is trusted: an untrusted project can redefine native behavior.
+The private repository requires access. The first bootstrap checks prerequisites and may record compact owned metadata. `--apply` downloads and verifies the pinned stack. Set `KRYN_PYTHON` if needed; `--node` and `--uv` select existing installations. Applications, model weights and browser profiles are not bundled. macOS may require first-open approval on another machine.
 
-Work one useful milestone at a time. Ask for explicit acceptance checks, inspect the diff, run the real checks, and preserve unresolved facts in TASK.md before a handoff. Automatic compaction can lose or misstate important task instructions; it is not perfect memory.
+The already configured Mac needs no bootstrap rerun. Existing modified configurations are deliberately preserved; bootstrap is not a general migration tool. Large verified downloads are cached. Disposable installer tests passed; a complete second-machine install has not been demonstrated. The current Mac retains prior models/backups and falls below the fresh-install disk threshold; the working installation only requires its normal runtime headroom.
 
-Project AGENTS.md, native .opencode/skills and explicit project .agents/skills/.claude/skills paths remain supported. Unrelated global skill catalogs are excluded because they previously overwhelmed context. Explicit native plan files may use ~/.opencode/plan.
+Offline checks:
 
-## Memory, privacy and boundaries
+```sh
+python3.13 -E -B -m unittest discover -s setup -p 'test_*.py'
+python3.13 -E -B tools/localai.py --self-check
+python3.13 -E -B evals/bench.py verify
+```
 
-The daily guard reuses the evaluation policy: three normal samples before inference, monitoring every two seconds, cancellation after two warning samples, immediately on critical/missing telemetry or runtime identity drift, and after more than 512 MiB additional swap. Any observed warning fails evaluation acceptance. These are conservative engineering thresholds, not proof that a warning has damaged hardware.
+## Resource and privacy boundaries
 
-The guard interrupts work on the owned native server and closes its client, then checks runtime idle. It does not kill personal applications. macOS pressure depends on the whole machine. Cold model loading and long desktop/browser sessions have both hit this guard. Closing other apps did not yet produce a passing cold-load comparison; do not advertise normal-app or cold-start stability from the synthetic cache successes.
+The unchanged guard requires three normal memory samples before inference, samples every two seconds, and cancels after two warnings, critical pressure, missing telemetry, runtime identity drift or more than 512 MiB additional swap. Any warning fails evaluation acceptance. It interrupts owned work, cleans up its client and verifies runtime idle. Do not disable it to force a task through. The 24 GiB ceiling is not a system-wide memory reservation; other applications affect available headroom.
 
-Inference is configured only to the loopback model, with cloud providers disabled and effective provider inventory checked. There are no normal metered cloud-model charges. Local inference still uses hardware, electricity, disk and time. Exa and websites are online, quota-limited services; queries and page interaction leave the Mac. Do not put private task details into public search.
+Inference is restricted to the configured loopback model, with cloud providers disabled and effective routing checked. There are no metered model API calls. Local work still consumes electricity, hardware, storage and time; throughput is finite. Search and websites are online, quota-limited services. Queries leave the Mac: keep private task content out of public search.
 
-A separate isolated Chrome session is used; personal Chrome profiles are not reused. Page-provided WebMCP and unsafe browser code are disabled. Ordinary shell descendants have a project/owned-state write boundary. Native file tools, MCP, formatters, persistent PTYs, reads and network are outside that OS boundary. This is not a complete hostile-project sandbox.
+Browser tools use an isolated Chrome session, not a personal profile. Page-provided WebMCP and unsafe browser code are disabled. Ordinary shell descendants have a project/owned-state write boundary. Native file tools, MCP, formatters, persistent PTYs, reads and networking are outside that boundary. This is not a complete hostile-project sandbox; project configuration is trusted and can redefine native behavior.
 
-## Local improvement
+Project `AGENTS.md`, native `.opencode/skills` and explicit `.agents/skills`/`.claude/skills` paths remain supported. Unrelated global skill catalogs are excluded to avoid overwhelming context. Explicit native plan files may use `~/.opencode/plan`.
 
-~~~mermaid
+## Improvement: available controls, no autonomous learning
+
+Compact local outcomes record enums, counts, timings and release/profile hashes, without prompts, source, credentials, URLs or project paths. A normal interface exit records **unverified**, not task success. On each write, owned records older than 30 days or beyond the newest 500 are pruned; unknown files are preserved. Native sessions can contain private prompts and code and remain local as user work. Raw evaluation traces stay local and are excluded from distribution.
+
+```mermaid
 flowchart LR
-    O[Compact outcomes] --> H[Repeated-failure hypothesis]
-    H --> C[Isolated fixed skill candidate]
-    C --> E[Matched development, validation and hidden checks]
-    E --> G{Objective promotion gate}
-    G -->|Fails or missing proof| X[Reject or hold]
-    G -->|Passes| V[Versioned owned skill]
-    V --> M[Monitor]
-    M -->|Regression| R[Rollback]
-~~~
+    O[Local outcomes] --> H[Fixed candidate hypothesis]
+    H --> C[Isolated skill]
+    C --> E[Matched control and candidate trials]
+    E --> G{Objective gate}
+    G -->|Pass| P[Explicit promotion]
+    G -->|Fail| R[Reject]
+    P --> M[Explicit regression check]
+    M --> B[Rollback]
+```
 
-Outcome collection is local and contains enums, counts, timings and release/profile hashes, not prompts, source, credentials, URLs or project paths. A normal TUI exit is recorded as unverified, not task success. At each outcome write, owned records older than 30 days or beyond the newest 500 are pruned; unknown files are preserved.
+`kryn improve observe` inspects repeated failures; `propose`, `register`, `evaluate`, `promote`, `monitor`, `reject` and `rollback` provide operator controls. Use `kryn improve --help` and the frozen [evaluation guide](evals/README.md). Promotion reruns objective checks and requires matched development, validation and hidden cases; caller-written PASS records cannot activate a skill. The fixed skill is the only optimization artifact: credentials, permissions, routing and external-action authorization are excluded.
 
-Start with observation; these commands do not invoke a model:
+Deterministic fixtures verify isolation, rejection, promotion gates and rollback. Foreground and improvement work share an exclusive lease; they refuse overlap rather than preempting each other. **No skill is active. Autonomous reflection, automatic trial dispatch, continuous regression monitoring and live learning benefit are not implemented or qualified.** There is no root daemon or automatic model downloader.
 
-~~~sh
-kryn improve status
-kryn improve observe
-# Only when observe returns this candidate_hypothesis:
-kryn improve propose verify_before_summary
-~~~
+## Verification and remaining limits
 
-`observe` groups repeated failures in the latest 20 retained outcomes by release/profile. `propose` refuses without a matching repeated failure; its other fixed hypotheses are `bounded_milestone` and `check_tool_contract`. Save the returned candidate ID. A proposal creates an isolated skill and does not activate it.
+The installed Q4 application completed a three-file coding change and added 18 focused tests. All 20 project tests and all three frozen independent checks passed; original tests/data stayed unchanged. The coding and completion-follow-up stage took 857 seconds, used 36 tool calls and two automatic compactions, and stayed at normal memory pressure with zero additional swap and a sampled runtime peak of 20.67 GiB.
 
-Evaluation is an explicit operator workflow using the included frozen [suite](evals/README.md):
+This was **supervised coding**: the model repaired two wrong expectations in its own new tests and an edit mismatch. After the second compaction it repeated completed exploration. An operator input coincided with a permission dialog and declined a redundant diff request, interrupting that turn; a completion follow-up then produced the correct final handoff. Six ordinary shell requests were approved. These observations do not qualify unattended long-running work.
 
-1. Prepare six fresh runs: a control and skill candidate for each of development, validation and hidden, using three distinct automatically graded tasks. Before any model request, register both arms with `kryn improve register CANDIDATE SPLIT /absolute/run/run.json`.
-2. Collect the real native runs separately with the existing evaluation driver. The control prompt must be the exact frozen task; construct the treatment with `tools/improvement.py`'s `skill_prompt(task_text, candidate_id, hypothesis)`. Require fresh sessions, matched model/role/tools/runtime conditions, complete routing/resource evidence and unchanged original checks. The improvement commands do not run these model trials for you.
-3. Write a JSON array of exactly three pair objects, one per split. Each object has this shape: `{"split":"development","baseline":"/absolute/control-run","candidate":"/absolute/skill-run","stage":"improvement"}`. `stage` must match the retained native evidence directory in both arms. Supply the real validation and hidden pairs too; this file contains paths, never PASS claims.
+The previous release's **NOT READY** result and all recorded failures remain in [RESULTS.json](RESULTS.json) and Git history. Earlier Q5 trials included 28 project tests, 10 turns / 45 tool calls and scoped mobile browser recovery, but also cold-load and sustained desktop memory stops. Historical measurements are not Q4 results.
 
-With those prerequisites met, replace the placeholders below with the returned ID and actual absolute paths:
+A fresh native Reviewer/Xhigh session finished with all project file hashes unchanged. It required the raw diff as a follow-up, took 559 seconds and made one false claim about repeated query parameters; a live HTTP check disproved that claim. Review is supplementary to actual tests. The installed deep doctor rehashed all 16 model files and verified both MCP services in 14.312 seconds.
 
-~~~sh
-kryn improve evaluate CANDIDATE --plan /absolute/pairs.json --suite /absolute/kryn/evals
-kryn improve promote CANDIDATE --plan /absolute/pairs.json --suite /absolute/kryn/evals
-kryn improve monitor /absolute/later-run --stage improvement --suite /absolute/kryn/evals
-kryn improve reject CANDIDATE --reason no_benefit
-kryn improve rollback
-~~~
+The unchanged launcher previously passed controlled local-outage refusal, autostart/UI recovery, routing checks and cleanup. The Q4 profile now passed all eight cold-start protocol checks in 33.584 seconds: health, model identity, Fast/Low/Medium/Xhigh streams and two-step tool replay. A subsequent actual `kryn` launch reopened native session history in Build/Fast with both MCP services connected. Normal exit removed all ten owned client/browser processes from the earlier session, and the disposable app server was stopped. Offline source checks pass 97 tests. Independent source review found no remaining blockers after migration verification was placed inside rollback handling.
 
-These are separate decisions, not a script to run blindly. `promote` reruns the objective evaluator; it cannot consume caller-written PASS JSON. All candidate cases must pass, and the validation control must fail to establish an objective improvement. A promoted version becomes available to the next native launch. `monitor` explicitly checks a later matched run and restores the previous skill version on an objective regression; `rollback` restores that skill pointer only, not the model or runtime profile. `--simulation` is for fixture tests and cannot activate a daily skill.
+Across 43.6 minutes of observation covering these workflows, all 1,225 pressure samples were normal, additional swap stayed at zero and the sampled runtime peak was 21.18 GiB. Sampling may miss short peaks; this does not qualify every project or foreground workload.
 
-Only the designated owned skill artifact may change; provider, credentials, permissions, model downloads and external-action authorization are outside optimization. **No autonomous reflection, model-trial scheduling or continuous regression monitoring is implemented. No live improvement benefit has been established.** Fixture demonstrations test the controls, not long-term learning. Optional improvement work refuses to start while foreground work holds the shared exclusive lease; a new foreground operation also refuses overlap. This is mutual exclusion, not preemption. There is no root daemon or scheduled model shopper.
+A fresh Browse/Fast session navigated the disposable app, filtered its table, inspected the console, saved and opened a screenshot, and made one public search that returned the official Python unittest documentation. The screenshot independently showed the correct two rows, and source/data stayed unchanged. This took 667.562 seconds, eight tool calls, four ordinary permission approvals and five compactions, without a completion follow-up. This single desktop workflow does not qualify sustained browser use, narrow layouts, error recovery or general vision accuracy.
 
-Native OpenCode sessions can contain private prompts and code. They are retained locally as user work. Temporary raw evaluation traces are retained locally until audited and are excluded from distribution; do not upload them. Outcome retention does not delete native sessions.
-
-## Measured on this Mac
-
-The final installed client is `156185af1a020a28`. These checks used the actual `kryn` command:
-
-| Release check | Result and scope |
-|---|---|
-| Installation and dependencies | `init`, `status`, `doctor` and the packaged bootstrap preflight passed against the existing installation. |
-| Deep model verification | `doctor --deep` passed in 10.176 seconds; every pinned model file was rehashed. Both MCP services connected. |
-| Fresh project launch with model loaded | Failed resource preflight in 1.977 seconds, before TUI/prompt/model dispatch. All 16 seed files stayed unchanged. |
-| Controlled local outage | An owned loopback 503 server held the model port, preventing launcher auto-start. Actual `kryn` and `kryn bench` refused clearly; only health GET requests reached the test endpoint. |
-| Recovery without inference | After removing the test endpoint, actual `kryn` restarted oMLX and opened OpenCode. Plan/Fast, Build/Fast and Reviewer/Xhigh were observed. Normal exit was recorded as incomplete, not task success. Owned client processes and temporary directories were removed. |
-| Outcome and promotion controls | Real startup failures were recorded without task content. Unsupported skill proposal was refused. No skill is active. |
-| Source kit | 97 offline tests passed, including actual bootstrap/fake-account cases and deterministic promotion/rejection/rollback fixtures. This is not live skill improvement. |
-
-Two cold-load OFF comparisons also stopped after 14.833 and 16.175 seconds, including the attempt after other applications were closed. No ON comparison followed. The installed `bench` outage behavior is verified; its successful inference path was not rerun after these resource failures. No new representative coding/browser/review/handoff result is claimed.
-
-These are retained engineering results from prior isolated drivers, not proof that the final daily product passed:
-
-| Check | Observation |
-|---|---|
-| Tool endurance | Ten sequential turns, 45 tools, 744.212 seconds; one launch recovery, no intervention in the model trajectory. |
-| Recovery project tests | 28 tests passed in an 834.018-second coding stage; test-quality/reporting weaknesses remain. |
-| Mobile browser recovery | 698.952 seconds; actual 503, retained inputs, single successful retry and persisted row. Reporting was partial. |
-| Desktop at 30 GiB | Guard stopped the session after 391.248 seconds. |
-| Desktop at 28 GiB | Guard stopped the session after 688.897 seconds; substantial form progress, incomplete final reporting. |
-| 24K synthetic cache sequence | 133.914/18.934/116.829/15.309 seconds; reuse worked, zero observed swap growth. This is not sustained 32K qualification. |
-
-The original representative project failed and a separate recovery remained incomplete. Historical failures, operator interventions, misleading model claims and incomplete streams are preserved. Optional macOS computer control, office modules and local image generation are not installed or qualified. No frontier-equivalence claim is made.
-
-Upstream capabilities and licensing are documented in [third-party notices](THIRD_PARTY_NOTICES.md); they are not measurements from this Mac.
-
-The remaining blocking work is to isolate the cold-load/host-pressure problem, qualify a stable profile through the actual complete workflow and sustained context, complete the matched MTP check, and implement and validate the automatic improvement cycle. Allow 60–90 minutes for the next bounded memory diagnosis; if resolved, the retained 12–14 minute coding/browser stages and repeated comparisons imply at least another 2–4 hours of qualification. Automatic improvement requires additional engineering. There is no defensible guaranteed completion time before the memory cause is known.
+Browse exposes a larger tool description set (11,694 prompt tokens on its first request here); at 16K it compacted frequently, adding substantial latency. Optional macOS computer control, office modules and local image generation are not installed or qualified. No configuration provides infinite compute or guarantees frontier-level results.
 
 ## Updating, rollback and uninstall
 
-No automatic update command is provided. Change one pinned component at a time, preserve the previous release, verify hashes/signatures, rerun the relevant smoke and representative tests, and compare completed-task quality and resources. Never promote a configuration because its files merely look correct.
+No automatic update command is provided. Pin one change, preserve the previous release, verify artifacts, and rerun relevant checks before adoption. Existing customized installations require an explicit reviewed migration.
 
-Owned runtime/model/client state lives under ~/Library/Application Support/LocalAI. The app is ~/Applications/oMLX.app; runtime settings are in ~/.omlx; the launcher aliases are ~/.local/bin/kryn and ~/.local/bin/localai. Content-addressed client releases and private pre-change backups are retained under LocalAI/client and LocalAI/backups.
+Owned state is under `~/Library/Application Support/LocalAI`; runtime settings are in `~/.omlx`; the app is `~/Applications/oMLX.app`; aliases are `~/.local/bin/kryn` and `~/.local/bin/localai`. Content-addressed clients and private pre-change backups remain under `LocalAI/client` and `LocalAI/backups`. The Q4 migration backs up the prior configuration, settings and launchers in `backups/daily-coding-q4-20260920`. Prior Q5 weights remain separately in `challenger/models`.
 
-A rollback restores the exact backed-up owned configuration/profile/launcher bytes and modes, after verifying the installation still matches the release being replaced. Keep model weights and sessions unless removal is intended. Never overwrite changed user files during rollback.
+Rollback requires the runtime stopped and restoration of the exact backed-up owned bytes and modes, after checking the current installation still matches the release being replaced. Preserve changed user files, model weights and sessions unless removal is intended.
 
-For uninstall, finish foreground work, run kryn stop, quit the owned app, and verify its process/listener are gone. Preserve useful sessions and backups, then remove only the verified KRYN-owned app, namespace and unchanged launcher files. Preserve existing Ollama, Intel OpenCode, personal browser profiles and all unrelated configuration. ~/.omlx and app-created support/symlink entries require ownership inspection; never remove the entire shared ~/Library/Application Support/oMLX directory or sweep temporary folders.
+To uninstall, finish foreground work, run `kryn stop`, quit the owned app, and verify its listener/process are gone. Preserve useful work and backups, then remove only verified KRYN-owned app/state and unchanged aliases. Inspect shared settings and support entries before deletion. Preserve existing Ollama, Intel OpenCode, personal profiles and unrelated configuration; never sweep shared support or temporary directories.
 
-The [release manifest](RELEASE_MANIFEST.json) binds this source snapshot, profile, dependency and evaluation versions. [Sanitized results](RESULTS.json) retain measurements and evidence hashes; full private traces remain on the original Mac and are required for independent replay/audit of those historical runs. Raw engineering history, personal paths, model weights, caches, browser profiles and credentials are not part of the private source package.
+The [release manifest](RELEASE_MANIFEST.json) binds exact source/profile/dependency/evaluation versions. [Third-party notices](THIRD_PARTY_NOTICES.md) preserve component licensing. Sanitized results contain evidence hashes; private traces remain on the original Mac. Model weights, credentials, personal paths, caches and browser profiles are excluded from the private source package.
