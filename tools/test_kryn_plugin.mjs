@@ -34,7 +34,8 @@ function fixture(extra = {}) {
     continuations, interruptions,
     call: (name, data) => hooks.get(name)(data),
     emit: async (type, data = {}, loc = location) => {
-      pending.push({ id: 'evt_' + (++serial), type, data: { sessionID: 'ses_1', ...data }, location: loc });
+      pending.push({ id: 'evt_' + (++serial), type, data: { sessionID: 'ses_1', ...data },
+        ...(loc === null ? {} : { location: loc }) });
       wake.splice(0).forEach(f => f()); await tick();
     },
     read: name => {
@@ -44,6 +45,34 @@ function fixture(extra = {}) {
     remove: () => fs.rmSync(root, { recursive: true, force: true }) };
 }
 const model = { providerID: 'local', id: 'qwen' };
+
+test('native locationless lifecycle settles only already owned sessions', async () => {
+  for (const outcome of ['succeeded', 'failed', 'interrupted']) {
+    const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+    try {
+      f.call('session.prompt', { sessionID: 'ses_1' });
+      await f.emit('session.execution.started', {}, null);
+      f.call('tool.execute.after', { sessionID: 'ses_1', messageID: 'msg_1', tool: 'read', status: 'completed' });
+      await f.emit('session.execution.failed', { sessionID: 'unknown' }, null);
+      await f.emit('session.execution.failed', {}, { directory: '/different-project' });
+      assert.equal(f.read('events').length, 0);
+      await f.emit('session.execution.' + outcome, {}, null);
+      const records = f.read('events');
+      assert.equal(records.length, 1);
+      assert.equal(records[0].state, outcome === 'succeeded' ? 'unknown' : outcome === 'failed' ? 'failed' : 'incomplete');
+      assert.equal(f.read('incidents').length, outcome === 'succeeded' ? 0 : 1);
+    } finally { await cleanup(); f.remove(); }
+  }
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    // The global started event can precede the first owned prompt hook.
+    await f.emit('session.execution.started', {}, null);
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.emit('session.execution.failed', {}, null);
+    assert.deepEqual(f.read('incidents')[0].triggers, ['execution_failed']);
+    assert.equal(f.read('events')[0].tool_calls, 0);
+  } finally { await cleanup(); f.remove(); }
+});
 
 test('permission indicator reflects launch locks and native JSONC without misreading strings', () => {
   assert.equal(permissionLabel('ask', '{"session":{"permissions":"autoaccept"}}'), 'Ask (locked)');

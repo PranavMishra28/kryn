@@ -390,6 +390,9 @@ class KrynChecks(unittest.TestCase):
             profile = setup.load_profile(setup.HERE / 'accepted-profile.json')
             setup.write_same(root / 'install-profile.json', setup.encode(profile))
             setup.write_same(root / 'xdg/config/opencode/opencode.json', setup.encode(setup.render(root, home / 'node', profile)))
+            rendered = json.loads((root / 'xdg/config/opencode/opencode.json').read_text())
+            with patch.object(localai, 'ROOT', root):
+                localai.validate_owned_config(rendered)
             marker = root / profile['model_parent'] / setup.model_id(profile) / '.localai-download.json'
             setup.write_same(marker, setup.encode({k: profile[k] for k in ('repository', 'revision')}))
             with patch.object(Path, 'home', return_value=home), patch.object(sys, 'argv', ['deploy', '--apply']), redirect_stdout(io.StringIO()):
@@ -401,6 +404,7 @@ class KrynChecks(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, 'not the installed release'):
                     localai.verify_release()
                 with patch.object(localai, 'PROJECT', Path(manifest['directory'])):
+                    localai.validate_owned_config(rendered)
                     self.assertEqual(localai.verify_release(), manifest)
             for path in (root/'kryn', root/'localai', home/'.local/bin/kryn', home/'.local/bin/localai'):
                 self.assertEqual(path.read_text(), manifest['launcher'])

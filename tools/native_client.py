@@ -24,6 +24,18 @@ SHELL_SHIM = Path(__file__).absolute().with_name("native-shell")
 SHELL_SHIM_BYTES = b'#!/bin/sh\nexec "${LOCALAI_SHELL_PYTHON:?missing owned interpreter}" -B "${LOCALAI_SHELL_HELPER:?missing owned helper}" --guarded-shell "$@"\n'
 
 
+def product_plugin_files(project):
+    """The same plugin bytes for source packaging and deployed-client validation."""
+    project = Path(project)
+    if (project / "plugin/server.js").is_file():
+        return {name: (project / "plugin" / name).read_bytes()
+                for name in ("package.json", "permission_display.mjs", "server.js", "tui.tsx")}
+    return {"server.js": (project / "tools/kryn_plugin.mjs").read_bytes(),
+            "tui.tsx": (project / "tools/kryn_tui.tsx").read_bytes(),
+            "permission_display.mjs": (project / "tools/permission_display.mjs").read_bytes(),
+            "package.json": b'{"private":true,"type":"module","exports":{".":"./server.js","./tui":"./tui.tsx"}}\n'}
+
+
 # Direct write containment only; reads, network and outside-service delegation remain outside its scope.
 WRITE_PROFILE = """;; Direct filesystem-write containment for ordinary shell descendants only.
 ;; Parameters must be canonical, existing, operator-owned directories.

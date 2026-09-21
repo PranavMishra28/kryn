@@ -40,3 +40,18 @@ The application source was preserved. This patch does not repair that applicatio
 - A live native terminal probe displayed the permission indicator and opened settings through `/permissions`, without a model call.
 - A fresh independent review found an off-by-one closing-step counter and missed pre-execution tool failures. Both were fixed and the focused regressions passed.
 - The user's existing foreground session remained open. It was preserved, so candidate local-model regression and installation were not performed. These control tests do not establish better end-to-end task quality; that remains a required follow-up after the foreground session closes.
+
+## Follow-up after the foreground session closed
+
+The owner closed the foreground sessions and v0.1.5 was installed from its verified release. Two serial Default-effort local-model trials then ran in disposable Git workspaces:
+
+- Reviewer finished in 233.111 seconds: 12 reads, two globs, one compaction, at most two reads of any file, no mutation and no forced interruption. It found the unpopulated liked view and unsupported test-report claims. It missed the reset-display defect and proposed an inadequate liked-view repair. Operational completion passed; review quality is **partial**, not accepted as a complete application review. The differently prompted historical run is not a controlled performance baseline.
+- Build repaired the frozen date-range fixture in 128.026 seconds. The independent grader failed before the model's edit and passed afterward; original tests and CSV data were unchanged. The model encountered and corrected two incorrect expectations in its own new tests. Those recovered failures remain diagnostic evidence rather than being discarded because the final execution succeeded.
+- Both trials verified local inference routing, normal memory pressure throughout, zero sampled swap growth, owned-process exit and idle settlement. These short trials do not establish long-run quality or memory bounds.
+
+Installed validation then exposed two release bugs, corrected in v0.1.6:
+
+1. The launcher still calculated the old server-only plugin identity, rejecting the newly bundled terminal plugin. Packaging and launcher configuration now share the plugin-byte definition. The deployment regression validates the generated configuration against both source and deployed clients; it failed on v0.1.5 and passed after the fix.
+2. Native global lifecycle events can omit a public location, even though the native Bus routes them to the owning instance. The observer discarded completion and mislabeled successful runs incomplete during cleanup. It now accepts absent locations only for already owned session IDs, while rejecting unknown sessions and explicitly foreign locations. Success, failure, interruption and failure before a first tool have regressions. A fresh independent review confirmed the pinned native API behavior and reviewed both fixes.
+
+After these fixes, 160 Python tests, 29 Node tests and 21 lifecycle tests pass (210 total). Installed v0.1.6 health and lifecycle validation are recorded below once completed.

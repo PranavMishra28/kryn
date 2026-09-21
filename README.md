@@ -2,7 +2,7 @@
 
 A private local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.5](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.5) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.6](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.6) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -126,10 +126,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.5 --repo PranavMishra28/kryn \
+     gh release download v0.1.6 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.5
+     python3 install-kryn.py --tag v0.1.6
    )
    ```
 
@@ -142,7 +142,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.5`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.6`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -158,7 +158,7 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.5` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.6` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn improve status` | Inspect experimental background improvement. |
 | `kryn improve failures` | Inspect failure-triggered incidents awaiting regression checks. |
@@ -182,7 +182,7 @@ Each file write is limited to 12,000 UTF-8 bytes; larger components should use s
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.5 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
+Version 0.1.6 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
 
 ## Improvement from actual failures
 

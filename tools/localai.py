@@ -21,7 +21,7 @@ import time
 import urllib.error
 import urllib.request
 
-from native_client import BINARY, MODEL_ID, PROJECT, ROOT, NativeServer, environment, owned_config
+from native_client import BINARY, MODEL_ID, PROJECT, ROOT, NativeServer, environment, owned_config, product_plugin_files
 from context_probe import ResourceGuard, resources
 import improvement
 import learning
@@ -104,10 +104,8 @@ def local_reference(ref, *, legacy=False):
 def expected_config():
     # The deployer copies the reviewed template and pins its selected model.
     config = json.loads((PROJECT / "setup/opencode.template.json").read_text())
-    plugin = PROJECT / "plugin/server.js"
-    if not plugin.is_file():
-        plugin = PROJECT / "tools/kryn_plugin.mjs"
-    identity = hashlib.sha256(plugin.read_bytes()).hexdigest()[:16]
+    files = product_plugin_files(PROJECT)
+    identity = hashlib.sha256(b''.join(files[name] for name in sorted(files))).hexdigest()[:16]
     profile = PROJECT / "setup/install-profile.json"
     if not profile.is_file():
         profile = PROJECT / "setup/accepted-profile.json"

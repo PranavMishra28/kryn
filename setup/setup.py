@@ -24,6 +24,8 @@ import tempfile
 import urllib.request
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent / "tools"))
+from native_client import product_plugin_files
 MODEL = "Qwen3.8-27B-oQ6e-mtp"
 REVISION = "f7ec1f012451c7a76e775e2fdefdd5f0a51f11f7"
 GIB = 1024 ** 3
@@ -167,10 +169,7 @@ def extract_cli(archive, destination):
 
 
 def plugin_files():
-    return {"server.js": (HERE.parent / "tools/kryn_plugin.mjs").read_bytes(),
-            "tui.tsx": (HERE.parent / "tools/kryn_tui.tsx").read_bytes(),
-            "permission_display.mjs": (HERE.parent / "tools/permission_display.mjs").read_bytes(),
-            "package.json": b'{"private":true,"type":"module","exports":{".":"./server.js","./tui":"./tui.tsx"}}\n'}
+    return product_plugin_files(HERE.parent)
 
 
 def plugin_directory(root):

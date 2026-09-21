@@ -357,11 +357,14 @@ export default {
     const controller = new AbortController();
     const pump = (async () => {
       for await (const event of ctx.event.subscribe({ signal: controller.signal })) {
-        if (!sameLocation(event.location) || typeof event.data?.sessionID !== 'string') continue;
+        const id = event.data?.sessionID;
+        if (typeof id !== 'string') continue;
+        // Native lifecycle events can omit public location even though the Bus
+        // routes them to this instance. Trust only sessions already owned here.
+        if (event.location === undefined ? !sessions.has(id) : !sameLocation(event.location)) continue;
         if (seen.has(event.id)) continue;
         seen.add(event.id);
         if (seen.size > 4096) seen.delete(seen.values().next().value);
-        const id = event.data.sessionID;
         if (event.type === 'session.execution.started') start(id, event.id);
         if (event.type === 'session.tool.failed') {
           const item = start(id, event.id);
@@ -418,8 +421,8 @@ export default {
           tracker(item);
         }
         if (event.type === 'session.execution.succeeded') finish(id, session(id).truncated ? 'incomplete' : 'unknown');
-        if (event.type === 'session.execution.failed') { session(id).stopped = true; finish(id, 'failed'); }
-        if (event.type === 'session.execution.interrupted') { session(id).stopped = true; finish(id, 'incomplete', true); }
+        if (event.type === 'session.execution.failed') { start(id, event.id).stopped = true; finish(id, 'failed'); }
+        if (event.type === 'session.execution.interrupted') { start(id, event.id).stopped = true; finish(id, 'incomplete', true); }
       }
     })().catch(error => { if (!controller.signal.aborted) failed = error; });
     return async () => {
