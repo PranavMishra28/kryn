@@ -54,4 +54,13 @@ Installed validation then exposed two release bugs, corrected in v0.1.6:
 1. The launcher still calculated the old server-only plugin identity, rejecting the newly bundled terminal plugin. Packaging and launcher configuration now share the plugin-byte definition. The deployment regression validates the generated configuration against both source and deployed clients; it failed on v0.1.5 and passed after the fix.
 2. Native global lifecycle events can omit a public location, even though the native Bus routes them to the owning instance. The observer discarded completion and mislabeled successful runs incomplete during cleanup. It now accepts absent locations only for already owned session IDs, while rejecting unknown sessions and explicitly foreign locations. Success, failure, interruption and failure before a first tool have regressions. A fresh independent review confirmed the pinned native API behavior and reviewed both fixes.
 
-After these fixes, 160 Python tests, 29 Node tests and 21 lifecycle tests pass (210 total). Installed v0.1.6 health and lifecycle validation are recorded below once completed.
+After these fixes, 160 Python tests, 29 Node tests and 21 lifecycle tests pass (210 total).
+
+### Installed v0.1.6 validation
+
+- Installed the clean wheel through the normal verified updater. `kryn doctor --deep` passed: model hashes, browser dependency integrity, native local routing, normal host pressure, healthy idle runtime, connected browser and connected search.
+- A Fast-mode native read-and-reply completed in 17.003 seconds and produced **no incident**. A separate expected exit-7 shell task completed in 13.168 seconds and produced exactly one `tool_error` incident, with no false `execution_incomplete`. Both had verified local routing, normal pressure, zero sampled swap growth and complete owned-session/process cleanup.
+- Launched the actual installed `kryn --permissions interactive` in a disposable project. The terminal showed the saved permission mode, `/permissions` opened native Settings, and its Permissions row matched the footer. Saved settings were preserved. `/exit` returned successfully through the ordinary resource guard.
+- Archived and reconciled only the two incorrect v0.1.5 trial records against their successful native exports. The recovered Build tool failure was retained; unrelated user sessions and application source were not modified.
+
+The installed launcher and failure-accounting regression are validated. The broader Reviewer quality limitation above remains; neither a native successful exit nor these tests establishes frontier parity.
