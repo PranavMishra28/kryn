@@ -4,7 +4,7 @@
   "created_utc": "2026-09-21T01:19:28.648463+00:00",
   "release_status": "NOT_READY",
   "daily_use_status": "NOT_READY_PENDING_CURRENT_PROFILE_QUALIFICATION",
-  "scope": "Current product snapshot with an installed clean-source private draft and partial native task evidence; final release acceptance remains incomplete.",
+  "scope": "Current product snapshot with actual private draft lifecycle transactions, bounded prior-client outage recovery, a scoped paired native task failure and isolated rejected-model evidence; final release acceptance remains incomplete.",
   "immutable_scope": "Per-file hashes describe this working-tree snapshot. The final committed clean source and wheel require a new manifest; no signature is implied.",
   "package": {
     "name": "kryn",
@@ -30,19 +30,48 @@
       "repository": "PranavMishra28/kryn",
       "release_is_draft": true,
       "visibility": "private",
-      "wheel_sha256": "edef64a9f483c5edb3ea6b1df20b5f1dbb8f938c6c2f922679c839325195eb6f",
-      "wheel_bytes": 196971,
-      "source_revision": "dafc7215640b808843a181d3e09be03d09c2a0bd",
+      "wheel_sha256": "1126b0ce509c4b61ab550bba230f42796a5b70686a688b02f2f2e5086d5602bf",
+      "wheel_bytes": 198103,
+      "source_revision": "59b4f63906bd80ca1bf2aa95e7a80d8da6903ecc",
       "source_dirty": false,
       "payload_files": 48,
       "wheel_entries": 57,
       "payload_hashes_verified": true,
       "installed": true,
-      "installed_client_release": "96e5d5ac08cceecd"
+      "installed_client_release": "f00700bc09fd4a77",
+      "think_temperature": 0.6
+    },
+    "prior_private_drafts": [
+      {
+        "version": "0.1.0",
+        "tag": "v0.1.0",
+        "repository": "PranavMishra28/kryn",
+        "release_is_draft": true,
+        "visibility": "private",
+        "wheel_sha256": "edef64a9f483c5edb3ea6b1df20b5f1dbb8f938c6c2f922679c839325195eb6f",
+        "wheel_bytes": 196971,
+        "source_revision": "dafc7215640b808843a181d3e09be03d09c2a0bd",
+        "source_dirty": false,
+        "payload_files": 48,
+        "wheel_entries": 57,
+        "payload_hashes_verified": true,
+        "installed": true,
+        "installed_client_release": "96e5d5ac08cceecd"
+      }
+    ],
+    "trust": {
+      "authenticated_private_github_assets": true,
+      "checksum_verified": true,
+      "source_bound_manifest": true,
+      "independently_signed": false,
+      "independently_notarized": false,
+      "hosted_ci_attestation_provided": false,
+      "limit": "Checksums and source binding detect byte mismatches; they do not protect against a compromised publisher.",
+      "upstream_omlx_codesign": "Verified separately from KRYN wheel/bootstrap trust."
     }
   },
   "source_snapshot": {
-    "base_commit": "dafc7215640b808843a181d3e09be03d09c2a0bd",
+    "base_commit": "59b4f63906bd80ca1bf2aa95e7a80d8da6903ecc",
     "working_tree_dirty": true,
     "final_source_commit": null
   },
@@ -150,8 +179,13 @@
         "enable_thinking": false
       }
     },
-    "current_preset_qualification": "PENDING_REVISED_PRIVATE_ARTIFACT_INSTALL_AND_PAIRED_NATIVE_TRIALS",
-    "historical_native_think_temperature": 1.0
+    "current_preset_qualification": "INSTALLED_PRIVATE_DRAFT_SCOPED_NATIVE_INITIAL_PAIR_RECORDED_CONTINUATION_AND_FINAL_DOGFOOD_PENDING",
+    "historical_native_think_temperature": 1.0,
+    "native_browse_handoff": {
+      "same_session_user_switch": true,
+      "automatic_build_delegation": false,
+      "live_verification": "PENDING"
+    }
   },
   "owner_policy": {
     "numeric_id": 90290458,
@@ -160,23 +194,36 @@
     "tokens_stored_in_kryn": false
   },
   "learning_policy": {
-    "version": "learning-2026-09-20.2",
+    "version": "learning-2026-09-20.3",
     "reflection_variant": "fast",
     "reflection_tokens": 768,
     "reflection_seconds": 120,
     "trial_seconds": 360,
     "idle_seconds": 120,
     "daily_work_seconds": 600,
-    "candidates_per_day": 1,
+    "candidates_per_day": 2,
     "queue": 2,
     "activation_scope": "disposable_json_cli",
     "live_qualified": false,
-    "benefit_proven": false
+    "benefit_proven": false,
+    "first_live_attempt": {
+      "status": "FAILED_BEFORE_MODEL_CALLS",
+      "worker_budget_seconds": 5.5424733749823645,
+      "actual_model_requests": 0,
+      "decision": "defer",
+      "reason": "reflection_incomplete",
+      "paused_after_attempt": true,
+      "active_preemption_observed": false
+    },
+    "source_validated": true,
+    "installed_corrected_worker_qualified": false,
+    "attempt_reservation": "Before inference; zero-dispatch release requires complete proof, charged time and durable receipt",
+    "prior_attempt_and_spent_budget_preserved": true
   },
   "evaluation": {
     "frozen_manifest_sha256": "186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6",
     "task_manifest_sha256": "6175d1bdd822f0bfec867b8c2653bfce316c4292de3de6ecf23326d19607a009",
-    "results_sha256": "dd47a56e13233fb9c9ed37e2c70b00382c9745b6ce3e4707d48bfebba5f2e904",
+    "results_sha256": "0ea4d8238d40e26d459267db8a0de664f2114157613ccf9f227e7af1799455fe",
     "all_current_gates": "INCOMPLETE",
     "gates": {
       "private_artifact_install": "PARTIAL_PRIVATE_DRAFT_INSTALL_PASS",
@@ -207,16 +254,111 @@
       "stockroom-kryn-run.json": "481012bc6d939003bea141768d70ecd5e22429391bddd3b2add03cb1b5bc2185",
       "stock-ablation-independent-audit.json": "9e67e483d7972f6340d86d8980a8a20feec82c55d9e04edda1183353183c834b",
       "stockroom-stock-initial-driver.json": "953d475e40db5c5f89fc2459ae14a1ff1da6e360e7681fec84dba17e06d6f9b4",
-      "paired-v2-protocol.json": "316f60942d61db217a12ab294512528aa4ab693333264bdb07f2d6119272be7b"
+      "paired-v2-protocol.json": "316f60942d61db217a12ab294512528aa4ab693333264bdb07f2d6119272be7b",
+      "private-update-rollback-summary.json": "1bd3d09be2be093636b5206fd8f701cd8793ba5272cf63670586348b9697b002",
+      "private-update-v2.log": "4ba604564c7ad7f07332959a30281213d5ce230d1c7b88f9da7f764bfebf313b",
+      "private-rollback-v2.json": "2ce273dec00201feae00b353ab52599d59cf24601fc0f471e8bc1898f03cadc8",
+      "private-rollback-v2.log": "de660f0efeb7b2ad34bf0f414f497967e3bcc049aafab5a8f0738eb5f59815ca",
+      "private-reupdate-v2.json": "0f80c7577641d9caabdaed0c47e83bff04592405a773771b50a78ba041a0ffde",
+      "private-reupdate-v2.log": "f994f1a084d8f39349053848056888eb324822a1e775690f73cae6b30d9f5e17",
+      "direct-native-outage-metrics.json": "0741dd79984e55e8944b75bc92a5d37136352e8b025a9a922e8d84d84e59fd67",
+      "direct-native-outage-cleanup.json": "1c3d827e7ca641afd821976e2cb75c10dcf800f8fdb325411252372737ef6a15",
+      "daily-launcher-outage-observer-metrics.json": "f068aa679f7d6dbf6eccf0b56a9c8d21dcc2e8ffb5eb6a4f40afdc70e454a55e",
+      "daily-launcher-outage-metrics.json": "ed7bb79a57faea2deb9793757e5a508b5a82c939bf7ff8381f71b57f74ceb7e5",
+      "daily-launcher-outage-interpretation.json": "6471211d0d78ec8118862c3c6cdcc8c49844d5d8773c3bedf2cedc70166d1e68",
+      "paired-v2-readiness.json": "3ce6a72936471efbdc487d31ea1d2d0f6ba9584e21fc94fe5b4abaed8de0e4a4",
+      "paired-v2-initial-summary.json": "87b003132e205781440af84b683d414ab601b120e9c088c64cf7fe0f945783a7",
+      "stock-v2-freeze.json": "67a06823c7fc75c8f61cc47a76a55585628d17bf5f05a737cb75b61eee63ea89",
+      "stock-v2-installed-binding.json": "c6b70575290038b2c3688d5d0f78f5ace80d0985c8752288ed8db98fe9744e4c",
+      "stock-v2-initial-error-audit.json": "e12d23f1c5f52015117f47b0472ba84084b10da51e1e6684c6cf80992f59f8fe",
+      "kryn-v2-initial-error-audit.json": "03247020d1f7988447928d59c02a91be8f0bc7270111c782612acf817625383c",
+      "stockroom-stock-v2-invalid-outer-sandbox-grade.json": "e84d7531731d437e7c9956e176a7820294859eeed5580c66051a4059e7796d6b",
+      "glm47-reap-rejection-summary.json": "df40c69323629bb1beea7e24fcd3a332633d08e3be183b2903913670a40a2f16",
+      "glm47-reap-qualification.json": "6a1fed160730fbcd6602cfa4cf6da7d5b0d030a0c4ce7ba6c34169bcbdb87fbc",
+      "glm47-reap-think-diagnostic.json": "e3c94f5e52b15566a2ddae7dd6042ac1cb9a66479693589033313cce98b26329",
+      "native-browse-switch-audit.json": "7eb541145456a93901bbe13deedc07b7084905777c00d15e31d0667d65d26a97",
+      "stockroom-stock-v2-initial-driver.json": "a5f09384ee27492e800f63533f6db4df5706db6c053a4e6562b27d693b57586d",
+      "stockroom-stock-v2-initial-grade.json": "048476694e8647c83a4285203332c1a474ccd9e0d53b682ad7a5270e21e84cd6",
+      "stockroom-stock-v2-first-wire.json": "b1a8f1d03f29a61c728096ab920e829e033167acdea9b67d1f445516e1074382",
+      "stockroom-kryn-v2-initial-driver.json": "9e3850b2be9bb2a5fe25f8c24b6dda67f0016c6129d285c82feddcfb96b677f9",
+      "stockroom-kryn-v2-initial-grade.json": "508475942f7b965ba4969e7f509745c6715c9288006694a7c50f157bff4e20e2",
+      "stockroom-kryn-v2-first-wire.json": "6ce4d0fd507f16bf705fb8f13f8290ea1aa0f162ed6b159d9cf24a3bfdb02d2d",
+      "compact-v2-metrics.json": "9f5d3e7b68e314a54dd0d0a14437a6c7a4780ae198c92390ca936d0431b92f2a",
+      "compact-v3-metrics.json": "17ae7be900df0692ad2ba942f6112ff82ebfac083ad136ba9789669a2e09f83f",
+      "compact-v4-metrics.json": "c63ac743b034882dcd0a12bbba41d46bc651109c9a583fa5f47e9621e5591d7e",
+      "cache-persistence-source-audit.json": "90cdd279dd6a59ce5483a56bff00ac14dc356ec1651e0f76fd27645cb62651f3",
+      "cache-read-error-fixtures.json": "90c047cc1e7e64d49ede0be9d9cb6ebd04c7099eba0bece05d2f177d25d77a24",
+      "compact-v3-count-failure-analysis.json": "55fc07085ff9daa6ba1f14223c11ab721753665c56f1fbc6260953421f49cbc8",
+      "compact-v4-normalization-controls.json": "af6d72d2b7eeb8ef9dc59c8e9c4661494a6e2db8379a667e438bcea756f13740",
+      "learning-first-attempt-metrics.json": "4de2584ca0e80a78426f3f107a3474175b1b148c13eb7fbe3f25505691c71650",
+      "learning-normal-exit-trigger-metrics.json": "9b6aa3e9837640266d59941cba4084cd4575e180765d927e296431714a04430f",
+      "learning-cli-startup-reproduction.json": "020412d13c8a11bc0a9386c29639ea7134051362b3aa9a824584259db28b97e9",
+      "paired-v2-sustained-summary.json": "ed5f74a78b1eb3e186f5967315d6899bd6aeb380ea830f978c3f887eafb400c6",
+      "stockroom-kryn-v2-sustained-driver.json": "a67e3814a011e55ec233aace590ef40a74c2be00a7e2da2fcd89b7158e7b8001",
+      "stockroom-kryn-v2-sustained-grade.json": "b3dc90f77a65b94a8468bea34d6be268993c72fc1b48f706f16f774d6e1c1ab3",
+      "kryn-v2-sustained-audit.json": "e3416f2fc5267219efd9537194b6978584ae69e0000037d6abd606b7753d4ba5",
+      "package-fault-controls-summary.json": "09e62fe21bc4a68545111d286fe309a99145282d49e72fe9aff0156a4d1a8fd1",
+      "owned-candidate-cleanup.json": "617a2f706783087aea968b82321bfca4fc0e60c14cb89eb95521b01deacba2f0",
+      "learning-policy3-final-source-receipt.json": "91f03b03c4936cb8678ca049fd2ea8f1ed6df9dc75ffc012da9d78e018e3a8f0",
+      "learning-policy3-source-canary.json": "7dbf307ed7c0d428eea9921bc3d77d6744db523bf243f01e756c215cd05dd84c",
+      "final-learning-native-unit.log": "4ad90d485079fa030a3e00d8bbfbdf42640bf1f3519363eb80818d250a9eb307"
     },
     "paired_native_v2": {
-      "status": "PENDING",
+      "status": "INITIAL_ATTEMPTS_RECORDED_BOTH_TASKS_INCOMPLETE",
       "temperature": 0.6,
       "expected_build_tool_count": 10,
-      "first_wire_schema_hashes": null,
-      "first_wire_tool_name_hashes": null,
+      "first_wire_schema_hashes": {
+        "kryn": "1fd2634e9319c12bcc4c418b632a9c599375e7cf66f323fc82a4858f54c51a76",
+        "stock": "4b369889c14caedc3b722b6d695944aef7a373c4cce578e87bbbdafd586b5eb7"
+      },
+      "first_wire_tool_name_hashes": {
+        "kryn": "37caeadcd5fc5ec64b8ebb526940840351fc5520aef8660680d2294b3904cb37",
+        "stock": "37caeadcd5fc5ec64b8ebb526940840351fc5520aef8660680d2294b3904cb37"
+      },
       "prior_native_think1_0_results_preserved": true,
-      "prior_api_calibration_temperature_both_modes": 0.6
+      "prior_api_calibration_temperature_both_modes": 0.6,
+      "configuration_freeze": "FROZEN_BEFORE_INITIAL_RUNS",
+      "comparison_outcome": "Both17/18; both timeout; no completed task or correctness gain.",
+      "continuation_status": "KRYN_NATIVE_COMPLETE_TASK_ACCEPTANCE_FAILED_26_OF_27; stock continuation not run"
+    },
+    "lifecycle_binding": {
+      "daily_outage_tested_client": "96e5d5ac08cceecd",
+      "current_installed_client": "f00700bc09fd4a77",
+      "guard_and_launcher_code_unchanged": true,
+      "current_artifact_native_dogfood": "PENDING",
+      "private_update_rollback_reupdate": "PASS_SCOPED",
+      "evidence": "private-update-rollback-summary.json"
+    },
+    "rejected_candidate": {
+      "artifact": "NexVeridian/GLM-4.7-Flash-REAP-23B-A3B-3bit",
+      "revision": "8109930ffb674f68d611a5270f0016632b31dfea",
+      "runtime": "oMLX 0.6.4",
+      "reason": "Degenerate truncated output in two supported-mode entry controls.",
+      "memory_pressure_failure": false,
+      "broader_model_quality_judgment": false,
+      "evidence": "glm47-reap-rejection-summary.json",
+      "owned_weight_cleanup": {
+        "shards": 2,
+        "bytes": 10068512681,
+        "evidence_retained": true
+      }
+    },
+    "context_cache_protocol": {
+      "v2_status": "FAIL",
+      "v3_status": "FAIL",
+      "v3_cache_cases_passed": 5,
+      "v4_status": "PASS_SCOPED_PROTOCOL",
+      "v4_cases_passed": 6,
+      "native_compaction_retention_qualified": false,
+      "live_corrupted_cache_recovery_qualified": false,
+      "production_settings_changed_for_test": false
+    },
+    "isolated_shipped_wheel_fault_controls": {
+      "status": "PASS_SCOPED_ISOLATED",
+      "checks": 11,
+      "real_sigkill_boundaries": 4,
+      "external_boundaries_mocked": true,
+      "live_interruption_qualified": false
     }
   },
   "source_files": {
@@ -231,13 +373,13 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "dffa7cb039256b3795f9392a66e9606156cf17ce2fcdef81333e1d87962a6157",
-      "bytes": 18627,
+      "sha256": "c86c8a19817f355a7698bd0e2e4a943f32a01ade1b7f4ba2ffd2fdfd7f86706c",
+      "bytes": 16958,
       "executable": false
     },
     "RESULTS.json": {
-      "sha256": "dd47a56e13233fb9c9ed37e2c70b00382c9745b6ce3e4707d48bfebba5f2e904",
-      "bytes": 44473,
+      "sha256": "0ea4d8238d40e26d459267db8a0de664f2114157613ccf9f227e7af1799455fe",
+      "bytes": 116265,
       "executable": false
     },
     "THIRD_PARTY_NOTICES.md": {
@@ -431,8 +573,8 @@
       "executable": false
     },
     "setup/test_learning.py": {
-      "sha256": "4de6202c10c449b1b119e605adfff3a42c94bd9085a7e726cd9a8c8760aef76c",
-      "bytes": 23680,
+      "sha256": "71bd7496506d390db50afa7e2c8eba4565f6f6555e70ccba7880171d666a1ecb",
+      "bytes": 35500,
       "executable": false
     },
     "setup/test_owner_auth.py": {
@@ -506,8 +648,8 @@
       "executable": false
     },
     "tools/learning.py": {
-      "sha256": "5ecda7579538809b09106a1d5947ad69348b76923b6dc07000b616bdc4f8f398",
-      "bytes": 56067,
+      "sha256": "dbe13c998db55d86079e6a00ed8dc926548f5d99e341e6032d2d3278c71c6d1d",
+      "bytes": 61179,
       "executable": false
     },
     "tools/localai.py": {
@@ -521,8 +663,8 @@
       "executable": true
     },
     "tools/native_client.py": {
-      "sha256": "6317833d8caee09b53e3e32655a33e703e5ba0a44a1892f4948b64a8ee9ab9c9",
-      "bytes": 34256,
+      "sha256": "a15a45d922199d41a81d037dabc216b06be1868585c85b85537574b7a004d2fb",
+      "bytes": 34805,
       "executable": false
     },
     "tools/native_lifecycle_probe.py": {
@@ -936,5 +1078,5 @@
       }
     }
   ],
-  "updated_utc": "2026-09-21T01:41:57.210182+00:00"
+  "updated_utc": "2026-09-21T02:48:17.380745+00:00"
 }

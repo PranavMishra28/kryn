@@ -28,9 +28,11 @@ import uuid
 import improvement as state
 
 POLICY = {
-    "version": "learning-2026-09-20.2", "idle_seconds": 120, "day_seconds": 600,
+    "version": "learning-2026-09-20.3", "idle_seconds": 120, "day_seconds": 600,
     "reflection_seconds": 120, "reflection_tokens": 768, "reflection_variant": "fast", "trial_seconds": 360,
-    "candidates_per_day": 1, "queue": 2, "pairs_per_family": 3,
+    # Version .2 spent its first slot on a proved pre-inference startup defect.
+    # Two prospective slots retain the same total daily time; no history is reset.
+    "candidates_per_day": 2, "queue": 2, "pairs_per_family": 3,
     "efficiency_fraction": .15, "yield_target_seconds": 10, "yield_bound_seconds": 30,
     "raw_days": 7, "raw_bytes": 256 * 1024**2, "metadata_days": 30, "metadata_records": 500,
     "holdout_uses_per_candidate": 1,
@@ -130,7 +132,7 @@ def status(directory):
             "champion": _champion(directory)["revision"], "default_scope_champion": active_champion(directory)["revision"],
             "activation_scope": "disposable_json_cli", "worker": read(base / "worker.json"),
             "budget": read(base / "budget.json"), "last_decision": read(base / "last-decision.json"),
-            "pipeline_implemented": True, "live_qualification_required": True, "benefit_proven": False}
+            "pipeline_implemented": True, "benefit_proven": False}
 
 
 def control(directory, action):
@@ -215,6 +217,52 @@ def record_decision(directory, candidate, decision, reason, **evidence):
     state._write_new(folder / (f"{time.time_ns():020d}-" + uuid.uuid4().hex + ".json"), value)
     put(base / "last-decision.json", value)
     return value
+
+
+def reserve_reflection_attempt(directory, observation):
+    """Persist the attempt before dispatch; any setup failure prevents inference."""
+    base = root(directory)
+    allowance = budget(directory)
+    consumed = set(read(base / "consumed.json", []))
+    if allowance["candidates"] >= POLICY["candidates_per_day"] or observation["task_id"] in consumed:
+        raise state.Deferred("Reflection attempt is already consumed or its daily quota is exhausted")
+    reservation = {"date": allowance["date"], "candidates_before": allowance["candidates"]}
+    allowance["candidates"] += 1
+    put(base / "budget.json", allowance)
+    consumed.add(observation["task_id"])
+    put(base / "consumed.json", sorted(consumed)[-500:])
+    return reservation
+
+
+def finish_reflection_attempt(directory, folder, observation, result, reservation, error_class=None, *, time_charged=False):
+    """Release only a proved zero-dispatch reservation after its durable receipt."""
+    try:
+        telemetry = read(Path(folder) / "evidence/telemetry.json", {})
+    except (OSError, ValueError, RuntimeError):
+        telemetry = {}
+    complete = (telemetry.get("dispatch_evidence_complete") is True
+                and isinstance(telemetry.get("requests"), list))
+    count = len(telemetry["requests"]) if complete else None
+    base = root(directory)
+    allowance = budget(directory)
+    consumed = set(read(base / "consumed.json", []))
+    release = (time_charged and complete and count == 0 and not result.get("native_completed")
+               and allowance["date"] == reservation["date"]
+               and allowance["candidates"] == reservation["candidates_before"] + 1
+               and observation["task_id"] in consumed)
+    receipt = {"policy": POLICY["version"], "unix": time.time(), "observation_sha256": digest(observation),
+               "dispatch_evidence_complete": complete, "accepted_requests": count,
+               "candidate_reserved": True, "release_authorized": release,
+               "time_charged": time_charged,
+               "native_completed": result.get("native_completed") is True,
+               "error_class": error_class}
+    state._write_new(Path(folder) / "reflection-attempt.json", receipt)
+    if release:
+        consumed.remove(observation["task_id"])
+        put(base / "consumed.json", sorted(consumed)[-500:])
+        allowance["candidates"] -= 1
+        put(base / "budget.json", allowance)
+    return {**receipt, "candidate_spent": not release}
 
 
 def parse_proposal(text):
@@ -542,12 +590,28 @@ def python_dependencies():
     return list(dict.fromkeys(paths))
 
 
+def record_native_process(logs, output, errors, returncode):
+    """Preserve bounded disposable diagnostics even when native startup fails."""
+    output, errors = output or b"", errors or b""
+    limits = {"stdout": 2 * 1024**2, "stderr": 64 * 1024}
+    receipt = {"exit_code": returncode}
+    private = {}
+    for name, value in (("stdout", output), ("stderr", errors)):
+        receipt[name + "_observed_bytes"] = len(value)
+        receipt[name + "_truncated"] = len(value) > limits[name]
+        private[name] = value[:limits[name]].decode(errors="replace")
+    state._write_new(Path(logs) / "native-process.json", {**receipt, **private})
+    return receipt
+
+
 def safe_run_telemetry(metadata):
     """Strict content-free receipt: never serialize prompts, answers or raw APIs."""
     import math
     number = lambda value: type(value) in {int, float} and math.isfinite(value)
     value = {key: metadata[key] for key in ("schema", "policy", "reflection", "requested_model", "requested_variant",
              "champion_revision", "started_unix", "finished_unix", "elapsed_seconds", "error_class") if key in metadata}
+    if type(metadata.get("dispatch_evidence_complete")) is bool:
+        value["dispatch_evidence_complete"] = metadata["dispatch_evidence_complete"]
     value["requests"] = []
     for request in metadata.get("requests", [])[:128]:
         item = {key: request[key] for key in ("max_tokens", "started", "tool_count") if number(request.get(key))}
@@ -561,6 +625,8 @@ def safe_run_telemetry(metadata):
         value["requests"].append(item)
     value["settlement"] = {key: result for key in ("idle", "acknowledged", "idle_samples", "acknowledgement_count", "interrupted_count", "seconds", "seconds_remaining")
                            if (result := metadata.get("settlement", {}).get(key)) is not None and (type(result) is bool or number(result))}
+    value["native_process"] = {key: result for key in ("exit_code", "stdout_observed_bytes", "stderr_observed_bytes", "stdout_truncated", "stderr_truncated")
+                               if (result := metadata.get("native_process", {}).get(key)) is not None and (type(result) is bool or number(result))}
     value["resources"] = [{key: sample[key] for key in ("pressure_level", "swap_used_bytes") if number(sample.get(key))}
                            for sample in metadata.get("samples", [])[-256:]]
     for target, source in zip(value["resources"], metadata.get("samples", [])[-256:]):
@@ -634,13 +700,17 @@ def _native_turn(directory, config, workspace, prompt, champion, seconds, *, ref
                 raise RuntimeError("Learning resource preflight failed")
             if n < 2: time.sleep(2)
         with NativeServer(workspace, effective, log=logs / "native.log", background={"dependencies": dependencies, "inference_port": relay.port, "cancel": lambda: foreground_requested(directory)}) as server:
-            create = {"model": {"providerID": "local", "id": "qwen", "variant": variant}, "agent": "build", "location": {"directory": str(workspace)}}
+            # A named native session skips automatic title inference, which would
+            # contend with the primary request at the single-generation relay.
+            create = {"model": {"providerID": "local", "id": "qwen", "variant": variant}, "agent": "build",
+                      "title": "KRYN background reflection" if reflection else "KRYN background trial",
+                      "location": {"directory": str(workspace)}}
             if reflection: create["permissions"] = [{"action": "*", "resource": "*", "effect": "deny"}]
             session = server.request("POST", "/api/session", create, timeout=3)["data"]
             sid = session["id"]
             command = server.background_prefix + [str(BINARY), "run", "--server", server.url, "--session", sid, "--agent", "build", "--model", reference, "--format", "json"]
-            child = subprocess.Popen(command, cwd=workspace, env=server.env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            interrupted, first, output, next_sample, settlement_attempted = False, True, b"", time.monotonic(), False
+            child = subprocess.Popen(command, cwd=workspace, env=server.env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            interrupted, first, output, errors, next_sample, settlement_attempted = False, True, b"", b"", time.monotonic(), False
             try:
                 while True:
                     now = time.monotonic()
@@ -656,11 +726,12 @@ def _native_turn(directory, config, workspace, prompt, champion, seconds, *, ref
                         if size > 64 * 1024**2:
                             result["reason"] = "disk_budget"; interrupted = True; break
                     try:
-                        output, _ = child.communicate(prompt.encode() if first else None, timeout=.25)
+                        output, errors = child.communicate(prompt.encode() if first else None, timeout=.25)
                         break
                     except subprocess.TimeoutExpired as error:
                         first = False
-                        if error.output and len(error.output) > 2 * 1024**2:
+                        output, errors = error.output or b"", error.stderr or b""
+                        if len(output) > 2 * 1024**2 or len(errors) > 64 * 1024:
                             result["reason"] = "output_budget"; interrupted = True; break
                 settlement_attempted = True
                 settlement = settle_background(server, sid, Path(workspace), relay, interrupt=interrupted)
@@ -686,9 +757,12 @@ def _native_turn(directory, config, workspace, prompt, champion, seconds, *, ref
                     child.terminate()
                     try: child.wait(timeout=2)
                     except subprocess.TimeoutExpired: child.kill(); child.wait(timeout=2)
-                if not settlement_attempted:
-                    telemetry["settlement"] = settle_background(server, sid, Path(workspace), relay, interrupt=True)
-                    relay.cancel()
+                try:
+                    if not settlement_attempted:
+                        telemetry["settlement"] = settle_background(server, sid, Path(workspace), relay, interrupt=True)
+                        relay.cancel()
+                finally:
+                    telemetry["native_process"] = record_native_process(logs, output, errors, child.returncode)
             # Grading uses another sandboxed process, with no model/network access.
             result["grading_prefix"] = background_boundary(workspace, Path(server.temporary.name), python_dependencies(), None)
             result["seconds"] = round(time.monotonic() - started, 3)
@@ -701,6 +775,9 @@ def _native_turn(directory, config, workspace, prompt, champion, seconds, *, ref
                 if foreground_requested(directory):
                     result.update(reason="foreground_yield", passed=False, conditions_verified=False)
             result.pop("grading_prefix", None)
+    # Set only after normal relay shutdown and owned native-process settlement.
+    # Exceptions or missing receipts never justify a free candidate attempt.
+    telemetry["dispatch_evidence_complete"] = True
     result["seconds"] = round(time.monotonic() - started, 3)
     result["resources"] = summarize_resources(samples)
     return result
@@ -845,13 +922,24 @@ def worker(directory, config, *, turn=native_turn):
                               'Return ONLY JSON {"decision":"propose|defer","instructions":"...","scope":"disposable_json_cli",'
                               '"reason":"repeated_tool_failure|verification_gap|context_inefficiency|insufficient_evidence"}. Metadata: ' + json.dumps(item))
                     started = time.monotonic()
+                    result, error_class = {}, None
+                    reservation = reserve_reflection_attempt(directory, item)
                     try:
                         result = turn(directory, config, workspace, prompt, BASELINE, min(POLICY["reflection_seconds"], POLICY["day_seconds"] - allowance["seconds"]), reflection=True)
-                    finally: charge(directory, started)
-                    consumed.add(item["task_id"]); put(base / "consumed.json", sorted(consumed)[-500:])
-                    allowance = budget(directory); allowance["candidates"] += 1; put(base / "budget.json", allowance)
+                    except BaseException as error:
+                        error_class = type(error).__name__
+                        if not isinstance(error, Exception): raise
+                    finally:
+                        time_charged = False
+                        try:
+                            charge(directory, started)
+                            time_charged = True
+                        finally:
+                            attempt = finish_reflection_attempt(directory, folder, item, result, reservation, error_class,
+                                                                time_charged=time_charged)
                     if not result.get("native_completed") or not result.get("conditions_verified"):
-                        record_decision(directory, None, "defer", "reflection_incomplete"); return
+                        reason = "reflection_incomplete" if attempt["candidate_spent"] else "reflection_startup_no_dispatch"
+                        record_decision(directory, None, "defer", reason, attempt_id=folder.name, **attempt); return
                     try: candidate = parse_proposal(result["text"])
                     except (ValueError, KeyError):
                         record_decision(directory, None, "defer", "invalid_reflection"); return

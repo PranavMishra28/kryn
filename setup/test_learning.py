@@ -108,14 +108,21 @@ class LearningTests(unittest.TestCase):
             (trial_workspace.parent/'case.json').write_text(json.dumps({'family':'collections','split':'selection'}))
             trial=learning.native_turn(self.state,config,trial_workspace,'repair',learning.BASELINE,120)
             trial_command=launch.call_args.args[0]
+            failed_workspace=self.base/'failed'/'workspace'; failed_workspace.mkdir(parents=True)
+            child.returncode=1; child.poll.return_value=1
+            child.communicate.return_value=(b'{"type":"error","message":"UnexpectedStatus"}',b'synthetic startup failure')
+            relay.records=[]
+            failed=learning.native_turn(self.state,config,failed_workspace,'reflect',learning.BASELINE,120,reflection=True)
         self.assertTrue(result['native_completed'])
         self.assertTrue(trial['native_completed'])
-        create,trial_create=[body for method,path,body in requests if path=='/api/session']
+        create,trial_create=[body for method,path,body in requests if path=='/api/session'][:2]
         self.assertEqual(create['model']['variant'],'fast')
+        self.assertEqual(create['title'],'KRYN background reflection')
         self.assertIsInstance(create['model']['variant'],str)
         self.assertEqual(create['permissions'],[{'action':'*','resource':'*','effect':'deny'}])
         self.assertIn('local/qwen#fast',reflection_command)
         self.assertEqual(trial_create['model']['variant'],'think')
+        self.assertEqual(trial_create['title'],'KRYN background trial')
         self.assertIn('local/qwen#think',trial_command)
         self.assertEqual(config['agents']['build']['model'],'local/qwen#think')
         requested=json.loads((workspace.parent/'evidence/requested-config.json').read_text())
@@ -125,6 +132,29 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(telemetry['requested_variant'],'fast')
         self.assertTrue(telemetry['settlement']['idle'])
         self.assertEqual(telemetry['resources'][0]['pressure_level'],1)
+        self.assertFalse(failed['native_completed'])
+        self.assertEqual(failed['requests'],[])
+        failure=json.loads((failed_workspace.parent/'evidence/native-process.json').read_text())
+        self.assertEqual(failure['exit_code'],1)
+        self.assertIn('UnexpectedStatus',failure['stdout'])
+        self.assertEqual(failure['stderr'],'synthetic startup failure')
+        failed_telemetry=json.loads((failed_workspace.parent/'evidence/telemetry.json').read_text())
+        self.assertEqual(failed_telemetry['native_process']['exit_code'],1)
+        self.assertTrue(failed_telemetry['dispatch_evidence_complete'])
+        self.assertNotIn('UnexpectedStatus',json.dumps(failed_telemetry))
+
+    def test_failed_native_diagnostics_are_bounded_private_and_content_free_in_telemetry(self):
+        logs=learning.state._directory(self.base/'evidence')
+        result=learning.record_native_process(logs,b'x'*(2*1024**2+1),b'private error'*(64*1024),1)
+        raw=json.loads((logs/'native-process.json').read_text())
+        self.assertEqual(len(raw['stdout']),2*1024**2)
+        self.assertEqual(len(raw['stderr']),64*1024)
+        self.assertTrue(result['stdout_truncated'])
+        self.assertTrue(result['stderr_truncated'])
+        self.assertEqual((logs/'native-process.json').stat().st_mode & 0o777,0o600)
+        safe=learning.safe_run_telemetry({'native_process':raw})
+        self.assertNotIn('private error',json.dumps(safe))
+        self.assertNotIn('stdout',safe['native_process'])
 
     def test_run_telemetry_drops_private_content_and_preserves_settlement_evidence(self):
         secret='SYNTHETIC_SECRET_PROMPT_ANSWER_URL'
@@ -300,6 +330,29 @@ class LearningTests(unittest.TestCase):
         self.assertIn('(deny file-read-data file-write* (subpath '+json.dumps(str(payload/'tools')),profile)
         self.assertNotIn('(subpath '+json.dumps(str(venv))+')',profile)
 
+    def test_native_background_uses_private_discovery_and_read_only_public_git(self):
+        workspace=self.base/'workspace'; workspace.mkdir()
+        server=native_client.NativeServer(workspace,{},self.base/'native.log',
+                                         background={'dependencies':[],'inference_port':19876})
+        process=MagicMock(); process.poll.return_value=None
+        try:
+            with patch.object(native_client.subprocess,'Popen',return_value=process), \
+                 patch.object(server,'request',return_value={}):
+                server._enter_background()
+            self.assertEqual(server.env['OPENCODE_TEST_HOME'],server.temporary.name)
+            self.assertEqual(server.env['HOME'],server.temporary.name)
+            self.assertEqual(server.env['OPENCODE_CONFIG_PROJECT_DISABLE'],'true')
+            profile=server.background_prefix[-1]
+            toolchain=Path('/Library/Developer/CommandLineTools')
+            if toolchain.is_dir():self.assertIn('(subpath '+json.dumps(str(toolchain.resolve()))+')',profile)
+            self.assertIn('(deny file-write*)',profile)
+            self.assertNotIn('(subpath '+json.dumps(str(Path.home()))+')',profile)
+            writes='(allow file-write* (subpath '+json.dumps(str(workspace))+') (subpath '+json.dumps(server.temporary.name)+'))'
+            self.assertIn(writes,profile)
+        finally:
+            if server.log_file:server.log_file.close()
+            if server.temporary:server.temporary.cleanup()
+
     def test_automatic_control_flow_runs_reflection_and_all_matched_trials_then_rejects(self):
         base = learning.root(self.state); folder = learning.state._directory(base/'events')
         item = self.event(); learning.state._write_new(folder/(item['task_id']+'.json'),item)
@@ -319,6 +372,119 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(learning.active_champion(self.state),learning.BASELINE)
         self.assertEqual(learning.read(base/'queue.json'),[])
         self.assertEqual(learning.budget(self.state)['candidates'],1)
+
+    def test_zero_dispatch_failure_is_charged_and_retryable_without_rewriting_prior_history(self):
+        base=learning.root(self.state); item=self.event()
+        learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
+        original={'date':learning.utc_day(),'seconds':5.542,'candidates':1}
+        learning.put(base/'budget.json',original)
+        learning.put(base/'consumed.json',['c'*64])
+        prior=learning.record_decision(self.state,None,'defer','prior_reflection_incomplete')
+        archived=next((base/'decisions').glob('*.json')); archived_bytes=archived.read_bytes()
+        calls=[]
+        def startup_failure(directory,config,workspace,*args,**kwargs):
+            calls.append(workspace)
+            evidence=learning.state._directory(workspace.parent/'evidence')
+            learning.state._write_new(evidence/'telemetry.json',{'dispatch_evidence_complete':True,'requests':[]})
+            time.sleep(.01)
+            return {'native_completed':False,'conditions_verified':False,'requests':[]}
+        with patch.dict(learning.POLICY,idle_seconds=0),patch.object(learning,'power_ready',return_value=True):
+            learning.worker(self.state,{},turn=startup_failure)
+        self.assertEqual(len(calls),1)  # No retry loop inside a worker invocation.
+        self.assertEqual(learning.budget(self.state)['candidates'],1)
+        self.assertGreater(learning.budget(self.state)['seconds'],original['seconds'])
+        self.assertEqual(learning.read(base/'consumed.json'),['c'*64])
+        self.assertEqual(archived.read_bytes(),archived_bytes)
+        receipt=learning.read(calls[0].parent/'reflection-attempt.json')
+        self.assertTrue(receipt['candidate_reserved'])
+        self.assertTrue(receipt['release_authorized'])
+        self.assertEqual(receipt['accepted_requests'],0)
+        self.assertEqual(learning.read(base/'last-decision.json')['reason'],'reflection_startup_no_dispatch')
+
+    def test_incomplete_or_uncertain_dispatch_and_post_dispatch_exception_spend_attempt(self):
+        for label,telemetry,raises in (
+            ('missing',None,False),
+            ('incomplete',{'requests':[]},False),
+            ('model_failure',{'dispatch_evidence_complete':True,'requests':[{}]},False),
+            ('exception',{'dispatch_evidence_complete':True,'requests':[{}]},True),
+        ):
+            with self.subTest(label=label):
+                directory=self.base/label; base=learning.root(directory); item=self.event()
+                learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
+                def failure(directory,config,workspace,*args,**kwargs):
+                    if telemetry is not None:
+                        learning.state._write_new(learning.state._directory(workspace.parent/'evidence')/'telemetry.json',telemetry)
+                    if raises: raise RuntimeError('synthetic adapter failure')
+                    return {'native_completed':False,'conditions_verified':False,'requests':[]}
+                with patch.dict(learning.POLICY,idle_seconds=0),patch.object(learning,'power_ready',return_value=True):
+                    learning.worker(directory,{},turn=failure)
+                self.assertEqual(learning.budget(directory)['candidates'],1)
+                self.assertEqual(learning.read(base/'consumed.json'),[item['task_id']])
+                decision=learning.read(base/'last-decision.json')
+                self.assertEqual(decision['reason'],'reflection_incomplete')
+                self.assertTrue(decision['candidate_spent'])
+                if raises:self.assertEqual(decision['error_class'],'RuntimeError')
+
+    def test_attempt_reservation_survives_failed_diagnostics_and_process_interruptions(self):
+        for label,exception in (('diagnostic_error',None),('keyboard',KeyboardInterrupt),('exit',SystemExit)):
+            with self.subTest(label=label):
+                directory=self.base/label; base=learning.root(directory); item=self.event()
+                learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
+                write=learning.state._write_new
+                def fail_receipt(path,value):
+                    if label=='diagnostic_error' and Path(path).name=='reflection-attempt.json':
+                        raise OSError('synthetic full disk')
+                    return write(path,value)
+                def turn(directory,config,workspace,*args,**kwargs):
+                    self.assertEqual(learning.budget(directory)['candidates'],1)
+                    self.assertIn(item['task_id'],learning.read(base/'consumed.json'))
+                    learning.state._write_new(learning.state._directory(workspace.parent/'evidence')/'telemetry.json',
+                                             {'dispatch_evidence_complete':True,'requests':[{}]})
+                    if exception:raise exception('synthetic interruption after dispatch')
+                    return {'native_completed':False,'conditions_verified':False}
+                with patch.dict(learning.POLICY,idle_seconds=0),patch.object(learning,'power_ready',return_value=True), \
+                     patch.object(learning.state,'_write_new',side_effect=fail_receipt):
+                    with self.assertRaises(exception or OSError):learning.worker(directory,{},turn=turn)
+                self.assertEqual(learning.budget(directory)['candidates'],1)
+                self.assertEqual(learning.read(base/'consumed.json'),[item['task_id']])
+                self.assertGreater(learning.budget(directory)['seconds'],0)
+
+    def test_failed_zero_dispatch_receipt_cannot_release_reservation(self):
+        item=self.event(); folder=learning.state._directory(self.base/'run')
+        reservation=learning.reserve_reflection_attempt(self.state,item)
+        learning.state._write_new(learning.state._directory(folder/'evidence')/'telemetry.json',
+                                 {'dispatch_evidence_complete':True,'requests':[]})
+        with patch.object(learning.state,'_write_new',side_effect=OSError('synthetic full disk')):
+            with self.assertRaises(OSError):
+                learning.finish_reflection_attempt(self.state,folder,item,{},reservation,time_charged=True)
+        self.assertEqual(learning.budget(self.state)['candidates'],1)
+        self.assertEqual(learning.read(learning.root(self.state)/'consumed.json'),[item['task_id']])
+
+    def test_zero_dispatch_requires_successful_elapsed_time_charge_to_release(self):
+        item=self.event(); folder=learning.state._directory(self.base/'run')
+        reservation=learning.reserve_reflection_attempt(self.state,item)
+        learning.state._write_new(learning.state._directory(folder/'evidence')/'telemetry.json',
+                                 {'dispatch_evidence_complete':True,'requests':[]})
+        attempt=learning.finish_reflection_attempt(self.state,folder,item,{},reservation,time_charged=False)
+        self.assertTrue(attempt['candidate_spent'])
+        self.assertFalse(attempt['release_authorized'])
+        self.assertEqual(learning.budget(self.state)['candidates'],1)
+        self.assertEqual(learning.read(learning.root(self.state)/'consumed.json'),[item['task_id']])
+
+    def test_reservation_setup_failure_never_calls_inference(self):
+        for filename in ('budget.json','consumed.json'):
+            with self.subTest(filename=filename):
+                directory=self.base/filename; base=learning.root(directory); item=self.event()
+                learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
+                write=learning.put
+                def fail_reservation(path,value):
+                    if Path(path).name==filename:raise OSError('synthetic reservation setup failure')
+                    return write(path,value)
+                turn=MagicMock()
+                with patch.dict(learning.POLICY,idle_seconds=0),patch.object(learning,'power_ready',return_value=True), \
+                     patch.object(learning,'put',side_effect=fail_reservation):
+                    with self.assertRaises(OSError):learning.worker(directory,{},turn=turn)
+                turn.assert_not_called()
 
     def test_monitor_dispatches_real_adapter_pairs_and_rolls_back_only_repeated_regression(self):
         candidate=self.candidate(); learning.promote(self.state,candidate,self.rows())

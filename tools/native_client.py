@@ -339,13 +339,21 @@ class NativeServer:
         effective["shell"] = "/bin/zsh"
         self.env["OPENCODE_CONFIG_CONTENT"] = json.dumps(effective)
         self.env["HOME"] = str(private)
+        # Pinned OpenCode 2.0.10 uses os.homedir(), which ignores HOME in Bun.
+        # Its explicit home hook keeps discovery inside the disposable boundary.
+        self.env["OPENCODE_TEST_HOME"] = str(private)
+        self.env["OPENCODE_CONFIG_PROJECT_DISABLE"] = "true"
         self.env["PATH"] = str(Path(sys.executable).parent) + ":/usr/bin:/bin"
         for key in ("TMPDIR", "TMP", "TEMP", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"):
             dest = private / key.lower()
             dest.mkdir(mode=0o700)
             self.env[key] = str(dest)
         self.env["TMPPREFIX"] = str(private / "zsh")
-        prefix = background_boundary(self.directory, private, options["dependencies"],
+        dependencies = list(options["dependencies"])
+        # /usr/bin/git is Apple's xcrun shim; its public implementation lives here.
+        git_toolchain = Path("/Library/Developer/CommandLineTools")
+        if git_toolchain.is_dir(): dependencies.append(git_toolchain.resolve())
+        prefix = background_boundary(self.directory, private, dependencies,
                                      options["inference_port"], self.port)
         self.background_prefix = prefix
         self.log_file = _open_owned_log(self.log_path)
