@@ -2,7 +2,7 @@
 
 A private local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.4](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.4) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.5](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.5) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -69,6 +69,8 @@ Then open **`/settings` → Permissions** and use **←/→** or **Enter** to sw
 
 Run **`kryn controls`** in your shell for a quick reference without starting the model or logging in.
 
+The terminal prompt footer now shows **Permissions: Ask/Auto**. `(locked)` means the launch option pins that mode. Click it or use `/permissions` to open native settings. To change the mode there, launch with `kryn --permissions interactive`. The indicator reads the native setting, including JSONC comments, and does not implement a second approval system. The browser GUI continues to use its native Settings permission control.
+
 Type these commands **inside KRYN**, then press Enter:
 
 | Command | Purpose |
@@ -76,6 +78,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/agents` | Switch the agent role without starting a different conversation. |
 | `/effort` | Switch Default (thinking) / Fast (no thinking), independently of the agent role. |
 | `/settings` | Display controls, reasoning visibility and permissions (see launch modes above). |
+| `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
@@ -123,10 +126,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.4 --repo PranavMishra28/kryn \
+     gh release download v0.1.5 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.4
+     python3 install-kryn.py --tag v0.1.5
    )
    ```
 
@@ -139,7 +142,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.4`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.5`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -155,9 +158,11 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.4` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.5` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn improve status` | Inspect experimental background improvement. |
+| `kryn improve failures` | Inspect failure-triggered incidents awaiting regression checks. |
+| `kryn report` | Read-only diagnostics of this project's latest session and its children. Add `--session SESSION_ID` for a specific session. |
 | `kryn improve pause` | Pause background improvement. |
 | `kryn stop` | Stop the verified, idle KRYN model server. Finish active work first. |
 
@@ -177,7 +182,17 @@ Each file write is limited to 12,000 UTF-8 bytes; larger components should use s
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.4 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
+Version 0.1.5 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
+
+## Improvement from actual failures
+
+No scheduled review is required. The local plugin records an incident when a native execution fails, work is interrupted, a check fails, a tool fails, or a review exhausts its tool budget. Successful exits alone create no incident. These private records contain counts and native session references, not prompts, code, screenshots or tool output. Retention is bounded to 30 days and 500 incidents. `kryn improve failures` lists them; `kryn report` reads the authoritative native transcript metadata, including child sessions and failures that happen before after-tool hooks.
+
+The engineering loop is **failure → reproducible regression → candidate change → independent checks → adoption or rejection**. Keep the failing case and validate actual production behavior. Passing a build, copying implementation into a test, or trusting a model-written report is insufficient. The current failure audit and regressions are in [the follow-up evaluation](evals/history/2026-09-21/failure-driven.md).
+
+Reviewer runs now end their tool phase after 48 attempts or two compactions, then must return findings and explicitly unreviewed scope. If the model still emits unavailable tool calls for two more steps, KRYN interrupts that Reviewer and records an incomplete review. This limit applies to Reviewer, not Build; large reviews should use focused follow-ups. It bounds the observed repeated-reading loop without increasing the memory or context limits.
+
+Incident capture is automatic; implementing and accepting a new harness fix still requires evidence and engineering review. The older local instruction-optimization experiment remains restricted to disposable JSON tasks and paused on the validated installation. It has not established an improvement in application-building quality. KRYN does not automatically rewrite its runtime, permissions, test answers or model weights after an error, and frontier parity has not been demonstrated.
 
 ## Repository layout
 

@@ -280,7 +280,8 @@ class KrynChecks(unittest.TestCase):
                  patch.object(localai, 'NativeServer', return_value=owner), patch.object(localai, 'inventory'), \
                  patch.object(localai, 'mcp_status', return_value={}), \
                  patch.object(localai, 'guarded_run', return_value=0) as launch, \
-                 patch.object(localai, 'await_runtime_idle'):
+                 patch.object(localai, 'await_runtime_idle'), \
+                 patch.object(localai.learning, 'foreground', return_value=nullcontext()):
                 self.assertEqual(localai.main([project, *flags]), 0)
                 self.assertEqual('--auto' in launch.call_args.args[1], auto)
                 self.assertEqual('OPENCODE_CLI_CONFIG_CONTENT' not in server.env, interactive)

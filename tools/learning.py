@@ -135,6 +135,21 @@ def status(directory):
             "pipeline_implemented": True, "benefit_proven": False}
 
 
+def failures(directory):
+    """Error-triggered local backlog, not a schedule or a successful-learning claim."""
+    folder = state._directory(root(directory) / "incidents")
+    items = []
+    for path in sorted(folder.glob('*.json'))[-POLICY['metadata_records']:]:
+        value = state._load(path)
+        if value.get('owner') != 'kryn.product' or value.get('task_id') != path.stem:
+            raise RuntimeError('Unexpected failure record')
+        items.append({key: value[key] for key in ('task_id', 'native_session_id', 'triggers', 'status', 'updated_at')})
+    return {'trigger': 'native execution failures, interruptions, failed checks and exhausted reviews',
+            'scheduled': False, 'count': len(items), 'incidents': items,
+            'note': 'Inspect the linked private native trace, reproduce the error, and validate a candidate '
+                    'against that regression and unaffected tasks before adopting it. Capturing a failure is not learning proof.'}
+
+
 def control(directory, action):
     if action not in {"pause", "resume", "disable", "enable"}:
         raise ValueError("Unknown learning control")

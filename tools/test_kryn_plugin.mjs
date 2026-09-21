@@ -5,12 +5,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import plugin, { validatedOptions, assertLocal, isCheck, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
+import { permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture(extra = {}) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-plugin-')));
   fs.chmodSync(root, 0o700);
-  const hooks = new Map(), pending = [], wake = [], continuations = [];
+  const hooks = new Map(), pending = [], wake = [], continuations = [], interruptions = [];
   let stopped = false, serial = 0;
   const location = { directory: root, project: { canonical: root } };
   const options = { stateDir: root, profileId: 'test-profile', modelID: 'test-Q4', workflowScope: 'disposable_json_cli',
@@ -28,8 +29,9 @@ function fixture(extra = {}) {
   ctx.session.get = async ({ sessionID }) => ({ id: sessionID, location, agent: 'build',
     model: { providerID: 'local', id: 'qwen' }, outcome: 'succeeded', time: {} });
   ctx.session.synthetic = async value => { continuations.push(value); };
+  ctx.session.interrupt = async value => { interruptions.push(value); return { interrupted: true }; };
   return { root, ctx, hooks,
-    continuations,
+    continuations, interruptions,
     call: (name, data) => hooks.get(name)(data),
     emit: async (type, data = {}, loc = location) => {
       pending.push({ id: 'evt_' + (++serial), type, data: { sessionID: 'ses_1', ...data }, location: loc });
@@ -42,6 +44,103 @@ function fixture(extra = {}) {
     remove: () => fs.rmSync(root, { recursive: true, force: true }) };
 }
 const model = { providerID: 'local', id: 'qwen' };
+
+test('permission indicator reflects launch locks and native JSONC without misreading strings', () => {
+  assert.equal(permissionLabel('ask', '{"session":{"permissions":"autoaccept"}}'), 'Ask (locked)');
+  assert.equal(permissionLabel('auto', '{}'), 'Auto (locked)');
+  assert.equal(permissionLabel(undefined), 'Unknown');
+  assert.equal(permissionLabel('interactive', '{ // settings\n"session": {"permissions":"autoaccept",}, /* end */}'), 'Auto');
+  assert.equal(permissionLabel('interactive', '{"text":"https://host/x,} /*keep*/", "session": {"permissions":"prompt"}}'), 'Ask');
+  assert.equal(permissionLabel('interactive', '{broken'), 'Unknown');
+});
+
+test('review phase is bounded across compaction and resets only on a new prompt', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const context = () => ({ sessionID: 'ses_1', agent: 'reviewer', system: [], tools: { read: {}, glob: {} } });
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('session.context', context());
+    for (let n = 0; n < 48; n++) f.call('tool.execute.before', {
+      sessionID: 'ses_1', agent: 'reviewer', tool: 'read', input: { path: 'app.js' } });
+    f.ctx.session.get = async ({ sessionID }) => ({ id: sessionID, agent: 'reviewer', location: f.ctx.location });
+    await f.emit('session.step.ended', { finish: 'tool-calls' }); // Last allowed call.
+    let event = context(); f.call('session.context', event);
+    assert.deepEqual(event.tools, {});
+    assert.ok(event.system.some(x => x.text.includes('partial review now')));
+    assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'reviewer', tool: 'read' }), /tool phase ended/);
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 0, 'last allowed call must not count as an unavailable-tool step');
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 1);
+    f.interruptions.length = 0;
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    event = context(); f.call('session.context', event); assert.ok(event.tools.read);
+    f.call('session.compaction', context()); f.call('session.compaction', context());
+    event = context(); f.call('session.generate', event); assert.deepEqual(event.tools, {});
+    f.ctx.session.get = async ({ sessionID }) => ({ id: sessionID, agent: 'reviewer', location: f.ctx.location });
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.deepEqual(f.interruptions, [{ sessionID: 'ses_1' }]);
+    const build = { ...context(), agent: 'build' }; f.call('session.context', build);
+    assert.ok(build.tools.read, 'review bound must not cap Build');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('verification guidance distinguishes observed browser calls from claims', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    let event = context(); f.call('session.context', event);
+    assert.ok(event.system.some(x => x.text.includes('0 completed browser calls')));
+    f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'browser_browser_snapshot', status: 'error' });
+    f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'browser_browser_click', status: 'completed' });
+    event = context(); f.call('session.context', event);
+    assert.ok(event.system.some(x => x.text.includes('1 completed browser calls')));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('only actual failures and interrupted work create private regression incidents', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    await f.emit('session.execution.started');
+    await f.emit('session.execution.succeeded');
+    assert.equal(f.read('incidents').length, 0);
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'PRIVATE REQUEST' } });
+    await f.emit('session.execution.started');
+    f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'shell', status: 'completed',
+      input: { command: 'node test-state.js' }, result: { output: { exit: 1 } } });
+    await f.emit('session.execution.interrupted');
+    const [incident] = f.read('incidents');
+    assert.deepEqual(incident.triggers, ['execution_incomplete', 'tool_error', 'check_failed']);
+    assert.equal(incident.status, 'needs_regression');
+    assert.equal(incident.native_session_id, 'ses_1');
+    assert.ok(!JSON.stringify(incident).includes('PRIVATE'));
+    assert.ok(!JSON.stringify(incident).includes('test-state.js'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('recovered native tool failures and early interruption still create incidents', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    await f.emit('session.execution.started');
+    await f.emit('session.tool.failed', { id: 'denied', error: { message: 'PRIVATE TOOL DETAIL' } });
+    f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'read', status: 'error', id: 'read-error' });
+    await f.emit('session.tool.failed', { id: 'read-error' });
+    await f.emit('session.execution.succeeded');
+    let records = f.read('incidents');
+    assert.equal(records.length, 1);
+    assert.equal(records[0].tool_errors, 2, 'after-hook and native failure must not count twice');
+    assert.deepEqual(records[0].triggers, ['tool_error']);
+    assert.ok(!JSON.stringify(records).includes('PRIVATE'));
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.emit('session.execution.started');
+    await f.emit('session.execution.interrupted');
+    records = f.read('incidents');
+    assert.equal(records.length, 2);
+    assert.ok(records.some(x => x.triggers.includes('execution_incomplete')));
+  } finally { await cleanup(); f.remove(); }
+});
 
 test('strict loopback/model guards apply independently of request kind and hot-reloaded refs', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
@@ -160,11 +259,11 @@ test('read-only guards reject every unlisted mutation route without autoapproval
   try {
     for (const agent of ['reviewer', 'explore', 'audit']) {
       for (const tool of ['write', 'edit', 'patch', 'shell', 'execute', 'subagent', 'pty', 'formatter', 'lsp_apply_edit', 'browser_browser_click', 'remote_mutate']) {
-        assert.throws(() => f.call('tool.execute.before', { agent, tool }));
+        assert.throws(() => f.call('tool.execute.before', { agent, tool, sessionID: 'ses_1' }));
         const event = { agent, action: tool, effect: 'allow' };
         f.call('permission.evaluate', event); assert.equal(event.effect, 'deny');
       }
-      f.call('tool.execute.before', { agent, tool: 'read' });
+      f.call('tool.execute.before', { agent, tool: 'read', sessionID: 'ses_1' });
     }
     const event = { agent: 'reviewer', action: 'read', effect: 'ask' };
     f.call('permission.evaluate', event); assert.equal(event.effect, 'ask');
@@ -303,6 +402,8 @@ test('private state rejects symlinks and a changed capsule; trials emit no learn
     assert.throws(() => validatedOptions({ ...f.ctx.options, champion: { instructions: 'changed', revision: digest('') } }));
     assert.equal(isCheck('echo pytest'), false); assert.equal(isCheck('pytest; true'), false);
     assert.equal(isCheck('npm test -- --run'), true);
+    assert.equal(isCheck('node test-state.js'), true);
+    assert.equal(isCheck('npm run build'), true);
   } finally { await cleanup(); f.remove(); }
   const unsafe = fixture();
   fs.mkdirSync(path.join(unsafe.root, 'learning'));

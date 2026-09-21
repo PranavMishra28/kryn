@@ -52,11 +52,14 @@ In your shell:
   kryn --session SESSION_ID    Resume a specific session in this project
   kryn --web                   Open the graphical companion; keep the terminal open
   kryn doctor                 Check runtime, browser and search connections
+  kryn report                 Inspect this project's latest native run and children
+  kryn improve failures       List error-triggered regression incidents
 
 Inside the terminal interface:
   /agents   or Ctrl+X then A   Choose Build, Plan, Browse or Audit
   /effort   or Ctrl+T          Switch Default (thinking on) / Fast (thinking off)
   /settings                   Display, reasoning visibility and permission settings
+  /permissions                Open settings from the visible permission indicator
   /web      (also /pair)       Show the local GUI address and temporary credentials
   /sessions                   Open a saved session
   /status                     Inspect native tool and service status
@@ -218,7 +221,7 @@ def verify_release(current=True):
     files = manifest.get("files")
     require(isinstance(files, dict) and {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
             "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/protocol_probe.py", "setup/opencode.template.json",
-            "plugin/server.js", "plugin/package.json",
+            "tools/session_report.py", "plugin/server.js", "plugin/package.json", "plugin/tui.tsx", "plugin/permission_display.mjs",
             "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"} == set(files), "Unexpected installed release contents")
     require(hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()[:16] == release,
             "Installed release manifest identity changed")
@@ -227,9 +230,11 @@ def verify_release(current=True):
         require(not any(p.is_symlink() for p in (path, *path.parents)), "Linked release file refused")
         require(path.is_file() and path.stat().st_size <= 2 * 1024**2 and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
                 "Installed release file changed; restore its reviewed release")
-    plugin_dir = ROOT / "plugins" / files["plugin/server.js"][:16]
+    plugin_names = ("package.json", "permission_display.mjs", "server.js", "tui.tsx")
+    plugin_digest = hashlib.sha256(b''.join((directory / "plugin" / name).read_bytes() for name in plugin_names)).hexdigest()[:16]
+    plugin_dir = ROOT / "plugins" / plugin_digest
     require(manifest.get("plugin_directory") == str(plugin_dir), "Native plugin path differs from its content identity")
-    for name in ("server.js", "package.json"):
+    for name in plugin_names:
         path = plugin_dir / name
         require(not any(p.is_symlink() for p in (path, *path.parents))
                 and path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == files["plugin/" + name],
@@ -796,6 +801,7 @@ def run(args, outcome):
                 # over every edit. Unlock it only with an explicit per-launch opt-in.
                 if permissions == "interactive":
                     server.env.pop("OPENCODE_CLI_CONFIG_CONTENT", None)
+                server.env["KRYN_PERMISSION_MODE"] = ("auto" if getattr(args, "auto", False) is True else permissions or "ask")
                 if getattr(args, "auto", False) is True or permissions == "auto":
                     executable.append("--auto")
                 if getattr(args, "continue_session", False) is True:
@@ -834,6 +840,13 @@ def main(argv=None):
     if argv == ["controls"]:
         print(CONTROLS)
         return 0
+    if argv and argv[0] == "report":
+        from session_report import report
+        require(len(argv) == 1 or len(argv) == 3 and argv[1] == "--session",
+                "Usage: kryn report [--session SESSION_ID], from your project folder")
+        print(json.dumps(report(ROOT / "xdg/data/opencode/opencode.db", Path.cwd(),
+                                argv[2] if len(argv) == 3 else None), indent=2))
+        return 0
     if argv in (["login"], ["logout"]):
         if argv[0] == "login":
             owner_auth.login()
@@ -845,11 +858,12 @@ def main(argv=None):
     if argv and argv[0] == "improve":
         owner_auth.authorize()
         verify_release()
-        require(len(argv) <= 2, "Usage: kryn improve [status|pause|resume|disable|enable]")
+        require(len(argv) <= 2, "Usage: kryn improve [failures|status|pause|resume|disable|enable]")
         action = argv[1] if len(argv) == 2 else "status"
-        require(action in {"status", "pause", "resume", "disable", "enable"},
-                "Use status, pause, resume, disable or enable; legacy manual promotion is not a product gate")
-        result = (learning.status(ROOT / "state/improvement") if action == "status"
+        require(action in {"failures", "status", "pause", "resume", "disable", "enable"},
+                "Use failures, status, pause, resume, disable or enable; legacy manual promotion is not a product gate")
+        result = (learning.failures(ROOT / "state/improvement") if action == "failures" else
+                  learning.status(ROOT / "state/improvement") if action == "status"
                   else learning.control(ROOT / "state/improvement", action))
         print(json.dumps(result, indent=2))
         return 0

@@ -26,6 +26,7 @@ const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and obse
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
 const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, use the Browse subagent with the actual local URL and explicit acceptance criteria; wait for its observations and fix reported failures. Use native background shell support for dev servers rather than appending &. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
 const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Build for repairs.";
+const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
 const count = value => Number.isFinite(value) && value >= 0 ? Math.min(Math.floor(value), 1e9) : 0;
 
 export function validatedOptions(options) {
@@ -110,7 +111,7 @@ export function pruneTrackers(directory, now = Date.now()) {
 // Only simple test commands count. Exit zero remains evidence of a command, not task correctness.
 export function isCheck(command) {
   if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
-  return /^(?:python(?:3(?:\.\d+)?)?\s+-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn)\s+(?:run\s+)?test(?:\s|$)|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
+  return /^(?:python(?:3(?:\.\d+)?)?\s+-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
 }
 export function assertLocal(event, options, wire = false) {
   if (event.model?.providerID !== 'local' || event.model?.id !== 'qwen')
@@ -129,7 +130,7 @@ export default {
     const options = validatedOptions(ctx.options);
     ownedDirectory(options.stateDir);
     const learning = ownedDirectory(path.join(options.stateDir, 'learning'), true);
-    const folders = Object.fromEntries(['events', 'pins', 'trackers'].map(name =>
+    const folders = Object.fromEntries(['events', 'pins', 'trackers', 'incidents'].map(name =>
       [name, ownedDirectory(path.join(learning, name), true)]));
     if (options.observe) pruneTrackers(folders.trackers);
     const sessions = new Map();
@@ -158,7 +159,8 @@ export default {
           (pin.schema === 1 && pin.workflowScope !== undefined))
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
-        recoveries: 0, promptEpoch: 0, stopped: false, truncated: false };
+        recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
+        reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0 };
       sessions.set(id, item);
       return item;
     }
@@ -179,11 +181,26 @@ export default {
         updated_at: new Date().toISOString(),
         note: 'Continuity aid only. Native checkpoint holds task details; reconcile Git, files and checks on resume.' }, true);
     }
-    function finish(id, state) {
+    function finish(id, state, interrupted = false) {
       const item = sessions.get(id);
       if (!item?.turn) return;
       if (options.observe) {
         const t = item.turn;
+        const triggers = [state === 'failed' ? 'execution_failed' : null,
+          state === 'incomplete' && (interrupted || t.tool_calls) ? 'execution_incomplete' : null,
+          t.tool_errors ? 'tool_error' : null, t.check_failures ? 'check_failed' : null,
+          item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null]
+          .filter(Boolean);
+        if (triggers.length) {
+          writeJSON(path.join(folders.incidents, t.task_id + '.json'), {
+            owner: 'kryn.product', schema: 1, task_id: t.task_id,
+            native_session_id: item.native_session_id, profile_id: options.profileId,
+            triggers, tool_errors: t.tool_errors, check_failures: t.check_failures,
+            compactions: t.compactions, review_tool_attempts: item.reviewCalls,
+            status: 'needs_regression', updated_at: new Date().toISOString(),
+          });
+          pruneTrackers(folders.incidents);
+        }
         writeJSON(path.join(folders.events, t.task_id + '.json'), { schema: 1, task_id: t.task_id,
           champion_revision: item.pin.revision, profile_id: options.profileId, state,
           wall_seconds: Math.max(0, (Date.now() - t.started) / 1000), tool_calls: t.tool_calls,
@@ -203,6 +220,7 @@ export default {
       assertHealthy();
       const item = session(event.sessionID);
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
+      item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0; item.browserCalls = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
       const text = event.prompt?.text;
       item.userRequest = typeof text === 'string' ? (text.length <= 6000 ? text :
@@ -211,22 +229,39 @@ export default {
     const instructions = event => {
       assertHealthy();
       const item = session(event.sessionID);
+      item.agent = event.agent;
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
       if (event.agent === 'build') event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
+      if (event.agent === 'build') event.system.push({ type: 'text', text:
+        'Verification evidence: this session has observed ' + item.browserCalls + ' completed browser calls. A delegated Browse result must supply its own observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation. If browser work is requested, delegate Browse before reporting it as verified.' });
+      if (event.agent === 'reviewer') {
+        event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +
+          ' tool attempts, ' + item.reviewCompactions + ' compactions. After 48 attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
+        if (item.reviewCalls >= 48 || item.reviewCompactions >= 2) {
+          item.reviewClosing = true;
+          for (const name of Object.keys(event.tools ?? {})) delete event.tools[name];
+          event.system.push({ type: 'text', text: 'The review tool budget is exhausted. Return your partial review now. Do not request another tool or claim checks ran. A new focused review can inspect remaining scope.' });
+        }
+      }
       if (READ_ROLES.has(event.agent))
         for (const name of Object.keys(event.tools ?? {}))
           if (!(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(name)) delete event.tools[name];
+      if (READ_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
+        'Your current role is read-only. You cannot run tests or start a dev server using shell, execute, or a helper agent. If the user asks for execution, explain that they must select Build with /agents first. Do not invent a tool or repeatedly attempt a denied action.' });
       if (event.agent === 'browse')
         for (const name of Object.keys(event.tools ?? {}))
           if (!BROWSE_TOOLS.has(name)) delete event.tools[name];
     };
     await ctx.session.hook('context', instructions);
     await ctx.session.hook('generate', instructions);
-    await ctx.session.hook('compaction', event => { instructions(event); tracker(session(event.sessionID)); });
+    await ctx.session.hook('compaction', event => {
+      if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
+      instructions(event); tracker(session(event.sessionID));
+    });
     await ctx.session.hook('retry', event => {
       const item = start(event.sessionID, 'retry-' + Date.now());
       item.turn.retries = count(item.turn.retries + 1); tracker(item);
@@ -262,6 +297,12 @@ export default {
     });
     await ctx.tool.hook('execute.before', event => {
       assertHealthy();
+      if (event.agent === 'reviewer') {
+        const item = session(event.sessionID);
+        if (item.reviewCalls >= 48 || item.reviewCompactions >= 2)
+          throw new Error('KRYN review tool phase ended. Return partial findings and unreviewed scope now.');
+        item.reviewCalls++;
+      }
       if (READ_ROLES.has(event.agent) && !(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(event.tool))
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
@@ -293,9 +334,11 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      if (event.tool.startsWith('browser_') && event.status === 'completed') item.browserCalls++;
       const t = item.turn;
-      t.tool_calls = count(t.tool_calls + 1);
-      if (event.status === 'error') t.tool_errors = count(t.tool_errors + 1);
+      if (event.status === 'completed') t.tool_calls = count(t.tool_calls + 1);
+      // Native session.tool.failed is authoritative, including errors that skip
+      // this hook. Count those there once; nonzero shell exits are tool success.
       if (event.tool === 'shell' && event.status === 'completed' &&
           (event.result?.output?.exit !== undefined && event.result.output.exit !== 0 || event.result?.output?.timeout))
         t.tool_errors = count(t.tool_errors + 1);
@@ -320,8 +363,29 @@ export default {
         if (seen.size > 4096) seen.delete(seen.values().next().value);
         const id = event.data.sessionID;
         if (event.type === 'session.execution.started') start(id, event.id);
+        if (event.type === 'session.tool.failed') {
+          const item = start(id, event.id);
+          item.turn.tool_calls = count(item.turn.tool_calls + 1);
+          item.turn.tool_errors = count(item.turn.tool_errors + 1);
+          tracker(item);
+        }
         if (event.type === 'session.step.ended') {
           const item = start(id, event.id);
+          if (item.agent === 'reviewer' && item.reviewClosing &&
+              event.data.finish === 'tool-calls') {
+            // Removing tools should produce a final answer. Bound models that
+            // nevertheless keep emitting unavailable calls instead of finishing.
+            item.reviewClosingSteps++;
+            if (item.reviewClosingSteps >= 2 && !item.stopped) {
+              const epoch = item.promptEpoch;
+              const info = await ctx.session.get({ sessionID: id });
+              if (!controller.signal.aborted && epoch === item.promptEpoch && info.id === id &&
+                  info.agent === 'reviewer' && sameLocation(info.location)) {
+                item.stopped = true;
+                await ctx.session.interrupt({ sessionID: id });
+              }
+            }
+          }
           item.turn.output_tokens = count(item.turn.output_tokens + count(event.data.tokens?.output));
           item.turn.input_tokens = count(item.turn.input_tokens + count(event.data.tokens?.input));
           item.turn.reasoning_tokens = count(item.turn.reasoning_tokens + count(event.data.tokens?.reasoning));
@@ -355,7 +419,7 @@ export default {
         }
         if (event.type === 'session.execution.succeeded') finish(id, session(id).truncated ? 'incomplete' : 'unknown');
         if (event.type === 'session.execution.failed') { session(id).stopped = true; finish(id, 'failed'); }
-        if (event.type === 'session.execution.interrupted') { session(id).stopped = true; finish(id, 'incomplete'); }
+        if (event.type === 'session.execution.interrupted') { session(id).stopped = true; finish(id, 'incomplete', true); }
       }
     })().catch(error => { if (!controller.signal.aborted) failed = error; });
     return async () => {

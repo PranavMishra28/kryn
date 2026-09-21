@@ -57,7 +57,7 @@ def main():
     setup.check_destination(marker, setup.encode({key: profile[key] for key in ("repository", "revision")}))
     if not marker.is_file():
         raise RuntimeError("Verified model installation marker is missing")
-    names = ["tools/localai.py", "tools/native_client.py", "tools/protocol_probe.py", "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/native-shell",
+    names = ["tools/localai.py", "tools/session_report.py", "tools/native_client.py", "tools/protocol_probe.py", "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/native-shell",
              "setup/opencode.template.json", "setup/AGENTS.md"]
     contents = {name: (source / name).read_bytes() for name in names}
     contents.update({"plugin/" + name: data for name, data in setup.plugin_files().items()})

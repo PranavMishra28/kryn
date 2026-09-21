@@ -168,11 +168,14 @@ def extract_cli(archive, destination):
 
 def plugin_files():
     return {"server.js": (HERE.parent / "tools/kryn_plugin.mjs").read_bytes(),
-            "package.json": b'{"private":true,"type":"module"}\n'}
+            "tui.tsx": (HERE.parent / "tools/kryn_tui.tsx").read_bytes(),
+            "permission_display.mjs": (HERE.parent / "tools/permission_display.mjs").read_bytes(),
+            "package.json": b'{"private":true,"type":"module","exports":{".":"./server.js","./tui":"./tui.tsx"}}\n'}
 
 
 def plugin_directory(root):
-    return root / "plugins" / hashlib.sha256(plugin_files()["server.js"]).hexdigest()[:16]
+    files = plugin_files()
+    return root / "plugins" / hashlib.sha256(b''.join(files[name] for name in sorted(files))).hexdigest()[:16]
 
 
 def render(root, node, profile=None):
