@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 import zipfile
 
-FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "README.md", "install-kryn.py",
+FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
     "setup/setup.py", "setup/deploy_client.py", "setup/AGENTS.md", "setup/accepted-profile.json",
     "setup/model-sha256.json", "setup/opencode.template.json", "setup/browser-package-lock.json",
     "tools/localai.py", "tools/native_client.py", "tools/context_probe.py", "tools/protocol_probe.py",

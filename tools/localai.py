@@ -689,7 +689,7 @@ def run(args, outcome):
             mcp = mcp_status(server, config) if command != "bench" else {}
             if command == "doctor":
                 print(json.dumps({"prerequisites": dependencies, "native_local_routing": "pass", "runtime": health,
-                                  "mcp": mcp, "scope": "Metadata/readiness only; no inference or browser actions. This is not release acceptance."}, indent=2))
+                                  "mcp": mcp, "scope": "Configuration and dependency checks; generation and browser interactions are not run."}, indent=2))
                 return 0 if health["healthy"] and all(v.get("status") == "connected" for v in mcp.values()) else 1
             if command == "bench":
                 print("Running guarded protocol smoke; this is not the full coding evaluation suite.", flush=True)

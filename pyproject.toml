@@ -5,11 +5,15 @@ build-backend = "hatchling.build"
 [project]
 name = "kryn"
 version = "0.1.0"
-description = "Private OpenCode-based local AI product for the qualified Apple Silicon profile"
+description = "Private local coding workspace for Apple Silicon, powered by OpenCode and oMLX"
 requires-python = ">=3.13"
 license = "MIT"
 authors = [{name = "Pranav Mishra"}]
 classifiers = ["Private :: Do Not Upload", "Operating System :: MacOS :: MacOS X", "Programming Language :: Python :: 3"]
+
+[project.urls]
+Repository = "https://github.com/PranavMishra28/kryn"
+Releases = "https://github.com/PranavMishra28/kryn/releases"
 
 [project.scripts]
 kryn = "kryn.cli:main"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reviewed setup recipe, not an agent harness. Default: read-only preflight.
 
-Python 3.13+, macOS 26/27 ARM64, at least 48 GiB RAM. See README.md.
+Python 3.13+, macOS 26/27 ARM64, at least 48 GiB RAM. Run with --help for phases.
 No sudo, shell startup edits, service launches or automatic removal of existing files.
 Core --apply copies only the verified user-space app and deploys the daily client.
 """
@@ -457,7 +457,7 @@ def main():
     if not args.apply:
         print("READ-ONLY preflight passed. No downloads, writes or installations performed.")
         print("With --apply and --profile: core verifies/downloads the selected model, installs the user app and daily client.")
-        print("Documents/desktop phases install only their named optional packages. Read README.md first.")
+        print("Documents/desktop phases install only their named optional packages. Inspect the chosen phase without --apply first.")
         return
     env = os.environ.copy()
     env.update({"PATH": str(node.parent) + os.pathsep + env.get("PATH", ""),
