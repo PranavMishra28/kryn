@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kryn"
-version = "0.1.0"
+version = "0.1.1"
 description = "Private local coding workspace for Apple Silicon, powered by OpenCode and oMLX"
 requires-python = ">=3.13"
 license = "MIT"

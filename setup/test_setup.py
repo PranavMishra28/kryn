@@ -108,7 +108,7 @@ class SetupChecks(unittest.TestCase):
         source = setup.HERE.parent / "tools/native_client.py"
         before = source.read_bytes()
         server_settings = setup.model_settings(profile)
-        server_settings["models"][setup.model_id(profile)]["max_context_window"] = 24576
+        server_settings["models"][setup.model_id(profile)]["max_context_window"] = 32768
         with patch.object(Path, "home", return_value=self.root), \
              patch.object(sys, "argv", ["deploy_client.py", "--apply"]), \
              patch.object(setup, "model_settings", return_value=server_settings), \
@@ -122,7 +122,7 @@ class SetupChecks(unittest.TestCase):
         self.assertIn("REPOSITORY = 'gcoli/Qwen3.8-27B-oQ5e-mtp'", localai)
         self.assertIn("MODEL_PARENT = 'challenger/models'", localai)
         self.assertIn("MEMORY_GIB = 32", localai)
-        self.assertIn("SERVER_CONTEXT = 24576", localai)  # Independent of the 16K client context.
+        self.assertIn("SERVER_CONTEXT = 32768", localai)  # Independent of the 24K client context.
         result = subprocess.run([sys.executable, "-B", directory / "tools/localai.py", "--self-check"],
                                 env={**setup.os.environ, "HOME": str(self.root)}, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1049,9 +1049,9 @@ class SetupChecks(unittest.TestCase):
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
         self.assertEqual(cfg["default_agent"], "build")
-        self.assertEqual(model["limit"], {"context": 16384, "output": 4096})
+        self.assertEqual(model["limit"], {"context": 24576, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
-        self.assertEqual(cfg["compaction"]["buffer"], 2048)
+        self.assertEqual(cfg["compaction"]["buffer"], 4096)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
         self.assertEqual(cfg["commands"]["audit"]["agent"], "audit")
         self.assertFalse(cfg["commands"]["audit"]["subagent"])
@@ -1067,7 +1067,7 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(setup.runtime_settings(root)["scheduler"]["max_concurrent_requests"], 1)
         self.assertEqual(setup.runtime_settings(root)["idle_timeout"], {"idle_timeout_seconds": 300})
         self.assertFalse(setup.runtime_settings(root)["server"]["auto_start_on_launch"])
-        self.assertEqual(setup.model_settings()["models"][setup.MODEL]["max_tokens"], 4096)
+        self.assertEqual(setup.model_settings()["models"][setup.MODEL]["max_tokens"], 8192)
         self.assertTrue(setup.model_settings()["models"][setup.MODEL]["is_default"])
         self.assertNotIn("__ROOT__", json.dumps(cfg))
 

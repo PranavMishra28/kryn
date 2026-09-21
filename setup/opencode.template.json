@@ -26,11 +26,11 @@
             ]
           },
           "limit": {
-            "context": 16384,
-            "output": 4096
+            "context": 24576,
+            "output": 8192
           },
           "body": {
-            "max_tokens": 4096,
+            "max_tokens": 8192,
             "temperature": 0.6,
             "top_p": 0.95,
             "top_k": 20,
@@ -79,9 +79,9 @@
   },
   "compaction": {
     "auto": true,
-    "buffer": 2048,
+    "buffer": 4096,
     "keep": {
-      "tokens": 2048
+      "tokens": 4096
     }
   },
   "tool_output": {

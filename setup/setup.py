@@ -215,7 +215,8 @@ def runtime_settings(root, profile=None):
             "model": {"model_dirs": [str(root / profile["model_parent"])],
             "model_fallback": False}, "scheduler": {"max_concurrent_requests": 1},
             "memory": {"prefill_memory_guard": True, "memory_guard_tier": "custom",
-            "memory_guard_custom_ceiling_gb": profile["memory_gib"], "soft_threshold": 0.85, "hard_threshold": 0.95},
+            "memory_guard_custom_ceiling_gb": profile["memory_gib"], "soft_threshold": 0.85, "hard_threshold": 0.95,
+            "prefill_safe_zone_ratio": 0.60},
             "idle_timeout": {"idle_timeout_seconds": 300},
             "cache": {"enabled": True, "hot_cache_only": False,
             "ssd_cache_max_size": "8GB", "hot_cache_max_size": "0",
@@ -224,7 +225,7 @@ def runtime_settings(root, profile=None):
 
 
 def model_settings(profile=None):
-    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 16384, "max_tokens": 4096,
+    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 24576, "max_tokens": 8192,
             "enable_thinking": True, "mtp_enabled": False,
             "mtp_num_draft_tokens": 3, "vlm_mtp_enabled": False, "dflash_enabled": False,
             "specprefill_enabled": False, "turboquant_kv_enabled": False,

@@ -23,6 +23,7 @@ const BROWSER_SET = new Set(BROWSER_TOOLS);
 const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'question', 'webfetch',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
+const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
 const count = value => Number.isFinite(value) && value >= 0 ? Math.min(Math.floor(value), 1e9) : 0;
 
 export function validatedOptions(options) {
@@ -154,7 +155,8 @@ export default {
           (pin.schema === 2 && pin.instructions && pin.workflowScope !== 'disposable_json_cli') ||
           (pin.schema === 1 && pin.workflowScope !== undefined))
         throw new Error('KRYN saved session pin changed');
-      const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null };
+      const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
+        recoveries: 0, promptEpoch: 0, stopped: false, truncated: false };
       sessions.set(id, item);
       return item;
     }
@@ -197,7 +199,8 @@ export default {
 
     await ctx.session.hook('prompt', event => {
       assertHealthy();
-      session(event.sessionID); // Native execution events group steered prompts into one task.
+      const item = session(event.sessionID);
+      item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
     });
     const instructions = event => {
       assertHealthy();
@@ -205,6 +208,8 @@ export default {
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
+      if (event.agent === 'build') event.system.push({ type: 'text', text: WRITE_GUIDANCE +
+        '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
       if (READ_ROLES.has(event.agent))
         for (const name of Object.keys(event.tools ?? {}))
           if (!(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(name)) delete event.tools[name];
@@ -225,11 +230,16 @@ export default {
       if (event.request.method !== 'POST') throw new Error('KRYN blocked unexpected model HTTP method');
       const body = await event.request.clone().json();
       if (body.model !== options.modelID) throw new Error('KRYN blocked a changed runtime model ID');
-      if (event.kind === 'title') {
+      if (event.kind === 'title' || event.kind === 'compaction') {
         // Native 2.0.10 has no title output budget. This final wire hook runs
         // after model.body overlays, which otherwise replace generation limits.
+        const cap = event.kind === 'title' ? 128 : 2048;
         body.max_tokens = Number.isInteger(body.max_tokens) && body.max_tokens > 0
-          ? Math.min(body.max_tokens, 128) : 128;
+          ? Math.min(body.max_tokens, cap) : cap;
+        if (event.kind === 'compaction') {
+          body.chat_template_kwargs = { ...body.chat_template_kwargs, enable_thinking: false };
+          body.temperature = 0.2;
+        }
         const headers = new Headers(event.request.headers);
         headers.delete('content-length');
         event.request = new Request(event.request, { headers, body: JSON.stringify(body) });
@@ -249,6 +259,12 @@ export default {
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
         throw new Error('KRYN Browse tool is outside the qualified surface');
+      if (event.tool === 'write' && typeof event.input?.content === 'string' &&
+          Buffer.byteLength(event.input.content, 'utf8') > 12000)
+        throw new Error('KRYN limits each write to 12,000 UTF-8 bytes. Split this component into smaller files or use small edits.');
+      if (['write', 'edit'].includes(event.tool) && typeof event.input?.path === 'string' &&
+          event.input.path.startsWith(ctx.location.directory.slice(1) + '/'))
+        throw new Error('This path repeats the project root but omits its leading /. Use ./file or the complete absolute path under ' + ctx.location.directory);
       if (event.tool === 'subagent') {
         if (activeChildren.has(event.sessionID)) throw new Error('KRYN allows one foreground child at a time');
         if (!event.input || typeof event.input !== 'object') throw new Error('KRYN invalid subagent input');
@@ -296,6 +312,27 @@ export default {
           item.turn.output_tokens = count(item.turn.output_tokens + count(event.data.tokens?.output));
           item.turn.input_tokens = count(item.turn.input_tokens + count(event.data.tokens?.input));
           item.turn.reasoning_tokens = count(item.turn.reasoning_tokens + count(event.data.tokens?.reasoning));
+          item.truncated = event.data.finish === 'length';
+          if (event.data.finish === 'length' && !item.stopped) {
+            const epoch = item.promptEpoch;
+            const info = await ctx.session.get({ sessionID: id });
+            // Only continue a top-level Build turn. A child belongs to its parent's
+            // native lifecycle; explicit interruption/revert/user steering wins.
+            if (controller.signal.aborted || item.stopped || epoch !== item.promptEpoch ||
+                info.id !== id || !sameLocation(info.location) || info.parentID || info.revert ||
+                info.agent !== 'build' || info.model?.providerID !== 'local' || info.model?.id !== 'qwen' ||
+                (['interrupted', 'failed'].includes(info.outcome) &&
+                 new Date(info.time?.idle).getTime() >= item.turn.started)) continue;
+            tracker(item, 'incomplete');
+            // Even resume:false input can be consumed by an already-active drain.
+            // Exhaustion must enqueue nothing, so it cannot prolong the native run.
+            if (item.recoveries >= 2) continue;
+            item.recoveries++;
+            await ctx.session.synthetic({ sessionID: id, delivery: 'steer', resume: true,
+              description: 'KRYN: recover truncated output (' + item.recoveries + '/2)',
+              metadata: { source: 'kryn.output-recovery', attempt: item.recoveries },
+              text: 'The last response reached the output-token limit and is incomplete. Continue the existing authorized task. First inspect the saved files and tool results; do not assume the unfinished tool call executed or repeat successful side effects. ' + WRITE_GUIDANCE + ' Preserve the current goal and acceptance checks in the native checkpoint.' });
+          }
         }
         if (event.type === 'session.compaction.ended') {
           const item = start(id, event.id);
@@ -303,9 +340,9 @@ export default {
           item.checkpoint = event.id;
           tracker(item);
         }
-        if (event.type === 'session.execution.succeeded') finish(id, 'unknown');
-        if (event.type === 'session.execution.failed') finish(id, 'failed');
-        if (event.type === 'session.execution.interrupted') finish(id, 'incomplete');
+        if (event.type === 'session.execution.succeeded') finish(id, session(id).truncated ? 'incomplete' : 'unknown');
+        if (event.type === 'session.execution.failed') { session(id).stopped = true; finish(id, 'failed'); }
+        if (event.type === 'session.execution.interrupted') { session(id).stopped = true; finish(id, 'incomplete'); }
       }
     })().catch(error => { if (!controller.signal.aborted) failed = error; });
     return async () => {
