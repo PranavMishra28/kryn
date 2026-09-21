@@ -910,6 +910,13 @@ class SetupChecks(unittest.TestCase):
         env["TMPPREFIX"] = str(task / "zsh")
         return private, env
 
+    def test_npm_cache_is_inside_owned_writable_cache_not_ambient_home(self):
+        with patch.dict(os.environ, {'NPM_CONFIG_CACHE': '/unowned/cache', 'npm_config_cache': '/other'}):
+            env = native_client.environment({})
+        self.assertEqual(env['NPM_CONFIG_CACHE'], str(self.native_root / 'xdg/cache/npm'))
+        self.assertNotIn('npm_config_cache', env)
+        self.assertEqual(json.loads(env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
+
     def test_native_write_boundary_prefix_and_owned_roots(self):
         private, env = self.native_boundary_fixture()
         prefix, metadata = native_client._sandbox_prefix(self.root, private, self.root / "evidence", env)
@@ -1051,6 +1058,19 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg["default_agent"], "build")
         self.assertEqual(model["limit"], {"context": 24576, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
+        variants = {v['id']: v['body'] for v in model['variants']}
+        self.assertFalse(variants['fast']['chat_template_kwargs']['enable_thinking'])
+        for name, budget in [('medium', 1024), ('high', 3072), ('xhigh', 6144)]:
+            self.assertTrue(variants[name]['chat_template_kwargs']['enable_thinking'])
+            self.assertEqual(variants[name]['thinking_budget'], budget)
+            self.assertLess(budget, model['limit']['output'])
+        self.assertNotIn('thinking_budget', variants['think'])  # Preserve old sessions.
+        self.assertEqual(cfg['agents']['build']['model'], 'local/qwen#high')
+        self.assertEqual(cfg['agents']['browse']['mode'], 'all')
+        self.assertNotIn('system', cfg['agents']['build'])  # Retain the native tool-aware prompt.
+        self.assertNotIn('system', cfg['agents']['browse'])
+        self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
+                      cfg['agents']['build']['permissions'])
         self.assertEqual(cfg["compaction"]["buffer"], 4096)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
         self.assertEqual(cfg["commands"]["audit"]["agent"], "audit")

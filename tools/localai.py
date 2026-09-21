@@ -30,7 +30,7 @@ import owner_auth
 RUNTIME = "http://127.0.0.1:8000"
 BASE_URL = RUNTIME + "/v1"
 PACKAGE = "@opencode/ai/providers/openai-compatible"
-VARIANTS = {"fast", "think"}
+VARIANTS = {"fast", "medium", "high", "xhigh", "think"}
 REVISION = '76fe4065e622cf34990d3c13ef80ec8531c9a0f7'
 REPOSITORY = 'mlx-community/Qwen3.5-9B-6bit'
 MODEL_PARENT = 'candidates/qwen35-9b/models'
@@ -97,7 +97,7 @@ def validate_route(provider, model):
     require(model.get("modelID") == MODEL_ID, "Unexpected runtime model ID")
     variants = model.get("variants", [])
     require(len(variants) == len(VARIANTS) and {v.get("id") for v in variants} == VARIANTS,
-            "Expected exactly fast/think variants")
+            "Expected fast/medium/high/xhigh variants and the legacy think alias")
     require(all(v.get("settings", {}).get("baseURL") == BASE_URL for v in variants),
             "Every variant must explicitly use the local endpoint")
     expected = expected_config()["providers"]["local"]["models"]["qwen"]
@@ -651,6 +651,8 @@ def self_check():
 
 def run(args, outcome):
     command = args.command_or_project
+    require(getattr(args, "auto", False) is not True or command not in {"init", "doctor", "status", "stop", "bench"},
+            "--auto is supported only for an interactive coding launch")
     require(not args.json_cli or command not in {"init", "doctor", "status", "stop", "bench"},
             "--json-cli is a scoped coding launch; start a new native session to use its current guidance")
     require(not args.deep or command == "doctor", "--deep is supported only by kryn doctor")
@@ -731,6 +733,8 @@ def run(args, outcome):
                     print("Local coding is available; unavailable tools: " + ", ".join(unavailable)
                           + ". Run kryn doctor for details.", file=sys.stderr, flush=True)
                 executable = [str(BINARY), "--server", server.url, str(project)]
+                if getattr(args, "auto", False) is True:
+                    executable.append("--auto")
                 if getattr(args, "continue_session", False) is True:
                     executable.append("--continue")
                 if isinstance(getattr(args, "session", None), str):
@@ -796,6 +800,7 @@ def main(argv=None):
     parser.add_argument("--self-check", action="store_true", help="offline validator checks; no services or inference")
     parser.add_argument("--deep", action="store_true", help="doctor only: rehash every pinned model file (slow; no inference)")
     parser.add_argument("--json-cli", action="store_true", help="apply validated workflow guidance for JSON command-line programs in new native sessions")
+    parser.add_argument("--auto", action="store_true", help="this launch only: auto-approve native permission requests unless explicitly denied; includes browser/network actions, not just edits")
     resume = parser.add_mutually_exclusive_group()
     resume.add_argument("--continue", dest="continue_session", action="store_true", help="open the latest saved session in this project")
     resume.add_argument("--session", help="open a saved session ID belonging to this project")

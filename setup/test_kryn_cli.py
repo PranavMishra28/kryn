@@ -238,6 +238,23 @@ class KrynChecks(unittest.TestCase):
         with patch.object(localai, 'resources', side_effect=OSError('unavailable')):
             self.assertEqual(localai.memory_status()['pressure'], 'unknown')
 
+    def test_auto_is_explicit_per_launch_and_reaches_native_without_changing_config(self):
+        project = str(Path.cwd().resolve())
+        for enabled in (False, True):
+            server = Mock(env={}, url='http://127.0.0.1:12345')
+            owner = Mock(__enter__=Mock(return_value=server), __exit__=Mock(return_value=False))
+            with patch.object(localai, 'prerequisites', return_value={}), \
+                 patch.object(localai, 'dependency_report', return_value={}), \
+                 patch.object(localai, 'ensure_runtime', return_value={'active_requests': 0, 'waiting_requests': 0}), \
+                 patch.object(localai, 'NativeServer', return_value=owner), patch.object(localai, 'inventory'), \
+                 patch.object(localai, 'mcp_status', return_value={}), \
+                 patch.object(localai, 'guarded_run', return_value=0) as launch, \
+                 patch.object(localai, 'await_runtime_idle'):
+                self.assertEqual(localai.main([project, *(['--auto'] if enabled else [])]), 0)
+                self.assertEqual('--auto' in launch.call_args.args[1], enabled)
+        with self.assertRaisesRegex(RuntimeError, '--auto'):
+            localai.main(['doctor', '--auto'])
+
     def test_session_ownership_before_interrupt(self):
         server = Mock(directory=Path('/owned/project'))
         info = {'id': 'ses_abc', 'location': {'directory': '/owned/project'},

@@ -6,13 +6,14 @@ For the current private distribution, authorized repository members can open an 
 
 Include the KRYN version, macOS version, affected component, expected and observed behavior, and a minimal reproduction using disposable data. Omit tokens, credentials, private source code, session transcripts and raw browser profiles. Redact local paths and diagnostic output before sharing them.
 
-This project currently distributes v0.1.2 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
+This project currently distributes v0.1.3 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
 
 ## Trust and data boundaries
 
 - **Owner access:** Installation and login verify the configured GitHub owner's numeric identity using GitHub CLI credentials in macOS Keychain. The seven-day offline identity cache contains no access token. It is an access policy, not tamper-resistant licensing or immediate remote revocation.
 - **Local inference:** The configured model endpoint is `127.0.0.1:8000`. The managed configuration permits the local provider. This does not prevent tools from using the network: search queries reach Exa, and browser requests reach visited sites.
 - **Project trust:** KRYN can read code, edit files and execute approved commands. Treat repository instructions, plugins, configuration and dependencies as trusted executable inputs. Ordinary shell writes are restricted to the project and owned state/temp/log paths. Native file tools, browser/MCP tools, formatters and persistent PTY sessions are outside that guard; reads and network access are not isolated. This is not a sandbox for hostile repositories.
+- **Automatic approvals:** `kryn --auto` opts into OpenCode’s native autoaccept for that launch. It accepts non-denied permission requests, including shell, external-directory, browser and network actions. It does not grant a new OS sandbox exemption; it also does not make native file tools or MCP project-contained. Ordinary launches retain prompts.
 - **Stored data:** Sessions, caches, browser output and diagnostic records can contain private material. Most KRYN state is under `~/Library/Application Support/LocalAI`; oMLX also uses `~/.omlx`. Review permission prompts and keep secrets out of prompts, reports and commits.
 
 ## Release integrity

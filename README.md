@@ -2,7 +2,7 @@
 
 A private local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.2](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.2) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.3](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.3) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -33,15 +33,38 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 
 | Mode | Use it for |
 |---|---|
-| **Build** | Editing code and running approved commands; thinking enabled. |
+| **Build** | Editing code and running approved commands; High effort by default. |
 | **Plan** | Inspecting code and discussing a plan before implementation; fast mode. |
-| **Browse** | Web search and interaction with an isolated Chrome session; fast mode. Select this mode explicitly for browser work. |
+| **Browse** | Web search and interaction with an isolated Chrome session; fast mode. Build can delegate UI checks to Browse; you can also select it directly. |
 | **Audit** | Read-only review, configured to request one fresh Reviewer. Switch back to Build explicitly before making fixes or running tests. |
+
+Agent roles and reasoning effort are separate. **Build/Plan/Browse/Audit** choose the tools and task; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. The native UI remembers choices per agent/model, so check the displayed selection when resuming.
+
+| Effort | Thinking-token budget | Use |
+|---|---:|---|
+| **Fast** | Thinking disabled | Simple edits and mechanical browser interaction. |
+| **Medium** | Up to 1,024 | Small changes and debugging. |
+| **High** | Up to 3,072 | Default for coding and review. |
+| **XHigh** | Up to 6,144 | Difficult problems; leaves less output room for code. |
+| **Think** | Legacy uncapped thinking | Compatibility for saved sessions; still subject to the total output limit. |
+
+These are local oMLX budget presets, not OpenAI reasoning settings or quality ratings. Thinking and the answer share the 8,192-token output limit. A model may continue explaining in its answer after a thinking cap, so a larger cap does not guarantee a better answer or a fixed runtime.
+
+Edits normally proceed without a separate approval; shell and browser actions can ask. For a trusted project, explicitly opt into native automatic approvals for one launch:
+
+```sh
+cd "/absolute/path/to/your/project" && kryn --auto
+# Resume with the same opt-in:
+kryn --continue --auto
+```
+
+`--auto` accepts **all native permission requests that are not explicitly denied**, including browser, network and external-file requests. It is broader than “accept edits.” Explicit denials and the ordinary shell write boundary remain; native file tools and browser/MCP are outside that shell boundary. The next launch without `--auto` returns to prompts. See [Security](SECURITY.md).
 
 Type these commands **inside KRYN**, then press Enter:
 
 | Command | Purpose |
 |---|---|
+| `/effort` | Choose Fast, Medium, High or XHigh independently of the agent role. |
 | `/audit` | Enter Audit mode and review current work. |
 | `/research your topic` | Research a topic with search and source links. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
@@ -73,10 +96,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.2 --repo PranavMishra28/kryn \
+     gh release download v0.1.3 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.2
+     python3 install-kryn.py --tag v0.1.3
    )
    ```
 
@@ -89,7 +112,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.2`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.3`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -103,7 +126,7 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.2` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.3` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn improve status` | Inspect experimental background improvement. |
 | `kryn improve pause` | Pause background improvement. |
@@ -119,11 +142,13 @@ The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **
 
 Automatic compaction reserves room for output and retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
 
+npm uses KRYN’s managed writable cache, so ordinary dependency installation does not require modifying `~/.npm` or running `sudo`. Build can delegate rendered UI checks to one foreground Browse child. KRYN attaches up to 6,000 characters of the current user request to that handoff so functional acceptance criteria are not lost in a visual-only summary. This text stays in memory outside the native conversation and survives compaction during the running client; it does not recover older criteria after a restart. Build is also instructed to finish a runnable slice and validate required services. These instructions improve the workflow but are not an enforced correctness gate.
+
 Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.2 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21).
+Version 0.1.3 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
 
 ## License and distribution
 
