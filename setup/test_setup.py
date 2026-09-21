@@ -155,6 +155,13 @@ class SetupChecks(unittest.TestCase):
             changed[section][name]["model"] = "local/qwen#low"
             with self.subTest(section=section), self.assertRaises(RuntimeError):
                 localai.validate_owned_config(changed)
+        for output in (None, {}, {"max_bytes": 4096}, {"max_lines": 200},
+                       {"max_bytes": 51200, "max_lines": 200},
+                       {"max_bytes": 4096, "max_lines": 2000}):
+            changed = copy.deepcopy(config)
+            changed["tool_output"] = output
+            with self.subTest(tool_output=output), self.assertRaises(RuntimeError):
+                localai.validate_owned_config(changed)
 
     def test_effective_profile_matches_native_shapes_and_rejects_drift(self):
         config = localai.expected_config()
@@ -186,6 +193,8 @@ class SetupChecks(unittest.TestCase):
             (("models", "data", 0, "settings", "baseURL"), "https://example.invalid/v1"),
             (("agents", "data", 0, "model", "variant"), "low"),
             (("config", 2, "info", "compaction", "buffer"), 1),
+            (("config", 2, "info", "tool_output", "max_bytes"), 51200),
+            (("config", 2, "info", "tool_output", "max_lines"), 2000),
             (("config", 2, "info", "default_agent"), "plan"),
             (("config", 2, "info", "model", "variant"), "low"),
             (("config", 2, "info", "commands", "review", "model", "variant"), "fast"),
@@ -211,6 +220,17 @@ class SetupChecks(unittest.TestCase):
             changed["config"].append({"type": "document", "info": {"compaction": partial}})
             with self.subTest(changed_partial=partial), self.assertRaises(RuntimeError):
                 localai.validate_inventory(changed)
+        for output in ({}, {"max_bytes": 4096}, {"max_lines": 200},
+                       {"max_bytes": 51200, "max_lines": 200},
+                       {"max_bytes": 4096, "max_lines": 2000}):
+            changed = copy.deepcopy(inventory)
+            changed["config"].append({"type": "document", "info": {"tool_output": output}})
+            with self.subTest(later_output_block=output), self.assertRaises(RuntimeError):
+                localai.validate_inventory(changed)
+        unchanged = copy.deepcopy(inventory)
+        unchanged["config"].append({"type": "document", "info": {
+            "tool_output": copy.deepcopy(config["tool_output"])}})
+        localai.validate_inventory(unchanged)
 
     def test_runtime_profile_context_and_effective_memory_bound(self):
         # oMLX server.py /v1/models ModelInfo and /api/status public response shapes.
@@ -1020,6 +1040,7 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(model["limit"], {"context": 16384, "output": 4096})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
         self.assertEqual(cfg["compaction"]["buffer"], 2048)
+        self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
         self.assertEqual(cfg["providers"]["local"]["settings"]["baseURL"], "http://127.0.0.1:8000/v1")
         self.assertTrue(all(a["model"].startswith("local/qwen#") for a in cfg["agents"].values()))
         self.assertTrue(all(c["model"].startswith("local/qwen#") for c in cfg["commands"].values()))

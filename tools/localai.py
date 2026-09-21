@@ -85,7 +85,7 @@ def same_reference(left, right):
 def validate_defaults(config, expected):
     require(same_reference(config.get("model"), expected.get("model")),
             "Expected release default model; review profile before launch")
-    for key in ("default_agent", "compaction"):
+    for key in ("default_agent", "compaction", "tool_output"):
         require(config.get(key) == expected.get(key), f"Expected release {key}; review profile before launch")
 
 
@@ -365,6 +365,10 @@ def validate_inventory(inventory):
             for key in ("model", "default_agent"):
                 if key in info:
                     defaults[key] = info[key]
+            # Native Config.latest selects the last whole tool_output block.
+            if "tool_output" in info:
+                defaults["tool_output"] = {"max_bytes": 50 * 1024, "max_lines": 2000,
+                                           **info["tool_output"]}
             # Native compaction config updates these supplied fields independently.
             configured = info.get("compaction", {})
             compaction = defaults.setdefault("compaction", {})
