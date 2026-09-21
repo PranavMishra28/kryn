@@ -42,7 +42,11 @@ class SetupChecks(unittest.TestCase):
                      patch.object(localai, "ensure_runtime", return_value={"healthy": True, "active_requests": 0, "waiting_requests": 0}), \
                      patch.object(localai, "dependency_report", return_value={}), \
                      patch.object(localai, "await_runtime_idle"), \
-                     patch.object(localai.improvement, "foreground", return_value=contextlib.nullcontext()), \
+                     patch.object(localai.owner_auth, "authorize", return_value={"owner_id": 90290458}), \
+                     patch.object(localai.learning, "foreground", return_value=contextlib.nullcontext()), \
+                     patch.object(localai.learning, "active_champion", return_value=localai.learning.BASELINE), \
+                     patch.object(localai.learning, "start_after_exit"), \
+                     patch.object(localai, "owned_config", return_value={}), \
                      patch.object(localai.improvement, "record_outcome"), \
                      patch.object(localai.improvement, "active_skill_directory", return_value=None), \
                      patch.object(localai, "NativeServer", return_value=owner), \
@@ -54,6 +58,13 @@ class SetupChecks(unittest.TestCase):
                 self.assertEqual(order, ["readiness", "tui"])
                 self.assertEqual("search" in error.getvalue(), state != "connected")
                 owner.__exit__.assert_called_once()
+
+    def test_missing_owner_session_prevents_native_start(self):
+        with patch.object(localai.owner_auth, "authorize", side_effect=localai.owner_auth.AuthorizationError("login required")), \
+             patch.object(localai, "NativeServer") as server, \
+             self.assertRaisesRegex(localai.owner_auth.AuthorizationError, "login required"):
+            localai.main([str(self.root)])
+        server.assert_not_called()
 
     def test_profile_pin_paths_and_memory(self):
         profile = setup.load_profile()
@@ -281,8 +292,9 @@ class SetupChecks(unittest.TestCase):
             contents = mount / "oMLX.app/Contents"
             contents.mkdir(parents=True)
             (contents / "Info.plist").write_bytes(plistlib.dumps({"CFBundleIdentifier": "app.omlx", "CFBundleShortVersionString": "0.6.4"}))
-            return plistlib.dumps({"system-entities": [{"dev-entry":"/dev/disk990"},
-                {"dev-entry":"/dev/disk990s1", "mount-point":str(mount)}]})
+            return plistlib.dumps({"system-entities": [{"dev-entry":"/dev/disk990", "content-hint":"GUID_partition_scheme"},
+                {"dev-entry":"/dev/disk991", "content-hint":"EF57347C-0000-11AA-AA11-00306543ECAC"},
+                {"dev-entry":"/dev/disk991s1", "mount-point":str(mount)}]})
         def run(command, env, timeout=None):
             calls.append(list(map(str, command)))
             if command[0] == "/usr/bin/ditto":
@@ -298,11 +310,16 @@ class SetupChecks(unittest.TestCase):
     def test_user_app_preserves_unowned_and_already_attached_image(self):
         destination = self.root / "Applications/oMLX.app"
         destination.mkdir(parents=True)
+        root, calls, lookup, run = self.app_transport()
         with patch.object(Path, "home", return_value=self.root), \
-             patch.object(setup.subprocess, "check_output", side_effect=AssertionError("native command forbidden")), \
-             self.assertRaisesRegex(RuntimeError, "without this installer's receipt"):
-            setup.install_app(self.root / "LocalAI", {})
+             patch.object(setup.subprocess, "check_output", side_effect=lookup), \
+             patch.object(setup, "run", side_effect=run), \
+             self.assertRaisesRegex(RuntimeError, "differs from the verified publisher"):
+            setup.install_app(root, {})
+        self.assertEqual(list(destination.iterdir()), [])
+        self.assertFalse((root / "app-install.json").exists())
         destination.rmdir()
+        shutil.rmtree(root)  # Only the test's mock download and empty mount state.
         dmg = self.root / "LocalAI/downloads/oMLX-0.6.4-macos26-27.dmg"
         root, calls, lookup, run = self.app_transport(images=[{"image-path":str(dmg),
             "system-entities":[{"dev-entry":"/dev/disk7"}]}])
@@ -312,6 +329,20 @@ class SetupChecks(unittest.TestCase):
              self.assertRaisesRegex(RuntimeError, "already-attached"):
             setup.install_app(root, {})
         self.assertEqual([command[1] for command in calls], ["info"])
+
+    def test_user_app_adopts_only_exact_verified_publisher_bundle(self):
+        root, calls, lookup, run = self.app_transport()
+        contents = self.root / "Applications/oMLX.app/Contents"
+        contents.mkdir(parents=True)
+        (contents / "Info.plist").write_bytes(plistlib.dumps({"CFBundleIdentifier": "app.omlx", "CFBundleShortVersionString": "0.6.4"}))
+        inode = contents.stat().st_ino
+        with patch.object(Path, "home", return_value=self.root), \
+             patch.object(setup.subprocess, "check_output", side_effect=lookup), \
+             patch.object(setup, "run", side_effect=run):
+            setup.install_app(root, {})
+        self.assertEqual(contents.stat().st_ino, inode)
+        self.assertTrue((root / "app-install.json").is_file())
+        self.assertFalse(any(command[0] == "/usr/bin/ditto" for command in calls))
 
     def test_user_app_copy_failure_cleans_only_new_device_and_retains_errors(self):
         root, calls, lookup, run = self.app_transport(copy_failure=True, detach_failure=True)

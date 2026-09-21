@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Daily entry point for the owned local stack; delegates all agent work to OpenCode."""
 import argparse
-from contextlib import nullcontext
+from contextlib import ExitStack, nullcontext
 import copy
 import ctypes
 import hashlib
@@ -16,6 +16,7 @@ import socket
 import stat
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -23,16 +24,18 @@ import urllib.request
 from native_client import BINARY, MODEL_ID, PROJECT, ROOT, NativeServer, environment, owned_config
 from context_probe import ResourceGuard, resources
 import improvement
+import learning
+import owner_auth
 
 RUNTIME = "http://127.0.0.1:8000"
 BASE_URL = RUNTIME + "/v1"
 PACKAGE = "@opencode/ai/providers/openai-compatible"
-VARIANTS = {"fast", "low", "medium", "xhigh"}
-REVISION = "c41ed507f1b16320942a1e9ce340e71d2692dee2"
-REPOSITORY = "gcoli/" + MODEL_ID
-MODEL_PARENT = "daily/models"
+VARIANTS = {"fast", "think"}
+REVISION = '76fe4065e622cf34990d3c13ef80ec8531c9a0f7'
+REPOSITORY = 'mlx-community/Qwen3.5-9B-6bit'
+MODEL_PARENT = 'candidates/qwen35-9b/models'
 SERVER_CONTEXT = 16384
-MEMORY_GIB = 24
+MEMORY_GIB = 14
 OMLX = Path.home() / "Applications/oMLX.app/Contents/MacOS/omlx-cli"
 CONTROL = Path.home() / "Library/Application Support/oMLX/control.sock"
 POLICY = [{"action": "provider.use", "resource": "*", "effect": "deny"},
@@ -55,7 +58,20 @@ def local_reference(ref):
 
 def expected_config():
     # The deployer copies the reviewed template and pins its selected model.
-    return json.loads((PROJECT / "setup/opencode.template.json").read_text())
+    config = json.loads((PROJECT / "setup/opencode.template.json").read_text())
+    plugin = PROJECT / "plugin/server.js"
+    if not plugin.is_file():
+        plugin = PROJECT / "tools/kryn_plugin.mjs"
+    identity = hashlib.sha256(plugin.read_bytes()).hexdigest()[:16]
+    profile = PROJECT / "setup/install-profile.json"
+    if not profile.is_file():
+        profile = PROJECT / "setup/accepted-profile.json"
+    profile_id = hashlib.sha256(profile.read_bytes()).hexdigest()
+    for item in config["plugins"]:
+        if isinstance(item, dict):
+            item["package"] = str(ROOT / "plugins" / identity)
+            item["options"].update(stateDir=str(ROOT / "state/improvement"), profileId=profile_id, modelID=MODEL_ID)
+    return config
 
 
 def reference_variant(ref):
@@ -81,7 +97,7 @@ def validate_route(provider, model):
     require(model.get("modelID") == MODEL_ID, "Unexpected runtime model ID")
     variants = model.get("variants", [])
     require(len(variants) == len(VARIANTS) and {v.get("id") for v in variants} == VARIANTS,
-            "Expected exactly fast/low/medium/xhigh variants")
+            "Expected exactly fast/think variants")
     require(all(v.get("settings", {}).get("baseURL") == BASE_URL for v in variants),
             "Every variant must explicitly use the local endpoint")
     expected = expected_config()["providers"]["local"]["models"]["qwen"]
@@ -104,9 +120,7 @@ def validate_owned_config(config):
              if p.get("action") == "provider.use"]
     require(rules == POLICY, "Owned global config needs deny-all/allow-local provider policy")
     plugins = config.get("plugins", [])
-    expected = {"-opencode.models.dev", "-opencode.provider.*", "opencode.config.policy",
-                "-opencode.config.compatibility", "-opencode.browser"}
-    require(len(plugins) == len(expected) and set(plugins) == expected,
+    require(plugins == expected_profile["plugins"],
             "Owned plugin policy changed; review before launch")
     require(config.get("update") == "disable" and config.get("share") == "disabled",
             "Automatic updates/sharing must remain disabled")
@@ -158,8 +172,9 @@ def verify_release(current=True):
             "This is not the installed release; run the deployed kryn command (source-kit init/self-check remain available)")
     files = manifest.get("files")
     require(isinstance(files, dict) and {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
-            "tools/context_probe.py", "tools/improvement.py", "tools/protocol_probe.py", "setup/opencode.template.json",
-            "setup/install-profile.json", "setup/runtime-profile.json"} == set(files), "Unexpected installed release contents")
+            "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/protocol_probe.py", "setup/opencode.template.json",
+            "plugin/server.js", "plugin/package.json",
+            "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"} == set(files), "Unexpected installed release contents")
     require(hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()[:16] == release,
             "Installed release manifest identity changed")
     for name, digest in files.items():
@@ -167,6 +182,13 @@ def verify_release(current=True):
         require(not any(p.is_symlink() for p in (path, *path.parents)), "Linked release file refused")
         require(path.is_file() and path.stat().st_size <= 2 * 1024**2 and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
                 "Installed release file changed; restore its reviewed release")
+    plugin_dir = ROOT / "plugins" / files["plugin/server.js"][:16]
+    require(manifest.get("plugin_directory") == str(plugin_dir), "Native plugin path differs from its content identity")
+    for name in ("server.js", "package.json"):
+        path = plugin_dir / name
+        require(not any(p.is_symlink() for p in (path, *path.parents))
+                and path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == files["plugin/" + name],
+                "Installed native product plugin changed")
     return manifest
 
 
@@ -207,18 +229,14 @@ def model_integrity(deep=False, source_init=False):
     return "Every pinned model file SHA256 verified."
 
 
-def with_verified_skill(config):
-    """Load only a real evaluator-approved immutable skill; never simulation."""
+def with_verified_skill(config, *, json_cli=False):
+    """Snapshot approved data-only instructions for this native server's sessions."""
     result = copy.deepcopy(config)
-    directory = improvement.active_skill_directory(ROOT / "state/improvement")
-    if directory is not None:
-        require(isinstance(directory, Path) and directory.is_absolute()
-                and directory.resolve().is_relative_to((ROOT / "state/improvement/versions").resolve()),
-                "Verified skill must belong to the owned version directory")
-        paths = result.setdefault("skills", [])
-        require(isinstance(paths, list) and all(isinstance(item, str) for item in paths), "Unexpected native skills configuration")
-        if str(directory) not in paths:
-            paths.append(str(directory))
+    scope = "disposable_json_cli" if json_cli else None
+    champion = learning.active_champion(ROOT / "state/improvement", scope=scope)
+    for item in result.get("plugins", []):
+        if isinstance(item, dict) and "champion" in item.get("options", {}):
+            item["options"].update(champion=champion, workflowScope=scope)
     return result
 
 
@@ -415,13 +433,14 @@ def dependency_report(config):
     require(chrome.is_file(), "Google Chrome is missing; browser tools are unavailable")
     with chrome.open("rb") as stream:
         browser_version = plistlib.load(stream).get("CFBundleShortVersionString", "")
-    require(browser_version == "153.0.8010.53", "Chrome differs from the tested version; review compatibility")
+    require(re.fullmatch(r"153\.\d+\.\d+\.\d+", browser_version), "Chrome major differs from the tested compatibility line")
     browser = config.get("mcp", {}).get("servers", {}).get("browser", {})
     node = browser.get("command", [None])[0]
     require(node is not None, "Browser Node executable is not configured")
     node_version = subprocess.check_output([node, "-p", "process.arch + ' ' + process.versions.node"],
                                            text=True, timeout=10, env=environment({})).strip()
-    require(node_version == "arm64 22.23.1", "Expected native ARM64 Node 22.23.1")
+    matched = re.fullmatch(r"arm64 22\.(\d+)\.(\d+)", node_version)
+    require(matched and int(matched[1]) >= 23, "Expected native ARM64 Node 22.23 or later in the 22.x line")
     mcp_package = json.loads((ROOT / "browser/node_modules/@playwright/mcp/package.json").read_text())
     require(mcp_package.get("version") == "0.0.82", "Expected Playwright MCP 0.0.82")
     return {"disk_free_bytes": free, "opencode": "2.0.10", "omlx": "0.6.4",
@@ -550,7 +569,7 @@ def initialize(args):
 
 
 def self_check():
-    config = json.loads((PROJECT / "setup/opencode.template.json").read_text())
+    config = expected_config()
     validate_owned_config(config)
     for change in ("provider", "model", "variant", "policy", "reference", "global_skills", "desktop_browser"):
         altered = copy.deepcopy(config)
@@ -575,7 +594,7 @@ def self_check():
         except RuntimeError:
             continue
         raise AssertionError(f"Failed to reject {change} mutation")
-    assert local_reference({"providerID": "local", "id": "qwen", "variant": "medium"})
+    assert local_reference({"providerID": "local", "id": "qwen", "variant": "think"})
     assert not local_reference("local/qwen#unknown")
     provider = copy.deepcopy(config["providers"]["local"])
     model = provider.pop("models")["qwen"]
@@ -597,6 +616,8 @@ def self_check():
 
 def run(args, outcome):
     command = args.command_or_project
+    require(not args.json_cli or command not in {"init", "doctor", "status", "stop", "bench"},
+            "--json-cli is a scoped coding launch; start a new native session to use its current guidance")
     require(not args.deep or command == "doctor", "--deep is supported only by kryn doctor")
     if command == "init":
         return initialize(args)
@@ -611,7 +632,16 @@ def run(args, outcome):
         print("Stopped the verified owned oMLX runtime. Existing Ollama was not targeted.")
         return 0
     if command == "status":
-        print(json.dumps({**runtime_metadata(), "improvement": improvement.status(ROOT / "state/improvement")}, indent=2))
+        try:
+            health = runtime_metadata()
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
+            health = {"healthy": False, "state": "stopped_or_unavailable"}
+        try:
+            authorization = {"authorized": True, "expires_at": owner_auth.authorize()["expires_at"]}
+        except owner_auth.AuthorizationError:
+            authorization = {"authorized": False}
+        print(json.dumps({**health, "owner_session": authorization,
+                          "improvement": learning.status(ROOT / "state/improvement")}, indent=2))
         return 0
     project = (Path(args.project or ".") if command == "launch" else
                Path.cwd() if command in {"doctor", "bench"} else Path(command)).expanduser().resolve()
@@ -619,10 +649,14 @@ def run(args, outcome):
     if command not in {"doctor", "bench"}:
         require(project != Path.home().resolve(), "Enter a project directory first, then run kryn.")
     outcome["failure_code"] = "config"
-    config = with_verified_skill(prerequisites())
+    config = with_verified_skill(prerequisites(), json_cli=args.json_cli)
     dependencies = dependency_report(config)
     if command == "doctor":
         dependencies["model_integrity"] = model_integrity(args.deep)
+        if args.deep:
+            from kryn.installer import verify_browser
+            verify_browser(ROOT, adopt=False)
+            dependencies["browser_integrity"] = "all installed dependency files verified"
     outcome["failure_code"] = "runtime"
     if command == "doctor":
         try:
@@ -636,7 +670,10 @@ def run(args, outcome):
                 "Local runtime is busy; wait for its existing work before launching KRYN")
     invoked = False
     try:
-        with NativeServer(project, config=config) as server:
+        with ExitStack() as stack:
+            if command in {"doctor", "bench"}:
+                project = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-check-", dir="/private/tmp")))
+            server = stack.enter_context(NativeServer(project, config=config))
             outcome["failure_code"] = "config"
             inventory(server, config)
             outcome["failure_code"] = "tools"
@@ -675,11 +712,25 @@ def run(args, outcome):
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv in (["login"], ["logout"]):
+        if argv[0] == "login":
+            owner_auth.login()
+            print("Owner verified with GitHub Keychain credentials. Offline session is valid for seven days.")
+        else:
+            owner_auth.logout()
+            print("KRYN owner session removed. Existing GitHub CLI authentication was preserved.")
+        return 0
     if argv and argv[0] == "improve":
-        require(not any(item.split("=", 1)[0] in {"--s", "--st", "--sta", "--stat", "--state"} for item in argv[1:]),
-                "KRYN improvement state is fixed to its owned directory")
+        owner_auth.authorize()
         verify_release()
-        return improvement.main(["--state", str(ROOT / "state/improvement"), *(argv[1:] or ["status"])])
+        require(len(argv) <= 2, "Usage: kryn improve [status|pause|resume|disable|enable]")
+        action = argv[1] if len(argv) == 2 else "status"
+        require(action in {"status", "pause", "resume", "disable", "enable"},
+                "Use status, pause, resume, disable or enable; legacy manual promotion is not a product gate")
+        result = (learning.status(ROOT / "state/improvement") if action == "status"
+                  else learning.control(ROOT / "state/improvement", action))
+        print(json.dumps(result, indent=2))
+        return 0
     parser = argparse.ArgumentParser(prog="kryn", description=__doc__, epilog=(
         "Ordinary shell writes are restricted to the project and owned state/temp/log paths. "
         "Native/shell scratch uses a private project child; browser infrastructure uses separate private temp. "
@@ -693,12 +744,15 @@ def main(argv=None):
     parser.add_argument("--uv", type=Path, help="init only: uv executable")
     parser.add_argument("--self-check", action="store_true", help="offline validator checks; no services or inference")
     parser.add_argument("--deep", action="store_true", help="doctor only: rehash every pinned model file (slow; no inference)")
+    parser.add_argument("--json-cli", action="store_true", help="apply validated workflow guidance for JSON command-line programs in new native sessions")
     args = parser.parse_args(argv)
     require(args.project is None or args.command_or_project == "launch", "Extra project argument requires launch")
     if args.self_check:
         self_check()
         return 0
     command = args.command_or_project if args.command_or_project in {"init", "doctor", "status", "stop", "bench"} else "run"
+    if command not in {"status", "stop"}:
+        owner_auth.authorize()
     outcome = {"command": command, "status": "failure", "wall_seconds": 0, "exit_code": None,
                "failure_code": "unknown", "interventions": 0, "pressure_warning_samples": None,
                "swap_growth_bytes": None, "release_id": PROJECT.name if re.fullmatch(r"[a-f0-9]{16}", PROJECT.name) else None,
@@ -708,7 +762,7 @@ def main(argv=None):
         outcome["profile_id"] = hashlib.sha256(profile.read_bytes()).hexdigest()
     started = time.monotonic()
     try:
-        with (improvement.foreground(ROOT / "state/improvement") if command in {"run", "bench"} else nullcontext()):
+        with (learning.foreground(ROOT / "state/improvement") if command in {"run", "bench"} else nullcontext()):
             code = run(args, outcome)
         outcome.update(exit_code=code, status="success" if code == 0 else "failure")
         if code == 0:
@@ -729,6 +783,12 @@ def main(argv=None):
             print("kryn: outcome recording failed (" + type(error).__name__ + "); no private task content was recorded", file=sys.stderr)
             if original is None:
                 raise RuntimeError("KRYN outcome was not recorded; inspect the owned state directory") from error
+        if command == "run" and original is None:
+            try:
+                learning.start_after_exit(ROOT / "state/improvement", with_verified_skill(owned_config()))
+            except Exception as error:
+                # Optional learning must not convert completed user work into a failed launch.
+                print("kryn: background improvement deferred (" + type(error).__name__ + ")", file=sys.stderr)
 
 
 if __name__ == "__main__":

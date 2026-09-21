@@ -13,6 +13,7 @@ import re
 from pathlib import Path
 import shlex
 import stat
+import subprocess
 import sys
 
 import setup
@@ -34,25 +35,32 @@ def pin_constant(data, name, value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--plan-json", action="store_true", help="Return the complete staged deployment manifest without writing")
     parser.add_argument("--profile", type=Path, help="Defaults to the installed profile; no profile is inferred from oMLX settings")
+    parser.add_argument("--entry-python", type=Path, help="Installed package interpreter; launch its kryn console module")
+    parser.add_argument("--smoke-check", action="store_true", help="Check staged client before activating owned entry points")
     args = parser.parse_args()
+    if args.apply and args.plan_json:
+        parser.error("--plan-json cannot be combined with --apply")
     os.umask(0o077)
     source = Path(__file__).resolve().parents[1]
     root = Path.home() / "Library/Application Support/LocalAI"
-    if not (root / "xdg/config/opencode/opencode.json").is_file():
+    config_path = root / "xdg/config/opencode/opencode.json"
+    if not args.plan_json and not config_path.is_file():
         raise RuntimeError("Install and validate the owned core first")
     profile = setup.load_profile(args.profile or root / "install-profile.json")
     model = setup.model_id(profile)
-    config = json.loads((root / "xdg/config/opencode/opencode.json").read_text())
-    if config.get("providers", {}).get("local", {}).get("models", {}).get("qwen", {}).get("modelID") != model:
+    config = json.loads(config_path.read_text()) if config_path.is_file() else {}
+    if not args.plan_json and config.get("providers", {}).get("local", {}).get("models", {}).get("qwen", {}).get("modelID") != model:
         raise RuntimeError("Owned OpenCode config disagrees with the chosen profile")
     marker = root / profile["model_parent"] / model / ".localai-download.json"
     setup.check_destination(marker, setup.encode({key: profile[key] for key in ("repository", "revision")}))
     if not marker.is_file():
         raise RuntimeError("Verified model installation marker is missing")
-    names = ["tools/localai.py", "tools/native_client.py", "tools/protocol_probe.py", "tools/context_probe.py", "tools/improvement.py", "tools/native-shell",
-             "setup/opencode.template.json"]
+    names = ["tools/localai.py", "tools/native_client.py", "tools/protocol_probe.py", "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/native-shell",
+             "setup/opencode.template.json", "setup/AGENTS.md"]
     contents = {name: (source / name).read_bytes() for name in names}
+    contents.update({"plugin/" + name: data for name, data in setup.plugin_files().items()})
     contents["tools/native_client.py"] = pin_constant(contents["tools/native_client.py"], "MODEL_ID", model)
     for name, value in (("REVISION", profile["revision"]), ("REPOSITORY", profile["repository"]),
                         ("MODEL_PARENT", profile["model_parent"]), ("MEMORY_GIB", profile["memory_gib"]),
@@ -60,6 +68,9 @@ def main():
         contents["tools/localai.py"] = pin_constant(contents["tools/localai.py"], name, value)
     template = json.loads(contents["setup/opencode.template.json"])
     template["providers"]["local"]["models"]["qwen"].update(modelID=model, name=model)
+    for item in template["plugins"]:
+        if isinstance(item, dict):
+            item["options"]["modelID"] = model
     contents["setup/opencode.template.json"] = setup.encode(template).encode()
     contents["setup/install-profile.json"] = setup.encode(profile).encode()
     contents["setup/runtime-profile.json"] = setup.encode({"global": setup.runtime_settings(root, profile),
@@ -67,9 +78,11 @@ def main():
     hashes = {name: sha(value) for name, value in contents.items()}
     release = sha(json.dumps(hashes, sort_keys=True).encode())[:16]
     destination = root / "client" / release
-    python = Path(sys.executable).resolve()
-    script = "#!/bin/sh\nexec " + shlex.quote(str(python)) + " -E -B " + shlex.quote(
-        str(destination / "tools/localai.py")) + ' "$@"\n'
+    python = args.entry_python.expanduser().absolute() if args.entry_python else Path(sys.executable).resolve()
+    if not python.is_file() or not os.access(python, os.X_OK):
+        raise RuntimeError("Package interpreter is missing or not executable")
+    target = "-m kryn" if args.entry_python else shlex.quote(str(destination / "tools/localai.py"))
+    script = "#!/bin/sh\nexec " + shlex.quote(str(python)) + " -E -B " + target + ' "$@"\n'
     manifest_path = root / "client/deployment.json"
     prior = json.loads(manifest_path.read_text()) if manifest_path.is_file() else None
     launchers = [root / "localai", Path.home() / ".local/bin/localai",
@@ -88,6 +101,11 @@ def main():
             if (not stat.S_ISREG(info.st_mode) or info.st_uid not in {0, os.geteuid()}
                     or info.st_nlink != 1 or info.st_mode & 0o022 or not os.access(path, os.X_OK)):
                 raise RuntimeError(f"Preserving unsafe existing release shim: {path}")
+    plugin_dir = setup.plugin_directory(root)
+    for name, data in setup.plugin_files().items():
+        path = plugin_dir / name
+        if any(p.is_symlink() for p in (path, *path.parents)) or (path.exists() and path.read_bytes() != data):
+            raise RuntimeError("Preserving changed or linked native product plugin")
     for path in launchers:
         if not path.exists():
             continue
@@ -99,6 +117,7 @@ def main():
         if not path.is_file() or path.read_text() not in allowed:
             raise RuntimeError(f"Preserving unowned/changed launcher: {path}")
     result = {"release": release, "directory": str(destination), "python": str(python),
+              "plugin_directory": str(plugin_dir),
               "files": hashes, "launcher": script}
     manifest_text = json.dumps(result, indent=2) + "\n"
     setup.check_destination(manifest_path.with_suffix(".new.json"), manifest_text)
@@ -107,7 +126,7 @@ def main():
         if path.exists() and path.read_text() != script:
             setup.check_destination(root / "backups" / ("client-" + release) / (str(index) + "-localai"), path.read_text())
     if not args.apply:
-        print(json.dumps({"read_only": True, "release": release, "launchers": list(map(str, launchers))}))
+        print(json.dumps(result if args.plan_json else {"read_only": True, "release": release, "launchers": list(map(str, launchers))}))
         return
     for name, data in contents.items():
         path = destination / name
@@ -117,6 +136,14 @@ def main():
                 output.write(data)
             if name == "tools/native-shell":
                 path.chmod(0o700)
+    plugin_dir.mkdir(parents=True, exist_ok=True)
+    for name, data in setup.plugin_files().items():
+        path = plugin_dir / name
+        if not path.exists():
+            with path.open("xb") as output:
+                output.write(data)
+    if args.smoke_check:
+        subprocess.run([str(python), "-E", "-B", str(destination / "tools/localai.py"), "--self-check"], check=True)
     # Backup changed owned entry points before replacing them atomically.
     for index, path in enumerate(launchers):
         path.parent.mkdir(parents=True, exist_ok=True)

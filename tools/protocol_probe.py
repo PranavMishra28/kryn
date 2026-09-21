@@ -278,9 +278,7 @@ def request(base, folder, label, path, payload=None, timeout=120, cancel_after=N
 
 def body(model, variant, messages, max_tokens):
     thinking = variant != "fast"
-    kwargs = {"enable_thinking": thinking, "preserve_thinking": True}
-    if thinking:
-        kwargs["reasoning_effort"] = variant
+    kwargs = {"enable_thinking": thinking}
     return {
         "model": model, "messages": messages, "stream": True,
         "stream_options": {"include_usage": True}, "max_tokens": max_tokens,
@@ -322,7 +320,7 @@ def run(args, folder, cases):
     if not all(c["pass"] for c in cases.values()):
         return cases
     messages = [{"role": "user", "content": "What is 17 multiplied by 19? Your entire final response must be only the integer, with no explanation, equation or formatting."}]
-    variants = [args.variant] if args.mode == "stream" else ["fast", "low", "medium", "xhigh"]
+    variants = [args.variant] if args.mode == "stream" else ["fast", "think"]
     for variant in variants:
         label = "stream-" + variant
         r = send(label, body(args.model, variant, messages, args.max_tokens), args.cancel_after)
@@ -341,7 +339,7 @@ def run(args, folder, cases):
         "parameters": {"type": "object", "properties": {"a": {"type": "integer"},
                         "b": {"type": "integer"}}, "required": ["a", "b"], "additionalProperties": False}}}]
     history = [{"role": "user", "content": "Call sum_integers exactly once with a=23 and b=19. After its result, reply with only the sum."}]
-    payload = body(args.model, "low", history, args.max_tokens)
+    payload = body(args.model, "think", history, args.max_tokens)
     payload.update(tools=tools, tool_choice="auto")
     first = send("tool-first", payload)
     assistant = first.get("assistant", {})
@@ -362,7 +360,7 @@ def run(args, folder, cases):
         # Replay the received reasoning_content verbatim, not a reconstructed think tag.
         history += [assistant, {"role": "tool", "tool_call_id": call["id"],
                     "content": json.dumps({"sum": arguments["a"] + arguments["b"]})}]
-        second_payload = body(args.model, "low", history, args.max_tokens)
+        second_payload = body(args.model, "think", history, args.max_tokens)
         second_payload.update(tools=tools, tool_choice="auto")
         second = send("tool-replay", second_payload)
         cases["tool-replay"]["reasoning_replayed_chars"] = len(assistant.get("reasoning_content", ""))
@@ -382,7 +380,7 @@ def run(args, folder, cases):
             raise ValueError("image grew beyond 8 MiB")
         parts = [{"type": "text", "text": "Read the visible text and describe the positions of the main objects. Do not invent unreadable details."},
                  {"type": "image_url", "image_url": {"url": "data:" + mime + ";base64," + base64.b64encode(data).decode()}}]
-        send("vision", body(args.model, "low", [{"role": "user", "content": parts}], args.max_tokens))
+        send("vision", body(args.model, "think", [{"role": "user", "content": parts}], args.max_tokens))
         cases["vision"]["semantic_result"] = "REQUIRES_IMAGE_GROUND_TRUTH_REVIEW"
     if args.extra_checks:
         malformed = send("malformed", {"model": args.model, "messages": "invalid", "stream": True})
@@ -391,7 +389,7 @@ def run(args, folder, cases):
         limited = send("max-output", body(args.model, "fast", long_prompt, 4))
         cases["max-output"]["pass"] &= (limited.get("metrics", {}).get("finish_reason") == "length"
                                          and 0 < (limited.get("usage") or {}).get("completion_tokens", 0) <= 4)
-        cancelled = send("cancel", body(args.model, "xhigh", long_prompt, 2048), 2.0)
+        cancelled = send("cancel", body(args.model, "think", long_prompt, 2048), 2.0)
         cases["cancel"]["pass"] = cancelled["cancelled_by_probe"]
         recovery = send("after-cancel", body(args.model, "fast", messages, args.max_tokens))
         cases["after-cancel"]["pass"] &= recovery.get("assistant", {}).get("content", "").strip() == "323"
@@ -440,7 +438,7 @@ def self_check():
     assert fast["chat_template_kwargs"]["enable_thinking"] is False
     assert "reasoning_effort" not in fast["chat_template_kwargs"]
     assert len({json.dumps(body("test", v, [], 8)["chat_template_kwargs"], sort_keys=True)
-                for v in ("fast", "low", "medium", "xhigh")}) == 4
+                for v in ("fast", "think")}) == 2
     # In-memory transport only: no listener, runtime or network connection.
     stopped = threading.Event()
     class FakeSocket:
@@ -498,7 +496,7 @@ def main():
     p.add_argument("--model")
     p.add_argument("--runs-dir", type=Path)
     p.add_argument("--mode", choices=("smoke", "stream"), default="smoke")
-    p.add_argument("--variant", choices=("fast", "low", "medium", "xhigh"), default="fast")
+    p.add_argument("--variant", choices=("fast", "think"), default="fast")
     p.add_argument("--max-tokens", type=int, default=512)
     p.add_argument("--timeout", type=float, default=120)
     p.add_argument("--cancel-after", type=float, help="stream mode only; close transport after this deadline")

@@ -769,7 +769,7 @@ def main():
     ap.add_argument("run", type=Path, nargs="?")
     ap.add_argument("--stage", default="attempt1")
     ap.add_argument("--agent", default="build")
-    ap.add_argument("--variant", default="xhigh", choices=("fast", "low", "medium", "xhigh"))
+    ap.add_argument("--variant", default="think", choices=("fast", "think"))
     ap.add_argument("--prompt", type=Path)
     ap.add_argument("--session")
     ap.add_argument("--timeout", type=int, default=1200)

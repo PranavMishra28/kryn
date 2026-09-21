@@ -1,98 +1,176 @@
 {
-  "schema": 2,
-  "snapshot": "kryn-2026-09-20-daily-q4",
+  "schema": 3,
+  "snapshot": "kryn-0.1.0-product-candidate",
+  "created_utc": "2026-09-21T01:19:28.648463+00:00",
   "release_status": "NOT_READY",
-  "daily_use_status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
-  "unresolved_mandatory_gates": [
-    "sustained_32k_context",
-    "completed_mtp_off_on_comparison",
-    "complete_continuous_improvement_cycle_and_live_skill_evaluation"
-  ],
-  "created_utc": "2026-09-20T22:01:43.731697+00:00",
-  "scope": "Installed supervised local coding on the tested host, with interventions and limits recorded. Not a qualification of the older complete frontier/automation target.",
-  "immutable_scope": "The Git commit binds this manifest and its exact source hashes. Subsequent changes require another snapshot. No signature is implied.",
-  "previous_snapshot": {
-    "commit": "d0a3f6e81c7e664cfc69631885796c22083b486f",
-    "manifest_sha256": "d677dd9ece20ed5ce3489c943752a41df4cc3803d604ac2f0358c20407e7b928",
-    "release_status": "NOT_READY",
-    "closed_historical_release_window": {
-      "start_utc": "2026-09-20T19:54:29Z",
-      "deadline_utc": "2026-09-20T21:24:29Z"
+  "daily_use_status": "NOT_READY_PENDING_CURRENT_PROFILE_QUALIFICATION",
+  "scope": "Candidate source/provenance snapshot; final tag/artifact installation and live acceptance remain pending.",
+  "immutable_scope": "Per-file hashes describe this working-tree snapshot. The final committed clean source and wheel require a new manifest; no signature is implied.",
+  "package": {
+    "name": "kryn",
+    "version": "0.1.0",
+    "distribution": "private GitHub release only",
+    "repository": "PranavMishra28/kryn",
+    "tag": "v0.1.0",
+    "published": false,
+    "installed_final_release": false,
+    "final_wheel_sha256": null,
+    "build_backend": "hatchling==1.32.4",
+    "candidate_wheel": {
+      "sha256": "3f93f889255735fe4fa92fe6d205031840716f7d89f39cdb84db64dbe6088fd6",
+      "bytes": 196972,
+      "entries": 57,
+      "payload_files": 48,
+      "source_revision": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+      "source_dirty": true
     }
   },
-  "installed_client_release": "77b098cefea64a1b",
-  "tested_hardware": {
+  "source_snapshot": {
+    "base_commit": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+    "working_tree_dirty": true,
+    "final_source_commit": null
+  },
+  "tested_host": {
     "chip": "Apple M4 Max",
     "gpu_cores": 40,
     "unified_memory_gib": 48,
     "macos": "26.6.2",
     "build": "25G83",
-    "qualification": "SUPERVISED_DAILY_CODING_WITH_RECORDED_INTERVENTIONS"
+    "scope": "Recorded candidate observations only; current final-profile qualification pending"
   },
-  "qualified_hardware": [
-    {
-      "chip": "Apple M4 Max",
-      "gpu_cores": 40,
-      "unified_memory_gib": 48,
-      "macos": "26.6.2",
-      "build": "25G83",
-      "scope": "Recorded daily Q4 checks only; other applications and workloads affect headroom."
-    }
-  ],
+  "qualified_hardware": [],
   "dependencies": {
-    "opencode": "2.0.10",
-    "omlx": "0.6.4",
-    "omlx_app_build": 2529,
-    "node": "22.23.1 arm64",
-    "chrome": "153.0.8010.53",
+    "opencode": {
+      "version": "2.0.10",
+      "architecture": "darwin-arm64",
+      "upstream_commit": "b8cedc1a7a5e2916bbb65dc1d4b620729c261638",
+      "artifact_url": "https://registry.npmjs.org/@opencode/cli-darwin-arm64/-/cli-darwin-arm64-2.0.10.tgz",
+      "artifact_sha512": "acb2f84e60c47a2437d6316c173250fa0a3f6af6ac9e55dadf7538996f49d84d6f3763222c639e690ce5398438804ef605b92ba763e5fc9531d4924288ada5dd"
+    },
+    "omlx": {
+      "version": "0.6.4",
+      "app_build": 2529,
+      "artifact_url": "https://github.com/jundot/omlx/releases/download/v0.6.4/oMLX-0.6.4-macos26-27.dmg",
+      "artifact_sha256": "53f1506c2385e8920a67198b72d1fe09351c1b3538be9c6bdeb78e5277d06d93"
+    },
+    "node": {
+      "compatible": "22.x >=22.23",
+      "fallback": "22.23.1 arm64"
+    },
+    "python": {
+      "requires": ">=3.13",
+      "managed_fallback": "3.13.13"
+    },
+    "uv_fallback": "0.11.16",
     "playwright_mcp": "0.0.82",
-    "search": "Exa remote keyless MCP; service not version-pinned"
+    "playwright": "1.64.0-alpha-1789764292000",
+    "browser_lock_sha256": "f3fb7b7a16f0cc7d40cfc0047d1d0dbe4679c2a210bae9e9bceac4d05c12f9b6",
+    "chrome": {
+      "provided_by_user": true,
+      "historical_measured_version": "153.0.8010.53",
+      "current_version": null
+    },
+    "search": {
+      "service": "Exa remote keyless MCP",
+      "version_pinned": false,
+      "tools": [
+        "web_search_exa",
+        "web_fetch_exa",
+        "web_search_advanced_exa"
+      ]
+    }
   },
   "model_profile": {
-    "model": "Qwen3.8-27B-oQ4e-mtp",
-    "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
-    "memory_gib": 24,
+    "repository": "mlx-community/Qwen3.5-9B-6bit",
+    "revision": "76fe4065e622cf34990d3c13ef80ec8531c9a0f7",
+    "profile_sha256": "667dfe2c0037804834e08b166c86e962406f85826959b6ac2ff3979907a7305a",
+    "pinned_file_count": 13,
+    "model_file_hashes": {
+      ".gitattributes": "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930",
+      "README.md": "363bdcf275a674aee3e2a44684480351cf43ca8a05c3cf7aa63af4e0251a9524",
+      "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+      "config.json": "6d92400233a58e9ea0e61198aeaee4ef671e9ad2bed4658066a547e3149edbe8",
+      "model-00001-of-00002.safetensors": "5a18de09d568e8c9c05a558291558a6e38c675cb98de04e7ac10b8ae99ea2e77",
+      "model-00002-of-00002.safetensors": "24a20e26216d658fbfe2e41e7238685638d544519e1747dc59961b7be839661d",
+      "model.safetensors.index.json": "f3254c4ac51fafa7c05b9efc2ab9f4fea162d334c37c7936ebd449bcf2d79295",
+      "preprocessor_config.json": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+      "processor_config.json": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b",
+      "tokenizer.json": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4",
+      "tokenizer_config.json": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182",
+      "video_preprocessor_config.json": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13",
+      "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+    },
+    "memory_ceiling_gib": 14,
     "context": 16384,
     "max_output": 4096,
-    "mtp": false,
-    "idle_unload_seconds": 300
+    "mtp": false
   },
   "runtime_profile": {
-    "memory_limit_gib": 24,
-    "ssd_prefix_cache_gib": 8,
-    "hot_cache_gib": 0,
     "concurrent_generation_limit": 1,
     "default_agent": "build",
-    "default_variant": "fast",
+    "default_model": "local/qwen#think",
+    "title_model": "local/qwen#fast",
+    "title_output_limit": 128,
     "compaction_buffer": 2048,
     "compaction_keep": 2048,
-    "mtp_on": false,
-    "idle_timeout_seconds": 300
+    "nominal_compaction_input_threshold": 12288,
+    "ssd_prefix_cache_setting": "8GB",
+    "hot_cache_setting": "0",
+    "idle_timeout_seconds": 300,
+    "loopback_endpoint": "http://127.0.0.1:8000/v1"
   },
-  "runtime_settings_at_adoption_sha256": {
-    "config": "bd63e7ac08c6d1637de00ad19e96418c432f5355c4f9e9fc5bfb57d0c9ff7d08",
-    "profile": "178e9306b2755927097b99fe34c52c43d20b9aea1bdf3579794d618ba2c9a85f",
-    "global": "39756883534ef1108c4887fe5598ba8b7f32f8c9231facd539b2f9a8527f5e26",
-    "model": "e3f6433b72a15819d9f3c2d21e4f2bd68a3f5911b9d5684646b4df3f10277df2"
+  "owner_policy": {
+    "numeric_id": 90290458,
+    "credential_source": "GitHub CLI OS keyring",
+    "offline_ttl_days": 7,
+    "tokens_stored_in_kryn": false
   },
-  "runtime_settings_hash_scope": "Hashes of exact owned settings immediately after adoption. Native runtime bookkeeping can later rewrite model_dir; configured profile compatibility is independently checked by doctor.",
+  "learning_policy": {
+    "version": "learning-2026-09-20.2",
+    "reflection_variant": "fast",
+    "reflection_tokens": 768,
+    "reflection_seconds": 120,
+    "trial_seconds": 360,
+    "idle_seconds": 120,
+    "daily_work_seconds": 600,
+    "candidates_per_day": 1,
+    "queue": 2,
+    "activation_scope": "disposable_json_cli",
+    "live_qualified": false,
+    "benefit_proven": false
+  },
   "evaluation": {
-    "suite": "2026-09-19.2",
     "frozen_manifest_sha256": "186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6",
-    "offline_tests": 97,
-    "live_improvement_qualified": false,
-    "results_sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb"
+    "task_manifest_sha256": "6175d1bdd822f0bfec867b8c2653bfce316c4292de3de6ecf23326d19607a009",
+    "results_sha256": "0d61c220423f82a9668cbfc6c3a6267f4c62c03e2dd83e20ec0bec7a21461f53",
+    "all_current_gates": "PENDING",
+    "gates": {
+      "private_artifact_install": "PENDING",
+      "owner_authentication": "PENDING",
+      "runtime_daily_lifecycle": "PENDING",
+      "sustained_native_sessions": "PENDING",
+      "native_capabilities": "PENDING",
+      "managed_locality_and_permissions": "PENDING",
+      "background_isolation": "PENDING",
+      "automatic_learning_cycle": "PENDING",
+      "foreground_preemption_and_regression": "PENDING",
+      "quality_comparison": "PENDING",
+      "release_update_rollback": "PENDING"
+    },
+    "private_evidence_hashes": {
+      "qwen9-runtime-summary.json": "b13e04eda25f2f27ffa0fda6edaf37c7aa8f5356e21852b32aee24cf3976d103",
+      "qwen9-reasoning-summary.json": "dd34a00618122ceec32767bf64e16ac0e656d4e321eca94c266006ee23dffd09",
+      "qwen9-semantic-failures.json": "0408e422aeefc79568d630783e549c0aee84a549c31b6b73cac95babfd0f40ee",
+      "learning-implementation.json": "3bd5c13aa10e83365ec536d604f9ba00930963b5a0fa3cd25a4de36484396123",
+      "learning-sandbox-results.json": "5e0fdd42d7d0511eaea1ba26c22c1eaf9b647b7746cd1b9ab54e8fe3b19e1b8b",
+      "release-secret-package-audit.json": "f7debafadacd08ae8bc8c50f686435a17fdeccf4ce6f44b7089858817053172c",
+      "feasibility.json": "1b5efdce9f1832062f3f72ed3e6b44f6ed4600b7e6c33f6a157e8447e56a8abc"
+    }
   },
-  "broader_scope_remaining": [
-    "Unattended sustained coding/browser sessions and sustained 32K/64K qualification",
-    "Completed matched MTP acceleration comparison",
-    "Autonomous improvement cycle and live matched skill benefit",
-    "Optional computer-control, office and image-generation modules"
-  ],
   "source_files": {
     ".gitignore": {
-      "sha256": "e5689e6419b10d78d5f25b65afd48474c588b3b9e65daf3bd0e35af6d2f33b9d",
-      "bytes": 182,
+      "sha256": "f659db701be72fcf83534972ac5dc6ed60d5cba370620f46b44bb4659f0b44b4",
+      "bytes": 207,
       "executable": false
     },
     "LICENSE": {
@@ -101,24 +179,29 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "9b60cde9adf3c849a9e3137d61cd87e8a570accb9b037077741bfc0ee0d0d71e",
-      "bytes": 14726,
+      "sha256": "69d019ded20435e3f962c12a829d43a6ae6a8973a8b1e8e9312c3d73296f174f",
+      "bytes": 15816,
       "executable": false
     },
     "RESULTS.json": {
-      "sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb",
-      "bytes": 18328,
+      "sha256": "0d61c220423f82a9668cbfc6c3a6267f4c62c03e2dd83e20ec0bec7a21461f53",
+      "bytes": 28440,
       "executable": false
     },
     "THIRD_PARTY_NOTICES.md": {
-      "sha256": "cffdc9b64889fd746bf7090563005ee0432c380541db2481d4d40f4962afd6f3",
-      "bytes": 1553,
+      "sha256": "a98410fd1341e601bb946e32afa87ed46bc3cd0d6f9d7e516804242457631c15",
+      "bytes": 3778,
       "executable": false
     },
     "bootstrap": {
       "sha256": "b8595db50b59bad1aa76b840ba7f1dc5e042b5dc835d64e26bb87b9081d44119",
       "bytes": 1484,
       "executable": true
+    },
+    "build_package.py": {
+      "sha256": "df3f56c3a4e328b50b3818d1be594bbe79ba4c925109ad88ea285f761c85607c",
+      "bytes": 4709,
+      "executable": false
     },
     "evals/README.md": {
       "sha256": "cf95bd5ff35a12433015a5d90a231febb1ea82fcdc247ab1a436c82a37251023",
@@ -235,14 +318,24 @@
       "bytes": 8349,
       "executable": false
     },
+    "install-kryn.py": {
+      "sha256": "d8e9ea61289763cc9d082cc4073e6835295e7b57a18a4294b45e7ab3ee010961",
+      "bytes": 10204,
+      "executable": false
+    },
+    "pyproject.toml": {
+      "sha256": "1b2a57916e8fa0907ef6a4fee4a8360005365857e6d5f1512c7118c6c1d6e784",
+      "bytes": 523,
+      "executable": false
+    },
     "setup/AGENTS.md": {
-      "sha256": "7a73c2ea22907bb6b62b42a27ad7adcf1aa490e9abdf0e4ad6bb66a6a5ba745f",
-      "bytes": 1720,
+      "sha256": "17a330d206fe27f4b147efc903661fdabc08694ff8f587836fd0834c0eb7ea54",
+      "bytes": 1796,
       "executable": false
     },
     "setup/accepted-profile.json": {
-      "sha256": "178e9306b2755927097b99fe34c52c43d20b9aea1bdf3579794d618ba2c9a85f",
-      "bytes": 1726,
+      "sha256": "667dfe2c0037804834e08b166c86e962406f85826959b6ac2ff3979907a7305a",
+      "bytes": 1449,
       "executable": false
     },
     "setup/browser-package-lock.json": {
@@ -251,8 +344,8 @@
       "executable": false
     },
     "setup/deploy_client.py": {
-      "sha256": "152777f8b497d225a8b7469165ad07d93609eaeed04c4364018cea717cd287d8",
-      "bytes": 7323,
+      "sha256": "9d50fd7bd1073ef247491b3ea5fe2673ffab8ea6d48d12bdc50481c36210bbc7",
+      "bytes": 9229,
       "executable": false
     },
     "setup/model-sha256.json": {
@@ -261,33 +354,68 @@
       "executable": false
     },
     "setup/opencode.template.json": {
-      "sha256": "74a6aef3f423dddf711d2b888a2930918448266ee9031247520edd92ef51c7bf",
-      "bytes": 12583,
+      "sha256": "3d09f0d1e770db6a04df6934d1c78c85669a253b453d7580ffb0078e22f29cb1",
+      "bytes": 14454,
       "executable": false
     },
     "setup/setup.py": {
-      "sha256": "3a850699bacf233555f28c4aded501e5cf5e5f9fc1f73a4b1c12adf7f8df797f",
-      "bytes": 25846,
+      "sha256": "d030334346194a535d02da587750e86de5295842cf59ac72e6bf4151db1eec6b",
+      "bytes": 27321,
       "executable": false
     },
     "setup/test_bootstrap.py": {
-      "sha256": "57167122921a239a0f5146447159805dcf61a290c5233abb292a91eb97c2f5ca",
-      "bytes": 6865,
+      "sha256": "659249468122f3e1fbcf04b835e39398f25258368e8828e8379cb94ee96b1f74",
+      "bytes": 6868,
       "executable": false
     },
     "setup/test_improvement.py": {
-      "sha256": "2df6358779a208dc12da911cab7b777e174502f23cd084eff2b036a553b06c17",
-      "bytes": 19680,
+      "sha256": "269b167c0cfa90ad08dbf22ffba7530c90eb1d38a073a7a14ec891e0cd610235",
+      "bytes": 19681,
       "executable": false
     },
     "setup/test_kryn_cli.py": {
-      "sha256": "cc49398901d562889d1e9531d782882f9abf33b9140e13c9afa0f7e8f60a8aa1",
-      "bytes": 22551,
+      "sha256": "7c8e6f8310862fbd6f07fe47a7e89f9c32da4eba33e7e61385230e08f15ae2df",
+      "bytes": 23739,
+      "executable": false
+    },
+    "setup/test_learning.py": {
+      "sha256": "4de6202c10c449b1b119e605adfff3a42c94bd9085a7e726cd9a8c8760aef76c",
+      "bytes": 23680,
+      "executable": false
+    },
+    "setup/test_owner_auth.py": {
+      "sha256": "b44814513cfa60cb8e6f15f21b9da41c28e0c26bce0ce42ed818a90c11cf972c",
+      "bytes": 3639,
+      "executable": false
+    },
+    "setup/test_package.py": {
+      "sha256": "a4d1276969f43e24a188bdc6dd0c897eb0588eca85c4242f3807b132c71fd850",
+      "bytes": 18486,
       "executable": false
     },
     "setup/test_setup.py": {
-      "sha256": "73397dbe6602b90e0ad007e9b0d2450c4512bf4adf8aa8edb9be214d4194f350",
-      "bytes": 72375,
+      "sha256": "1969f74bbe594a57e806cc31b3412db7a794780f778b70552a06e4651111b028",
+      "bytes": 74448,
+      "executable": false
+    },
+    "src/kryn/__init__.py": {
+      "sha256": "2124276c19e317cf115fc51854294b2269a02bb1bf3d36064de35ee3b50c4cb0",
+      "bytes": 104,
+      "executable": false
+    },
+    "src/kryn/__main__.py": {
+      "sha256": "3129adff95e0f38b87ab34cddfc27082c7892bcaec267ff5d40f160fdf55b44a",
+      "bytes": 61,
+      "executable": false
+    },
+    "src/kryn/cli.py": {
+      "sha256": "9a848c821ed92bf8fe674ea539da781d6a970e15e2f0f38a04c224bddee1f39f",
+      "bytes": 2215,
+      "executable": false
+    },
+    "src/kryn/installer.py": {
+      "sha256": "9976647e3b154a6d111c1a2922455ba5f7d27e1507224708141f2ebce7133c8b",
+      "bytes": 26361,
       "executable": false
     },
     "tools/browser_check.mjs": {
@@ -296,13 +424,13 @@
       "executable": false
     },
     "tools/context_probe.py": {
-      "sha256": "6a2593ba1db57572e8ff250e7b0089a5f1f7405962011cf0c2c8e845f3ca9ea2",
-      "bytes": 37568,
+      "sha256": "75269448b58c8cedb7b64e430500e8bb9c8969e29e3ad5e409776303a365de7e",
+      "bytes": 37688,
       "executable": false
     },
     "tools/improvement.py": {
-      "sha256": "8fd417eb41141571ccee2e3b9bcbc57b3801d76884a3788af58766d04c764a19",
-      "bytes": 44156,
+      "sha256": "6f80434d9bede1054ff4873acee6628a2949b0469528eb07204bc1369dcf42fd",
+      "bytes": 44441,
       "executable": false
     },
     "tools/inference-audit/package.json": {
@@ -320,9 +448,19 @@
       "bytes": 6438,
       "executable": false
     },
+    "tools/kryn_plugin.mjs": {
+      "sha256": "4f25cd684683d44b6f5d547ffe1e92cf4736e17ab79d4493f1cf995c94348e71",
+      "bytes": 17760,
+      "executable": false
+    },
+    "tools/learning.py": {
+      "sha256": "5ecda7579538809b09106a1d5947ad69348b76923b6dc07000b616bdc4f8f398",
+      "bytes": 56067,
+      "executable": false
+    },
     "tools/localai.py": {
-      "sha256": "93ce77625e0d2b32416a8f343cda4b08f4bf89308da44dabc061ad84d2a7cc18",
-      "bytes": 39548,
+      "sha256": "f5d33f1c2258400a9165f45f590858b1c90d02629f6055458abc2c07c3d62b1e",
+      "bytes": 42948,
       "executable": false
     },
     "tools/native-shell": {
@@ -331,8 +469,8 @@
       "executable": true
     },
     "tools/native_client.py": {
-      "sha256": "30e6f51682a44d5707dbdc6b25bc6cb73dbcdaa26c2708d41633aeca3dcebd26",
-      "bytes": 27724,
+      "sha256": "6317833d8caee09b53e3e32655a33e703e5ba0a44a1892f4948b64a8ee9ab9c9",
+      "bytes": 34256,
       "executable": false
     },
     "tools/native_lifecycle_probe.py": {
@@ -340,14 +478,24 @@
       "bytes": 52876,
       "executable": false
     },
+    "tools/owner_auth.py": {
+      "sha256": "2a3c015bf51a27d99484571002c6085fad4c6bf0be64b6b8f52262777bc61026",
+      "bytes": 5608,
+      "executable": false
+    },
     "tools/protocol_probe.py": {
-      "sha256": "6c06031889ed33b85794448ccffd6c9010476718315a46ee06dc055c88587e4f",
-      "bytes": 27458,
+      "sha256": "fd6515c4996811037756ef9e9e63d94fccd3d72f9572aece81a9db975fe2920c",
+      "bytes": 27324,
       "executable": false
     },
     "tools/run_native_trial.py": {
-      "sha256": "558f512830346556e6cb5c8050a9ee4357b80a07485dcaba8e76d61573278abf",
-      "bytes": 60389,
+      "sha256": "d27bf997b1f5f4764a99701f89db51b7ee5258ec5eac94c4d639ff3db5b2f9c2",
+      "bytes": 60372,
+      "executable": false
+    },
+    "tools/test_kryn_plugin.mjs": {
+      "sha256": "7245eae0f070ba19c757ca3b5e42571d818263ac4b6c57e034356dfb2f83d60b",
+      "bytes": 16471,
       "executable": false
     },
     "tools/test_lifecycle_guard.py": {
@@ -355,5 +503,385 @@
       "bytes": 16722,
       "executable": false
     }
-  }
+  },
+  "unresolved_mandatory_gates": [
+    "private_artifact_install",
+    "owner_authentication",
+    "runtime_daily_lifecycle",
+    "sustained_native_sessions",
+    "native_capabilities",
+    "managed_locality_and_permissions",
+    "background_isolation",
+    "automatic_learning_cycle",
+    "foreground_preemption_and_regression",
+    "quality_comparison",
+    "release_update_rollback"
+  ],
+  "historical": [
+    {
+      "snapshot": "kryn-2026-09-20-daily-q4",
+      "source_commit": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+      "original_file_sha256": "117d0d0a5f5f277749c5884f5a743d55ef9be1d646289bfd470db29f19106e42",
+      "preservation": "Entire previous manifest retained, including provenance and failures; not current-profile readiness.",
+      "manifest": {
+        "schema": 2,
+        "snapshot": "kryn-2026-09-20-daily-q4",
+        "release_status": "NOT_READY",
+        "daily_use_status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
+        "unresolved_mandatory_gates": [
+          "sustained_32k_context",
+          "completed_mtp_off_on_comparison",
+          "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+        ],
+        "created_utc": "2026-09-20T22:01:43.731697+00:00",
+        "scope": "Installed supervised local coding on the tested host, with interventions and limits recorded. Not a qualification of the older complete frontier/automation target.",
+        "immutable_scope": "The Git commit binds this manifest and its exact source hashes. Subsequent changes require another snapshot. No signature is implied.",
+        "previous_snapshot": {
+          "commit": "d0a3f6e81c7e664cfc69631885796c22083b486f",
+          "manifest_sha256": "d677dd9ece20ed5ce3489c943752a41df4cc3803d604ac2f0358c20407e7b928",
+          "release_status": "NOT_READY",
+          "closed_historical_release_window": {
+            "start_utc": "2026-09-20T19:54:29Z",
+            "deadline_utc": "2026-09-20T21:24:29Z"
+          }
+        },
+        "installed_client_release": "77b098cefea64a1b",
+        "tested_hardware": {
+          "chip": "Apple M4 Max",
+          "gpu_cores": 40,
+          "unified_memory_gib": 48,
+          "macos": "26.6.2",
+          "build": "25G83",
+          "qualification": "SUPERVISED_DAILY_CODING_WITH_RECORDED_INTERVENTIONS"
+        },
+        "qualified_hardware": [
+          {
+            "chip": "Apple M4 Max",
+            "gpu_cores": 40,
+            "unified_memory_gib": 48,
+            "macos": "26.6.2",
+            "build": "25G83",
+            "scope": "Recorded daily Q4 checks only; other applications and workloads affect headroom."
+          }
+        ],
+        "dependencies": {
+          "opencode": "2.0.10",
+          "omlx": "0.6.4",
+          "omlx_app_build": 2529,
+          "node": "22.23.1 arm64",
+          "chrome": "153.0.8010.53",
+          "playwright_mcp": "0.0.82",
+          "search": "Exa remote keyless MCP; service not version-pinned"
+        },
+        "model_profile": {
+          "model": "Qwen3.8-27B-oQ4e-mtp",
+          "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
+          "memory_gib": 24,
+          "context": 16384,
+          "max_output": 4096,
+          "mtp": false,
+          "idle_unload_seconds": 300
+        },
+        "runtime_profile": {
+          "memory_limit_gib": 24,
+          "ssd_prefix_cache_gib": 8,
+          "hot_cache_gib": 0,
+          "concurrent_generation_limit": 1,
+          "default_agent": "build",
+          "default_variant": "fast",
+          "compaction_buffer": 2048,
+          "compaction_keep": 2048,
+          "mtp_on": false,
+          "idle_timeout_seconds": 300
+        },
+        "runtime_settings_at_adoption_sha256": {
+          "config": "bd63e7ac08c6d1637de00ad19e96418c432f5355c4f9e9fc5bfb57d0c9ff7d08",
+          "profile": "178e9306b2755927097b99fe34c52c43d20b9aea1bdf3579794d618ba2c9a85f",
+          "global": "39756883534ef1108c4887fe5598ba8b7f32f8c9231facd539b2f9a8527f5e26",
+          "model": "e3f6433b72a15819d9f3c2d21e4f2bd68a3f5911b9d5684646b4df3f10277df2"
+        },
+        "runtime_settings_hash_scope": "Hashes of exact owned settings immediately after adoption. Native runtime bookkeeping can later rewrite model_dir; configured profile compatibility is independently checked by doctor.",
+        "evaluation": {
+          "suite": "2026-09-19.2",
+          "frozen_manifest_sha256": "186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6",
+          "offline_tests": 97,
+          "live_improvement_qualified": false,
+          "results_sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb"
+        },
+        "broader_scope_remaining": [
+          "Unattended sustained coding/browser sessions and sustained 32K/64K qualification",
+          "Completed matched MTP acceleration comparison",
+          "Autonomous improvement cycle and live matched skill benefit",
+          "Optional computer-control, office and image-generation modules"
+        ],
+        "source_files": {
+          ".gitignore": {
+            "sha256": "e5689e6419b10d78d5f25b65afd48474c588b3b9e65daf3bd0e35af6d2f33b9d",
+            "bytes": 182,
+            "executable": false
+          },
+          "LICENSE": {
+            "sha256": "7513abc6ea5801ae789abe04e7c116e81906c2f63996cd0baff67ceb7b7f49a7",
+            "bytes": 1074,
+            "executable": false
+          },
+          "README.md": {
+            "sha256": "9b60cde9adf3c849a9e3137d61cd87e8a570accb9b037077741bfc0ee0d0d71e",
+            "bytes": 14726,
+            "executable": false
+          },
+          "RESULTS.json": {
+            "sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb",
+            "bytes": 18328,
+            "executable": false
+          },
+          "THIRD_PARTY_NOTICES.md": {
+            "sha256": "cffdc9b64889fd746bf7090563005ee0432c380541db2481d4d40f4962afd6f3",
+            "bytes": 1553,
+            "executable": false
+          },
+          "bootstrap": {
+            "sha256": "b8595db50b59bad1aa76b840ba7f1dc5e042b5dc835d64e26bb87b9081d44119",
+            "bytes": 1484,
+            "executable": true
+          },
+          "evals/README.md": {
+            "sha256": "cf95bd5ff35a12433015a5d90a231febb1ea82fcdc247ab1a436c82a37251023",
+            "bytes": 9560,
+            "executable": false
+          },
+          "evals/bench.py": {
+            "sha256": "b5a693b9e0758ed645676f14253eadc1fb7985e082b68d95346911fbcb843e03",
+            "bytes": 15552,
+            "executable": false
+          },
+          "evals/checks.py": {
+            "sha256": "cda93b02753efc0a19743e443c7dc75e3a6049a885b9c7d84293138ab6f8b8cd",
+            "bytes": 10443,
+            "executable": false
+          },
+          "evals/fixture/AGENTS.md": {
+            "sha256": "65d8b8cb86ff9fef212b8252101fecd20c3b68489b3c2597d900595ff3b9f90d",
+            "bytes": 447,
+            "executable": false
+          },
+          "evals/fixture/README.md": {
+            "sha256": "178bd64dc0eaaa44d815875694980ee67fe7bd0f571ff3d8f5460b65b5f7ce62",
+            "bytes": 906,
+            "executable": false
+          },
+          "evals/fixture/data/entries.csv": {
+            "sha256": "2e1fb02500185013019a8ea737a2c765679bf6849638745fbf078e896b566624",
+            "bytes": 91,
+            "executable": false
+          },
+          "evals/fixture/taskboard_lite/__init__.py": {
+            "sha256": "37ed4a783f1173fad39d9f35fc784f78f2f76286a31e17603455b01adf7eb585",
+            "bytes": 75,
+            "executable": false
+          },
+          "evals/fixture/taskboard_lite/cli.py": {
+            "sha256": "fb4d05656f4819c0ea01fd9efbf874a5f20899c86a766344e428da5b89b937f5",
+            "bytes": 804,
+            "executable": false
+          },
+          "evals/fixture/taskboard_lite/parse.py": {
+            "sha256": "ab3957d707f9d992d2d7dc2902c54d2e63ee3125edadd0381aa7745d3d1d308b",
+            "bytes": 928,
+            "executable": false
+          },
+          "evals/fixture/taskboard_lite/report.py": {
+            "sha256": "f154b8d73f41ab5141e8519760db28e39edf538c7d668368bd05f70e71a22b96",
+            "bytes": 545,
+            "executable": false
+          },
+          "evals/fixture/taskboard_lite/server.py": {
+            "sha256": "8d812934b2eae97fb1187e33f230d86519a69207e87de2ee347da974314a40aa",
+            "bytes": 4083,
+            "executable": false
+          },
+          "evals/fixture/taskboard_lite/store.py": {
+            "sha256": "b497227421851101a93a99c5de9aa0feabbc6ef2575cc619dd2a137709627187",
+            "bytes": 1080,
+            "executable": false
+          },
+          "evals/fixture/test_existing.py": {
+            "sha256": "a38fcdb095b470b05b43fb2061221ddf109de1bb69d66d6998b21ba235868fa4",
+            "bytes": 577,
+            "executable": false
+          },
+          "evals/fixture/web/app.js": {
+            "sha256": "0d2a4cbfc17683f22b020d5aa28feaf67135495f0efa4ccb44425e34582acd80",
+            "bytes": 1894,
+            "executable": false
+          },
+          "evals/fixture/web/index.html": {
+            "sha256": "0a17a657166675d1d1708109aab14e536e50f8017f25c6a73f2098dcf5ddf5ed",
+            "bytes": 941,
+            "executable": false
+          },
+          "evals/fixture/web/style.css": {
+            "sha256": "f482a373ddbe6950c8611261de7ea8026a0bdcd98d2efbbc33d358e30c6dc824",
+            "bytes": 421,
+            "executable": false
+          },
+          "evals/frozen.sha256.json": {
+            "sha256": "186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6",
+            "bytes": 2146,
+            "executable": false
+          },
+          "evals/references/comprehension.json": {
+            "sha256": "f0a65e55a0fd8181d01917499bd82f8188e3604d0802053b9c46b14d00544339",
+            "bytes": 476,
+            "executable": false
+          },
+          "evals/references/omlx-release.json": {
+            "sha256": "f6beac02b7afddd4712f97eb58a9be46e77eaa334c1d51e5e7125645398c4f6a",
+            "bytes": 7310,
+            "executable": false
+          },
+          "evals/references/playwright-mcp-release.json": {
+            "sha256": "47531739c6890772aba211f4ee23bb4f3847bd0e9a5242559186b3df279d8731",
+            "bytes": 4242,
+            "executable": false
+          },
+          "evals/references/research-oracle.json": {
+            "sha256": "dc0d97c4651925b9ae4c440fb23475f9223531ac0139bbbd1cf20ef5b47e6324",
+            "bytes": 342,
+            "executable": false
+          },
+          "evals/references/vision.png": {
+            "sha256": "60288123d9db0b463d1bd846440f32c856a261327f91bf3aaaf48bb6610253eb",
+            "bytes": 1462,
+            "executable": false
+          },
+          "evals/tasks.json": {
+            "sha256": "6175d1bdd822f0bfec867b8c2653bfce316c4292de3de6ecf23326d19607a009",
+            "bytes": 8349,
+            "executable": false
+          },
+          "setup/AGENTS.md": {
+            "sha256": "7a73c2ea22907bb6b62b42a27ad7adcf1aa490e9abdf0e4ad6bb66a6a5ba745f",
+            "bytes": 1720,
+            "executable": false
+          },
+          "setup/accepted-profile.json": {
+            "sha256": "178e9306b2755927097b99fe34c52c43d20b9aea1bdf3579794d618ba2c9a85f",
+            "bytes": 1726,
+            "executable": false
+          },
+          "setup/browser-package-lock.json": {
+            "sha256": "f3fb7b7a16f0cc7d40cfc0047d1d0dbe4679c2a210bae9e9bceac4d05c12f9b6",
+            "bytes": 1722,
+            "executable": false
+          },
+          "setup/deploy_client.py": {
+            "sha256": "152777f8b497d225a8b7469165ad07d93609eaeed04c4364018cea717cd287d8",
+            "bytes": 7323,
+            "executable": false
+          },
+          "setup/model-sha256.json": {
+            "sha256": "210f1b3d87aea35fe32576337a210384f552cf7d85a0379f4c8e80e84ceab809",
+            "bytes": 533,
+            "executable": false
+          },
+          "setup/opencode.template.json": {
+            "sha256": "74a6aef3f423dddf711d2b888a2930918448266ee9031247520edd92ef51c7bf",
+            "bytes": 12583,
+            "executable": false
+          },
+          "setup/setup.py": {
+            "sha256": "3a850699bacf233555f28c4aded501e5cf5e5f9fc1f73a4b1c12adf7f8df797f",
+            "bytes": 25846,
+            "executable": false
+          },
+          "setup/test_bootstrap.py": {
+            "sha256": "57167122921a239a0f5146447159805dcf61a290c5233abb292a91eb97c2f5ca",
+            "bytes": 6865,
+            "executable": false
+          },
+          "setup/test_improvement.py": {
+            "sha256": "2df6358779a208dc12da911cab7b777e174502f23cd084eff2b036a553b06c17",
+            "bytes": 19680,
+            "executable": false
+          },
+          "setup/test_kryn_cli.py": {
+            "sha256": "cc49398901d562889d1e9531d782882f9abf33b9140e13c9afa0f7e8f60a8aa1",
+            "bytes": 22551,
+            "executable": false
+          },
+          "setup/test_setup.py": {
+            "sha256": "73397dbe6602b90e0ad007e9b0d2450c4512bf4adf8aa8edb9be214d4194f350",
+            "bytes": 72375,
+            "executable": false
+          },
+          "tools/browser_check.mjs": {
+            "sha256": "5a636b2dc786a07bfd388f403eba145e8f9e6f6362319bfb966b442afdc69841",
+            "bytes": 15936,
+            "executable": false
+          },
+          "tools/context_probe.py": {
+            "sha256": "6a2593ba1db57572e8ff250e7b0089a5f1f7405962011cf0c2c8e845f3ca9ea2",
+            "bytes": 37568,
+            "executable": false
+          },
+          "tools/improvement.py": {
+            "sha256": "8fd417eb41141571ccee2e3b9bcbc57b3801d76884a3788af58766d04c764a19",
+            "bytes": 44156,
+            "executable": false
+          },
+          "tools/inference-audit/package.json": {
+            "sha256": "a90fc33418afa2b9cbf4768524b021135b965ecdf993457505bfae3ac44a8428",
+            "bytes": 33,
+            "executable": false
+          },
+          "tools/inference-audit/server.js": {
+            "sha256": "5647fbfd400103e7433e36f56ae48f921425ad8a9c3edce93e4e17f65fe61ee8",
+            "bytes": 5900,
+            "executable": false
+          },
+          "tools/inference-audit/server.test.js": {
+            "sha256": "42746aa298ba43e3b3aa2cc42c5cc91c97ee192747063af4524166d14f656129",
+            "bytes": 6438,
+            "executable": false
+          },
+          "tools/localai.py": {
+            "sha256": "93ce77625e0d2b32416a8f343cda4b08f4bf89308da44dabc061ad84d2a7cc18",
+            "bytes": 39548,
+            "executable": false
+          },
+          "tools/native-shell": {
+            "sha256": "f4ffce271cbe56591314183d3f13c733c942506716d75964918a271653fa8d16",
+            "bytes": 140,
+            "executable": true
+          },
+          "tools/native_client.py": {
+            "sha256": "30e6f51682a44d5707dbdc6b25bc6cb73dbcdaa26c2708d41633aeca3dcebd26",
+            "bytes": 27724,
+            "executable": false
+          },
+          "tools/native_lifecycle_probe.py": {
+            "sha256": "3b738d8cade4096ba9e0dda3a132cffa92a0db1bfe0b4af9cf1f1a34f6bbf8c9",
+            "bytes": 52876,
+            "executable": false
+          },
+          "tools/protocol_probe.py": {
+            "sha256": "6c06031889ed33b85794448ccffd6c9010476718315a46ee06dc055c88587e4f",
+            "bytes": 27458,
+            "executable": false
+          },
+          "tools/run_native_trial.py": {
+            "sha256": "558f512830346556e6cb5c8050a9ee4357b80a07485dcaba8e76d61573278abf",
+            "bytes": 60389,
+            "executable": false
+          },
+          "tools/test_lifecycle_guard.py": {
+            "sha256": "4230b2d97049d076112d7a85fd767fadc3290a172685c73fe00a324260976a23",
+            "bytes": 16722,
+            "executable": false
+          }
+        }
+      }
+    }
+  ]
 }

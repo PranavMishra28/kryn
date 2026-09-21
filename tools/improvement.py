@@ -282,7 +282,8 @@ def status(state_dir):
     return {"schema": 1, "outcome_records": count, "retention_days": RETENTION_DAYS,
             "max_records": MAX_RECORDS, "retention_trigger": "next_outcome_write",
             "repeated_failures": observations(root),
-            "promotion_enabled": True, "promotion_requires_objective_receipt": True,
+            "promotion_enabled": False, "promotion_requires_objective_receipt": True,
+            "production_promotion": "retired; the bounded learning worker owns the new isolated evaluation gate",
             "autonomous_reflection": False, "active_skill": active is not None,
             "background_inference": False, "complete_improvement_loop": False,
             "blocker": "live_matched_skill_evaluation_and_autonomous_cycle_not_qualified",
@@ -678,6 +679,8 @@ def promote(state_dir, candidate_id, evidence=None):
     if not isinstance(evidence, _Evaluation) or evidence not in _ISSUED:
         raise RuntimeError("Promotion unavailable: an objective evaluator-issued receipt is required")
     verified = _ISSUED[evidence]
+    if not verified["report"]["simulation"]:
+        raise RuntimeError("Legacy production promotion is retired: use the bounded learning worker and isolated evaluator")
     with _lock(state_dir, "foreground.lock", True, True) as root:
         if verified["root"] != root or verified["candidate_id"] != candidate_id or not verified["report"]["accepted"]:
             raise RuntimeError("Rejected or foreign evaluation")

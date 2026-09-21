@@ -17,3 +17,6 @@ artifacts/
 *.fail-next
 trace.zip
 .DS_Store
+dist/
+build/
+*.egg-info/

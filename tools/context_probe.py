@@ -113,7 +113,8 @@ def resources(base):
 def telemetry_ready(sample):
     processes = sample.get("listener_processes", [])
     return (type(sample.get("swap_used_bytes")) is int and sample["swap_used_bytes"] >= 0
-            and sample.get("pressure_level") in {1, 2, 4, 6}
+            and type(sample.get("pressure_level")) is int
+            and sample["pressure_level"] in {1, 2, 4, 6}
             and len(processes) == 1 and type(processes[0].get("pid")) is int
             and any(type(processes[0].get(k)) is int and processes[0][k] > 0
                     for k in ("phys_footprint_bytes", "rss_bytes")))
@@ -481,6 +482,7 @@ def self_check():
     green = {"swap_used_bytes": 100, "pressure_level": 1, "listener_processes": [
         {"pid": 1, "rss_bytes": 100, "phys_footprint_bytes": 120}]}
     warning = {**green, "pressure_level": 2}
+    assert not telemetry_ready({**green, "pressure_level": True})
     guard = ResourceGuard(50, 2)
     assert guard.check(green) is None and guard.check(warning) is None
     assert guard.check(green) is None and guard.check(warning) is None

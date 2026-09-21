@@ -15,6 +15,7 @@ For browser work, inspect current state before acting. Ask before messages, purc
 publishing or private uploads unless the current user request authorizes the action.
 Never claim a test or tool ran if it did not. Distinguish verified results from guesses.
 Before long-context handoff, preserve goal, checks, results, failed approaches and next
-step in a concise TASK.md when edits are authorized. Keep durable facts in AGENTS.md.
+step in the native checkpoint. Reconcile it with current Git/files when resuming.
+Do not create or overwrite user-owned task records merely to keep a checkpoint.
 For office/PDF tasks, extract text or render pages first, then inspect generated outputs.
 Create reusable skills only for a repeated successful workflow, not speculative machinery.

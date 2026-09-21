@@ -90,7 +90,7 @@ class BootstrapChecks(unittest.TestCase):
         home = self.root / 'fake account'
         root = home / 'Library/Application Support/LocalAI'
         profile = setup.load_profile(SOURCE/'setup/accepted-profile.json')
-        self.assertEqual(profile['repository'], 'gcoli/Qwen3.8-27B-oQ4e-mtp')
+        self.assertEqual(profile['repository'], 'mlx-community/Qwen3.5-9B-6bit')
         setup.write_same(root/'install-profile.json', setup.encode(profile))
         setup.write_same(root/'xdg/config/opencode/opencode.json', setup.encode(setup.render(root, home/'node', profile)))
         marker = root/profile['model_parent']/setup.model_id(profile)/'.localai-download.json'

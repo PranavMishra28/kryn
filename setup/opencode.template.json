@@ -1,5 +1,5 @@
 {
-  "model": "local/qwen#fast",
+  "model": "local/qwen#think",
   "update": "disable",
   "share": "disabled",
   "providers": {
@@ -10,7 +10,7 @@
       },
       "models": {
         "qwen": {
-          "modelID": "Qwen3.8-27B-oQ4e-mtp",
+          "modelID": "Qwen3.5-9B-6bit",
           "compatibility": {
             "reasoningField": "reasoning_content",
             "maxTokensField": "max_tokens"
@@ -38,39 +38,15 @@
             "presence_penalty": 0.0,
             "repetition_penalty": 1.0,
             "chat_template_kwargs": {
-              "enable_thinking": true,
-              "preserve_thinking": true,
-              "reasoning_effort": "xhigh"
+              "enable_thinking": true
             }
           },
           "variants": [
             {
-              "id": "low",
+              "id": "think",
               "body": {
                 "chat_template_kwargs": {
-                  "reasoning_effort": "low"
-                }
-              },
-              "settings": {
-                "baseURL": "http://127.0.0.1:8000/v1"
-              }
-            },
-            {
-              "id": "medium",
-              "body": {
-                "chat_template_kwargs": {
-                  "reasoning_effort": "medium"
-                }
-              },
-              "settings": {
-                "baseURL": "http://127.0.0.1:8000/v1"
-              }
-            },
-            {
-              "id": "xhigh",
-              "body": {
-                "chat_template_kwargs": {
-                  "reasoning_effort": "xhigh"
+                  "enable_thinking": true
                 }
               },
               "settings": {
@@ -96,7 +72,7 @@
             "baseURL": "http://127.0.0.1:8000/v1"
           },
           "package": "@opencode/ai/providers/openai-compatible",
-          "name": "Qwen3.8-27B-oQ4e-mtp"
+          "name": "Qwen3.5-9B-6bit"
         }
       }
     }
@@ -200,7 +176,7 @@
   },
   "agents": {
     "build": {
-      "model": "local/qwen#fast",
+      "model": "local/qwen#think",
       "permissions": [
         {
           "action": "subagent",
@@ -275,7 +251,7 @@
       ]
     },
     "explore": {
-      "model": "local/qwen#medium",
+      "model": "local/qwen#think",
       "permissions": [
         {
           "action": "browser_*",
@@ -320,7 +296,7 @@
       ]
     },
     "general": {
-      "model": "local/qwen#medium",
+      "model": "local/qwen#think",
       "permissions": [
         {
           "action": "browser_*",
@@ -347,7 +323,7 @@
     "reviewer": {
       "mode": "all",
       "description": "Read-only review for correctness and regressions",
-      "model": "local/qwen#xhigh",
+      "model": "local/qwen#think",
       "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
       "permissions": [
         {
@@ -393,11 +369,101 @@
       ]
     },
     "title": {
-      "model": "local/qwen#low"
+      "model": "local/qwen#fast"
     },
     "browse": {
       "model": "local/qwen#fast",
       "permissions": [
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "browser_browser_navigate",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_navigate_back",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_snapshot",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "browser_browser_click",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_type",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_fill_form",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_press_key",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_select_option",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_wait_for",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_take_screenshot",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "browser_browser_console_messages",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "browser_browser_network_requests",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "browser_browser_resize",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_tabs",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_handle_dialog",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_file_upload",
+          "resource": "*",
+          "effect": "ask"
+        },
+        {
+          "action": "browser_browser_close",
+          "resource": "*",
+          "effect": "ask"
+        },
         {
           "action": "subagent",
           "resource": "explore",
@@ -431,31 +497,31 @@
   "commands": {
     "research": {
       "agent": "plan",
-      "model": "local/qwen#xhigh",
+      "model": "local/qwen#think",
       "subagent": false,
       "template": "Research $ARGUMENTS using keyless search and webfetch. Open primary sources, compare evidence and dates, cite URLs, and identify uncertainty. If search is rate limited, stop and explain; do not authenticate a paid provider."
     },
     "review": {
       "agent": "reviewer",
-      "model": "local/qwen#xhigh",
+      "model": "local/qwen#think",
       "subagent": false,
       "template": "Review current changes for correctness, regressions and missing tests. Report actionable findings with file and line references. Do not edit files. $ARGUMENTS"
     },
     "deliver": {
       "agent": "build",
-      "model": "local/qwen#xhigh",
+      "model": "local/qwen#think",
       "subagent": false,
       "template": "Deliver $ARGUMENTS. First state the smallest useful milestone and observable acceptance criteria. Inspect relevant code and tests, implement that milestone, run suitable checks, and inspect the real output or browser UI when relevant. Preserve user changes. After two repair cycles without new evidence, summarize the blocker and next hypothesis instead of repeating the same attempt. Use one foreground child at a time. Report actual results and unresolved risks; never weaken tests just to pass. This is a workflow instruction, not an enforced execution budget."
     },
     "handoff": {
       "agent": "build",
-      "model": "local/qwen#medium",
+      "model": "local/qwen#think",
       "subagent": false,
-      "template": "Write or update a concise TASK.md when file edits are authorized; otherwise return the handoff in chat. Include goal, acceptance checks, completed work, actual test results, failed approaches, current blocker and single next step. Preserve useful existing content and omit secrets. Do not change implementation files. $ARGUMENTS"
+      "template": "Return a concise handoff with objective, acceptance checks, completed work, actual check commands/results, unresolved failures, disproven approaches, and the next action. Reconcile with current Git and files. Use the native checkpoint; do not overwrite user-owned task files. $ARGUMENTS"
     },
     "audit": {
       "agent": "build",
-      "model": "local/qwen#xhigh",
+      "model": "local/qwen#think",
       "subagent": false,
       "template": "Audit $ARGUMENTS without modifying files. Launch exactly one new reviewer subagent with background:false and no sessionID. Supply acceptance criteria, changed paths, the raw diff and actual check results. Wait for its result. Report actionable findings with file and line references; do not fix them."
     }
@@ -465,7 +531,21 @@
     "-opencode.provider.*",
     "opencode.config.policy",
     "-opencode.config.compatibility",
-    "-opencode.browser"
+    "-opencode.browser",
+    {
+      "package": "__KRYN_PLUGIN__",
+      "options": {
+        "stateDir": "__KRYN_STATE__",
+        "profileId": "__PROFILE_ID__",
+        "modelID": "Qwen3.5-9B-6bit",
+        "champion": {
+          "revision": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "instructions": ""
+        },
+        "observe": true,
+        "workflowScope": null
+      }
+    }
   ],
   "experimental": {
     "policies": [

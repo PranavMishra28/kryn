@@ -199,7 +199,7 @@ class ImprovementTests(unittest.TestCase):
         report = improvement.status(self.state)
         self.assertFalse(report["background_inference"])
         self.assertFalse(report["raw_traces_collected"])
-        self.assertTrue(report["promotion_enabled"])
+        self.assertFalse(report["promotion_enabled"])
         self.assertTrue(report["promotion_requires_objective_receipt"])
 
     def pairs(self, *, baseline_fixed=False):

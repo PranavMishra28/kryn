@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kryn"
+version = "0.1.0"
+description = "Private OpenCode-based local AI product for the qualified Apple Silicon profile"
+requires-python = ">=3.13"
+license = "MIT"
+authors = [{name = "Pranav Mishra"}]
+classifiers = ["Private :: Do Not Upload", "Operating System :: MacOS :: MacOS X", "Programming Language :: Python :: 3"]
+
+[project.scripts]
+kryn = "kryn.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kryn"]

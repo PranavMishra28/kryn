@@ -166,18 +166,34 @@ def extract_cli(archive, destination):
                 target.chmod(0o700)
 
 
+def plugin_files():
+    return {"server.js": (HERE.parent / "tools/kryn_plugin.mjs").read_bytes(),
+            "package.json": b'{"private":true,"type":"module"}\n'}
+
+
+def plugin_directory(root):
+    return root / "plugins" / hashlib.sha256(plugin_files()["server.js"]).hexdigest()[:16]
+
+
 def render(root, node, profile=None):
+    profile = profile or load_profile()
     def substitute(value):
         if isinstance(value, str):
-            return value.replace("__ROOT__", str(root)).replace("__NODE__", str(node))
+            return (value.replace("__ROOT__", str(root)).replace("__NODE__", str(node))
+                    .replace("__KRYN_PLUGIN__", str(plugin_directory(root)))
+                    .replace("__KRYN_STATE__", str(root / "state/improvement"))
+                    .replace("__PROFILE_ID__", hashlib.sha256(encode(profile).encode()).hexdigest()))
         if isinstance(value, list):
             return [substitute(item) for item in value]
         if isinstance(value, dict):
             return {key: substitute(item) for key, item in value.items()}
         return value
     cfg = substitute(json.loads((HERE / "opencode.template.json").read_text()))
-    selected = model_id(profile or load_profile())
+    selected = model_id(profile)
     cfg["providers"]["local"]["models"]["qwen"].update(modelID=selected, name=selected)
+    for item in cfg["plugins"]:
+        if isinstance(item, dict):
+            item["options"]["modelID"] = selected
     return cfg
 
 
@@ -202,13 +218,14 @@ def runtime_settings(root, profile=None):
             "memory_guard_custom_ceiling_gb": profile["memory_gib"], "soft_threshold": 0.85, "hard_threshold": 0.95},
             "idle_timeout": {"idle_timeout_seconds": 300},
             "cache": {"enabled": True, "hot_cache_only": False,
-            "ssd_cache_max_size": "8GB", "hot_cache_max_size": "0"},
+            "ssd_cache_max_size": "8GB", "hot_cache_max_size": "0",
+            "ssd_cache_dir": str(root / "cache" / profile["revision"])},
             "huggingface": {"hf_cache_enabled": False}}
 
 
 def model_settings(profile=None):
     return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 16384, "max_tokens": 4096,
-            "enable_thinking": True, "preserve_thinking": True, "mtp_enabled": False,
+            "enable_thinking": True, "mtp_enabled": False,
             "mtp_num_draft_tokens": 3, "vlm_mtp_enabled": False, "dflash_enabled": False,
             "specprefill_enabled": False, "turboquant_kv_enabled": False,
             "qwen35_ane_prefill_enabled": False, "is_pinned": False, "is_default": True}}}
@@ -256,12 +273,11 @@ def install_app(root, env):
     for path in (destination, receipt, temporary):
         if any(part.is_symlink() for part in (path, *path.parents)):
             raise RuntimeError(f"Refusing symlink app destination: {path}")
-    if destination.exists():
+    reuse = destination.exists()
+    if reuse and receipt.is_file():
         expected = {"path": str(destination), "dmg_sha256": DMG_SHA,
                     "bundle_sha256": bundle_digest(destination)}
         check_destination(receipt, encode(expected))
-        if not receipt.is_file():
-            raise RuntimeError("Preserving existing app without this installer's receipt")
         run(["/usr/bin/codesign", "--verify", "--deep", "--strict", destination], env)
         return
     if temporary.exists() or receipt.exists():
@@ -283,16 +299,26 @@ def install_app(root, env):
         entities = plistlib.loads(result)["system-entities"]
         devices = {item["dev-entry"] for item in entities if item.get("dev-entry")}
         whole = {device for device in devices if re.fullmatch(r"/dev/disk[0-9]+", device)}
+        physical = {item["dev-entry"] for item in entities
+                    if item.get("content-hint") == "GUID_partition_scheme" and item.get("dev-entry") in whole}
+        owners = physical or whole
         mounted = [Path(item["mount-point"]) for item in entities if item.get("mount-point")]
-        if len(whole) != 1 or devices & existing_devices or mounted != [mount]:
+        if len(owners) != 1 or devices & existing_devices or mounted != [mount]:
             raise RuntimeError("Could not prove a new private app-image attachment; leaving returned devices untouched")
-        owned_device = whole.pop()
+        owned_device = owners.pop()  # APFS also returns a synthesized whole-disk device.
         app = mount / "oMLX.app"
         info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
         if (info.get("CFBundleIdentifier"), info.get("CFBundleShortVersionString")) != ("app.omlx", "0.6.4"):
             raise RuntimeError("Unexpected app identity/version")
         run(["/usr/bin/codesign", "--verify", "--deep", "--strict", app], env)
         expected_hash = bundle_digest(app)
+        if reuse:
+            if not destination.is_dir() or bundle_digest(destination) != expected_hash:
+                raise RuntimeError("Preserving existing app that differs from the verified publisher artifact")
+            run(["/usr/bin/codesign", "--verify", "--deep", "--strict", destination], env)
+            write_same(receipt, encode({"path": str(destination), "dmg_sha256": DMG_SHA,
+                                       "bundle_sha256": expected_hash}))
+            return
         destination.parent.mkdir(parents=True, exist_ok=True)
         run(["/usr/bin/ditto", "--rsrc", "--extattr", app, temporary], env)
         if bundle_digest(temporary) != expected_hash or destination.exists():
@@ -377,8 +403,9 @@ def main():
         if not required.exists():
             raise RuntimeError(f"Required existing dependency missing: {required}; install prerequisites or pass --uv/--node")
     node_info = subprocess.check_output([str(node), "-p", "process.arch + ' ' + process.versions.node"], text=True).strip()
-    if node_info != "arm64 22.23.1":
-        raise RuntimeError("Use the reviewed native ARM64 Node 22.23.1 (select its path with --node)")
+    node_match = re.fullmatch(r"arm64 22\.(\d+)\.(\d+)", node_info)
+    if not node_match or int(node_match[1]) < 23:
+        raise RuntimeError("Use native ARM64 Node 22.23 or later in the 22.x compatibility line")
     for part in [root, *root.parents]:
         if part.is_symlink():
             raise RuntimeError(f"Refusing symlink install root: {part}")

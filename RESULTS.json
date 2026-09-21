@@ -1,475 +1,625 @@
 {
-  "schema": 2,
+  "schema": 3,
+  "snapshot": "kryn-0.1.0-product-candidate",
+  "created_utc": "2026-09-21T01:19:28.648463+00:00",
   "release_status": "NOT_READY",
-  "scope": "The installed application is ready for supervised local coding on the tested Mac. The complete original release remains NOT_READY because required autonomous improvement and broader performance qualification are incomplete. Historical failures and mandatory requirements have not been relabeled or waived.",
-  "historical_release_sha256": "788f71d05d90f656c3a2e0f3b35fb7f17acff8a8a89020c6cf020e92a4ff70ef",
-  "historical_q5_release": {
-    "schema": 1,
-    "release_status": "NOT_READY",
-    "scope": "Preserved historical model trials, offline source checks and actual installed command startup/outage/recovery checks. Final representative model workflow did not pass; no frontier parity.",
+  "daily_use_status": "NOT_READY_PENDING_CURRENT_PROFILE_QUALIFICATION",
+  "scope": "Current product qualification skeleton. PENDING is not a failure claim or a pass. Prior candidate/runtime results are not final installed release acceptance.",
+  "current": {
+    "source_base_commit": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+    "source_dirty": true,
+    "final_source_commit": null,
+    "package_version": "0.1.0",
     "profile": {
-      "model": "Qwen3.8-27B-oQ5e-mtp",
-      "revision": "fb646bbfbdce4caa26fa2262f0ef7953708f66d9",
-      "memory_gib": 30,
-      "context": 32768,
-      "max_output": 8192,
-      "mtp": false
+      "repository": "mlx-community/Qwen3.5-9B-6bit",
+      "revision": "76fe4065e622cf34990d3c13ef80ec8531c9a0f7",
+      "profile_sha256": "667dfe2c0037804834e08b166c86e962406f85826959b6ac2ff3979907a7305a",
+      "memory_ceiling_gib": 14,
+      "context": 16384,
+      "max_output": 4096
     },
-    "endurance": {
-      "status": "PASS_WITH_ONE_PREDISPATCH_OPERATOR_RECOVERY",
-      "turns": 10,
-      "evidence_sha256": "11182bc94a23e8cae0893897711c161befe12a229ff6e2c15d2f4676cf62d521",
-      "sum_model_turn_driver_wall_seconds": 744.212,
-      "including_failed_predispatch_driver_wall_seconds": 744.742,
-      "operator_launch_failures": 1,
-      "operator_recoveries": 1,
-      "model_trajectory_interventions": 0,
-      "tool_calls": 45,
-      "tool_errors": 0,
-      "resource_samples": 363,
-      "max_swap_growth_bytes": 0,
-      "max_sampled_phys_footprint_bytes": 28151234688,
-      "generations": {
-        "primary": 54,
-        "compaction": 1
+    "gates": {
+      "private_artifact_install": {
+        "status": "PENDING",
+        "requirement": "Clean tagged private wheel installed without a source checkout; exact documented download/checksum/install route and dependency integrity verified.",
+        "evidence": []
+      },
+      "owner_authentication": {
+        "status": "PENDING",
+        "requirement": "Verified stable owner and Keychain credentials; other/no/expired identity refusal, bounded offline session, logout and network failures verified.",
+        "evidence": []
+      },
+      "runtime_daily_lifecycle": {
+        "status": "PENDING",
+        "requirement": "Five installed-profile cold starts, warm use, cancellation/restart, verified idle/stop and no owned orphan processes.",
+        "evidence": []
+      },
+      "sustained_native_sessions": {
+        "status": "PENDING",
+        "requirement": "Two representative sustained native sessions under ordinary desktop load; pressure/swap, compaction, recovery, latency and interventions recorded.",
+        "evidence": []
+      },
+      "native_capabilities": {
+        "status": "PENDING",
+        "requirement": "Actual edits/tests/Git/Plan/Reviewer/Browse/research/image and task-resume checks from the final installed artifact.",
+        "evidence": []
+      },
+      "managed_locality_and_permissions": {
+        "status": "PENDING",
+        "requirement": "Every managed role/helper remains local; read-only mutation guards and startup/in-flight outage recovery verified.",
+        "evidence": []
+      },
+      "background_isolation": {
+        "status": "PENDING",
+        "requirement": "Whole-process background read/write/network and protected-grader canaries pass from the installed wheel.",
+        "evidence": []
+      },
+      "automatic_learning_cycle": {
+        "status": "PENDING",
+        "requirement": "Meaningful native event triggers bounded reflection and real repeated paired/protected trials with evidence-derived accept/reject/defer; immutable session pins verified.",
+        "evidence": []
+      },
+      "foreground_preemption_and_regression": {
+        "status": "PENDING",
+        "requirement": "Actual active worker yields safely within admission bound; matching scoped regression monitoring and rollback verified.",
+        "evidence": []
+      },
+      "quality_comparison": {
+        "status": "PENDING",
+        "requirement": "Matched stock-OpenCode baseline on varied unseen tasks with frozen grader controls; failures, interventions, correctness and latency separated.",
+        "evidence": []
+      },
+      "release_update_rollback": {
+        "status": "PENDING",
+        "requirement": "Exact tagged update, interrupted activation recovery and rollback preserve previous owned state and reject changed/unowned files.",
+        "evidence": []
       }
     },
-    "stages": [
-      {
-        "case": "coding_tests",
-        "status": "COMPLETED_28_TESTS_WITH_REPORTING_LIMITATIONS",
-        "evidence_sha256": "0a8908c18e88ea43aa65809ae0f3265760f9db05f033d829e934d21a3bc27c1b",
-        "wall_seconds": 834.018,
-        "completed": true,
-        "model_completed": true,
-        "operator_interventions": 0,
-        "automatic_interventions": 0,
-        "sample_count": 401,
-        "max_sampled_listener_phys_footprint_bytes": 28292104488,
-        "swap_peak_growth_bytes": 0,
-        "actual_tests_passed": 28
+    "measurements": {},
+    "private_evidence_refs": {
+      "qwen9-runtime-summary.json": {
+        "sha256": "b13e04eda25f2f27ffa0fda6edaf37c7aa8f5356e21852b32aee24cf3976d103",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       },
-      {
-        "case": "mobile_browser",
-        "status": "COMPLETED_SCOPED_MOBILE_RECOVERY",
-        "evidence_sha256": "cd9cafe3b64aa9cb0999752d8009a33d432bdaf42aedd76583f33b6aef5df59b",
-        "wall_seconds": 698.952,
-        "completed": true,
-        "model_completed": true,
-        "operator_interventions": 0,
-        "automatic_interventions": 0,
-        "sample_count": 336,
-        "max_sampled_listener_phys_footprint_bytes": 28786376880,
-        "swap_peak_growth_bytes": 0
+      "qwen9-reasoning-summary.json": {
+        "sha256": "dd34a00618122ceec32767bf64e16ac0e656d4e321eca94c266006ee23dffd09",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       },
-      {
-        "case": "desktop_30_gib",
-        "status": "FAIL_RESOURCE_ABORT",
-        "evidence_sha256": "d3f8d695d4e9f9f013df8a8063d7d52656589a8b1073245c0e381d399e939fd7",
-        "wall_seconds": 391.248,
-        "completed": false,
-        "model_completed": false,
-        "operator_interventions": 0,
-        "automatic_interventions": 1,
-        "sample_count": 188,
-        "max_sampled_listener_phys_footprint_bytes": 29019177064,
-        "swap_peak_growth_bytes": 0
+      "qwen9-semantic-failures.json": {
+        "sha256": "0408e422aeefc79568d630783e549c0aee84a549c31b6b73cac95babfd0f40ee",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       },
-      {
-        "case": "desktop_28_gib",
-        "status": "FAIL_RESOURCE_ABORT",
-        "evidence_sha256": "0f1658f8c9cb601d129c4e9b6827bb568d0d2be0292ae130ece8f7b86454dbc2",
-        "wall_seconds": 688.897,
-        "completed": false,
-        "model_completed": false,
-        "operator_interventions": 0,
-        "automatic_interventions": 1,
-        "sample_count": 331,
-        "max_sampled_listener_phys_footprint_bytes": 28532391872,
-        "swap_peak_growth_bytes": 0
+      "learning-implementation.json": {
+        "sha256": "3bd5c13aa10e83365ec536d604f9ba00930963b5a0fa3cd25a4de36484396123",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       },
-      {
-        "case": "mtp_off_initial",
-        "status": "FAIL_RESOURCE_ABORT_NO_ON",
-        "condition": "Original observed foreground workload",
-        "evidence_sha256": "840fe32dac375cf379fd3c81407bf7dcfbd7ce49962e0d378270604c047b0b8d",
-        "wall_seconds": 14.833,
-        "tools": 0,
-        "swap_growth_bytes": 0,
-        "automatic_interventions": 1
+      "learning-sandbox-results.json": {
+        "sha256": "5e0fdd42d7d0511eaea1ba26c22c1eaf9b647b7746cd1b9ab54e8fe3b19e1b8b",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       },
-      {
-        "case": "mtp_off_reduced_foreground",
-        "status": "FAIL_RESOURCE_ABORT_NO_ON",
-        "condition": "After the user reduced foreground applications",
-        "evidence_sha256": "c9979fa111867399f65f53c5ada16cd2cc45dbd9449e1bdb955e087953a21ab3",
-        "wall_seconds": 16.175,
-        "tools": 0,
-        "swap_growth_bytes": 0,
-        "automatic_interventions": 1
-      }
-    ],
-    "mtp_comparison": {
-      "status": "INCOMPLETE",
-      "on_runs": 0,
-      "acceleration_claim": false,
-      "scope": "Two OFF arms aborted under separate host conditions. No completed OFF/ON comparison."
-    },
-    "offline_validation": {
-      "status": "PASS",
-      "tests": 97,
-      "wall_seconds": 6.533,
-      "scope": "Copied-kit installer/launcher/bootstrap/improvement controls, with fake accounts and deterministic frozen-checker fixtures. No runtime, browser or model inference.",
-      "test_receipt_sha256": "8db686291349c48bb7cd23e2d61a97ed33518d36ef14094e29449a3244b94946",
-      "source_set_sha256": "828285956d2d82944f3c9ed190c5d34660541467cc95a573afd356e46966af3b",
-      "code_unchanged_since_tested_copy": true
-    },
-    "limits": [
-      "Sampled memory peaks are process-wide and may miss transients.",
-      "A completed driver does not establish every task criterion.",
-      "No sustained desktop-browser profile is qualified; both tested ceilings encountered pressure.",
-      "Historical failures are preserved; no safe cache/native tier or MTP acceleration is claimed.",
-      "Actual UI recovery sent no model prompt and does not close representative-workflow acceptance.",
-      "Controlled503 outage tested startup metadata unavailability, not an in-flight model stream.",
-      "Continuous improvement is not active; tested manual controls are not a complete automated loop."
-    ],
-    "installed_product_checks": {
-      "fresh_product_start": {
-        "evidence_sha256": "b6d8d095cecda1ae5ac6da01415653f4bedd219ccd3cc21bf5ee8e42caca0201",
-        "status": "FAIL_RESOURCE_PREFLIGHT",
-        "wall_seconds": 1.977,
-        "pressure_warning_samples": 1,
-        "swap_growth_bytes": 0,
-        "tui_started": false,
-        "prompt_sent": false,
-        "seed_files_unchanged": 16
+      "release-secret-package-audit.json": {
+        "sha256": "f7debafadacd08ae8bc8c50f686435a17fdeccf4ce6f44b7089858817053172c",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       },
-      "local_outage": {
-        "evidence_sha256": "8bdf7619bd47f991442214b5b4433b44344e3516ac72c380ecbdb85180ea8905",
-        "status": "PASS_SCOPED_PREINFERENCE_FAILURE",
-        "actual_commands": [
-          "kryn",
-          "kryn bench"
-        ],
-        "http_requests": {
-          "GET_health": 2,
-          "POST": 0
-        },
-        "autostart_prevented": true,
-        "test_listener_removed": true
-      },
-      "ui_recovery": {
-        "evidence_sha256": "174d7816d739ade0f0eef5063cddc4266ed03c5364fea12907ed26d474fda191",
-        "status": "PASS_NO_GENERATION_UI_RECOVERY",
-        "autostart_verified": true,
-        "normal_tui_exit_code": 0,
-        "recorded_task_status": "incomplete",
-        "model_requests": 0,
-        "known_client_pids_gone": 4,
-        "seed_files_unchanged": 16
-      },
-      "deep_doctor": {
-        "evidence_sha256": "049572975ecb8b4f9650a356d58f13bb3f5aeccb9fa9c57a8afbb74b87ae5c09",
-        "status": "PASS",
-        "wall_seconds": 10.176,
-        "model_files_rehashed": 17,
-        "local_inventory": "pass",
-        "browser_mcp": "connected",
-        "search_mcp": "connected"
-      },
-      "final_state": {
-        "evidence_sha256": "e020b822d129b0cc513994628d8172cdb59d18a80f11d5f71754978667b6b4c7",
-        "status": "STOPPED_RECOVERABLE",
-        "runtime_port_closed": true,
-        "pressure_level": 1,
-        "backup_bytes_verified": true,
-        "unrelated_ollama_preserved": true
-      },
-      "independent_product_review": {
-        "evidence_sha256": "afaf41a84a6516fe2e7128c5f4c5b518f1f3d5cbd65115e9c96fedc538333683"
+      "feasibility.json": {
+        "sha256": "1b5efdce9f1832062f3f72ed3e6b44f6ed4600b7e6c33f6a157e8447e56a8abc",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Historical candidate observation; final gate status below remains pending"
       }
     },
-    "continuous_improvement": {
-      "status": "INCOMPLETE",
-      "outcome_collection_verified": true,
-      "unsupported_proposal_refusal_verified": true,
-      "fixture_promotion_rejection_rollback_verified": true,
-      "active_skill": false,
-      "autonomous_reflection": false,
-      "automatic_evaluation_dispatch": false,
-      "continuous_regression_monitoring": false,
-      "foreground_preemption": false,
-      "live_matched_skill_benefit": false
+    "quality_claims": {
+      "frontier_parity": false,
+      "matched_stock_harness_uplift": false,
+      "general_learning_benefit": false,
+      "scoped_learning_benefit": false,
+      "official_external_benchmark_score": null
     },
-    "unresolved_mandatory_gates": [
-      "cold_load_and_sustained_resource_stability",
-      "fresh_representative_daily_coding_browser_review_handoff",
-      "sustained_32k_context",
-      "completed_mtp_off_on_comparison",
-      "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+    "scope_limits": [
+      "Current learning activation is limited to explicit disposable JSON CLI sessions; ordinary sessions remain baseline.",
+      "No sustained 32K/64K or completed matched MTP acceleration qualification.",
+      "No integrated macOS computer control, office suite or local image-generation module."
     ]
   },
-  "daily_q4": {
-    "profile": {
-      "model": "Qwen3.8-27B-oQ4e-mtp",
-      "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
-      "memory_gib": 24,
-      "context": 16384,
-      "max_output": 4096,
-      "mtp": false,
-      "idle_unload_seconds": 300
-    },
-    "installed_client_release": "77b098cefea64a1b",
-    "coding": {
-      "status": "PASS_CODING_WITH_OPERATOR_COMPLETION_FOLLOWUP",
-      "client_release": "77b098cefea64a1b",
-      "model": "Qwen3.8-27B-oQ4e-mtp",
-      "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
-      "actual_installed_native_interface": true,
-      "cold_model_start": true,
-      "base_model_local_only": true,
-      "wall_seconds": 857.034,
-      "user_messages": 2,
-      "tool_calls": 36,
-      "tool_counts": {
-        "read": 21,
-        "shell": 7,
-        "grep": 1,
-        "edit": 6,
-        "write": 1
-      },
-      "tool_errors": 2,
-      "ordinary_permissions_allowed": 6,
-      "ordinary_permissions_declined": 1,
-      "completion_followups": 1,
-      "source_edits_by_operator": 0,
-      "compactions": 2,
-      "final_native_finish": "stop",
-      "initial_test_failures": 2,
-      "final_project_tests_passed": 20,
-      "frozen_grader_checks_passed": 3,
-      "frozen_grade": "PASS",
-      "original_tests_and_data_preserved": true,
-      "resources": {
-        "samples": 402,
-        "pressure_levels": [
-          1
-        ],
-        "additional_swap_bytes": 0,
-        "max_sampled_runtime_phys_footprint_bytes": 22193387200
-      },
-      "limitations": [
-        "Two incorrect new test expectations repaired by the local model; original checks were not changed.",
-        "One edit mismatch recovered by rereading the file.",
-        "Second native compaction led to repeated exploration after tests had passed.",
-        "An operator attempted to type a completion follow-up while a permission dialog appeared, declining its redundant diff request. This interrupted the first turn; a correctly submitted follow-up then completed with a useful final handoff.",
-        "The follow-up reran the tests; this is supervised daily coding, not unattended long-run qualification."
-      ],
-      "evidence_sha256": {
-        "coding-complete.json": "75a542446f60a164225065d231f238c9833e5536d85f071bd25db8cc77cde861",
-        "independent-project-tests.txt": "b32160f6a87ea4000f4f73d4f802dc729ca69305fc56a074f6978a0d3e309001",
-        "grade.json": "06f614fcb90b9ba0fcd8587af9b6cae2ee686f3c3c2cdbee658eee692b77e9fd"
-      }
-    },
-    "offline_tests": {
-      "tests": 97,
-      "status": "PASS",
-      "receipt_sha256": "66ea27d4856e864c29e3cc328e1e809716f422255ef745123ff13826cedf0673"
-    },
-    "download": {
-      "files": 16,
-      "all_pinned_hashes_verified": true,
-      "receipt_sha256": "3143078988247209ba1e80f3180d12f0b843faafd340fb9676577c8a7def69e0"
-    },
-    "migration": {
-      "backup_preserved": true,
-      "release_integrity_verified": true,
-      "receipt_sha256": "af88c0eaef914cdeeae72daa9276c6da50a9f1be8c12f42dce60da0fc8c944e0"
-    },
-    "pending": [],
-    "read_only_review": {
-      "status": "COMPLETED_READ_ONLY_WITH_REVIEW_QUALITY_LIMITS",
-      "fresh_session": true,
-      "model": {
-        "id": "qwen",
-        "providerID": "local",
-        "variant": "xhigh"
-      },
-      "wall_seconds": 558.525,
-      "native_finish": "stop",
-      "tools": 17,
-      "tool_names": [
-        "glob",
-        "read"
-      ],
-      "project_hashes_unchanged": true,
-      "compactions": 1,
-      "operator_diff_followups": 1,
-      "finding_assessment": "Empty-string filter is an explicitly supplied unmatched project; not a specification failure. Reviewer repeated-query claim is wrong: server takes first value; live response confirmed alpha=2/75. No blocking correctness finding established.",
-      "actual_http_responses": {
-        "project=": {
-          "count": 0,
-          "minutes": 0
-        },
-        "project=alpha&project=beta": {
-          "count": 2,
-          "minutes": 75
-        }
-      },
-      "review_is_not_test_execution": true,
-      "raw_evidence_sha256": "df97707db6b121a3ace9ee76daa5ea31e7419e5585a4ed24ae50e074a24e26a8"
-    },
-    "deep_doctor": {
-      "exit_code": 0,
-      "wall_seconds": 14.312,
-      "metadata_only": true,
-      "model_files_rehashed": 16,
-      "model_integrity": "Every pinned model file SHA256 verified.",
-      "local_routing": "pass",
-      "mcp": {
-        "browser": {
-          "status": "connected"
-        },
-        "search": {
-          "status": "connected"
-        }
-      }
-    },
-    "browser": {
-      "status": "PASS_SCOPED_BROWSER_SEARCH_AND_IMAGE_READ",
-      "wall_seconds": 667.562,
-      "model": {
-        "id": "qwen",
-        "providerID": "local",
-        "variant": "fast"
-      },
-      "tool_calls": 8,
-      "tool_counts": {
-        "browser_browser_navigate": 1,
-        "search_web_search_exa": 1,
-        "browser_browser_snapshot": 1,
-        "browser_browser_console_messages": 1,
-        "browser_browser_type": 1,
-        "browser_browser_click": 1,
-        "browser_browser_take_screenshot": 1,
-        "read": 1
-      },
-      "tool_errors": 0,
-      "ordinary_permissions_allowed": 4,
-      "completion_followups": 0,
-      "compactions": 5,
-      "native_finish": "stop",
-      "source_and_seed_data_unchanged": true,
-      "filtered_visible_rows": [
-        "t1: alpha, 30 minutes, 2026-09-01",
-        "t3: alpha, 45 minutes, 2026-09-02"
-      ],
-      "screenshot_independently_viewed": true,
-      "screenshot_sha256": "1cfe50953e6176d1ab59d9bfee5313e38d53bdb47e0cfd31598d4acd8412303c",
-      "image_read_content_types": [
-        "text",
-        "file"
-      ],
-      "public_search_queries": 1,
-      "public_search_result": "https://docs.python.org/3/library/unittest.html",
-      "first_prompt_tokens": 11694,
-      "limitations": [
-        "A single desktop filter workflow; not sustained browser, narrow viewport or error/retry qualification.",
-        "Frequent compaction and permission waits contribute to wall time.",
-        "Screenshot generation and native image reading were exercised; this is not a broad vision benchmark."
-      ],
-      "raw_evidence_sha256": "24bf951b21c6e746739902c07796f38a5e10ec5e55e31a04136938f6fe96f35d"
-    },
-    "client_cleanup": {
-      "normal_tui_exit_code": 0,
-      "owned_client_pids_gone": 10,
-      "fixture_http_port_closed": true,
-      "project_temporary_dirs_remaining": []
-    },
-    "status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
-    "cold_restart_protocol": {
-      "runtime_was_stopped_and_port_closed": true,
-      "actual_command": "kryn bench",
-      "exit_code": 0,
-      "bench_wall_seconds": 33.584,
-      "stop_and_bench_wall_seconds": 34.433,
-      "new_owned_run_entries": [
-        "protocol-20260920T215507Z-b737fc14"
-      ],
-      "status": "PASS_COLD_START_PROTOCOL",
-      "protocol_pass": true,
-      "cases": {
-        "health": true,
-        "models": true,
-        "stream-fast": true,
-        "stream-low": true,
-        "stream-medium": true,
-        "stream-xhigh": true,
-        "tool-first": true,
-        "tool-replay": true
-      },
-      "metrics_sha256": "20c97b2f3fc0ff0b6116e22859e363e40a0838f7660911c6bc7aeecfc189f5cd",
-      "receipt_sha256": "77de945df3d44bf64d6dbc7018a312a8422c703e126692fad08ced33a150d2c4"
-    },
-    "ui_restart": {
-      "normal_exit_code": 0,
-      "observed_agent": "build",
-      "observed_model": "Qwen3.8-27B-oQ4e-mtp",
-      "observed_variant": "fast",
-      "connected_mcp_services": 2,
-      "native_session_history_reopened": true,
-      "trace_sha256": "b1bd91bc9b882c47d26e835b3ae0f9c7041dbf7c2c28b0dd5ed72a71f3bdbf7c",
-      "receipt_sha256": "ffa62995d1491ac1029ac656c112f42c3d385cb14779a072515477c081659ed6"
-    },
-    "resource_observation": {
-      "utc": "2026-09-20T21:56:41.332313+00:00",
-      "samples": 1225,
-      "pressure_levels": [
-        1
-      ],
-      "warning_samples": 0,
-      "max_swap_growth_bytes": 0,
-      "peak_runtime_footprint_bytes": 22738286464,
-      "wall_seconds": 2617.812,
-      "observational_only": true,
-      "receipt_sha256": "1e9179489cbf894b813a4b1ee0d2584677052904320de6ea70c4206f8939c459"
-    },
-    "final_state": {
-      "model": "Qwen3.8-27B-oQ4e-mtp",
-      "healthy": true,
-      "max_model_len": 16384,
-      "memory_limit_gib": 24,
-      "active_requests": 0,
-      "waiting_requests": 0,
-      "version": "0.6.4",
-      "status": "HEALTHY_IDLE",
-      "active_skill": false,
-      "background_inference": false,
-      "receipt_sha256": "7c0bead482b4407ba448ab7f7bd3f332cbefb84cdc54712165dbb15c71178386"
-    }
-  },
-  "broader_scope_remaining": [
-    "Unattended sustained coding/browser sessions and sustained 32K/64K qualification",
-    "Completed matched MTP acceleration comparison",
-    "Autonomous improvement cycle and live matched skill benefit",
-    "Optional computer-control, office and image-generation modules"
-  ],
-  "continuous_improvement": {
-    "status": "INCOMPLETE",
-    "outcome_collection_verified": true,
-    "unsupported_proposal_refusal_verified": true,
-    "fixture_promotion_rejection_rollback_verified": true,
-    "active_skill": false,
-    "autonomous_reflection": false,
-    "automatic_evaluation_dispatch": false,
-    "continuous_regression_monitoring": false,
-    "foreground_preemption": false,
-    "live_matched_skill_benefit": false
-  },
-  "daily_use_status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
   "unresolved_mandatory_gates": [
-    "sustained_32k_context",
-    "completed_mtp_off_on_comparison",
-    "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+    "private_artifact_install",
+    "owner_authentication",
+    "runtime_daily_lifecycle",
+    "sustained_native_sessions",
+    "native_capabilities",
+    "managed_locality_and_permissions",
+    "background_isolation",
+    "automatic_learning_cycle",
+    "foreground_preemption_and_regression",
+    "quality_comparison",
+    "release_update_rollback"
+  ],
+  "historical": [
+    {
+      "snapshot": "kryn-2026-09-20-daily-q4",
+      "source_commit": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+      "original_file_sha256": "1ab37dd4555197d755fe52fa1d4a831ada53af561421fb5b3a94552ddd2ce9eb",
+      "preservation": "Entire previous RESULTS object retained, including nested earlier failures; not current-profile readiness.",
+      "results": {
+        "schema": 2,
+        "release_status": "NOT_READY",
+        "scope": "The installed application is ready for supervised local coding on the tested Mac. The complete original release remains NOT_READY because required autonomous improvement and broader performance qualification are incomplete. Historical failures and mandatory requirements have not been relabeled or waived.",
+        "historical_release_sha256": "788f71d05d90f656c3a2e0f3b35fb7f17acff8a8a89020c6cf020e92a4ff70ef",
+        "historical_q5_release": {
+          "schema": 1,
+          "release_status": "NOT_READY",
+          "scope": "Preserved historical model trials, offline source checks and actual installed command startup/outage/recovery checks. Final representative model workflow did not pass; no frontier parity.",
+          "profile": {
+            "model": "Qwen3.8-27B-oQ5e-mtp",
+            "revision": "fb646bbfbdce4caa26fa2262f0ef7953708f66d9",
+            "memory_gib": 30,
+            "context": 32768,
+            "max_output": 8192,
+            "mtp": false
+          },
+          "endurance": {
+            "status": "PASS_WITH_ONE_PREDISPATCH_OPERATOR_RECOVERY",
+            "turns": 10,
+            "evidence_sha256": "11182bc94a23e8cae0893897711c161befe12a229ff6e2c15d2f4676cf62d521",
+            "sum_model_turn_driver_wall_seconds": 744.212,
+            "including_failed_predispatch_driver_wall_seconds": 744.742,
+            "operator_launch_failures": 1,
+            "operator_recoveries": 1,
+            "model_trajectory_interventions": 0,
+            "tool_calls": 45,
+            "tool_errors": 0,
+            "resource_samples": 363,
+            "max_swap_growth_bytes": 0,
+            "max_sampled_phys_footprint_bytes": 28151234688,
+            "generations": {
+              "primary": 54,
+              "compaction": 1
+            }
+          },
+          "stages": [
+            {
+              "case": "coding_tests",
+              "status": "COMPLETED_28_TESTS_WITH_REPORTING_LIMITATIONS",
+              "evidence_sha256": "0a8908c18e88ea43aa65809ae0f3265760f9db05f033d829e934d21a3bc27c1b",
+              "wall_seconds": 834.018,
+              "completed": true,
+              "model_completed": true,
+              "operator_interventions": 0,
+              "automatic_interventions": 0,
+              "sample_count": 401,
+              "max_sampled_listener_phys_footprint_bytes": 28292104488,
+              "swap_peak_growth_bytes": 0,
+              "actual_tests_passed": 28
+            },
+            {
+              "case": "mobile_browser",
+              "status": "COMPLETED_SCOPED_MOBILE_RECOVERY",
+              "evidence_sha256": "cd9cafe3b64aa9cb0999752d8009a33d432bdaf42aedd76583f33b6aef5df59b",
+              "wall_seconds": 698.952,
+              "completed": true,
+              "model_completed": true,
+              "operator_interventions": 0,
+              "automatic_interventions": 0,
+              "sample_count": 336,
+              "max_sampled_listener_phys_footprint_bytes": 28786376880,
+              "swap_peak_growth_bytes": 0
+            },
+            {
+              "case": "desktop_30_gib",
+              "status": "FAIL_RESOURCE_ABORT",
+              "evidence_sha256": "d3f8d695d4e9f9f013df8a8063d7d52656589a8b1073245c0e381d399e939fd7",
+              "wall_seconds": 391.248,
+              "completed": false,
+              "model_completed": false,
+              "operator_interventions": 0,
+              "automatic_interventions": 1,
+              "sample_count": 188,
+              "max_sampled_listener_phys_footprint_bytes": 29019177064,
+              "swap_peak_growth_bytes": 0
+            },
+            {
+              "case": "desktop_28_gib",
+              "status": "FAIL_RESOURCE_ABORT",
+              "evidence_sha256": "0f1658f8c9cb601d129c4e9b6827bb568d0d2be0292ae130ece8f7b86454dbc2",
+              "wall_seconds": 688.897,
+              "completed": false,
+              "model_completed": false,
+              "operator_interventions": 0,
+              "automatic_interventions": 1,
+              "sample_count": 331,
+              "max_sampled_listener_phys_footprint_bytes": 28532391872,
+              "swap_peak_growth_bytes": 0
+            },
+            {
+              "case": "mtp_off_initial",
+              "status": "FAIL_RESOURCE_ABORT_NO_ON",
+              "condition": "Original observed foreground workload",
+              "evidence_sha256": "840fe32dac375cf379fd3c81407bf7dcfbd7ce49962e0d378270604c047b0b8d",
+              "wall_seconds": 14.833,
+              "tools": 0,
+              "swap_growth_bytes": 0,
+              "automatic_interventions": 1
+            },
+            {
+              "case": "mtp_off_reduced_foreground",
+              "status": "FAIL_RESOURCE_ABORT_NO_ON",
+              "condition": "After the user reduced foreground applications",
+              "evidence_sha256": "c9979fa111867399f65f53c5ada16cd2cc45dbd9449e1bdb955e087953a21ab3",
+              "wall_seconds": 16.175,
+              "tools": 0,
+              "swap_growth_bytes": 0,
+              "automatic_interventions": 1
+            }
+          ],
+          "mtp_comparison": {
+            "status": "INCOMPLETE",
+            "on_runs": 0,
+            "acceleration_claim": false,
+            "scope": "Two OFF arms aborted under separate host conditions. No completed OFF/ON comparison."
+          },
+          "offline_validation": {
+            "status": "PASS",
+            "tests": 97,
+            "wall_seconds": 6.533,
+            "scope": "Copied-kit installer/launcher/bootstrap/improvement controls, with fake accounts and deterministic frozen-checker fixtures. No runtime, browser or model inference.",
+            "test_receipt_sha256": "8db686291349c48bb7cd23e2d61a97ed33518d36ef14094e29449a3244b94946",
+            "source_set_sha256": "828285956d2d82944f3c9ed190c5d34660541467cc95a573afd356e46966af3b",
+            "code_unchanged_since_tested_copy": true
+          },
+          "limits": [
+            "Sampled memory peaks are process-wide and may miss transients.",
+            "A completed driver does not establish every task criterion.",
+            "No sustained desktop-browser profile is qualified; both tested ceilings encountered pressure.",
+            "Historical failures are preserved; no safe cache/native tier or MTP acceleration is claimed.",
+            "Actual UI recovery sent no model prompt and does not close representative-workflow acceptance.",
+            "Controlled503 outage tested startup metadata unavailability, not an in-flight model stream.",
+            "Continuous improvement is not active; tested manual controls are not a complete automated loop."
+          ],
+          "installed_product_checks": {
+            "fresh_product_start": {
+              "evidence_sha256": "b6d8d095cecda1ae5ac6da01415653f4bedd219ccd3cc21bf5ee8e42caca0201",
+              "status": "FAIL_RESOURCE_PREFLIGHT",
+              "wall_seconds": 1.977,
+              "pressure_warning_samples": 1,
+              "swap_growth_bytes": 0,
+              "tui_started": false,
+              "prompt_sent": false,
+              "seed_files_unchanged": 16
+            },
+            "local_outage": {
+              "evidence_sha256": "8bdf7619bd47f991442214b5b4433b44344e3516ac72c380ecbdb85180ea8905",
+              "status": "PASS_SCOPED_PREINFERENCE_FAILURE",
+              "actual_commands": [
+                "kryn",
+                "kryn bench"
+              ],
+              "http_requests": {
+                "GET_health": 2,
+                "POST": 0
+              },
+              "autostart_prevented": true,
+              "test_listener_removed": true
+            },
+            "ui_recovery": {
+              "evidence_sha256": "174d7816d739ade0f0eef5063cddc4266ed03c5364fea12907ed26d474fda191",
+              "status": "PASS_NO_GENERATION_UI_RECOVERY",
+              "autostart_verified": true,
+              "normal_tui_exit_code": 0,
+              "recorded_task_status": "incomplete",
+              "model_requests": 0,
+              "known_client_pids_gone": 4,
+              "seed_files_unchanged": 16
+            },
+            "deep_doctor": {
+              "evidence_sha256": "049572975ecb8b4f9650a356d58f13bb3f5aeccb9fa9c57a8afbb74b87ae5c09",
+              "status": "PASS",
+              "wall_seconds": 10.176,
+              "model_files_rehashed": 17,
+              "local_inventory": "pass",
+              "browser_mcp": "connected",
+              "search_mcp": "connected"
+            },
+            "final_state": {
+              "evidence_sha256": "e020b822d129b0cc513994628d8172cdb59d18a80f11d5f71754978667b6b4c7",
+              "status": "STOPPED_RECOVERABLE",
+              "runtime_port_closed": true,
+              "pressure_level": 1,
+              "backup_bytes_verified": true,
+              "unrelated_ollama_preserved": true
+            },
+            "independent_product_review": {
+              "evidence_sha256": "afaf41a84a6516fe2e7128c5f4c5b518f1f3d5cbd65115e9c96fedc538333683"
+            }
+          },
+          "continuous_improvement": {
+            "status": "INCOMPLETE",
+            "outcome_collection_verified": true,
+            "unsupported_proposal_refusal_verified": true,
+            "fixture_promotion_rejection_rollback_verified": true,
+            "active_skill": false,
+            "autonomous_reflection": false,
+            "automatic_evaluation_dispatch": false,
+            "continuous_regression_monitoring": false,
+            "foreground_preemption": false,
+            "live_matched_skill_benefit": false
+          },
+          "unresolved_mandatory_gates": [
+            "cold_load_and_sustained_resource_stability",
+            "fresh_representative_daily_coding_browser_review_handoff",
+            "sustained_32k_context",
+            "completed_mtp_off_on_comparison",
+            "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+          ]
+        },
+        "daily_q4": {
+          "profile": {
+            "model": "Qwen3.8-27B-oQ4e-mtp",
+            "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
+            "memory_gib": 24,
+            "context": 16384,
+            "max_output": 4096,
+            "mtp": false,
+            "idle_unload_seconds": 300
+          },
+          "installed_client_release": "77b098cefea64a1b",
+          "coding": {
+            "status": "PASS_CODING_WITH_OPERATOR_COMPLETION_FOLLOWUP",
+            "client_release": "77b098cefea64a1b",
+            "model": "Qwen3.8-27B-oQ4e-mtp",
+            "revision": "c41ed507f1b16320942a1e9ce340e71d2692dee2",
+            "actual_installed_native_interface": true,
+            "cold_model_start": true,
+            "base_model_local_only": true,
+            "wall_seconds": 857.034,
+            "user_messages": 2,
+            "tool_calls": 36,
+            "tool_counts": {
+              "read": 21,
+              "shell": 7,
+              "grep": 1,
+              "edit": 6,
+              "write": 1
+            },
+            "tool_errors": 2,
+            "ordinary_permissions_allowed": 6,
+            "ordinary_permissions_declined": 1,
+            "completion_followups": 1,
+            "source_edits_by_operator": 0,
+            "compactions": 2,
+            "final_native_finish": "stop",
+            "initial_test_failures": 2,
+            "final_project_tests_passed": 20,
+            "frozen_grader_checks_passed": 3,
+            "frozen_grade": "PASS",
+            "original_tests_and_data_preserved": true,
+            "resources": {
+              "samples": 402,
+              "pressure_levels": [
+                1
+              ],
+              "additional_swap_bytes": 0,
+              "max_sampled_runtime_phys_footprint_bytes": 22193387200
+            },
+            "limitations": [
+              "Two incorrect new test expectations repaired by the local model; original checks were not changed.",
+              "One edit mismatch recovered by rereading the file.",
+              "Second native compaction led to repeated exploration after tests had passed.",
+              "An operator attempted to type a completion follow-up while a permission dialog appeared, declining its redundant diff request. This interrupted the first turn; a correctly submitted follow-up then completed with a useful final handoff.",
+              "The follow-up reran the tests; this is supervised daily coding, not unattended long-run qualification."
+            ],
+            "evidence_sha256": {
+              "coding-complete.json": "75a542446f60a164225065d231f238c9833e5536d85f071bd25db8cc77cde861",
+              "independent-project-tests.txt": "b32160f6a87ea4000f4f73d4f802dc729ca69305fc56a074f6978a0d3e309001",
+              "grade.json": "06f614fcb90b9ba0fcd8587af9b6cae2ee686f3c3c2cdbee658eee692b77e9fd"
+            }
+          },
+          "offline_tests": {
+            "tests": 97,
+            "status": "PASS",
+            "receipt_sha256": "66ea27d4856e864c29e3cc328e1e809716f422255ef745123ff13826cedf0673"
+          },
+          "download": {
+            "files": 16,
+            "all_pinned_hashes_verified": true,
+            "receipt_sha256": "3143078988247209ba1e80f3180d12f0b843faafd340fb9676577c8a7def69e0"
+          },
+          "migration": {
+            "backup_preserved": true,
+            "release_integrity_verified": true,
+            "receipt_sha256": "af88c0eaef914cdeeae72daa9276c6da50a9f1be8c12f42dce60da0fc8c944e0"
+          },
+          "pending": [],
+          "read_only_review": {
+            "status": "COMPLETED_READ_ONLY_WITH_REVIEW_QUALITY_LIMITS",
+            "fresh_session": true,
+            "model": {
+              "id": "qwen",
+              "providerID": "local",
+              "variant": "xhigh"
+            },
+            "wall_seconds": 558.525,
+            "native_finish": "stop",
+            "tools": 17,
+            "tool_names": [
+              "glob",
+              "read"
+            ],
+            "project_hashes_unchanged": true,
+            "compactions": 1,
+            "operator_diff_followups": 1,
+            "finding_assessment": "Empty-string filter is an explicitly supplied unmatched project; not a specification failure. Reviewer repeated-query claim is wrong: server takes first value; live response confirmed alpha=2/75. No blocking correctness finding established.",
+            "actual_http_responses": {
+              "project=": {
+                "count": 0,
+                "minutes": 0
+              },
+              "project=alpha&project=beta": {
+                "count": 2,
+                "minutes": 75
+              }
+            },
+            "review_is_not_test_execution": true,
+            "raw_evidence_sha256": "df97707db6b121a3ace9ee76daa5ea31e7419e5585a4ed24ae50e074a24e26a8"
+          },
+          "deep_doctor": {
+            "exit_code": 0,
+            "wall_seconds": 14.312,
+            "metadata_only": true,
+            "model_files_rehashed": 16,
+            "model_integrity": "Every pinned model file SHA256 verified.",
+            "local_routing": "pass",
+            "mcp": {
+              "browser": {
+                "status": "connected"
+              },
+              "search": {
+                "status": "connected"
+              }
+            }
+          },
+          "browser": {
+            "status": "PASS_SCOPED_BROWSER_SEARCH_AND_IMAGE_READ",
+            "wall_seconds": 667.562,
+            "model": {
+              "id": "qwen",
+              "providerID": "local",
+              "variant": "fast"
+            },
+            "tool_calls": 8,
+            "tool_counts": {
+              "browser_browser_navigate": 1,
+              "search_web_search_exa": 1,
+              "browser_browser_snapshot": 1,
+              "browser_browser_console_messages": 1,
+              "browser_browser_type": 1,
+              "browser_browser_click": 1,
+              "browser_browser_take_screenshot": 1,
+              "read": 1
+            },
+            "tool_errors": 0,
+            "ordinary_permissions_allowed": 4,
+            "completion_followups": 0,
+            "compactions": 5,
+            "native_finish": "stop",
+            "source_and_seed_data_unchanged": true,
+            "filtered_visible_rows": [
+              "t1: alpha, 30 minutes, 2026-09-01",
+              "t3: alpha, 45 minutes, 2026-09-02"
+            ],
+            "screenshot_independently_viewed": true,
+            "screenshot_sha256": "1cfe50953e6176d1ab59d9bfee5313e38d53bdb47e0cfd31598d4acd8412303c",
+            "image_read_content_types": [
+              "text",
+              "file"
+            ],
+            "public_search_queries": 1,
+            "public_search_result": "https://docs.python.org/3/library/unittest.html",
+            "first_prompt_tokens": 11694,
+            "limitations": [
+              "A single desktop filter workflow; not sustained browser, narrow viewport or error/retry qualification.",
+              "Frequent compaction and permission waits contribute to wall time.",
+              "Screenshot generation and native image reading were exercised; this is not a broad vision benchmark."
+            ],
+            "raw_evidence_sha256": "24bf951b21c6e746739902c07796f38a5e10ec5e55e31a04136938f6fe96f35d"
+          },
+          "client_cleanup": {
+            "normal_tui_exit_code": 0,
+            "owned_client_pids_gone": 10,
+            "fixture_http_port_closed": true,
+            "project_temporary_dirs_remaining": []
+          },
+          "status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
+          "cold_restart_protocol": {
+            "runtime_was_stopped_and_port_closed": true,
+            "actual_command": "kryn bench",
+            "exit_code": 0,
+            "bench_wall_seconds": 33.584,
+            "stop_and_bench_wall_seconds": 34.433,
+            "new_owned_run_entries": [
+              "protocol-20260920T215507Z-b737fc14"
+            ],
+            "status": "PASS_COLD_START_PROTOCOL",
+            "protocol_pass": true,
+            "cases": {
+              "health": true,
+              "models": true,
+              "stream-fast": true,
+              "stream-low": true,
+              "stream-medium": true,
+              "stream-xhigh": true,
+              "tool-first": true,
+              "tool-replay": true
+            },
+            "metrics_sha256": "20c97b2f3fc0ff0b6116e22859e363e40a0838f7660911c6bc7aeecfc189f5cd",
+            "receipt_sha256": "77de945df3d44bf64d6dbc7018a312a8422c703e126692fad08ced33a150d2c4"
+          },
+          "ui_restart": {
+            "normal_exit_code": 0,
+            "observed_agent": "build",
+            "observed_model": "Qwen3.8-27B-oQ4e-mtp",
+            "observed_variant": "fast",
+            "connected_mcp_services": 2,
+            "native_session_history_reopened": true,
+            "trace_sha256": "b1bd91bc9b882c47d26e835b3ae0f9c7041dbf7c2c28b0dd5ed72a71f3bdbf7c",
+            "receipt_sha256": "ffa62995d1491ac1029ac656c112f42c3d385cb14779a072515477c081659ed6"
+          },
+          "resource_observation": {
+            "utc": "2026-09-20T21:56:41.332313+00:00",
+            "samples": 1225,
+            "pressure_levels": [
+              1
+            ],
+            "warning_samples": 0,
+            "max_swap_growth_bytes": 0,
+            "peak_runtime_footprint_bytes": 22738286464,
+            "wall_seconds": 2617.812,
+            "observational_only": true,
+            "receipt_sha256": "1e9179489cbf894b813a4b1ee0d2584677052904320de6ea70c4206f8939c459"
+          },
+          "final_state": {
+            "model": "Qwen3.8-27B-oQ4e-mtp",
+            "healthy": true,
+            "max_model_len": 16384,
+            "memory_limit_gib": 24,
+            "active_requests": 0,
+            "waiting_requests": 0,
+            "version": "0.6.4",
+            "status": "HEALTHY_IDLE",
+            "active_skill": false,
+            "background_inference": false,
+            "receipt_sha256": "7c0bead482b4407ba448ab7f7bd3f332cbefb84cdc54712165dbb15c71178386"
+          }
+        },
+        "broader_scope_remaining": [
+          "Unattended sustained coding/browser sessions and sustained 32K/64K qualification",
+          "Completed matched MTP acceleration comparison",
+          "Autonomous improvement cycle and live matched skill benefit",
+          "Optional computer-control, office and image-generation modules"
+        ],
+        "continuous_improvement": {
+          "status": "INCOMPLETE",
+          "outcome_collection_verified": true,
+          "unsupported_proposal_refusal_verified": true,
+          "fixture_promotion_rejection_rollback_verified": true,
+          "active_skill": false,
+          "autonomous_reflection": false,
+          "automatic_evaluation_dispatch": false,
+          "continuous_regression_monitoring": false,
+          "foreground_preemption": false,
+          "live_matched_skill_benefit": false
+        },
+        "daily_use_status": "READY_WITH_EXPLICIT_LIMITATIONS_FOR_SUPERVISED_LOCAL_CODING",
+        "unresolved_mandatory_gates": [
+          "sustained_32k_context",
+          "completed_mtp_off_on_comparison",
+          "complete_continuous_improvement_cycle_and_live_skill_evaluation"
+        ]
+      }
+    }
   ]
 }

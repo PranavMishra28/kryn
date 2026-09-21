@@ -19,7 +19,7 @@ import urllib.request
 ROOT = Path.home() / "Library/Application Support/LocalAI"
 PROJECT = Path(__file__).resolve().parents[1]
 BINARY = ROOT / "opencode/2.0.10/package/bin/opencode"
-MODEL_ID = "Qwen3.8-27B-oQ4e-mtp"
+MODEL_ID = "Qwen3.5-9B-6bit"
 SHELL_SHIM = Path(__file__).absolute().with_name("native-shell")
 SHELL_SHIM_BYTES = b'#!/bin/sh\nexec "${LOCALAI_SHELL_PYTHON:?missing owned interpreter}" -B "${LOCALAI_SHELL_HELPER:?missing owned helper}" --guarded-shell "$@"\n'
 
@@ -47,6 +47,73 @@ WRITE_PROFILE = """;; Direct filesystem-write containment for ordinary shell des
     (literal "/dev/ptmx")
     (regex #"^/dev/ttys[0-9]+$"))
 """
+
+
+def background_boundary(workspace, private, dependencies, inference_port, native_port=0):
+    """Whole-process boundary for disposable learning, never ordinary user work.
+
+    The trusted worker/grader stays outside this sandbox. No personal XDG state,
+    evaluator files, credentials or non-loopback service is readable/reachable.
+    Only the inference-only worker proxy is reachable, never runtime admin APIs.
+    """
+    sandbox = Path("/usr/bin/sandbox-exec")
+    if sys.platform != "darwin" or not sandbox.is_file() or sandbox.stat().st_uid != 0 or sandbox.stat().st_mode & 0o022:
+        raise RuntimeError("Background evaluation requires the owned macOS sandbox boundary")
+    workspace, private = (_owned_directory(Path(p)) for p in (workspace, private))
+    if workspace in {Path("/"), Path.home(), ROOT, PROJECT} or _within(ROOT, workspace):
+        raise RuntimeError("Background workspace is too broad")
+    if private in {Path("/"), Path.home(), ROOT, PROJECT} or _within(ROOT, private):
+        raise RuntimeError("Background private root is too broad")
+    if workspace == private or _within(workspace, private) or _within(private, workspace):
+        raise RuntimeError("Background workspace/private roots must be separate")
+    ports = ([inference_port] if inference_port is not None else []) + ([native_port] if native_port else [])
+    if any(type(p) is not int or not 1024 <= p <= 65535 for p in ports):
+        raise RuntimeError("Background boundary requires explicit unprivileged ports")
+    reads = [workspace, private, Path("/System"), Path("/usr/lib"), Path("/usr/share"),
+             Path("/usr/bin"), Path("/bin"), Path("/sbin"), Path("/Library/Apple"),
+             Path("/private/var/db/timezone")]
+    for given in dependencies:
+        path = Path(given)
+        if not path.is_absolute() or path != path.resolve() or not path.exists():
+            raise RuntimeError("Background dependencies must be canonical existing paths")
+        info = path.stat()
+        if info.st_uid not in {0, os.geteuid()} or info.st_mode & 0o022:
+            raise RuntimeError("Background dependency is writable by another user")
+        if path in {Path("/"), Path.home(), ROOT, PROJECT, Path("/Users"), Path("/private")}:
+            raise RuntimeError("Background dependency allowance is too broad")
+        reads.append(path)
+    quote = lambda path: json.dumps(str(path))
+    allowed = "\n".join(f'    ({"subpath" if p.is_dir() else "literal"} {quote(p)})' for p in reads)
+    # Bun resolves cwd through parent directories. Literal directory reads permit
+    # this traversal without granting any parent subtree's file contents.
+    ancestors = "\n".join(f'    (literal {quote(p)})' for p in sorted(set(workspace.parents) | set(private.parents)))
+    # Seatbelt's address grammar accepts localhost/*, not numeric hosts.
+    # All actual listeners/requests are bound to explicit IPv4 loopback addresses.
+    network = "\n".join(f'(allow network-outbound (remote ip "localhost:{p}"))' for p in ports)
+    inbound = f'(allow network-inbound (local ip "localhost:{native_port}"))' if native_port else ''
+    profile = f'''(version 1)
+(allow default)
+(deny file-read-data)
+(deny file-write*)
+(deny network*)
+(deny mach-lookup)
+(deny appleevent-send)
+(deny process-info*)
+(allow process-info* (target self))
+(allow file-read-data
+{allowed}
+{ancestors}
+    (literal "/dev/null") (literal "/dev/random") (literal "/dev/urandom"))
+(allow file-write* (subpath {quote(workspace)}) (subpath {quote(private)}))
+(deny file-read-data file-write* (subpath {quote(workspace / '.opencode')})
+    (literal {quote(workspace / 'opencode.json')}) (literal {quote(workspace / 'opencode.jsonc')}))
+;; Even an interpreter allowance must never expose installed evaluation answers.
+(deny file-read-data file-write* (subpath {quote(PROJECT / 'tools')}) (subpath {quote(PROJECT / 'evals')}))
+(allow file-write-data (literal "/dev/null") (literal "/dev/tty"))
+{inbound}
+{network}
+'''
+    return ["/usr/bin/sandbox-exec", "-p", profile]
 
 def _owned_directory(path, *, create=False):
     path = Path(path)
@@ -226,9 +293,10 @@ def environment(config=None):
 
 
 class NativeServer:
-    def __init__(self, directory, config=None, log=None):
+    def __init__(self, directory, config=None, log=None, *, background=None):
         self.directory = Path(directory).absolute()
         self.env = environment(config)
+        self.background = background
         effective = json.loads(self.env["OPENCODE_CONFIG_CONTENT"])
         if effective.get("shell") not in (None, str(SHELL_SHIM)):
             raise RuntimeError("Owned shell setting conflicts with the required boundary shim")
@@ -258,6 +326,43 @@ class NativeServer:
         self.task_temporary = None
         self.forced_shutdown = False
         self.termination_requested = False
+
+    def _enter_background(self):
+        options = self.background
+        if set(options) - {"dependencies", "inference_port", "cancel"} or not {"dependencies", "inference_port"}.issubset(options):
+            raise RuntimeError("Unexpected background isolation options")
+        self.temporary = tempfile.TemporaryDirectory(prefix="kryn-isolated-", dir="/private/tmp", delete=False)
+        private = Path(self.temporary.name)
+        effective = json.loads(self.env["OPENCODE_CONFIG_CONTENT"])
+        # The whole server and descendants are sandboxed; do not route a nested
+        # shell shim back to the foreground user's private XDG directories.
+        effective["shell"] = "/bin/zsh"
+        self.env["OPENCODE_CONFIG_CONTENT"] = json.dumps(effective)
+        self.env["HOME"] = str(private)
+        self.env["PATH"] = str(Path(sys.executable).parent) + ":/usr/bin:/bin"
+        for key in ("TMPDIR", "TMP", "TEMP", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"):
+            dest = private / key.lower()
+            dest.mkdir(mode=0o700)
+            self.env[key] = str(dest)
+        self.env["TMPPREFIX"] = str(private / "zsh")
+        prefix = background_boundary(self.directory, private, options["dependencies"],
+                                     options["inference_port"], self.port)
+        self.background_prefix = prefix
+        self.log_file = _open_owned_log(self.log_path)
+        self.process = subprocess.Popen(prefix + [str(BINARY), "serve", "--hostname", "127.0.0.1",
+                                                  "--port", str(self.port)], cwd=self.directory,
+                                        env=self.env, stdout=self.log_file, stderr=self.log_file)
+        for _ in range(100):
+            if options.get("cancel", lambda: False)():
+                raise RuntimeError("Background native startup yielded to foreground")
+            if self.process.poll() is not None:
+                raise RuntimeError("Isolated native server exited before readiness")
+            try:
+                self.request("GET", "/api/info", timeout=1)
+                return self
+            except (OSError, urllib.error.URLError):
+                time.sleep(.2)
+        raise RuntimeError("Isolated native server readiness timed out")
 
     def request(self, method, endpoint, body=None, timeout=30):
         if not endpoint.startswith("/api/"):
@@ -357,6 +462,8 @@ class NativeServer:
         if self.temporary is not None or self.task_temporary is not None:
             raise RuntimeError("Native server still owns its temporary directory")
         try:
+            if self.background is not None:
+                return self._enter_background()
             helper, python, digest = _shell_identity()
             _validate_work_locations(self.directory, self.log_path.parent)
             # delete=False prevents garbage collection from deleting beneath an
@@ -440,11 +547,11 @@ class NativeServer:
                     self.process.terminate()
                     self.termination_requested = True
                     try:
-                        self.process.wait(timeout=10)
+                        self.process.wait(timeout=2 if self.background is not None else 10)
                     except subprocess.TimeoutExpired:
                         self.forced_shutdown = True
                         self.process.kill()
-                        self.process.wait(timeout=5)
+                        self.process.wait(timeout=2 if self.background is not None else 5)
                 # Effect's scoped SIGTERM teardown exits 130 on interruption.
                 # Accept it only after our terminate request; forced/unknown exits retain.
                 code = self.process.poll()

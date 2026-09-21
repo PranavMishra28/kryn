@@ -37,6 +37,13 @@ class Child:
 
 
 class KrynChecks(unittest.TestCase):
+    def setUp(self):
+        # Separate owner-session tests cover authentication; these exercise lifecycle without production state.
+        self.enterContext(patch.object(localai.owner_auth, 'authorize', return_value={'owner_id': 90290458, 'expires_at': 9999999999}))
+        self.enterContext(patch.object(localai.learning, 'active_champion', return_value=localai.learning.BASELINE))
+        self.enterContext(patch.object(localai.learning, 'start_after_exit'))
+        self.enterContext(patch.object(localai, 'owned_config', return_value={}))
+
     def guarded(self, samples, child, outcome=None):
         outcome = {} if outcome is None else outcome
         server = Mock(env={}, directory=Path('/owned/project'))
@@ -135,7 +142,7 @@ class KrynChecks(unittest.TestCase):
         order = []
         owner, server = Mock(), Mock(env={}, url='http://127.0.0.1:12345')
         owner = Mock(__enter__=Mock(return_value=server), __exit__=Mock(side_effect=lambda *a: order.append('closed')))
-        args = Mock(command_or_project='launch', deep=False, project=str(Path.cwd()), apply=False, profile=None, node=None, uv=None)
+        args = Mock(command_or_project='launch', json_cli=False, deep=False, project=str(Path.cwd()), apply=False, profile=None, node=None, uv=None)
         with patch.object(localai, 'prerequisites', return_value={}), \
              patch.object(localai.improvement, 'active_skill_directory', return_value=None), \
              patch.object(localai, 'dependency_report', return_value={}), \
@@ -169,7 +176,7 @@ class KrynChecks(unittest.TestCase):
             self.assertTrue(all(c.args[0] == 'GET' for c in server.request.call_args_list))
 
     def test_stop_refuses_foreign_or_busy_runtime(self):
-        args = Mock(command_or_project='stop', deep=False, apply=False, profile=None, node=None, uv=None)
+        args = Mock(command_or_project='stop', json_cli=False, deep=False, apply=False, profile=None, node=None, uv=None)
         for identity, state in ((RuntimeError('foreign'), {}), (42, {'active_requests': 1, 'waiting_requests': 0})):
             with patch.object(localai, 'runtime_identity', side_effect=identity if isinstance(identity, Exception) else None,
                               return_value=identity), patch.object(localai, 'runtime_metadata', return_value=state), \
@@ -211,7 +218,7 @@ class KrynChecks(unittest.TestCase):
     def test_outcomes_do_not_leak_or_claim_task_success(self):
         for result in (0, RuntimeError('secret source /private/customer'), KeyboardInterrupt()):
             with patch.object(localai, 'run', side_effect=result if isinstance(result, BaseException) else None,
-                              return_value=result), patch.object(localai.improvement, 'foreground', return_value=nullcontext()), \
+                              return_value=result), patch.object(localai.learning, 'foreground', return_value=nullcontext()), \
                  patch.object(localai.improvement, 'record_outcome') as record:
                 if isinstance(result, BaseException):
                     with self.assertRaises(type(result)): localai.main(['.'])
@@ -226,7 +233,7 @@ class KrynChecks(unittest.TestCase):
 
     def test_outcome_write_failure_is_not_success(self):
         with patch.object(localai, 'run', return_value=0), \
-             patch.object(localai.improvement, 'foreground', return_value=nullcontext()), \
+             patch.object(localai.learning, 'foreground', return_value=nullcontext()), \
              patch.object(localai.improvement, 'record_outcome', side_effect=OSError('denied')), \
              redirect_stderr(io.StringIO()), self.assertRaisesRegex(RuntimeError, 'not recorded'):
             localai.main(['.'])
@@ -325,38 +332,45 @@ class KrynChecks(unittest.TestCase):
                 process.assert_not_called()
                 socket.assert_not_called()
 
-    def test_only_verified_real_skill_is_added_without_policy_changes(self):
+    def test_only_verified_champion_snapshot_is_added_without_policy_changes(self):
         config = localai.expected_config()
         before = copy.deepcopy(config)
-        root = localai.ROOT / 'state/improvement/versions' / ('a' * 32) / 'skills'
-        for selected in (None, root):
-            with patch.object(localai.improvement, 'active_skill_directory', return_value=selected):
+        for selected in (localai.learning.BASELINE, {'revision': hashlib.sha256(b'check').hexdigest(), 'instructions': 'check'}):
+            with patch.object(localai.learning, 'active_champion', return_value=selected), \
+                 patch.object(localai.improvement, 'active_skill_directory', side_effect=AssertionError('legacy activation must not run')):
                 effective = localai.with_verified_skill(config)
             expected = copy.deepcopy(before)
-            if selected is not None: expected.setdefault('skills', []).append(str(selected))
+            for item in expected['plugins']:
+                if isinstance(item, dict): item['options']['champion'] = selected
             self.assertEqual(effective, expected)
             self.assertEqual(config, before)
-            localai.validate_owned_config(effective)
-        for selected in (Path('/unrelated/skills'), localai.ROOT/'state/improvement/simulation/skills',
-                         localai.ROOT/'state/improvement/versions/../simulation/skills'):
-            with patch.object(localai.improvement, 'active_skill_directory', return_value=selected), self.assertRaises(RuntimeError):
-                localai.with_verified_skill(config)
-        with patch.object(localai.improvement, 'active_skill_directory', side_effect=RuntimeError('artifact drift')), \
+        with patch.object(localai.learning, 'active_champion', side_effect=RuntimeError('artifact drift')), \
              self.assertRaisesRegex(RuntimeError, 'artifact drift'):
             localai.with_verified_skill(config)
+        with patch.object(localai.learning, 'active_champion', return_value=selected) as champion:
+            effective = localai.with_verified_skill(config, json_cli=True)
+            champion.assert_called_once_with(localai.ROOT / 'state/improvement', scope='disposable_json_cli')
+        product = next(item for item in effective['plugins'] if isinstance(item, dict))
+        self.assertEqual(product['options']['workflowScope'], 'disposable_json_cli')
+        self.assertEqual(product['options']['champion'], selected)
+        self.assertEqual(config, before)
 
-    def test_improve_delegates_to_owned_module_without_task_success_record(self):
-        for tail in ([], ['status'], ['propose','bounded_milestone']):
+    def test_improve_uses_only_owned_automatic_controls_without_task_success_record(self):
+        for tail in ([], ['status'], ['pause'], ['disable']):
             with patch.object(localai, 'verify_release') as verify, \
-                 patch.object(localai.improvement, 'main', return_value=0) as controls, \
-                 patch.object(localai.improvement, 'record_outcome') as record:
-                self.assertEqual(localai.main(['improve',*tail]), 0)
+                 patch.object(localai.learning, 'status', return_value={}) as status, \
+                 patch.object(localai.learning, 'control', return_value={}) as controls, \
+                 patch.object(localai.improvement, 'record_outcome') as record, redirect_stdout(io.StringIO()):
+                self.assertEqual(localai.main(['improve', *tail]), 0)
             verify.assert_called_once_with()
-            controls.assert_called_once_with(['--state',str(localai.ROOT/'state/improvement'),*(tail or ['status'])])
+            if not tail or tail == ['status']:
+                status.assert_called_once_with(localai.ROOT/'state/improvement')
+            else:
+                controls.assert_called_once_with(localai.ROOT/'state/improvement', tail[0])
             record.assert_not_called()
-        for tail in (['--state','/elsewhere','status'], ['--state=/elsewhere','status'], ['--sta','/elsewhere','status'], ['--s=/elsewhere','status']):
-            with patch.object(localai.improvement, 'main') as controls, self.assertRaises(RuntimeError):
-                localai.main(['improve',*tail])
+        for tail in (['--state','/elsewhere','status'], ['--state=/elsewhere','status'], ['--sta','/elsewhere','status'], ['--s=/elsewhere','status'], ['promote','unqualified']):
+            with patch.object(localai, 'verify_release'), patch.object(localai.learning, 'control') as controls, self.assertRaises(RuntimeError):
+                localai.main(['improve', *tail])
             controls.assert_not_called()
 
 
