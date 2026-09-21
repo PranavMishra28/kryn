@@ -34,8 +34,8 @@ VARIANTS = {"fast", "think"}
 REVISION = '76fe4065e622cf34990d3c13ef80ec8531c9a0f7'
 REPOSITORY = 'mlx-community/Qwen3.5-9B-6bit'
 MODEL_PARENT = 'candidates/qwen35-9b/models'
-SERVER_CONTEXT = 16384
-MEMORY_GIB = 14
+SERVER_CONTEXT = 24576
+MEMORY_GIB = 12
 OMLX = Path.home() / "Applications/oMLX.app/Contents/MacOS/omlx-cli"
 CONTROL = Path.home() / "Library/Application Support/oMLX/control.sock"
 POLICY = [{"action": "provider.use", "resource": "*", "effect": "deny"},
@@ -486,6 +486,22 @@ def stop_child(child):
     raise RuntimeError("Owned client did not exit; no other process was targeted")
 
 
+class ResourceStop(RuntimeError):
+    """A resource refusal whose owned runtime must be released after cancellation."""
+
+
+def memory_status():
+    try:
+        value = resources(RUNTIME)
+    except Exception:
+        value = {}
+    level = value.get("pressure_level")
+    listeners = value.get("listener_processes", [])
+    return {"pressure": {1: "normal", 2: "warning", 4: "critical", 6: "critical"}.get(level, "unknown"),
+            "pressure_level": level, "swap_used_bytes": value.get("swap_used_bytes"),
+            "runtime_footprint_bytes": listeners[0].get("phys_footprint_bytes") if len(listeners) == 1 else None}
+
+
 def guarded_run(server, command, project, outcome, timeout=None):
     """Monitor the native client; OpenCode still owns every agent/tool decision."""
     guard = ResourceGuard(512 * 1024**2, 2)
@@ -498,18 +514,28 @@ def guarded_run(server, command, project, outcome, timeout=None):
             value = {}
         reason = guard.check(value)
         level = value.get("pressure_level", 0)
+        if type(level) is int and level in {1, 2, 4, 6}:
+            outcome["last_pressure_level"] = level
         outcome["pressure_warning_samples"] = (outcome.get("pressure_warning_samples") or 0) + int(type(level) is int and bool(level & 6))
+        footprints = [p.get("phys_footprint_bytes") for p in value.get("listener_processes", [])]
+        for footprint in footprints:
+            if type(footprint) is int and footprint > 0:
+                outcome["max_runtime_footprint_bytes"] = max(outcome.get("max_runtime_footprint_bytes", 0), footprint)
         swap = value.get("swap_used_bytes")
         if type(swap) is int and guard.baseline_swap is not None:
             outcome["swap_growth_bytes"] = max(outcome.get("swap_growth_bytes") or 0, swap - guard.baseline_swap)
         if reason:
             outcome["failure_code"] = "resource"
-            raise RuntimeError("Resource guard stopped KRYN: " + reason
-                               + ". Close memory-heavy applications, let pressure settle, then check kryn doctor before retrying.")
+            raise ResourceStop("Resource guard stopped KRYN: " + reason
+                               + f" (pressure={level}, swap growth={outcome.get('swap_growth_bytes', 0)} bytes)."
+                               + " Saved session and completed file writes are retained."
+                               + " After pressure settles, run kryn --continue in this project to resume.")
         return value
     try:
         for index in range(3):
-            require(sample().get("pressure_level") == 1, "Resource preflight needs three consecutive green samples")
+            if sample().get("pressure_level") != 1:
+                raise ResourceStop("Resource preflight needs three consecutive green samples; no generation started."
+                                   " Let memory pressure settle, then run kryn --continue.")
             if index < 2:
                 time.sleep(2)
         started = time.monotonic()
@@ -650,6 +676,7 @@ def run(args, outcome):
         except owner_auth.AuthorizationError:
             authorization = {"authorized": False}
         print(json.dumps({**health, "owner_session": authorization,
+                          "memory": memory_status(),
                           "improvement": learning.status(ROOT / "state/improvement")}, indent=2))
         return 0
     project = (Path(args.project or ".") if command == "launch" else
@@ -688,9 +715,11 @@ def run(args, outcome):
             outcome["failure_code"] = "tools"
             mcp = mcp_status(server, config) if command != "bench" else {}
             if command == "doctor":
+                memory = memory_status()
                 print(json.dumps({"prerequisites": dependencies, "native_local_routing": "pass", "runtime": health,
+                                  "memory": memory,
                                   "mcp": mcp, "scope": "Configuration and dependency checks; generation and browser interactions are not run."}, indent=2))
-                return 0 if health["healthy"] and all(v.get("status") == "connected" for v in mcp.values()) else 1
+                return 0 if health["healthy"] and memory["pressure"] == "normal" and all(v.get("status") == "connected" for v in mcp.values()) else 1
             if command == "bench":
                 print("Running guarded protocol smoke; this is not the full coding evaluation suite.", flush=True)
                 executable = [sys.executable, "-E", "-B", str(PROJECT / "tools/protocol_probe.py"),
@@ -702,6 +731,13 @@ def run(args, outcome):
                     print("Local coding is available; unavailable tools: " + ", ".join(unavailable)
                           + ". Run kryn doctor for details.", file=sys.stderr, flush=True)
                 executable = [str(BINARY), "--server", server.url, str(project)]
+                if getattr(args, "continue_session", False) is True:
+                    executable.append("--continue")
+                if isinstance(getattr(args, "session", None), str):
+                    selected = server.request("GET", "/api/session/" + args.session).get("data", {})
+                    require(selected.get("id") == args.session and selected.get("location", {}).get("directory") == str(project)
+                            and local_reference(selected.get("model")), "Resume session must belong to this local project")
+                    executable.extend(["--session", args.session])
             outcome["failure_code"] = "resource"
             invoked = True
             code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None)
@@ -712,9 +748,15 @@ def run(args, outcome):
             original = sys.exc_info()[1]
             try:
                 await_runtime_idle()
+                if isinstance(original, ResourceStop):
+                    runtime_identity()
+                    runtime_command("stop")
+                    print("Released the idle KRYN model server after the resource stop."
+                          " Resume with kryn --continue; the server will start automatically.", file=sys.stderr)
             except BaseException as error:
                 if original is not None:
                     original.add_note("Runtime idle could not be verified after owned native shutdown")
+                    print("kryn: resource cleanup could not be verified; inspect kryn status before retrying.", file=sys.stderr)
                 else:
                     raise error
 
@@ -754,7 +796,13 @@ def main(argv=None):
     parser.add_argument("--self-check", action="store_true", help="offline validator checks; no services or inference")
     parser.add_argument("--deep", action="store_true", help="doctor only: rehash every pinned model file (slow; no inference)")
     parser.add_argument("--json-cli", action="store_true", help="apply validated workflow guidance for JSON command-line programs in new native sessions")
+    resume = parser.add_mutually_exclusive_group()
+    resume.add_argument("--continue", dest="continue_session", action="store_true", help="open the latest saved session in this project")
+    resume.add_argument("--session", help="open a saved session ID belonging to this project")
     args = parser.parse_args(argv)
+    require(args.session is None or re.fullmatch(r"ses_[A-Za-z0-9]+", args.session), "Invalid native session ID")
+    require(not (args.continue_session or args.session) or args.command_or_project not in {"init", "doctor", "status", "stop", "bench"},
+            "Session resume options are supported only for a coding launch")
     require(args.project is None or args.command_or_project == "launch", "Extra project argument requires launch")
     if args.self_check:
         self_check()

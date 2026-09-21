@@ -161,6 +161,83 @@ class KrynChecks(unittest.TestCase):
             localai.await_runtime_idle()
         self.assertEqual(status.call_count, 3)
 
+    def test_resource_stop_releases_runtime_only_after_native_close_idle_and_identity(self):
+        for idle_error, identity_error in ((False, False), (True, False), (False, True)):
+            order = []
+            server = Mock(env={}, url='http://127.0.0.1:12345')
+            owner = Mock(__enter__=Mock(return_value=server), __exit__=Mock(side_effect=lambda *a: order.append('closed')))
+            args = Mock(command_or_project='launch', json_cli=False, deep=False, project=str(Path.cwd()),
+                        apply=False, profile=None, node=None, uv=None, continue_session=True, session=None)
+            def idle():
+                order.append('idle')
+                if idle_error: raise RuntimeError('busy')
+            def identity():
+                order.append('identity')
+                if identity_error: raise RuntimeError('foreign process')
+            with patch.object(localai, 'prerequisites', return_value={}), \
+                 patch.object(localai, 'dependency_report', return_value={}), \
+                 patch.object(localai, 'ensure_runtime', return_value={'active_requests': 0, 'waiting_requests': 0}), \
+                 patch.object(localai, 'NativeServer', return_value=owner), patch.object(localai, 'inventory'), \
+                 patch.object(localai, 'mcp_status', return_value={}), \
+                 patch.object(localai, 'guarded_run', side_effect=localai.ResourceStop('memory')) as launch, \
+                 patch.object(localai, 'await_runtime_idle', side_effect=idle), \
+                 patch.object(localai, 'runtime_identity', side_effect=identity), \
+                 patch.object(localai, 'runtime_command', side_effect=lambda op: order.append(op)) as command, \
+                 redirect_stderr(io.StringIO()), self.assertRaises(localai.ResourceStop):
+                localai.run(args, {})
+            self.assertIn('--continue', launch.call_args.args[1])
+            self.assertEqual(order[:2], ['closed', 'idle'])
+            if idle_error or identity_error:
+                command.assert_not_called()
+            else:
+                self.assertEqual(order, ['closed', 'idle', 'identity', 'stop'])
+
+    def test_guard_retains_bounded_numeric_diagnostics(self):
+        reading = sample()
+        reading['listener_processes'][0]['phys_footprint_bytes'] = 9000
+        _, outcome, *_ = self.guarded([reading] * 4, Child([0]))
+        self.assertEqual(outcome['last_pressure_level'], 1)
+        self.assertEqual(outcome['max_runtime_footprint_bytes'], 9000)
+        localai.improvement._outcome({**outcome, 'command': 'run', 'status': 'incomplete', 'wall_seconds': 1})
+        for field, value in [('last_pressure_level', True), ('last_pressure_level', 'private text'),
+                             ('max_runtime_footprint_bytes', -1), ('max_runtime_footprint_bytes', {})]:
+            with self.assertRaises(ValueError):
+                localai.improvement._outcome({**outcome, 'command': 'run', 'status': 'incomplete',
+                                             'wall_seconds': 1, field: value})
+
+    def test_explicit_resume_requires_matching_session_project_and_local_model(self):
+        project = str(Path.cwd().resolve())
+        valid = {'id': 'ses_owned', 'location': {'directory': project},
+                 'model': {'providerID': 'local', 'id': 'qwen'}}
+        for change in ({}, {'id': 'ses_other'}, {'location': {'directory': '/other'}},
+                       {'location': {}}, {'model': {'providerID': 'remote', 'id': 'qwen'}}):
+            server = Mock(env={}, url='http://127.0.0.1:12345')
+            server.request.return_value = {'data': {**valid, **change}}
+            owner = Mock(__enter__=Mock(return_value=server), __exit__=Mock(return_value=False))
+            args = Mock(command_or_project='launch', json_cli=False, deep=False, project=project,
+                        apply=False, profile=None, node=None, uv=None, continue_session=False, session='ses_owned')
+            with patch.object(localai, 'prerequisites', return_value={}), \
+                 patch.object(localai, 'dependency_report', return_value={}), \
+                 patch.object(localai, 'ensure_runtime', return_value={'active_requests': 0, 'waiting_requests': 0}), \
+                 patch.object(localai, 'NativeServer', return_value=owner), patch.object(localai, 'inventory'), \
+                 patch.object(localai, 'mcp_status', return_value={}), \
+                 patch.object(localai, 'guarded_run', return_value=0) as launch, \
+                 patch.object(localai, 'await_runtime_idle'):
+                if change:
+                    with self.assertRaisesRegex(RuntimeError, 'Resume session'):
+                        localai.run(args, {})
+                    launch.assert_not_called()
+                else:
+                    self.assertEqual(localai.run(args, {}), 0)
+                    self.assertEqual(launch.call_args.args[1][-2:], ['--session', 'ses_owned'])
+
+    def test_memory_status_distinguishes_host_pressure_from_runtime_health(self):
+        for level, label in ((1, 'normal'), (2, 'warning'), (4, 'critical'), (6, 'critical'), (None, 'unknown')):
+            with patch.object(localai, 'resources', return_value=sample(level)):
+                self.assertEqual(localai.memory_status()['pressure'], label)
+        with patch.object(localai, 'resources', side_effect=OSError('unavailable')):
+            self.assertEqual(localai.memory_status()['pressure'], 'unknown')
+
     def test_session_ownership_before_interrupt(self):
         server = Mock(directory=Path('/owned/project'))
         info = {'id': 'ses_abc', 'location': {'directory': '/owned/project'},

@@ -10,7 +10,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture(extra = {}) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-plugin-')));
   fs.chmodSync(root, 0o700);
-  const hooks = new Map(), pending = [], wake = [];
+  const hooks = new Map(), pending = [], wake = [], continuations = [];
   let stopped = false, serial = 0;
   const location = { directory: root, project: { canonical: root } };
   const options = { stateDir: root, profileId: 'test-profile', modelID: 'test-Q4', workflowScope: 'disposable_json_cli',
@@ -25,7 +25,11 @@ function fixture(extra = {}) {
         while (pending.length) yield pending.shift();
       }
     } } };
+  ctx.session.get = async ({ sessionID }) => ({ id: sessionID, location, agent: 'build',
+    model: { providerID: 'local', id: 'qwen' }, outcome: 'succeeded', time: {} });
+  ctx.session.synthetic = async value => { continuations.push(value); };
   return { root, ctx, hooks,
+    continuations,
     call: (name, data) => hooks.get(name)(data),
     emit: async (type, data = {}, loc = location) => {
       pending.push({ id: 'evt_' + (++serial), type, data: { sessionID: 'ses_1', ...data }, location: loc });
@@ -59,7 +63,7 @@ test('strict loopback/model guards apply independently of request kind and hot-r
   } finally { await cleanup(); f.remove(); }
 });
 
-test('title wire budget is bounded after body overlays without changing other requests or private headers', async () => {
+test('auxiliary budgets reserve output for coding and preserve cancellation and private headers', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     for (const kind of ['primary', 'compaction', 'generate', 'title']) {
@@ -72,11 +76,13 @@ test('title wire budget is bounded after body overlays without changing other re
         body: JSON.stringify(body), signal: controller.signal });
       const event = { model, kind, request };
       await f.call('session.http.request', event);
-      assert.deepEqual(await event.request.clone().json(), { ...body, max_tokens: kind === 'title' ? 128 : 4096 });
+      const expected = { ...body, max_tokens: kind === 'title' ? 128 : kind === 'compaction' ? 2048 : 4096 };
+      if (kind === 'compaction') expected.temperature = 0.2;
+      assert.deepEqual(await event.request.clone().json(), expected);
       assert.equal(event.request.method, 'POST'); assert.equal(event.request.url, request.url);
       assert.equal(event.request.headers.get('authorization'), 'Bearer synthetic-test-only');
       assert.equal(event.request.headers.get('x-session-affinity'), 'ses_1');
-      if (kind === 'title') assert.equal(event.request.headers.has('content-length'), false);
+      if (kind === 'title' || kind === 'compaction') assert.equal(event.request.headers.has('content-length'), false);
       else assert.equal(event.request, request);
       controller.abort(); assert.equal(event.request.signal.aborted, true);
     }
@@ -86,6 +92,66 @@ test('title wire budget is bounded after body overlays without changing other re
       await f.call('session.http.request', event);
       assert.equal((await event.request.json()).max_tokens, cap ?? 128);
     }
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('truncated top-level Build output gets two bounded native continuations, never replayed tool execution', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    for (let n = 0; n < 3; n++) await f.emit('session.step.ended', { finish: 'length', tokens: { output: 8192 } });
+    assert.deepEqual(f.continuations.map(v => v.resume), [true, true]);
+    assert.ok(f.continuations[0].text.includes('do not assume the unfinished tool call executed'));
+    assert.equal(f.continuations[0].delivery, 'steer');
+    assert.ok(f.continuations.every(v => !Object.hasOwn(v, 'tools') && !Object.hasOwn(v, 'permissions')));
+    await f.emit('session.execution.succeeded');
+    assert.equal(f.read('trackers')[0].state, 'incomplete');
+    await f.emit('session.step.ended', { finish: 'stop' });
+    await f.emit('session.execution.succeeded');
+    assert.equal(f.read('trackers')[0].state, 'unknown');
+    assert.equal(f.continuations.length, 2);
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.emit('session.step.ended', { finish: 'length' });
+    assert.equal(f.continuations.at(-1).resume, true);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('output recovery respects interruption, user steering, read-only roles and child ownership', async () => {
+  for (const changed of [{ parentID: 'ses_parent' }, { agent: 'audit' }, { agent: 'reviewer' },
+    { outcome: 'interrupted', time: { idle: new Date(Date.now() + 1000).toISOString() } },
+    { location: { directory: '/other' } }, { revert: {} }]) {
+    const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+    const original = f.ctx.session.get;
+    f.ctx.session.get = async args => ({ ...await original(args), ...changed });
+    try {
+      await f.emit('session.step.ended', { finish: 'length' });
+      assert.equal(f.continuations.length, 0);
+    } finally { await cleanup(); f.remove(); }
+  }
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const original = f.ctx.session.get;
+  f.ctx.session.get = async args => {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    return original(args);
+  };
+  try {
+    await f.emit('session.step.ended', { finish: 'length' });
+    assert.equal(f.continuations.length, 0);
+    await f.emit('session.execution.interrupted');
+    await f.emit('session.step.ended', { finish: 'length' });
+    assert.equal(f.continuations.length, 0);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('write budget uses UTF-8 bytes and leaves small edits available', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    assert.doesNotThrow(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { content: 'a'.repeat(12000) } }));
+    assert.throws(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { content: '🐴'.repeat(3001) } }), /12,000/);
+    assert.doesNotThrow(() => f.call('tool.execute.before', { agent: 'build', tool: 'edit', input: { newString: 'small correction' } }));
+    assert.throws(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { path: f.root.slice(1) + '/index.html', content: 'test' } }), /leading/);
+    for (const target of ['./index.html', f.root + '/index.html'])
+      assert.doesNotThrow(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { path: target, content: 'test' } }));
   } finally { await cleanup(); f.remove(); }
 });
 

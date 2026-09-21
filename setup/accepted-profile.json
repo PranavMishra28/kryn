@@ -1,7 +1,7 @@
 {
   "repository": "mlx-community/Qwen3.5-9B-6bit",
   "revision": "76fe4065e622cf34990d3c13ef80ec8531c9a0f7",
-  "memory_gib": 14,
+  "memory_gib": 12,
   "model_parent": "candidates/qwen35-9b/models",
   "files": {
     ".gitattributes": "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930",

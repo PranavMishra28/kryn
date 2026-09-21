@@ -2,7 +2,7 @@
 
 A private local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.0](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.0) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.2](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.2) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -73,10 +73,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.0 --repo PranavMishra28/kryn \
+     gh release download v0.1.2 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.0
+     python3 install-kryn.py --tag v0.1.2
    )
    ```
 
@@ -89,7 +89,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.0`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.2`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -97,27 +97,33 @@ Run these commands in **Terminal**, outside the KRYN interface:
 
 | Command | Purpose |
 |---|---|
-| `kryn status` | Inspect runtime, owner session and background improvement state. |
+| `kryn --continue` | Open the latest saved session in this project. |
+| `kryn --session SESSION_ID` | Open a specific saved session belonging to this project. |
+| `kryn status` | Inspect host memory pressure, runtime, owner session and background improvement state. |
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.0` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.2` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn improve status` | Inspect experimental background improvement. |
 | `kryn improve pause` | Pause background improvement. |
 | `kryn stop` | Stop the verified, idle KRYN model server. Finish active work first. |
 
-If memory protection stops a session, close memory-heavy applications, let pressure settle, and run `kryn doctor` before retrying. If search or browser services are unavailable, local coding can still launch; inspect their connection status with `kryn doctor`.
+If memory protection stops a session, KRYN cancels its work, retains the native session and completed file writes, and stops its verified idle model server to release memory. Check `kryn status`; once `memory.pressure` is `normal`, run `kryn --continue` from the same project. The server starts automatically. Memory pressure can recur if the desktop workload leaves insufficient room for the model. If search or browser services are unavailable, local coding can still launch; inspect their connection status with `kryn doctor`.
 
 Application state, sessions, caches and installed packages live under `~/Library/Application Support/LocalAI`; the oMLX application lives under `~/Applications/oMLX.app`, with settings in `~/.omlx`. Keep private session data out of bug reports and commits.
 
 ## Configuration and release scope
 
-The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The model profile uses a **16,384-token context**, **4,096-token output limit**, **14 GiB model memory ceiling** and one active generation. Exact model hashes and tool settings are in [the accepted profile](setup/accepted-profile.json) and [the client template](setup/opencode.template.json).
+The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The model profile uses a **24,576-token context**, **8,192-token output limit**, **12 GiB model memory ceiling** and one active generation. Exact model hashes and tool settings are in [the accepted profile](setup/accepted-profile.json) and [the client template](setup/opencode.template.json).
+
+Automatic compaction reserves room for output and retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
+
+Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.0 is a prerelease for owner testing. Installation and runtime checks passed, but recorded task evaluations include failed tests, incomplete browser work and missed review steps. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21).
+Version 0.1.2 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21).
 
 ## License and distribution
 

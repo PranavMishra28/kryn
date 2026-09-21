@@ -45,7 +45,7 @@ def stage(root, destination, revision, dirty=False):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(root / name, target)
         files[name] = hashlib.sha256(target.read_bytes()).hexdigest()
-    manifest = {"schema": 1, "version": "0.1.0", "source_revision": revision, "source_dirty": dirty, "files": files}
+    manifest = {"schema": 1, "version": "0.1.2", "source_revision": revision, "source_dirty": dirty, "files": files}
     (destination / "src/kryn/manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
     return manifest
 
@@ -67,7 +67,7 @@ def main():
         work = Path(work)
         manifest = stage(root, work, revision, dirty)
         subprocess.run([args.uv, "build", "--wheel", "--out-dir", output, work], check=True)
-    wheel = output / "kryn-0.1.0-py3-none-any.whl"
+    wheel = output / "kryn-0.1.2-py3-none-any.whl"
     with zipfile.ZipFile(wheel) as bundle:
         names = bundle.namelist()
         required = {"kryn/payload/" + name for name in manifest["files"]} | {"kryn/manifest.json", "kryn/cli.py", "kryn/installer.py"}

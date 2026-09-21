@@ -24,7 +24,8 @@ COMMANDS = {"init", "doctor", "status", "stop", "bench", "run"}
 STATUSES = {"success", "failure", "interrupted", "incomplete"}
 FAILURES = {"none", "runtime", "config", "tools", "resource", "timeout", "verification", "interrupted", "unknown"}
 FIELDS = {"command", "status", "wall_seconds", "exit_code", "failure_code", "interventions",
-          "pressure_warning_samples", "swap_growth_bytes", "release_id", "profile_id"}
+          "pressure_warning_samples", "swap_growth_bytes", "release_id", "profile_id",
+          "last_pressure_level", "max_runtime_footprint_bytes"}
 HYPOTHESES = {
     "verification": ("verify_before_summary", "Run the task's relevant existing checks before the final summary. State which checks actually ran, their results, and any unverified requirement. Never change a check merely to obtain a pass."),
     "timeout": ("bounded_milestone", "Complete one useful milestone with observable checks before expanding scope. After two unsuccessful repair attempts without new evidence, preserve the failure and report the next bounded hypothesis."),
@@ -123,6 +124,10 @@ def _outcome(value):
         raise ValueError("A non-success outcome needs a failure classification")
     for key in ("interventions", "pressure_warning_samples", "swap_growth_bytes"):
         out[key] = _number(out.get(key, 0 if key == "interventions" else None), integer=True, nullable=key != "interventions")
+    if "last_pressure_level" in out and (type(out["last_pressure_level"]) is not int or out["last_pressure_level"] not in {1, 2, 4, 6}):
+        raise ValueError("Invalid memory-pressure level")
+    if "max_runtime_footprint_bytes" in out:
+        out["max_runtime_footprint_bytes"] = _number(out["max_runtime_footprint_bytes"], integer=True)
     exit_code = out.get("exit_code")
     if exit_code is not None and (type(exit_code) is not int or not -255 <= exit_code <= 255):
         raise ValueError("Invalid exit code")

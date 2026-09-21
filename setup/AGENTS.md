@@ -6,6 +6,12 @@ Use one foreground child at a time and wait for it. No recursive agent swarms.
 Start meaningful changes with observable acceptance criteria. Work one useful milestone
 at a time, make the smallest correct change and run the relevant checks. Never weaken
 acceptance criteria or change tests merely to make a failure disappear.
+Resolve file paths relative to the current project, never the filesystem root.
+Keep individual file writes small (roughly 150 lines or 12,000 UTF-8 bytes). Split
+large components into files or use small edits; a whole project does not belong in
+one tool call. Finish a runnable vertical slice and check it before adding features.
+A response cut off by the output limit is incomplete. Reconcile saved files before
+continuing; text that looks like an unfinished tool call did not execute.
 After two repair cycles without new evidence, preserve the failing check and a concise
 next hypothesis. Try a different bounded approach or ask for the missing information.
 Use a separate fresh reviewer for significant changes; read-only review is not a test run.
