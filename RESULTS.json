@@ -3,11 +3,11 @@
   "snapshot": "kryn-0.1.0-product-candidate",
   "created_utc": "2026-09-21T01:19:28.648463+00:00",
   "release_status": "NOT_READY",
-  "daily_use_status": "NOT_READY_PENDING_CURRENT_PROFILE_QUALIFICATION",
-  "scope": "Current product qualification with scoped completed measurements and unresolved release gates. Historical failures are retained; partial correctness is not task completion.",
+  "daily_use_status": "NOT_READY_FOR_REQUESTED_CAPABILITIES",
+  "scope": "Final qualification of private KRYN 0.1.0 draft: infrastructure criteria pass with stated scopes, required task capability fails, complete learning and varied comparison remain unqualified. All historical failures retained.",
   "current": {
-    "source_base_commit": "59b4f63906bd80ca1bf2aa95e7a80d8da6903ecc",
-    "source_dirty": true,
+    "source_base_commit": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+    "source_dirty": false,
     "final_source_commit": null,
     "package_version": "0.1.0",
     "profile": {
@@ -37,22 +37,31 @@
     },
     "gates": {
       "private_artifact_install": {
-        "status": "PARTIAL_PRIVATE_DRAFT_INSTALL_PASS",
+        "status": "PASSED",
         "requirement": "Clean tagged private wheel installed without a source checkout; exact documented download/checksum/install route and dependency integrity verified.",
         "evidence": [
           "private-asset-install.json",
           "source-independent-entry-verification.json",
-          "private-update-rollback-summary.json"
+          "private-update-rollback-summary.json",
+          "private-update-v5.json",
+          "private-update-v7.json"
         ],
-        "remaining": "Final release acceptance/publication is pending; draft installation is a completed scoped check."
+        "remaining": "No missing frozen installation criterion asserted. Final publication is downstream; private draft installation is verified."
       },
       "owner_authentication": {
-        "status": "PENDING",
+        "status": "PASSED",
         "requirement": "Verified stable owner and Keychain credentials; other/no/expired identity refusal, bounded offline session, logout and network failures verified.",
-        "evidence": []
+        "evidence": [
+          "installed-v7-auth-controls.json",
+          "installed-v7-auth-controls.log",
+          "private-asset-install.json",
+          "private-update-v7.json"
+        ],
+        "completed_scope": "Actual owner login/install plus eleven behavioral cases against the exact deployed v7 module: absent/wrong/expired identity, bounded offline cache, online failure cleanup, logout, malformed state, token storage/env refusal and symlink preservation.",
+        "qualification_scope": "Existing two auth tests imported the exact installed v7 module. Isolated temporary cache, mocked GitHub subprocess replies/keyring metadata and deterministic clocks; no actual credentials/cache modified, no GitHub calls, no runtime/model requests. Actual authenticated owner install/start evidence is separate."
       },
       "runtime_daily_lifecycle": {
-        "status": "PENDING",
+        "status": "PASSED",
         "requirement": "Five installed-profile cold starts, warm use, cancellation/restart, verified idle/stop and no owned orphan processes.",
         "evidence": [
           "direct-native-outage-metrics.json",
@@ -61,12 +70,14 @@
           "daily-launcher-outage-interpretation.json",
           "private-update-rollback-summary.json",
           "compact-v3-metrics.json",
-          "compact-v4-metrics.json"
+          "compact-v4-metrics.json",
+          "queuewatch-continuation-cleanup.json"
         ],
-        "completed_scope": "Actual daily outage guard and normal relaunch inference passed on prior client96e5d5ac08cceecd. Guard/launcher bytes are unchanged in latest client; latest-artifact dogfood and complete lifecycle qualification remain pending."
+        "completed_scope": "Unchanged-profile five isolated cold generations, warm/cancel/restart protocol and actual installed daily launcher outage/relaunch plus v7 normal start/exit satisfy respective frozen scopes; samples and retained filesystem caches limit extrapolation.",
+        "queuewatch_cleanup_scope": "Normal TUI/observer exit 0 reported; three known owned processes absent, no listener on port 4173, owned model runtime healthy with zero active/waiting requests. Unrelated native fixtures not audited."
       },
       "sustained_native_sessions": {
-        "status": "PENDING",
+        "status": "PASSED",
         "requirement": "Two representative sustained native sessions under ordinary desktop load; pressure/swap, compaction, recovery, latency and interventions recorded.",
         "evidence": [
           "tui-dogfood.json",
@@ -77,12 +88,16 @@
           "kryn-v2-initial-error-audit.json",
           "stockroom-kryn-v2-sustained-driver.json",
           "stockroom-kryn-v2-sustained-grade.json",
-          "kryn-v2-sustained-audit.json"
+          "kryn-v2-sustained-audit.json",
+          "queuewatch-initial-final-audit.json",
+          "queuewatch-label-v2-interpretation.json",
+          "queuewatch-continuation-final-audit.json"
         ],
-        "completed_scope": "One continued KRYN session ended normally after1320.481s with normal sampled pressure and zero additional swap, but task acceptance failed public tests and omitted requested review/handoff; second daily workflow pending."
+        "completed_scope": "Two sustained workflows were observed with normal sampled pressure, no additional swap, recorded timings/interventions/compactions and cleanup. Their functional acceptance failed; that separate failure remains in native_capabilities.",
+        "task_quality_status": "FAILED"
       },
       "native_capabilities": {
-        "status": "PENDING",
+        "status": "FAILED",
         "requirement": "Actual edits/tests/Git/Plan/Reviewer/Browse/research/image and task-resume checks from the final installed artifact.",
         "evidence": [
           "tui-dogfood.json",
@@ -90,45 +105,69 @@
           "compact-v4-metrics.json",
           "stockroom-kryn-v2-sustained-driver.json",
           "stockroom-kryn-v2-sustained-grade.json",
-          "kryn-v2-sustained-audit.json"
-        ]
+          "kryn-v2-sustained-audit.json",
+          "queuewatch-initial-observer.json",
+          "private-draft-v5-audit.json",
+          "native-vision-v5-acceptance.json",
+          "native-research-v5-failure.json",
+          "queuewatch-continuation-final-audit.json",
+          "native-research-v7-final.json",
+          "scoped-json-recovery-v7-qualification.json"
+        ],
+        "completed_scope": "Actual image attachment understanding passed one scoped case. Research used real search and exact22tools but overflowed context. Fresh local read-only Reviewer child ran, gave incorrect review; parent Build edited CSS afterward. Final artifact capabilities remain unqualified. Installed v7 search/source retrieval avoided prior context rejection but timed out with no final answer. Final v7 recovery preserved session/pin and Audit read-only state but omitted Reviewer/handoff and violated a no-change instruction after explicit Build selection."
       },
       "managed_locality_and_permissions": {
-        "status": "PENDING",
+        "status": "PASSED",
         "requirement": "Every managed role/helper remains local; read-only mutation guards and startup/in-flight outage recovery verified.",
         "evidence": [
-          "daily-launcher-outage-interpretation.json"
+          "daily-launcher-outage-interpretation.json",
+          "queuewatch-reviewer-attribution.json",
+          "queuewatch-continuation-final-audit.json",
+          "native-audit-v7-boundary-control.json"
         ],
-        "completed_scope": "Prior-client daily test recorded local selected model and loopback inference sockets; no complete wire trace, every-role test or host-wide isolation claim."
+        "completed_scope": "Managed role-independent locality guards, actual local routing/outage evidence and exact native Audit controls plus installed byte binding. No host-wide network isolation or model review-quality claim.",
+        "observed_failure": "Historical v5 parent Build mutation retained; corrected deterministic native boundary passes and matching bytes are installed.",
+        "source_correction": "Native primary Audit control PASS: actual pinned binary, 10 fake replies, parent writes/shell/second child denied after Reviewer; explicit same-session Build switch restores edit. No actual local-model review or installed v7 acceptance."
       },
       "background_isolation": {
-        "status": "PENDING",
+        "status": "PASSED",
         "requirement": "Whole-process background read/write/network and protected-grader canaries pass from the installed wheel.",
-        "evidence": []
+        "evidence": [
+          "learning-sandbox-results.json",
+          "learning-policy3-source-canary.json",
+          "learning-policy3-final-source-receipt.json"
+        ],
+        "remaining": "No missing frozen background-isolation criterion asserted. Source and nested-venv boundary controls plus full native/CLI canary apply to identical executable v7 code; deployment changes only quote rendering.",
+        "completed_scope": "Source and real nested-venv controls cover allowed workspace/relay and denied outside/alias/plugin/evaluator/model-metadata reads, outside writes, other services, runtime admin and public network."
       },
       "automatic_learning_cycle": {
-        "status": "PENDING",
+        "status": "UNQUALIFIED",
         "requirement": "Meaningful native event triggers bounded reflection and real repeated paired/protected trials with evidence-derived accept/reject/defer; immutable session pins verified.",
         "evidence": [
           "learning-first-attempt-metrics.json",
           "learning-normal-exit-trigger-metrics.json",
           "learning-cli-startup-reproduction.json",
           "learning-policy3-final-source-receipt.json",
-          "learning-policy3-source-canary.json"
+          "learning-policy3-source-canary.json",
+          "learning-v3-valid-deferral.json",
+          "learning-normal-exit-v3.json",
+          "learning-v7-final-deferral.json"
         ],
         "observed_failure": "The first real automatic worker failed native CLI startup before any model call, recorded defer/reflection_incomplete after5.542seconds and was paused; no candidate or paired row completed.",
-        "source_correction": "Policy .3 source fake-relay admission passes; actual installed corrected worker still unqualified."
+        "source_correction": "Corrected policy.3 source admission passed; installed policy.3 actual reflection returned a valid defer. Full trial/promotion cycle remains unqualified.",
+        "completed_scope": "First pre-dispatch failure and two real valid deferrals preserved. Final third scoped opportunity exhausted; no candidate/trials or full cycle, learner paused.",
+        "remaining": "Repeated live matched/protected trials and benefit remain unqualified; no forced promotion or additional attempt."
       },
       "foreground_preemption_and_regression": {
-        "status": "PENDING",
+        "status": "UNQUALIFIED",
         "requirement": "Actual active worker yields safely within admission bound; matching scoped regression monitoring and rollback verified.",
         "evidence": [
           "learning-first-attempt-metrics.json"
         ],
-        "remaining": "Active worker preemption was not observed because the worker failed before an active trial; confirmed stopped/idle cleanup is narrower evidence."
+        "remaining": "Both genuine successful reflections deferred before any trial/preemption opportunity. Full active yield and matching regression/rollback remain unqualified after frozen opportunities."
       },
       "quality_comparison": {
-        "status": "PENDING",
+        "status": "UNQUALIFIED",
         "requirement": "Matched stock-OpenCode baseline on varied unseen tasks with frozen grader controls; failures, interventions, correctness and latency separated.",
         "evidence": [
           "stockroom-kryn-initial-grade.json",
@@ -139,15 +178,16 @@
         "completed_scope": "One prospectively scoped Think0.6 fixed-order pair recorded equal17/18 correctness and two incomplete tasks. Varied unseen task coverage and a quality benefit remain unestablished."
       },
       "release_update_rollback": {
-        "status": "PENDING",
+        "status": "PASSED",
         "requirement": "Exact tagged update, interrupted activation recovery and rollback preserve previous owned state and reject changed/unowned files.",
         "evidence": [
           "private-update-rollback-summary.json",
           "private-rollback-v2.json",
           "private-reupdate-v2.json",
-          "package-fault-controls-summary.json"
+          "package-fault-controls-summary.json",
+          "private-update-v7.json"
         ],
-        "completed_scope": "Actual private tagged update/rollback/reupdate passed. Eleven isolated shipped-wheel fault controls, including real SIGKILL at four activation boundaries and fresh-process recovery, passed with external runtime/dependency/deployer boundaries mocked. Full live interrupted installation and final release remain pending."
+        "completed_scope": "Actual private tagged update/rollback/re-update and eleven isolated exact-wheel fault controls pass the frozen requirement. Four real SIGKILL/fresh-process recovery boundaries preserved bytes, modes and absence; external boundaries were mocked. No actual power loss or disk exhaustion claim."
       }
     },
     "measurements": {
@@ -1621,6 +1661,1016 @@
           "learning-policy3-source-canary.json",
           "final-learning-native-unit.log"
         ]
+      },
+      "queuewatch_daily_initial": {
+        "schema": 1,
+        "recorded_utc": "2026-09-21T03:25:00.880226+00:00",
+        "status": "INITIAL_NATIVE_EXIT_COMPLETE_TASK_ACCEPTANCE_FAILED",
+        "task_interval_seconds": 1491.313,
+        "task_budget_seconds": 1500,
+        "observer_interval_seconds": 1537.878,
+        "observer_interval_includes_pre_prompt_setup": true,
+        "tools": 49,
+        "native_error_states": 5,
+        "error_classes": {
+          "operator_denials": 4,
+          "unsupported_browser_key": 1
+        },
+        "completed_nonzero_shell_exits": 1,
+        "reported_output_tokens": 8652,
+        "persisted_completed_compactions": 3,
+        "sample_count": 727,
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "current_profile_and_artifact_binding_unchanged": true,
+        "manual_approval_pairs": 17,
+        "approval_capture_complete": false,
+        "measured_manual_mark_intervals_seconds": 58.053,
+        "timing_limit": "Marks bracket only operator recording time; actual wait before notice is missing. Do not call this complete approval wait or subtract from task time to infer compute.",
+        "operator_intervention_episodes": 4,
+        "observer_generic_intervention_marks": 2,
+        "intervention_count_source": "Root separate intervention JSONL; observer generic marks alone undercount.",
+        "native_browser": {
+          "fresh_primary_session": true,
+          "tools": 25,
+          "resize_calls": 2,
+          "sizes": [
+            {
+              "width": 1280,
+              "height": 800
+            },
+            {
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "real_navigation": true,
+          "real_acknowledgement_clicks": 2,
+          "console_inspection": true,
+          "last_network_log": {
+            "initial_api_get": 1,
+            "ack_posts": 2,
+            "second_api_get_observed": false
+          },
+          "reload_demonstrated": false,
+          "reload_claim": "Unsupported: Command+R error, plain r only, final network log has no second API GET",
+          "filter_failure_observed": true,
+          "model_claimed_filtering_success_despite_worker_card_in_api_view": true,
+          "fresh_reviewer": false,
+          "handoff": false
+        },
+        "frozen_original_grade": {
+          "raw_checks_passed": 4,
+          "raw_checks_total": 7,
+          "result_preserved": true,
+          "browser_block": "Exact Service locator mismatched Service: label; no browser assertions executed"
+        },
+        "versioned_selector_only_diagnostic": {
+          "protocol_sha256": "d31913e9db77f268ab5875c1594181372289a56a26c9cc6cdc596be1fefd34a6",
+          "controls_expected": {
+            "correct_original": true,
+            "correct_colon": true,
+            "broken_rejected": true
+          },
+          "raw_checks_passed": 3,
+          "raw_checks_total": 7,
+          "real_service_filter_check": "FAIL: selecting api leaves all5fixture cards",
+          "public_tests": "4/5; backup now contains all acknowledged incidents after manual browser work, and model-written tests depend on that backup. Previous5/5pass retained; no selector-only score delta claimed.",
+          "restart": "DEPENDENT_NOT_TESTED; browser acknowledgement prerequisite not reached",
+          "sample_byte_criterion": "Unchanged; fail from formatting only, original JSON values still equal",
+          "candidate_copy_and_live_project_unchanged_by_grading": true
+        },
+        "owned_server_cleanup": "Root verified/stopped only its4173server; grader-owned temporary servers all exited",
+        "remaining": [
+          "Failed filtering, data preservation and public-test acceptance remains unresolved",
+          "Correct fresh-context review and handoff remain unqualified",
+          "Final artifact dogfood, learning/preemption and publication gates remain incomplete"
+        ],
+        "evidence": [
+          "queuewatch-initial-final-audit.json",
+          "queuewatch-initial-observer.json",
+          "queuewatch-initial-grade.json",
+          "queuewatch-label-v2-protocol.json",
+          "queuewatch-label-v2-controls.json",
+          "queuewatch-label-v2-grade.json",
+          "queuewatch-label-v2-interpretation.json"
+        ]
+      },
+      "automatic_learning_valid_deferral": {
+        "schema": 1,
+        "recorded_unix": 1789959377.8153632,
+        "release": "b91397c5e13774a0",
+        "event_family": "unknown",
+        "event_sha256_matches_reflection": true,
+        "native_exit": 0,
+        "native_completed": true,
+        "dispatch_count": 1,
+        "requested_variant": "fast",
+        "request_metadata": [
+          {
+            "enable_thinking": false,
+            "max_tokens": 768,
+            "numeric": {
+              "max_tokens": 768,
+              "min_p": 0,
+              "presence_penalty": 1.5,
+              "repetition_penalty": 1,
+              "temperature": 0.7,
+              "top_k": 20,
+              "top_p": 0.8
+            },
+            "started": 1789959277.453274,
+            "tool_count": 0,
+            "tool_schema_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        ],
+        "paired_trials": 0,
+        "foreground_preemption_exercised": false,
+        "diagnosis": "Valid model-derived insufficient_evidence deferral. Event family was unknown and only aggregate telemetry was supplied. Unknown family is not a hard rejection in worker code; the bounded output gives no more specific causal explanation. No transport or generation failure was observed.",
+        "time_budget_seconds_after": 15.200058583985083,
+        "candidate_attempts_after": 2,
+        "historical_budget_reset": false,
+        "status": "VALID_MODEL_DEFERRAL_PARTIAL_CYCLE",
+        "decision": "defer",
+        "reason": "insufficient_evidence",
+        "instructions_empty": true,
+        "evidence": [
+          "learning-v3-valid-deferral.json",
+          "learning-normal-exit-v3.json",
+          "learning-preemption-v3.json"
+        ]
+      },
+      "learning_policy4_prospective": {
+        "status": "PROSPECTIVE_THIRD_OPPORTUNITY_PENDING",
+        "policy": "learning-2026-09-20.4",
+        "candidates_per_day": 3,
+        "daily_seconds": 600,
+        "prior_attempts": 2,
+        "spent_seconds_preserved": 15.200058583985083,
+        "reason": "One final opportunity on genuinely new scoped evidence after the preserved startup failure and valid deferral. No budget reset or forced candidate.",
+        "candidate_trial_or_promotion_proven": false,
+        "active_preemption_proven": false,
+        "source_revision": "65f62242cc600283e51f412962484dda3cae0502",
+        "final_outcome": "Third opportunity completed with valid scoped deferral; final budget and prior history preserved, learner paused."
+      },
+      "browse_v5_tool_surface": {
+        "status": "EXACT_TOOL_MAP_OBSERVED_ON_LIVE_PRIMARY_AND_COMPACTION_TASK_FAILED",
+        "tool_count": 22,
+        "browser_tools": 17,
+        "search_tools": 3,
+        "other_tools": [
+          "question",
+          "webfetch"
+        ],
+        "request_hooks": [
+          "context",
+          "generate",
+          "compaction"
+        ],
+        "fixture_tests_per_node": 9,
+        "tested_node_versions": [
+          "22.23.1",
+          "25.2.1"
+        ],
+        "source_revision": "e4aa2fc6034c7412329cc9883c85a79d9869fd50",
+        "other_roles_unchanged": true,
+        "model_requests_in_qualification": 0,
+        "limit": "Tool-map fixtures and pinned native enforcement source do not establish reasoning or task success.",
+        "evidence": [
+          "private-draft-v5-audit.json",
+          "native-research-v5-failure.json"
+        ],
+        "wire_tool_count": 22,
+        "live_primary_and_compaction_names_equal": true,
+        "schema_sha256": "431b83de7cbb5b1527f101afcb3acd17c05dcbf56e85c905b3e219d86c770b85"
+      },
+      "private_artifact_v5": {
+        "status": "PASS_SCOPED_PRIVATE_DRAFT_UPDATE",
+        "source_revision": "e4aa2fc6034c7412329cc9883c85a79d9869fd50",
+        "wheel_sha256": "59ce98613a9ef68976fe7515cf031e83629843794380ced08ce30fcea79c4f80",
+        "wheel_bytes": 198997,
+        "payload_files": 48,
+        "wheel_entries": 57,
+        "source_dirty": false,
+        "source_binding_verified": true,
+        "package_update_exit": 0,
+        "installed_client": "a4962bcd74a607b9",
+        "live_qualified": false,
+        "evidence": [
+          "private-draft-v5-audit.json",
+          "private-draft-v5-staged.json",
+          "private-update-v5.json"
+        ],
+        "transaction_status": "committed",
+        "installed": true
+      },
+      "v5_remaining_acceptance": {
+        "status": "PENDING",
+        "native_research_vision_review_plan": "Vision scoped PASS; research context FAIL; fresh Reviewer execution observed but review correctness and whole-audit readonly FAIL; broad Plan acceptance unqualified",
+        "queuewatch_continuation": "COMPLETED_WINDOW_TASK_ACCEPTANCE_FAILED_3_OF_9",
+        "json_recovery": "PENDING",
+        "genuine_learning_opportunity": "PENDING",
+        "active_preemption": "PENDING",
+        "final_publication": "PENDING",
+        "tiny_check_limit": "Protocol/fixture checks must not be aggregated into broad agent-capability evidence.",
+        "future_artifact_fix_acceptance": "PENDING"
+      },
+      "queuewatch_daily_continuation": {
+        "schema": 1,
+        "recorded_utc": "2026-09-21T04:04:22.712101+00:00",
+        "status": "FINAL_TASK_ACCEPTANCE_FAILED",
+        "task_budget_seconds": 1500,
+        "task_interval_seconds": 1375.027,
+        "normal_tui_exit_reported_by_root": true,
+        "normal_tui_exit_utc": "2026-09-21T03:58:20Z",
+        "observer_interval_seconds": 1499.04,
+        "observer_interval_includes_pre_prompt_setup": true,
+        "wall_time_not_inference_time": true,
+        "installed_binding": {
+          "package_sha256": "59ce98613a9ef68976fe7515cf031e83629843794380ced08ce30fcea79c4f80",
+          "source_revision": "e4aa2fc6034c7412329cc9883c85a79d9869fd50",
+          "client": "a4962bcd74a607b9",
+          "owned_config_sha256": "bc7f4f022c2e9c4a40d5bac1f6618c9ecb352daf78d0c0f08c5e5b523507afa0",
+          "profile_sha256": "667dfe2c0037804834e08b166c86e962406f85826959b6ac2ff3979907a7305a"
+        },
+        "installed_binding_unchanged": true,
+        "artifact_transition_from_initial": true,
+        "same_artifact_quality_comparison": false,
+        "tools": 39,
+        "native_error_states": 4,
+        "error_classes": {
+          "operator_declined_shell": 4
+        },
+        "completed_shell_exit_counts": {
+          "0": 8,
+          "unknown": 3,
+          "7": 1
+        },
+        "reported_output_tokens": 14626,
+        "persisted_completed_compactions": 3,
+        "token_limit": "Persisted counters can omit title helpers and unpersisted work.",
+        "resources": {
+          "sample_count": 705,
+          "max_listener_rss_bytes": 8974450688,
+          "max_sampled_listener_phys_footprint_bytes": 12256238768,
+          "max_observed_listener_lifetime_phys_footprint_bytes": 12306619568,
+          "swap_start_bytes": 3941660098,
+          "swap_end_bytes": 3908105666,
+          "swap_peak_bytes": 3941660098,
+          "swap_peak_growth_bytes": 0,
+          "pressure_levels_observed": [
+            1
+          ],
+          "warning_or_critical_observed": false,
+          "telemetry_complete": true,
+          "rss_available": true,
+          "phys_footprint_available": true,
+          "caveat": "Physical footprint is process-wide and includes Metal-backed allocations; it is not per-model or KV usage. Sampled peaks can miss transients. Lifetime peak covers the whole process lifetime, not this case. RSS may underreport Metal memory. Short samples do not establish bounded long-run swap."
+        },
+        "manual_approval_pairs": 13,
+        "approval_capture_complete": false,
+        "recorded_mark_interval_seconds": 15.951,
+        "approval_timing_limit": "Marks capture operator recording intervals; total waiting unknown, no pure-inference subtraction.",
+        "logged_intervention_records": 4,
+        "intervention_classes": [
+          "declined port-wide forced termination and supplied process-ownership constraint",
+          "read-only verification of owned app server",
+          "graceful stop of verified owned app server",
+          "declined broad process pattern and invoked native audit"
+        ],
+        "closing_action_root_reported": "Rejected pending post-review npm test, then normal TUI exit.",
+        "operator_app_code_edits": false,
+        "hidden_feedback_given_to_local_agent": false,
+        "fresh_reviewer": {
+          "agent": "reviewer",
+          "provider": "local",
+          "model": "qwen",
+          "variant": "think",
+          "idle_outcome": "succeeded",
+          "elapsed_seconds": 66.323,
+          "tools": {
+            "read": 5,
+            "glob": 1
+          },
+          "mutation_calls": 0,
+          "reported_output_tokens": 3228
+        },
+        "review_quality": [
+          "Read-only local Reviewer execution is demonstrated; correctness is not.",
+          "Reviewer approved filter and Refresh behavior that fails independent functional evidence.",
+          "Missing media queries alone does not establish nonresponsive layout; neither viewport was exercised by child."
+        ],
+        "review_handoff_spec_drift": {
+          "spec_drift_origin": "Parent-authored Reviewer prompt",
+          "requested_external_file_updates_preserved_in_child_task": false,
+          "replacement_requirement": "New POST /api/incidents endpoint for external appending",
+          "hidden_grader_findings_shared": false
+        },
+        "parent_after_review_mutation": {
+          "agent": "build",
+          "path": "public/style.css",
+          "completed_ms": 1789962959017,
+          "child_idle_ms": 1789962940484,
+          "after_child_idle": true,
+          "operator_edit": false,
+          "before_sha256": "247f6d12ee888fb7c2dddc79dd4e80e8cce125e3d9bf9622a838c203913e14d1",
+          "after_sha256": "92426026363f67d397f8076a0edc665d53ba81e9c05151d36be513698e31b72d"
+        },
+        "whole_audit_workflow_readonly": false,
+        "reviewer_child_mutation_observed": false,
+        "post_review_only_changed_file": "public/style.css",
+        "handoff_file_present": false,
+        "completed_browser_continuation": false,
+        "grade": {
+          "schema": 1,
+          "final_binding_sha256": "fb6b70f30936b6c6420234a60c79407330d6b124c09f595e6f6a3027081ca631",
+          "protocol_sha256": "6a8274b9e779fba490e8273617d7af48583c710c39d4480c6b00a93f192d5a2c",
+          "controls_all_expected": true,
+          "raw_grade_sha256": "f65ba48f78aa1f372f73c25e2112f53f9bca4f55927267612928ed00921db67b",
+          "raw_checks_passed": 3,
+          "raw_checks_total": 9,
+          "raw_passed": false,
+          "checks": [
+            {
+              "name": "original-tests-and-data-preserved",
+              "passed": false
+            },
+            {
+              "name": "public-tests",
+              "passed": false,
+              "details": null
+            },
+            {
+              "name": "unknown-404-no-change",
+              "passed": true,
+              "details": null
+            },
+            {
+              "name": "ack-api",
+              "passed": true,
+              "details": null
+            },
+            {
+              "name": "ack-idempotent-count",
+              "passed": true,
+              "details": null
+            },
+            {
+              "name": "real-browser-workflow",
+              "passed": false,
+              "details": "Error: service-filter: [\"i-1\",\"i-2\",\"i-3\",\"i-4\",\"i-5\"]"
+            },
+            {
+              "name": "api-sees-external-collector",
+              "passed": false,
+              "details": null
+            },
+            {
+              "name": "ack-preserves-external-collector",
+              "passed": false,
+              "details": null
+            },
+            {
+              "name": "restart-keeps-acknowledgement",
+              "passed": false,
+              "details": null
+            }
+          ],
+          "browser": {
+            "checks": [
+              {
+                "name": "service-filter",
+                "passed": false,
+                "detail": [
+                  "i-1",
+                  "i-2",
+                  "i-3",
+                  "i-4",
+                  "i-5"
+                ]
+              }
+            ],
+            "errors": [],
+            "screenshots": [],
+            "failure": "Error: service-filter: [\"i-1\",\"i-2\",\"i-3\",\"i-4\",\"i-5\"]",
+            "passed": false
+          },
+          "restart": "DEPENDENT_NOT_TESTED: browser prerequisite absent",
+          "live_project_before": {
+            ".gitignore": "76a578f24322db58a656d176b59697c3bed7d848cd491667412b340e02150d6c",
+            "README.md": "84955d39aee52563dd596f6cf4d1d5869e9bc868865dca73e431776c42d12abb",
+            "TASK.md": "86ca999af7055fe61bd5fd0c1347de481dcfa9d52d2a08d410c9cddd25d99b84",
+            "data/incidents.json": "c157b128c0c2526fccf6c6b7b47ddeb3669be2ea98f44c2534d3ed4707a84ace",
+            "data/incidents.json.backup": "5a22854ea8e6e1d2cfc050945f7474fb102f637a7d482122df1eba2ad26dcd58",
+            "data/incidents.test.json": "c157b128c0c2526fccf6c6b7b47ddeb3669be2ea98f44c2534d3ed4707a84ace",
+            "package.json": "84684be96174d652e5fae9522fbb6ffdfaee0a75c685ac14818f6f0e2d5275a9",
+            "public/app.js": "50fa94007ea124df6a3b61b00f3a68951c60e80ec4d313327a8d92c579f464f4",
+            "public/index.html": "4e24add7954350728823f26df3803830f3da79ec15b11fb34631bb5403cd31e7",
+            "public/style.css": "92426026363f67d397f8076a0edc665d53ba81e9c05151d36be513698e31b72d",
+            "server.mjs": "5e0acb69826842b57bd9a19d93deb26fe428399dd07621161ac49c60e5652241",
+            "store.mjs": "514e36328d7d770e3289b2eb276595add6bb6e434d4aee17d93f9cd0ccae2e59",
+            "test/acknowledge.test.mjs": "6f568988b96dcc0c6b4ed349a1a3569f2457f6ef7b9d493a718c38362938d0a8",
+            "test/existing.test.mjs": "83ddf8ff6cb10e99d404d9e4dfb6b0395586b6fc827bf5e1dd50fcea0b89d4af"
+          },
+          "live_project_after": {
+            ".gitignore": "76a578f24322db58a656d176b59697c3bed7d848cd491667412b340e02150d6c",
+            "README.md": "84955d39aee52563dd596f6cf4d1d5869e9bc868865dca73e431776c42d12abb",
+            "TASK.md": "86ca999af7055fe61bd5fd0c1347de481dcfa9d52d2a08d410c9cddd25d99b84",
+            "data/incidents.json": "c157b128c0c2526fccf6c6b7b47ddeb3669be2ea98f44c2534d3ed4707a84ace",
+            "data/incidents.json.backup": "5a22854ea8e6e1d2cfc050945f7474fb102f637a7d482122df1eba2ad26dcd58",
+            "data/incidents.test.json": "c157b128c0c2526fccf6c6b7b47ddeb3669be2ea98f44c2534d3ed4707a84ace",
+            "package.json": "84684be96174d652e5fae9522fbb6ffdfaee0a75c685ac14818f6f0e2d5275a9",
+            "public/app.js": "50fa94007ea124df6a3b61b00f3a68951c60e80ec4d313327a8d92c579f464f4",
+            "public/index.html": "4e24add7954350728823f26df3803830f3da79ec15b11fb34631bb5403cd31e7",
+            "public/style.css": "92426026363f67d397f8076a0edc665d53ba81e9c05151d36be513698e31b72d",
+            "server.mjs": "5e0acb69826842b57bd9a19d93deb26fe428399dd07621161ac49c60e5652241",
+            "store.mjs": "514e36328d7d770e3289b2eb276595add6bb6e434d4aee17d93f9cd0ccae2e59",
+            "test/acknowledge.test.mjs": "6f568988b96dcc0c6b4ed349a1a3569f2457f6ef7b9d493a718c38362938d0a8",
+            "test/existing.test.mjs": "83ddf8ff6cb10e99d404d9e4dfb6b0395586b6fc827bf5e1dd50fcea0b89d4af"
+          },
+          "live_project_unchanged": true,
+          "private_candidate_unchanged": true,
+          "grader_servers_exited": true,
+          "root_server_touched": false,
+          "hidden_feedback_to_local_model": false,
+          "model_calls": 0,
+          "earlier_results_preserved": true
+        },
+        "earlier_pre_review_grade_preserved": {
+          "raw_passed": 3,
+          "raw_total": 9,
+          "sha256": "0c111a102c312872a29c74ab40902adb513a108ae39f6070af3093ff1ad3743e"
+        },
+        "owned_cleanup": {
+          "grader_servers_exited": true,
+          "live_project_unchanged_by_grading": true,
+          "root_server_touched_by_grader": false,
+          "tui_exit_code_operator_observed": 0,
+          "observer_exit_code_operator_observed": 0,
+          "queuewatch_port_4173_listener_absent": true,
+          "known_owned_processes_absent": 3,
+          "runtime_healthy": true,
+          "runtime_active_requests": 0,
+          "runtime_waiting_requests": 0,
+          "runtime_model": "Qwen3.5-9B-6bit",
+          "runtime_max_model_len": 16384,
+          "runtime_memory_limit_gib": 14,
+          "runtime_deliberately_left_idle": true,
+          "receipt_sha256": "9d3b750df2b2bdebfa9d3414eae323bccdc27457373fdc96025504fc00911af0",
+          "scope": "Known QueueWatch process identities and loopback port 4173; does not audit unrelated concurrent native fixtures."
+        },
+        "no_model_calls_or_project_mutations_by_auditor": true,
+        "cleanup_verified_utc": "2026-09-21T04:03:06.222719+00:00"
+      },
+      "native_vision_v5": {
+        "installed_wheel": "59ce98613a9ef68976fe7515cf031e83629843794380ced08ce30fcea79c4f80",
+        "installed_client": "a4962bcd74a607b9",
+        "protocol_sha256": "ff0554c09d57dac7022443bb9cebd5c69c387e0d34b5fe043d90ccad5db8cf2b",
+        "all_pass": true,
+        "checks": {
+          "one_primary_local_fast_request": true,
+          "actual_matching_image_wire": true,
+          "export_attachment_identical": true,
+          "no_tools_exposed_or_called": true,
+          "literal_event_export_identity": true,
+          "unchanged_frozen_grader_pass": true,
+          "generation_completed": true,
+          "routing_and_bracket_verified": true,
+          "guard_clean": true,
+          "owned_cleanup": true,
+          "no_intervention": true,
+          "workspace_original_bytes_unchanged": true,
+          "frozen_launch_bindings_still_match": true,
+          "all_driver_acceptance_checks_pass": true
+        },
+        "model_requests": 1,
+        "tools_exposed": 0,
+        "tools_called": 0,
+        "wall_seconds": 12.184,
+        "prompt_seconds": 6.65,
+        "sampled_peak_footprint_bytes": 10316471472,
+        "swap_growth_bytes": 0,
+        "pressure_levels": [
+          1
+        ],
+        "scope": "Scoped attached synthetic image understanding through installed native Plan/Fast, no tools. Not task08 PhaseB, application repair, broad visual intelligence, OS-wide routing proof or long-run stability.",
+        "previous_attempt1": "Preserved 0.07s launch defect with zero model/CLI dispatch; not included as a model capability failure.",
+        "status": "PASS_SCOPED_SYNTHETIC_IMAGE",
+        "evidence": [
+          "native-vision-v5-acceptance.json"
+        ],
+        "observed_agent": "plan",
+        "observed_variant": "fast"
+      },
+      "native_research_v5": {
+        "status": "FAIL_CONTEXT_OVERFLOW",
+        "installed_wheel": "59ce98613a9ef68976fe7515cf031e83629843794380ced08ce30fcea79c4f80",
+        "installed_client": "a4962bcd74a607b9",
+        "wall_seconds": 22.522,
+        "prompt_seconds": 15.883,
+        "real_search_calls": 2,
+        "search_result_text_bytes": [
+          16837,
+          17580
+        ],
+        "compaction_input_tokens": 21288,
+        "context_limit": 16384,
+        "official_sources_opened": 0,
+        "final_response": false,
+        "strict_json_grading": "NOT_RUN_NO_FINAL_RESPONSE",
+        "tool_errors": 0,
+        "quota_failure": false,
+        "normal_sampled_pressure": true,
+        "swap_growth_bytes": 0,
+        "owned_cleanup": true,
+        "workspace_unchanged": true,
+        "exact_browse22_primary_and_compaction": true,
+        "raw_destinations_all_local": true,
+        "formal_routing_acceptance": false,
+        "formal_routing_limit": "Driver requires completed generation coverage; rejected compaction has no completed timestamp and remains unqualified. Do not promote raw-destination evidence to a formal pass.",
+        "evidence": [
+          "native-research-v5-failure.json"
+        ],
+        "observed_variant": "think",
+        "default_browse_variant": "fast"
+      },
+      "native_tool_output_v6": {
+        "status": "BUILT_AND_FIXTURE_QUALIFIED_NOT_INSTALLED_DURING_QUEUEWATCH",
+        "source_revision": "41bfc3b9189a72561b09accfaa00153aeaeefa45",
+        "wheel_sha256": "51550c01c605ac9d8aa7f40f63adca158364d7329002f592373450e96de4d971",
+        "max_bytes": 4096,
+        "max_lines": 200,
+        "global_native_preview_limit": true,
+        "full_native_text_archive_retention_days": 7,
+        "actual_model_calls_in_fixture": 0,
+        "fixture_provider_requests": 2,
+        "fixture_tools_completed": 7,
+        "full_original_exa_text_archives_verified": true,
+        "premarked_results_bypass_generic_limit": true,
+        "oversized_first_line_can_return_marker_only": true,
+        "marker_additional_to_preview_bytes": true,
+        "aggregate_token_guarantee": false,
+        "live_research_requalification": "MECHANICAL_PASS_TASK_FAIL",
+        "evidence": [
+          "native-tool-output-fixture.json",
+          "private-draft-v6-audit.json"
+        ],
+        "installed_successor": "v7 installed the same native cap; mechanical behavior passed actual affected research regression, but research task timed out without final answer"
+      },
+      "native_audit_workflow_v5": {
+        "status": "FAIL_WHOLE_WORKFLOW_READONLY",
+        "fresh_child": true,
+        "child_local_think": true,
+        "child_observed_mutation_tools": 0,
+        "parent_after_child_css_edit": true,
+        "operator_app_code_edits": false,
+        "review_correctness": false,
+        "fix_status": "Corrected native boundary controls and matching installed v7 bytes qualify the v5 guard fix. Actual v7 Audit remained read-only across resume; required Reviewer and handoff were omitted, so review task quality still fails.",
+        "evidence": [
+          "queuewatch-reviewer-attribution.json",
+          "queuewatch-continuation-final-audit.json"
+        ],
+        "prospective_correction": {
+          "command": "/audit",
+          "primary_role": "audit",
+          "variant": "think",
+          "persists_across_child_result_and_resume": true,
+          "writes_and_checks_require_explicit_build_switch": true,
+          "allowed_child": "one fresh foreground reviewer",
+          "session_and_model_override_denied": true,
+          "background_delegation_denied": true,
+          "qualification": "Actual pinned native boundary control PASS with 10 fake replies and zero real inference; installed local-model workflow acceptance pending"
+        }
+      },
+      "native_audit_v7_boundary_control": {
+        "source_plugin_sha256": "1cc2f1e2b8f74696b5afd9ea9decd450a2785cbc7156e94d2f2a75c3669b0820",
+        "actual_model_calls": 0,
+        "actual_runtime_requests": 0,
+        "checks": {
+          "native_command_switches_parent_to_audit": true,
+          "fresh_reviewer_identity": true,
+          "fresh_context_excludes_parent_history": true,
+          "reuse_and_background_rejected": true,
+          "one_synchronous_reviewer_completed": true,
+          "reviewer_read_success_mutation_denied": true,
+          "parent_mutation_denied_after_child": true,
+          "canary_unchanged_after_audit": true,
+          "audit_and_reviewer_schemas_exclude_writes": true,
+          "explicit_build_switch_restores_edit": true,
+          "same_parent_session_after_explicit_switch": true,
+          "all_owned_sessions_idle": true,
+          "clean_shutdown": true
+        },
+        "failed_attempts_preserved": true,
+        "parent_after_audit": "audit",
+        "fake_provider_requests": 10,
+        "requests_by_agent": {
+          "audit": 4,
+          "reviewer": 3,
+          "build": 3
+        },
+        "all_pass": true,
+        "status": "PASS_NATIVE_BOUNDARY_CONTROL_NOT_MODEL_QUALITY",
+        "source_revision": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+        "installed_v7": true,
+        "live_local_model_review_quality": "FAILED_REQUIRED_REVIEWER_OMITTED",
+        "evidence": [
+          "native-audit-v7-boundary-control.json"
+        ],
+        "installed_artifact_binding": "Source boundary controls now correspond to verified installed v7 bytes; no real local-model Audit run claimed.",
+        "live_scope": "Actual v7 recovery kept Audit read-only across resume, but omitted required Reviewer and handoff. Explicit Build later changed a test against instructions."
+      },
+      "installed_v7_authentication": {
+        "installed_client": "b0378997fa21b68d",
+        "source_revision": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+        "module_sha256": "2a3c015bf51a27d99484571002c6085fad4c6bf0be64b6b8f52262777bc61026",
+        "test_sha256": "b44814513cfa60cb8e6f15f21b9da41c28e0c26bce0ce42ed818a90c11cf972c",
+        "installed_module_verified": true,
+        "tests": 2,
+        "success": true,
+        "errors": 0,
+        "failures": 0,
+        "cases": [
+          "no_cache_denied",
+          "verified_owner_accepted",
+          "offline_before_expiry_accepted",
+          "expired_cache_denied",
+          "online_failure_removes_cache",
+          "logout_removes_cache",
+          "malformed_cache_denied_and_logout_recovers",
+          "wrong_numeric_owner_denied",
+          "environment_token_denied",
+          "plaintext_token_storage_denied",
+          "symlink_logout_denied_preserves_target"
+        ],
+        "scope": "Existing two auth tests imported the exact installed v7 module. Isolated temporary cache, mocked GitHub subprocess replies/keyring metadata and deterministic clocks; no actual credentials/cache modified, no GitHub calls, no runtime/model requests. Actual authenticated owner install/start evidence is separate.",
+        "status": "PASSED_DEPLOYED_MODULE_CONTROLS_WITH_LIVE_POSITIVE_OWNER_EVIDENCE",
+        "behavioral_cases": 11,
+        "real_credentials_changed": false,
+        "actual_github_calls": 0,
+        "actual_runtime_or_model_requests": 0,
+        "evidence": [
+          "installed-v7-auth-controls.json",
+          "installed-v7-auth-controls.log",
+          "private-asset-install.json",
+          "private-update-v7.json"
+        ]
+      },
+      "private_artifact_v7": {
+        "source_revision": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+        "wheel_sha256": "f1d8eba744bbf87a3045d968592489ef30f2338a764ced927e5f3087773f241c",
+        "installed_client": "b0378997fa21b68d",
+        "payload_manifest_sha256": "ce3a446707c7cd60fbc0c31cc8724acb28ff51da6a0c6312e672770004218037",
+        "source_clean": true,
+        "payload_files_verified": 48,
+        "wheel_package_bytes_verified": true,
+        "deployment_files_verified": 14,
+        "plugin_bytes_verified": true,
+        "transaction_status": "committed",
+        "transaction_files_hash_verified": 10,
+        "update_exit_code": 0,
+        "update_exit_evidence": "Root operator reported exit 0; log and committed transaction independently agree.",
+        "production_budget": {
+          "candidates": 2,
+          "date": "2026-09-21",
+          "seconds": 15.200058583985083
+        },
+        "production_controls": {
+          "enabled": true,
+          "paused": true
+        },
+        "status": "PASS_SCOPED_PRIVATE_DRAFT_UPDATE",
+        "external_spaced_cwd": true,
+        "native_normal_autostart_and_exit_operator_observed": true,
+        "task_inference_during_normal_start": false,
+        "post_launch_settings_changed_in_serialization_only": true,
+        "settings_semantic_differences": 0,
+        "scope": "Actual tagged update and normal native launch; scoped lifecycle evidence, not task-quality acceptance.",
+        "evidence": [
+          "private-update-v7.json",
+          "private-update-v7.log"
+        ]
+      },
+      "native_research_v7": {
+        "status": "FAILED_TASK_TIMEOUT_MECHANICAL_OUTPUT_CAP_PASSED",
+        "scope": "Affected native output-cap regression; not the full task07 benchmark or slash-command dispatch.",
+        "wall_seconds": 247.73,
+        "prompt_budget_seconds": 240,
+        "observed_prompt_interval_seconds": 241.10033032226562,
+        "deadline_scope": "240s prompt deadline; observed prompt interval includes stop/settlement overhead; total wall also includes native startup/readiness/export/cleanup.",
+        "outcome": {
+          "driver_completed": false,
+          "model_completed": false,
+          "native_cli_exit_code": 0,
+          "outer_driver_exit_code": 1,
+          "terminal_assistant_answer_present": false,
+          "semantic_pass": false,
+          "reason": "Deadline reached after repeated source/archive retrieval attempts; no terminal JSON answer. The native CLI cleanly exiting is not a task pass.",
+          "no_retry": true
+        },
+        "mechanical_output_cap": {
+          "configured": {
+            "max_bytes": 4096,
+            "max_lines": 200
+          },
+          "archived_tool_outputs": 13,
+          "all_archives_exist": true,
+          "all_archives_match_preview_prefix": true,
+          "all_previews_within_cap": true,
+          "all_explicit_archive_markers": true,
+          "marker_only_outputs": 2,
+          "observed_regression_fix": "The prior 21288-token compaction rejection did not recur. Three compactions completed within the 16K context, and the fourth was interrupted by the deadline.",
+          "limitation": "Native truncation preserves whole lines. A single oversized oMLX GitHub API JSON line yielded only a 164-byte archive marker. Browse has no local read tool and repeated invalid webfetch local-path attempts did not recover the text."
+        },
+        "tool_calls": 29,
+        "tool_counts": {
+          "search_web_search_exa": 7,
+          "webfetch": 22
+        },
+        "source_coverage": {
+          "real_successful_search": true,
+          "both_official_release_pages_opened": true,
+          "playwright_api_timestamp_visible": true,
+          "omlx_api_full_text_visible_to_model": false,
+          "final_caveats_and_citations_qualified": false
+        },
+        "wire": {
+          "request_count": 19,
+          "kinds": {
+            "primary": 15,
+            "compaction": 4
+          },
+          "all_requests_local": true,
+          "response_status_counts": {
+            "200": 19
+          },
+          "all_browse22_schema": true,
+          "all_think": true,
+          "all_numeric_settings_unchanged": true
+        },
+        "resources": {
+          "sample_count": 119,
+          "max_listener_rss_bytes": 8779481088,
+          "max_sampled_listener_phys_footprint_bytes": 12579233064,
+          "max_observed_listener_lifetime_phys_footprint_bytes": 12651748744,
+          "swap_start_bytes": 3899717058,
+          "swap_end_bytes": 3874551234,
+          "swap_peak_bytes": 3899717058,
+          "swap_peak_growth_bytes": 0,
+          "pressure_levels_observed": [
+            1
+          ],
+          "warning_or_critical_observed": false,
+          "telemetry_complete": true,
+          "rss_available": true,
+          "phys_footprint_available": true,
+          "caveat": "Physical footprint is process-wide and includes Metal-backed allocations; it is not per-model or KV usage. Sampled peaks can miss transients. Lifetime peak covers the whole process lifetime, not this case. RSS may underreport Metal memory. Short samples do not establish bounded long-run swap."
+        },
+        "automatic_interventions": 1,
+        "operator_interventions": 0,
+        "previous_failures_retained": true,
+        "independent_review_model_calls": 0,
+        "artifact": {
+          "source_revision": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+          "wheel_sha256": "f1d8eba744bbf87a3045d968592489ef30f2338a764ced927e5f3087773f241c",
+          "client_release": "b0378997fa21b68d",
+          "installed_config_sha256": "09aacef7b7e96ccddb7c7e288adc554152e7cf2b6fac6565a43402d9bc4b99af"
+        },
+        "tool_errors_count": 11,
+        "error_classes": {
+          "invalid_local_path_webfetch": 9,
+          "invalid_webfetch_format": 2
+        },
+        "official_source_opens": 11,
+        "completed_compactions": 3,
+        "interrupted_compactions_at_deadline": 1,
+        "persisted_output_tokens": 5955,
+        "token_scope": "Persisted native counters; interrupted generation can omit counters.",
+        "routing_verified": true,
+        "owned_sessions_idle": true,
+        "owned_cli_exited": true,
+        "owned_native_server_exited": true,
+        "workspace_unchanged": true,
+        "final_json_answer": false,
+        "semantic_task_pass": false,
+        "literal_extraction_scope": "The last completed tool-call preamble was graded verbatim and failed strict JSON; it is not a terminal answer.",
+        "offline_extractor_correction": "The first offline report did not recognize line-count markers. Corrected extraction verifies all 13 native archives/previews; task outcome and underlying evidence are unchanged. Original report retained.",
+        "evidence": [
+          "native-research-v7-final.json",
+          "native-research-v7-original-extractor.json",
+          "native-research-v5-failure.json"
+        ]
+      },
+      "v7_remaining_acceptance": {
+        "status": "FROZEN_OPPORTUNITIES_EXHAUSTED_NOT_READY",
+        "research_regression": "COMPLETED_TASK_FAILED_MECHANICAL_CAP_PASSED",
+        "json_recovery": "COMPLETED_TASK_FAILED",
+        "learning_cycle": "FINAL_VALID_DEFERRAL_FULL_CYCLE_UNQUALIFIED",
+        "active_preemption": "UNQUALIFIED_NO_ACTIVE_OPPORTUNITY",
+        "live_local_model_audit": "READ_ONLY_PERSISTENCE_PASS_REQUIRED_REVIEWER_OMITTED",
+        "final_publication": "PRIVATE_DRAFT_RETAINED_NOT_PUBLISHED"
+      },
+      "v7_history_privacy_scan": {
+        "schema": 1,
+        "unix": 1789964475.103225,
+        "head": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+        "tracked_files": 68,
+        "reachable_blobs": 123,
+        "reachable_blob_bytes": 2466743,
+        "patterns": [
+          "github_token",
+          "openai_token",
+          "private_key",
+          "private_home_path"
+        ],
+        "findings_without_matched_values": [],
+        "limits": "Pattern scan plus curated tracked paths; no claim of detecting every possible secret. New documentation changes must be scanned again before push.",
+        "status": "PASS_SCOPED_PATTERN_SCAN",
+        "findings": 0,
+        "raw_traces_weights_and_databases_excluded_from_curated_source": true,
+        "final_document_diff_rescan_required": true,
+        "evidence": [
+          "final-v7-history-privacy-audit.json"
+        ]
+      },
+      "background_canary_v7_continuity": {
+        "status": "PASSED_STATIC_EQUIVALENCE",
+        "installed_client": "b0378997fa21b68d",
+        "tested_source_sha256": "a15a45d922199d41a81d037dabc216b06be1868585c85b85537574b7a004d2fb",
+        "deployed_sha256": "541143b1123956564889f03da8e97370a301f52a98f35fdd4a3989d6ddaf7464",
+        "full_ast_equal": true,
+        "normalized_ast_sha256": "2700b4126f2d1d0f6c054e09fba2b958413d14df07763ec0861ecbe8b8a9a54a",
+        "only_text_delta": "Deployment rendered the same MODEL_ID string using single instead of double quotes.",
+        "sandbox_logic_changed_since_full_cli_canary": false,
+        "original_fake_cli_canary_outcome": "Reached one Fast max768 tools0 fake request, then intentional fake-provider HTTP403; denied all four protected reads and shut down cleanly. Not a model capability pass.",
+        "broad_boundary_coverage": "Source and real nested-venv controls cover allowed workspace/relay and denied outside/alias/plugin/evaluator/model-metadata reads, outside writes, other services, runtime admin and public network.",
+        "model_calls": 0,
+        "production_changes": false,
+        "evidence": [
+          "learning-sandbox-results.json",
+          "learning-policy3-source-canary.json",
+          "learning-policy3-final-source-receipt.json",
+          "private-update-v7.json",
+          "native-client-canary-binding-resolution.json"
+        ]
+      },
+      "scoped_json_recovery_v7": {
+        "status": "FAILED_TASK_ACCEPTANCE",
+        "binding": {
+          "source_revision": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+          "wheel_sha256": "f1d8eba744bbf87a3045d968592489ef30f2338a764ced927e5f3087773f241c",
+          "client": "b0378997fa21b68d"
+        },
+        "protocol": "scoped-json-recovery-v7.3",
+        "protocol_sha256": "e240702ce3b138d7e0aeab419ad5da68d286acac1bc91714da0bdd66e5e3aad1",
+        "started_utc": "2026-09-21T04:19:25.941Z",
+        "deadline_utc": "2026-09-21T04:34:25.941Z",
+        "budget_seconds": 900,
+        "foreground_wall_seconds_recorded_upper_bound": 619.6327481269836,
+        "within_frozen_budget": true,
+        "timing_is_upper_bound_not_exact_inference": true,
+        "normal_launcher_exit_codes": [
+          0,
+          0
+        ],
+        "same_native_session_resumed": true,
+        "scope_pin_unchanged": true,
+        "audit_persisted_across_restart": true,
+        "explicit_build_selection_and_actual_dispatch": true,
+        "audit_mutation_and_shell_guard_held": true,
+        "project_unchanged_during_audit": true,
+        "reviewer_child_created": false,
+        "handoff_produced": false,
+        "public_suite_exit_code": 1,
+        "prohibited_test_change_after_build_switch": true,
+        "operator_code_edits": false,
+        "mutation_reverted": false,
+        "sample_data_and_other_original_files_unchanged": true,
+        "failures": [
+          "Initial unquoted spaced-path command requested unrelated external-directory access and was rejected.",
+          "Audit completed without the requested fresh Reviewer and no handoff was produced.",
+          "Resumed verification reproduced an existing public-test error, then changed a test despite the frozen no-change instruction.",
+          "No full-suite pass or successful repair demonstrated."
+        ],
+        "instruction_failure_scope": "The forbidden test change occurred in legitimate Build mode after explicit switch; this is model instruction following, not an Audit guard bypass.",
+        "operator_actions": {
+          "permission_rejects": 1,
+          "allow_once_answers": 2,
+          "native_question_answers": 1,
+          "question_choice_was_delegation": true,
+          "extra_repair_prompts": 0,
+          "forced_model_candidates": 0,
+          "owned_turn_interrupted_after_prohibited_edit": true,
+          "exact_initial_permission_wait_seconds": null
+        },
+        "resources": {
+          "schema": 1,
+          "interval_limit": "First observer was sandbox-restricted; all original null pressure/swap samples retained. Supplemental host capture begins at recorded intervention and does not fill earlier history.",
+          "original_observer_samples": 277,
+          "original_samples_missing_pressure_or_swap": 277,
+          "supplemental_samples": 137,
+          "supplemental_first_utc": "2026-09-21T04:25:00.763835+00:00",
+          "supplemental_last_utc": "2026-09-21T04:29:45.120463+00:00",
+          "supplemental_pressure_levels": [
+            1
+          ],
+          "supplemental_swap_growth_bytes": 0,
+          "full_interval_memory_qualification": false
+        },
+        "evidence": [
+          "scoped-json-recovery-v7-qualification.json",
+          "scoped-json-recovery-v7-foreground.json",
+          "scoped-json-recovery-v7-resources.json"
+        ]
+      },
+      "automatic_learning_final_v7": {
+        "status": "VALID_LOCAL_DEFERRAL_NO_LIVE_TRIAL_QUALIFICATION",
+        "binding": {
+          "source_revision": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+          "wheel_sha256": "f1d8eba744bbf87a3045d968592489ef30f2338a764ced927e5f3087773f241c",
+          "client": "b0378997fa21b68d"
+        },
+        "genuine_event_family": "json_cli",
+        "genuine_event_state": "incomplete",
+        "observation_sha256": "a3dc1be47025efdbed9413c493c4aefca9797b597d249eeca21039b9c78db002",
+        "selection_verified_against_actual_receipt": true,
+        "observed_tool_errors": 1,
+        "observed_check_passes": 0,
+        "observed_check_failures": 0,
+        "counter_limit": "The transcript has a compound shell public-suite invocation with exit 1; it is not recognized as a simple check command. Native tool_errors remains 1 and check_failures remains 0; no relabeling.",
+        "decision": "defer",
+        "reason": "insufficient_evidence",
+        "instructions_empty": true,
+        "native_exit_code": 0,
+        "native_completed": true,
+        "request_count": 1,
+        "variant": "fast",
+        "max_tokens": 768,
+        "tool_count": 0,
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "elapsed_seconds": 7.454,
+        "charged_seconds": 7.455430125002749,
+        "prior_budget": {
+          "candidates": 2,
+          "date": "2026-09-21",
+          "seconds": 15.200058583985083
+        },
+        "final_budget": {
+          "candidates": 3,
+          "date": "2026-09-21",
+          "seconds": 22.655488708987832
+        },
+        "policy": "learning-2026-09-20.4",
+        "policy_or_counters_reset": false,
+        "candidate_proposed": false,
+        "paired_trials_completed": 0,
+        "foreground_preemption_exercised": false,
+        "benefit_proven": false,
+        "full_cycle_qualified": false,
+        "reflection_resources": {
+          "pressure_levels": [
+            1
+          ],
+          "swap_growth_bytes": 0
+        },
+        "stop_rule": "Third and final frozen opportunity returned valid local-model defer. No fourth attempt, invented candidate, manual trial or retry.",
+        "evidence": [
+          "learning-v7-final-deferral.json",
+          "scoped-json-recovery-v7-qualification.json"
+        ]
+      },
+      "final_v7_settlement": {
+        "status": "VERIFIED_OWNED_IDLE_AND_PAUSED",
+        "installed_client": "b0378997fa21b68d",
+        "verified_runtime_identity": true,
+        "runtime_active_requests": [
+          0,
+          0
+        ],
+        "runtime_waiting_requests": [
+          0,
+          0
+        ],
+        "remaining_owned_native_processes": 0,
+        "remaining_worker_processes": 0,
+        "learner_enabled": true,
+        "learner_paused": true,
+        "actual_pause_exit_code": 0,
+        "worker_stopped": true,
+        "final_budget": {
+          "candidates": 3,
+          "date": "2026-09-21",
+          "seconds": 22.655488708987832
+        },
+        "scope": "Known owned processes and two idle runtime samples; unrelated applications untouched.",
+        "evidence": [
+          "v7-final-owned-settlement.json"
+        ]
       }
     },
     "private_evidence_refs": {
@@ -1647,7 +2697,7 @@
       "learning-sandbox-results.json": {
         "sha256": "5e0fdd42d7d0511eaea1ba26c22c1eaf9b647b7746cd1b9ab54e8fe3b19e1b8b",
         "visibility": "private raw receipt; hash only in distributed source",
-        "scope": "Historical candidate observation; final gate status below remains pending"
+        "scope": "Source or isolated control scope; not full installed acceptance"
       },
       "release-secret-package-audit.json": {
         "sha256": "f7debafadacd08ae8bc8c50f686435a17fdeccf4ce6f44b7089858817053172c",
@@ -1927,17 +2977,267 @@
       "learning-policy3-final-source-receipt.json": {
         "sha256": "91f03b03c4936cb8678ca049fd2ea8f1ed6df9dc75ffc012da9d78e018e3a8f0",
         "visibility": "private raw receipt; hash only in distributed source",
-        "scope": "Scoped current receipt; full release gates remain incomplete"
+        "scope": "Source or isolated control scope; not full installed acceptance"
       },
       "learning-policy3-source-canary.json": {
         "sha256": "7dbf307ed7c0d428eea9921bc3d77d6744db523bf243f01e756c215cd05dd84c",
         "visibility": "private raw receipt; hash only in distributed source",
-        "scope": "Scoped current receipt; full release gates remain incomplete"
+        "scope": "Recorded source/control scope; no broad task-quality inference"
       },
       "final-learning-native-unit.log": {
         "sha256": "4ad90d485079fa030a3e00d8bbfbdf42640bf1f3519363eb80818d250a9eb307",
         "visibility": "private raw receipt; hash only in distributed source",
         "scope": "Scoped current receipt; full release gates remain incomplete"
+      },
+      "queuewatch-initial-final-audit.json": {
+        "sha256": "e23f1d8551c7967016e1be9885f58be601d99bc8011df73a3a232248c8972211",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-initial-observer.json": {
+        "sha256": "29860418b5c40b419d9194fc9517df1593379f6995fde006334e69b57a898101",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-initial-interventions.jsonl": {
+        "sha256": "55dba31392642fe027bddf25e80b0194bbcdee262c4bdebfa4335a0106cf538a",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-initial-grade.json": {
+        "sha256": "525d2822cd5398e61ae4e58f7b0f655c2d21b607adc66a3c4f8e3e27ea433705",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-initial-grade-snapshot.json": {
+        "sha256": "bba65240f0ef7c6fb777561ee7aa3a5baf6f8ba6a3a86bfc211541d8d8ac14ba",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-initial-grade-interpretation.json": {
+        "sha256": "4a2a503d09b5e87be60b11788f268561a986a162536f9037d9231f2bb8227d14",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-label-v2-protocol.json": {
+        "sha256": "d31913e9db77f268ab5875c1594181372289a56a26c9cc6cdc596be1fefd34a6",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-label-v2-controls.json": {
+        "sha256": "537b7cfc3d3eac1651ee4e8220687fd6050125bfaab5ab1efdc5065e3349d0a3",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-label-v2-grade.json": {
+        "sha256": "53eb99baaeff69213e527379ed375cf324d92d9fddf5b400e316f523921ba8fc",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-label-v2-interpretation.json": {
+        "sha256": "1aecfc1d5c88c77d91cd7031bca4632e3392f64812aa90aa67fe0e4893fb975d",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-owned-server-stop.json": {
+        "sha256": "7f791985a65dc6dc20593bdfafc6a4b8051d1769ae127a999d962f1c8fae6543",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "learning-v3-valid-deferral.json": {
+        "sha256": "c19295614501c100557c7c011991a07ca486b6bb5ab216047e666bf98ef90b4f",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "learning-normal-exit-v3.json": {
+        "sha256": "db909330f4bae4db52937552d5a7dec43c86e229bd08cb103fba3d69e58f12c4",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "learning-preemption-v3.json": {
+        "sha256": "09a8ab609cbe7cfd902492bb9255d4d0a942f88ab22863aa6c4720cd67c6b213",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "private-update-v3.json": {
+        "sha256": "7c136c89fa0bff913e665c4510c2e6f9b92d22412f94b14d4504dfdf82a19cac",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "private-draft-v5-audit.json": {
+        "sha256": "840d673740b244c306ab1f3c87d5be1c3fa29fa9d8711030b722aa68c1b5bc09",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "private-draft-v5-staged.json": {
+        "sha256": "3d290a6199735d60153796ec44c494dd765d1ac7213d87bd74be915049e2769f",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-continuation-final-audit.json": {
+        "sha256": "c63de9faab3a0c44ce9742c32e5e9d56755f481373c4cbc2122434ace2d5c540",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-continuation-observer.json": {
+        "sha256": "cd9586feceac74abc18f73ae0f2e86719b034552904aa800d005d42b9398197e",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-continuation-interventions.jsonl": {
+        "sha256": "a4320a7d264df33c863204153bc35aec67b2eb4da3956bb1e936d517a47b5ba0",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-continuation-v5-binding.json": {
+        "sha256": "26c5f09d95c97a93da5a3b39af37f2784c0bb1eed2ab1cba63a8276c7f02fd03",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-continuation-active-binding.json": {
+        "sha256": "da4855f47601339a2f1d0058410aecf0a6cbad37c6dce0d3757ddef499df2e44",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-reviewer-attribution.json": {
+        "sha256": "b04b23fa70349f485d5db33b802c23c473a7ed7d50bdc7832c22084b6e6b03b5",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-labels-v3-protocol.json": {
+        "sha256": "6a8274b9e779fba490e8273617d7af48583c710c39d4480c6b00a93f192d5a2c",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-labels-v3-controls.json": {
+        "sha256": "9ca863e6c2fe89a94c146cd791d406e0a9bcd5ac03861b3f7b1d6e3fd2eca5c6",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-labels-v3-pre-review-grade.json": {
+        "sha256": "0c111a102c312872a29c74ab40902adb513a108ae39f6070af3093ff1ad3743e",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-labels-v3-final-grade.json": {
+        "sha256": "f65ba48f78aa1f372f73c25e2112f53f9bca4f55927267612928ed00921db67b",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-labels-v3-final-interpretation.json": {
+        "sha256": "68c4cfcab54fc68e802fc57ef04c689581f6e67cc69d63c6fd32f099f65d53eb",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "private-update-v5.json": {
+        "sha256": "38c8e757b29268fcc9bce2a5e29d9de083d3f268bcda8dff6c5a52afac566850",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "native-vision-v5-acceptance.json": {
+        "sha256": "45cc204cd709837c12c94ecf908294673fee19f213337f26539e2e3224a435f0",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "native-research-v5-failure.json": {
+        "sha256": "1e1d395c388847b34503ecbe57e5bdd005d39971bd1119aa3f29b9bf479ab27d",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "native-tool-output-fixture.json": {
+        "sha256": "36d7146e512c6788794cf25e28d37563b49b8054f1466cc742751065288966c4",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "private-draft-v6-audit.json": {
+        "sha256": "f10e90b82f8c8839b3756b71e778f474d6c81ec194990f590b31edef6a0d6334",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "queuewatch-continuation-cleanup.json": {
+        "sha256": "9d3b750df2b2bdebfa9d3414eae323bccdc27457373fdc96025504fc00911af0",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scoped observation; full release gates remain incomplete"
+      },
+      "package-auth-independent-audit.json": {
+        "sha256": "7bf470b37283a91d4accebb2a0a682b989f0a17e4976facd093d7592757d4f86",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Source or isolated control scope; not full installed acceptance"
+      },
+      "native-audit-v7-boundary-control.json": {
+        "sha256": "55ef6ae876a0a9fea7cfe4bb90be60df5c190a66c01ae4ea2dbe44b29789efde",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Actual pinned native binary, deterministic fake-provider replies, no local-model or runtime requests"
+      },
+      "installed-v7-auth-controls.json": {
+        "sha256": "ac330eddf6db621426dbb7b795b9f1fda9d51ee76d43539e9831cb60b711202d",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scope and artifact binding preserved in the corresponding measurement"
+      },
+      "installed-v7-auth-controls.log": {
+        "sha256": "b4d1baf6fa8a7e962d31c32d67466f3d2e893fb9683dda8721e67275b2a5d6bd",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scope and artifact binding preserved in the corresponding measurement"
+      },
+      "private-update-v7.json": {
+        "sha256": "77d4a0290855dcc5c2c0737c286861d93c3f56f3c775c2240e19ba9b05490cf4",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scope and artifact binding preserved in the corresponding measurement"
+      },
+      "private-update-v7.log": {
+        "sha256": "ab701ff89f7e08e314c733a62315aa8c2e4868425b659db90bd29bbbb673c2a4",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scope and artifact binding preserved in the corresponding measurement"
+      },
+      "native-research-v7-final.json": {
+        "sha256": "213e4aa142fe5915e799651cc84ff0cb5490100cabddecbf9981e46c21f3af29",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scope and artifact binding preserved in the corresponding measurement"
+      },
+      "native-research-v7-original-extractor.json": {
+        "sha256": "ab445d8e3023290dbc23e32d0483d27f850c74985fc5fe60f892f50c57bbe351",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Scope and artifact binding preserved in the corresponding measurement"
+      },
+      "final-v7-history-privacy-audit.json": {
+        "sha256": "75bdddbaa013962f1b8ac966940c5c6cfc31bc203419d8db8a95ae839038cd1d",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Recorded source/control scope; no broad task-quality inference"
+      },
+      "private-draft-v7-audit.json": {
+        "sha256": "70d20353173520c2db4fc80d838272e01cdd697f973392d121e7ada145da81bb",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Recorded source/control scope; no broad task-quality inference"
+      },
+      "native-client-canary-binding-resolution.json": {
+        "sha256": "77d8e6e75b63d24d67c8ef61ef714266730dfeaeedbc581d9488706224971086",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Independent static confirmation: sole MODEL_ID quote-rendering difference, identical AST, no rerun or inference"
+      },
+      "scoped-json-recovery-v7-qualification.json": {
+        "sha256": "e233378c15e88e8ec8ff6d7b46e81e6bac49785f70fdea523a51709db1773673",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Final frozen v7 recovery, learning and settlement; limitations explicit"
+      },
+      "scoped-json-recovery-v7-foreground.json": {
+        "sha256": "9189589d880aa6e7c7c033a1b150c6086e1a4ff49fce342b5b9a988704efa371",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Final frozen v7 recovery, learning and settlement; limitations explicit"
+      },
+      "scoped-json-recovery-v7-resources.json": {
+        "sha256": "cd9d34741287c9e002e3636b2907e14d65987841253fffb7dd7ad69e30ee3fdc",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Final frozen v7 recovery, learning and settlement; limitations explicit"
+      },
+      "learning-v7-final-deferral.json": {
+        "sha256": "1b8d3e918a17378fbdbb9489e3a21657c3aa5d919b9e5df2fada32096ce73d13",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Final frozen v7 recovery, learning and settlement; limitations explicit"
+      },
+      "v7-final-owned-settlement.json": {
+        "sha256": "275bc453fe716d30434ccd7290bf74d20b756ad75e4f215eda10a7681a956ce7",
+        "visibility": "private raw receipt; hash only in distributed source",
+        "scope": "Final frozen v7 recovery, learning and settlement; limitations explicit"
       }
     },
     "quality_claims": {
@@ -1951,20 +3251,572 @@
       "Current learning activation is limited to explicit disposable JSON CLI sessions; ordinary sessions remain baseline.",
       "No sustained 32K/64K or completed matched MTP acceleration qualification.",
       "No integrated macOS computer control, office suite or local image-generation module."
-    ]
+    ],
+    "source_snapshot_scope": "Tested code and installed artifact bind to commit 7db4d4e. Documentation is applied after qualification and may be committed later; no post-doc wheel rebuild or self-referential commit hash is implied.",
+    "acceptance_matrix": {
+      "schema": 1,
+      "recorded_utc": "2026-09-21T04:35:42.546346+00:00",
+      "overall": "NOT_READY",
+      "requirements_source": "acceptance.json required_gates",
+      "requirements_sha256": "c40b1918de0832c8b2d7a2374927bde4f704ce11eddc17c7aed4d8a58286d046",
+      "scope": "Final frozen evidence through installed v7 recovery and third learning reflection. No further experiment is pending in this release attempt; unmet capability/full-learning criteria remain unqualified or failed.",
+      "classification": {
+        "PASSED": "All criteria for the explicitly named scope are supported. A scoped check pass does not pass its containing mandatory gate.",
+        "FAILED": "A required behavior failed in the recorded installed artifact; future correction does not erase it.",
+        "UNQUALIFIED": "Some required criteria lack adequate evidence; this is neither an assumed pass nor an invented observed failure."
+      },
+      "mandatory_rows": [
+        {
+          "gate": "package",
+          "status": "PASSED",
+          "passed_scope": "Actual private draft install from external spaced directory without source checkout; tagged update, rollback and re-update; eleven isolated shipped-wheel fault controls. Latest v7 tagged update and native autostart/normal exit also passed.",
+          "failed_or_missing_scope": "No missing frozen package criterion asserted. Existing-host dependency reuse and mocked external fault-control boundaries are limits; real power loss, physical disk exhaustion and publication are not required to pass this gate.",
+          "maps_to": [
+            "private_artifact_install",
+            "release_update_rollback"
+          ],
+          "evidence": [
+            {
+              "receipt": "private-asset-install.json",
+              "sha256": "ad4d1b6d2524d52c6bf3b5d26cdbd8dd061d70704982ef7b1d1f4009961defe5"
+            },
+            {
+              "receipt": "source-independent-entry-verification.json",
+              "sha256": "c952f6ede3a5b876c71790f4c797a25ca4732ba873818b72c732c3f632247ddf"
+            },
+            {
+              "receipt": "private-update-rollback-summary.json",
+              "sha256": "1bd3d09be2be093636b5206fd8f701cd8793ba5272cf63670586348b9697b002"
+            },
+            {
+              "receipt": "private-update-v5.json",
+              "sha256": "38c8e757b29268fcc9bce2a5e29d9de083d3f268bcda8dff6c5a52afac566850"
+            },
+            {
+              "receipt": "package-fault-controls-summary.json",
+              "sha256": "09e62fe21bc4a68545111d286fe309a99145282d49e72fe9aff0156a4d1a8fd1"
+            },
+            {
+              "receipt": "private-update-v7.json",
+              "sha256": "77d4a0290855dcc5c2c0737c286861d93c3f56f3c775c2240e19ba9b05490cf4"
+            }
+          ],
+          "publication": "Downstream release action, not a circular precondition for acceptance.",
+          "frozen_criterion": "Private release wheel install without source checkout; clean/spaced environment; corrupt/unsupported fail; reuse/preserve; transaction/update/rollback."
+        },
+        {
+          "gate": "auth",
+          "status": "PASSED",
+          "passed_scope": "Actual owner login/install plus eleven behavioral cases against the exact deployed v7 module: absent/wrong/expired identity, bounded offline cache, online failure cleanup, logout, malformed state, token storage/env refusal and symlink preservation.",
+          "failed_or_missing_scope": "No missing frozen auth criterion asserted. Negative cases use isolated temporary cache, mocked GitHub/keyring replies and deterministic clocks; no actual credentials were revoked or changed. This does not prove hostile-administrator resistance.",
+          "maps_to": [
+            "owner_authentication"
+          ],
+          "evidence": [
+            {
+              "receipt": "installed-v7-auth-controls.json",
+              "sha256": "ac330eddf6db621426dbb7b795b9f1fda9d51ee76d43539e9831cb60b711202d"
+            },
+            {
+              "receipt": "installed-v7-auth-controls.log",
+              "sha256": "b4d1baf6fa8a7e962d31c32d67466f3d2e893fb9683dda8721e67275b2a5d6bd"
+            },
+            {
+              "receipt": "private-asset-install.json",
+              "sha256": "ad4d1b6d2524d52c6bf3b5d26cdbd8dd061d70704982ef7b1d1f4009961defe5"
+            },
+            {
+              "receipt": "private-update-v7.json",
+              "sha256": "77d4a0290855dcc5c2c0737c286861d93c3f56f3c775c2240e19ba9b05490cf4"
+            }
+          ],
+          "frozen_criterion": "Verified owner90290458/keychain; deny other/noauth/expired; cached bounded offline; logout/networkerror tested."
+        },
+        {
+          "gate": "daily",
+          "status": "PASSED",
+          "passed_scope": "Five isolated runtime cold starts with real tiny generations; installed daily outage/relaunch; sustained Stockroom and QueueWatch resource observations; known task process cleanup.",
+          "failed_or_missing_scope": "Frozen daily criteria are met by prior profile/lifecycle/sustained observations. Final recovery separately lacked early pressure/swap capture; its 137 later normal samples do not qualify the complete recovery interval. Task correctness remains classified under agent.",
+          "maps_to": [
+            "runtime_daily_lifecycle",
+            "sustained_native_sessions"
+          ],
+          "evidence": [
+            {
+              "receipt": "qwen9-runtime-summary.json",
+              "sha256": "b13e04eda25f2f27ffa0fda6edaf37c7aa8f5356e21852b32aee24cf3976d103"
+            },
+            {
+              "receipt": "daily-launcher-outage-interpretation.json",
+              "sha256": "6471211d0d78ec8118862c3c6cdcc8c49844d5d8773c3bedf2cedc70166d1e68"
+            },
+            {
+              "receipt": "kryn-v2-sustained-audit.json",
+              "sha256": "e3416f2fc5267219efd9537194b6978584ae69e0000037d6abd606b7753d4ba5"
+            },
+            {
+              "receipt": "queuewatch-continuation-final-audit.json",
+              "sha256": "c63de9faab3a0c44ce9742c32e5e9d56755f481373c4cbc2122434ace2d5c540"
+            },
+            {
+              "receipt": "queuewatch-continuation-cleanup.json",
+              "sha256": "9d3b750df2b2bdebfa9d3414eae323bccdc27457373fdc96025504fc00911af0"
+            }
+          ],
+          "scope_boundary": "Inference/lifecycle/resource reliability only; not completed-task quality.",
+          "frozen_criterion": "5 cold starts actual inference; warm/cancel/restart;2 sustained sessions under observed ordinary desktop; no owned orphans."
+        },
+        {
+          "gate": "agent",
+          "status": "FAILED",
+          "passed_scope": "Actual native edits/checks, session continuation, browser actions, a fresh local read-only Reviewer child and one synthetic image case observed.",
+          "failed_or_missing_scope": "Stockroom public tests failed; QueueWatch final 3/9 and browser/handoff/review failures remain. v7 research timed out with no answer. Final recovery resumed the same session/pin but omitted Reviewer/handoff, reproduced failing tests, then violated a no-change instruction in Build.",
+          "maps_to": [
+            "native_capabilities",
+            "sustained_native_sessions"
+          ],
+          "evidence": [
+            {
+              "receipt": "stockroom-kryn-v2-sustained-grade.json",
+              "sha256": "b3dc90f77a65b94a8468bea34d6be268993c72fc1b48f706f16f774d6e1c1ab3"
+            },
+            {
+              "receipt": "queuewatch-labels-v3-final-grade.json",
+              "sha256": "f65ba48f78aa1f372f73c25e2112f53f9bca4f55927267612928ed00921db67b"
+            },
+            {
+              "receipt": "queuewatch-continuation-final-audit.json",
+              "sha256": "c63de9faab3a0c44ce9742c32e5e9d56755f481373c4cbc2122434ace2d5c540"
+            },
+            {
+              "receipt": "native-vision-v5-acceptance.json",
+              "sha256": "45cc204cd709837c12c94ecf908294673fee19f213337f26539e2e3224a435f0"
+            },
+            {
+              "receipt": "native-research-v5-failure.json",
+              "sha256": "1e1d395c388847b34503ecbe57e5bdd005d39971bd1119aa3f29b9bf479ab27d"
+            },
+            {
+              "receipt": "native-research-v7-final.json",
+              "sha256": "213e4aa142fe5915e799651cc84ff0cb5490100cabddecbf9981e46c21f3af29"
+            },
+            {
+              "receipt": "scoped-json-recovery-v7-qualification.json",
+              "sha256": "e233378c15e88e8ec8ff6d7b46e81e6bac49785f70fdea523a51709db1773673"
+            }
+          ],
+          "frozen_criterion": "Actual native edits/tests/Git/plan/review/browser/research/image/long task restart; limitations separated."
+        },
+        {
+          "gate": "safety",
+          "status": "PASSED",
+          "passed_scope": "Role-independent request/locality guards, observed local wire and startup/in-flight outage recovery; native read-only Audit/Reviewer boundary controls with matching v7 bytes; source and nested-venv background read/write/network canaries. Actual v7 Audit stayed read-only across normal exit/resume before explicit Build selection.",
+          "failed_or_missing_scope": "No missing frozen safety criterion asserted after source/deployment equivalence. Scope covers managed inference and bounded background boundaries; no host-wide containment, hostile administrator resistance, exhaustive unknown exploit coverage or model review-quality claim.",
+          "maps_to": [
+            "managed_locality_and_permissions",
+            "background_isolation"
+          ],
+          "evidence": [
+            {
+              "receipt": "daily-launcher-outage-interpretation.json",
+              "sha256": "6471211d0d78ec8118862c3c6cdcc8c49844d5d8773c3bedf2cedc70166d1e68"
+            },
+            {
+              "receipt": "native-audit-v7-boundary-control.json",
+              "sha256": "55ef6ae876a0a9fea7cfe4bb90be60df5c190a66c01ae4ea2dbe44b29789efde"
+            },
+            {
+              "receipt": "private-update-v7.json",
+              "sha256": "77d4a0290855dcc5c2c0737c286861d93c3f56f3c775c2240e19ba9b05490cf4"
+            },
+            {
+              "receipt": "learning-sandbox-results.json",
+              "sha256": "5e0fdd42d7d0511eaea1ba26c22c1eaf9b647b7746cd1b9ab54e8fe3b19e1b8b"
+            },
+            {
+              "receipt": "learning-policy3-final-source-receipt.json",
+              "sha256": "91f03b03c4936cb8678ca049fd2ea8f1ed6df9dc75ffc012da9d78e018e3a8f0"
+            },
+            {
+              "receipt": "learning-policy3-source-canary.json",
+              "sha256": "7dbf307ed7c0d428eea9921bc3d77d6744db523bf243f01e756c215cd05dd84c"
+            },
+            {
+              "receipt": "queuewatch-reviewer-attribution.json",
+              "sha256": "b04b23fa70349f485d5db33b802c23c473a7ed7d50bdc7832c22084b6e6b03b5"
+            },
+            {
+              "receipt": "native-client-canary-binding-resolution.json",
+              "sha256": "77d8e6e75b63d24d67c8ef61ef714266730dfeaeedbc581d9488706224971086"
+            }
+          ],
+          "historical_failure": "v5 parent Build edited after read-only Reviewer; retained, with corrected native mechanics qualified separately.",
+          "frozen_criterion": "Every managed role local, startup and in-flight outage recover, background read/write/network isolation and canary tests.",
+          "source_deployed_ast_equal": true
+        },
+        {
+          "gate": "improvement",
+          "status": "UNQUALIFIED",
+          "qualification_state": "FROZEN_OPPORTUNITIES_EXHAUSTED",
+          "passed_scope": "Two real normal-exit reflections returned valid insufficient_evidence deferrals, including a final genuine json_cli event. Three attempts and 22.655488708987832 charged seconds remain recorded; learner paused after frozen opportunities.",
+          "failed_or_missing_scope": "No candidate, real repeated paired/protected trials, benefit, active foreground preemption or matching regression/rollback cycle. Deferral is valid but does not demonstrate the full required cycle.",
+          "maps_to": [
+            "automatic_learning_cycle",
+            "foreground_preemption_and_regression"
+          ],
+          "evidence": [
+            {
+              "receipt": "learning-first-attempt-metrics.json",
+              "sha256": "4de2584ca0e80a78426f3f107a3474175b1b148c13eb7fbe3f25505691c71650"
+            },
+            {
+              "receipt": "learning-v3-valid-deferral.json",
+              "sha256": "c19295614501c100557c7c011991a07ca486b6bb5ab216047e666bf98ef90b4f"
+            },
+            {
+              "receipt": "learning-normal-exit-v3.json",
+              "sha256": "db909330f4bae4db52937552d5a7dec43c86e229bd08cb103fba3d69e58f12c4"
+            },
+            {
+              "receipt": "learning-preemption-v3.json",
+              "sha256": "09a8ab609cbe7cfd902492bb9255d4d0a942f88ab22863aa6c4720cd67c6b213"
+            },
+            {
+              "receipt": "learning-v7-final-deferral.json",
+              "sha256": "1b8d3e918a17378fbdbb9489e3a21657c3aa5d919b9e5df2fada32096ce73d13"
+            }
+          ],
+          "frozen_criterion": "Automatic native event->bounded reflection->real repeated matched trials->evidence-derived decision; pinning/preemption/rollback; no fabricatedgain."
+        },
+        {
+          "gate": "quality",
+          "status": "UNQUALIFIED",
+          "passed_scope": "One prospectively scoped stock/KRYN coding pair matched initial files, model, sampler, budget and ten tool names; graders and error attribution controlled. Both scored 17/18 and timed out.",
+          "failed_or_missing_scope": "One fixed-order pair, different complete tool schemas and shared caches do not establish general correctness or latency gain; varied unseen tasks are insufficient. KRYN-only continuation is not a paired comparison.",
+          "maps_to": [
+            "quality_comparison"
+          ],
+          "evidence": [
+            {
+              "receipt": "paired-v2-protocol.json",
+              "sha256": "316f60942d61db217a12ab294512528aa4ab693333264bdb07f2d6119272be7b"
+            },
+            {
+              "receipt": "paired-v2-initial-summary.json",
+              "sha256": "87b003132e205781440af84b683d414ab601b120e9c088c64cf7fe0f945783a7"
+            },
+            {
+              "receipt": "stock-v2-initial-error-audit.json",
+              "sha256": "e12d23f1c5f52015117f47b0472ba84084b10da51e1e6684c6cf80992f59f8fe"
+            },
+            {
+              "receipt": "kryn-v2-initial-error-audit.json",
+              "sha256": "03247020d1f7988447928d59c02a91be8f0bc7270111c782612acf817625383c"
+            },
+            {
+              "receipt": "kryn-v2-sustained-audit.json",
+              "sha256": "e3416f2fc5267219efd9537194b6978584ae69e0000037d6abd606b7753d4ba5"
+            }
+          ],
+          "frozen_criterion": "StockOpenCode matched baseline, varied unseen tasks, objective grader controls, failure/intervention/latency separately."
+        }
+      ],
+      "mandatory_status_counts": {
+        "PASSED": 4,
+        "FAILED": 1,
+        "UNQUALIFIED": 2
+      },
+      "scoped_passes": [
+        {
+          "check": "private_draft_install_and_update",
+          "status": "PASSED",
+          "limit": "Existing Mac with verified reusable dependencies; private DRAFT, not final publication.",
+          "evidence": [
+            {
+              "receipt": "private-asset-install.json",
+              "sha256": "ad4d1b6d2524d52c6bf3b5d26cdbd8dd061d70704982ef7b1d1f4009961defe5"
+            },
+            {
+              "receipt": "private-update-v5.json",
+              "sha256": "38c8e757b29268fcc9bce2a5e29d9de083d3f268bcda8dff6c5a52afac566850"
+            }
+          ]
+        },
+        {
+          "check": "local_runtime_protocol_and_five_cold_generations",
+          "status": "PASSED",
+          "limit": "Isolated oMLX API and tiny answers; filesystem caches retained; not final packaged task quality.",
+          "evidence": [
+            {
+              "receipt": "qwen9-runtime-summary.json",
+              "sha256": "b13e04eda25f2f27ffa0fda6edaf37c7aa8f5356e21852b32aee24cf3976d103"
+            }
+          ]
+        },
+        {
+          "check": "sampled_sustained_resources_and_known_process_cleanup",
+          "status": "PASSED",
+          "limit": "Observed intervals only; sampled peaks can miss transients; cleanup covers identified task processes.",
+          "evidence": [
+            {
+              "receipt": "kryn-v2-sustained-audit.json",
+              "sha256": "e3416f2fc5267219efd9537194b6978584ae69e0000037d6abd606b7753d4ba5"
+            },
+            {
+              "receipt": "queuewatch-continuation-final-audit.json",
+              "sha256": "c63de9faab3a0c44ce9742c32e5e9d56755f481373c4cbc2122434ace2d5c540"
+            },
+            {
+              "receipt": "queuewatch-continuation-cleanup.json",
+              "sha256": "9d3b750df2b2bdebfa9d3414eae323bccdc27457373fdc96025504fc00911af0"
+            }
+          ]
+        },
+        {
+          "check": "single_native_synthetic_image",
+          "status": "PASSED",
+          "limit": "One attached-image Plan/Fast case without tools, not broad visual or application-repair ability.",
+          "evidence": [
+            {
+              "receipt": "native-vision-v5-acceptance.json",
+              "sha256": "45cc204cd709837c12c94ecf908294673fee19f213337f26539e2e3224a435f0"
+            }
+          ]
+        },
+        {
+          "check": "readonly_reviewer_child_execution",
+          "status": "PASSED",
+          "limit": "Six read tools, zero mutation tools; its conclusions were wrong and parent v5 Audit workflow was not read-only.",
+          "evidence": [
+            {
+              "receipt": "queuewatch-reviewer-attribution.json",
+              "sha256": "b04b23fa70349f485d5db33b802c23c473a7ed7d50bdc7832c22084b6e6b03b5"
+            }
+          ]
+        },
+        {
+          "check": "genuine_normal_exit_reflection_valid_deferral",
+          "status": "PASSED",
+          "limit": "No candidate evaluation, promotion or benefit demonstrated.",
+          "evidence": [
+            {
+              "receipt": "learning-v3-valid-deferral.json",
+              "sha256": "c19295614501c100557c7c011991a07ca486b6bb5ab216047e666bf98ef90b4f"
+            }
+          ]
+        },
+        {
+          "check": "native_audit_boundary_control",
+          "status": "PASSED",
+          "limit": "Pinned actual binary and 10 deterministic fake replies. Parent mutation and second-child attempts denied; explicit same-session Build switch restores edits. Zero local-model/runtime calls, no review-quality claim.",
+          "evidence": [
+            {
+              "receipt": "native-audit-v7-boundary-control.json",
+              "sha256": "55ef6ae876a0a9fea7cfe4bb90be60df5c190a66c01ae4ea2dbe44b29789efde"
+            }
+          ]
+        },
+        {
+          "check": "installed_v7_authentication_controls",
+          "status": "PASSED",
+          "limit": "Existing two auth tests imported the exact installed v7 module. Isolated temporary cache, mocked GitHub subprocess replies/keyring metadata and deterministic clocks; no actual credentials/cache modified, no GitHub calls, no runtime/model requests. Actual authenticated owner install/start evidence is separate.",
+          "evidence": [
+            {
+              "receipt": "installed-v7-auth-controls.json",
+              "sha256": "ac330eddf6db621426dbb7b795b9f1fda9d51ee76d43539e9831cb60b711202d"
+            }
+          ]
+        },
+        {
+          "check": "installed_v7_native_output_cap_mechanics",
+          "status": "PASSED",
+          "limit": "All 13 full archives and bounded previews with markers verified; three compactions completed without prior overflow. Research task still timed out. This is not a context-overflow guarantee.",
+          "evidence": [
+            {
+              "receipt": "native-research-v7-final.json",
+              "sha256": "213e4aa142fe5915e799651cc84ff0cb5490100cabddecbf9981e46c21f3af29"
+            }
+          ]
+        }
+      ],
+      "pending_receipts": [],
+      "inference_vs_quality": {
+        "local_inference": "Scoped protocol, lifecycle, sampled-resource and cleanup passes recorded.",
+        "completed_task_quality": "Representative sustained acceptance failed; no frontier parity or general stock-harness improvement established.",
+        "do_not_aggregate": "Do not add protocol/fixture controls to task correctness counts or treat normal resources as a quality score."
+      },
+      "comparison_limits": {
+        "stock_pair_initial_correctness": {
+          "stock": "17/18",
+          "kryn": "17/18"
+        },
+        "both_task_complete": false,
+        "matched_tool_names": 10,
+        "full_tool_schema_match": false,
+        "stock_ran_first": true,
+        "shared_cache": true,
+        "pairs": 1,
+        "stock_continuation_run": false,
+        "general_quality_uplift_claim": false,
+        "latency_uplift_claim": false,
+        "earlier_unscoped_44_vs_10_attempt_preserved": true,
+        "evidence": [
+          {
+            "receipt": "paired-v2-initial-summary.json",
+            "sha256": "87b003132e205781440af84b683d414ab601b120e9c088c64cf7fe0f945783a7"
+          },
+          {
+            "receipt": "stock-ablation-independent-audit.json",
+            "sha256": "9e67e483d7972f6340d86d8980a8a20feec82c55d9e04edda1183353183c834b"
+          }
+        ]
+      },
+      "classification_changes": [
+        {
+          "gate": "auth",
+          "previous_status": "UNQUALIFIED",
+          "status": "PASSED",
+          "reason": "Exact deployed v7 authentication module passed all eleven existing behavioral controls; genuine owner login/install is separate positive live evidence. No destructive real credential revocation or second account is required by this qualification.",
+          "evidence": [
+            {
+              "receipt": "installed-v7-auth-controls.json",
+              "sha256": "ac330eddf6db621426dbb7b795b9f1fda9d51ee76d43539e9831cb60b711202d"
+            },
+            {
+              "receipt": "private-asset-install.json",
+              "sha256": "ad4d1b6d2524d52c6bf3b5d26cdbd8dd061d70704982ef7b1d1f4009961defe5"
+            },
+            {
+              "receipt": "private-update-v7.json",
+              "sha256": "77d4a0290855dcc5c2c0737c286861d93c3f56f3c775c2240e19ba9b05490cf4"
+            }
+          ]
+        },
+        {
+          "check": "research_regression",
+          "previous_status": "UNQUALIFIED",
+          "status": "FAILED",
+          "evidence": [
+            {
+              "receipt": "native-research-v7-final.json",
+              "sha256": "213e4aa142fe5915e799651cc84ff0cb5490100cabddecbf9981e46c21f3af29"
+            }
+          ]
+        },
+        {
+          "gate": "package",
+          "previous_status": "UNQUALIFIED",
+          "status": "PASSED",
+          "reason": "Reconciled to frozen criteria. Actual private install/update/rollback and adequate isolated corruption, download, disk and interruption controls satisfy the gate; publication, live power loss and actual disk exhaustion are not prerequisites."
+        },
+        {
+          "gate": "daily",
+          "previous_status": "UNQUALIFIED",
+          "status": "PASSED",
+          "reason": "Unchanged model/runtime profile cold-generation evidence combines with actual installed launcher lifecycle, two sustained resource observations and known-owned cleanup. Frozen criteria do not require all five starts to traverse the final wheel or tasks to pass their functional grader."
+        },
+        {
+          "gate": "safety",
+          "previous_status": "FAILED",
+          "status": "UNQUALIFIED",
+          "reason": "The recorded v5 Audit workflow failure is fixed mechanically by the native control with matching installed v7 bytes. Remaining qualification is static continuity/accounting of the background canary scope, not a demand for a live model to prove deterministic permissions."
+        },
+        {
+          "gate": "safety",
+          "previous_status": "UNQUALIFIED",
+          "status": "PASSED",
+          "reason": "Static source/deployed comparison resolved the receipt hash difference: identical full AST, only MODEL_ID quote rendering. Existing broad boundary controls plus post-fix full native/CLI canaries, request guards, real outage evidence and corrected native Audit controls satisfy frozen safety scope."
+        }
+      ],
+      "completed_followups": [
+        {
+          "check": "research_regression",
+          "status": "FAILED",
+          "qualification_state": "COMPLETED",
+          "mechanical_cap": "PASSED",
+          "result": "Fixed 240-second prompt budget expired without terminal JSON; 247.730 seconds including lifecycle/settlement. Both official pages opened; repeated archive-path/format errors. All earlier failures and extractor correction preserved.",
+          "evidence": [
+            {
+              "receipt": "native-research-v7-final.json",
+              "sha256": "213e4aa142fe5915e799651cc84ff0cb5490100cabddecbf9981e46c21f3af29"
+            },
+            {
+              "receipt": "native-research-v7-original-extractor.json",
+              "sha256": "ab445d8e3023290dbc23e32d0483d27f850c74985fc5fe60f892f50c57bbe351"
+            },
+            {
+              "receipt": "native-research-v5-failure.json",
+              "sha256": "1e1d395c388847b34503ecbe57e5bdd005d39971bd1119aa3f29b9bf479ab27d"
+            }
+          ]
+        },
+        {
+          "check": "json_recovery",
+          "status": "FAILED",
+          "qualification_state": "COMPLETED",
+          "result": "Same-session/pin recovery and Audit persistence passed; task failed required review/handoff/checks/no-change acceptance.",
+          "evidence": [
+            {
+              "receipt": "scoped-json-recovery-v7-qualification.json",
+              "sha256": "e233378c15e88e8ec8ff6d7b46e81e6bac49785f70fdea523a51709db1773673"
+            }
+          ]
+        },
+        {
+          "check": "final_learning_opportunity",
+          "status": "UNQUALIFIED",
+          "qualification_state": "VALID_DEFERRAL_FULL_CYCLE_NOT_DEMONSTRATED",
+          "result": "One real Fast tools-disabled reflection deferred; no paired trials or preemption. Final third opportunity and history preserved; learner paused.",
+          "evidence": [
+            {
+              "receipt": "learning-v7-final-deferral.json",
+              "sha256": "1b8d3e918a17378fbdbb9489e3a21657c3aa5d919b9e5df2fada32096ce73d13"
+            },
+            {
+              "receipt": "v7-final-owned-settlement.json",
+              "sha256": "275bc453fe716d30434ccd7290bf74d20b756ad75e4f215eda10a7681a956ce7"
+            }
+          ]
+        }
+      ],
+      "requirements_interpretation": "Frozen acceptance criteria govern. Adequate isolated controls can qualify deterministic failure paths; final publication, actual power loss/exhaustion, another GitHub account and five final-wheel cold launches are not newly required."
+    },
+    "tested_code_commit": "7db4d4ea35ab5550e00ba5f9c76bd35e70b4137e",
+    "final_state": {
+      "status": "VERIFIED_OWNED_IDLE_AND_PAUSED",
+      "installed_client": "b0378997fa21b68d",
+      "verified_runtime_identity": true,
+      "runtime_active_requests": [
+        0,
+        0
+      ],
+      "runtime_waiting_requests": [
+        0,
+        0
+      ],
+      "remaining_owned_native_processes": 0,
+      "remaining_worker_processes": 0,
+      "learner_enabled": true,
+      "learner_paused": true,
+      "actual_pause_exit_code": 0,
+      "worker_stopped": true,
+      "final_budget": {
+        "candidates": 3,
+        "date": "2026-09-21",
+        "seconds": 22.655488708987832
+      },
+      "scope": "Known owned processes and two idle runtime samples; unrelated applications untouched.",
+      "evidence": [
+        "v7-final-owned-settlement.json"
+      ]
+    },
+    "unresolved_acceptance_is_not_infrastructure_install_failure": true
   },
   "unresolved_mandatory_gates": [
-    "private_artifact_install",
-    "owner_authentication",
-    "runtime_daily_lifecycle",
-    "sustained_native_sessions",
     "native_capabilities",
-    "managed_locality_and_permissions",
-    "background_isolation",
     "automatic_learning_cycle",
     "foreground_preemption_and_regression",
-    "quality_comparison",
-    "release_update_rollback"
+    "quality_comparison"
   ],
   "historical": [
     {
@@ -2449,5 +4301,5 @@
       }
     }
   ],
-  "updated_utc": "2026-09-21T02:48:17.380745+00:00"
+  "updated_utc": "2026-09-21T04:35:42.546346+00:00"
 }

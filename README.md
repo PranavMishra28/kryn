@@ -1,8 +1,8 @@
 # KRYN
 
-**NOT READY for the complete requested release.** Private installation, update and rollback work on the tested Mac. Sustained workflows, final artifact acceptance and automatic improvement remain incomplete. The selected local model has serious recorded reasoning and coding failures. Frontier parity, general quality gains and beneficial learning have not been demonstrated.
+**NOT READY for the complete requested release.** Private installation, update and rollback work on the tested Mac. Required coding, browser, research and review tasks have recorded failures. Final artifact acceptance and automatic improvement remain incomplete. Frontier parity, general quality gains and beneficial learning have not been demonstrated.
 
-KRYN joins existing tools: OpenCode supplies the interface, agent loop, file/shell tools, plans, checkpoints and subagents; oMLX runs the local model. KRYN adds reproducible configuration, owner access, integrity/resource checks, bounded metadata and an experimental learning worker. It is an installation and reliability layer, not a new model or harness.
+KRYN joins existing tools: OpenCode supplies the interface, agent loop, plans, tools, checkpoints and subagents; oMLX runs the local model. KRYN adds reproducible configuration, owner access, integrity/resource checks, bounded metadata and an experimental learning worker.
 
 ## Daily use
 
@@ -13,26 +13,26 @@ cd /path/to/your/project
 ~/.local/bin/kryn
 ```
 
-Use `kryn` when `~/.local/bin` is on PATH. It verifies the owned installation and owner session, starts or verifies oMLX, checks routing, then opens native OpenCode in **Build / Think**. No model account or API key is needed. Describe observable acceptance criteria, approve appropriate tool requests, and inspect the diff and actual test output.
+Use `kryn` when `~/.local/bin` is on PATH. It verifies the owned installation and owner session, starts or verifies oMLX, checks routing, then opens native OpenCode in **Build / Think**. No model account or API key is needed. Describe observable acceptance criteria, approve appropriate tools, and inspect the diff and actual test output.
 
-**Ctrl+X, A** opens the agent picker; **Ctrl+P** opens commands. Plan/Fast inspects and discusses; Build/Think edits and tests; Reviewer/Think reads with mutation routes denied. `/review`, `/research`, `/deliver` and `/handoff` supply instructions, not guaranteed outcomes.
+**Ctrl+X, A** opens the agent picker; **Ctrl+P** opens commands. Plan/Fast inspects; Build/Think edits and tests; Reviewer/Think reads with mutation routes denied. `/review`, `/research`, `/deliver` and `/handoff` provide instructions whose successful execution still needs verification.
 
-`/audit` switches the primary session to **Audit / Think** and permits one fresh foreground Reviewer. The parent remains read-only after the child returns and across resume; explicitly choose Build before editing or running checks. This corrects the tested v5 behavior, where the Reviewer stayed read-only but parent Build subsequently edited CSS. Installed validation of the complete corrected workflow remains pending.
+The `/audit` correction in v7 switches the primary session to **Audit / Think**, permits one fresh foreground Reviewer, and keeps the parent read-only after that child returns and across resume. Explicitly switch back to Build to edit or run checks. Pinned native controls pass with deterministic fake replies; installed local-model workflow and review quality remain unqualified. In the tested v5, `/audit` retained Build: the child stayed read-only, but the parent subsequently changed CSS.
 
-For browser verification, let Build settle, use `/agents` to choose **Browse in the same session**, confirm Fast, and provide the local URL and checks. Return to Build for fixes. Browse is primary-only: automatic Build-to-Browse delegation is not configured. This explicit switch keeps browser schemas out of coding turns. A remembered native variant can override the default; **Ctrl+T** cycles variants.
+For browser checks, let Build settle, choose Browse through `/agents`, confirm Fast, and provide the local URL and checks. Return to Build for fixes. Browse is primary-only; automatic Build-to-Browse delegation is not configured. The initial live trial needed a fresh Browse session and operator-started disposable server. A remembered variant can override the default; **Ctrl+T** cycles variants.
 
 | Command | Purpose |
 |---|---|
-| `kryn login` / `logout` | Refresh/remove the owner session; logout preserves GitHub CLI login. |
-| `kryn doctor` / `doctor --deep` | Inspect installation/runtime; deep verifies model and browser bytes. No generation. |
+| `kryn login` / `logout` | Refresh/remove the owner session; preserve GitHub CLI login. |
+| `kryn doctor` / `doctor --deep` | Inspect integrity/runtime; deep verifies model/browser bytes. No generation. |
 | `kryn status` / `stop` | Inspect state or stop only the verified owned, idle runtime. |
 | `kryn bench` | Guarded protocol smoke, not a coding benchmark. |
-| `kryn improve status` | Worker state, budgets, decisions and qualified scope. |
+| `kryn improve status` | Worker budgets, decisions and qualified scope. |
 | `kryn improve pause` / `resume` / `disable` / `enable` | Control future background work. |
-| `kryn --json-cli` | New-session opt-in to guidance qualified only for disposable JSON CLI tasks. |
+| `kryn --json-cli` | Opt new disposable JSON CLI sessions into experimental guidance. |
 | `kryn update v0.1.0` / `rollback` | Explicit private tagged update or previous owned activation. |
 
-Close the interface normally. The unpinned model unloads after 300 idle seconds; the small server may remain running. Eligible learning starts only after interface exit.
+Close normally. The unpinned model unloads after 300 idle seconds; the small server can remain. Learning is currently paused; eligible future runs start only after interface exit.
 
 ## Architecture and profile
 
@@ -48,35 +48,37 @@ flowchart LR
     O --> T[Native checkpoints and bounded metadata]
 ```
 
-| Component | Configured selection |
+| Component | Selection |
 |---|---|
 | Harness / runtime | OpenCode **2.0.10** ARM64; oMLX **0.6.4**, build **2529** |
 | Model | `mlx-community/Qwen3.5-9B-6bit`, revision `76fe4065e622cf34990d3c13ef80ec8531c9a0f7` |
 | Context / output | **16,384** total / **4,096** maximum output; one active generation |
-| Roles | Build, Audit, Reviewer and coding children: Think. Plan, Browse and title: Fast; title capped at **128 tokens**. |
+| Roles | Build, Reviewer and coding children: Think. Plan, Browse and title: Fast; title capped at **128 tokens**. |
 | Decoding | Think: temperature .6, top-p .95. Fast: .7, .8, presence penalty 1.5. Both top-k 20. |
 | Memory / cache | **14 GiB** ceiling; **8 GB** SSD prefix cache by model revision; no extra hot cache |
 | Acceleration | MTP, DFlash, speculative prefill and experimental KV/prefill options off |
 | Browser / search | Playwright MCP **0.0.82**, isolated Chrome; three keyless Exa MCP tools |
 | Support | Python **3.13+**; ARM64 Node **22.x ≥22.23**, fallback **22.23.1**; uv fallback **0.11.16** |
 
-The earlier 27B Q5/Q4 candidates failed memory-pressure qualification under ordinary desktop load. Six-bit 9B retains image input, tool calls and a supported thinking toggle with more memory headroom. It is provisionally selected for reliability; it is not established as the best coding model. The tested GLM alternative also failed its entry controls.
+Earlier 27B Q5/Q4 candidates failed ordinary-desktop memory-pressure qualification. Six-bit 9B retains image input, tool calls and a thinking toggle with more headroom. It is provisionally selected for reliability, not established as the best coding model. The tested GLM artifact/runtime pairing failed with repetitive output despite normal pressure.
 
-Native compaction reserves a 2,048-token buffer/keep setting. With 4,096 output reserved, the nominal input trigger is `16,384 − max(4,096, 2,048) = 12,288`. Instructions, tool schemas, images and history share that space, and estimates affect the trigger. Build exposes ten coding tools; Browse admits 17 browser tools plus search. Prefix caching reduces repeated prefill work, not reasoning errors or context limits.
+Native compaction reserves a 2,048-token buffer/keep setting. With 4,096 output reserved, the nominal input trigger is `16,384 − max(4,096, 2,048) = 12,288`. Instructions, schemas, images and history share that space. Build exposes ten tools. Browse exposes 22: 17 browser tools, three Exa tools, question and webfetch. The exact Browse map was observed on live primary and compaction requests; research still overflowed context.
 
-Retrieval uses native search/read and source fetch; no vector database is installed. Detailed task state stays in native checkpoints and `/handoff`. A small owned tracker records references without overwriting user files. Session guidance stays pinned across resume; 500 saved pins require deliberate archival rather than eviction. Lossless recall and sustained 32K/64K work are unqualified.
+The native output limit caps previews at **4,096 bytes/200 lines**, preserving full text for seven days under the owned native `tool-output` directory. Build/Plan can inspect archives selectively; Browse must use narrower searches or targeted URLs. Markers add bytes, pre-marked results can bypass the cap, and an oversized first line can produce only a marker. All 13 archived outputs passed the installed regression mechanics; the task still timed out. This is not an aggregate token guarantee.
+
+Retrieval uses native search/read and source fetch; no vector database. Native checkpoints and `/handoff` hold task state. An owned tracker preserves user files; resumed guidance stays pinned. The 500-pin limit requires deliberate archival. Lossless recall and sustained 32K/64K work are unqualified.
 
 ## Permissions, privacy and resources
 
-All managed roles/helpers use the pinned loopback model. Native request hooks reject other models or inference destinations, including after configuration refresh; cloud providers are disabled. This covers managed inference routing, not all host networking. Search queries and visited sites leave the Mac. Exa is quota-limited and has no guaranteed free availability. Local inference has no metered API charge but consumes finite hardware, electricity, storage and time.
+Managed roles/helpers use the pinned loopback model. Request hooks reject other models/inference destinations after configuration refresh; cloud providers are disabled. This covers managed inference, not all host networking. Search queries and visited sites leave the Mac. Exa is quota-limited with no guaranteed free availability. Local inference consumes finite hardware, electricity, storage and time.
 
-Shell normally asks permission. Reviewer/Explore and the Audit primary have native permissions plus mutation guards. Audit allows one fresh Reviewer per execution, denying child session/model overrides and background delegation. One foreground child per parent is admitted; no background swarm. Chrome is isolated, with page WebMCP and unsafe browser code disabled. Project instructions and native skills remain supported; unrelated global catalogs are excluded.
+Shell normally asks permission. Reviewer/Explore use native permissions plus mutation guards. Audit mode in v7 applies those guards to the primary and limits delegation to one fresh Reviewer; child model/session overrides and background delegation are denied. Actual Audit persistence passed; required review task completion failed. Chrome is isolated, with page WebMCP and unsafe browser code disabled. Native project instructions and skills remain supported; unrelated global catalogs are excluded.
 
-Foreground shell descendants have a project/owned-state write boundary. Native file tools, MCP, formatters, persistent PTYs, reads and networking are outside it; foreground project configuration is trusted. Arbitrary hostile repositories are not safely contained. Background evaluation uses a separate whole-process sandbox, disposable workspace, protected grader and restricted inference relay.
+Foreground shell descendants have a project/owned-state write boundary. Native file tools, MCP, formatters, persistent PTYs, reads and networking are outside it; project configuration is trusted. Hostile repositories are not safely contained. Background evaluation uses a whole-process sandbox, disposable workspace, protected grader and restricted inference relay.
 
-The resource guard requires three normal memory samples, then samples every two seconds. Two warnings, critical pressure, telemetry loss, runtime identity drift or over 512 MiB additional swap cancel owned inference. Any warning fails acceptance. The memory ceiling is not a reservation; samples can miss brief peaks.
+The guard requires three normal memory samples, then samples every two seconds. Two warnings, critical pressure, telemetry loss, runtime identity drift or over 512 MiB additional swap cancel owned inference. Any warning fails acceptance. The ceiling is not a reservation; samples can miss brief peaks.
 
-## Experimental automatic improvement
+## Experimental improvement
 
 ```mermaid
 flowchart LR
@@ -92,21 +94,21 @@ flowchart LR
     F[Foreground launch] --> Y[Cancel worker and verify idle]
 ```
 
-**The first real automatic attempt failed during native CLI startup before any model call.** It consumed 5.542 seconds, recorded `defer / reflection_incomplete`, stopped safely and was paused. No candidate, paired learning trial or active-worker preemption was completed. A source correction reached one fake local relay request and denied four protected reads; it made no real model call. Installation and the full live cycle remain unqualified.
+**Useful improvement remains unproven.** Three frozen opportunities are exhausted: one pre-dispatch failure, then two genuine tool-free Fast reflections returning valid `defer / insufficient_evidence`. The final reflection used a scoped JSON CLI event and took 7.454 seconds. No candidate, paired trial, promotion or active preemption occurred. All history remains; total charged time is 22.655 seconds across three attempts. **Learning is paused.**
 
-Revised source policy `learning-2026-09-20.3` has no always-on daemon: after exit and 120 seconds idle, a finite worker allows two candidate attempts within 600 seconds/day, queue length two, reflection at most 120 seconds/768 tokens and trials at most 360 seconds. The increase follows the preserved zero-dispatch failure; spent history remains. Admission reserves an attempt before dispatch and releases it only with durable proof of zero dispatch and time accounting. Evaluation can span days. Foreground admission targets ten-second cancellation and fails closed after thirty seconds if safe yield is unconfirmed; active-preemption timing remains unmeasured.
+Policy `learning-2026-09-20.4` allows three attempts within 600 seconds daily, with queue length two, 120-second/768-token reflection and 360-second trials. Admission reserves before dispatch; release requires durable zero-dispatch proof and time accounting. There is no always-on daemon. The full cycle and active foreground preemption remain unqualified.
 
-Candidates are at most 1,500 characters of instructions for **disposable JSON CLI tasks**. They cannot change code, tools, permissions, credentials, routing or evaluation. Three repeats across three families in both arms, then three protected checks, require 21 runs. Promotion requires no lost baseline passes, all candidate cases passing, and at least two paired correctness wins or 15% median efficiency gain with matched caches. Shared caches currently prevent an efficiency-only claim; protected-suite reuse is capped.
+Candidates contain at most 1,500 characters of instructions for **disposable JSON CLI tasks**; they cannot alter code, tools, permissions, credentials, routing or evaluation. Three repeats across three families in both arms plus three protected checks require 21 runs. Promotion requires no lost baseline passes, all candidate cases passing, and two paired correctness wins or 15% median efficiency improvement with matched caches. Shared caches currently prevent an efficiency-only claim. Evaluation can span days; protected-suite reuse is capped.
 
-Ordinary projects receive no narrow learned instructions. Only `--json-cli` new sessions opt in; resumed sessions retain their pin. Regression monitoring requires matching scoped outcomes. Rejection/deferral is valid; useful promotion is not forced or demonstrated.
+Only new `--json-cli` sessions opt into narrow learned guidance; ordinary projects stay baseline and resumed sessions retain their pins. Regression checks require matching scoped outcomes. Deferral is valid; promotion is never forced.
 
-Observations contain enums, hashes, counts and timings—not prompts, code, commands, URLs or project paths. Unknown correctness stays unknown. Owned metadata/trackers retain at most 30 days/500 records; evaluation traces retain seven days/256 MiB. Native conversation history is separate and may contain private content.
+Observations contain enums, hashes, counts and timings—not prompts, code, commands, URLs or project paths. Unknown correctness remains unknown. Owned metadata/trackers retain at most 30 days/500 records; evaluation traces retain seven days/256 MiB. Native conversation history is separate and can contain private content.
 
 ## Private installation and lifecycle
 
-**This flow was exercised against actual private DRAFT assets from an external directory with spaces and a minimal environment, without a source checkout. Final publication remains pending.** Requirements: native Apple Silicon, macOS 26/27, at least 48 GiB memory, GitHub CLI, bootstrap `python3`, and Chrome. Only the M4 Max 40-GPU-core/48-GiB Mac on macOS 26.6.2 build 25G83 has measurements; other hosts and macOS 27 are unqualified.
+**This flow passed with actual private DRAFT assets, an external directory with spaces, a minimal environment and no source checkout. Final publication is pending.** Requirements: native Apple Silicon, macOS 26/27, at least 48 GiB memory, GitHub CLI, bootstrap `python3`, and Chrome. Only the M4 Max 40-GPU-core/48-GiB Mac on macOS 26.6.2 build 25G83 has measurements.
 
-Sign in using the browser flow and macOS Keychain, then download and verify:
+Sign in through the browser and macOS Keychain, then download and verify:
 
 ```sh
 gh auth login --hostname github.com --web
@@ -121,40 +123,34 @@ gh auth login --hostname github.com --web
 )
 ```
 
-The bootstrap verifies private-repository access, active Keychain credentials and stable owner ID **90290458** before its wheel download. Token environment variables and plaintext GitHub token storage are rejected. Only verified identity is cached for **seven days** offline; expiration requires online login. This owner policy does not resist a hostile administrator.
+The bootstrap verifies private access, Keychain credentials and owner ID **90290458** before its wheel download. Token environment variables and plaintext GitHub token storage are rejected. Verified identity is cached for **seven days** offline; expiration requires login. Eleven controls passed against the deployed v7 module using mocked GitHub/keyring replies and clocks, alongside separate live owner-login evidence. No real credentials were changed. This policy does not resist a hostile administrator.
 
-Wheel/bootstrap checksums come from authenticated private GitHub assets and a source-bound manifest. They have no independent signature/notarization; integrity checks do not protect against publisher compromise. Upstream oMLX codesign is verified separately. No public PyPI upload or hosted CI attestation is claimed.
+Checksums come from authenticated private GitHub assets and a source-bound manifest, without independent signature/notarization. They do not protect against publisher compromise. Upstream oMLX codesign is checked separately; no hosted CI attestation is claimed.
 
-The installer provisions/reuses Python, Node, OpenCode, oMLX, browser dependencies and pinned model files. The 9B download measured 8.22 GB; missing bytes plus a 40 GiB reserve must fit. Dependencies/weights download separately. Existing components require integrity verification; changed/unowned files are preserved.
+The installer verifies dependencies/weights and preserves changed/unowned files. The 9B download measured 8.22 GB; missing bytes plus 40 GiB reserve must fit. Install/update holds the foreground lease, verifies runtime identity/idle, waits for port closure, then stages a recoverable transaction. Rollback restores matching owned settings/aliases and activation. Reinstall still checks dependency/model integrity.
 
-Install/update holds the foreground lease, verifies runtime identity and idle counters, waits for port closure before runtime-setting changes, stages verified files and records a recoverable transaction. Rollback restores matching owned settings/aliases and the previous activation while preserving new dependencies, weights and user changes. Updates require an explicit tag; identical-package reinstalls still verify dependencies/models. Real update/rollback/re-update passed. Eleven shipped-wheel fault controls passed, including SIGKILL at four activation boundaries and fresh-process recovery preserving bytes, modes and absence. Runtime, dependency and deployment boundaries were mocked; full live interrupted installation and power loss remain unqualified.
+Real private update/rollback/re-update passed. Eleven isolated shipped-wheel fault controls included four real SIGKILL/recovery boundaries preserving bytes, modes and absence. External runtime/dependency/deployment boundaries were mocked; live interrupted installation and power loss remain unqualified.
 
-Owned state lives under `~/Library/Application Support/LocalAI`, settings under `~/.omlx`, the app under `~/Applications/oMLX.app`, aliases under `~/.local/bin`. There is no automatic uninstaller. Preserve sessions/backups, disable improvement, stop the verified idle runtime, then remove only verified owned files while preserving shared settings and unrelated applications/models.
+Owned state is under `~/Library/Application Support/LocalAI`, settings under `~/.omlx`, the app under `~/Applications/oMLX.app`, aliases under `~/.local/bin`. No automatic uninstaller exists. Back up sessions, disable learning, stop the verified idle runtime and remove only verified owned files.
 
 ## Evidence and limits
 
-[RESULTS.json](RESULTS.json) contains attempts, failures, scope and pending gates; [RELEASE_MANIFEST.json](RELEASE_MANIFEST.json) binds known source, dependency, profile and artifact hashes. Raw private traces are excluded. Historical readiness claims do not apply to this candidate.
+[RESULTS.json](RESULTS.json) preserves attempts, failures and remaining gates. [RELEASE_MANIFEST.json](RELEASE_MANIFEST.json) binds known hashes. Raw private traces are excluded; historical readiness claims do not apply to this candidate.
 
-**Runtime/protocol:** five isolated 9B cold starts passed; median 3.731 seconds to a tiny completed answer, with filesystem caches retained. Revised 4,097-token cache cases observed cached-token counts **0 → 4,096 → 0 after edit → 4,096 after restoration → 4,096 after runtime restart**. Six residual protocol checks passed: two normalized tool counts, synthetic fact retention at 12,288 input tokens, rejection at 16,448, cancellation after output began, and recovery. These do not qualify native automatic-compaction retention, live corrupt-cache recovery or long-run stability. Earlier cache-eligibility and token-count failures remain recorded; corrected probes do not relabel them.
+**Runtime:** five isolated cold starts passed (median 3.731 seconds to a tiny answer; filesystem caches retained). Revised cache tests observed 0→4,096→0 after edit→4,096 after restoration/restart cached tokens. Scoped tool-count, synthetic retention/input rejection and cancellation checks passed. Native compaction retention, corrupted-cache recovery and long-run stability remain unqualified.
 
-**Quality:** the fixed API calibration scored **0/6 Fast** semantic checks and **0/6 Think** within its 30-second deadline; both used temperature .6, unlike production Fast .7. One earlier supervised Fast TUI task passed 22 model-written tests and 12 independent checks after eight failed tools, taking 1,372.496 seconds including approvals/execution. Its title-token waste was fixed. The tested GLM artifact/runtime pairing produced degenerate output in Fast and Think despite normal sampled pressure; it was rejected without a broader model-quality judgment.
+**Coding:** fixed API calibration scored 0/6 Fast and 0/6 Think within 30 seconds; both used temperature .6, unlike production Fast .7. An earlier supervised TUI task passed 22 model-written tests and 12 independent checks.
 
-The corrected Think .6 coding pair matched initial files, budget, model, sampler and ten tool names; complete schemas differ. Stock ran first with shared caches:
+The scoped stock/KRYN Think .6 initial pair matched files, budget, model, sampler and ten tool names; full schemas differed and caches were shared. Both timed out at 360 seconds and scored **17/18**, establishing no quality/latency advantage. KRYN's 1,320.481-second continuation scored **26/27**, still failed its public suite while claiming success, and omitted requested review/handoff. Earlier confounded attempts remain preserved.
 
-| Initial result | Stock OpenCode | KRYN |
-|---|---:|---:|
-| Independent checks | 17/18 | 17/18 |
-| Task complete | No; timeout | No; timeout |
-| Driver time with cleanup | 369.455 s | 367.765 s |
-| Tool calls / native error-state tools | 47 / 14 | 37 / 1 |
-| Completed shells with nonzero exit | 5 | 6 |
-| Compactions | 3 | 4 |
-| Reported output tokens | 13,085 | 12,683 |
+**Actual daily QueueWatch:** initial work ended normally at 1,491.313/1,500 seconds: 49 tools, 8,652 reported output tokens, three compactions, 727 normal samples and zero additional swap. Browser navigation, acknowledgement and viewport resizes occurred, but reload/filter success claims lacked supporting evidence. No reviewer/handoff completed. Four interventions and 17 approval pairs were recorded; waiting capture is incomplete.
 
-Both failed model-written public tests, with normal sampled pressure and zero additional swap. Each has an interrupted generation without token counters. Stock’s wrong paths appeared in generated compaction; no wrapper path defect was observed. This pair establishes neither a correctness advantage nor general quality/latency gain. Earlier Think1.0, unscoped 44-tool baseline and invalid outer-sandbox grading attempts remain distinguished in the results.
+The original **4/7** grader had a brittle label locator. A versioned punctuation-only correction passed positive/negative controls and confirmed filtering failure; its **3/7** also reflects tests depending on a backup changed during browser work. This is not a selector-only regression. Strict sample-byte preservation failed formatting changes; values remained equal.
 
-The same KRYN session then ended normally after a 1,320.481-second continuation: 127 tools, four edit errors, 23 completed compactions and 48,421 reported output tokens. All 631 resource samples were normal, with zero additional swap. Protected checks passed **26/27**; its public suite still failed, despite the final answer claiming 13 tests passed. The requested fresh reviewer and handoff were omitted. Native completion therefore did not meet full task acceptance. There was no stock continuation or operator code fix.
+The same session continued under v5 for **1,375.027/1,500 seconds**: 39 tools, 14,626 reported output tokens, three compactions, 705 normal samples and zero additional swap. Four error states were operator-declined shell calls. Four intervention records and 13 approval pairs remain separate from compute timing. A fresh local Think Reviewer used only six read tools but approved broken behavior after receiving a distorted requirement. Parent Build then changed CSS. Protected pre-review and final grades both scored **3/9**: filtering, external-collector visibility/preservation and public tests failed. Restart was dependent/untested; browser continuation and handoff did not complete. The operator made no app code edits. Cleanup confirmed the known task processes had exited, the app port was closed and the model runtime was healthy and idle.
 
-**Distribution/lifecycle:** clean private draft installation, update, rollback and re-update passed on this existing Mac. The current installed draft is `1126b0ce…6d5602bf`, client `f00700bc09fd4a77`, Think .6. An actual daily-launcher outage/relaunch passed on the prior client with unchanged launcher/guard code; final-artifact dogfood remains pending. It observed an active request, not a pre-stop streamed-token boundary or complete network audit. Prior partial attempts remain preserved.
+**Other capabilities:** one attached synthetic image case passed through installed native Plan/Fast. Real research made two successful searches, then compaction failed at **21,288 >16,384 tokens**, before source opens/final JSON. The installed v7 output cap preserved 13 full archives and avoided that rejection; three compactions completed. Research still timed out at 240 seconds (247.730 including lifecycle), with 29 tools, 11 retrieval errors and no final answer despite opening both official pages. Oversized single-line results produced archive markers that Browse could not read locally.
 
-Outstanding acceptance includes successful sustained coding/browser/review, handoff, final artifact dogfood/publication, full live interrupted installation, complete learning and active preemption. Offline checks establish specific properties, not agent correctness. Infinite inference, frontier parity, general self-improvement, integrated macOS computer control, office suites and image generation are not implemented or demonstrated. See [evaluation methodology](evals/README.md), [profile](setup/accepted-profile.json) and [third-party notices](THIRD_PARTY_NOTICES.md).
+**Final v7 recovery:** two normal exits and same-session/pin resume passed within a recorded upper bound of 619.633/900 seconds. Audit stayed read-only across restart but produced no Reviewer child or handoff. After explicit Build selection, tests failed and the model changed a test despite a frozen no-change instruction. The operator interrupted the turn. Early pressure/swap capture was missing; only the later 137 samples were normal with zero swap growth. This does not qualify the whole interval.
+
+Actual v7 update/autostart passed. Earlier QueueWatch artifacts differ, so it is not a same-artifact quality comparison. Required task completion, review/handoff, full learning and varied comparison remain failed or unqualified. The private draft remains unpublished; the runtime is verified idle, with no owned native/worker children and learning paused. Infinite inference, frontier parity, general self-improvement, integrated macOS control, office suites and image generation are not demonstrated. See [evaluation methodology](evals/README.md), [profile](setup/accepted-profile.json) and [notices](THIRD_PARTY_NOTICES.md).
