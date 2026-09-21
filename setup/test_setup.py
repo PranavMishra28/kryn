@@ -1065,6 +1065,7 @@ class SetupChecks(unittest.TestCase):
         self.assertNotIn("agent_run", cfg["mcp"]["servers"]["search"]["url"])
         self.assertIn(str(root / "browser/node_modules/@playwright/mcp/cli.js"), cfg["mcp"]["servers"]["browser"]["command"])
         self.assertEqual(setup.runtime_settings(root)["scheduler"]["max_concurrent_requests"], 1)
+        self.assertIsInstance(setup.runtime_settings(root)["memory"]["memory_guard_custom_ceiling_gb"], float)
         self.assertEqual(setup.runtime_settings(root)["idle_timeout"], {"idle_timeout_seconds": 300})
         self.assertFalse(setup.runtime_settings(root)["server"]["auto_start_on_launch"])
         self.assertEqual(setup.model_settings()["models"][setup.MODEL]["max_tokens"], 8192)

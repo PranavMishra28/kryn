@@ -215,7 +215,7 @@ def runtime_settings(root, profile=None):
             "model": {"model_dirs": [str(root / profile["model_parent"])],
             "model_fallback": False}, "scheduler": {"max_concurrent_requests": 1},
             "memory": {"prefill_memory_guard": True, "memory_guard_tier": "custom",
-            "memory_guard_custom_ceiling_gb": profile["memory_gib"], "soft_threshold": 0.85, "hard_threshold": 0.95,
+            "memory_guard_custom_ceiling_gb": float(profile["memory_gib"]), "soft_threshold": 0.85, "hard_threshold": 0.95,
             "prefill_safe_zone_ratio": 0.60},
             "idle_timeout": {"idle_timeout_seconds": 300},
             "cache": {"enabled": True, "hot_cache_only": False,
