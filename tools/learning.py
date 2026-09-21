@@ -28,11 +28,11 @@ import uuid
 import improvement as state
 
 POLICY = {
-    "version": "learning-2026-09-20.3", "idle_seconds": 120, "day_seconds": 600,
+    "version": "learning-2026-09-20.4", "idle_seconds": 120, "day_seconds": 600,
     "reflection_seconds": 120, "reflection_tokens": 768, "reflection_variant": "fast", "trial_seconds": 360,
-    # Version .2 spent its first slot on a proved pre-inference startup defect.
-    # Two prospective slots retain the same total daily time; no history is reset.
-    "candidates_per_day": 2, "queue": 2, "pairs_per_family": 3,
+    # One final prospective opportunity can use genuinely new scoped evidence.
+    # Prior startup failure/valid deferral and total daily time remain preserved.
+    "candidates_per_day": 3, "queue": 2, "pairs_per_family": 3,
     "efficiency_fraction": .15, "yield_target_seconds": 10, "yield_bound_seconds": 30,
     "raw_days": 7, "raw_bytes": 256 * 1024**2, "metadata_days": 30, "metadata_records": 500,
     "holdout_uses_per_candidate": 1,

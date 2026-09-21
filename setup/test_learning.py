@@ -251,6 +251,18 @@ class LearningTests(unittest.TestCase):
         learning.control(self.state, 'disable'); self.assertTrue(learning.foreground_requested(self.state))
         self.assertEqual(learning.budget(self.state)['seconds'], 0)
 
+    def test_final_prospective_opportunity_preserves_spent_time_and_stops_at_three(self):
+        base=learning.root(self.state)
+        previous={'date':learning.utc_day(),'seconds':15.200058583985083,'candidates':2}
+        learning.put(base/'budget.json',previous)
+        learning.put(base/'consumed.json',['b'*64,'c'*64])
+        learning.reserve_reflection_attempt(self.state,self.event())
+        self.assertEqual(learning.budget(self.state),{**previous,'candidates':3})
+        self.assertEqual(set(learning.read(base/'consumed.json')),{'a'*64,'b'*64,'c'*64})
+        with self.assertRaises(learning.state.Deferred):
+            learning.reserve_reflection_attempt(self.state,self.event(task_id='d'*64))
+        self.assertEqual(learning.budget(self.state)['seconds'],previous['seconds'])
+
     def test_exit_prunes_nonactionable_events_without_starting_worker(self):
         folder=learning.state._directory(learning.root(self.state)/'events')
         for index in range(503):
