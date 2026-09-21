@@ -8,7 +8,8 @@ const HASH = /^[a-f0-9]{64}$/;
 const MAX_SESSION_PINS = 500;
 const READ_TOOLS = new Set(['read', 'glob', 'grep', 'webfetch', 'question',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
-const READ_ROLES = new Set(['reviewer', 'explore']);
+const READ_ROLES = new Set(['reviewer', 'explore', 'audit']);
+const AUDIT_TOOLS = new Set([...READ_TOOLS, 'subagent']);
 const READ_ACTIONS = new Set([...READ_TOOLS, 'external_directory']);
 export const BROWSER_TOOLS = [
   'browser_browser_navigate', 'browser_browser_navigate_back', 'browser_browser_snapshot',
@@ -130,6 +131,7 @@ export default {
     if (options.observe) pruneTrackers(folders.trackers);
     const sessions = new Map();
     const activeChildren = new Map();
+    const auditDelegated = new Set();
     const seen = new Set();
     let failed;
     const assertHealthy = () => { if (failed) throw new Error('KRYN observer failed; restart and inspect owned state'); };
@@ -190,6 +192,7 @@ export default {
       }
       item.turn = undefined;
       activeChildren.delete(id);
+      auditDelegated.delete(id);
     }
 
     await ctx.session.hook('prompt', event => {
@@ -203,7 +206,8 @@ export default {
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
       if (READ_ROLES.has(event.agent))
-        for (const name of Object.keys(event.tools ?? {})) if (!READ_TOOLS.has(name)) delete event.tools[name];
+        for (const name of Object.keys(event.tools ?? {}))
+          if (!(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(name)) delete event.tools[name];
       if (event.agent === 'browse')
         for (const name of Object.keys(event.tools ?? {}))
           if (!BROWSE_TOOLS.has(name)) delete event.tools[name];
@@ -233,19 +237,27 @@ export default {
     });
     await ctx.session.hook('experimental.ws.handshake', () => { throw new Error('KRYN has not qualified model WebSocket transport'); });
     await ctx.permission.hook('evaluate', event => {
-      if (READ_ROLES.has(event.agent) && !READ_ACTIONS.has(event.action)) {
+      const auditChild = event.agent === 'audit' && event.action === 'subagent' &&
+        event.resources?.length === 1 && event.resources[0] === 'reviewer';
+      if (READ_ROLES.has(event.agent) && !READ_ACTIONS.has(event.action) && !auditChild) {
         event.effect = 'deny'; event.message = 'KRYN managed read-only role';
       }
     });
     await ctx.tool.hook('execute.before', event => {
       assertHealthy();
-      if (READ_ROLES.has(event.agent) && !READ_TOOLS.has(event.tool))
+      if (READ_ROLES.has(event.agent) && !(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(event.tool))
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
         throw new Error('KRYN Browse tool is outside the qualified surface');
       if (event.tool === 'subagent') {
         if (activeChildren.has(event.sessionID)) throw new Error('KRYN allows one foreground child at a time');
         if (!event.input || typeof event.input !== 'object') throw new Error('KRYN invalid subagent input');
+        if (event.agent === 'audit') {
+          if (event.input.agent !== 'reviewer' || Object.hasOwn(event.input, 'sessionID') ||
+              Object.hasOwn(event.input, 'model') || event.input.background === true || auditDelegated.has(event.sessionID))
+            throw new Error('KRYN Audit allows one fresh foreground Reviewer per execution');
+          auditDelegated.add(event.sessionID);
+        }
         event.input = { ...event.input, background: false };
         activeChildren.set(event.sessionID, event.id);
       }

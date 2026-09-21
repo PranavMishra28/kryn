@@ -162,6 +162,11 @@ class SetupChecks(unittest.TestCase):
             changed["tool_output"] = output
             with self.subTest(tool_output=output), self.assertRaises(RuntimeError):
                 localai.validate_owned_config(changed)
+        for key, value in (("agent", "build"), ("subagent", True)):
+            changed = copy.deepcopy(config)
+            changed["commands"]["audit"][key] = value
+            with self.subTest(audit_route=key), self.assertRaises(RuntimeError):
+                localai.validate_owned_config(changed)
 
     def test_effective_profile_matches_native_shapes_and_rejects_drift(self):
         config = localai.expected_config()
@@ -198,6 +203,8 @@ class SetupChecks(unittest.TestCase):
             (("config", 2, "info", "default_agent"), "plan"),
             (("config", 2, "info", "model", "variant"), "low"),
             (("config", 2, "info", "commands", "review", "model", "variant"), "fast"),
+            (("config", 2, "info", "commands", "audit", "agent"), "build"),
+            (("config", 2, "info", "commands", "audit", "subagent"), True),
         ]
         for keys, value in mutations:
             changed = copy.deepcopy(inventory)
@@ -231,6 +238,11 @@ class SetupChecks(unittest.TestCase):
         unchanged["config"].append({"type": "document", "info": {
             "tool_output": copy.deepcopy(config["tool_output"])}})
         localai.validate_inventory(unchanged)
+        replaced_command = copy.deepcopy(inventory)
+        replaced_command["config"].append({"type": "document", "info": {"commands": {
+            "audit": {"template": "Review without edits."}}}})
+        with self.assertRaises(RuntimeError):
+            localai.validate_inventory(replaced_command)
 
     def test_runtime_profile_context_and_effective_memory_bound(self):
         # oMLX server.py /v1/models ModelInfo and /api/status public response shapes.
@@ -1041,6 +1053,11 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
         self.assertEqual(cfg["compaction"]["buffer"], 2048)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
+        self.assertEqual(cfg["commands"]["audit"]["agent"], "audit")
+        self.assertFalse(cfg["commands"]["audit"]["subagent"])
+        self.assertEqual(cfg["agents"]["audit"]["mode"], "primary")
+        self.assertEqual(cfg["agents"]["audit"]["permissions"], cfg["agents"]["reviewer"]["permissions"] + [
+            {"action": "subagent", "resource": "reviewer", "effect": "allow"}])
         self.assertEqual(cfg["providers"]["local"]["settings"]["baseURL"], "http://127.0.0.1:8000/v1")
         self.assertTrue(all(a["model"].startswith("local/qwen#") for a in cfg["agents"].values()))
         self.assertTrue(all(c["model"].startswith("local/qwen#") for c in cfg["commands"].values()))

@@ -15,7 +15,9 @@ cd /path/to/your/project
 
 Use `kryn` when `~/.local/bin` is on PATH. It verifies the owned installation and owner session, starts or verifies oMLX, checks routing, then opens native OpenCode in **Build / Think**. No model account or API key is needed. Describe observable acceptance criteria, approve appropriate tool requests, and inspect the diff and actual test output.
 
-**Ctrl+X, A** opens the agent picker; **Ctrl+P** opens commands. Plan/Fast inspects and discusses; Build/Think edits and tests; Reviewer/Think reads with mutation routes denied. `/review`, `/audit`, `/research`, `/deliver` and `/handoff` supply instructions, not guaranteed outcomes.
+**Ctrl+X, A** opens the agent picker; **Ctrl+P** opens commands. Plan/Fast inspects and discusses; Build/Think edits and tests; Reviewer/Think reads with mutation routes denied. `/review`, `/research`, `/deliver` and `/handoff` supply instructions, not guaranteed outcomes.
+
+`/audit` switches the primary session to **Audit / Think** and permits one fresh foreground Reviewer. The parent remains read-only after the child returns and across resume; explicitly choose Build before editing or running checks. This corrects the tested v5 behavior, where the Reviewer stayed read-only but parent Build subsequently edited CSS. Installed validation of the complete corrected workflow remains pending.
 
 For browser verification, let Build settle, use `/agents` to choose **Browse in the same session**, confirm Fast, and provide the local URL and checks. Return to Build for fixes. Browse is primary-only: automatic Build-to-Browse delegation is not configured. This explicit switch keeps browser schemas out of coding turns. A remembered native variant can override the default; **Ctrl+T** cycles variants.
 
@@ -51,7 +53,7 @@ flowchart LR
 | Harness / runtime | OpenCode **2.0.10** ARM64; oMLX **0.6.4**, build **2529** |
 | Model | `mlx-community/Qwen3.5-9B-6bit`, revision `76fe4065e622cf34990d3c13ef80ec8531c9a0f7` |
 | Context / output | **16,384** total / **4,096** maximum output; one active generation |
-| Roles | Build, Reviewer and coding children: Think. Plan, Browse and title: Fast; title capped at **128 tokens**. |
+| Roles | Build, Audit, Reviewer and coding children: Think. Plan, Browse and title: Fast; title capped at **128 tokens**. |
 | Decoding | Think: temperature .6, top-p .95. Fast: .7, .8, presence penalty 1.5. Both top-k 20. |
 | Memory / cache | **14 GiB** ceiling; **8 GB** SSD prefix cache by model revision; no extra hot cache |
 | Acceleration | MTP, DFlash, speculative prefill and experimental KV/prefill options off |
@@ -68,7 +70,7 @@ Retrieval uses native search/read and source fetch; no vector database is instal
 
 All managed roles/helpers use the pinned loopback model. Native request hooks reject other models or inference destinations, including after configuration refresh; cloud providers are disabled. This covers managed inference routing, not all host networking. Search queries and visited sites leave the Mac. Exa is quota-limited and has no guaranteed free availability. Local inference has no metered API charge but consumes finite hardware, electricity, storage and time.
 
-Shell normally asks permission. Reviewer/Explore have native permissions plus mutation guards. One foreground child per parent is admitted; no background swarm. Chrome is isolated, with page WebMCP and unsafe browser code disabled. Project instructions and native skills remain supported; unrelated global catalogs are excluded.
+Shell normally asks permission. Reviewer/Explore and the Audit primary have native permissions plus mutation guards. Audit allows one fresh Reviewer per execution, denying child session/model overrides and background delegation. One foreground child per parent is admitted; no background swarm. Chrome is isolated, with page WebMCP and unsafe browser code disabled. Project instructions and native skills remain supported; unrelated global catalogs are excluded.
 
 Foreground shell descendants have a project/owned-state write boundary. Native file tools, MCP, formatters, persistent PTYs, reads and networking are outside it; foreground project configuration is trusted. Arbitrary hostile repositories are not safely contained. Background evaluation uses a separate whole-process sandbox, disposable workspace, protected grader and restricted inference relay.
 

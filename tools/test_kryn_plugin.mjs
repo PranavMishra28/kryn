@@ -92,7 +92,7 @@ test('title wire budget is bounded after body overlays without changing other re
 test('read-only guards reject every unlisted mutation route without autoapproval; native child is bounded', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    for (const agent of ['reviewer', 'explore']) {
+    for (const agent of ['reviewer', 'explore', 'audit']) {
       for (const tool of ['write', 'edit', 'patch', 'shell', 'execute', 'subagent', 'pty', 'formatter', 'lsp_apply_edit', 'browser_browser_click', 'remote_mutate']) {
         assert.throws(() => f.call('tool.execute.before', { agent, tool }));
         const event = { agent, action: tool, effect: 'allow' };
@@ -107,6 +107,38 @@ test('read-only guards reject every unlisted mutation route without autoapproval
     assert.throws(() => f.call('tool.execute.before', { ...child, id: 'call_2' }));
     f.call('tool.execute.after', { ...child, messageID: 'msg_1', status: 'error' });
     f.call('tool.execute.before', { ...child, id: 'call_3' });
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('Audit parent stays read-only after one fresh foreground Reviewer and ordinary Build remains available', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    await f.emit('session.execution.started');
+    const call = { agent: 'audit', tool: 'subagent', sessionID: 'ses_1', id: 'audit_child',
+      messageID: 'msg_1', input: { agent: 'reviewer', prompt: 'Review the supplied evidence.', background: false } };
+    for (const input of [
+      { agent: 'build' }, { agent: 'reviewer', sessionID: 'ses_old' },
+      { agent: 'reviewer', sessionID: null }, { agent: 'reviewer', background: true },
+      { agent: 'reviewer', model: 'local/qwen#fast' },
+    ]) assert.throws(() => f.call('tool.execute.before', { ...call, input }));
+    for (const resources of [[], ['build'], ['reviewer', 'build']]) {
+      const permission = { agent: 'audit', action: 'subagent', resources, effect: 'allow' };
+      f.call('permission.evaluate', permission); assert.equal(permission.effect, 'deny');
+    }
+    const permission = { agent: 'audit', action: 'subagent', resources: ['reviewer'], effect: 'allow' };
+    f.call('permission.evaluate', permission); assert.equal(permission.effect, 'allow');
+    f.call('tool.execute.before', call);
+    f.call('tool.execute.after', { ...call, status: 'completed' });
+    assert.throws(() => f.call('tool.execute.before', { ...call, id: 'second_child' }));
+    for (const tool of ['edit', 'write', 'patch', 'shell', 'execute', 'browser_browser_click', 'unknown_mutation']) {
+      assert.throws(() => f.call('tool.execute.before', { agent: 'audit', tool }));
+      const mutation = { agent: 'audit', action: tool, resources: ['*'], effect: 'allow' };
+      f.call('permission.evaluate', mutation); assert.equal(mutation.effect, 'deny');
+      f.call('tool.execute.before', { agent: 'build', tool });
+    }
+    await f.emit('session.execution.succeeded');
+    await f.emit('session.execution.started');
+    f.call('tool.execute.before', { ...call, id: 'later_audit_child' });
   } finally { await cleanup(); f.remove(); }
 });
 
@@ -184,10 +216,11 @@ test('Browse advertises only its 22 browser/research tools across request hooks 
     assert.deepEqual([...BROWSER_TOOLS].sort(), [...browser].sort());
     assert.equal(allowed.length, 22);
     for (const hook of ['context', 'generate', 'compaction']) {
-      for (const agent of ['browse', 'build', 'plan', 'general', 'reviewer', 'explore']) {
+      for (const agent of ['browse', 'build', 'plan', 'general', 'reviewer', 'explore', 'audit']) {
         const event = { sessionID: 'ses_' + agent, agent, system: [], tools: { ...registry } };
         f.call('session.' + hook, event);
         const expected = agent === 'browse' ? allowed
+          : agent === 'audit' ? [...readOnly, 'subagent'].sort()
           : ['reviewer', 'explore'].includes(agent) ? readOnly : Object.keys(registry).sort();
         assert.deepEqual(Object.keys(event.tools).sort(), expected, agent + ' ' + hook);
         for (const name of expected) assert.equal(event.tools[name], registry[name]);

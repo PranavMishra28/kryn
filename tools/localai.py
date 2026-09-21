@@ -130,6 +130,9 @@ def validate_owned_config(config):
         for name, item in expected_profile[section].items():
             require(same_reference(config.get(section, {}).get(name, {}).get("model"), item.get("model")),
                     f"Expected release model reference for {section}/{name}")
+            if section == "commands":
+                require(all(config[section][name].get(key) == item.get(key) for key in ("agent", "subagent")),
+                        f"Expected release command routing for {name}")
 
 
 def prerequisites(source_init=False):
@@ -378,7 +381,7 @@ def validate_inventory(inventory):
             if "tokens" in configured.get("keep", {}):
                 compaction["keep"] = {"tokens": configured["keep"]["tokens"]}
             for name, item in info.get("commands", {}).items():
-                commands.setdefault(name, {}).update(item)
+                commands[name] = item  # Native command registration replaces the whole definition.
     validate_defaults(defaults, expected_profile)
     for name, item in commands.items():
         require(item.get("model") is None or local_reference(item["model"]),
@@ -386,6 +389,8 @@ def validate_inventory(inventory):
     for name, item in expected_profile["commands"].items():
         require(same_reference(commands.get(name, {}).get("model"), item.get("model")),
                 f"Effective command {name} differs from this release's model reference")
+        require(all(commands[name].get(key) == item.get(key) for key in ("agent", "subagent")),
+                f"Effective command {name} differs from this release's routing")
 
 
 def inventory(server, config):

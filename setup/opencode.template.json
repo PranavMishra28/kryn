@@ -496,6 +496,59 @@
       ],
       "mode": "primary",
       "description": "Browser interaction and research using configured tools"
+    },
+    "audit": {
+      "mode": "primary",
+      "description": "Read-only audit with one fresh Reviewer",
+      "model": "local/qwen#think",
+      "system": "Coordinate a read-only audit. Inspect relevant files and available diff/check evidence, then delegate exactly once to a fresh Reviewer with no sessionID, model override, or background execution. Supply acceptance criteria, changed paths and actual evidence. Wait for the Reviewer, then report findings without fixing them. Do not claim tests ran unless their results are available. You remain read-only until the user explicitly switches agents.",
+      "permissions": [
+        {
+          "action": "browser_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "browser",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "peekaboo_*",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "shell",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "search_*",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "execute",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "reviewer",
+          "effect": "allow"
+        }
+      ]
     }
   },
   "commands": {
@@ -524,10 +577,10 @@
       "template": "Return a concise handoff with objective, acceptance checks, completed work, actual check commands/results, unresolved failures, disproven approaches, and the next action. Reconcile with current Git and files. Use the native checkpoint; do not overwrite user-owned task files. $ARGUMENTS"
     },
     "audit": {
-      "agent": "build",
+      "agent": "audit",
       "model": "local/qwen#think",
       "subagent": false,
-      "template": "Audit $ARGUMENTS without modifying files. Launch exactly one new reviewer subagent with background:false and no sessionID. Supply acceptance criteria, changed paths, the raw diff and actual check results. Wait for its result. Report actionable findings with file and line references; do not fix them."
+      "template": "Audit $ARGUMENTS without modifying files. Inspect relevant files and available diff/check evidence. Launch exactly one new reviewer subagent with background:false, no sessionID and no model override. Supply acceptance criteria, changed paths, available raw diff and actual check results; identify missing evidence. Wait for its result, then report actionable findings with file and line references. Do not fix findings. Remain in Audit mode until the user explicitly switches agents."
     }
   },
   "plugins": [
