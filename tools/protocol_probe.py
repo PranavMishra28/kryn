@@ -282,7 +282,7 @@ def body(model, variant, messages, max_tokens):
     return {
         "model": model, "messages": messages, "stream": True,
         "stream_options": {"include_usage": True}, "max_tokens": max_tokens,
-        "temperature": 1.0 if thinking else 0.7, "top_p": 0.95 if thinking else 0.8,
+        "temperature": 0.6 if thinking else 0.7, "top_p": 0.95 if thinking else 0.8,
         "top_k": 20, "min_p": 0, "presence_penalty": 0 if thinking else 1.5,
         "repetition_penalty": 1, "chat_template_kwargs": kwargs,
     }

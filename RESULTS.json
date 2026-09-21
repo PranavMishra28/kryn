@@ -4,9 +4,9 @@
   "created_utc": "2026-09-21T01:19:28.648463+00:00",
   "release_status": "NOT_READY",
   "daily_use_status": "NOT_READY_PENDING_CURRENT_PROFILE_QUALIFICATION",
-  "scope": "Current product qualification skeleton. PENDING is not a failure claim or a pass. Prior candidate/runtime results are not final installed release acceptance.",
+  "scope": "Current product qualification with scoped completed measurements and unresolved release gates. Historical failures are retained; partial correctness is not task completion.",
   "current": {
-    "source_base_commit": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+    "source_base_commit": "dafc7215640b808843a181d3e09be03d09c2a0bd",
     "source_dirty": true,
     "final_source_commit": null,
     "package_version": "0.1.0",
@@ -16,13 +16,34 @@
       "profile_sha256": "667dfe2c0037804834e08b166c86e962406f85826959b6ac2ff3979907a7305a",
       "memory_ceiling_gib": 14,
       "context": 16384,
-      "max_output": 4096
+      "max_output": 4096,
+      "decoding": {
+        "think": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "top_k": 20,
+          "presence_penalty": 0,
+          "enable_thinking": true
+        },
+        "fast": {
+          "temperature": 0.7,
+          "top_p": 0.8,
+          "top_k": 20,
+          "presence_penalty": 1.5,
+          "enable_thinking": false
+        },
+        "status": "SOURCE_CONFIGURED_PENDING_REVISED_ARTIFACT_QUALIFICATION"
+      }
     },
     "gates": {
       "private_artifact_install": {
-        "status": "PENDING",
+        "status": "PARTIAL_PRIVATE_DRAFT_INSTALL_PASS",
         "requirement": "Clean tagged private wheel installed without a source checkout; exact documented download/checksum/install route and dependency integrity verified.",
-        "evidence": []
+        "evidence": [
+          "private-asset-install.json",
+          "source-independent-entry-verification.json"
+        ],
+        "remaining": "Final release acceptance/publication is pending; draft installation is a completed scoped check."
       },
       "owner_authentication": {
         "status": "PENDING",
@@ -37,12 +58,18 @@
       "sustained_native_sessions": {
         "status": "PENDING",
         "requirement": "Two representative sustained native sessions under ordinary desktop load; pressure/swap, compaction, recovery, latency and interventions recorded.",
-        "evidence": []
+        "evidence": [
+          "tui-dogfood.json",
+          "stockroom-kryn-initial-driver.json",
+          "stockroom-kryn-initial-grade.json"
+        ]
       },
       "native_capabilities": {
         "status": "PENDING",
         "requirement": "Actual edits/tests/Git/Plan/Reviewer/Browse/research/image and task-resume checks from the final installed artifact.",
-        "evidence": []
+        "evidence": [
+          "tui-dogfood.json"
+        ]
       },
       "managed_locality_and_permissions": {
         "status": "PENDING",
@@ -67,7 +94,9 @@
       "quality_comparison": {
         "status": "PENDING",
         "requirement": "Matched stock-OpenCode baseline on varied unseen tasks with frozen grader controls; failures, interventions, correctness and latency separated.",
-        "evidence": []
+        "evidence": [
+          "stockroom-kryn-initial-grade.json"
+        ]
       },
       "release_update_rollback": {
         "status": "PENDING",
@@ -75,7 +104,313 @@
         "evidence": []
       }
     },
-    "measurements": {},
+    "measurements": {
+      "native_daily_tui": {
+        "status": "COMPLETED_WITH_REPAIRS",
+        "task_family": "Python SQLite command-line application",
+        "interface": "ordinary daily native TUI",
+        "installed_client_release": "8043a58827bba640",
+        "variant": "fast",
+        "model_written_tests_passed": 22,
+        "independent_checks_passed": 12,
+        "independent_checks_total": 12,
+        "task_completed": true,
+        "wall_seconds": 1372.496,
+        "tool_elapsed_including_approval_seconds": 969.054,
+        "remaining_wall_seconds_unpartitioned": 403.442,
+        "timing_caveat": "Tool elapsed includes approval waiting and execution; neither it nor the remaining model/UI/orchestration time is an isolated inference measurement.",
+        "ordinary_shell_approvals": 18,
+        "implementation_hints_or_operator_repairs": 0,
+        "tool_calls": 30,
+        "failed_tools": 8,
+        "compactions": 3,
+        "native_reported_tokens": {
+          "input": 47968,
+          "output": 11437,
+          "reasoning": 0
+        },
+        "token_scope": "Native session counters; helper usage is not asserted to be fully included.",
+        "preserved_failures": [
+          "Eight failed tools before completion.",
+          "Earlier title helper used Think and exhausted4096tokens; subsequent source changes title to Fast with128tokens."
+        ],
+        "evidence": [
+          "tui-dogfood.json"
+        ],
+        "qualification_limit": "Completed supervised earlier Fast candidate run, not all current Build/Think workflows or unattended operation.",
+        "configured_temperature": 0.7
+      },
+      "private_artifact_install": {
+        "status": "PASS_PRIVATE_DRAFT_INSTALL",
+        "artifact": {
+          "version": "0.1.0",
+          "tag": "v0.1.0",
+          "repository": "PranavMishra28/kryn",
+          "release_is_draft": true,
+          "visibility": "private",
+          "wheel_sha256": "edef64a9f483c5edb3ea6b1df20b5f1dbb8f938c6c2f922679c839325195eb6f",
+          "wheel_bytes": 196971,
+          "source_revision": "dafc7215640b808843a181d3e09be03d09c2a0bd",
+          "source_dirty": false,
+          "payload_files": 48,
+          "wheel_entries": 57,
+          "payload_hashes_verified": true
+        },
+        "installer_ran": true,
+        "exit_code": 0,
+        "source_checkout_used": false,
+        "external_temporary_directory": true,
+        "installation_path_contains_spaces": true,
+        "minimal_environment": true,
+        "wheel_and_installer_checksums_verified": true,
+        "source_independent_launcher_verified": true,
+        "installed_client_release": "96e5d5ac08cceecd",
+        "evidence": [
+          "private-asset-install.json",
+          "source-independent-entry-verification.json"
+        ],
+        "qualification_limit": "Installed private draft on the existing configured Mac with reusable dependencies; final publication, second-machine installation, update and rollback remain unqualified."
+      },
+      "representative_stockroom": {
+        "initial": {
+          "status": "TIMEOUT_PARTIAL_CORRECTNESS",
+          "suite": "independent-representative-v1",
+          "agent": "build",
+          "variant": "think",
+          "model_id": "Qwen3.5-9B-6bit",
+          "budget_seconds": 360,
+          "wall_seconds_including_driver_and_cleanup": 367.767,
+          "task_completed": false,
+          "model_completed": false,
+          "timed_out": true,
+          "independent_checks_passed": 17,
+          "independent_checks_total": 18,
+          "independent_grade_passed": false,
+          "public_tests_passed": false,
+          "failed_check_names": [
+            "public-tests"
+          ],
+          "original_tests_and_data_preserved": true,
+          "tool_calls": 38,
+          "tool_errors_count": 1,
+          "compactions": 4,
+          "operator_interventions": 0,
+          "automatic_interventions": 1,
+          "intervention_cause": "timeout",
+          "resources": {
+            "sample_count": 177,
+            "max_sampled_listener_phys_footprint_bytes": 12453338264,
+            "max_observed_listener_lifetime_phys_footprint_bytes": 12507094336,
+            "swap_peak_growth_bytes": 0,
+            "pressure_levels_observed": [
+              1
+            ],
+            "warning_or_critical_observed": false,
+            "telemetry_complete": true
+          },
+          "routing_verified": true,
+          "owned_runtime_idle_after_cancellation": true,
+          "owned_cli_exited": true,
+          "owned_native_server_exited": true,
+          "evidence": [
+            "stockroom-kryn-initial-driver.json",
+            "stockroom-kryn-initial-grade.json",
+            "stockroom-kryn-run.json"
+          ],
+          "qualification_limit": "17/18 independent checks does not mean task completion; model-written public tests still fail. Driver/cleanup time is not pure inference.",
+          "wire_temperature": 1.0,
+          "profile_generation": "historical native Think1.0 before prospective coding-preset correction"
+        },
+        "continuation": {
+          "status": "PENDING",
+          "budget_seconds": 1500,
+          "initial_failure_must_remain_visible": true
+        }
+      },
+      "structured_api_calibration": {
+        "status": "COMPLETED_WITH_RECORDED_FAILURES",
+        "cases": 3,
+        "repeats_per_mode": 2,
+        "fast_strict_passes": 0,
+        "fast_attempted": 6,
+        "think_strict_passes_within_deadline": 0,
+        "think_attempted": 6,
+        "think_deadline_failures": 6,
+        "deadline_seconds": 30,
+        "sampler_held_constant_both_modes": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "top_k": 20,
+          "presence_penalty": 0
+        },
+        "requests": [
+          {
+            "receipt_sha256": "26569ba27fac314a3ed3643948f374bc47a4bd18ec9d00950a5213aa384d2c48",
+            "thinking": false,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "12802c26a30b3e1e49aa854ec3a3494f6ad8bf08c38376a5d0f34842652f859a",
+            "thinking": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "32e1a206b3b0990369ae17d94be5d0b926c935ad1912d6e64e97ccca984b2551",
+            "thinking": false,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "707395bf6e2139d6c05edec246bc76737a2127900fb0c1019614e9b897109305",
+            "thinking": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "04b62cf12244cddddfb4ac1f00882ae0694ba482e1e99970de748f3c2844c220",
+            "thinking": false,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "5684de896a3ddcc016435acbefc81563e34a99ed0e97d574b418355ea4fbf620",
+            "thinking": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "26569ba27fac314a3ed3643948f374bc47a4bd18ec9d00950a5213aa384d2c48",
+            "thinking": false,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "12802c26a30b3e1e49aa854ec3a3494f6ad8bf08c38376a5d0f34842652f859a",
+            "thinking": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "32e1a206b3b0990369ae17d94be5d0b926c935ad1912d6e64e97ccca984b2551",
+            "thinking": false,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "707395bf6e2139d6c05edec246bc76737a2127900fb0c1019614e9b897109305",
+            "thinking": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "04b62cf12244cddddfb4ac1f00882ae0694ba482e1e99970de748f3c2844c220",
+            "thinking": false,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          },
+          {
+            "receipt_sha256": "5684de896a3ddcc016435acbefc81563e34a99ed0e97d574b418355ea4fbf620",
+            "thinking": true,
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "presence_penalty": 0
+          }
+        ],
+        "scope": "Matched API reasoning-toggle calibration; this did not use the production Fast0.7/top-p0.8/presence1.5 sampler and did not measure native agent task completion."
+      },
+      "unscoped_stockroom_v1": {
+        "status": "PRESERVED_WEAK_BASELINE_TIMEOUT",
+        "wire_temperature": 1.0,
+        "variant": "think",
+        "completed": false,
+        "timed_out": true,
+        "wall_seconds": 367.702,
+        "tool_calls": 35,
+        "tool_errors_count": 7,
+        "wire_tool_count": 44,
+        "kryn_wire_tool_count": 10,
+        "compactions": 13,
+        "completed_compactions": 12,
+        "interrupted_compactions": 1,
+        "successful_identical_read_repetition_counts": [
+          8,
+          6,
+          5
+        ],
+        "state_reset_established": false,
+        "comparison_limit": "The44versus10tool schema difference and compaction pressure invalidate this as a strong coding baseline for general quality claims. Shared cache and one fixed-order pair also limit latency interpretation.",
+        "evidence": [
+          "stock-ablation-independent-audit.json",
+          "stockroom-stock-initial-driver.json"
+        ]
+      },
+      "paired_native_stockroom_v2": {
+        "status": "PENDING",
+        "arms": {
+          "kryn": {
+            "status": "PREPARED_NOT_RUN",
+            "first_wire_schema_sha256": null,
+            "first_wire_tool_names_sha256": null
+          },
+          "stock": {
+            "status": "PREPARED_NOT_RUN",
+            "first_wire_schema_sha256": null,
+            "first_wire_tool_names_sha256": null
+          }
+        },
+        "variant": "think",
+        "temperature": 0.6,
+        "initial_budget_seconds": 360,
+        "continuation_budget_seconds": 1500,
+        "identical_initial_files_and_prompt": true,
+        "expected_build_tool_count": 10,
+        "stock_native_permission_scope": [
+          "deny browser_*",
+          "deny search_*",
+          "deny execute",
+          "allow builtin explore/general subagents"
+        ],
+        "custom_reviewer_in_stock": false,
+        "native_stock_prompts_retained": true,
+        "configuration_freeze": "PENDING_REVISED_PRIVATE_ARTIFACT_INSTALL",
+        "first_wire_freeze": "Existing audit logs full schemas and names before inference; extract and verify first primary request for each arm.",
+        "prior_results_preserved": true,
+        "evidence": [
+          "paired-v2-protocol.json"
+        ],
+        "comparison_limits": [
+          "KRYN retains authored guidance, product hooks and custom Reviewer; stock removes them.",
+          "Full subagent schema may differ despite equal tool names.",
+          "Both title variants Fast; KRYN128versusstock4096 cap, but explicit driver titles should suppress title calls.",
+          "Shared caches, fixed order and one task cannot establish general quality or clean latency gain."
+        ]
+      }
+    },
     "private_evidence_refs": {
       "qwen9-runtime-summary.json": {
         "sha256": "b13e04eda25f2f27ffa0fda6edaf37c7aa8f5356e21852b32aee24cf3976d103",
@@ -111,6 +446,51 @@
         "sha256": "1b5efdce9f1832062f3f72ed3e6b44f6ed4600b7e6c33f6a157e8447e56a8abc",
         "visibility": "private raw receipt; hash only in distributed source",
         "scope": "Historical candidate observation; final gate status below remains pending"
+      },
+      "tui-dogfood.json": {
+        "sha256": "f68430c42b0c81442ef564de60e668c320a928891cb97f2cb7bdca362ba67d95",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Completed earlier Fast native daily interface run; title helper defect and all repairs retained."
+      },
+      "private-asset-install.json": {
+        "sha256": "ad4d1b6d2524d52c6bf3b5d26cdbd8dd061d70704982ef7b1d1f4009961defe5",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Actual private draft assets installed from an external spaced path in a minimal environment, without source checkout."
+      },
+      "source-independent-entry-verification.json": {
+        "sha256": "c952f6ede3a5b876c71790f4c797a25ca4732ba873818b72c732c3f632247ddf",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Read-only installed launcher, active package and immutable client verification; no model call."
+      },
+      "stockroom-kryn-initial-driver.json": {
+        "sha256": "da316cf7607141518475b86e9eac6361f6ef429b7cd303476b90ef321a87de53",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Initial 360-second Think native run timed out; cleanup and resource evidence retained."
+      },
+      "stockroom-kryn-initial-grade.json": {
+        "sha256": "cd508bdc061af9ff5495dbd2fba256c6060dbc950909037b3db38279910e91e6",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Independent initial snapshot assessment, 17/18 checks; public tests fail."
+      },
+      "stockroom-kryn-run.json": {
+        "sha256": "481012bc6d939003bea141768d70ecd5e22429391bddd3b2add03cb1b5bc2185",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Frozen representative initial/continuation budgets and acceptance identities."
+      },
+      "stock-ablation-independent-audit.json": {
+        "sha256": "9e67e483d7972f6340d86d8980a8a20feec82c55d9e04edda1183353183c834b",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Read-only validity audit of earlier native1.0 unscoped comparison; unused1.0 v2 freeze superseded before any model calls."
+      },
+      "stockroom-stock-initial-driver.json": {
+        "sha256": "953d475e40db5c5f89fc2459ae14a1ff1da6e360e7681fec84dba17e06d6f9b4",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Unscoped native Think1.0 failure, retained without quality-gain interpretation."
+      },
+      "paired-v2-protocol.json": {
+        "sha256": "316f60942d61db217a12ab294512528aa4ab693333264bdb07f2d6119272be7b",
+        "visibility": "private receipt; sanitized metrics and hash only in distributed source",
+        "scope": "Fresh paired nativeThink0.6 prospective protocol; no model calls yet."
       }
     },
     "quality_claims": {
@@ -621,5 +1001,6 @@
         ]
       }
     }
-  ]
+  ],
+  "updated_utc": "2026-09-21T01:41:17.489009+00:00"
 }

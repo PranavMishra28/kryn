@@ -4,7 +4,7 @@
   "created_utc": "2026-09-21T01:19:28.648463+00:00",
   "release_status": "NOT_READY",
   "daily_use_status": "NOT_READY_PENDING_CURRENT_PROFILE_QUALIFICATION",
-  "scope": "Candidate source/provenance snapshot; final tag/artifact installation and live acceptance remain pending.",
+  "scope": "Current product snapshot with an installed clean-source private draft and partial native task evidence; final release acceptance remains incomplete.",
   "immutable_scope": "Per-file hashes describe this working-tree snapshot. The final committed clean source and wheel require a new manifest; no signature is implied.",
   "package": {
     "name": "kryn",
@@ -23,10 +23,26 @@
       "payload_files": 48,
       "source_revision": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
       "source_dirty": true
+    },
+    "private_draft": {
+      "version": "0.1.0",
+      "tag": "v0.1.0",
+      "repository": "PranavMishra28/kryn",
+      "release_is_draft": true,
+      "visibility": "private",
+      "wheel_sha256": "edef64a9f483c5edb3ea6b1df20b5f1dbb8f938c6c2f922679c839325195eb6f",
+      "wheel_bytes": 196971,
+      "source_revision": "dafc7215640b808843a181d3e09be03d09c2a0bd",
+      "source_dirty": false,
+      "payload_files": 48,
+      "wheel_entries": 57,
+      "payload_hashes_verified": true,
+      "installed": true,
+      "installed_client_release": "96e5d5ac08cceecd"
     }
   },
   "source_snapshot": {
-    "base_commit": "94c985fee3dddf449ba48d3e1d7bde9f5617cb64",
+    "base_commit": "dafc7215640b808843a181d3e09be03d09c2a0bd",
     "working_tree_dirty": true,
     "final_source_commit": null
   },
@@ -117,7 +133,25 @@
     "ssd_prefix_cache_setting": "8GB",
     "hot_cache_setting": "0",
     "idle_timeout_seconds": 300,
-    "loopback_endpoint": "http://127.0.0.1:8000/v1"
+    "loopback_endpoint": "http://127.0.0.1:8000/v1",
+    "decoding": {
+      "think": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 0.0,
+        "enable_thinking": true
+      },
+      "fast": {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "enable_thinking": false
+      }
+    },
+    "current_preset_qualification": "PENDING_REVISED_PRIVATE_ARTIFACT_INSTALL_AND_PAIRED_NATIVE_TRIALS",
+    "historical_native_think_temperature": 1.0
   },
   "owner_policy": {
     "numeric_id": 90290458,
@@ -142,10 +176,10 @@
   "evaluation": {
     "frozen_manifest_sha256": "186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6",
     "task_manifest_sha256": "6175d1bdd822f0bfec867b8c2653bfce316c4292de3de6ecf23326d19607a009",
-    "results_sha256": "0d61c220423f82a9668cbfc6c3a6267f4c62c03e2dd83e20ec0bec7a21461f53",
-    "all_current_gates": "PENDING",
+    "results_sha256": "dd47a56e13233fb9c9ed37e2c70b00382c9745b6ce3e4707d48bfebba5f2e904",
+    "all_current_gates": "INCOMPLETE",
     "gates": {
-      "private_artifact_install": "PENDING",
+      "private_artifact_install": "PARTIAL_PRIVATE_DRAFT_INSTALL_PASS",
       "owner_authentication": "PENDING",
       "runtime_daily_lifecycle": "PENDING",
       "sustained_native_sessions": "PENDING",
@@ -164,7 +198,25 @@
       "learning-implementation.json": "3bd5c13aa10e83365ec536d604f9ba00930963b5a0fa3cd25a4de36484396123",
       "learning-sandbox-results.json": "5e0fdd42d7d0511eaea1ba26c22c1eaf9b647b7746cd1b9ab54e8fe3b19e1b8b",
       "release-secret-package-audit.json": "f7debafadacd08ae8bc8c50f686435a17fdeccf4ce6f44b7089858817053172c",
-      "feasibility.json": "1b5efdce9f1832062f3f72ed3e6b44f6ed4600b7e6c33f6a157e8447e56a8abc"
+      "feasibility.json": "1b5efdce9f1832062f3f72ed3e6b44f6ed4600b7e6c33f6a157e8447e56a8abc",
+      "tui-dogfood.json": "f68430c42b0c81442ef564de60e668c320a928891cb97f2cb7bdca362ba67d95",
+      "private-asset-install.json": "ad4d1b6d2524d52c6bf3b5d26cdbd8dd061d70704982ef7b1d1f4009961defe5",
+      "source-independent-entry-verification.json": "c952f6ede3a5b876c71790f4c797a25ca4732ba873818b72c732c3f632247ddf",
+      "stockroom-kryn-initial-driver.json": "da316cf7607141518475b86e9eac6361f6ef429b7cd303476b90ef321a87de53",
+      "stockroom-kryn-initial-grade.json": "cd508bdc061af9ff5495dbd2fba256c6060dbc950909037b3db38279910e91e6",
+      "stockroom-kryn-run.json": "481012bc6d939003bea141768d70ecd5e22429391bddd3b2add03cb1b5bc2185",
+      "stock-ablation-independent-audit.json": "9e67e483d7972f6340d86d8980a8a20feec82c55d9e04edda1183353183c834b",
+      "stockroom-stock-initial-driver.json": "953d475e40db5c5f89fc2459ae14a1ff1da6e360e7681fec84dba17e06d6f9b4",
+      "paired-v2-protocol.json": "316f60942d61db217a12ab294512528aa4ab693333264bdb07f2d6119272be7b"
+    },
+    "paired_native_v2": {
+      "status": "PENDING",
+      "temperature": 0.6,
+      "expected_build_tool_count": 10,
+      "first_wire_schema_hashes": null,
+      "first_wire_tool_name_hashes": null,
+      "prior_native_think1_0_results_preserved": true,
+      "prior_api_calibration_temperature_both_modes": 0.6
     }
   },
   "source_files": {
@@ -179,13 +231,13 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "69d019ded20435e3f962c12a829d43a6ae6a8973a8b1e8e9312c3d73296f174f",
-      "bytes": 15816,
+      "sha256": "dffa7cb039256b3795f9392a66e9606156cf17ce2fcdef81333e1d87962a6157",
+      "bytes": 18627,
       "executable": false
     },
     "RESULTS.json": {
-      "sha256": "0d61c220423f82a9668cbfc6c3a6267f4c62c03e2dd83e20ec0bec7a21461f53",
-      "bytes": 28440,
+      "sha256": "dd47a56e13233fb9c9ed37e2c70b00382c9745b6ce3e4707d48bfebba5f2e904",
+      "bytes": 44473,
       "executable": false
     },
     "THIRD_PARTY_NOTICES.md": {
@@ -354,7 +406,7 @@
       "executable": false
     },
     "setup/opencode.template.json": {
-      "sha256": "3d09f0d1e770db6a04df6934d1c78c85669a253b453d7580ffb0078e22f29cb1",
+      "sha256": "6c6ea81c3a91e5f72923c1ef86c6fe182d5736c31f0905cd2a8b9c9e0495f089",
       "bytes": 14454,
       "executable": false
     },
@@ -484,7 +536,7 @@
       "executable": false
     },
     "tools/protocol_probe.py": {
-      "sha256": "fd6515c4996811037756ef9e9e63d94fccd3d72f9572aece81a9db975fe2920c",
+      "sha256": "b4c2ae2e4e77fb7c48d022ab0cd1171dd30d32190c10e594bed7fa90d74ab00b",
       "bytes": 27324,
       "executable": false
     },
@@ -883,5 +935,6 @@
         }
       }
     }
-  ]
+  ],
+  "updated_utc": "2026-09-21T01:41:57.210182+00:00"
 }
