@@ -286,6 +286,8 @@ def environment(config=None):
     for key, name in (("XDG_CONFIG_HOME", "config"), ("XDG_DATA_HOME", "data"),
                       ("XDG_CACHE_HOME", "cache"), ("XDG_STATE_HOME", "state")):
         env[key] = str(ROOT / "xdg" / name)
+    # npm otherwise writes ~/.npm, outside the ordinary shell write boundary.
+    env["NPM_CONFIG_CACHE"] = str(ROOT / "xdg/cache/npm")
     env["NO_PROXY"] = env["no_proxy"] = "127.0.0.1,localhost,::1"
     env["OPENCODE_CLI_CONFIG_CONTENT"] = '{"session":{"permissions":"prompt"}}'
     env["OPENCODE_CONFIG_CONTENT"] = json.dumps(config if config is not None else owned_config())
@@ -348,6 +350,7 @@ class NativeServer:
             dest = private / key.lower()
             dest.mkdir(mode=0o700)
             self.env[key] = str(dest)
+        self.env["NPM_CONFIG_CACHE"] = str(private / "xdg_cache_home/npm")
         self.env["TMPPREFIX"] = str(private / "zsh")
         dependencies = list(options["dependencies"])
         # /usr/bin/git is Apple's xcrun shim; its public implementation lives here.

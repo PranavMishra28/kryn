@@ -171,7 +171,7 @@ class SetupChecks(unittest.TestCase):
     def test_effective_profile_matches_native_shapes_and_rejects_drift(self):
         config = localai.expected_config()
         def reference(text):
-            return {"providerID": "local", "model": "qwen", "variant": text.partition("#")[2]}
+            return {"providerID": "local", "model": "qwen", "variant": text.partition("#")[2] or None}
         # Actual v2 config documents normalize model strings to {providerID, model, variant}.
         document = copy.deepcopy(config)
         document["model"] = reference(document["model"])
@@ -910,6 +910,13 @@ class SetupChecks(unittest.TestCase):
         env["TMPPREFIX"] = str(task / "zsh")
         return private, env
 
+    def test_npm_cache_is_inside_owned_writable_cache_not_ambient_home(self):
+        with patch.dict(os.environ, {'NPM_CONFIG_CACHE': '/unowned/cache', 'npm_config_cache': '/other'}):
+            env = native_client.environment({})
+        self.assertEqual(env['NPM_CONFIG_CACHE'], str(self.native_root / 'xdg/cache/npm'))
+        self.assertNotIn('npm_config_cache', env)
+        self.assertEqual(json.loads(env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
+
     def test_native_write_boundary_prefix_and_owned_roots(self):
         private, env = self.native_boundary_fixture()
         prefix, metadata = native_client._sandbox_prefix(self.root, private, self.root / "evidence", env)
@@ -1051,6 +1058,18 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg["default_agent"], "build")
         self.assertEqual(model["limit"], {"context": 24576, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
+        variants = {v['id']: v['body'] for v in model['variants']}
+        self.assertEqual(set(variants), {'fast'})  # Native UI adds Default itself.
+        self.assertTrue(model['body']['chat_template_kwargs']['enable_thinking'])
+        self.assertEqual(model['body']['thinking_budget'], 3072)
+        self.assertFalse(variants['fast']['chat_template_kwargs']['enable_thinking'])
+        self.assertEqual(variants['fast']['thinking_budget'], 0)
+        self.assertEqual(cfg['agents']['build']['model'], 'local/qwen')
+        self.assertEqual(cfg['agents']['browse']['mode'], 'all')
+        self.assertNotIn('system', cfg['agents']['build'])  # Retain the native tool-aware prompt.
+        self.assertNotIn('system', cfg['agents']['browse'])
+        self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
+                      cfg['agents']['build']['permissions'])
         self.assertEqual(cfg["compaction"]["buffer"], 4096)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
         self.assertEqual(cfg["commands"]["audit"]["agent"], "audit")
@@ -1059,8 +1078,8 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg["agents"]["audit"]["permissions"], cfg["agents"]["reviewer"]["permissions"] + [
             {"action": "subagent", "resource": "reviewer", "effect": "allow"}])
         self.assertEqual(cfg["providers"]["local"]["settings"]["baseURL"], "http://127.0.0.1:8000/v1")
-        self.assertTrue(all(a["model"].startswith("local/qwen#") for a in cfg["agents"].values()))
-        self.assertTrue(all(c["model"].startswith("local/qwen#") for c in cfg["commands"].values()))
+        self.assertTrue(all(a["model"] in {"local/qwen", "local/qwen#fast"} for a in cfg["agents"].values()))
+        self.assertTrue(all(c["model"] in {"local/qwen", "local/qwen#fast"} for c in cfg["commands"].values()))
         self.assertFalse(cfg["mcp"]["servers"]["search"]["oauth"])
         self.assertNotIn("agent_run", cfg["mcp"]["servers"]["search"]["url"])
         self.assertIn(str(root / "browser/node_modules/@playwright/mcp/cli.js"), cfg["mcp"]["servers"]["browser"]["command"])

@@ -16,6 +16,7 @@ import subprocess
 import sys
 import threading
 import time
+from urllib.parse import quote
 
 from native_client import BINARY, MODEL_ID, NativeServer, owned_config
 from protocol_probe import memory_snapshot, request as protocol_request
@@ -142,13 +143,25 @@ def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, c
                         raise RuntimeError("Unexpected native interrupt response")
                     sent.add(sid)
                     result["interrupts"].append({"session_id": sid, "interrupted": response["interrupted"]})
-                children = request("GET", f"/api/session?parentID={sid}&limit=100")
-                if not isinstance(children.get("data"), list) or children.get("cursor", {}).get("next"):
-                    raise RuntimeError("Native descendant list is unavailable or truncated")
-                for child in children["data"]:
-                    if child.get("parentID") != sid:
-                        raise RuntimeError("Native descendant list contains an unrelated session")
-                    pending.append((child["id"], sid))
+                endpoint, cursors = f"/api/session?parentID={sid}&limit=100", set()
+                while True:
+                    children = request("GET", endpoint)
+                    page = children.get("data")
+                    if not isinstance(page, list) or len(found) + len(pending) + len(page) > 64:
+                        raise RuntimeError("Native descendant list is unavailable or excessive")
+                    for child in page:
+                        if child.get("parentID") != sid:
+                            raise RuntimeError("Native descendant list contains an unrelated session")
+                        pending.append((child["id"], sid))
+                    cursor = children.get("cursor", {}).get("next")
+                    # Native 2.0.10 returns a next cursor on every nonempty page,
+                    # including the final one. Follow it to prove exhaustion.
+                    if not page or not cursor:
+                        break
+                    if not isinstance(cursor, str) or len(cursor) > 4096 or cursor in cursors:
+                        raise RuntimeError("Invalid or cyclic native descendant cursor")
+                    cursors.add(cursor)
+                    endpoint = f"/api/session?parentID={sid}&limit=100&cursor=" + quote(cursor, safe="")
             active = request("GET", "/api/session/active")["data"]
             if not isinstance(active, dict):
                 raise RuntimeError("Unexpected native active-session response")
@@ -480,7 +493,8 @@ def budget_value(value):
 def apply_budget(config, variant, budget):
     if budget is None:
         return
-    selected = [v for v in config["providers"]["local"]["models"]["qwen"]["variants"] if v["id"] == variant]
+    model = config["providers"]["local"]["models"]["qwen"]
+    selected = [model] if variant == "default" else [v for v in model["variants"] if v["id"] == variant]
     if len(selected) != 1:
         raise ValueError("Expected exactly one selected variant")
     selected[0].setdefault("body", {})["thinking_budget"] = budget
@@ -570,8 +584,9 @@ def guard_self_check():
         assert not monitor.watcher.is_alive() and monitor.log.closed
         assert summarize_resources(monitor.samples)["warning_or_critical_observed"]
         class Server:
-            def __init__(self, foreign=False, busy=False):
+            def __init__(self, foreign=False, busy=False, paginated=False, cyclic=False):
                 self.paths, self.foreign, self.busy = [], foreign, busy
+                self.paginated, self.cyclic = paginated, cyclic
             def request(self, method, path, body=None, timeout=None):
                 assert threading.current_thread() is threading.main_thread() and 0 < timeout <= 3
                 self.paths.append((method, path))
@@ -580,7 +595,10 @@ def guard_self_check():
                 if "parentID=" in path:
                     sid = path.split("parentID=")[1].split("&")[0]
                     kids = {"ses_root": "ses_child", "ses_child": "ses_grand"}
-                    return {"data": [{"id": kids[sid], "parentID": sid}] if sid in kids else [], "cursor": {}}
+                    if "&cursor=" in path and not self.cyclic:
+                        return {"data": [], "cursor": {}}
+                    return {"data": [{"id": kids[sid], "parentID": sid}] if sid in kids else [],
+                            "cursor": {"next": "last-page"} if self.paginated and sid in kids else {}}
                 if path.endswith("/interrupt"):
                     return {"interrupted": True}
                 sid = path.rsplit("/", 1)[1]
@@ -597,6 +615,11 @@ def guard_self_check():
             assert result["idle"] and len(result["interrupts"]) == 3
             posts = [path for method, path in server.paths if method == "POST"]
             assert posts == [f"/api/session/{sid}/interrupt" for sid in ("ses_root", "ses_child", "ses_grand")]
+            paginated = Server(paginated=True)
+            assert settle_owned_sessions(paginated, "ses_root", folder, folder)["idle"]
+            assert any("&cursor=" in path for _, path in paginated.paths)
+            cyclic = settle_owned_sessions(Server(paginated=True, cyclic=True), "ses_root", folder, folder)
+            assert not cyclic["idle"] and "cursor" in cyclic["error"]
             bad = Server(foreign=True)
             assert not settle_owned_sessions(bad, "ses_root", folder, folder, interrupt=True)["idle"]
             assert [p for m, p in bad.paths if m == "POST"] == ["/api/session/ses_root/interrupt"]
@@ -665,6 +688,8 @@ def self_check():
     assert config["providers"]["local"]["models"]["qwen"]["variants"] == [
         {"id": "low", "body": {"x": 1, "thinking_budget": 0}}, {"id": "xhigh"}]
     assert config["providers"]["local"]["models"]["qwen"]["body"] == {"max_tokens": 8192}
+    apply_budget(config, "default", 3072)
+    assert config["providers"]["local"]["models"]["qwen"]["body"]["thinking_budget"] == 3072
     assert budget_value("8192") == 8192
     for value in ("-1", "8193"):
         try:
@@ -769,7 +794,7 @@ def main():
     ap.add_argument("run", type=Path, nargs="?")
     ap.add_argument("--stage", default="attempt1")
     ap.add_argument("--agent", default="build")
-    ap.add_argument("--variant", default="think", choices=("fast", "think"))
+    ap.add_argument("--variant", default="default", choices=("default", "fast"))
     ap.add_argument("--prompt", type=Path)
     ap.add_argument("--session")
     ap.add_argument("--timeout", type=int, default=1200)
@@ -895,7 +920,7 @@ def main():
                 if not runtime_is_idle(folder, "guard-idle-after-preflight"):
                     raise RuntimeError("Expected runtime became busy during resource preflight; no prompt sent")
             command = [str(BINARY), "run", "--server", server.url, "--agent", args.agent,
-                       "--model", "local/qwen#" + args.variant, "--format", "json", "--thinking",
+                       "--model", "local/qwen" + ("#fast" if args.variant == "fast" else ""), "--format", "json", "--thinking",
                        "--session", session["id"], "--title", run.name + "-" + args.stage]
             if attachment:
                 command += ["--file", str(attachment)]

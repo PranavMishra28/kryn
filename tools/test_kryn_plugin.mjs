@@ -371,3 +371,31 @@ test('bounded pin admission preserves old sessions and tracker retention preserv
     assert.deepEqual(fs.readdirSync(trackers), ['user-note.txt']);
   } finally { await cleanup(); f.remove(); }
 });
+
+test('Browse handoff retains current user criteria through compaction without persisting prompt text', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const request = 'Private acceptance: valid login shows Welcome; invalid login shows an error.';
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: request } });
+    f.call('session.compaction', { sessionID: 'ses_1', agent: 'build', system: [] });
+    const event = { sessionID: 'ses_1', agent: 'build', tool: 'subagent', id: 'call_1',
+      input: { agent: 'browse', prompt: 'Check the layout.', background: true } };
+    f.call('tool.execute.before', event);
+    assert.ok(event.input.prompt.includes(request));
+    assert.ok(event.input.prompt.startsWith('Check the layout.'));
+    assert.equal(event.input.background, false);
+    f.call('tool.execute.after', { ...event, messageID: 'msg_1', status: 'completed' });
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Only inspect layout; do not submit forms.' } });
+    const next = { ...event, id: 'call_2', input: { agent: 'browse', prompt: 'Check layout.' } };
+    f.call('tool.execute.before', next);
+    assert.ok(next.input.prompt.includes('do not submit forms'));
+    assert.ok(!next.input.prompt.includes(request));
+    await f.emit('session.execution.succeeded');
+    assert.ok(!JSON.stringify([...f.read('trackers'), ...f.read('events'), ...f.read('pins')]).includes('Private acceptance'));
+    f.call('session.prompt', { sessionID: 'ses_2', prompt: { text: 'x'.repeat(10000) } });
+    const long = { ...event, sessionID: 'ses_2', input: { agent: 'browse', prompt: 'Check.' } };
+    f.call('tool.execute.before', long);
+    assert.ok(long.input.prompt.includes('Middle omitted'));
+    assert.ok(long.input.prompt.length < 6500);
+  } finally { await cleanup(); f.remove(); }
+});

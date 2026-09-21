@@ -44,15 +44,15 @@ class KrynChecks(unittest.TestCase):
         self.enterContext(patch.object(localai.learning, 'start_after_exit'))
         self.enterContext(patch.object(localai, 'owned_config', return_value={}))
 
-    def guarded(self, samples, child, outcome=None):
+    def guarded(self, samples, child, outcome=None, **options):
         outcome = {} if outcome is None else outcome
-        server = Mock(env={}, directory=Path('/owned/project'))
+        server = Mock(env={}, directory=Path('/owned/project'), url='http://127.0.0.1:12345')
         with patch.object(localai, 'resources', side_effect=samples) as readings, \
              patch.object(localai, 'runtime_identity', return_value=42), \
              patch.object(localai.time, 'sleep') as sleep, \
              patch.object(localai.subprocess, 'Popen', return_value=child) as popen, \
              patch.object(localai, 'interrupt_owned_sessions') as interrupt:
-            result = localai.guarded_run(server, ['native'], server.directory, outcome)
+            result = localai.guarded_run(server, ['native'], server.directory, outcome, **options)
             return result, outcome, readings, sleep, popen, interrupt
 
     def test_three_green_and_normal_cleanup(self):
@@ -74,6 +74,24 @@ class KrynChecks(unittest.TestCase):
                  patch.object(localai, 'interrupt_owned_sessions'), self.assertRaises(RuntimeError):
                 localai.guarded_run(Mock(), ['native'], Path('/owned'), {})
             popen.assert_not_called()
+
+    def test_web_uses_clean_loopback_url_inside_the_existing_resource_guard(self):
+        with patch.object(localai.subprocess, 'run', return_value=Mock(returncode=0)) as opened:
+            code, _, _, _, popen, interrupt = self.guarded([sample()] * 4, Child([0]), web=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(opened.call_args.args[0], ['/usr/bin/open', 'http://127.0.0.1:12345'])
+        popen.assert_called_once()
+        interrupt.assert_called_once()
+        with patch.object(localai.subprocess, 'run') as opened, self.assertRaises(localai.ResourceStop):
+            self.guarded([sample(2)], Child([0]), web=True)
+        opened.assert_not_called()
+
+    def test_browser_open_failure_preserves_the_guarded_terminal(self):
+        with patch.object(localai.subprocess, 'run', side_effect=OSError('unavailable')), redirect_stderr(io.StringIO()) as error:
+            code, _, _, _, _, interrupt = self.guarded([sample()] * 4, Child([0]), web=True)
+        self.assertEqual(code, 0)
+        self.assertIn('Use /web', error.getvalue())
+        interrupt.assert_called_once()
 
     def test_each_guard_gate_cancels_owned_child(self):
         cases = ([sample(2), sample(2)], [sample(4)], [{}], [sample(None)], [sample(pid=99)],
@@ -231,12 +249,61 @@ class KrynChecks(unittest.TestCase):
                     self.assertEqual(localai.run(args, {}), 0)
                     self.assertEqual(launch.call_args.args[1][-2:], ['--session', 'ses_owned'])
 
+    def test_removed_efforts_are_allowed_only_for_owned_session_compatibility(self):
+        for variant in localai.LEGACY_VARIANTS:
+            ref = {'providerID': 'local', 'id': 'qwen', 'variant': variant}
+            self.assertFalse(localai.local_reference(ref))
+            self.assertTrue(localai.local_reference(ref, legacy=True))
+            self.assertTrue(localai.local_reference('local/qwen#' + variant, legacy=True))
+        self.assertFalse(localai.local_reference('cloud/qwen#high', legacy=True))
+        self.assertFalse(localai.local_reference('local/qwen#unknown', legacy=True))
+
     def test_memory_status_distinguishes_host_pressure_from_runtime_health(self):
         for level, label in ((1, 'normal'), (2, 'warning'), (4, 'critical'), (6, 'critical'), (None, 'unknown')):
             with patch.object(localai, 'resources', return_value=sample(level)):
                 self.assertEqual(localai.memory_status()['pressure'], label)
         with patch.object(localai, 'resources', side_effect=OSError('unavailable')):
             self.assertEqual(localai.memory_status()['pressure'], 'unknown')
+
+    def test_permission_modes_keep_default_prompts_and_unlock_only_on_opt_in(self):
+        project = str(Path.cwd().resolve())
+        modes = [([], False, False), (['--auto'], True, False),
+                 (['--permissions', 'ask'], False, False),
+                 (['--permissions', 'auto'], True, False),
+                 (['--permissions', 'interactive'], False, True)]
+        for flags, auto, interactive in modes:
+            server = Mock(env=localai.environment({}), url='http://127.0.0.1:12345')
+            owner = Mock(__enter__=Mock(return_value=server), __exit__=Mock(return_value=False))
+            with patch.object(localai, 'prerequisites', return_value={}), \
+                 patch.object(localai, 'dependency_report', return_value={}), \
+                 patch.object(localai, 'ensure_runtime', return_value={'active_requests': 0, 'waiting_requests': 0}), \
+                 patch.object(localai, 'NativeServer', return_value=owner), patch.object(localai, 'inventory'), \
+                 patch.object(localai, 'mcp_status', return_value={}), \
+                 patch.object(localai, 'guarded_run', return_value=0) as launch, \
+                 patch.object(localai, 'await_runtime_idle'):
+                self.assertEqual(localai.main([project, *flags]), 0)
+                self.assertEqual('--auto' in launch.call_args.args[1], auto)
+                self.assertEqual('OPENCODE_CLI_CONFIG_CONTENT' not in server.env, interactive)
+                if not interactive:
+                    self.assertEqual(json.loads(server.env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
+        with self.assertRaisesRegex(RuntimeError, '--auto'):
+            localai.main(['doctor', '--auto'])
+        with self.assertRaisesRegex(RuntimeError, '--permissions'):
+            localai.main(['doctor', '--permissions', 'interactive'])
+        with self.assertRaisesRegex(RuntimeError, '--web'):
+            localai.main(['doctor', '--web'])
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            localai.main([project, '--auto', '--permissions', 'ask'])
+
+    def test_controls_are_available_offline_without_starting_or_authorizing_services(self):
+        output = io.StringIO()
+        with patch.object(localai.owner_auth, 'authorize') as auth, \
+             patch.object(localai, 'run') as run, redirect_stdout(output):
+            self.assertEqual(localai.main(['controls']), 0)
+        auth.assert_not_called()
+        run.assert_not_called()
+        self.assertIn('/web', output.getvalue())
+        self.assertIn('--permissions interactive', output.getvalue())
 
     def test_session_ownership_before_interrupt(self):
         server = Mock(directory=Path('/owned/project'))

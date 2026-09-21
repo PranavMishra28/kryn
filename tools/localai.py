@@ -30,7 +30,8 @@ import owner_auth
 RUNTIME = "http://127.0.0.1:8000"
 BASE_URL = RUNTIME + "/v1"
 PACKAGE = "@opencode/ai/providers/openai-compatible"
-VARIANTS = {"fast", "think"}
+VARIANTS = {"fast"}
+LEGACY_VARIANTS = {"medium", "high", "xhigh", "think"}
 REVISION = '76fe4065e622cf34990d3c13ef80ec8531c9a0f7'
 REPOSITORY = 'mlx-community/Qwen3.5-9B-6bit'
 MODEL_PARENT = 'candidates/qwen35-9b/models'
@@ -40,6 +41,46 @@ OMLX = Path.home() / "Applications/oMLX.app/Contents/MacOS/omlx-cli"
 CONTROL = Path.home() / "Library/Application Support/oMLX/control.sock"
 POLICY = [{"action": "provider.use", "resource": "*", "effect": "deny"},
           {"action": "provider.use", "resource": "local", "effect": "allow"}]
+CONTROLS = """KRYN controls (no model or server needed for this help)
+
+In your shell:
+  kryn                         Start with permission prompts
+  kryn --auto                  Auto-approve non-denied requests for this launch
+  kryn --permissions interactive
+                               Let /settings toggle permissions; saved by OpenCode
+  kryn --continue              Resume this project's latest session
+  kryn --session SESSION_ID    Resume a specific session in this project
+  kryn --web                   Open the graphical companion; keep the terminal open
+  kryn doctor                 Check runtime, browser and search connections
+
+Inside the terminal interface:
+  /agents   or Ctrl+X then A   Choose Build, Plan, Browse or Audit
+  /effort   or Ctrl+T          Switch Default (thinking on) / Fast (thinking off)
+  /settings                   Display, reasoning visibility and permission settings
+  /web      (also /pair)       Show the local GUI address and temporary credentials
+  /sessions                   Open a saved session
+  /status                     Inspect native tool and service status
+  /deliver your task          Build a small milestone and verify it
+  /research your topic        Search primary sources with citations
+  /audit                      Request a fresh read-only review
+  /handoff                    Summarize work, checks and next steps
+  Ctrl+P                      Search the full native command palette
+  /exit                       Exit both interfaces' owned server
+
+For GUI login use username opencode and the password shown by /web (click to reveal).
+Use the plain local address, without user:password@ or auth_token in the URL.
+Keep this terminal running while using the GUI. Select the same project/session
+in the browser and use Cmd+Tab to switch. Finish or interrupt the current turn
+before submitting from the other interface; unsent drafts are not synchronized.
+The pairing password is temporary and local: do not share the link or QR code.
+GUI permissions are separate; terminal --auto is not a global GUI permission mode.
+
+Default launches pin prompts. --auto pins autoaccept. To switch permissions
+without restarting, use --permissions interactive, then /settings > Permissions.
+That explicit mode honors saved native preferences, including saved autoaccept.
+Launch without it to restore prompts. Autoaccept includes shell/browser/network
+requests, not just edits; explicit denials and resource guards remain in effect.
+"""
 
 
 def require(condition, message):
@@ -47,13 +88,14 @@ def require(condition, message):
         raise RuntimeError(message)
 
 
-def local_reference(ref):
+def local_reference(ref, *, legacy=False):
+    variants = VARIANTS | (LEGACY_VARIANTS if legacy else set())
     if isinstance(ref, str):
         model, separator, variant = ref.partition("#")
-        return model == "local/qwen" and (not separator or variant in VARIANTS)
+        return model == "local/qwen" and (not separator or variant in variants)
     return (isinstance(ref, dict) and ref.get("providerID") == "local"
             and ref.get("id", ref.get("model")) == "qwen"
-            and ref.get("variant") in VARIANTS | {None})
+            and ref.get("variant") in variants | {None})
 
 
 def expected_config():
@@ -97,7 +139,7 @@ def validate_route(provider, model):
     require(model.get("modelID") == MODEL_ID, "Unexpected runtime model ID")
     variants = model.get("variants", [])
     require(len(variants) == len(VARIANTS) and {v.get("id") for v in variants} == VARIANTS,
-            "Expected exactly fast/think variants")
+            "Expected Default (thinking) and Fast (no thinking); only Fast is an explicit variant")
     require(all(v.get("settings", {}).get("baseURL") == BASE_URL for v in variants),
             "Every variant must explicitly use the local endpoint")
     expected = expected_config()["providers"]["local"]["models"]["qwen"]
@@ -468,7 +510,7 @@ def interrupt_owned_sessions(server):
         require(re.fullmatch(r"ses_[A-Za-z0-9]+", sid), "Unexpected active session identifier")
         info = request("GET", "/api/session/" + sid).get("data", {})
         require(info.get("id") == sid and Path(info.get("location", {}).get("directory", "")).resolve() == server.directory
-                and local_reference(info.get("model")), "Refusing to interrupt an unrelated native session")
+                and local_reference(info.get("model"), legacy=True), "Refusing to interrupt an unrelated native session")
         response = request("POST", "/api/session/" + sid + "/interrupt", {})
         require(type(response.get("interrupted")) is bool, "Native session interruption was not acknowledged")
 
@@ -502,7 +544,7 @@ def memory_status():
             "runtime_footprint_bytes": listeners[0].get("phys_footprint_bytes") if len(listeners) == 1 else None}
 
 
-def guarded_run(server, command, project, outcome, timeout=None):
+def guarded_run(server, command, project, outcome, timeout=None, *, web=False):
     """Monitor the native client; OpenCode still owns every agent/tool decision."""
     guard = ResourceGuard(512 * 1024**2, 2)
     guard.pid = runtime_identity()
@@ -540,6 +582,17 @@ def guarded_run(server, command, project, outcome, timeout=None):
                 time.sleep(2)
         started = time.monotonic()
         child = subprocess.Popen(command, cwd=project, env=server.env)
+        if web:
+            # Credentials in native /pair links duplicate frontend module contexts
+            # in the pinned web build. A clean URL uses the browser's Basic login.
+            # Keep credentials out of process arguments, history and launcher logs.
+            try:
+                opened = subprocess.run(["/usr/bin/open", server.url], env=server.env,
+                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
+                if opened.returncode:
+                    raise OSError("browser open failed")
+            except (OSError, subprocess.SubprocessError):
+                print("kryn: Browser could not open. Use /web in the terminal for the local address and login.", file=sys.stderr)
         while True:
             try:
                 code = child.wait(timeout=2)
@@ -629,7 +682,8 @@ def self_check():
         except RuntimeError:
             continue
         raise AssertionError(f"Failed to reject {change} mutation")
-    assert local_reference({"providerID": "local", "id": "qwen", "variant": "think"})
+    assert local_reference({"providerID": "local", "id": "qwen", "variant": "think"}, legacy=True)
+    assert not local_reference("local/qwen#think")
     assert not local_reference("local/qwen#unknown")
     provider = copy.deepcopy(config["providers"]["local"])
     model = provider.pop("models")["qwen"]
@@ -651,6 +705,13 @@ def self_check():
 
 def run(args, outcome):
     command = args.command_or_project
+    require(getattr(args, "auto", False) is not True or command not in {"init", "doctor", "status", "stop", "bench"},
+            "--auto is supported only for an interactive coding launch")
+    permissions = getattr(args, "permissions", None)
+    require(not isinstance(permissions, str) or command not in {"init", "doctor", "status", "stop", "bench"},
+            "--permissions is supported only for an interactive coding launch")
+    require(getattr(args, "web", False) is not True or command not in {"init", "doctor", "status", "stop", "bench"},
+            "--web is supported only for an interactive coding launch")
     require(not args.json_cli or command not in {"init", "doctor", "status", "stop", "bench"},
             "--json-cli is a scoped coding launch; start a new native session to use its current guidance")
     require(not args.deep or command == "doctor", "--deep is supported only by kryn doctor")
@@ -731,16 +792,23 @@ def run(args, outcome):
                     print("Local coding is available; unavailable tools: " + ", ".join(unavailable)
                           + ". Run kryn doctor for details.", file=sys.stderr, flush=True)
                 executable = [str(BINARY), "--server", server.url, str(project)]
+                # Native /settings writes cli.json, but an environment overlay wins
+                # over every edit. Unlock it only with an explicit per-launch opt-in.
+                if permissions == "interactive":
+                    server.env.pop("OPENCODE_CLI_CONFIG_CONTENT", None)
+                if getattr(args, "auto", False) is True or permissions == "auto":
+                    executable.append("--auto")
                 if getattr(args, "continue_session", False) is True:
                     executable.append("--continue")
                 if isinstance(getattr(args, "session", None), str):
                     selected = server.request("GET", "/api/session/" + args.session).get("data", {})
                     require(selected.get("id") == args.session and selected.get("location", {}).get("directory") == str(project)
-                            and local_reference(selected.get("model")), "Resume session must belong to this local project")
+                            and local_reference(selected.get("model"), legacy=True), "Resume session must belong to this local project")
                     executable.extend(["--session", args.session])
             outcome["failure_code"] = "resource"
             invoked = True
-            code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None)
+            code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None,
+                               web=getattr(args, "web", False) is True)
             outcome["failure_code"] = "none" if code == 0 else "verification" if command == "bench" else "unknown"
             return code
     finally:
@@ -763,6 +831,9 @@ def run(args, outcome):
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv == ["controls"]:
+        print(CONTROLS)
+        return 0
     if argv in (["login"], ["logout"]):
         if argv[0] == "login":
             owner_auth.login()
@@ -787,7 +858,7 @@ def main(argv=None):
         "Native/shell scratch uses a private project child; browser infrastructure uses separate private temp. "
         "Native file tools, browser/MCP, formatters and persistent PTY are outside this guard; reads and network are not isolated. "
         "Project configuration is trusted. Native explicit plan files use ~/.opencode/plan."))
-    parser.add_argument("command_or_project", nargs="?", default=".", help="project directory, launch, init, status, doctor, bench, stop, or improve (--help)")
+    parser.add_argument("command_or_project", nargs="?", default=".", help="project directory, launch, controls, init, status, doctor, bench, stop, or improve (--help)")
     parser.add_argument("project", nargs="?", help="project directory for launch")
     parser.add_argument("--apply", action="store_true", help="init only: explicitly apply the existing installer")
     parser.add_argument("--profile", type=Path, help="init only: pinned profile file")
@@ -796,6 +867,10 @@ def main(argv=None):
     parser.add_argument("--self-check", action="store_true", help="offline validator checks; no services or inference")
     parser.add_argument("--deep", action="store_true", help="doctor only: rehash every pinned model file (slow; no inference)")
     parser.add_argument("--json-cli", action="store_true", help="apply validated workflow guidance for JSON command-line programs in new native sessions")
+    parser.add_argument("--web", "--gui", action="store_true", help="open the local graphical companion; keep the terminal running and use /web for its login credentials")
+    permissions = parser.add_mutually_exclusive_group()
+    permissions.add_argument("--auto", action="store_true", help="alias for --permissions auto; includes browser/network actions, not just edits")
+    permissions.add_argument("--permissions", choices=("ask", "auto", "interactive"), help="ask (default) pins prompts; auto pins autoaccept; interactive lets /settings change and save native permissions")
     resume = parser.add_mutually_exclusive_group()
     resume.add_argument("--continue", dest="continue_session", action="store_true", help="open the latest saved session in this project")
     resume.add_argument("--session", help="open a saved session ID belonging to this project")
