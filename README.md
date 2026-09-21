@@ -2,7 +2,7 @@
 
 A private local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.3](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.3) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.4](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.4) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -33,22 +33,21 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 
 | Mode | Use it for |
 |---|---|
-| **Build** | Editing code and running approved commands; High effort by default. |
+| **Build** | Editing code and running approved commands; thinking on by default. |
 | **Plan** | Inspecting code and discussing a plan before implementation; fast mode. |
 | **Browse** | Web search and interaction with an isolated Chrome session; fast mode. Build can delegate UI checks to Browse; you can also select it directly. |
 | **Audit** | Read-only review, configured to request one fresh Reviewer. Switch back to Build explicitly before making fixes or running tests. |
 
 Agent roles and reasoning effort are separate. **Build/Plan/Browse/Audit** choose the tools and task; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. The native UI remembers choices per agent/model, so check the displayed selection when resuming.
 
-| Effort | Thinking-token budget | Use |
-|---|---:|---|
-| **Fast** | Thinking disabled | Simple edits and mechanical browser interaction. |
-| **Medium** | Up to 1,024 | Small changes and debugging. |
-| **High** | Up to 3,072 | Default for coding and review. |
-| **XHigh** | Up to 6,144 | Difficult problems; leaves less output room for code. |
-| **Think** | Legacy uncapped thinking | Compatibility for saved sessions; still subject to the total output limit. |
+| Choice in OpenCode | Actual model behavior | Use |
+|---|---|---|
+| **Default** | Thinking on, capped at 3,072 thinking tokens | Normal coding, debugging and review. |
+| **Fast** | Thinking off | Simple edits, quick questions and browser interaction. |
 
-These are local oMLX budget presets, not OpenAI reasoning settings or quality ratings. Thinking and the answer share the 8,192-token output limit. A model may continue explaining in its answer after a thinking cap, so a larger cap does not guarantee a better answer or a fixed runtime.
+There are only **two choices**. OpenCode always supplies a `Default` entry for the base model; KRYN makes that entry mean bounded thinking and adds only `Fast`. Medium/High/XHigh were our artificial budget presets, not distinct Qwen capabilities or measured quality levels, so they have been removed. There is no duplicate `Think` entry.
+
+Qwen exposes `enable_thinking`; oMLX additionally supports a thinking-token cap. Thinking and the answer share the 8,192-token output limit. The cap keeps reasoning from consuming the whole response; it is not a guarantee of intelligence or runtime. “Show reasoning” in `/settings` changes visibility only, not whether the model thinks. Saved conversations remain available; removed effort selections fall back to Default in the native picker. Check the selection before continuing an older session.
 
 Edits normally proceed without a separate approval; shell and browser actions can ask. For a trusted project, explicitly opt into native automatic approvals for one launch:
 
@@ -58,13 +57,28 @@ cd "/absolute/path/to/your/project" && kryn --auto
 kryn --continue --auto
 ```
 
-`--auto` accepts **all native permission requests that are not explicitly denied**, including browser, network and external-file requests. It is broader than “accept edits.” Explicit denials and the ordinary shell write boundary remain; native file tools and browser/MCP are outside that shell boundary. The next launch without `--auto` returns to prompts. See [Security](SECURITY.md).
+`--auto` accepts **all native permission requests that are not explicitly denied**, including browser, network and external-file requests. It is broader than “accept edits.” Explicit denials and the ordinary shell write boundary remain; native file tools and browser/MCP are outside that shell boundary. A launch without a permission option returns to prompts. See [Security](SECURITY.md).
+
+To change approvals **while KRYN is running**, start with:
+
+```sh
+kryn --permissions interactive
+```
+
+Then open **`/settings` → Permissions** and use **←/→** or **Enter** to switch between `prompt` and `auto accept`. This mode honors OpenCode’s saved setting, including any saved `autoaccept`, and saves later changes. Ordinary `kryn` pins prompts; `kryn --auto` (also `--permissions auto`) pins autoaccept for that launch. Those pinned modes intentionally override the settings menu. Reasoning visibility, appearance and other display settings remain available through `/settings` in every mode.
+
+Run **`kryn controls`** in your shell for a quick reference without starting the model or logging in.
 
 Type these commands **inside KRYN**, then press Enter:
 
 | Command | Purpose |
 |---|---|
-| `/effort` | Choose Fast, Medium, High or XHigh independently of the agent role. |
+| `/agents` | Switch the agent role without starting a different conversation. |
+| `/effort` | Switch Default (thinking) / Fast (no thinking), independently of the agent role. |
+| `/settings` | Display controls, reasoning visibility and permissions (see launch modes above). |
+| `/web` | Show the local graphical interface address and temporary login credentials. |
+| `/status` | Inspect native tool and service status. |
+| `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
 | `/audit` | Enter Audit mode and review current work. |
 | `/research your topic` | Research a topic with search and source links. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
@@ -72,6 +86,19 @@ Type these commands **inside KRYN**, then press Enter:
 | `/exit` | Close the terminal interface and return to your shell. |
 
 After exiting, run `kryn stop` in Terminal if you also want to stop the idle model server. Otherwise, model weights unload after five idle minutes. One local generation runs at a time.
+
+### Switch between terminal and GUI
+
+Both interfaces use the **same local OpenCode server, model, tools and saved sessions**. No separate desktop application or paid service is required.
+
+1. From your project folder, run `kryn --web` (or `kryn --gui`). Add `--continue` to resume, and `--permissions interactive` if you want the terminal permission toggle. The browser opens alongside the terminal.
+2. In the terminal, enter **`/web`**. Click the masked password to reveal it. In the browser’s sign-in dialog, use username **`opencode`** and that temporary password. Do not save it; it changes each launch.
+3. Select the same project and saved session in the GUI. Use **Cmd+Tab** to switch between browser and terminal. The GUI provides the conversation, effort picker, context usage, files and review controls; the terminal retains its native command palette and mode picker.
+4. Keep the terminal running. Finish or interrupt a turn before submitting from the other interface. Unsent drafts are separate. `/exit` shuts down the owned server, disconnects the GUI and cancels remaining owned work; saved sessions remain available to `kryn --continue`.
+
+To open the GUI after an ordinary launch, use `/web` and copy its **plain local address** into your browser. Use an address such as `http://127.0.0.1:PORT/`, without credentials or query parameters. The pinned upstream client’s credential-bearing link can cause a `BrowserAttachments` error; its token-only link can leave assets waiting for authentication. KRYN’s `--web` opens the clean address and uses the browser’s normal sign-in dialog. If a credential-bearing link was already opened, navigate to the plain address, reload the page, and reopen the session.
+
+The GUI has its own permission preferences. A terminal running with `--auto` can still approve requests for the same session while you use the GUI. Use a normal prompted launch when you want explicit approvals in both interfaces. Select the project KRYN was launched in; to work on another project, exit and relaunch there so the shell write boundary follows it. Treat the pairing password, link and QR code as private.
 
 ## First installation
 
@@ -96,10 +123,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.3 --repo PranavMishra28/kryn \
+     gh release download v0.1.4 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.3
+     python3 install-kryn.py --tag v0.1.4
    )
    ```
 
@@ -112,7 +139,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.3`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.4`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -120,13 +147,15 @@ Run these commands in **Terminal**, outside the KRYN interface:
 
 | Command | Purpose |
 |---|---|
+| `kryn controls` | Offline reference for modes, effort, approvals and GUI switching. |
+| `kryn --web` | Open the graphical companion alongside the guarded terminal. |
 | `kryn --continue` | Open the latest saved session in this project. |
 | `kryn --session SESSION_ID` | Open a specific saved session belonging to this project. |
 | `kryn status` | Inspect host memory pressure, runtime, owner session and background improvement state. |
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.3` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.4` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn improve status` | Inspect experimental background improvement. |
 | `kryn improve pause` | Pause background improvement. |
@@ -148,7 +177,14 @@ Each file write is limited to 12,000 UTF-8 bytes; larger components should use s
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.3 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
+Version 0.1.4 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
+
+## Repository layout
+
+- `src/kryn/`: packaged launcher, verified installation, updates and rollback.
+- `setup/`: pinned configuration, model profile and installation checks.
+- `tools/`: resource supervision, native client adapter, workflow hooks and evaluation utilities. OpenCode owns the agent loop and both interfaces.
+- `evals/`: task definitions and redacted validation history. Private transcripts, credentials and generated test workspaces stay outside Git.
 
 ## License and distribution
 

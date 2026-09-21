@@ -493,7 +493,8 @@ def budget_value(value):
 def apply_budget(config, variant, budget):
     if budget is None:
         return
-    selected = [v for v in config["providers"]["local"]["models"]["qwen"]["variants"] if v["id"] == variant]
+    model = config["providers"]["local"]["models"]["qwen"]
+    selected = [model] if variant == "default" else [v for v in model["variants"] if v["id"] == variant]
     if len(selected) != 1:
         raise ValueError("Expected exactly one selected variant")
     selected[0].setdefault("body", {})["thinking_budget"] = budget
@@ -687,6 +688,8 @@ def self_check():
     assert config["providers"]["local"]["models"]["qwen"]["variants"] == [
         {"id": "low", "body": {"x": 1, "thinking_budget": 0}}, {"id": "xhigh"}]
     assert config["providers"]["local"]["models"]["qwen"]["body"] == {"max_tokens": 8192}
+    apply_budget(config, "default", 3072)
+    assert config["providers"]["local"]["models"]["qwen"]["body"]["thinking_budget"] == 3072
     assert budget_value("8192") == 8192
     for value in ("-1", "8193"):
         try:
@@ -791,7 +794,7 @@ def main():
     ap.add_argument("run", type=Path, nargs="?")
     ap.add_argument("--stage", default="attempt1")
     ap.add_argument("--agent", default="build")
-    ap.add_argument("--variant", default="high", choices=("fast", "medium", "high", "xhigh", "think"))
+    ap.add_argument("--variant", default="default", choices=("default", "fast"))
     ap.add_argument("--prompt", type=Path)
     ap.add_argument("--session")
     ap.add_argument("--timeout", type=int, default=1200)
@@ -917,7 +920,7 @@ def main():
                 if not runtime_is_idle(folder, "guard-idle-after-preflight"):
                     raise RuntimeError("Expected runtime became busy during resource preflight; no prompt sent")
             command = [str(BINARY), "run", "--server", server.url, "--agent", args.agent,
-                       "--model", "local/qwen#" + args.variant, "--format", "json", "--thinking",
+                       "--model", "local/qwen" + ("#fast" if args.variant == "fast" else ""), "--format", "json", "--thinking",
                        "--session", session["id"], "--title", run.name + "-" + args.stage]
             if attachment:
                 command += ["--file", str(attachment)]
