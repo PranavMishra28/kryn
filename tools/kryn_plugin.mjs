@@ -19,6 +19,8 @@ export const BROWSER_TOOLS = [
   'browser_browser_handle_dialog', 'browser_browser_file_upload', 'browser_browser_close',
 ];
 const BROWSER_SET = new Set(BROWSER_TOOLS);
+const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'question', 'webfetch',
+  'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
 const count = value => Number.isFinite(value) && value >= 0 ? Math.min(Math.floor(value), 1e9) : 0;
 
@@ -204,7 +206,7 @@ export default {
         for (const name of Object.keys(event.tools ?? {})) if (!READ_TOOLS.has(name)) delete event.tools[name];
       if (event.agent === 'browse')
         for (const name of Object.keys(event.tools ?? {}))
-          if (name.startsWith('browser_') && !BROWSER_SET.has(name)) delete event.tools[name];
+          if (!BROWSE_TOOLS.has(name)) delete event.tools[name];
     };
     await ctx.session.hook('context', instructions);
     await ctx.session.hook('generate', instructions);

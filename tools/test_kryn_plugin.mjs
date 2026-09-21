@@ -163,6 +163,39 @@ test('session champion survives restart; tool schema pruning and native checkpoi
   } finally { await cleanup(); f.remove(); }
 });
 
+test('Browse advertises only its 22 browser/research tools across request hooks without changing other roles', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const browser = [
+      'browser_browser_navigate', 'browser_browser_navigate_back', 'browser_browser_snapshot',
+      'browser_browser_click', 'browser_browser_type', 'browser_browser_fill_form',
+      'browser_browser_press_key', 'browser_browser_select_option', 'browser_browser_wait_for',
+      'browser_browser_take_screenshot', 'browser_browser_console_messages',
+      'browser_browser_network_requests', 'browser_browser_resize', 'browser_browser_tabs',
+      'browser_browser_handle_dialog', 'browser_browser_file_upload', 'browser_browser_close',
+    ];
+    const research = ['question', 'webfetch', 'search_web_search_exa',
+      'search_web_fetch_exa', 'search_web_search_advanced_exa'];
+    const allowed = [...browser, ...research].sort();
+    const readOnly = [...research, 'read', 'glob', 'grep'].sort();
+    const registry = Object.fromEntries([...allowed, ...readOnly, 'edit', 'write', 'shell', 'skill',
+      'subagent', 'execute', 'patch', 'browser_browser_run_code_unsafe', 'browser_future_tool',
+      'unknown_tool'].map(name => [name, { description: name }]));
+    assert.deepEqual([...BROWSER_TOOLS].sort(), [...browser].sort());
+    assert.equal(allowed.length, 22);
+    for (const hook of ['context', 'generate', 'compaction']) {
+      for (const agent of ['browse', 'build', 'plan', 'general', 'reviewer', 'explore']) {
+        const event = { sessionID: 'ses_' + agent, agent, system: [], tools: { ...registry } };
+        f.call('session.' + hook, event);
+        const expected = agent === 'browse' ? allowed
+          : ['reviewer', 'explore'].includes(agent) ? readOnly : Object.keys(registry).sort();
+        assert.deepEqual(Object.keys(event.tools).sort(), expected, agent + ' ' + hook);
+        for (const name of expected) assert.equal(event.tools[name], registry[name]);
+      }
+    }
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('private state rejects symlinks and a changed capsule; trials emit no learning events', async () => {
   const f = fixture({ observe: false }); const cleanup = await plugin.setup(f.ctx);
   try {
