@@ -455,9 +455,11 @@ def install():
                  root / "install-profile.json": setup.encode(profile),
                  root / "xdg/config/opencode/AGENTS.md": (payload() / "setup/AGENTS.md").read_text() +
                     f"\nIf installed, use {root}/artifacts/.venv/bin/python for document/data tasks.\n",
-                 Path.home() / ".omlx/settings.json": setup.encode(merge_settings(
+                 # Match oMLX's float values and no trailing newline: app startup
+                 # must not invalidate the rollback transaction's exact hashes.
+                 Path.home() / ".omlx/settings.json": json.dumps(merge_settings(
                     safe_json(Path.home() / ".omlx/settings.json") if (Path.home() / ".omlx/settings.json").exists() else {},
-                    setup.runtime_settings(root, profile)))}
+                    setup.runtime_settings(root, profile)), indent=2)}
         model_settings_path = Path.home() / ".omlx/model_settings.json"
         models = safe_json(model_settings_path) if model_settings_path.exists() else {"version": 1, "models": {}}
         for value in models.get("models", {}).values(): value["is_default"] = False

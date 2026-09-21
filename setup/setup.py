@@ -417,7 +417,7 @@ def main():
     guidance = (HERE / "AGENTS.md").read_text() + f"\nIf installed, use {root}/artifacts/.venv/bin/python for document/data tasks.\n"
     files = {cfg_path: encode(cfg), root / "xdg/config/opencode/AGENTS.md": guidance,
              root / "install-profile.json": encode(profile),
-             home / ".omlx/settings.json": encode(runtime_settings(root, profile)),
+             home / ".omlx/settings.json": json.dumps(runtime_settings(root, profile), indent=2),
              home / ".omlx/model_settings.json": encode(model_settings(profile))}
     if args.phase == "core":
         model_dir, model_marker, model_identity = model_destination(root, profile)
