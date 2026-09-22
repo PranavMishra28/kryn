@@ -10,6 +10,19 @@ from pathlib import Path
 import re
 import sqlite3
 
+# Tool names can contain malformed model output, including arguments. Only these
+# pinned tool labels may leave the private transcript; unknown calls still count.
+REPORT_TOOLS = frozenset('''read glob grep edit write shell skill subagent question
+webfetch todoread todowrite plan_enter plan_exit list batch patch apply_patch invalid
+search_web_fetch_exa search_web_search_exa search_web_search_advanced_exa
+browser_browser_navigate browser_browser_navigate_back browser_browser_snapshot
+browser_browser_click browser_browser_type browser_browser_fill_form
+browser_browser_press_key browser_browser_select_option browser_browser_wait_for
+browser_browser_take_screenshot browser_browser_console_messages
+browser_browser_network_requests browser_browser_resize browser_browser_tabs
+browser_browser_handle_dialog browser_browser_file_upload browser_browser_close
+browser_browser_find browser_browser_run_code_unsafe'''.split())
+
 
 def summarize(connection, session_id):
     pending, ids, sessions = [session_id], set(), []
@@ -43,7 +56,9 @@ def summarize(connection, session_id):
         if len(rows) > 10000:
             limited = True
         for kind, status, finish, output, created, completed, uncached, cached, written, reasoning in rows[:10000]:
-            counts[kind + '_messages'] += 1
+            message_kind = kind if kind in {'user', 'assistant', 'compaction', 'system', 'synthetic',
+                                            'idle', 'agent-switched', 'model-switched'} else 'unknown'
+            counts[message_kind + '_messages'] += 1
             if kind in usage:
                 bucket = usage[kind]
                 values = (uncached, cached, written, output, reasoning)
@@ -60,7 +75,8 @@ def summarize(connection, session_id):
                 else:
                     bucket['records_without_usable_usage'] += 1
             if kind == 'assistant':
-                finishes[finish or 'unknown'] += 1
+                finish_label = finish if isinstance(finish, str) and finish in {'stop', 'length', 'tool-calls', 'content-filter', 'error'} else 'unknown'
+                finishes[finish_label] += 1
                 counts['output_tokens'] += output if type(output) is int and output >= 0 else 0
                 if created and completed:
                     counts['assistant_wall_ms'] += max(0, completed - created)
@@ -78,7 +94,8 @@ def summarize(connection, session_id):
         if len(calls) > 20000:
             limited = True
         for name, status, path, command, exit_code, nested_exit in calls[:20000]:
-            tools[name or 'unknown'] += 1
+            name = name if isinstance(name, str) and name in REPORT_TOOLS else 'unknown'
+            tools[name] += 1
             counts['tool_errors'] += status == 'error'
             if name == 'read' and path:
                 reads[(sid, path)] += 1
@@ -107,8 +124,9 @@ def summarize(connection, session_id):
         token_usage[kind] = dict(bucket)
         token_usage[kind]['cache_read_fraction'] = (round(bucket['cache_read_tokens'] / bucket['prompt_tokens'], 4)
                                                   if bucket['prompt_tokens'] else None)
+    outcome = sessions[0][2] if sessions[0][2] in {'succeeded', 'failed', 'interrupted', 'cancelled'} else 'unknown'
     return {'schema': 1, 'session_id': session_id, 'session_count': len(ids),
-            'native_outcome': sessions[0][2], 'counts': dict(counts), 'tools': dict(tools),
+            'native_outcome': outcome, 'counts': dict(counts), 'tools': dict(tools),
             'token_usage': token_usage,
             'usage_note': 'Provider-reported usage summed across requests, not unique conversation tokens. '
                           'max_recorded_prompt_tokens is one native record, not the configured context limit. '
@@ -116,7 +134,8 @@ def summarize(connection, session_id):
                           'Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.',
             'maximum_reads_of_one_path_per_session': repeated, 'finishes': dict(finishes),
             'partial': limited, 'findings': findings, 'acceptance_verified': False,
-            'note': 'Native completion, command exits and model-written reports do not prove task acceptance. '
+            'note': 'Unrecognized tool and status labels are grouped as unknown to avoid exposing malformed model output. '
+                    'Native completion, command exits and model-written reports do not prove task acceptance. '
                     'Compare the actual application with independent checks; copied test logic is insufficient.'}
 
 

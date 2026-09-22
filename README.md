@@ -69,7 +69,7 @@ Then open **`/settings` → Permissions** and use **←/→** or **Enter** to sw
 
 Run **`kryn controls`** in your shell for a quick reference without starting the model or logging in.
 
-The terminal prompt footer now shows **Permissions: Ask/Auto**. `(locked)` means the launch option pins that mode. Click it or use `/permissions` to open native settings. To change the mode there, launch with `kryn --permissions interactive`. The indicator reads the native setting, including JSONC comments, and does not implement a second approval system. The browser GUI continues to use its native Settings permission control.
+The terminal prompt footer now shows **Permissions: Ask/Auto**. `(locked)` means the launch option pins that mode. Click it or use `/permissions` to open native settings. To change the mode there, launch with `kryn --permissions interactive`. The indicator reads the native setting, including JSONC comments, and does not implement a second approval system. In the browser GUI, **Cmd+Shift+P** opens the native command palette; search for **Auto-accept permissions** to find its toggle.
 
 Type these commands **inside KRYN**, then press Enter:
 
@@ -102,6 +102,8 @@ Both interfaces use the **same local OpenCode server, model, tools and saved ses
 To open the GUI after an ordinary launch, use `/web` and copy its **plain local address** into your browser. Use an address such as `http://127.0.0.1:PORT/`, without credentials or query parameters. The pinned upstream client’s credential-bearing link can cause a `BrowserAttachments` error; its token-only link can leave assets waiting for authentication. KRYN’s `--web` opens the clean address and uses the browser’s normal sign-in dialog. If a credential-bearing link was already opened, navigate to the plain address, reload the page, and reopen the session.
 
 The GUI has its own permission preferences. A terminal running with `--auto` can still approve requests for the same session while you use the GUI. Use a normal prompted launch when you want explicit approvals in both interfaces. Select the project KRYN was launched in; to work on another project, exit and relaunch there so the shell write boundary follows it. Treat the pairing password, link and QR code as private.
+
+In the GUI, hover over the prompt area to reveal the **Default** effort button beside the model, then choose Default or Fast. It is also reachable with Tab and Enter; the pinned upstream interface hides it when neither hovered nor focused.
 
 ## First installation
 
@@ -172,7 +174,7 @@ If memory protection stops a session, KRYN cancels its work, retains the native 
 
 Application state, sessions, caches and installed packages live under `~/Library/Application Support/LocalAI`; the oMLX application lives under `~/Applications/oMLX.app`, with settings in `~/.omlx`. Keep private session data out of bug reports and commits.
 
-`kryn report` separates uncached input, cache reads/writes, reported output and reasoning, with compaction usage reported separately. These are cumulative provider-reported counts, not unique conversation length. A zero reasoning count can mean the provider omitted the breakdown, leaving reasoning included in output. Missing usage remains unmeasured; a cache hit does not prove a correct answer. The report includes no prompts, source, command text or tool output.
+`kryn report` separates uncached input, cache reads/writes, reported output and reasoning, with compaction usage reported separately. These are cumulative provider-reported counts, not unique conversation length. A zero reasoning count can mean the provider omitted the breakdown, leaving reasoning included in output. Missing usage remains unmeasured; a cache hit does not prove a correct answer. The report includes no prompts, source, command text or tool output. Unrecognized tool and status names are grouped as `unknown`, since malformed model output can put private arguments into those fields.
 
 ## Configuration and release scope
 
@@ -188,7 +190,9 @@ Each file write is limited to 12,000 UTF-8 bytes; larger components should use s
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.7 is a prerelease for owner testing. Earlier task evaluations include failed tests, incomplete browser work and missed review steps; larger context and recovery do not establish frontier-level task quality. Review generated changes and run your project's checks. Background improvement is experimental; a measured learning benefit has not been established. Detailed results remain in [evaluation history](evals/history/2026-09-21) and the [run-quality audit](evals/history/2026-09-21/run-quality.md).
+Version 0.1.7 is a prerelease for owner testing. The [September 22 qualification](evals/history/2026-09-22/qualification.json) records 80.2 minutes of operator-staged engineering work. The primary session, including its child, reached a maximum recorded assistant prompt of 40,812 tokens and eight completed native compactions. Host pressure remained normal with no incremental swap growth during that workload. However, seven of eleven stages timed out: backend checks passed, while the generated UI still lacked accessible status feedback and the fresh review did not finish. The overall application acceptance failed; larger context does not establish frontier-level task quality.
+
+After that run, a Browse permission fix enabled native reads of saved, truncated web results. Separate tests verified the read scope and actual model calls; autonomous research still chose an outdated release, while a follow-up supplied with canonical source URLs returned the requested facts. Build-mode compaction, provider outage, restart and saved-session recall passed a separate lifecycle test. These narrowly scoped results do not turn the failed application or research trials into passes. Review generated changes and run your project's checks. Background improvement remains experimental, with no established learning benefit. Earlier results remain in [evaluation history](evals/history/2026-09-21).
 
 ## Improvement from actual failures
 

@@ -1,0 +1,1784 @@
+{
+  "schema": 1,
+  "date": "2026-09-22",
+  "baseline_commit": "0d1ffc6bcc2db61eff4b33c448fab6f68fc7a356",
+  "scope": "Owner-testing prerelease; local reliability and capability measurements, not frontier parity or a general coding benchmark.",
+  "qualification_outcome": {
+    "release_channel": "owner-testing prerelease",
+    "autonomous_production_engineering": "NOT_QUALIFIED",
+    "reason": "Representative application acceptance and autonomous current-information accuracy failed. Independently verified reliability and capability fixes are retained with their limits."
+  },
+  "machine": {
+    "chip": "Apple M4 Max",
+    "gpu_cores": 40,
+    "unified_memory_gib": 48,
+    "macos": "26.6.2"
+  },
+  "configuration": {
+    "model": "mlx-community/Qwen3.5-9B-6bit",
+    "revision": "76fe4065e622cf34990d3c13ef80ec8531c9a0f7",
+    "opencode": "2.0.10",
+    "omlx": "0.6.4",
+    "playwright_mcp": "0.0.82",
+    "context_before": 24576,
+    "context_after": 49152,
+    "output_limit": 8192,
+    "memory_ceiling_before_gib": 12,
+    "memory_ceiling_after_gib": 16,
+    "thinking_budget": 3072,
+    "fast_thinking": false,
+    "compaction_output_budget": 2048,
+    "compaction_keep_recent_tokens": 4096,
+    "one_generation_at_a_time": true,
+    "automatic_improvement": "paused, user preference preserved"
+  },
+  "retained_changes": [
+    "Larger measured context with unchanged host memory stop rules.",
+    "Fixed known diagnostic labels prevent malformed tool names from exposing arguments; unknown calls remain counted.",
+    "Reject plain trailing shell ampersand; require native background ownership.",
+    "Recognize failed Python checks with startup flags.",
+    "Report provider token/cache/compaction usage without content.",
+    "Freeze and verify exact active trial plugin/config; preserve stable instruction paths on session continuation.",
+    "Allow qualified Browse asks only in disposable noninteractive evaluations; preserve explicit denials.",
+    "Fallback for missing oMLX asset using unchanged publisher SHA256.",
+    "Allow the verified owner to install from a public repository without dropping numeric-account or keychain checks.",
+    "Browse can read saved native tool output using scoped cache permissions; ordinary file reads remain denied for this role."
+  ],
+  "cache": {
+    "cache-24k": [
+      {
+        "case": "16384-initial",
+        "input_tokens": 16384,
+        "cached_tokens": 0,
+        "wall_seconds": 32.21699,
+        "first_output_seconds": {
+          "reasoning": 20.987298,
+          "content": 31.873913,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 16384,
+          "completion_tokens": 655,
+          "total_tokens": 17039,
+          "input_tokens": 16384,
+          "output_tokens": 655,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 20.9,
+          "total_time": 32.13,
+          "prompt_eval_duration": 20.9,
+          "generation_duration": 11.23,
+          "prompt_tokens_per_second": 783.88,
+          "generation_tokens_per_second": 58.33
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 11458370832,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "16384-repeat",
+        "input_tokens": 16384,
+        "cached_tokens": 14336,
+        "wall_seconds": 15.60962,
+        "first_output_seconds": {
+          "reasoning": 3.175152,
+          "content": 15.21498,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 16384,
+          "completion_tokens": 721,
+          "total_tokens": 17105,
+          "input_tokens": 16384,
+          "output_tokens": 721,
+          "prompt_tokens_details": {
+            "cached_tokens": 14336
+          },
+          "time_to_first_token": 3.09,
+          "total_time": 15.53,
+          "prompt_eval_duration": 3.09,
+          "generation_duration": 12.44,
+          "prompt_tokens_per_second": 5301.73,
+          "generation_tokens_per_second": 57.98
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 11886714440,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "16384-changed-facts",
+        "input_tokens": 16384,
+        "cached_tokens": 0,
+        "wall_seconds": 35.546136,
+        "first_output_seconds": {
+          "reasoning": 23.482142,
+          "content": 35.186353,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 16384,
+          "completion_tokens": 669,
+          "total_tokens": 17053,
+          "input_tokens": 16384,
+          "output_tokens": 669,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 23.39,
+          "total_time": 35.45,
+          "prompt_eval_duration": 23.39,
+          "generation_duration": 12.07,
+          "prompt_tokens_per_second": 700.48,
+          "generation_tokens_per_second": 55.45
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 11529395544,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "16384-restore-original",
+        "input_tokens": 16384,
+        "cached_tokens": 14336,
+        "wall_seconds": 15.001648,
+        "first_output_seconds": {
+          "reasoning": 3.151957,
+          "content": 14.393043,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 16384,
+          "completion_tokens": 683,
+          "total_tokens": 17067,
+          "input_tokens": 16384,
+          "output_tokens": 683,
+          "prompt_tokens_details": {
+            "cached_tokens": 14336
+          },
+          "time_to_first_token": 3.06,
+          "total_time": 14.92,
+          "prompt_eval_duration": 3.06,
+          "generation_duration": 11.85,
+          "prompt_tokens_per_second": 5346.57,
+          "generation_tokens_per_second": 57.63
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 11938029152,
+        "swap_growth_bytes": 0
+      }
+    ],
+    "cache-32768": [
+      {
+        "case": "30000-initial",
+        "input_tokens": 30000,
+        "cached_tokens": 0,
+        "wall_seconds": 68.747984,
+        "first_output_seconds": {
+          "reasoning": 54.599555,
+          "content": 68.190954,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 30000,
+          "completion_tokens": 579,
+          "total_tokens": 30579,
+          "input_tokens": 30000,
+          "output_tokens": 579,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 54.14,
+          "total_time": 68.29,
+          "prompt_eval_duration": 54.14,
+          "generation_duration": 14.15,
+          "prompt_tokens_per_second": 554.16,
+          "generation_tokens_per_second": 40.92
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 11799059968,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "30000-repeat",
+        "input_tokens": null,
+        "cached_tokens": null,
+        "wall_seconds": 2.178869,
+        "first_output_seconds": {
+          "reasoning": 2.178602,
+          "content": null,
+          "tool": null
+        },
+        "usage": null,
+        "answer_correct": false,
+        "pass": false,
+        "protocol_complete": false,
+        "finish_reason": null,
+        "error_count": 1,
+        "sampled_footprint_bytes": 12650946288,
+        "swap_growth_bytes": 0
+      }
+    ],
+    "cache-16g-32768": [
+      {
+        "case": "30000-initial",
+        "input_tokens": 30000,
+        "cached_tokens": 0,
+        "wall_seconds": 50.42585,
+        "first_output_seconds": {
+          "reasoning": 39.008568,
+          "content": 49.757593,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 30000,
+          "completion_tokens": 609,
+          "total_tokens": 30609,
+          "input_tokens": 30000,
+          "output_tokens": 609,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 38.5,
+          "total_time": 49.92,
+          "prompt_eval_duration": 38.5,
+          "generation_duration": 11.42,
+          "prompt_tokens_per_second": 779.13,
+          "generation_tokens_per_second": 53.33
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 12795550968,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "30000-repeat",
+        "input_tokens": 30000,
+        "cached_tokens": 28672,
+        "wall_seconds": 14.497804,
+        "first_output_seconds": {
+          "reasoning": 2.543323,
+          "content": 14.05376,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 30000,
+          "completion_tokens": 644,
+          "total_tokens": 30644,
+          "input_tokens": 30000,
+          "output_tokens": 644,
+          "prompt_tokens_details": {
+            "cached_tokens": 28672
+          },
+          "time_to_first_token": 2.41,
+          "total_time": 14.36,
+          "prompt_eval_duration": 2.41,
+          "generation_duration": 11.96,
+          "prompt_tokens_per_second": 12456.63,
+          "generation_tokens_per_second": 53.87
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 12523642536,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "30000-changed-facts",
+        "input_tokens": 30000,
+        "cached_tokens": 0,
+        "wall_seconds": 46.420644,
+        "first_output_seconds": {
+          "reasoning": 38.131536,
+          "content": 46.004377,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 30000,
+          "completion_tokens": 445,
+          "total_tokens": 30445,
+          "input_tokens": 30000,
+          "output_tokens": 445,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 38.02,
+          "total_time": 46.31,
+          "prompt_eval_duration": 38.02,
+          "generation_duration": 8.29,
+          "prompt_tokens_per_second": 789.16,
+          "generation_tokens_per_second": 53.68
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 13330963680,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "30000-restore-original",
+        "input_tokens": 30000,
+        "cached_tokens": 28672,
+        "wall_seconds": 13.991575,
+        "first_output_seconds": {
+          "reasoning": 2.627112,
+          "content": 13.574323,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 30000,
+          "completion_tokens": 598,
+          "total_tokens": 30598,
+          "input_tokens": 30000,
+          "output_tokens": 598,
+          "prompt_tokens_details": {
+            "cached_tokens": 28672
+          },
+          "time_to_first_token": 2.5,
+          "total_time": 13.86,
+          "prompt_eval_duration": 2.5,
+          "generation_duration": 11.37,
+          "prompt_tokens_per_second": 12004.75,
+          "generation_tokens_per_second": 52.61
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 12503899768,
+        "swap_growth_bytes": 0
+      }
+    ],
+    "cache-16g-49152": [
+      {
+        "case": "46000-initial",
+        "input_tokens": 46000,
+        "cached_tokens": 0,
+        "wall_seconds": 88.473362,
+        "first_output_seconds": {
+          "reasoning": 71.474126,
+          "content": 88.47226,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 46000,
+          "completion_tokens": 768,
+          "total_tokens": 46768,
+          "input_tokens": 46000,
+          "output_tokens": 768,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 70.96,
+          "total_time": 87.96,
+          "prompt_eval_duration": 70.96,
+          "generation_duration": 17.0,
+          "prompt_tokens_per_second": 648.28,
+          "generation_tokens_per_second": 45.18
+        },
+        "answer_correct": false,
+        "pass": false,
+        "protocol_complete": true,
+        "finish_reason": "length",
+        "error_count": 0,
+        "sampled_footprint_bytes": 14356110584,
+        "swap_growth_bytes": 0
+      }
+    ],
+    "cache-16g-1536-49152": [
+      {
+        "case": "46000-initial",
+        "input_tokens": 46000,
+        "cached_tokens": 0,
+        "wall_seconds": 85.691508,
+        "first_output_seconds": {
+          "reasoning": 64.531769,
+          "content": 85.164806,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 46000,
+          "completion_tokens": 1047,
+          "total_tokens": 47047,
+          "input_tokens": 46000,
+          "output_tokens": 1047,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 63.94,
+          "total_time": 85.1,
+          "prompt_eval_duration": 63.94,
+          "generation_duration": 21.16,
+          "prompt_tokens_per_second": 719.46,
+          "generation_tokens_per_second": 49.48
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 14406081784,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "46000-repeat",
+        "input_tokens": 46000,
+        "cached_tokens": 45056,
+        "wall_seconds": 15.845225,
+        "first_output_seconds": {
+          "reasoning": 2.502432,
+          "content": 15.325062,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 46000,
+          "completion_tokens": 662,
+          "total_tokens": 46662,
+          "input_tokens": 46000,
+          "output_tokens": 662,
+          "prompt_tokens_details": {
+            "cached_tokens": 45056
+          },
+          "time_to_first_token": 2.23,
+          "total_time": 15.57,
+          "prompt_eval_duration": 2.23,
+          "generation_duration": 13.34,
+          "prompt_tokens_per_second": 20656.69,
+          "generation_tokens_per_second": 49.61
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 14357437832,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "46000-changed-facts",
+        "input_tokens": 46000,
+        "cached_tokens": 0,
+        "wall_seconds": 78.350968,
+        "first_output_seconds": {
+          "reasoning": 65.783947,
+          "content": 77.78604,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 46000,
+          "completion_tokens": 607,
+          "total_tokens": 46607,
+          "input_tokens": 46000,
+          "output_tokens": 607,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 65.52,
+          "total_time": 78.08,
+          "prompt_eval_duration": 65.52,
+          "generation_duration": 12.57,
+          "prompt_tokens_per_second": 702.13,
+          "generation_tokens_per_second": 48.3
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 14120623496,
+        "swap_growth_bytes": 0
+      },
+      {
+        "case": "46000-restore-original",
+        "input_tokens": 46000,
+        "cached_tokens": 45056,
+        "wall_seconds": 14.162171,
+        "first_output_seconds": {
+          "reasoning": 2.494097,
+          "content": 13.701604,
+          "tool": null
+        },
+        "usage": {
+          "prompt_tokens": 46000,
+          "completion_tokens": 585,
+          "total_tokens": 46585,
+          "input_tokens": 46000,
+          "output_tokens": 585,
+          "prompt_tokens_details": {
+            "cached_tokens": 45056
+          },
+          "time_to_first_token": 2.23,
+          "total_time": 13.9,
+          "prompt_eval_duration": 2.23,
+          "generation_duration": 11.67,
+          "prompt_tokens_per_second": 20665.68,
+          "generation_tokens_per_second": 50.13
+        },
+        "answer_correct": true,
+        "pass": true,
+        "protocol_complete": true,
+        "finish_reason": "stop",
+        "error_count": 0,
+        "sampled_footprint_bytes": 13281419424,
+        "swap_growth_bytes": 0
+      }
+    ]
+  },
+  "cache_limits": [
+    "Synthetic retrieval only; not proof of engineering quality.",
+    "24K timings overlapped a candidate download, so they are not a fair speed comparison.",
+    "46K initial 768-output test exhausted its output budget; 1536-output repeat passed.",
+    "32K/12GiB warm prefill was rejected by the runtime despite HTTP200; 16GiB completed the cold/warm/change/restore cases."
+  ],
+  "reviewer_ab": {
+    "schema": 1,
+    "reviewer": "independent gold_master_review agent",
+    "decision": "reject candidate guidance; no demonstrated reliable uplift",
+    "trials": [
+      {
+        "run": "review-a1",
+        "active_product_verified": true,
+        "wall_seconds": 60.83,
+        "seeded_actionable_findings": 1,
+        "seeded_defects": 3,
+        "partial_favorites_mention": false,
+        "substantive_false_claims": 2,
+        "reset_visibility_missed": true
+      },
+      {
+        "run": "review-a2",
+        "active_product_verified": true,
+        "wall_seconds": 51.671,
+        "seeded_actionable_findings": 1,
+        "seeded_defects": 3,
+        "partial_favorites_mention": false,
+        "substantive_false_claims": 1,
+        "reset_visibility_missed": true
+      },
+      {
+        "run": "review-b1",
+        "active_product_verified": true,
+        "wall_seconds": 61.543,
+        "seeded_actionable_findings": 1,
+        "seeded_defects": 3,
+        "partial_favorites_mention": true,
+        "substantive_false_claims": 2,
+        "reset_visibility_missed": true
+      },
+      {
+        "run": "review-b2",
+        "active_product_verified": true,
+        "wall_seconds": 50.692,
+        "seeded_actionable_findings": 2,
+        "seeded_defects": 3,
+        "partial_favorites_mention": false,
+        "substantive_false_claims": 1,
+        "reset_visibility_missed": true
+      }
+    ],
+    "limits": "Two repeats per arm, not a statistical benchmark. Neither arm provides dependable code review; every trial missed the reset visibility defect."
+  },
+  "build_guidance_ab": {
+    "schema": 1,
+    "decision": "reject; target failure repeated",
+    "hypothesis": "Explicit existing-framework and file-preservation instructions improve coding correctness",
+    "candidate": "build-tested-plugin",
+    "multi_file": {
+      "native_wall_seconds": 222.779,
+      "functional_checks_passed": true,
+      "protected_test_preserved": false,
+      "acceptance_passed": false
+    },
+    "held_out_refactor": {
+      "native_wall_seconds": 106.348,
+      "functional_checks_passed": true,
+      "protected_files_preserved": true,
+      "acceptance_passed": true
+    },
+    "baseline_multi_file": {
+      "native_wall_seconds": 257.892,
+      "functional_checks_passed": true,
+      "protected_test_preserved": false,
+      "acceptance_passed": false
+    },
+    "timing_limit": "One attempt per task; candidate download overlaps the end of the multi-file trial and the refactor. Do not claim a speed improvement."
+  },
+  "invalidated_evidence": [
+    "Earlier plugin trials merged the installed same-ID product and failed to load the candidate; discarded for A/B claims.",
+    "Initial endurance stages used the installed plugin, not the final candidate; excluded from final duration.",
+    "Old lifecycle draft rejects the current product and cannot qualify it; excluded from the distributed wheel."
+  ],
+  "model_challengers": [
+    {
+      "model": "Youssofal/Qwen3.8-27B-MTPLX-Bare-Speed",
+      "revision": "b59d7002368575f08a58ba0d26686b53a9c162d6",
+      "runtime": "MTPLX 2.11.3",
+      "result": "Rejected",
+      "evidence": "Review found 3/3 seeded defects plus one false claim in 174.598s, but host memory warning failed acceptance. A 1 GiB RAM-bank retry stayed normal and timed out at 240s.",
+      "note": "No runtime or weights adopted."
+    },
+    {
+      "model": "same 27B artifact",
+      "runtime": "oMLX 0.6.4, autoregressive",
+      "result": "Rejected",
+      "evidence": "240s review timeout without final answer; sampled footprint about 17.95 GiB, no swap growth.",
+      "note": "Timeout is not a claim that the model cannot run."
+    },
+    {
+      "model": "Jundot/Qwen3.6-35B-A3B-oQ4e-mtp",
+      "revision": "14c285372cbdb1777adea5bb49087ced0bffc0b5",
+      "runtime": "oMLX 0.6.4, MTP disabled",
+      "result": "Rejected under observed desktop load",
+      "evidence": "Sustained host memory warning while loading; cancelled after 14.8s. Swap grew 456,854,077 bytes. No quality score.",
+      "note": "Downloaded weights removed; manifests and failure evidence retained."
+    }
+  ],
+  "shell_regression": {
+    "completed": true,
+    "model_completed": true,
+    "wall_seconds": 28.714,
+    "timed_out": null,
+    "resource_aborted": null,
+    "tool_calls": 3,
+    "acceptance_checks": {
+      "trial_inputs_verified": true,
+      "routing_verified": true,
+      "resource_guard_clean": true,
+      "owned_sessions_idle": true,
+      "owned_cli_exited": true,
+      "owned_native_server_exited": true
+    },
+    "tool_error_count": 1,
+    "outcome": "Plain detached launch rejected; native background retry and HTTP fetch succeeded; listener absent after client shutdown."
+  },
+  "vision": {
+    "image_turn_seconds": 10.301,
+    "actual_image_on_wire": true,
+    "tools_disabled": true,
+    "literal_answer_correct": true,
+    "independent_browser_sizes": [
+      [
+        390,
+        844
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "independent_browser_pass": true,
+    "limitation": "Model repair phase timed out waiting on a browser permission in the old evaluation configuration. CSS fix independently passed; this was not an autonomous browser pass."
+  },
+  "distribution": {
+    "source": "https://downloads.sourceforge.net/project/omlx.mirror/v0.6.4/oMLX-0.6.4-macos26-27.dmg",
+    "bytes": 805799490,
+    "sha256": "53f1506c2385e8920a67198b72d1fe09351c1b3538be9c6bdeb78e5277d06d93",
+    "matches_original_pin": true,
+    "wall_seconds": 30.110276250023162,
+    "retained_download": false,
+    "primary_url_status": 404
+  },
+  "research_decisions": {
+    "checked_utc": "2026-09-22",
+    "sources": [
+      {
+        "url": "https://arxiv.org/abs/2510.04618",
+        "scope": "ACE paper abstract and method; incremental generator/reflector/curator contexts",
+        "decision": "No production framework adopted. Existing incident provenance and bounded challenger evaluation retained; measured quality benefit not established."
+      },
+      {
+        "url": "https://arxiv.org/abs/2507.19457",
+        "scope": "GEPA paper abstract and method; reflective candidate search",
+        "decision": "Use diagnostic trajectories and independent held-out checks as experiment discipline, without adding optimizer dependency or automatic policy promotion."
+      },
+      {
+        "url": "https://www.anthropic.com/engineering/harness-design-long-running-apps",
+        "scope": "Long application development harness; incremental work and independent browser evaluation",
+        "decision": "Use staged real engineering tasks, native compaction, fresh review and an independent browser checker. Do not transfer published frontier-model performance claims to local 9B."
+      },
+      {
+        "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+        "scope": "Distinguish trajectories, graders and observed task outcomes",
+        "decision": "Invalidate wrong-plugin trials. Driver completion remains distinct from functional and protected-file acceptance."
+      }
+    ],
+    "rejected_infrastructure": [
+      "new agent loop",
+      "always-on prompt rewriting",
+      "unbounded learned global memory",
+      "new optimizer dependencies",
+      "automatic high-effort router without task-quality evidence"
+    ]
+  },
+  "tests": {
+    "python_setup": 162,
+    "node_product_plugin": 22,
+    "historical_lifecycle_helpers": 21,
+    "inference_audit": 9,
+    "driver_self_check": "PASS",
+    "note": "Helper tests do not establish live lifecycle coverage."
+  },
+  "remaining_limits": [
+    "Local 9B review missed real bugs and made false claims.",
+    "One/few trials per task; no statistically established overall speed or correctness uplift.",
+    "No frontier-assistant parity claim; human review and independent tests remain necessary.",
+    "Host memory sampling can miss transients.",
+    "The evaluated model issued broad process-name/port kills despite task instructions. No unrelated victim was established. Permission prompts remain the default; automatic approvals do not contain process signaling.",
+    "Search/browser use external services and may be unavailable."
+  ],
+  "endurance": {
+    "product_revision": "d7a504dc0023c686815520dc87c10e73333783bb",
+    "later_change_scope": "Subsequent Browse saved-output read permission and report-only privacy fixes are qualified separately. The model, context, memory, compaction, Build behavior and resource-stop policy are unchanged.",
+    "stages": [
+      {
+        "stage": "01-plan",
+        "exit": 0,
+        "wall_seconds": 88.436,
+        "elapsed_seconds": 88.4573850420129,
+        "model_completed": true,
+        "completed": true,
+        "resource_clean": true,
+        "agent": "plan",
+        "variant": "fast",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "02-build",
+        "exit": 1,
+        "wall_seconds": 906.583,
+        "elapsed_seconds": 906.602138666989,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "default",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "03-ui",
+        "exit": 1,
+        "wall_seconds": 906.77,
+        "elapsed_seconds": 906.7888266670052,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "default",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "04-hardening",
+        "exit": 0,
+        "wall_seconds": 822.882,
+        "elapsed_seconds": 822.9009067910083,
+        "model_completed": true,
+        "completed": true,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "default",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "05-accessibility",
+        "exit": 1,
+        "wall_seconds": 906.721,
+        "elapsed_seconds": 906.7404479999968,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "fast",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "06-review",
+        "exit": 1,
+        "wall_seconds": 306.738,
+        "elapsed_seconds": 306.75785154200275,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "reviewer",
+        "variant": "default",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "07-research",
+        "exit": 1,
+        "wall_seconds": 246.691,
+        "elapsed_seconds": 246.70930879202206,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "browse",
+        "variant": "fast",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "08-document",
+        "exit": 0,
+        "wall_seconds": 109.143,
+        "elapsed_seconds": 109.16281283300486,
+        "model_completed": true,
+        "completed": true,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "fast",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "09-final-coding",
+        "exit": 1,
+        "wall_seconds": 306.682,
+        "elapsed_seconds": 306.70191470801365,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "default",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "10-recovery",
+        "exit": 1,
+        "wall_seconds": 246.627,
+        "elapsed_seconds": 246.64621387500665,
+        "model_completed": false,
+        "completed": false,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "fast",
+        "trial_inputs_verified": true
+      },
+      {
+        "stage": "11-observability",
+        "exit": 0,
+        "wall_seconds": 27.134,
+        "elapsed_seconds": 27.15162375001819,
+        "model_completed": true,
+        "completed": true,
+        "resource_clean": true,
+        "agent": "build",
+        "variant": "fast",
+        "trial_inputs_verified": true
+      }
+    ],
+    "driver_wall_seconds": 4874.407,
+    "active_session_wall_seconds": 4813.611,
+    "runner_restored": true,
+    "note": "Operator-staged tasks with targeted diagnostic feedback. Active-session wall time includes model and tool execution/waits, excludes queue idle and driver startup/cleanup, and is not accelerator compute time. Timeouts and failed checks are retained.",
+    "session_count": 2,
+    "partial": false,
+    "usage_note": "Provider-reported usage summed across requests, not unique conversation tokens. max_recorded_prompt_tokens is one native record, not the configured context limit. Compaction records can aggregate multiple summary attempts. Native missing usage may be normalized to zero; all-zero or incomplete usage is unmeasured. Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.",
+    "session_counts": {
+      "agent-switched_messages": 5,
+      "synthetic_messages": 18,
+      "user_messages": 6,
+      "assistant_messages": 321,
+      "output_tokens": 101771,
+      "assistant_wall_ms": 3710266,
+      "idle_messages": 6,
+      "model-switched_messages": 2,
+      "system_messages": 4,
+      "compaction_messages": 8,
+      "completed_compactions": 8,
+      "tool_errors": 32,
+      "shell_nonzero_exits": 29,
+      "check_commands": 29,
+      "check_exit_zero": 19,
+      "check_exit_unknown": 0,
+      "completed_browser_calls": 55
+    },
+    "tools": {
+      "read": 60,
+      "glob": 10,
+      "shell": 114,
+      "edit": 47,
+      "write": 13,
+      "grep": 7,
+      "unknown": 2,
+      "list": 2,
+      "skill": 4,
+      "subagent": 1,
+      "browser_browser_navigate": 18,
+      "webfetch": 6,
+      "browser_browser_snapshot": 21,
+      "browser_browser_resize": 1,
+      "browser_browser_take_screenshot": 1,
+      "browser_browser_press_key": 2,
+      "browser_browser_type": 1,
+      "browser_browser_console_messages": 5,
+      "browser_browser_network_requests": 6,
+      "browser_browser_click": 4,
+      "browser_browser_file_upload": 2,
+      "browser_browser_fill_form": 1
+    },
+    "token_usage": {
+      "assistant": {
+        "records_with_usage": 318,
+        "uncached_input_tokens": 701151,
+        "cache_read_tokens": 7147520,
+        "cache_write_tokens": 0,
+        "output_tokens": 101771,
+        "reasoning_tokens": 0,
+        "prompt_tokens": 7848671,
+        "max_recorded_prompt_tokens": 40812,
+        "records_without_usable_usage": 3,
+        "cache_read_fraction": 0.9107
+      },
+      "compaction": {
+        "records_with_usage": 8,
+        "uncached_input_tokens": 12107,
+        "cache_read_tokens": 184320,
+        "cache_write_tokens": 0,
+        "output_tokens": 5883,
+        "reasoning_tokens": 0,
+        "prompt_tokens": 196427,
+        "max_recorded_prompt_tokens": 36469,
+        "cache_read_fraction": 0.9384
+      }
+    },
+    "finishes": {
+      "tool-calls": 315,
+      "stop": 3,
+      "error": 3
+    },
+    "separate_native_sessions": [
+      {
+        "first_stage": "06-review",
+        "session_count": 1,
+        "partial": false,
+        "usage_note": "Provider-reported usage summed across requests, not unique conversation tokens. max_recorded_prompt_tokens is one native record, not the configured context limit. Compaction records can aggregate multiple summary attempts. Native missing usage may be normalized to zero; all-zero or incomplete usage is unmeasured. Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.",
+        "counts": {
+          "agent-switched_messages": 1,
+          "user_messages": 1,
+          "assistant_messages": 12,
+          "output_tokens": 975,
+          "assistant_wall_ms": 299770,
+          "idle_messages": 1,
+          "tool_errors": 1
+        },
+        "tools": {
+          "read": 10,
+          "unknown": 1
+        },
+        "token_usage": {
+          "assistant": {
+            "records_with_usage": 11,
+            "uncached_input_tokens": 163648,
+            "cache_read_tokens": 40960,
+            "cache_write_tokens": 0,
+            "output_tokens": 975,
+            "reasoning_tokens": 0,
+            "prompt_tokens": 204608,
+            "max_recorded_prompt_tokens": 32671,
+            "records_without_usable_usage": 1,
+            "cache_read_fraction": 0.2002
+          },
+          "compaction": {
+            "cache_read_fraction": null
+          }
+        },
+        "finishes": {
+          "tool-calls": 11,
+          "error": 1
+        }
+      },
+      {
+        "first_stage": "07-research",
+        "session_count": 1,
+        "partial": false,
+        "usage_note": "Provider-reported usage summed across requests, not unique conversation tokens. max_recorded_prompt_tokens is one native record, not the configured context limit. Compaction records can aggregate multiple summary attempts. Native missing usage may be normalized to zero; all-zero or incomplete usage is unmeasured. Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.",
+        "counts": {
+          "agent-switched_messages": 2,
+          "user_messages": 2,
+          "assistant_messages": 37,
+          "output_tokens": 2472,
+          "assistant_wall_ms": 220968,
+          "compaction_messages": 2,
+          "idle_messages": 2,
+          "system_messages": 1,
+          "completed_compactions": 1,
+          "tool_errors": 4
+        },
+        "tools": {
+          "search_web_search_exa": 4,
+          "webfetch": 32
+        },
+        "token_usage": {
+          "assistant": {
+            "records_with_usage": 37,
+            "uncached_input_tokens": 82998,
+            "cache_read_tokens": 694272,
+            "cache_write_tokens": 0,
+            "output_tokens": 2472,
+            "reasoning_tokens": 0,
+            "prompt_tokens": 777270,
+            "max_recorded_prompt_tokens": 40584,
+            "cache_read_fraction": 0.8932
+          },
+          "compaction": {
+            "records_without_usable_usage": 1,
+            "records_with_usage": 1,
+            "uncached_input_tokens": 40344,
+            "cache_read_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 423,
+            "reasoning_tokens": 0,
+            "prompt_tokens": 40344,
+            "max_recorded_prompt_tokens": 40344,
+            "cache_read_fraction": 0.0
+          }
+        },
+        "finishes": {
+          "tool-calls": 36,
+          "stop": 1
+        }
+      },
+      {
+        "first_stage": "09-final-coding",
+        "session_count": 1,
+        "partial": false,
+        "usage_note": "Provider-reported usage summed across requests, not unique conversation tokens. max_recorded_prompt_tokens is one native record, not the configured context limit. Compaction records can aggregate multiple summary attempts. Native missing usage may be normalized to zero; all-zero or incomplete usage is unmeasured. Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.",
+        "counts": {
+          "agent-switched_messages": 2,
+          "user_messages": 2,
+          "assistant_messages": 45,
+          "output_tokens": 9020,
+          "assistant_wall_ms": 456445,
+          "compaction_messages": 2,
+          "idle_messages": 2,
+          "model-switched_messages": 1,
+          "system_messages": 1,
+          "completed_compactions": 1,
+          "synthetic_messages": 3,
+          "tool_errors": 3,
+          "shell_nonzero_exits": 3,
+          "check_commands": 3,
+          "check_exit_zero": 1,
+          "check_exit_unknown": 0
+        },
+        "tools": {
+          "read": 24,
+          "glob": 4,
+          "shell": 18,
+          "edit": 11
+        },
+        "token_usage": {
+          "assistant": {
+            "records_with_usage": 44,
+            "uncached_input_tokens": 118674,
+            "cache_read_tokens": 937984,
+            "cache_write_tokens": 0,
+            "output_tokens": 9020,
+            "reasoning_tokens": 0,
+            "prompt_tokens": 1056658,
+            "max_recorded_prompt_tokens": 38600,
+            "records_without_usable_usage": 1,
+            "cache_read_fraction": 0.8877
+          },
+          "compaction": {
+            "records_without_usable_usage": 1,
+            "records_with_usage": 1,
+            "uncached_input_tokens": 37407,
+            "cache_read_tokens": 4096,
+            "cache_write_tokens": 0,
+            "output_tokens": 557,
+            "reasoning_tokens": 0,
+            "prompt_tokens": 41503,
+            "max_recorded_prompt_tokens": 41503,
+            "cache_read_fraction": 0.0987
+          }
+        },
+        "finishes": {
+          "tool-calls": 44,
+          "error": 1
+        }
+      },
+      {
+        "first_stage": "11-observability",
+        "session_count": 1,
+        "partial": false,
+        "usage_note": "Provider-reported usage summed across requests, not unique conversation tokens. max_recorded_prompt_tokens is one native record, not the configured context limit. Compaction records can aggregate multiple summary attempts. Native missing usage may be normalized to zero; all-zero or incomplete usage is unmeasured. Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.",
+        "counts": {
+          "agent-switched_messages": 1,
+          "user_messages": 1,
+          "assistant_messages": 4,
+          "output_tokens": 401,
+          "assistant_wall_ms": 20365,
+          "idle_messages": 1,
+          "tool_errors": 0,
+          "shell_nonzero_exits": 2,
+          "check_commands": 3,
+          "check_exit_zero": 1,
+          "check_exit_unknown": 0
+        },
+        "tools": {
+          "shell": 3
+        },
+        "token_usage": {
+          "assistant": {
+            "records_with_usage": 4,
+            "uncached_input_tokens": 7704,
+            "cache_read_tokens": 14336,
+            "cache_write_tokens": 0,
+            "output_tokens": 401,
+            "reasoning_tokens": 0,
+            "prompt_tokens": 22040,
+            "max_recorded_prompt_tokens": 5879,
+            "cache_read_fraction": 0.6505
+          },
+          "compaction": {
+            "cache_read_fraction": null
+          }
+        },
+        "finishes": {
+          "tool-calls": 3,
+          "stop": 1
+        }
+      }
+    ],
+    "operator_feedback": {
+      "stage_03": "Targeted diagnosis of fragile hand-written HTTP test transport; instructed use of Python standard library while preserving cases.",
+      "stage_05": "Independent browser overflow and source trace of wrong served asset directory supplied for repair.",
+      "stage_09": "Independent save/reload passed at two sizes; missing accessible feedback plus independently reviewed upload contract, selector retention, cancel label and safe option construction defects supplied for repair.",
+      "scope": "Operator-assisted staged workload; no autonomous one-shot claim."
+    },
+    "resources": {
+      "sample_count": 2347,
+      "first_utc": "2026-09-22T08:51:25.538215+00:00",
+      "last_utc": "2026-09-22T10:12:38.889600+00:00",
+      "pressure_levels": [
+        1
+      ],
+      "swap_start_bytes": 1695746621,
+      "swap_end_bytes": 1687358013,
+      "swap_peak_growth_bytes": 0,
+      "max_sampled_model_process_footprint_bytes": 14103239880
+    },
+    "cache_disk": {
+      "sampling_scope": "active configured cache sampling started during stage03, not at endurance start",
+      "first_utc": "2026-09-22T09:08:30.821798+00:00",
+      "last_utc": "2026-09-22T10:13:02.786054+00:00",
+      "allocated_start_bytes": 8613605376,
+      "allocated_end_bytes": 8577650688,
+      "minimum_disk_free_bytes": 73590595584
+    },
+    "runtime_observations": {
+      "completed_log_records": 424,
+      "runtime_reported_decode_median_tokens_per_second": 57.4,
+      "cache_store_skips_missing_boundary_snapshot": 254,
+      "note": "Runtime logs in the sampled endurance interval; decode rates are not end-to-end task speed. Runtime skips unsafe cache snapshots rather than storing non-reconstructible state."
+    },
+    "functional_grade": {
+      "status": "FAIL",
+      "assertions": {
+        "preserved_test_existing.py": true,
+        "preserved_data/entries.csv": true
+      },
+      "manual": {
+        "plan_build_separation": "PASS",
+        "browser_upload_edit_filter_export": "NOT_TESTED",
+        "503_recovery": "NOT_TESTED",
+        "fresh_review_readonly": "FAIL",
+        "native_compaction": "PASS",
+        "new_session_handoff": "PASS",
+        "representative_duration_recorded": "PASS"
+      },
+      "automatic_passed": true
+    },
+    "independent_browser": {
+      "pass": false,
+      "checks": [
+        {
+          "name": "responsive form, save and reload 390x844",
+          "pass": true
+        },
+        {
+          "name": "responsive form, save and reload 1280x800",
+          "pass": true
+        },
+        {
+          "name": "invalid minutes produce accessible feedback without persistence",
+          "pass": false
+        }
+      ],
+      "page_error_count": 0,
+      "console_error_count": 0,
+      "binding_note": "Original outcome assertions retained; bindings adapted to the model-designed form IDs, accessible button names, automatic upload and labeled select. No model autonomy inferred from independent checks."
+    }
+  },
+  "lifecycle_plan_single_object_probe": {
+    "error_present": true,
+    "cleanup_error_count": 0,
+    "status": "FAIL",
+    "cases": {
+      "admission-before": {
+        "status": "PASS"
+      },
+      "first-turn": {
+        "status": "PASS",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": true,
+          "local_primary_observed": true
+        },
+        "api_record_count": 9
+      },
+      "second-turn": {
+        "status": "PASS",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": true,
+          "local_primary_observed": true
+        },
+        "api_record_count": 19
+      },
+      "compaction": {
+        "status": "PASS",
+        "checks": {
+          "completed": true,
+          "audited_local": true
+        },
+        "api_record_count": 29
+      },
+      "after-compaction": {
+        "status": "FAIL",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": false,
+          "local_primary_observed": true
+        },
+        "api_record_count": 36
+      }
+    },
+    "wall_seconds": 38.353853292006534,
+    "observed_routes_local": null,
+    "limitations": [
+      "Observed native routes only, not OS-wide egress proof.",
+      "Synthetic retained facts; engineering-history retention is covered separately by endurance."
+    ],
+    "native_process_exited": {
+      "before": true
+    }
+  },
+  "lifecycle": {
+    "error_present": false,
+    "cleanup_error_count": 0,
+    "status": "PASS",
+    "cases": {
+      "admission-before": {
+        "status": "PASS"
+      },
+      "first-turn": {
+        "status": "PASS",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": true,
+          "local_primary_observed": true
+        },
+        "api_record_count": 8
+      },
+      "second-turn": {
+        "status": "PASS",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": true,
+          "local_primary_observed": true
+        },
+        "api_record_count": 18
+      },
+      "compaction": {
+        "status": "PASS",
+        "checks": {
+          "completed": true,
+          "audited_local": true
+        },
+        "api_record_count": 28
+      },
+      "after-compaction": {
+        "status": "PASS",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": true,
+          "local_primary_observed": true
+        },
+        "api_record_count": 35
+      },
+      "admission-before-outage": {
+        "status": "PASS"
+      },
+      "outage-same-session": {
+        "status": "PASS",
+        "checks": {
+          "local_request_observed": true,
+          "terminal_failure": true,
+          "explicit_transport_error": true,
+          "no_generated_answer": true,
+          "runtime_stayed_down": true
+        },
+        "api_record_count": 48
+      },
+      "admission-after-outage": {
+        "status": "PASS"
+      },
+      "admission-after-restart": {
+        "status": "PASS"
+      },
+      "same-session-history": {
+        "status": "PASS",
+        "checks": {
+          "original_message_ids_preserved": true
+        },
+        "api_record_count": 49
+      },
+      "same-session-recall": {
+        "status": "PASS",
+        "checks": {
+          "native_succeeded": true,
+          "terminal_stop": true,
+          "no_new_errors": true,
+          "tool_policy": true,
+          "literal_content": true,
+          "local_primary_observed": true
+        },
+        "api_record_count": 56
+      },
+      "admission-final": {
+        "status": "PASS"
+      }
+    },
+    "wall_seconds": 138.71226124998066,
+    "observed_routes_local": true,
+    "limitations": [
+      "Observed native routes only, not OS-wide egress proof.",
+      "Synthetic retained facts; engineering-history retention is covered separately by endurance."
+    ],
+    "native_process_exited": {
+      "before": true,
+      "after": true
+    }
+  },
+  "lifecycle_plan_failure_analysis": {
+    "original_grade": "FAIL",
+    "single_object_requirement_satisfied": false,
+    "returned_object_count": 2,
+    "all_returned_objects_equal_original_facts": true,
+    "native_plan_reminder_between_answers": true,
+    "outage_and_restart_reached": false,
+    "note": "Native database independently reviewed. This is duplicated correct output after a Plan reminder, not evidence of lost facts. Build lifecycle uses unchanged single-object grading and is reported separately."
+  },
+  "report_privacy_regression": {
+    "status": "PASS",
+    "scope": "Read-only regeneration against actual endurance database; no inference.",
+    "checks": {
+      "token_usage_unchanged": true,
+      "diagnostic_counts_unchanged": true,
+      "total_tool_attempts_unchanged": true,
+      "malformed_argument_not_exposed": true,
+      "unknown_tool_bucket_nonempty": true
+    }
+  },
+  "cleanup_fault_regression": {
+    "status": "PASS",
+    "model_completed": true,
+    "driver_completed": false,
+    "cleanup_fault_observed": true,
+    "native_exit_verified_before_fault": true
+  },
+  "failure_observer": {
+    "pass": true,
+    "checks": {
+      "exact_native_commands_and_exit_codes": true,
+      "one_check_failed_incident": true,
+      "one_check_pass_and_one_failure": true,
+      "combined_classification_counts_consistent": true
+    },
+    "native_shell_call_count": 3,
+    "incident_count": 1,
+    "scope": "Real native ShellTool executions and product after-tool/lifecycle hooks; one failing simple check, one passing check, and one failing compound expression."
+  },
+  "installed_acceptance": {
+    "scope": "Clean installed behavioral candidate before the final report-only privacy fix and curated documentation. Final release package is rebuilt and verified separately.",
+    "utc": "2026-09-22T10:29:50.869487+00:00",
+    "version": "KRYN 0.1.7",
+    "source_revision": "a58bedd487bde56e60354b4300808e7b90ec23f6",
+    "source_dirty": false,
+    "wheel_sha256": "7ab4f1cc0e79ff3ea78c2972099229b3113bd5a0cb5f75de7164ea190014eda9",
+    "install_completed": true,
+    "terminal": {
+      "normal_launch": true,
+      "launch_permission_mode": "interactive",
+      "saved_permission_display": "Auto",
+      "permission_settings_menu_opened": true,
+      "reasoning_picker_entries": [
+        "Default",
+        "fast"
+      ],
+      "normal_exit_code": 0,
+      "method": "Actual installed launcher in a PTY; menus inspected without changing preferences; native /exit."
+    },
+    "saved_cli_preferences_sha256": "e53dfb949da2cc05d3d95c2d2400b9fef7ec03601ff1ae2574685c75a10c4a2c",
+    "saved_cli_preferences_unchanged": true,
+    "deep_doctor": {
+      "prerequisites": {
+        "disk_free_bytes": 76885049344,
+        "opencode": "2.0.10",
+        "omlx": "0.6.4",
+        "chrome": "153.0.8010.53",
+        "node": "arm64 22.23.1",
+        "playwright_mcp": "0.0.82",
+        "model_integrity": "Every pinned model file SHA256 verified.",
+        "browser_integrity": "all installed dependency files verified"
+      },
+      "native_local_routing": "pass",
+      "runtime": {
+        "runtime": "http://127.0.0.1:8000",
+        "model": "Qwen3.5-9B-6bit",
+        "healthy": true,
+        "max_model_len": 49152,
+        "model_memory_max": 17179869184,
+        "memory_limit_gib": 16,
+        "active_requests": 0,
+        "waiting_requests": 0,
+        "version": "0.6.4",
+        "note": "Profile metadata only; no generation. MTP and full runtime settings require adoption checks."
+      },
+      "memory": {
+        "pressure": "normal",
+        "pressure_level": 1,
+        "swap_used_bytes": 1687358013,
+        "runtime_footprint_bytes": 166348384
+      },
+      "mcp": {
+        "browser": {
+          "status": "connected"
+        },
+        "search": {
+          "status": "connected"
+        }
+      },
+      "scope": "Configuration and dependency checks; generation and browser interactions are not run."
+    },
+    "gui": {
+      "http_status": 200,
+      "prompt_visible": true,
+      "page_errors": 0,
+      "scope": "Isolated authenticated browser launch without inference. Control interaction results reported separately."
+    }
+  },
+  "gui_controls": {
+    "schema": 1,
+    "status": "PARTIAL_CONTROL_DISCOVERY",
+    "scope": "Installed native GUI in an isolated browser and owned native server. Menu discovery only; no inference or setting selections.",
+    "reasoning": {
+      "status": "PASS_MENU_DISCOVERY",
+      "choices": [
+        "Default",
+        "Fast"
+      ],
+      "pointer_steps": "Hover inside the composer, then click the variant beside the model.",
+      "keyboard_steps": "Focus the composer; Tab through attachment and model buttons to Choose model variant, then press Enter.",
+      "normal_pointer_click_after_hover": true,
+      "forced_click_used": false,
+      "initial_direct_click_failure_retained": true,
+      "native_behavior": "The default variant has opacity 0 and pointer-events none while the composer is not hovered or focus-visible; hover restores opacity 1 and pointer-events auto.",
+      "pinned_source": "https://github.com/anomalyco/opencode/blob/b8cedc1a7a5e2916bbb65dc1d4b620729c261638/packages/app/src/composer/editor/editor.css"
+    },
+    "permissions": {
+      "status": "PASS_COMMAND_DISCOVERY",
+      "steps": "Open the command palette with Command+Shift+P and search permissions.",
+      "observed_command": "Auto-accept permissions",
+      "displayed_shortcut": "Command+Shift+A",
+      "command_invoked": false,
+      "permission_effects_tested": false,
+      "settings_panel_probe": "NOT_VERIFIED: Command+comma did not expose the expected settings control before the bounded timeout.",
+      "session_more_options_menu": [
+        "Rename",
+        "Export",
+        "Delete"
+      ]
+    },
+    "preservation": {
+      "existing_browser_profile_not_used": true,
+      "model_and_agent_unchanged": true,
+      "variant_and_permission_choices_not_selected": true,
+      "no_assistant_messages": true,
+      "runtime_start_stop_requested": false,
+      "owned_native_process_exited": true,
+      "temporary_credentials_removed": true
+    },
+    "limits": [
+      "The original direct-pointer failure and subsequent Settings shortcut timeout are preserved; this is not a full GUI acceptance pass.",
+      "No proof of setting persistence or autonomous permission behavior is claimed because settings were not toggled.",
+      "The isolated browser blocked two native worktree-refresh POST requests; this may limit background maintenance behavior during the fixture.",
+      "Variant and agent command-palette searches returned no results; only the actual variant menu and permissions command are qualified."
+    ],
+    "page_error_count": 0,
+    "evidence_sha256": {
+      "gui-controls/gui.json": "022ed9299d33ae955d1004afabbf86156f039214e51fc0fc12164c3999e5f224",
+      "gui-keyboard-controls/result.json": "cd8847ff82313fee20d0c4cd83233fadc354f173aa36b384a487af3b52cef978",
+      "gui-native-menus/result.json": "ce851bda4b852df1ad3adcff00ff8912a23e812c678986b5bb498c71760cefbb"
+    }
+  },
+  "current_information": {
+    "schema": 1,
+    "evaluation_date": "2026-09-22",
+    "status": "FAIL_AUTONOMOUS_CURRENT_INFORMATION_ACCURACY",
+    "same_prompt": true,
+    "prompt_sha256": "b16c63c0df0082ba5cda3b034e854f8a84f3372407a2bf568f7dfc6d26eeceec",
+    "profile": {
+      "model": "Qwen3.5-9B-6bit",
+      "variant": "fast",
+      "context_tokens": 49152,
+      "output_limit_tokens": 8192,
+      "per_run_timeout_seconds": 240
+    },
+    "official_reference": {
+      "source_url": "https://api.github.com/repos/microsoft/playwright-mcp/releases/latest",
+      "tag_name": "v0.0.82",
+      "published_at": "2026-09-18T23:35:04Z",
+      "html_url": "https://github.com/microsoft/playwright-mcp/releases/tag/v0.0.82",
+      "prerelease": false,
+      "verification": "Independently fetched official GitHub API; also present in the initial run saved native API response."
+    },
+    "initial_A_before_browse_read_fix": {
+      "model_completed": false,
+      "timed_out": true,
+      "driver_wall_seconds": 246.691,
+      "tool_attempts": 34,
+      "successful_tools": {
+        "search_web_search_exa": 3,
+        "webfetch": 27
+      },
+      "tool_error_count": 4,
+      "product_plugin_sha256": "0dbd81265cf52bb0e614e8230766b42e768a858450f675c6c4a25e40740cfe6a",
+      "product_active_before_and_after": true,
+      "admission_routing_resources_and_cleanup": {
+        "trial_inputs_verified": true,
+        "routing_verified": true,
+        "resource_guard_clean": true,
+        "owned_sessions_idle": true,
+        "owned_cli_exited": true,
+        "owned_native_server_exited": true
+      },
+      "canonical_latest_api_fetched": true,
+      "acceptance": "FAIL_TIMEOUT",
+      "final_answer_produced": false,
+      "successful_native_saved_output_reads": 0,
+      "failure_summary": "The autonomous run timed out. A complete official latest-release API response was saved locally, but Browse had no advertised read tool to recover its truncated output."
+    },
+    "candidate_B_after_browse_read_fix": {
+      "model_completed": true,
+      "timed_out": false,
+      "driver_wall_seconds": 108.832,
+      "tool_attempts": 10,
+      "successful_tools": {
+        "read": 3,
+        "search_web_search_exa": 2,
+        "webfetch": 4
+      },
+      "tool_error_count": 1,
+      "product_plugin_sha256": "3df02f04992d6d4be30b0b331de83ca7f79d30817fd5225908fb2b591d6e6823",
+      "product_active_before_and_after": true,
+      "admission_routing_resources_and_cleanup": {
+        "trial_inputs_verified": true,
+        "routing_verified": true,
+        "resource_guard_clean": true,
+        "owned_sessions_idle": true,
+        "owned_cli_exited": true,
+        "owned_native_server_exited": true
+      },
+      "canonical_latest_api_fetched": false,
+      "acceptance": "FAIL_WRONG_LATEST_RELEASE",
+      "final_answer_produced": true,
+      "successful_native_saved_output_reads": 3,
+      "reported_tag": "v0.0.79",
+      "reported_publication_timestamp": "2026-08-06T00:15:56Z",
+      "reported_release_url": "https://github.com/microsoft/playwright-mcp/releases/tag/v0.0.79",
+      "exact_latest_tag_correct": false,
+      "exact_latest_publication_timestamp_correct": false,
+      "supported_compatibility_observation": {
+        "constraint": "Official Playwright documentation requires Node.js 20 or newer.",
+        "source_url": "https://playwright.dev/docs/getting-started-mcp",
+        "primary_fetch_observed": true
+      },
+      "failure_summary": "Saved-output reads succeeded, but the model selected a stale search result and never fetched the canonical latest-release API. It completed with the wrong current release."
+    },
+    "privacy_review": {
+      "scope": "All recorded search queries and objectives in both native runs were manually inspected.",
+      "private_query_content_observed": false,
+      "raw_queries_or_prompts_in_this_report": false,
+      "note": "Initial A passed a local output-file path to webfetch, which rejected it as an invalid URL. No private query transmission was observed; this is not OS-wide network auditing."
+    },
+    "decision": {
+      "retain_browse_read_capability_fix": true,
+      "reason": "Native cache-read API probe and three actual model-selected saved-output reads verify the repaired capability.",
+      "research_quality_improvement_established": false,
+      "general_speed_improvement_established": false,
+      "note": "A timeout and one incorrect completed answer do not establish a quality or speed gain. Endurance preceded the narrow Browse policy fix; candidate identity hashes remain separate."
+    },
+    "related_acceptance": {
+      "browse_permissions_api": {
+        "status": "PASS",
+        "checks_passed": 9,
+        "driver_wall_seconds": 3.105,
+        "model_inference_executed": false
+      },
+      "native_check_observer": {
+        "status": "PASS",
+        "initial_oracle_error_retained": true
+      },
+      "task12": {
+        "status": "FAIL",
+        "unreached_browser_and_503_flows": "NOT_TESTED",
+        "fresh_reviewer": "FAIL"
+      }
+    },
+    "guided_followups": [
+      {
+        "label": "operator_guided_canonical_sources",
+        "status": "PASS_REQUESTED_FACTS_WITH_SOURCE_CAVEAT",
+        "guidance": "Operator supplied the canonical latest-release API URL, raw repository README URL, and explicit saved-output read instruction; release answers were not supplied.",
+        "same_native_session_as_candidate_B": true,
+        "model_completed": true,
+        "driver_wall_seconds": 75.916,
+        "tool_attempts": 5,
+        "successful_tools": {
+          "read": 2,
+          "webfetch": 2
+        },
+        "tool_error_count": 1,
+        "recovered_error": "Invalid webfetch format=json; retried with supported format=text.",
+        "successful_native_saved_output_reads": 2,
+        "product_plugin_sha256": "3df02f04992d6d4be30b0b331de83ca7f79d30817fd5225908fb2b591d6e6823",
+        "product_active_before_and_after": true,
+        "admission_routing_resources_and_cleanup": {
+          "trial_inputs_verified": true,
+          "routing_verified": true,
+          "resource_guard_clean": true,
+          "owned_sessions_idle": true,
+          "owned_cli_exited": true,
+          "owned_native_server_exited": true
+        },
+        "reported_primary_source_facts": {
+          "tag_name": "v0.0.82",
+          "published_at": "2026-09-18T23:35:04Z",
+          "html_url": "https://github.com/microsoft/playwright-mcp/releases/tag/v0.0.82",
+          "api_url": "https://api.github.com/repos/microsoft/playwright-mcp/releases/latest",
+          "readme_requirement": "Node.js 18 or newer",
+          "readme_url": "https://raw.githubusercontent.com/microsoft/playwright-mcp/main/README.md"
+        },
+        "requested_fact_checks": {
+          "latest_tag_correct": true,
+          "publication_timestamp_correct": true,
+          "release_url_correct": true,
+          "repository_readme_requirement_supported": true,
+          "actual_primary_fetch_and_saved_output_reads": true
+        },
+        "compatibility_source_caveat": "The official getting-started page fetched in candidate B states Node.js 20 or newer, while the repository README states 18 or newer. Both source observations are supported. The guided answer overgeneralized by labeling the prior documentation statement outdated; this discrepancy was not resolved.",
+        "privacy": {
+          "search_calls": 0,
+          "private_query_content_observed": false,
+          "scope": "Recorded requests used the supplied public sources and local saved-output reads."
+        },
+        "interpretation": "Guided recovery succeeds on requested source facts; it does not erase the failed autonomous result or establish general research quality or speed gains."
+      }
+    ],
+    "guided_followup_policy": "Any operator-supplied canonical-URL follow-up is a separately labeled result; it must not replace these failed autonomous trials."
+  },
+  "gui": {
+    "pass": true,
+    "checks": {
+      "http_status": 200,
+      "prompt_visible": true
+    },
+    "page_error_count": 0,
+    "inference_requested": false
+  },
+  "browse_saved_output_recovery": {
+    "status": "PASS",
+    "scope": "Native ReadTool API permissions and capture-only native advertised schema",
+    "limitations": [
+      "No model-generated tool-call or research-quality coverage.",
+      "Read API calls bypass tool-selection hooks; native FileAccess permissions still execute.",
+      "Lexical, account-wide cache permission; no canonical-path or session isolation claim."
+    ],
+    "checks": {
+      "admission_before": true,
+      "cached_read_exact": true,
+      "workspace_file_denied": true,
+      "outside_cache_file_denied": true,
+      "cache_directory_denied": true,
+      "advertised_tools_exact": true,
+      "capture_stopped_before_inference": true,
+      "admission_after": true,
+      "native_exited": true
+    },
+    "wall_seconds": 3.105,
+    "native_exited": true
+  },
+  "evidence_hashes": {
+    "endurance-final/evidence/06-review/driver.json": "8ff4a35b5f9351c21fcef038cacb58c8b9266eaf926d9899bd8307a6b182fef3",
+    "endurance-final/evidence/07-research/driver.json": "3fa2a29904b7ee6e226c35107cde7a67e9ebfb11db2c953c255b9e693984f252",
+    "endurance-final/evidence/11-observability/driver.json": "46820198eae15e13d0b0dc56467d98ee8744946167781876ea6feda27e72005d",
+    "endurance-final/evidence/10-recovery/driver.json": "993b716328ca0ff3ac30308ffc8b170b004b8e10439d8420e0bad7722724bebe",
+    "endurance-final/evidence/03-ui/driver.json": "adc7fec679783dba29476f6a92f229e5722419f89e93a6fd01b2a223310bd4ac",
+    "endurance-final/evidence/08-document/driver.json": "acf80ec2bbfb50dc190dbf50bb9e74183ee8c8529333e9e38b3df79f70b08181",
+    "endurance-final/evidence/05-accessibility/driver.json": "aa9f799fec1f138d0d4ef2fb874c8137b719fe4ee9a1aec1b2b19510c1a7bccf",
+    "endurance-final/evidence/02-build/driver.json": "f5b760a1a8b5d140afa17cf2b273a8689ede1cafc86a00c5ab696a54d9f98875",
+    "endurance-final/evidence/04-hardening/driver.json": "cefd0aa0d533b0622f21da6afc33d35aa7761c4f37b0bfc7fb46762de9950c51",
+    "endurance-final/evidence/09-final-coding/driver.json": "89cdc275e69a3e023153b60ea8eeb59c27d12a5dcdcaac9dba99a3cf1fcc5ef0",
+    "endurance-final/evidence/01-plan/driver.json": "e6b9e26e1eac1bfa76c9580f105b2fb6c35c538c986f1de388eece6286d28a63",
+    "candidate-multifile/evidence/qualified/driver.json": "05eb4cf8d35942759e623c45aa6cfc24f7d32344ddedc7416ca452261a92d03e",
+    "shell-tool/evidence/qualified/driver.json": "a3a0956e51a2e36085a28aaab28bce7a497ef8db79507ddf3851632eedcd6228",
+    "vision/evidence/qualified/driver.json": "14b5a8b0efc486634473d1d7300e4f87ffa84f6357f483e99cffb6aef01257d2",
+    "live-research/evidence/qualified/driver.json": "cfb6c7d8cb4fdcfc2f38c63f61aa96ddfd6a37c696c2a942daa428f880774396",
+    "candidate-refactor/evidence/qualified/driver.json": "9b5cb62f3ddee8accb69aa94744e8c0dfe976f615966dd328eea0d724d2bf55e"
+  }
+}

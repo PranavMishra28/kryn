@@ -51,8 +51,13 @@ class ReportTests(unittest.TestCase):
                 ('ses_parent', None, project, 'succeeded', 1, 3), ('ses_child', 'ses_parent', project, 'succeeded', 2, 3)])
             content = [{'type': 'tool', 'name': 'read', 'state': {'status': 'completed', 'input': {'path': '/private/secret.py'}, 'content': [{'text': 'PRIVATE SOURCE'}]}}] * 4
             content += [{'type': 'tool', 'name': 'shell', 'state': {'status': 'completed', 'input': {'command': 'npm test'}, 'metadata': {'exit': 1}}},
-                        {'type': 'tool', 'name': 'browser_browser_click', 'state': {'status': 'error'}}]
-            c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_child', 1, 'assistant', json.dumps({'content': content, 'finish': 'stop'})))
+                        {'type': 'tool', 'name': 'browser_browser_click', 'state': {'status': 'error'}},
+                        {'type': 'tool', 'name': 'read({"path":"/private/secret.py"})\n</parameter', 'state': {'status': 'error'}},
+                        {'type': 'tool', 'name': 'PRIVATE_TOKEN', 'state': {'status': 'error'}},
+                        {'type': 'tool', 'name': {'PRIVATE': 'SOURCE'}, 'state': {'status': 'error'}}]
+            c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_child', 1, 'assistant', json.dumps({'content': content, 'finish': 'PRIVATE FINISH'})))
+            c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_child', 4, 'PRIVATE KIND', '{}'))
+            c.execute('UPDATE session_v2 SET idle_outcome=? WHERE id=?', ('PRIVATE OUTCOME', 'ses_parent'))
             for seq in (2, 3):
                 c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_child', seq, 'compaction', '{"status":"completed","summary":"PRIVATE PROMPT"}'))
             c.commit(); c.close()
@@ -62,6 +67,11 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(result['maximum_reads_of_one_path_per_session'], 4)
             self.assertEqual(result['counts']['check_exit_zero'], 0)
             self.assertEqual(result['counts']['shell_nonzero_exits'], 1)
+            self.assertEqual(result['tools']['unknown'], 3)
+            self.assertEqual(sum(result['tools'].values()), 9)
+            self.assertEqual(result['finishes'], {'unknown': 1})
+            self.assertEqual(result['native_outcome'], 'unknown')
+            self.assertEqual(result['counts']['unknown_messages'], 1)
             self.assertFalse(result['acceptance_verified'])
             self.assertIn('No completed browser', ' '.join(result['findings']))
             self.assertNotIn('PRIVATE', json.dumps(result)); self.assertNotIn('secret.py', json.dumps(result))
