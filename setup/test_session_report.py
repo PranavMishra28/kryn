@@ -12,6 +12,51 @@ from session_report import report
 
 
 class ReportTests(unittest.TestCase):
+    def test_only_settled_simple_checks_can_count_as_exit_zero(self):
+        with tempfile.TemporaryDirectory() as folder:
+            db = Path(folder) / 'native.db'
+            project = str(Path(folder).resolve())
+            # Each row represents an actual native tool result, not an assistant claim.
+            cases = [
+                ('npm test', 'completed', {'exit': 0}),
+                ('python3.13 -I -B -m unittest -v', 'completed', {'output': {'exit': 0, 'status': 'completed'}}),
+                ('node --test', 'completed', {'exit': 1}),
+                ('npm test || true', 'completed', {'exit': 0}),
+                ('echo npm test', 'completed', {'exit': 0}),
+                ('npm test\ntrue', 'completed', {'exit': 0}),
+                ('npm test ' + 'x' * 4100 + ' || true', 'completed', {'exit': 0}),
+                ('npm test', 'completed', {'exit': 0, 'timeout': True}),
+                ('npm test', 'completed', {'exit': 1, 'timeout': True}),
+                ('npm test', 'completed', {'exit': 0, 'output': {'timeout': True}}),
+                ('npm test', 'completed', {'exit': 0, 'status': 'running'}),
+                ('npm test', 'completed', {'output': {'exit': 0, 'status': 'running'}}),
+                ('npm test', 'completed', {'status': 'running'}),
+                ('npm test', 'error', {'exit': 0}),
+                ('npm test', 'completed', {}),
+                ('npm test', 'completed', {'exit': False}),
+                ('npm test', 'completed', {'exit': '0'}),
+            ]
+            with closing(sqlite3.connect(db)) as c, c:
+                c.executescript('CREATE TABLE session_v2 (id TEXT, parent_id TEXT, directory TEXT, idle_outcome TEXT, time_created INTEGER, time_updated INTEGER);'
+                                'CREATE TABLE session_message (session_id TEXT, seq INTEGER, type TEXT, data TEXT);')
+                c.execute('INSERT INTO session_v2 VALUES (?,?,?,?,?,?)', ('ses_checks', None, project, 'succeeded', 1, 3))
+                content = [{'type': 'tool', 'name': 'shell', 'state': {'status': status, 'input': {'command': command}, 'metadata': metadata}}
+                           for command, status, metadata in cases]
+                c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_checks', 1, 'assistant',
+                          json.dumps({'content': [{'type': 'text', 'text': 'All required tests passed.'}, *content]})))
+                c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_checks', 2, 'compaction',
+                          '{"status":"completed","summary":"All verification passed."}'))
+            result = report(db, project)
+            self.assertEqual(result['counts']['check_commands'], 13)
+            self.assertEqual(result['counts']['check_exit_zero'], 2)
+            self.assertEqual(result['counts']['check_exit_nonzero'], 1)
+            self.assertEqual(result['counts']['check_exit_unknown'], 10)
+            self.assertEqual(sum(result['counts'][key] for key in
+                                 ('check_exit_zero', 'check_exit_nonzero', 'check_exit_unknown')),
+                             result['counts']['check_commands'])
+            self.assertFalse(result['acceptance_verified'])
+            self.assertNotIn('All required tests passed', json.dumps(result))
+
     def test_native_usage_separates_cache_reasoning_compaction_and_missing_data(self):
         with tempfile.TemporaryDirectory() as folder:
             db = Path(folder) / 'native.db'

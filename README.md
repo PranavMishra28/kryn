@@ -2,7 +2,7 @@
 
 A local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.7](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.7) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.8](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.8) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -128,10 +128,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.7 --repo PranavMishra28/kryn \
+     gh release download v0.1.8 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.7
+     python3 install-kryn.py --tag v0.1.8
    )
    ```
 
@@ -146,7 +146,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.7`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.8`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -162,13 +162,18 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.7` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.8` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
+| `kryn uninstall` | Deactivate owned command launchers; keep models, sessions, caches, settings and packages. |
 | `kryn improve status` | Inspect experimental background improvement. |
 | `kryn improve failures` | Inspect failure-triggered incidents awaiting regression checks. |
 | `kryn report` | Read-only diagnostics of this project's latest session and its children. Add `--session SESSION_ID` for a specific session. |
 | `kryn improve pause` | Pause background improvement. |
 | `kryn stop` | Stop the verified, idle KRYN model server. Finish active work first. |
+
+Updates and removal refuse changed or unowned files. `kryn uninstall` stops only the verified idle runtime and removes KRYN's four owned launcher aliases; it does not erase data, runtime settings, the oMLX app, or GitHub credentials. Rerun the verified tagged installer from **First installation** to reactivate or repair a missing owned launcher or guidance file. Repeating deactivation through the retained package is a no-op. There is no automatic disk purge.
+
+Interrupted activation and rollback retain recovery journals. Rerun the current verified release installer to recover, especially if a rollback already restored an older launcher whose package predates this recovery fix. Do not delete transaction journals or edit activation files during recovery; unrelated changes are preserved by refusing the operation.
 
 If memory protection stops a session, KRYN cancels its work, retains the native session and completed file writes, and stops its verified idle model server to release memory. Check `kryn status`; once `memory.pressure` is `normal`, run `kryn --continue` from the same project. The server starts automatically. Memory pressure can recur if the desktop workload leaves insufficient room for the model. If search or browser services are unavailable, local coding can still launch; inspect their connection status with `kryn doctor`.
 
@@ -186,23 +191,60 @@ npm uses KRYN’s managed writable cache, so ordinary dependency installation do
 
 Persistent development servers should use the native shell tool's `background:true` option in a separate call, with no trailing `&`. KRYN rejects a plain trailing background operator and gives the model that repair instruction, keeping ordinary checks in foreground calls. This guard does not parse complex shell syntax or contain deliberately detached processes.
 
+KRYN warns after three consecutive foreground shell calls return the same command result, then denies another identical call through native permissions. Two denied retries interrupt that stuck session. Changed evidence, a different action or a new user prompt resets detection. This catches the observed repeated-request loop; it is not general loop detection, and does not cover every background or parser-unrecognized command.
+
 Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.7 is a prerelease for owner testing. The [September 22 qualification](evals/history/2026-09-22/qualification.json) records 80.2 minutes of operator-staged engineering work. The primary session, including its child, reached a maximum recorded assistant prompt of 40,812 tokens and eight completed native compactions. Host pressure remained normal with no incremental swap growth during that workload. However, seven of eleven stages timed out: backend checks passed, while the generated UI still lacked accessible status feedback and the fresh review did not finish. The overall application acceptance failed; larger context does not establish frontier-level task quality.
+Version 0.1.8 remains a prerelease for owner testing. The [productionization qualification](evals/history/2026-09-22-production/qualification.json) records 172 setup tests, 21 helper tests, 39 JavaScript tests and 18 grader self-test cases passing. Native probes verified durable failed-check tracking across restart and blocking an unchanged fourth shell call after a warning. The 8,192-token cache probe returned correct original and changed facts on cold and reused paths. These are mechanism checks, not proof of general engineering quality.
+
+The same-model comparison completed both bug-fix repeats in each of minimal OpenCode, incumbent KRYN and candidate KRYN. No arm completed the feature task within its 240-second budget. The external Requests trial timed out and still failed both bug cases. Qwen3.8-27B oQ4 and Qwen3-Coder-30B-A3B Q4 failed the memory-pressure qualification and were rolled back; the 9B profile remains selected. The comparison establishes no statistical harness uplift or frontier parity.
+
+The final staged application trial completed Plan, backend, UI and edge-case stages, then passed native compaction with history preserved. Saved-session continuation timed out; after AC power disconnected, the fresh review stopped at the experiment's 20% battery reserve, 24.2 minutes into the workload. Backend checks passed, but the independent browser check failed because a successful save did not clear the form. Application acceptance failed. An earlier 6.5-minute battery-limited attempt is retained separately; neither qualifies the planned 45–60 minute sustained run.
+
+The earlier [v0.1.7 qualification](evals/history/2026-09-22/qualification.json) records 80.2 minutes of operator-staged engineering work. The primary session, including its child, reached a maximum recorded assistant prompt of 40,812 tokens and eight completed native compactions. Host pressure remained normal with no incremental swap growth during that workload. However, seven of eleven stages timed out: backend checks passed, while the generated UI still lacked accessible status feedback and the fresh review did not finish. The overall application acceptance failed; larger context does not establish frontier-level task quality.
 
 After that run, a Browse permission fix enabled native reads of saved, truncated web results. Separate tests verified the read scope and actual model calls; autonomous research still chose an outdated release, while a follow-up supplied with canonical source URLs returned the requested facts. Build-mode compaction, provider outage, restart and saved-session recall passed a separate lifecycle test. These narrowly scoped results do not turn the failed application or research trials into passes. Review generated changes and run your project's checks. Background improvement remains experimental, with no established learning benefit. Earlier results remain in [evaluation history](evals/history/2026-09-21).
 
 ## Improvement from actual failures
 
-No scheduled review is required. The local plugin records an incident when a native execution fails, work is interrupted, a recognized check fails, a tool fails, or a review exhausts its tool budget. Check-specific incidents recognize simple test/build commands, including Python startup flags; compound shell expressions remain available in `kryn report` diagnostics. Successful exits alone create no incident. These private records contain counts and native session references, not prompts, code, screenshots or tool output. Retention is bounded to 30 days and 500 incidents. `kryn improve failures` lists them; `kryn report` reads the authoritative native transcript metadata, including child sessions and failures that happen before after-tool hooks.
+No scheduled review is required. The local plugin records an incident when a native execution fails, work is interrupted, a recognized check fails, a tool fails, or a review exhausts its tool budget. Check-specific incidents recognize simple test/build commands, including Python startup flags; compound shell expressions remain shell events, but cannot count as passed checks. Successful exits alone create no incident. These private records contain counts and native session references, not prompts, code, screenshots or tool output. Retention is bounded to 30 days and 500 incidents. `kryn improve failures` lists them; `kryn report` reads the authoritative native transcript metadata, including child sessions and failures that happen before after-tool hooks.
+
+A bounded private ledger preserves observed test/build/lint/typecheck outcomes and native result references across compaction and restart. Failed or unfinished checks remain unresolved until the same command in the same directory produces a completed result. Old successful exits are historical observations; they do not prove current correctness or require rerunning just to clear a counter. The ledger records up to 64 simple check identities and marks missing history or provenance as partial. It cannot infer every requirement, prove browser flows from tool-call counts, or turn an assistant’s “done” into verified acceptance.
 
 The engineering loop is **failure → reproducible regression → candidate change → independent checks → adoption or rejection**. Keep the failing case and validate actual production behavior. Passing a build, copying implementation into a test, or trusting a model-written report is insufficient. The current failure audit and regressions are in [the follow-up evaluation](evals/history/2026-09-21/failure-driven.md).
 
 Reviewer runs now end their tool phase after 48 attempts or two compactions, then must return findings and explicitly unreviewed scope. If the model still emits unavailable tool calls for two more steps, KRYN interrupts that Reviewer and records an incomplete review. This limit applies to Reviewer, not Build; large reviews should use focused follow-ups. It bounds the observed repeated-reading loop without increasing the memory or context limits.
 
-Incident capture is automatic; implementing and accepting a new harness fix still requires evidence and engineering review. The older local instruction-optimization experiment remains restricted to disposable JSON tasks and paused on the validated installation. It has not established an improvement in application-building quality. KRYN does not automatically rewrite its runtime, permissions, test answers or model weights after an error, and frontier parity has not been demonstrated.
+Incident capture is automatic; implementing and accepting a new harness fix still requires evidence and engineering review. The older local instruction-optimization experiment remains restricted to disposable JSON tasks. Fresh installations and the validated installation start paused; `kryn improve resume` explicitly opts into that experiment. Failure incident capture does not require it. It has not established an improvement in application-building quality. KRYN does not automatically rewrite its runtime, permissions, test answers or model weights after an error, and frontier parity has not been demonstrated.
+
+## External Requests regression
+
+[The external evaluator](evals/external_requests.py) reproduces one [SWE-bench Verified instance](https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified/tree/c104f840cc67f8b6eec6f759ebc8b2693d585d4a), `psf__requests-6028`, against [Requests commit 0192aac](https://github.com/psf/requests/tree/0192aac24123735b3eaf9b08df46429bb770c283). This optional evaluator is separate from the installed KRYN package. It calls no model and changes no inference settings. Prerequisites are Python 3.10+, Git and `uv`; initialization creates an isolated Python 3.10.16 environment with the exact dependency versions embedded in the adapter.
+
+Run these from the repository root, choosing a new state directory outside the checkout:
+
+```sh
+kryn_eval_state="$HOME/kryn-evals/requests-6028"
+python3 -B evals/external_requests.py --state "$kryn_eval_state" init
+python3 -B evals/external_requests.py --state "$kryn_eval_state" selftest
+python3 -B evals/external_requests.py --state "$kryn_eval_state" prepare trial-1
+```
+
+The last command prints a fresh Git workspace containing only upstream source and the exact issue as `TASK.md`. In a separate terminal, enter that workspace, put the evaluator's `venv/bin` first on `PATH`, start your normal harness, and submit `TASK.md` verbatim. Give the candidate access only to its workspace. Keep the state directory's `oracle/`, `grades/`, reference solutions and other attempts out of its context. These ordinary filesystem directories are **not a security sandbox**.
+
+After the attempt ends, grade it from the repository root:
+
+```sh
+python3 -B evals/external_requests.py --state "$kryn_eval_state" grade "$kryn_eval_state/workspaces/trial-1"
+```
+
+Initialization verifies the source archive, exact problem/test/reference hashes and all 102 frozen fixture inputs. The Hugging Face rows API is not revision-addressable, so changed fields fail their fixed hashes instead of silently updating the task. `init --source-archive PATH --instance-json PATH` can use cached official inputs under the same checks. Existing nonempty state and workspace labels are never overwritten. A failed initialization remains for inspection; use a fresh state directory to retry.
+
+Grading copies the candidate outside its workspace, checks preserved original tests/configuration, rejects added `conftest.py` files and symlinks, applies the unchanged official test patch, and runs the focused and adjacent test module. Case and skip identities must match the frozen reference. Only the grader workspace and owned virtual-environment prefixes in test names become `<workspace>` and `<venv>`; the latter removes one absolute `pytest.__file__` parameter path. No assertion or skip changes. `selftest` requires the original bug to fail both official regression cases, the reference to pass 5 focused cases and 203 adjacent cases with 11 upstream skips, and modified tests to be rejected before execution. Reports and raw pytest output remain under the chosen state directory. Exit 0 means PASS, 1 means a graded failure, and 2 means a setup/error condition.
+
+This is a native macOS adaptation of one public 2022 task, not the official SWE-bench Docker score, a representative benchmark, or demonstrably uncontaminated training data. A passing fixture grade does not establish model completion, tool correctness or resource safety; retain those separate native-run checks.
 
 ## Repository layout
 

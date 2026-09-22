@@ -1,0 +1,49 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-and-package:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      # Release tags resolved through the primary GitHub API on 2026-09-22.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.23.1'
+          package-manager-cache: false
+      - name: Existing offline regressions
+        run: |
+          git diff --check
+          python -B -m unittest discover -s setup
+          python -B -m unittest discover -s tools -p 'test_*.py'
+          node --test tools/test_kryn_plugin.mjs tools/inference-audit/server.test.js
+          python -B tools/run_native_trial.py --self-check
+      - name: Frozen acceptance grader checks
+        run: |
+          python -B evals/bench.py verify
+          python -B evals/bench.py selftest
+      - name: Curated wheel and outside-checkout smoke
+        run: |
+          python -m pip install 'uv==0.11.16'
+          python -B build_package.py
+          python -m venv "$RUNNER_TEMP/kryn-package-smoke"
+          uv pip install --python "$RUNNER_TEMP/kryn-package-smoke/bin/python" --no-index --no-deps dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/kryn-package-smoke/bin/python" -I -B -m kryn --package-check
+          "$RUNNER_TEMP/kryn-package-smoke/bin/python" -I -B -m kryn --version
+      - name: Tracked source remains unchanged
+        run: git diff --exit-code

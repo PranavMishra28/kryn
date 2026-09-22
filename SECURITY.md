@@ -6,7 +6,7 @@ Use [GitHub private vulnerability reporting](https://github.com/PranavMishra28/k
 
 Include the KRYN version, macOS version, affected component, expected and observed behavior, and a minimal reproduction using disposable data. Omit tokens, credentials, private source code, session transcripts and raw browser profiles. Redact local paths and diagnostic output before sharing them.
 
-This project currently distributes v0.1.7 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
+This project currently distributes v0.1.8 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
 
 ## Trust and data boundaries
 
@@ -14,6 +14,7 @@ This project currently distributes v0.1.7 as an owner-testing prerelease. There 
 
 
 - **Owner access:** Installation and login verify the configured GitHub owner's numeric identity using GitHub CLI credentials in macOS Keychain. The seven-day offline identity cache contains no access token. It is an access policy, not tamper-resistant licensing or immediate remote revocation.
+- **Deactivation:** `kryn uninstall` verifies ownership receipts and refuses modified files, stops only the verified idle runtime, and removes owned launcher aliases transactionally. It retains private data, settings, dependencies and credentials; it is not secure erasure or a recursive purge. The verified release installer can reactivate retained state.
 - **Local inference:** The configured model endpoint is `127.0.0.1:8000`. The managed configuration permits the local provider. This does not prevent tools from using the network: search queries reach Exa, and browser requests reach visited sites.
 - **Project trust:** KRYN can read code, edit files and execute approved commands. Treat repository instructions, plugins, configuration and dependencies as trusted executable inputs. Ordinary shell writes are restricted to the project and owned state/temp/log paths. Native file tools, browser/MCP tools, formatters and persistent PTY sessions are outside that guard; reads, network access and process signaling are not isolated. A permitted shell command can signal other processes owned by your account. This is not a sandbox for hostile repositories.
 - **Browse output recovery:** Browse can read saved native `tool_*` results in KRYN's tool-output cache; ordinary workspace and other file reads are denied for that role. Native permission matching uses lexical paths and follows symlinks. This cache belongs to the same macOS account and is shared across sessions; the rule is not a canonical-path or session-isolation boundary. Keep owned application state trusted.

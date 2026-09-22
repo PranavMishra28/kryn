@@ -1,7 +1,8 @@
 """Isolated package/transaction checks; no model, services or home activation."""
 import hashlib
-from contextlib import nullcontext
+from contextlib import nullcontext, redirect_stdout
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -14,7 +15,7 @@ from unittest.mock import Mock, patch
 
 SOURCE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SOURCE / "src"))
-from kryn import installer
+from kryn import cli, installer
 spec = importlib.util.spec_from_file_location("kryn_builder", SOURCE / "build_package.py")
 builder = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(builder)
@@ -31,6 +32,38 @@ class PackageTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp.cleanup()
+
+    def owned_installation(self):
+        """Receipt-valid disposable installation; no dependencies or services."""
+        root, home = self.root, self.root / "home"
+        self.enterContext(patch.object(Path, "home", return_value=home))
+        self.enterContext(patch.object(installer, "root_path", return_value=root))
+        self.enterContext(patch.object(installer, "verify_payload", return_value={"source_revision": "a" * 40}))
+        setup, auth, learning = Mock(), Mock(), Mock()
+        setup.encode.side_effect = lambda value: json.dumps(value, indent=2) + "\n"
+        learning.foreground.side_effect = lambda _: nullcontext()
+        self.enterContext(patch.object(installer, "module", side_effect=lambda name: {"setup": setup, "owner_auth": auth, "learning": learning}[name]))
+        self.enterContext(redirect_stdout(io.StringIO()))
+        self.runtime_guard = self.enterContext(patch.object(installer, "guard_runtime"))
+        directory = root / "client" / ("a" * 16)
+        files = {"setup/opencode.template.json": "{}", "setup/install-profile.json": "{}",
+                 "setup/runtime-profile.json": json.dumps({"global": {"owned": True}, "model": {"models": {}}}),
+                 "setup/AGENTS.md": (SOURCE / "setup/AGENTS.md").read_text()}
+        for name, text in files.items(): installer.atomic_write(directory / name, text.encode())
+        receipt = {"directory": str(directory), "launcher": "#!/bin/sh\n# owned launcher\n",
+                   "files": {name: installer.digest(directory / name) for name in files}}
+        for path in installer.activation_paths(root): installer.atomic_write(path, b"{}")
+        for path in installer.aliases(root): installer.atomic_write(path, receipt["launcher"].encode(), 0o700)
+        installer.atomic_write(root / "client/deployment.json", json.dumps(receipt).encode())
+        installer.atomic_write(root / "xdg/config/opencode/AGENTS.md", (files["setup/AGENTS.md"] +
+                              f"\nIf installed, use {root}/artifacts/.venv/bin/python for document/data tasks.\n").encode())
+        installer.atomic_write(home / ".omlx/settings.json", b'{"owned": true, "unrelated": "keep"}')
+        installer.atomic_write(home / ".omlx/model_settings.json", b'{"models": {}}')
+        installer.atomic_write(root / "packages/active.json", json.dumps({"schema": 1,
+                              "payload_manifest_sha256": "same", "transaction": "unused"}).encode())
+        for name in ("models/retained", "xdg/data/session", "cache/retained", "owner-session"):
+            installer.atomic_write(root / name, b"private retained data")
+        return setup, receipt
 
     def test_curated_stage_is_self_contained_and_corruption_is_detected(self):
         manifest = builder.stage(SOURCE, self.root, "a" * 40)
@@ -62,6 +95,7 @@ class PackageTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Preserving changed"):
             second.restore(require_after=True)
         self.assertEqual(new.read_bytes(), b"owned alias")
+        self.assertEqual(json.loads((second.folder / "transaction.json").read_text())["status"], "committed")
         installer.atomic_write(existing, b"release-two")
         second.restore(require_after=True)
         self.assertEqual(existing.read_bytes(), b"before")
@@ -81,6 +115,54 @@ class PackageTests(unittest.TestCase):
         transaction.restore(require_planned=True)
         self.assertEqual(one.read_bytes(), b"old")
         self.assertFalse(two.exists())
+
+    def test_interrupted_rollback_resumes_without_rolling_back_another_generation(self):
+        auth, learning = Mock(), Mock()
+        learning.foreground.side_effect = lambda _: nullcontext()
+        count = len(installer.activation_paths(self.root))
+        # Cut after the intent journal and after every restored activation file,
+        # including active.json, which already selects the previous generation.
+        for cut in range(-1, count):
+            with self.subTest(cut=cut):
+                root = self.root / str(cut)
+                home = root / "home"
+                folder = root / "packages/transactions/new"
+                with patch.object(Path, "home", return_value=home), \
+                        patch.object(installer, "root_path", return_value=root), \
+                        patch.object(installer, "verify_payload", return_value={}), \
+                        patch.object(installer, "module", side_effect=lambda name: {"owner_auth": auth, "learning": learning}[name]), \
+                        patch.object(installer, "guard_runtime"):
+                    paths = installer.activation_paths(root)
+                    active = root / "packages/active.json"
+                    before = {p: ("old-" + str(i)).encode() for i, p in enumerate(paths)}
+                    before[active] = json.dumps({"transaction": str(folder.parent / "older")}).encode()
+                    after = {p: ("new-" + str(i)).encode() for i, p in enumerate(paths)}
+                    after[active] = json.dumps({"transaction": str(folder)}).encode()
+                    for path, data in before.items(): installer.atomic_write(path, data)
+                    transaction = installer.Transaction(folder, paths, after)
+                    for path, data in after.items(): installer.atomic_write(path, data)
+                    transaction.finish()
+                    journal = folder / "transaction.json"
+                    target = journal if cut == -1 else list(reversed(paths))[cut]
+                    write = installer.atomic_write
+                    def interrupt(path, *args, **kwargs):
+                        write(path, *args, **kwargs)
+                        if path == target: raise KeyboardInterrupt("simulated interruption")
+                    with patch.object(installer, "atomic_write", side_effect=interrupt):
+                        with self.assertRaises(KeyboardInterrupt): installer.rollback()
+                    self.assertEqual(json.loads(journal.read_text())["status"], "rolling_back")
+                    # A user edit during interruption blocks every recovery write.
+                    previous = paths[0].read_bytes()
+                    paths[0].write_bytes(b"unrelated user edit")
+                    snapshot = {p: p.read_bytes() for p in paths}
+                    with self.assertRaisesRegex(RuntimeError, "interrupted rollback"):
+                        installer.rollback()
+                    self.assertEqual({p: p.read_bytes() for p in paths}, snapshot)
+                    self.assertEqual(json.loads(journal.read_text())["status"], "rolling_back")
+                    paths[0].write_bytes(previous)
+                    installer.rollback()
+                    self.assertEqual({p: p.read_bytes() for p in paths}, before)
+                    self.assertEqual(json.loads(journal.read_text())["status"], "rolled_back")
 
     def test_symlinks_hardlinks_and_corrupt_backups_fail_before_restore(self):
         target = self.root / "target"; target.write_bytes(b"safe")
@@ -225,6 +307,7 @@ class PackageTests(unittest.TestCase):
         with patch.object(installer, "verify_payload", return_value={}), \
                 patch.object(installer, "module", side_effect=lambda name: {"setup": setup, "owner_auth": auth, "learning": learning}[name]), \
                 patch.object(installer, "root_path", return_value=root), \
+                patch.object(installer, "activation_paths", return_value=[root / "packages/active.json"]), \
                 patch.object(installer, "platform_check"), patch.object(installer, "recover"), \
                 patch.object(installer, "check_existing"), patch.object(installer, "digest", return_value="same"), \
                 patch.object(installer, "verify_browser"), \
@@ -240,6 +323,121 @@ class PackageTests(unittest.TestCase):
             installer.install()
             setup.install_app.assert_called_once()
             transaction.assert_not_called()
+
+    def test_uninstall_preserves_data_and_modified_files_and_is_idempotent(self):
+        setup, _ = self.owned_installation()
+        paths = installer.activation_paths(self.root)
+        original = {p: p.read_bytes() for p in paths}
+        launcher = installer.aliases(self.root)[0]
+        launcher.write_bytes(b"user change")
+        with self.assertRaisesRegex(RuntimeError, "changed or unowned launcher"):
+            installer.uninstall()
+        self.runtime_guard.assert_not_called()
+        self.assertEqual({p: p.read_bytes() for p in paths if p != launcher}, {p: v for p, v in original.items() if p != launcher})
+        launcher.write_bytes(original[launcher])
+        self.runtime_guard.side_effect = RuntimeError("busy runtime")
+        with self.assertRaisesRegex(RuntimeError, "busy runtime"): installer.uninstall()
+        self.assertEqual({p: p.read_bytes() for p in paths}, original)
+        self.runtime_guard.reset_mock(side_effect=True)
+        retained = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file() and p not in paths}
+        installer.uninstall()
+        self.runtime_guard.assert_called_once_with(self.root, stop=True)
+        self.assertFalse(any(p.exists() for p in installer.aliases(self.root)))
+        active = self.root / "packages/active.json"
+        self.assertTrue(json.loads(active.read_text())["deactivated"])
+        for path in paths:
+            if path not in installer.aliases(self.root) and path != active:
+                self.assertEqual(path.read_bytes(), original[path])
+        for path, data in retained.items(): self.assertEqual(path.read_bytes(), data)
+        before = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+        installer.uninstall()
+        self.assertEqual({p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}, before)
+        self.assertEqual(self.runtime_guard.call_count, 1)
+
+    def test_interrupted_deactivation_recovers_removed_launchers(self):
+        self.owned_installation()
+        paths = installer.activation_paths(self.root)
+        original = {p: p.read_bytes() for p in paths}
+        active = self.root / "packages/active.json"
+        write = installer.atomic_write
+        def interrupt(path, *args, **kwargs):
+            if path == active: raise KeyboardInterrupt("simulated termination after launcher removal")
+            write(path, *args, **kwargs)
+        # A killed process cannot execute the exception cleanup. Retain its
+        # prepared journal, then exercise normal recovery in a fresh call.
+        with patch.object(installer, "atomic_write", side_effect=interrupt), \
+                patch.object(installer.Transaction, "restore", side_effect=KeyboardInterrupt("process gone")):
+            with self.assertRaises(KeyboardInterrupt): installer.uninstall()
+        self.assertFalse(any(p.exists() for p in installer.aliases(self.root)))
+        installer.recover(self.root)
+        self.assertEqual({p: p.read_bytes() for p in paths}, original)
+
+    def test_rollback_recovers_prepared_upgrade_without_removing_incumbent(self):
+        self.owned_installation()
+        paths = installer.activation_paths(self.root)
+        active = self.root / "packages/active.json"
+        older = self.root / "packages/transactions/100-installed"
+        newer = older.with_name("200-interrupted-upgrade")
+        incumbent = {p: p.read_bytes() for p in paths}
+        incumbent[active] = json.dumps({"schema": 1, "transaction": str(older)}).encode()
+        for path in paths: path.unlink()
+        installed = installer.Transaction(older, paths, incumbent)
+        for path, data in incumbent.items(): installer.atomic_write(path, data)
+        installed.finish()
+        upgrade = {**incumbent, paths[0]: b"new config", active: json.dumps({"transaction": str(newer)}).encode()}
+        installer.Transaction(newer, paths, upgrade)
+        installer.atomic_write(paths[0], upgrade[paths[0]])
+        installer.atomic_write(active, upgrade[active])
+        installer.rollback()
+        self.assertEqual({p: p.read_bytes() for p in paths}, incumbent)
+        self.assertEqual(json.loads((older / "transaction.json").read_text())["status"], "committed")
+        self.assertEqual(json.loads((newer / "transaction.json").read_text())["status"], "rolled_back")
+
+    def test_same_package_repairs_missing_activation_and_reactivates(self):
+        setup, receipt = self.owned_installation()
+        setup.load_profile.return_value = {"files": {"shard": "hash"}}
+        model = self.root / "model"; model.mkdir(); (model / "shard").write_bytes(b"model")
+        setup.model_destination.return_value = (model, model / "marker", "marker")
+        setup.plugin_files.return_value = {}
+        setup.render.return_value = {}
+        setup.runtime_settings.return_value = {"owned": True}
+        setup.model_settings.return_value = {"models": {}}
+        original_digest, original_is_dir = installer.digest, Path.is_dir
+        def digest(path):
+            return "same" if Path(path) == Path(installer.__file__).parent / "manifest.json" else original_digest(path)
+        def deploy(*_, **__):
+            installer.atomic_write(self.root / "client/deployment.json", (json.dumps(receipt, indent=2) + "\n").encode())
+            for path in installer.aliases(self.root): installer.atomic_write(path, receipt["launcher"].encode(), 0o700)
+        # Use real receipt checks and activation transactions; dependencies and
+        # the separately tested deployment subprocess are disposable stand-ins.
+        with patch.object(installer, "platform_check"), patch.object(installer, "payload", return_value=SOURCE), \
+                patch.object(installer, "digest", side_effect=digest), \
+                patch.object(installer, "selected_node", return_value=Path(sys.executable)), \
+                patch.object(installer.shutil, "which", return_value=sys.executable), \
+                patch.object(Path, "is_dir", lambda p: str(p) == "/Applications/Google Chrome.app" or original_is_dir(p)), \
+                patch.object(installer, "verify_browser"), \
+                patch.object(installer.subprocess, "check_output", return_value=json.dumps(receipt)), \
+                patch.object(installer.subprocess, "run", side_effect=deploy) as applied:
+            for missing in (installer.aliases(self.root)[-1], self.root / "xdg/config/opencode/AGENTS.md"):
+                missing.unlink()
+                installer.install()
+                self.assertTrue(missing.is_file())
+            self.assertEqual(applied.call_count, 2)
+            installer.uninstall()
+            installer.install()
+            self.assertTrue(all(p.is_file() for p in installer.activation_paths(self.root)))
+            self.assertNotIn("deactivated", json.loads((self.root / "packages/active.json").read_text()))
+            self.assertEqual(applied.call_count, 3)
+            installer.install()
+            self.assertEqual(applied.call_count, 3)
+
+    def test_package_cli_uninstall_rejects_extra_arguments_before_mutation(self):
+        with patch.object(cli, "uninstall") as remove, patch.object(sys, "argv", ["kryn", "uninstall", "--purge"]):
+            with self.assertRaisesRegex(SystemExit, "Usage: kryn uninstall"): cli.main()
+            remove.assert_not_called()
+        with patch.object(cli, "uninstall") as remove, patch.object(sys, "argv", ["kryn", "uninstall"]):
+            cli.main()
+            remove.assert_called_once()
 
     def test_recovery_stops_only_verified_idle_runtime_before_restoring_settings(self):
         folder = self.root / "packages/transactions/interrupted"

@@ -127,7 +127,7 @@ class Transaction:
                 before = None
             row = {"path": str(file), "before": before}
             if planned is not None:
-                row["planned"] = hashlib.sha256(planned[file]).hexdigest() if file in planned else None
+                row["planned"] = hashlib.sha256(planned[file]).hexdigest() if planned.get(file) is not None else None
             self.rows.append(row)
         self.save("prepared")
 
@@ -141,18 +141,26 @@ class Transaction:
             row["after"] = digest(file) if file.exists() else None
         self.save("committed")
 
-    def restore(self, require_after=False, require_planned=False):
+    def restore(self, require_after=False, require_planned=False, resume_rollback=False):
         # Validate every destination and backup before the first restoration write.
         for row in self.rows:
             file = safe_path(row["path"])
             if require_after and (digest(file) if file.exists() else None) != row.get("after"):
                 raise RuntimeError("Preserving changed file during rollback: " + str(file))
+            if resume_rollback:
+                before = row["before"]["sha256"] if row["before"] else None
+                if (digest(file) if file.exists() else None) not in {before, row["after"]}:
+                    raise RuntimeError("Preserving changed file during interrupted rollback: " + str(file))
             if require_planned:
                 before = row["before"]["sha256"] if row["before"] else None
                 if "planned" not in row or (digest(file) if file.exists() else None) not in {before, row["planned"]}:
                     raise RuntimeError("Preserving unknown change during interrupted installation recovery: " + str(file))
             if row["before"] and digest(safe_path(self.folder / row["before"]["backup"])) != row["before"]["sha256"]:
                 raise RuntimeError("Rollback backup failed integrity")
+        if require_after:
+            # active.json is restored first. Persist intent before it can point
+            # at an older transaction, so a retry resumes this one exactly once.
+            self.save("rolling_back")
         for row in reversed(self.rows):
             file = Path(row["path"])
             if row["before"]:
@@ -390,13 +398,19 @@ def load_transaction(root, folder):
 
 
 def recover(root):
+    restored_transaction = False
     for file in sorted((root / "packages/transactions").glob("*/transaction.json"), reverse=True):
         transaction, status = load_transaction(root, file.parent)
-        if status == "prepared":
+        if status in {"prepared", "rolling_back"}:
             # A prior crash may have been followed by a separately restarted app.
             # Never restore runtime settings beneath busy or unidentifiable work.
             guard_runtime(root, stop=True)
-            transaction.restore(require_planned=True)
+            if status == "rolling_back":
+                transaction.restore(resume_rollback=True)
+            else:
+                transaction.restore(require_planned=True)
+            restored_transaction = True
+    return restored_transaction
 
 
 def install():
@@ -420,7 +434,10 @@ def install():
         recover(root)
         check_existing(root, setup)
         current = root / "packages/active.json"
-        same_package = current.exists() and safe_json(current).get("payload_manifest_sha256") == digest(Path(__file__).parent / "manifest.json")
+        same_package = (current.exists()
+                        and safe_json(current).get("payload_manifest_sha256") == digest(Path(__file__).parent / "manifest.json")
+                        and not safe_json(current).get("deactivated")
+                        and all(file.is_file() for file in activation_paths(root)))
         env = {k: v for k, v in os.environ.items() if not any(x in k.upper() for x in ("TOKEN", "API_KEY", "SECRET"))}
         env.update(PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1", HF_HUB_DISABLE_XET="1",
                    UV_CACHE_DIR=str(root / "uv-cache"))
@@ -498,9 +515,49 @@ def rollback():
     auth.authorize()
     root = root_path()
     with learning.foreground(root / "state/improvement"):
-        active = safe_json(root / "packages/active.json")
-        transaction, status = load_transaction(root, active["transaction"])
-        if status != "committed": raise RuntimeError("No committed rollback transaction")
-        guard_runtime(root, stop=True)
-        transaction.restore(require_after=True)
+        if not recover(root):
+            active = safe_json(root / "packages/active.json")
+            transaction, status = load_transaction(root, active["transaction"])
+            if status != "committed": raise RuntimeError("No committed rollback transaction")
+            guard_runtime(root, stop=True)
+            transaction.restore(require_after=True)
     print("Previous owned configuration and launchers restored; retained dependencies/models remain available.")
+
+
+def uninstall():
+    """Deactivate owned entry points; retain all data and installed dependencies."""
+    verify_payload()
+    setup, auth, learning = module("setup"), module("owner_auth"), module("learning")
+    auth.authorize()
+    root = root_path()
+    with learning.foreground(root / "state/improvement"):
+        recover(root)
+        active = root / "packages/active.json"
+        if not active.exists():
+            if any(path.exists() or path.is_symlink() for path in aliases(root)):
+                raise RuntimeError("Preserving launchers without an active package receipt")
+            print("KRYN is already deactivated; retained data was not changed.")
+            return
+        if check_existing(root, setup) is None:
+            raise RuntimeError("An owned client receipt is required to deactivate KRYN")
+        current = safe_json(active)
+        if current.get("deactivated") is True and not any(path.exists() for path in aliases(root)):
+            print("KRYN is already deactivated; retained data was not changed.")
+            return
+        guard_runtime(root, stop=True)
+        paths = activation_paths(root)
+        planned = {path: path.read_bytes() for path in paths if path.exists()}
+        planned.update({path: None for path in aliases(root)})
+        folder = root / "packages/transactions" / (str(time.time_ns()) + "-deactivate")
+        planned[active] = json.dumps({**current, "deactivated": True, "transaction": str(folder)}, indent=2).encode()
+        transaction = Transaction(folder, paths, planned)
+        try:
+            for path in aliases(root):
+                if path.exists(): path.unlink()
+            atomic_write(active, planned[active])
+            transaction.finish()
+        except BaseException:
+            transaction.restore(require_planned=True)
+            raise
+    print("KRYN deactivated. Models, sessions, caches, settings and packages are retained. "
+          "Rerun the verified release installer to reactivate.")

@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 from . import __version__
-from .installer import install, rollback, payload, verify_payload, safe_json, root_path
+from .installer import install, rollback, uninstall, payload, verify_payload, safe_json, root_path
 
 
 def main():
@@ -29,9 +29,14 @@ def main():
                 raise RuntimeError("Usage: kryn rollback")
             rollback()
             return
+        if args and args[0] == "uninstall":
+            if len(args) != 1:
+                raise RuntimeError("Usage: kryn uninstall (deactivates launchers; retains data)")
+            uninstall()
+            return
         if args and args[0] == "update":
             if len(args) != 2 or not args[1].startswith("v"):
-                raise RuntimeError("Usage: kryn update v0.1.7")
+                raise RuntimeError("Usage: kryn update v0.1.8")
             verify_payload()
             subprocess.run([sys.executable, "-E", "-B", str(payload() / "install-kryn.py"),
                             "--tag", args[1]], check=True)

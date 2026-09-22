@@ -46,6 +46,245 @@ function fixture(extra = {}) {
 }
 const model = { providerID: 'local', id: 'qwen' };
 
+function shellRun(f, command, text, serial, extra = {}, auto = true, exit = 0) {
+  const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + serial, id: 'call_' + serial,
+    tool: 'shell', input: { command, ...extra } };
+  f.call('tool.execute.before', event);
+  const permission = { sessionID: 'ses_1', agent: 'build', action: 'shell', resources: [command],
+    source: { type: 'tool', messageID: event.messageID, id: event.id }, effect: 'allow' };
+  f.call('permission.evaluate', permission);
+  // Native --auto approves only asked permissions; a configured/hook deny never asks.
+  if (permission.effect === 'ask' && auto) permission.effect = 'allow';
+  const executed = permission.effect === 'allow';
+  const after = executed ? { ...event, status: 'completed', result: {
+    output: { output: text, exit, status: extra.background ? 'running' : 'completed', truncated: false },
+    content: [{ type: 'text', text }, { type: 'text', text: 'Command exited with code ' + exit + '.' }] } } :
+    { ...event, status: 'error', error: new Error(permission.message) };
+  f.call('tool.execute.after', after);
+  return { executed, permission, after, event };
+}
+
+test('unchanged shell loop warns at three, native deny survives auto, and repeated denial interrupts', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const command = "curl -s -X POST http://127.0.0.1:8765/api/import -d 'id,project,minutes,date\nt3，プロジェクト，60,2026-09-03'";
+    let executions = 0, attempts = 0, warning;
+    for (let n = 1; n <= 24 && !f.interruptions.length; n++) {
+      const run = shellRun(f, command, '{"error": "invalid minutes"}', n, { description: 'attempt ' + n });
+      attempts++; executions += Number(run.executed);
+      if (n === 3) warning = run.after.result.content.at(-1).text;
+      if (n > 3) {
+        assert.equal(run.permission.effect, 'deny');
+        assert.match(run.permission.message, /not executed/);
+      }
+      await f.emit('session.step.ended', { finish: 'tool-calls', tokens: {} });
+    }
+    assert.equal(executions, 3);
+    assert.equal(attempts, 5, 'two denied retries end the unchanged native execution');
+    assert.match(warning, /unchanged output three times/);
+    assert.match(warning, /not an inferred HTTP/);
+    assert.equal(f.interruptions.length, 1);
+    assert.equal(f.continuations.length, 0);
+    assert.ok(!JSON.stringify(f.read('trackers')).includes(command));
+    assert.ok(!JSON.stringify(f.read('trackers')).includes('invalid minutes'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('changed evidence, foreground work, directory, and user prompt reset the shell repetition guard', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx); let n = 0;
+  const run = (text = 'same result', extra = {}, command = 'npm test') => shellRun(f, command, text, ++n, extra);
+  try {
+    for (const exit of [1, 0, 1, 0, 1, 0])
+      assert.equal(shellRun(f, 'npm test', 'same result', ++n, {}, true, exit).executed, true,
+        'changing success/failure status is material evidence even when stdout is identical');
+    for (let i = 0; i < 8; i++) assert.equal(run('progress ' + i).executed, true, 'changing polling evidence is allowed');
+    for (let i = 0; i < 3; i++) assert.equal(run().executed, true);
+    assert.equal(run().executed, false);
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.equal(run().executed, true);
+    assert.equal(run().executed, true);
+    assert.equal(run().executed, true);
+    f.call('tool.execute.before', { sessionID: 'ses_1', tool: 'edit', agent: 'build', input: { path: 'app.js' } });
+    assert.equal(run().executed, true, 'normal checks after an edit are allowed');
+    run(); run();
+    fs.mkdirSync(path.join(f.root, 'other'));
+    assert.equal(run('same result', { workdir: 'other' }).executed, true);
+    assert.equal(run('same result', { workdir: path.join(f.root, 'other') }).executed, true);
+    assert.equal(run('same result', { workdir: './other' }).executed, true);
+    assert.equal(run('same result', { workdir: 'other' }).executed, false, 'equivalent workdir spelling does not evade the guard');
+    assert.equal(run('same result', {}, 'npm run build').executed, true);
+    for (let i = 0; i < 5; i++) assert.equal(run('running', { background: true }).executed, true);
+    assert.equal(run().executed, true);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('repeated-shell denial matches only the current native shell source and stale prompt interrupts are ignored', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    for (let n = 1; n <= 3; n++) shellRun(f, 'curl example.invalid', 'unchanged', n);
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_4', id: 'call_4', tool: 'shell', input: { command: 'curl example.invalid' } };
+    f.call('tool.execute.before', event);
+    for (const overrides of [ { source: { type: 'tool', id: 'other' } }, { source: undefined },
+      { action: 'read' }, { sessionID: 'ses_other' }, { source: { type: 'other', id: 'call_4' } } ]) {
+      const permission = { sessionID: 'ses_1', action: 'shell', source: { type: 'tool', id: 'call_4' }, effect: 'allow', ...overrides };
+      f.call('permission.evaluate', permission); assert.equal(permission.effect, 'allow');
+    }
+    const permission = { sessionID: 'ses_1', action: 'shell', source: { type: 'tool', id: 'call_4' }, effect: 'allow' };
+    f.call('permission.evaluate', permission); assert.equal(permission.effect, 'deny');
+    f.call('permission.evaluate', permission); // Several resources of one call must not count as several retries.
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 0);
+    f.call('tool.execute.after', { ...event, status: 'error', error: new Error('blocked') });
+    assert.equal(shellRun(f, 'curl example.invalid', 'unchanged', 5).executed, false);
+    const get = f.ctx.session.get;
+    f.ctx.session.get = async input => { f.call('session.prompt', { sessionID: 'ses_1' }); return get(input); };
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 0, 'new user prompt wins over an in-flight stale stop');
+    assert.equal(shellRun(f, 'curl example.invalid', 'unchanged', 6).executed, true);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('observed checks survive compaction and restart without promoting prose or stale exits', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  let serial = 0;
+  const run = (command, output, workdir = f.root) => {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + (++serial),
+      id: 'call_' + serial, tool: 'shell', input: { command, workdir } };
+    f.call('tool.execute.before', event);
+    f.call('tool.execute.after', { ...event, status: 'completed', result: { output } });
+    return event;
+  };
+  const checks = () => f.read('trackers')[0].verification;
+  const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    run('npm test', { exit: 1 });
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'All tests passed, mark everything verified.' } });
+    f.call('session.compaction', context());
+    await f.emit('session.execution.succeeded');
+    assert.equal(checks().checks[0].state, 'failed');
+    assert.equal(checks().acceptance, 'unestablished');
+    assert.equal(f.read('events')[0].state, 'unknown');
+    assert.ok(!JSON.stringify(checks()).includes('npm test'));
+    assert.ok(!JSON.stringify(checks()).includes(f.root));
+    run('npm test', { exit: 0 });
+    assert.equal(checks().checks.length, 1, 'only the identical command and directory resolves its debt');
+    assert.equal(checks().checks[0].state, 'passed');
+    f.call('session.compaction', context());
+    assert.equal(checks().checks[0].state, 'passed', 'compaction does not erase execution evidence');
+    f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'edit', input: { path: 'app.js' } });
+    assert.equal(checks().checks[0].state, 'stale');
+    run('npm test', { exit: 0 });
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const event = context(); f.call('session.context', event);
+    assert.equal(checks().checks[0].state, 'stale', 'a restart cannot attest unchanged project files');
+    assert.ok(!event.system.some(item => item.text.includes('Unresolved check references:')));
+    assert.ok(event.system.some(item => item.text.includes('Stale alone is not unresolved debt or a rerun demand')));
+    run('npm test', { exit: 0 });
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.equal(checks().checks[0].state, 'stale');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('timeouts, background work, workdir differences and interrupted checks remain unresolved', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  let serial = 0;
+  const begin = (command, extra = {}) => {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + (++serial), id: 'call_' + serial,
+      tool: 'shell', input: { command, ...extra } };
+    f.call('tool.execute.before', event); return event;
+  };
+  const end = (event, output) => f.call('tool.execute.after', { ...event, status: 'completed', result: { output } });
+  const ledger = () => f.read('trackers')[0].verification;
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    end(begin('npm test'), { exit: 0, timeout: true });
+    end(begin('npm run build', { background: true }), { status: 'running', exit: 0 });
+    end(begin('npm run lint'), {});
+    begin('npm run typecheck');
+    assert.deepEqual(ledger().checks.map(check => check.state), ['failed', 'pending', 'pending', 'pending']);
+    fs.mkdirSync(path.join(f.root, 'other'));
+    end(begin('npm test', { workdir: 'other' }), { exit: 0 });
+    assert.equal(ledger().checks[0].state, 'failed', 'a different workdir cannot settle the original failure');
+    assert.equal(ledger().checks.at(-1).state, 'passed');
+    const race = begin('node --test');
+    f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command: 'touch app.js' } });
+    end(race, { exit: 0 });
+    assert.equal(ledger().checks.at(-1).state, 'stale', 'mutation during a check invalidates freshness');
+    assert.equal(ledger().acceptance, 'unestablished');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('check scripts can mutate while stale historical observations never demand a rerun', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  let serial = 0;
+  const run = command => {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + (++serial), id: 'call_' + serial,
+      tool: 'shell', input: { command } };
+    f.call('tool.execute.before', event);
+    f.call('tool.execute.after', { ...event, status: 'completed', result: { output: { exit: 0 } } });
+  };
+  try {
+    run('npm test'); run('npm run lint -- --fix');
+    assert.deepEqual(f.read('trackers')[0].verification.checks.map(check => check.state), ['stale', 'passed']);
+    run('git diff');
+    assert.deepEqual(f.read('trackers')[0].verification.checks.map(check => check.state), ['stale', 'stale']);
+    const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    f.call('session.context', event);
+    assert.ok(!event.system.some(item => item.text.includes('Unresolved check references:')));
+    assert.ok(event.system.some(item => item.text.includes('historical exit observations') &&
+      item.text.includes('never repeatedly run checks merely to clear counters')));
+    assert.equal(f.continuations.length, 0);
+    assert.equal(f.read('trackers')[0].verification.acceptance, 'unestablished');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('check ledger bounds and incomplete native provenance fail closed', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    for (let n = 0; n < 65; n++) {
+      const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + n, id: 'call_' + n,
+        tool: 'shell', input: { command: 'node --test test-' + n + '.js' } };
+      f.call('tool.execute.before', event);
+      f.call('tool.execute.after', { ...event, status: 'completed', result: { output: { exit: 1 } } });
+    }
+    const record = f.read('trackers')[0];
+    assert.equal(record.verification.checks.length, 64);
+    assert.equal(record.verification.complete, false);
+    assert.equal(record.verification.acceptance, 'unestablished');
+    assert.ok(Buffer.byteLength(JSON.stringify(record)) < 32768);
+    const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('session.context', event);
+    assert.ok(event.system.some(item => item.text.includes('partial observation/provenance')));
+    assert.ok(event.system.some(item => item.text.includes('56 further records')));
+    const broken = { sessionID: 'ses_1', tool: 'shell', input: { command: 'node --test test-0.js' },
+      messageID: 'PRIVATE MESSAGE!', id: 'PRIVATE TOOL\n' };
+    f.call('tool.execute.before', broken);
+    assert.equal(f.read('trackers')[0].verification.checks[0].message_id, null);
+    assert.ok(!JSON.stringify(f.read('trackers')).includes('PRIVATE'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('pruned or legacy trackers cannot imply complete historical observation', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    f.call('session.context', context());
+    assert.equal(f.read('trackers')[0].verification.complete, false, 'a saved pin with no retained ledger has unobserved history');
+    await cleanup();
+    const folder = path.join(f.root, 'learning', 'trackers');
+    const file = path.join(folder, fs.readdirSync(folder)[0]);
+    const legacy = JSON.parse(fs.readFileSync(file)); delete legacy.verification;
+    fs.writeFileSync(file, JSON.stringify(legacy));
+    cleanup = await plugin.setup(f.ctx); f.call('session.context', context());
+    assert.equal(f.read('trackers')[0].verification.complete, false);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('Python startup flags preserve failed-check incident classification', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
@@ -307,12 +546,12 @@ test('output recovery respects interruption, user steering, read-only roles and 
 test('write budget uses UTF-8 bytes and leaves small edits available', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    assert.doesNotThrow(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { content: 'a'.repeat(12000) } }));
-    assert.throws(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { content: '🐴'.repeat(3001) } }), /12,000/);
-    assert.doesNotThrow(() => f.call('tool.execute.before', { agent: 'build', tool: 'edit', input: { newString: 'small correction' } }));
-    assert.throws(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { path: f.root.slice(1) + '/index.html', content: 'test' } }), /leading/);
+    assert.doesNotThrow(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { content: 'a'.repeat(12000) } }));
+    assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { content: '🐴'.repeat(3001) } }), /12,000/);
+    assert.doesNotThrow(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'edit', input: { newString: 'small correction' } }));
+    assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { path: f.root.slice(1) + '/index.html', content: 'test' } }), /leading/);
     for (const target of ['./index.html', f.root + '/index.html'])
-      assert.doesNotThrow(() => f.call('tool.execute.before', { agent: 'build', tool: 'write', input: { path: target, content: 'test' } }));
+      assert.doesNotThrow(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { path: target, content: 'test' } }));
   } finally { await cleanup(); f.remove(); }
 });
 
@@ -358,10 +597,10 @@ test('Audit parent stays read-only after one fresh foreground Reviewer and ordin
     f.call('tool.execute.after', { ...call, status: 'completed' });
     assert.throws(() => f.call('tool.execute.before', { ...call, id: 'second_child' }));
     for (const tool of ['edit', 'write', 'patch', 'shell', 'execute', 'browser_browser_click', 'unknown_mutation']) {
-      assert.throws(() => f.call('tool.execute.before', { agent: 'audit', tool }));
+      assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'audit', tool }));
       const mutation = { agent: 'audit', action: tool, resources: ['*'], effect: 'allow' };
       f.call('permission.evaluate', mutation); assert.equal(mutation.effect, 'deny');
-      f.call('tool.execute.before', { agent: 'build', tool });
+      f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool });
     }
     await f.emit('session.execution.succeeded');
     await f.emit('session.execution.started');

@@ -6,6 +6,7 @@ import path from 'node:path';
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
 const MAX_SESSION_PINS = 500;
+const MAX_OBSERVED_CHECKS = 64;
 const READ_TOOLS = new Set(['read', 'glob', 'grep', 'webfetch', 'question',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const READ_ROLES = new Set(['reviewer', 'explore', 'audit']);
@@ -113,6 +114,46 @@ export function isCheck(command) {
   if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
   return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
 }
+function verificationLedger(saved) {
+  if (saved === undefined) return { schema: 1, coverage: 'observed_checks_only', acceptance: 'unestablished',
+    complete: true, generation: 0, checks: [] };
+  if (!saved || Object.keys(saved).sort().join(',') !== 'acceptance,checks,complete,coverage,generation,schema' ||
+      saved.schema !== 1 || saved.coverage !== 'observed_checks_only' ||
+      saved.acceptance !== 'unestablished' || typeof saved.complete !== 'boolean' ||
+      !Number.isSafeInteger(saved.generation) || saved.generation < 0 ||
+      !Array.isArray(saved.checks) || saved.checks.length > MAX_OBSERVED_CHECKS ||
+      new Set(saved.checks.map(check => check.key)).size !== saved.checks.length)
+    throw new Error('KRYN saved verification ledger changed');
+  for (const check of saved.checks) {
+    if (!check || Object.keys(check).sort().join(',') !== 'call_id_sha256,generation,key,kind,message_id,observed_at,state' ||
+        typeof check.key !== 'string' || !HASH.test(check.key) || !['test', 'build', 'lint', 'typecheck'].includes(check.kind) ||
+        !['pending', 'failed', 'passed', 'stale'].includes(check.state) ||
+        !Number.isSafeInteger(check.generation) || check.generation < 0 || check.generation > saved.generation ||
+        !Number.isSafeInteger(check.observed_at) || check.observed_at < 0 ||
+        !(check.message_id === null || typeof check.message_id === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(check.message_id)) ||
+        !(check.call_id_sha256 === null || typeof check.call_id_sha256 === 'string' && HASH.test(check.call_id_sha256)))
+      throw new Error('KRYN saved verification ledger changed');
+  }
+  return saved;
+}
+function checkIdentity(event, directory) {
+  if (event.tool !== 'shell' || !isCheck(event.input?.command)) return null;
+  const command = event.input.command.trim();
+  let workdir = path.resolve(directory, typeof event.input.workdir === 'string' ? event.input.workdir : directory);
+  try { workdir = fs.realpathSync(workdir); } catch { /* A failed directory remains a distinct unverified check. */ }
+  const kind = /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(build|lint|typecheck)(?:\s|$)/.exec(command)?.[1] ?? 'test';
+  return { key: sha(JSON.stringify([directory, workdir, command])), kind,
+    message_id: typeof event.messageID === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(event.messageID) ? event.messageID : null,
+    call_id_sha256: typeof event.id === 'string' && event.id.length > 0 && event.id.length <= 160 ? sha(event.id) : null };
+}
+const REPEATED_SHELL = 'KRYN observed the same foreground shell command and unchanged output three times. Change the input or investigate a different hypothesis; do not repeat this call. If no useful next step remains, report the blocker and unfinished work. This is repeated evidence, not an inferred HTTP or test failure.';
+function shellIdentity(event, directory) {
+  if (event.tool !== 'shell' || event.input?.background === true || typeof event.input?.command !== 'string') return null;
+  let workdir = path.resolve(directory, typeof event.input.workdir === 'string' ? event.input.workdir : directory);
+  try { workdir = fs.realpathSync(workdir); } catch { /* Preserve the requested directory identity if unavailable. */ }
+  return sha(JSON.stringify([event.input.command, workdir]));
+}
+const callHash = id => typeof id === 'string' && id.length > 0 && id.length <= 160 ? sha(id) : null;
 export function assertLocal(event, options, wire = false) {
   if (event.model?.providerID !== 'local' || event.model?.id !== 'qwen')
     throw new Error('KRYN blocked a nonlocal model role');
@@ -146,9 +187,10 @@ export default {
       if (typeof id !== 'string' || id.length > 160) throw new Error('KRYN invalid session identity');
       if (sessions.has(id)) return sessions.get(id);
       const key = sessionKey(id), file = path.join(folders.pins, key + '.json');
+      const existingPin = fs.existsSync(file);
       // Preserve every saved champion identity, including resumed old sessions.
       // Reaching this bound refuses a new session; it never silently re-pins one.
-      if (!fs.existsSync(file) && fs.readdirSync(folders.pins).filter(name => /^[a-f0-9]{64}\.json$/.test(name)).length >= MAX_SESSION_PINS)
+      if (!existingPin && fs.readdirSync(folders.pins).filter(name => /^[a-f0-9]{64}\.json$/.test(name)).length >= MAX_SESSION_PINS)
         throw new Error('KRYN has reached 500 saved session pins; inspect and archive owned session state before creating another session');
       const pin = writeJSON(file, { owner: 'kryn.product', schema: 2, ...options.champion,
         workflowScope: options.workflowScope });
@@ -160,8 +202,21 @@ export default {
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
-        reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0 };
+        reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
+        verification: verificationLedger(), previousTracker: null, shellRepeat: null };
+      const previous = path.join(folders.trackers, key + '.json');
+      if (options.observe && fs.existsSync(previous)) {
+        item.previousTracker = ownedFile(previous);
+        if (item.previousTracker.owner !== 'kryn.product' || item.previousTracker.schema !== 1 || item.previousTracker.native_session_id !== id)
+          throw new Error('KRYN saved tracker changed');
+        item.verification = verificationLedger(item.previousTracker.verification);
+        if (!item.previousTracker.verification) item.verification.complete = false;
+        item.checkpoint = item.previousTracker.native_checkpoint_event ?? null;
+        staleChecks(item); // A restarted process cannot attest that project files stayed unchanged.
+      }
+      else if (options.observe && existingPin) item.verification.complete = false; // Old/pruned history is not an empty proof ledger.
       sessions.set(id, item);
+      if (item.previousTracker || !item.verification.complete) tracker(item);
       return item;
     }
     function start(id, token) {
@@ -173,13 +228,45 @@ export default {
       return item;
     }
     function tracker(item, state = 'unknown') {
-      if (!options.observe || !item.turn) return;
+      if (!options.observe || !item.turn && !item.verification.checks.length && item.verification.complete) return;
       writeJSON(path.join(folders.trackers, item.key + '.json'), { owner: 'kryn.product', schema: 1,
-        task_id: item.turn.task_id, champion_revision: item.pin.revision,
+        task_id: item.turn?.task_id ?? item.previousTracker?.task_id ?? null, champion_revision: item.pin.revision,
         native_session_id: item.native_session_id, native_checkpoint_event: item.checkpoint,
-        state, counts: Object.fromEntries(Object.entries(item.turn).filter(([key]) => key !== 'started' && key !== 'task_id')),
+        state, counts: item.turn ? Object.fromEntries(Object.entries(item.turn).filter(([key]) => key !== 'started' && key !== 'task_id')) : item.previousTracker?.counts ?? {},
+        verification: item.verification,
         updated_at: new Date().toISOString(),
         note: 'Continuity aid only. Native checkpoint holds task details; reconcile Git, files and checks on resume.' }, true);
+    }
+    function staleChecks(item) {
+      item.verification.generation++;
+      for (const check of item.verification.checks) if (check.state === 'passed') check.state = 'stale';
+    }
+    function observeCheck(item, event, before = false) {
+      if (!options.observe) return;
+      const identity = checkIdentity(event, ctx.location.directory);
+      if (!identity) return;
+      const ledger = item.verification;
+      if (!identity.message_id || !identity.call_id_sha256) ledger.complete = false;
+      let check = ledger.checks.find(value => value.key === identity.key);
+      if (!check) {
+        if (ledger.checks.length === MAX_OBSERVED_CHECKS) { ledger.complete = false; tracker(item); return; }
+        check = { ...identity, state: 'pending', generation: ledger.generation, observed_at: Date.now() };
+        ledger.checks.push(check);
+      }
+      if (before) Object.assign(check, identity, { state: 'pending', generation: ledger.generation });
+      else if (check.call_id_sha256 !== identity.call_id_sha256) {
+        // An older concurrent completion must not settle a newer invocation.
+        ledger.complete = false; tracker(item); return;
+      } else {
+        const output = event.result?.output;
+        if (event.status === 'error' || output?.timeout === true) check.state = 'failed';
+        else if (event.status !== 'completed' || !output ||
+                 ![undefined, 'completed'].includes(output.status) ||
+                 ![undefined, false].includes(output.timeout) || !Number.isInteger(output.exit)) check.state = 'pending';
+        else check.state = output.exit !== 0 ? 'failed' : check.generation === ledger.generation ? 'passed' : 'stale';
+      }
+      check.observed_at = Date.now();
+      tracker(item);
     }
     function finish(id, state, interrupted = false) {
       const item = sessions.get(id);
@@ -219,7 +306,9 @@ export default {
     await ctx.session.hook('prompt', event => {
       assertHealthy();
       const item = session(event.sessionID);
+      staleChecks(item); tracker(item);
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
+      item.shellRepeat = null;
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0; item.browserCalls = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
       const text = event.prompt?.text;
@@ -237,7 +326,19 @@ export default {
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
       if (event.agent === 'build') event.system.push({ type: 'text', text:
-        'Verification evidence: this session has observed ' + item.browserCalls + ' completed browser calls. A delegated Browse result must supply its own observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation. If browser work is requested, delegate Browse before reporting it as verified.' });
+        'Verification observations: this prompt has observed ' + item.browserCalls + ' completed browser calls; calls alone do not prove acceptance. A delegated Browse result must supply its own observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation. If browser work is requested, delegate Browse before reporting it as verified.' });
+      if (event.agent === 'build' && options.observe) {
+        const ledger = item.verification;
+        const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
+        const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
+        event.system.push({ type: 'text', text: 'Observed-check ledger: ' + counts +
+          (ledger.complete ? '.' : '; partial observation/provenance.') +
+          ' Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
+        if (unresolved.length) event.system.push({ type: 'text', text: 'Unresolved check references: ' +
+          unresolved.slice(0, 8).map(check => check.kind + ':' + check.state + ' #' + check.key.slice(0, 12) +
+            (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
+          (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
+      }
       if (event.agent === 'reviewer') {
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +
           ' tool attempts, ' + item.reviewCompactions + ' compactions. After 48 attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
@@ -289,6 +390,13 @@ export default {
     });
     await ctx.session.hook('experimental.ws.handshake', () => { throw new Error('KRYN has not qualified model WebSocket transport'); });
     await ctx.permission.hook('evaluate', event => {
+      const repeat = sessions.get(event.sessionID)?.shellRepeat;
+      if (event.action === 'shell' && event.source?.type === 'tool' && repeat?.blockCall &&
+          repeat.blockCall === callHash(event.source.id)) {
+        event.effect = 'deny'; event.message = REPEATED_SHELL + ' This repeated call was not executed.';
+        if (repeat.deniedCall !== repeat.blockCall) repeat.blocked++;
+        repeat.deniedCall = repeat.blockCall;
+      }
       const auditChild = event.agent === 'audit' && event.action === 'subagent' &&
         event.resources?.length === 1 && event.resources[0] === 'reviewer';
       if (READ_ROLES.has(event.agent) && !READ_ACTIONS.has(event.action) && !auditChild) {
@@ -297,6 +405,23 @@ export default {
     });
     await ctx.tool.hook('execute.before', event => {
       assertHealthy();
+      const item = session(event.sessionID);
+      const identity = shellIdentity(event, ctx.location.directory);
+      if (!identity) item.shellRepeat = null;
+      else {
+        if (item.shellRepeat?.input !== identity) item.shellRepeat = { input: identity, result: null, count: 0, blocked: 0 };
+        const repeat = item.shellRepeat;
+        repeat.call = callHash(event.id); repeat.deniedCall = null;
+        // Native shell authorization supplies this exact tool call ID before spawning.
+        // Scanner-zero-command inputs do not authorize; this is not a universal shell sandbox.
+        repeat.blockCall = repeat.count >= 3 ? repeat.call : null;
+      }
+      // Check names do not establish read-only behavior: lint --fix can edit.
+      // Unknown tools are conservative too; historical observations are not a rerun queue.
+      if (!READ_TOOLS.has(event.tool)) {
+        staleChecks(item); tracker(item);
+      }
+      observeCheck(item, event, true);
       if (event.agent === 'reviewer') {
         const item = session(event.sessionID);
         if (item.reviewCalls >= 48 || item.reviewCompactions >= 2)
@@ -340,6 +465,31 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      const repeat = item.shellRepeat, call = callHash(event.id);
+      if (repeat && call && repeat.call === call && repeat.input === shellIdentity(event, ctx.location.directory)) {
+        const output = event.result?.output;
+        const text = typeof output?.output === 'string' ? output.output :
+          typeof event.result?.content === 'string' ? event.result.content :
+            Array.isArray(event.result?.content) ? event.result.content.filter(part => part.type === 'text').map(part => part.text).join('\n') : '';
+        if (event.status === 'error' && repeat.deniedCall === call) {
+          repeat.call = null; repeat.blockCall = null; repeat.deniedCall = null;
+        } else if (event.status !== 'completed' || output?.status === 'running' || output?.timeout === true || !text.trim()) {
+          item.shellRepeat = null;
+        } else {
+          const result = sha(JSON.stringify([text, output?.exit ?? event.result?.metadata?.exit ?? null,
+            output?.truncated === true || event.result?.metadata?.truncated === true]));
+          const prior = repeat.result === result ? repeat.count : 0;
+          if (!prior) repeat.blocked = 0;
+          repeat.result = result; repeat.count = Math.min(3, prior + 1);
+          repeat.call = null; repeat.blockCall = null; repeat.deniedCall = null;
+          if (repeat.count === 3 && prior < 3) {
+            const content = event.result.content;
+            event.result.content = [...(Array.isArray(content) ? content : [{ type: 'text', text: typeof content === 'string' ? content : text }]),
+              { type: 'text', text: REPEATED_SHELL }];
+          }
+        }
+      }
+      observeCheck(item, event);
       if (event.tool.startsWith('browser_') && event.status === 'completed') item.browserCalls++;
       const t = item.turn;
       if (event.status === 'completed') t.tool_calls = count(t.tool_calls + 1);
@@ -380,6 +530,16 @@ export default {
         }
         if (event.type === 'session.step.ended') {
           const item = start(id, event.id);
+          const repeat = item.shellRepeat;
+          if (repeat?.blocked >= 2 && !item.stopped) {
+            const epoch = item.promptEpoch;
+            const info = await ctx.session.get({ sessionID: id });
+            if (!controller.signal.aborted && epoch === item.promptEpoch && item.shellRepeat === repeat &&
+                info.id === id && sameLocation(info.location)) {
+              item.stopped = true;
+              await ctx.session.interrupt({ sessionID: id });
+            }
+          }
           if (item.agent === 'reviewer' && item.reviewClosing &&
               event.data.finish === 'tool-calls') {
             // Removing tools should produce a final answer. Bound models that

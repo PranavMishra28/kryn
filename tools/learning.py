@@ -41,6 +41,7 @@ POLICY = {
 FAMILIES = ("collections", "records", "text")
 EMPTY = hashlib.sha256(b"").hexdigest()
 BASELINE = {"revision": EMPTY, "instructions": ""}
+DEFAULT_CONTROLS = {"enabled": True, "paused": True}
 EVENT_KEYS = {"schema", "task_id", "champion_revision", "profile_id", "state", "wall_seconds",
               "tool_calls", "tool_errors", "check_passes", "check_failures", "compactions",
               "corrections", "output_tokens", "family", "completed_at"}
@@ -128,7 +129,7 @@ def active_champion(directory, *, scope=None):
 
 def status(directory):
     base = root(directory)
-    return {"policy": POLICY, "controls": read(base / "control.json", {"enabled": True, "paused": False}),
+    return {"policy": POLICY, "controls": read(base / "control.json", dict(DEFAULT_CONTROLS)),
             "champion": _champion(directory)["revision"], "default_scope_champion": active_champion(directory)["revision"],
             "activation_scope": "disposable_json_cli", "worker": read(base / "worker.json"),
             "budget": read(base / "budget.json"), "last_decision": read(base / "last-decision.json"),
@@ -155,7 +156,7 @@ def control(directory, action):
         raise ValueError("Unknown learning control")
     base = root(directory)
     with state._lock(base, "control.lock", True):
-        value = read(base / "control.json", {"enabled": True, "paused": False})
+        value = read(base / "control.json", dict(DEFAULT_CONTROLS))
         value["paused" if action in {"pause", "resume"} else "enabled"] = action in {"pause", "enable"}
         put(base / "control.json", value)
     return value
@@ -163,7 +164,7 @@ def control(directory, action):
 
 def foreground_requested(directory):
     base = root(directory)
-    controls = read(base / "control.json", {"enabled": True, "paused": False})
+    controls = read(base / "control.json", dict(DEFAULT_CONTROLS))
     if not controls["enabled"] or controls["paused"]:
         return True
     for path in (base / "intent").glob("*.json"):
@@ -1007,7 +1008,7 @@ def start_after_exit(directory, config):
             prune(directory)
     except state.Deferred:
         return None
-    controls = read(base / "control.json", {"enabled": True, "paused": False})
+    controls = read(base / "control.json", dict(DEFAULT_CONTROLS))
     if not controls["enabled"] or controls["paused"]: return None
     consumed = set(read(base / "consumed.json", []))
     pending = bool(read(base / "queue.json", []) or read(base / "monitor.json"))

@@ -23,6 +23,7 @@ class LearningTests(unittest.TestCase):
         self.base = Path(self.tmp.name).resolve()
         self.addCleanup(self.tmp.cleanup)
         self.state = self.base / 'state'
+        learning.control(self.state, 'resume')  # Existing worker tests explicitly opt in.
 
     def event(self, **extra):
         return {**dict(schema=1, task_id='a'*64, champion_revision=learning.EMPTY,
@@ -251,6 +252,38 @@ class LearningTests(unittest.TestCase):
         learning.control(self.state, 'disable'); self.assertTrue(learning.foreground_requested(self.state))
         self.assertEqual(learning.budget(self.state)['seconds'], 0)
 
+    def test_fresh_learning_stays_paused_until_explicit_resume(self):
+        directory = self.base / 'fresh'
+        base = learning.root(directory)
+        item = self.event()
+        event = learning.state._directory(base / 'events') / (item['task_id'] + '.json')
+        learning.state._write_new(event, item)
+        before = event.read_bytes()
+        self.assertEqual(learning.status(directory)['controls'], {'enabled': True, 'paused': True})
+        self.assertTrue(learning.foreground_requested(directory))
+        with patch.object(learning.subprocess, 'Popen') as launch:
+            self.assertIsNone(learning.start_after_exit(directory, {}))
+        launch.assert_not_called()
+        self.assertFalse((base / 'control.json').exists())
+        turn = MagicMock()
+        with patch.dict(learning.POLICY, idle_seconds=0), patch.object(learning, 'power_ready', return_value=True):
+            learning.worker(directory, {}, turn=turn)
+        turn.assert_not_called()
+        self.assertEqual(event.read_bytes(), before)
+        self.assertEqual(learning.control(directory, 'resume'), {'enabled': True, 'paused': False})
+        with patch.object(learning.subprocess, 'Popen', return_value=SimpleNamespace(pid=31415)) as launch:
+            self.assertEqual(learning.start_after_exit(directory, {}), 31415)
+        launch.assert_called_once()
+        self.assertEqual(learning.status(self.base / 'another-fresh')['controls'], {'enabled': True, 'paused': True})
+        for enabled in (True, False):
+            for paused in (True, False):
+                saved = {'enabled': enabled, 'paused': paused}
+                learning.put(base / 'control.json', saved)
+                before = (base / 'control.json').read_bytes()
+                self.assertEqual(learning.status(directory)['controls'], saved)
+                self.assertEqual(learning.foreground_requested(directory), not enabled or paused)
+                self.assertEqual((base / 'control.json').read_bytes(), before)
+
     def test_final_prospective_opportunity_preserves_spent_time_and_stops_at_three(self):
         base=learning.root(self.state)
         previous={'date':learning.utc_day(),'seconds':15.200058583985083,'candidates':2}
@@ -422,6 +455,7 @@ class LearningTests(unittest.TestCase):
         ):
             with self.subTest(label=label):
                 directory=self.base/label; base=learning.root(directory); item=self.event()
+                learning.control(directory, 'resume')
                 learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
                 def failure(directory,config,workspace,*args,**kwargs):
                     if telemetry is not None:
@@ -441,6 +475,7 @@ class LearningTests(unittest.TestCase):
         for label,exception in (('diagnostic_error',None),('keyboard',KeyboardInterrupt),('exit',SystemExit)):
             with self.subTest(label=label):
                 directory=self.base/label; base=learning.root(directory); item=self.event()
+                learning.control(directory, 'resume')
                 learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
                 write=learning.state._write_new
                 def fail_receipt(path,value):
@@ -487,6 +522,7 @@ class LearningTests(unittest.TestCase):
         for filename in ('budget.json','consumed.json'):
             with self.subTest(filename=filename):
                 directory=self.base/filename; base=learning.root(directory); item=self.event()
+                learning.control(directory, 'resume')
                 learning.state._write_new(learning.state._directory(base/'events')/(item['task_id']+'.json'),item)
                 write=learning.put
                 def fail_reservation(path,value):

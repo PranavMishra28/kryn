@@ -24,6 +24,17 @@ browser_browser_handle_dialog browser_browser_file_upload browser_browser_close
 browser_browser_find browser_browser_run_code_unsafe'''.split())
 
 
+def is_check(command):
+    """Match the plugin's conservative simple-command contract, never shell prose."""
+    if not isinstance(command, str) or len(command) > 4096 or re.search(r'[;&|`$\n\r<>]', command):
+        return False
+    return bool(re.match(
+        r'^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)'
+        r'|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)'
+        r'|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))'
+        r'|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))', command.strip()))
+
+
 def summarize(connection, session_id):
     pending, ids, sessions = [session_id], set(), []
     tools, reads, finishes = Counter(), Counter(), Counter()
@@ -85,15 +96,22 @@ def summarize(connection, session_id):
         calls = connection.execute("""SELECT
           json_extract(p.value,'$.name'), json_extract(p.value,'$.state.status'),
           substr(json_extract(p.value,'$.state.input.path'),1,4096),
-          substr(json_extract(p.value,'$.state.input.command'),1,4096),
+          substr(json_extract(p.value,'$.state.input.command'),1,4097),
           json_extract(p.value,'$.state.metadata.exit'),
-          json_extract(p.value,'$.state.metadata.output.exit')
+          json_extract(p.value,'$.state.metadata.output.exit'),
+          json_type(p.value,'$.state.metadata.exit'),
+          json_type(p.value,'$.state.metadata.output.exit'),
+          json_extract(p.value,'$.state.metadata.status'),
+          json_extract(p.value,'$.state.metadata.output.status'),
+          json_extract(p.value,'$.state.metadata.timeout'),
+          json_extract(p.value,'$.state.metadata.output.timeout')
           FROM session_message m, json_each(m.data,'$.content') p
           WHERE m.session_id=? AND m.type='assistant' AND json_extract(p.value,'$.type')='tool'
           ORDER BY m.seq LIMIT 20001""", (sid,)).fetchall()
         if len(calls) > 20000:
             limited = True
-        for name, status, path, command, exit_code, nested_exit in calls[:20000]:
+        for (name, status, path, command, exit_code, nested_exit, exit_type, nested_type,
+             output_status, nested_status, timeout, nested_timeout) in calls[:20000]:
             name = name if isinstance(name, str) and name in REPORT_TOOLS else 'unknown'
             tools[name] += 1
             counts['tool_errors'] += status == 'error'
@@ -103,11 +121,17 @@ def summarize(connection, session_id):
                 counts['completed_browser_calls'] += 1
             if name == 'shell' and command:
                 code = exit_code if exit_code is not None else nested_exit
-                counts['shell_nonzero_exits'] += isinstance(code, int) and code != 0
-                if re.search(r'\b(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)\b|\b(?:pytest|unittest)\b|\bnode\s+[^\s;&|]*test[^\s;&|]*', command):
+                code_type = exit_type if exit_code is not None else nested_type
+                measured = type(code) is int and code_type == 'integer'
+                settled = status == 'completed' and all(value in (None, 'completed')
+                                                       for value in (output_status, nested_status))
+                clean = settled and all(value in (None, 0) for value in (timeout, nested_timeout))
+                counts['shell_nonzero_exits'] += measured and code != 0
+                if is_check(command):
                     counts['check_commands'] += 1
-                    counts['check_exit_zero'] += code == 0 and status == 'completed'
-                    counts['check_exit_unknown'] += code is None
+                    counts['check_exit_zero'] += measured and code == 0 and clean
+                    counts['check_exit_nonzero'] += measured and code != 0 and clean
+                    counts['check_exit_unknown'] += not measured or not clean
     limited = limited or bool(pending)
     repeated = max(reads.values(), default=0)
     findings = []
@@ -135,6 +159,7 @@ def summarize(connection, session_id):
             'maximum_reads_of_one_path_per_session': repeated, 'finishes': dict(finishes),
             'partial': limited, 'findings': findings, 'acceptance_verified': False,
             'note': 'Unrecognized tool and status labels are grouped as unknown to avoid exposing malformed model output. '
+                    'Only simple check commands count; compound shell expressions, running background jobs and timeouts cannot establish a check pass. '
                     'Native completion, command exits and model-written reports do not prove task acceptance. '
                     'Compare the actual application with independent checks; copied test logic is insufficient.'}
 
