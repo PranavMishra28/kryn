@@ -13,8 +13,6 @@ jobs:
   offline-and-package:
     runs-on: macos-15
     timeout-minutes: 15
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/kryn-python
     steps:
       # Release tags resolved through the primary GitHub API on 2026-09-22.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -32,6 +30,7 @@ jobs:
       - name: Owned Python for boundary tests
         run: |
           python -m pip install 'uv==0.11.16'
+          export UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/kryn-python"
           uv python install --no-bin 3.13.13
           kryn_python="$(uv python find --managed-python 3.13.13)"
           dirname "$kryn_python" >> "$GITHUB_PATH"
