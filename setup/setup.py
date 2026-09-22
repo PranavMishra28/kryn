@@ -21,6 +21,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
 import urllib.request
 
 HERE = Path(__file__).resolve().parent
@@ -30,6 +31,7 @@ MODEL = "Qwen3.8-27B-oQ6e-mtp"
 REVISION = "f7ec1f012451c7a76e775e2fdefdd5f0a51f11f7"
 GIB = 1024 ** 3
 DMG_URL = "https://github.com/jundot/omlx/releases/download/v0.6.4/oMLX-0.6.4-macos26-27.dmg"
+DMG_MIRROR_URL = "https://downloads.sourceforge.net/project/omlx.mirror/v0.6.4/oMLX-0.6.4-macos26-27.dmg"
 DMG_SHA = "53f1506c2385e8920a67198b72d1fe09351c1b3538be9c6bdeb78e5277d06d93"
 CLI_URL = "https://registry.npmjs.org/@opencode/cli-darwin-arm64/-/cli-darwin-arm64-2.0.10.tgz"
 CLI_SHA = "acb2f84e60c47a2437d6316c173250fa0a3f6af6ac9e55dadf7538996f49d84d6f3763222c639e690ce5398438804ef605b92ba763e5fc9531d4924288ada5dd"
@@ -141,6 +143,16 @@ def download(url, path, algorithm, expected):
     partial.replace(path)
 
 
+def download_omlx(path):
+    try:
+        download(DMG_URL, path, "sha256", DMG_SHA)
+    except urllib.error.HTTPError as error:
+        if error.code not in (404, 410):
+            raise
+        print("Pinned oMLX publisher asset is unavailable; trying the SourceForge mirror with the same required SHA256.", flush=True)
+        download(DMG_MIRROR_URL, path, "sha256", DMG_SHA)
+
+
 def extract_cli(archive, destination):
     # Read only the two known files; never extract archive paths, links or modes.
     with tarfile.open(archive, "r:gz") as bundle:
@@ -227,7 +239,7 @@ def runtime_settings(root, profile=None):
 
 
 def model_settings(profile=None):
-    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 24576, "max_tokens": 8192,
+    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 49152, "max_tokens": 8192,
             "enable_thinking": True, "mtp_enabled": False,
             "mtp_num_draft_tokens": 3, "vlm_mtp_enabled": False, "dflash_enabled": False,
             "specprefill_enabled": False, "turboquant_kv_enabled": False,
@@ -467,7 +479,7 @@ def main():
                 "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1", "HF_HUB_DISABLE_IMPLICIT_TOKEN": "1",
                 "HF_HUB_DISABLE_XET": "1", "UV_CACHE_DIR": str(root / "uv-cache")})
     if args.phase == "core":
-        download(DMG_URL, root / "downloads/oMLX-0.6.4-macos26-27.dmg", "sha256", DMG_SHA)
+        download_omlx(root / "downloads/oMLX-0.6.4-macos26-27.dmg")
         archive = root / "downloads/opencode-2.0.10.tgz"
         download(CLI_URL, archive, "sha512", CLI_SHA)
         extract_cli(archive, root / "opencode/2.0.10")

@@ -123,15 +123,16 @@ class PackageTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             installer.verify_payload(base, manifest)
 
-    def test_bootstrap_owner_policy_precedes_private_release_access(self):
+    def test_bootstrap_owner_policy_precedes_release_access_without_visibility_gate(self):
         status = {"hosts": {"github.com": [{"active": True, "state": "success", "tokenSource": "keyring"}]}}
-        responses = [status, {"id": 90290458, "type": "User"}, {"isPrivate": True}]
+        responses = [status, {"id": 90290458, "type": "User"}]
         def github(args, **kwargs):
             self.assertTrue(kwargs["capture_output"])
             return subprocess.CompletedProcess(args, 0, json.dumps(responses.pop(0)), "")
         with patch.dict(os.environ, {"GH_CONFIG_DIR": str(self.root)}, clear=True), patch.object(bootstrap.subprocess, "run", side_effect=github) as runner:
             bootstrap.secure_owner("/test/gh")
-            self.assertEqual(runner.call_count, 3)
+            self.assertEqual(runner.call_count, 2)
+            self.assertFalse(any("repo" in call.args[0] for call in runner.call_args_list))
             responses[:] = [status, {"id": 1, "type": "User"}]
             runner.reset_mock()
             with self.assertRaisesRegex(RuntimeError, "only the verified"):

@@ -2,11 +2,11 @@
 
 ## Reporting an issue
 
-For the current private distribution, authorized repository members can open an [issue](https://github.com/PranavMishra28/kryn/issues/new) with a redacted security report. Confirm that the repository is still private before including vulnerability details. If it becomes public, use GitHub private vulnerability reporting if available, or contact the repository owner through an existing private channel; do not post exploit details publicly.
+Use [GitHub private vulnerability reporting](https://github.com/PranavMishra28/kryn/security/advisories/new) for security reports. The source repository is public; do not post credentials, private data or exploit details in public issues.
 
 Include the KRYN version, macOS version, affected component, expected and observed behavior, and a minimal reproduction using disposable data. Omit tokens, credentials, private source code, session transcripts and raw browser profiles. Redact local paths and diagnostic output before sharing them.
 
-This project currently distributes v0.1.6 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
+This project currently distributes v0.1.7 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
 
 ## Trust and data boundaries
 

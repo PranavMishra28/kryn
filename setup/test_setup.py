@@ -122,7 +122,7 @@ class SetupChecks(unittest.TestCase):
         self.assertIn("REPOSITORY = 'gcoli/Qwen3.8-27B-oQ5e-mtp'", localai)
         self.assertIn("MODEL_PARENT = 'challenger/models'", localai)
         self.assertIn("MEMORY_GIB = 32", localai)
-        self.assertIn("SERVER_CONTEXT = 32768", localai)  # Independent of the 24K client context.
+        self.assertIn("SERVER_CONTEXT = 32768", localai)  # Independent of the client context.
         result = subprocess.run([sys.executable, "-B", directory / "tools/localai.py", "--self-check"],
                                 env={**setup.os.environ, "HOME": str(self.root)}, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1056,7 +1056,7 @@ class SetupChecks(unittest.TestCase):
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
         self.assertEqual(cfg["default_agent"], "build")
-        self.assertEqual(model["limit"], {"context": 24576, "output": 8192})
+        self.assertEqual(model["limit"], {"context": 49152, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
         variants = {v['id']: v['body'] for v in model['variants']}
         self.assertEqual(set(variants), {'fast'})  # Native UI adds Default itself.
@@ -1140,6 +1140,35 @@ class SetupChecks(unittest.TestCase):
             setup.download("https://example.invalid/file", target, "sha256", hashlib.sha256(target.read_bytes()).hexdigest())
             with self.assertRaises(RuntimeError):
                 setup.download("https://example.invalid/file", target, "sha256", "0" * 64)
+
+    def test_runtime_mirror_only_for_missing_asset_and_same_digest_required(self):
+        artifact = b"pinned publisher artifact"
+        expected = hashlib.sha256(artifact).hexdigest()
+        for status, mirror, passed, calls in ((200, artifact, True, 1), (404, artifact, True, 2),
+                                            (410, artifact, True, 2), (500, artifact, False, 1),
+                                            (200, b"wrong", False, 1), (404, b"wrong", False, 2)):
+            with self.subTest(status=status, mirror=mirror), tempfile.TemporaryDirectory() as folder:
+                target = Path(folder).resolve() / "runtime.dmg"
+                def response(url, **kwargs):
+                    if url == setup.DMG_URL and status != 200:
+                        raise setup.urllib.error.HTTPError(url, status, "fixture", {}, None)
+                    result = io.BytesIO(mirror)
+                    result.url = url
+                    return result
+                with patch.object(setup.urllib.request, "urlopen", side_effect=response) as request, \
+                     patch.object(setup, "DMG_SHA", expected), contextlib.redirect_stdout(io.StringIO()):
+                    if passed:
+                        setup.download_omlx(target)
+                        self.assertEqual(target.read_bytes(), artifact)
+                        setup.download_omlx(target)  # Verified cached artifact requires no network.
+                    else:
+                        with self.assertRaises((RuntimeError, setup.urllib.error.HTTPError)):
+                            setup.download_omlx(target)
+                        self.assertFalse(target.exists())
+                    self.assertEqual(request.call_count, calls)
+                    self.assertEqual(request.call_args_list[0].args[0], setup.DMG_URL)
+                    if calls == 2:
+                        self.assertEqual(request.call_args_list[1].args[0], setup.DMG_MIRROR_URL)
 
     def test_archive_traversal_rejected_before_writes(self):
         archive = self.root / "hostile.tar.gz"

@@ -46,6 +46,39 @@ function fixture(extra = {}) {
 }
 const model = { providerID: 'local', id: 'qwen' };
 
+test('Python startup flags preserve failed-check incident classification', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    for (const command of ['python3 -B -m unittest -v', 'python3.13 -I -B -m pytest', 'python -EB -m unittest'])
+      assert.equal(isCheck(command), true);
+    assert.equal(isCheck('python3 -c "import unittest"'), false);
+    assert.equal(isCheck('python3 -B -m unittest; true'), false);
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.emit('session.execution.started');
+    f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'shell', status: 'completed',
+      input: { command: 'python3 -B -m unittest -v' }, result: { output: { exit: 1 } } });
+    await f.emit('session.execution.succeeded');
+    assert.equal(f.read('incidents')[0].check_failures, 1);
+    assert.ok(f.read('incidents')[0].triggers.includes('check_failed'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('plain detached servers require native background ownership without rewriting shell syntax', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const call = input => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'shell', input });
+  try {
+    for (const background of [undefined, false, true])
+      assert.throws(() => call({ command: 'npm run dev &', background }), /background:true/);
+    for (const command of ['npm run dev', 'echo "&"', "echo '&'", 'echo \\&', 'echo ok # &',
+                           'echo a && echo b', 'echo a & wait', 'echo a\n# &']) {
+      const input = { command, ...(command === 'npm run dev' ? { background: true } : {}) };
+      const before = structuredClone(input);
+      assert.doesNotThrow(() => call(input));
+      assert.deepEqual(input, before);
+    }
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('native locationless lifecycle settles only already owned sessions', async () => {
   for (const outcome of ['succeeded', 'failed', 'interrupted']) {
     const f = fixture(); const cleanup = await plugin.setup(f.ctx);

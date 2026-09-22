@@ -1,4 +1,5 @@
 """Native trace diagnostics must stay private and must not fabricate acceptance."""
+from contextlib import closing
 import json
 from pathlib import Path
 import sqlite3
@@ -11,6 +12,34 @@ from session_report import report
 
 
 class ReportTests(unittest.TestCase):
+    def test_native_usage_separates_cache_reasoning_compaction_and_missing_data(self):
+        with tempfile.TemporaryDirectory() as folder:
+            db = Path(folder) / 'native.db'
+            project = str(Path(folder).resolve())
+            with closing(sqlite3.connect(db)) as c, c:
+                c.executescript('CREATE TABLE session_v2 (id TEXT, parent_id TEXT, directory TEXT, idle_outcome TEXT, time_created INTEGER, time_updated INTEGER);'
+                                'CREATE TABLE session_message (session_id TEXT, seq INTEGER, type TEXT, data TEXT);')
+                c.execute('INSERT INTO session_v2 VALUES (?,?,?,?,?,?)', ('ses_usage', None, project, 'succeeded', 1, 3))
+                tokens = {'input': 100, 'output': 20, 'reasoning': 30, 'cache': {'read': 900, 'write': 50}}
+                for seq, (kind, value) in enumerate((('assistant', tokens), ('assistant', tokens),
+                                                    ('compaction', tokens), ('assistant', None),
+                                                    ('assistant', {**tokens, 'output': -1}),
+                                                    ('assistant', {'input': 0, 'output': 0, 'reasoning': 0, 'cache': {'read': 0, 'write': 0}}))):
+                    c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_usage', seq, kind,
+                              json.dumps({'tokens': value, 'status': 'completed', 'finish': 'stop'})))
+            result = report(db, project)
+            usage = result['token_usage']['assistant']
+            self.assertEqual(usage['prompt_tokens'], 2100)
+            self.assertEqual(usage['max_recorded_prompt_tokens'], 1050)
+            self.assertEqual(usage['output_tokens'], 40)
+            self.assertEqual(usage['reasoning_tokens'], 60)
+            self.assertEqual(usage['cache_read_fraction'], .8571)
+            self.assertEqual(usage['records_with_usage'], 2)
+            self.assertEqual(usage['records_without_usable_usage'], 3)
+            self.assertEqual(result['token_usage']['compaction']['prompt_tokens'], 1050)
+            self.assertEqual(result['counts']['output_tokens'], 40)
+            self.assertFalse(result['acceptance_verified'])
+
     def test_child_loops_failed_checks_and_privacy(self):
         with tempfile.TemporaryDirectory() as folder:
             db = Path(folder) / 'native.db'

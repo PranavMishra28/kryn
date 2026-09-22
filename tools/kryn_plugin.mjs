@@ -111,7 +111,7 @@ export function pruneTrackers(directory, now = Date.now()) {
 // Only simple test commands count. Exit zero remains evidence of a command, not task correctness.
 export function isCheck(command) {
   if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
-  return /^(?:python(?:3(?:\.\d+)?)?\s+-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
 }
 export function assertLocal(event, options, wire = false) {
   if (event.model?.providerID !== 'local' || event.model?.id !== 'qwen')
@@ -307,6 +307,12 @@ export default {
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
         throw new Error('KRYN Browse tool is outside the qualified surface');
+      // Recognize only a plain terminal background operator. Do not rewrite or
+      // pretend to parse quoted, escaped, commented or multiline shell syntax.
+      if (event.tool === 'shell' &&
+          typeof event.input?.command === 'string' &&
+          !/['"`\\#\r\n]/.test(event.input.command) && /[ \t]&[ \t]*$/.test(event.input.command))
+        throw new Error('Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls.');
       if (event.tool === 'write' && typeof event.input?.content === 'string' &&
           Buffer.byteLength(event.input.content, 'utf8') > 12000)
         throw new Error('KRYN limits each write to 12,000 UTF-8 bytes. Split this component into smaller files or use small edits.');

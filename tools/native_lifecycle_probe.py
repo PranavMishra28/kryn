@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """DRAFT: serial native-API task-11 stimulus; --self-check is entirely offline.
 
+Historical source only: its plugin admission and variants predate the current stack;
+it is excluded from the wheel and cannot qualify a current release.
 A real run sends local inference and temporarily stops the owned oMLX app server.
 Root must review this draft before execution. No candidate code is edited.
 """

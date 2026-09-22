@@ -15,6 +15,7 @@ def summarize(connection, session_id):
     pending, ids, sessions = [session_id], set(), []
     tools, reads, finishes = Counter(), Counter(), Counter()
     counts = Counter()
+    usage = {kind: Counter() for kind in ('assistant', 'compaction')}
     limited = False
     for _ in range(64):
         if not pending:
@@ -35,15 +36,32 @@ def summarize(connection, session_id):
         rows = connection.execute("""SELECT type,
           json_extract(data,'$.status'), json_extract(data,'$.finish'),
           json_extract(data,'$.tokens.output'),
-          json_extract(data,'$.time.created'), json_extract(data,'$.time.completed')
+          json_extract(data,'$.time.created'), json_extract(data,'$.time.completed'),
+          json_extract(data,'$.tokens.input'), json_extract(data,'$.tokens.cache.read'),
+          json_extract(data,'$.tokens.cache.write'), json_extract(data,'$.tokens.reasoning')
           FROM session_message WHERE session_id=? ORDER BY seq LIMIT 10001""", (sid,)).fetchall()
         if len(rows) > 10000:
             limited = True
-        for kind, status, finish, output, created, completed in rows[:10000]:
+        for kind, status, finish, output, created, completed, uncached, cached, written, reasoning in rows[:10000]:
             counts[kind + '_messages'] += 1
+            if kind in usage:
+                bucket = usage[kind]
+                values = (uncached, cached, written, output, reasoning)
+                # Native 2.0.10 stores mutually exclusive input/cache fields and
+                # separate reported output/reasoning. Missing usage is not zero.
+                if all(type(value) is int and value >= 0 for value in values) and any(values):
+                    bucket['records_with_usage'] += 1
+                    for key, value in zip(('uncached_input_tokens', 'cache_read_tokens',
+                                           'cache_write_tokens', 'output_tokens', 'reasoning_tokens'), values):
+                        bucket[key] += value
+                    prompt = uncached + cached + written
+                    bucket['prompt_tokens'] += prompt
+                    bucket['max_recorded_prompt_tokens'] = max(bucket['max_recorded_prompt_tokens'], prompt)
+                else:
+                    bucket['records_without_usable_usage'] += 1
             if kind == 'assistant':
                 finishes[finish or 'unknown'] += 1
-                counts['output_tokens'] += output or 0
+                counts['output_tokens'] += output if type(output) is int and output >= 0 else 0
                 if created and completed:
                     counts['assistant_wall_ms'] += max(0, completed - created)
             if kind == 'compaction' and status == 'completed':
@@ -84,8 +102,18 @@ def summarize(connection, session_id):
         findings.append('Tool errors occurred; inspect the native transcript before classifying their cause.')
     if limited:
         findings.append('Report bounds reached; counts are partial.')
+    token_usage = {}
+    for kind, bucket in usage.items():
+        token_usage[kind] = dict(bucket)
+        token_usage[kind]['cache_read_fraction'] = (round(bucket['cache_read_tokens'] / bucket['prompt_tokens'], 4)
+                                                  if bucket['prompt_tokens'] else None)
     return {'schema': 1, 'session_id': session_id, 'session_count': len(ids),
             'native_outcome': sessions[0][2], 'counts': dict(counts), 'tools': dict(tools),
+            'token_usage': token_usage,
+            'usage_note': 'Provider-reported usage summed across requests, not unique conversation tokens. '
+                          'max_recorded_prompt_tokens is one native record, not the configured context limit. '
+                          'Compaction records can aggregate multiple summary attempts. Native missing usage may be normalized to zero; all-zero or incomplete usage is unmeasured. '
+                          'Zero reasoning can also mean the provider omitted its breakdown; output may then include reasoning. Cache reuse is not correctness proof.',
             'maximum_reads_of_one_path_per_session': repeated, 'finishes': dict(finishes),
             'partial': limited, 'findings': findings, 'acceptance_verified': False,
             'note': 'Native completion, command exits and model-written reports do not prove task acceptance. '

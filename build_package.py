@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a private wheel from a curated stage, never from ignored personal state."""
+"""Build a wheel from a curated stage, never from ignored personal state."""
 import argparse
 import hashlib
 import json
@@ -15,7 +15,7 @@ FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
     "tools/localai.py", "tools/native_client.py", "tools/context_probe.py", "tools/protocol_probe.py",
     "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/native-shell",
     "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/session_report.py", "tools/run_native_trial.py", "tools/browser_check.mjs",
-    "tools/native_lifecycle_probe.py", "tools/inference-audit/server.js", "tools/inference-audit/package.json",
+    "tools/inference-audit/server.js", "tools/inference-audit/package.json",
     "evals/README.md", "evals/bench.py", "evals/checks.py", "evals/tasks.json", "evals/frozen.sha256.json"]
 
 
@@ -45,7 +45,7 @@ def stage(root, destination, revision, dirty=False):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(root / name, target)
         files[name] = hashlib.sha256(target.read_bytes()).hexdigest()
-    manifest = {"schema": 1, "version": "0.1.6", "source_revision": revision, "source_dirty": dirty, "files": files}
+    manifest = {"schema": 1, "version": "0.1.7", "source_revision": revision, "source_dirty": dirty, "files": files}
     (destination / "src/kryn/manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
     return manifest
 
@@ -67,7 +67,7 @@ def main():
         work = Path(work)
         manifest = stage(root, work, revision, dirty)
         subprocess.run([args.uv, "build", "--wheel", "--out-dir", output, work], check=True)
-    wheel = output / "kryn-0.1.6-py3-none-any.whl"
+    wheel = output / "kryn-0.1.7-py3-none-any.whl"
     with zipfile.ZipFile(wheel) as bundle:
         names = bundle.namelist()
         required = {"kryn/payload/" + name for name in manifest["files"]} | {"kryn/manifest.json", "kryn/cli.py", "kryn/installer.py"}

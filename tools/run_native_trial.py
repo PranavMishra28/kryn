@@ -18,7 +18,7 @@ import threading
 import time
 from urllib.parse import quote
 
-from native_client import BINARY, MODEL_ID, NativeServer, owned_config
+from native_client import BINARY, MODEL_ID, ROOT, NativeServer, owned_config
 from protocol_probe import memory_snapshot, request as protocol_request
 from context_probe import ResourceGuard, resources, summarize_resources
 
@@ -243,10 +243,67 @@ def snapshot_audit_plugin(folder):
     return target, hashes
 
 
-def audit_plugin_active(inventory, snapshot):
-    return any(p.get("id") == "localai.inference-audit" and p.get("state", {}).get("status") == "active"
-               and Path(p.get("source", {}).get("path", "")).resolve() == snapshot / "server.js"
-               for p in inventory.get("data", []))
+def plugin_active(inventory, plugin_id, snapshot):
+    entries = [p for p in inventory.get("data", []) if p.get("id") == plugin_id]
+    return (len(entries) == 1 and entries[0].get("state", {}).get("status") == "active"
+            and entries[0].get("source", {}).get("type") == "local"
+            and Path(entries[0].get("source", {}).get("path", "")).resolve() == snapshot / "server.js")
+
+
+def hashes_match(folder, hashes):
+    try:
+        return all(hashlib.sha256((folder / name).read_bytes()).hexdigest() == digest
+                   for name, digest in hashes.items())
+    except OSError:
+        return False
+
+
+def allow_fixture_browser(config):
+    # Agent rules override globals. Auto-approve only the already-qualified
+    # named Browse actions in disposable tests; retain every explicit denial.
+    for rule in config.get("agents", {}).get("browse", {}).get("permissions", []):
+        if rule.get("effect") == "ask" and rule.get("action", "").startswith("browser_browser_"):
+            rule["effect"] = "allow"
+
+
+def isolate_trial_config(config, target, managed):
+    """Freeze trial inputs without merging the incumbent product plugin back in.
+
+    OpenCode merges plugin packages by path, so an inline config cannot replace a
+    same-ID plugin at another path. Override only its native config directory;
+    leave project discovery and the session database at their ordinary locations.
+    """
+    allowed = {"AGENTS.md", "cli.json", "opencode.json"}
+    if set(p.name for p in managed.iterdir()) - allowed:
+        raise RuntimeError("Trial isolation refuses unsupported managed config entries")
+    products = [p for p in config.get("plugins", [])
+                if isinstance(p, dict) and "profileId" in p.get("options", {})]
+    if len(products) != 1:
+        raise RuntimeError("Expected exactly one requested KRYN product plugin")
+    source = Path(products[0]["package"]).resolve()
+    fresh = not target.exists()
+    target.mkdir(parents=True, mode=0o700, exist_ok=True)
+    config_root, product = target / "config", target / "product"
+    if fresh:
+        config_root.mkdir(mode=0o700)
+        product.mkdir(mode=0o700)
+    hashes = {"config": {}, "product": {}}
+    for origin, destination, names, key in (
+        (managed, config_root, ("AGENTS.md", "cli.json"), "config"),
+        (source, product, ("server.js", "tui.tsx", "permission_display.mjs", "package.json"), "product"),
+    ):
+        for name in names:
+            if name == "cli.json" and not (origin / name).exists():
+                continue
+            raw = (origin / name).read_bytes()
+            if fresh:
+                (destination / name).write_bytes(raw)
+                (destination / name).chmod(0o444)
+            hashes[key][name] = hashlib.sha256(raw).hexdigest()
+        if set(p.name for p in destination.iterdir()) != set(hashes[key]) or not hashes_match(destination, hashes[key]):
+            raise RuntimeError("Frozen trial inputs changed; prepare a new run for a different candidate")
+    products[0]["package"] = str(product)
+    return config_root, product, hashes
 
 
 def audit_session_ids(audit):
@@ -645,6 +702,55 @@ def guard_self_check():
 def self_check():
     import tempfile
     guard_self_check()
+    browser = {"agents": {"browse": {"permissions": [
+        {"action": "browser_*", "effect": "deny"},
+        {"action": "browser_browser_navigate", "effect": "ask"},
+        {"action": "browser_browser_run_code_unsafe", "effect": "deny"},
+        {"action": "external_directory", "effect": "ask"}]}}}
+    allow_fixture_browser(browser)
+    assert [r["effect"] for r in browser["agents"]["browse"]["permissions"]] == ["deny", "allow", "deny", "ask"]
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp).resolve()
+        managed, original = root / "managed", root / "original"
+        managed.mkdir()
+        original.mkdir()
+        for name in ("AGENTS.md", "cli.json", "opencode.json"):
+            (managed / name).write_text(name)
+        for name in ("server.js", "tui.tsx", "permission_display.mjs", "package.json"):
+            (original / name).write_text(name)
+        config = {"plugins": [{"package": str(original), "options": {"profileId": "test"}}]}
+        isolated, product, hashes = isolate_trial_config(config, root / "frozen", managed)
+        assert hashes_match(isolated, hashes["config"]) and hashes_match(product, hashes["product"])
+        assert not (isolated / "opencode.json").exists()
+        assert config["plugins"][0]["package"] == str(product)
+        resumed = {"plugins": [{"package": str(original), "options": {"profileId": "test"}}]}
+        assert isolate_trial_config(resumed, root / "frozen", managed) == (isolated, product, hashes)
+        entry = {"id": "kryn.product", "state": {"status": "active"},
+                 "source": {"type": "local", "path": str(product / "server.js")}}
+        assert plugin_active({"data": [entry]}, "kryn.product", product)
+        assert not plugin_active({"data": []}, "kryn.product", product)
+        assert not plugin_active({"data": [entry]}, "kryn.product", original)
+        failed = copy.deepcopy(entry)
+        failed["state"] = {"status": "failed", "error": "Duplicate plugin ID: kryn.product"}
+        assert not plugin_active({"data": [entry, failed]}, "kryn.product", product)
+        assert not plugin_active({"data": [failed]}, "kryn.product", product)
+        (product / "server.js").chmod(0o600)
+        (product / "server.js").write_text("changed")
+        assert not hashes_match(product, hashes["product"])
+        resumed["plugins"][0]["package"] = str(original)
+        try:
+            isolate_trial_config(resumed, root / "frozen", managed)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("changed snapshot reused")
+        (managed / "agents").mkdir()
+        try:
+            isolate_trial_config(config, root / "unsupported", managed)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("custom managed instructions silently omitted")
     def audit_row(event, milliseconds, **extra):
         return {"event": event, "time": dt.datetime.fromtimestamp(milliseconds / 1000, dt.timezone.utc).isoformat(), **extra}
     scope = {"sessionID": "test", "kind": "primary"}
@@ -828,6 +934,9 @@ def main():
     folder.mkdir(parents=True, exist_ok=False)
     config = copy.deepcopy(owned_config())
     apply_budget(config, args.variant, args.thinking_budget)
+    # Outside the workspace and shell's writable evidence/log directory.
+    config_root, product_plugin, input_hashes = isolate_trial_config(
+        config, run / "trial-inputs" / "frozen", ROOT / "xdg/config/opencode")
     # These eval-only permissions remove interactive waiting in the disposable repo.
     # Ordinary daily launches retain ask. They are not an OS filesystem sandbox.
     config["permissions"] += [
@@ -838,6 +947,7 @@ def main():
         {"action": "webfetch", "resource": "*", "effect": "allow"},
         {"action": "external_directory", "resource": "*", "effect": "deny"},
     ]
+    allow_fixture_browser(config)
     audit_options = {"log": str(folder / "inference.jsonl"), "expectedModelID": MODEL_ID}
     if ready_tools:
         audit_options["readyTools"] = True
@@ -852,6 +962,7 @@ def main():
               "thinking_budget_override": args.thinking_budget, "no_tools": args.no_tools,
               "attachment": image_info,
               "audit_plugin_sha256": audit_hashes,
+              "trial_input_sha256": input_hashes,
               "ready_tools": ready_tools, "expected_tools": str(args.expected_tools.resolve()) if args.expected_tools else None,
               "config_sha256": hashlib.sha256(config_bytes).hexdigest(),
               "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
@@ -879,7 +990,9 @@ def main():
         report.update(operator_interventions=0, automatic_interventions=0)
     exports, server = [], None
     try:
-        with NativeServer(workspace, config, folder / "native-server.log") as server:
+        server = NativeServer(workspace, config, folder / "native-server.log")
+        server.env["OPENCODE_CONFIG_DIR"] = str(config_root)
+        with server:
             providers, models = server.inventory()
             if [p["id"] for p in providers["data"]] != ["local"] or [m["id"] for m in models["data"]] != ["qwen"]:
                 raise RuntimeError("Unexpected provider/model inventory")
@@ -890,7 +1003,12 @@ def main():
             audit_path = folder / "inference.jsonl"
             if not audit_path.is_file() or '"event":"ready"' not in audit_path.read_text():
                 raise RuntimeError("Native inference audit hook did not initialize")
-            report["audit_plugin_active_before"] = audit_plugin_active(server.request("GET", "/api/plugin"), audit_plugin)
+            plugin_before = server.request("GET", "/api/plugin")
+            report["product_plugin_active_before"] = plugin_active(plugin_before, "kryn.product", product_plugin)
+            if not (report["product_plugin_active_before"] and hashes_match(product_plugin, input_hashes["product"])
+                    and hashes_match(config_root, input_hashes["config"])):
+                raise RuntimeError("Frozen KRYN product plugin/config is not active and unchanged; no prompt sent")
+            report["audit_plugin_active_before"] = plugin_active(plugin_before, "localai.inference-audit", audit_plugin)
             if not report["audit_plugin_active_before"]:
                 raise RuntimeError("Frozen audit plugin is not active before prompting")
             if ready_tools:
@@ -974,7 +1092,8 @@ def main():
             report["completed"] = report["model_completed"] and report["session_ownership"]["verified"]
             plugin_after = server.request("GET", "/api/plugin")
             (folder / "plugin-inventory-after.json").write_text(json.dumps(plugin_after, indent=2) + "\n")
-            report["audit_plugin_active_after"] = audit_plugin_active(plugin_after, audit_plugin)
+            report["audit_plugin_active_after"] = plugin_active(plugin_after, "localai.inference-audit", audit_plugin)
+            report["product_plugin_active_after"] = plugin_active(plugin_after, "kryn.product", product_plugin)
             if args.no_tools or attachment or args.thinking_budget is not None:
                 audit = [json.loads(line) for line in audit_path.read_text().splitlines() if line.strip()]
                 checks = acceptance_checks(audit, session["id"], args.no_tools, image_info,
@@ -986,8 +1105,7 @@ def main():
             # The external grader and transcript review decide task success, never this exit code.
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
-        if monitor is not None:
-            report["completed"] = False
+        report["completed"] = False
         raise
     finally:
         if monitor is None:
@@ -1029,6 +1147,11 @@ def main():
         except (OSError, ValueError, KeyError, TypeError) as error:
             report["route_coverage"] = {"verified": False, "reason": type(error).__name__}
         report["routing_verified"] = report["route_coverage"]["verified"]
+        report.setdefault("acceptance_checks", {})["trial_inputs_verified"] = bool(
+            report.get("product_plugin_active_before") and report.get("product_plugin_active_after")
+            and hashes_match(product_plugin, input_hashes["product"])
+            and hashes_match(config_root, input_hashes["config"]))
+        report["completed"] &= report["acceptance_checks"]["trial_inputs_verified"]
         if ready_tools or args.no_tools or attachment or args.thinking_budget is not None or monitor is not None:
             report.setdefault("acceptance_checks", {})["routing_verified"] = report["routing_verified"]
             report["completed"] &= report["routing_verified"]

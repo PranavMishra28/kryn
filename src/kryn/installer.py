@@ -438,7 +438,7 @@ def install():
                     total += int(size)
             if shutil.disk_usage(root).free < total + 40 * 1024**3:
                 raise RuntimeError("Model download would leave less than 40 GiB disk reserve")
-        setup.download(setup.DMG_URL, root / "downloads/oMLX-0.6.4-macos26-27.dmg", "sha256", setup.DMG_SHA)
+        setup.download_omlx(root / "downloads/oMLX-0.6.4-macos26-27.dmg")
         archive = root / "downloads/opencode-2.0.10.tgz"
         setup.download(setup.CLI_URL, archive, "sha512", setup.CLI_SHA)
         setup.extract_cli(archive, root / "opencode/2.0.10")

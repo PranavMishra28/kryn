@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a checksum-verified wheel asset from the owner's private GitHub release."""
+"""Install a checksum-verified GitHub release for the authorized owner."""
 import argparse
 import hashlib
 import json
@@ -63,8 +63,8 @@ def secure_owner(gh):
     user = read(["api", "--hostname", "github.com", "user"])
     if type(user.get("id")) is not int or user["id"] != 90290458 or user.get("type") != "User":
         raise RuntimeError("This release authorizes only the verified repository owner")
-    repository = read(["repo", "view", REPO, "--json", "isPrivate"])
-    if repository.get("isPrivate") is not True: raise RuntimeError("Private release distribution requires a private repository")
+    # Repository visibility is independent of the owner's installation policy.
+    # Release access is checked by the subsequent authenticated download.
 
 
 def main():
@@ -72,7 +72,7 @@ def main():
     parser.add_argument("--tag", required=True)
     args = parser.parse_args()
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", args.tag):
-        raise RuntimeError("Use an exact private release tag")
+        raise RuntimeError("Use an exact release tag")
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         raise RuntimeError("This installer supports native Apple Silicon macOS")
     gh = shutil.which("gh")
@@ -89,7 +89,7 @@ def main():
         work = Path(work)
         run([gh, "release", "download", args.tag, "--repo", REPO, "--pattern", "*.whl", "--pattern", "SHA256SUMS", "--dir", work])
         wheels = list(work.glob("*.whl"))
-        if len(wheels) != 1: raise RuntimeError("Expected one wheel in this private release")
+        if len(wheels) != 1: raise RuntimeError("Expected one wheel in this release")
         wheel = wheels[0]
         sums = {}
         for line in (work / "SHA256SUMS").read_text().splitlines():
@@ -99,7 +99,7 @@ def main():
                 if not re.fullmatch(r"[a-f0-9]{64}", value) or name in sums: raise RuntimeError("Invalid release checksums")
                 sums[name] = value
         expected = sums.get(wheel.name)
-        if expected is None or sha(wheel) != expected: raise RuntimeError("Private wheel checksum failed")
+        if expected is None or sha(wheel) != expected: raise RuntimeError("Release wheel checksum failed")
         # Reject path traversal, links, and non-package data before pip touches the wheel.
         with zipfile.ZipFile(wheel) as bundle:
             names = bundle.namelist()

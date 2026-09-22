@@ -1,6 +1,6 @@
 # Third-party components
 
-KRYN's private wheel contains KRYN source, configuration, lockfiles and evaluation material. It does not bundle third-party model weights, applications, runtime binaries, Node dependency trees or Chrome profiles. The installer downloads verified upstream artifacts and preserves their supplied licenses. Their terms remain separate from KRYN's [MIT license](LICENSE).
+KRYN's wheel contains KRYN source, configuration, lockfiles and evaluation material. It does not bundle third-party model weights, applications, runtime binaries, Node dependency trees or Chrome profiles. The installer downloads verified upstream artifacts and preserves their supplied licenses. Their terms remain separate from KRYN's [MIT license](LICENSE).
 
 | Component | License and provenance |
 |---|---|
@@ -15,7 +15,9 @@ KRYN's private wheel contains KRYN source, configuration, lockfiles and evaluati
 | CPython | uv-managed runtime; [Python license](https://docs.python.org/3/license.html) and bundled dependency notices apply. Runtime bytes are not included in KRYN's wheel. |
 | uv 0.11.16 fallback | Separately downloaded original-publisher artifact; [MIT/Apache-2.0 licensing](https://github.com/astral-sh/uv/tree/0.11.16). |
 | hatchling 1.32.4 | MIT; [upstream](https://github.com/pypa/hatch). Build dependency only, not needed by the installed runtime. |
-| GitHub CLI | Separately installed prerequisite; [MIT license](https://github.com/cli/cli/blob/trunk/LICENSE). GitHub's service terms govern private release access. |
+| GitHub CLI | Separately installed prerequisite; [MIT license](https://github.com/cli/cli/blob/trunk/LICENSE). GitHub's service terms govern release access. |
+
+The oMLX download can fall back to the [unaffiliated SourceForge mirror](https://sourceforge.net/projects/omlx.mirror/files/v0.6.4/) when the publisher asset is missing. KRYN requires the original pinned image hash from either source; the mirror is a transport fallback, not a new runtime or publisher endorsement.
 
 The memory telemetry helper is loaded from the user's pinned oMLX installation after a source-hash check; it is not copied into KRYN. Model and dependency manifests retain artifact identities and hashes. Downloaded runtimes and applications can include additional third-party notices; their distributed license files remain authoritative.
 

@@ -31,7 +31,7 @@ def main():
             return
         if args and args[0] == "update":
             if len(args) != 2 or not args[1].startswith("v"):
-                raise RuntimeError("Usage: kryn update v0.1.6")
+                raise RuntimeError("Usage: kryn update v0.1.7")
             verify_payload()
             subprocess.run([sys.executable, "-E", "-B", str(payload() / "install-kryn.py"),
                             "--tag", args[1]], check=True)
