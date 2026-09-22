@@ -1068,6 +1068,13 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg['agents']['browse']['mode'], 'all')
         self.assertNotIn('system', cfg['agents']['build'])  # Retain the native tool-aware prompt.
         self.assertNotIn('system', cfg['agents']['browse'])
+        output = str(root / 'xdg/data/opencode/tool-output')
+        self.assertEqual(cfg['agents']['browse']['permissions'][-4:], [
+            {'action': 'read', 'resource': '*', 'effect': 'deny'},
+            {'action': 'read', 'resource': output + '/tool_*', 'effect': 'allow'},
+            {'action': 'external_directory', 'resource': '*', 'effect': 'deny'},
+            {'action': 'external_directory', 'resource': output + '/*', 'effect': 'allow'},
+        ])
         self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
                       cfg['agents']['build']['permissions'])
         self.assertEqual(cfg["compaction"]["buffer"], 4096)

@@ -422,7 +422,7 @@ test('session champion survives restart; tool schema pruning and native checkpoi
   } finally { await cleanup(); f.remove(); }
 });
 
-test('Browse advertises only its 22 browser/research tools across request hooks without changing other roles', async () => {
+test('Browse includes saved-output reading in its bounded browser/research tools across request hooks', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     const browser = [
@@ -435,13 +435,13 @@ test('Browse advertises only its 22 browser/research tools across request hooks 
     ];
     const research = ['question', 'webfetch', 'search_web_search_exa',
       'search_web_fetch_exa', 'search_web_search_advanced_exa'];
-    const allowed = [...browser, ...research].sort();
+    const allowed = [...browser, ...research, 'read'].sort();
     const readOnly = [...research, 'read', 'glob', 'grep'].sort();
     const registry = Object.fromEntries([...allowed, ...readOnly, 'edit', 'write', 'shell', 'skill',
       'subagent', 'execute', 'patch', 'browser_browser_run_code_unsafe', 'browser_future_tool',
       'unknown_tool'].map(name => [name, { description: name }]));
     assert.deepEqual([...BROWSER_TOOLS].sort(), [...browser].sort());
-    assert.equal(allowed.length, 22);
+    assert.equal(allowed.length, 23);
     for (const hook of ['context', 'generate', 'compaction']) {
       for (const agent of ['browse', 'build', 'plan', 'general', 'reviewer', 'explore', 'audit']) {
         const event = { sessionID: 'ses_' + agent, agent, system: [], tools: { ...registry } };
