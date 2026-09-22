@@ -13,6 +13,8 @@ jobs:
   offline-and-package:
     runs-on: macos-15
     timeout-minutes: 15
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/kryn-python
     steps:
       # Release tags resolved through the primary GitHub API on 2026-09-22.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -25,6 +27,14 @@ jobs:
         with:
           node-version: '22.23.1'
           package-manager-cache: false
+      # The shell boundary requires an owner-controlled interpreter, as installed
+      # on the Mac. Hosted setup-python resolves to a shared system framework.
+      - name: Owned Python for boundary tests
+        run: |
+          python -m pip install 'uv==0.11.16'
+          uv python install --no-bin 3.13.13
+          kryn_python="$(uv python find --managed-python 3.13.13)"
+          dirname "$kryn_python" >> "$GITHUB_PATH"
       - name: Existing offline regressions
         run: |
           git diff --check
@@ -38,7 +48,6 @@ jobs:
           python -B evals/bench.py selftest
       - name: Curated wheel and outside-checkout smoke
         run: |
-          python -m pip install 'uv==0.11.16'
           python -B build_package.py
           python -m venv "$RUNNER_TEMP/kryn-package-smoke"
           uv pip install --python "$RUNNER_TEMP/kryn-package-smoke/bin/python" --no-index --no-deps dist/*.whl
