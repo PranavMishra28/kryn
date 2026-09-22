@@ -6,7 +6,7 @@ Use [GitHub private vulnerability reporting](https://github.com/PranavMishra28/k
 
 Include the KRYN version, macOS version, affected component, expected and observed behavior, and a minimal reproduction using disposable data. Omit tokens, credentials, private source code, session transcripts and raw browser profiles. Redact local paths and diagnostic output before sharing them.
 
-This project currently distributes v0.1.8 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
+This project currently distributes v0.1.9 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
 
 ## Trust and data boundaries
 

@@ -114,17 +114,24 @@ def main():
             allowed.add(prior["launcher"])
         elif path == root / "localai":
             allowed.add(setup.launcher(root))
-        if not path.is_file() or path.read_text() not in allowed:
+        if not path.is_file() or path.read_bytes() not in {value.encode() for value in allowed}:
             raise RuntimeError(f"Preserving unowned/changed launcher: {path}")
     result = {"release": release, "directory": str(destination), "python": str(python),
               "plugin_directory": str(plugin_dir),
               "files": hashes, "launcher": script}
     manifest_text = json.dumps(result, indent=2) + "\n"
     setup.check_destination(manifest_path.with_suffix(".new.json"), manifest_text)
+    backups = {}
     for index, path in enumerate(launchers):
         setup.check_destination(path.with_name(path.name + ".localai-new"), script)
-        if path.exists() and path.read_text() != script:
-            setup.check_destination(root / "backups" / ("client-" + release) / (str(index) + "-localai"), path.read_text())
+        if path.exists() and path.read_bytes() != script.encode():
+            previous = path.read_bytes()
+            # The same client can be launched by multiple immutable package interpreters.
+            backup = root / "backups" / ("client-" + release) / sha(previous) / (str(index) + "-localai")
+            setup.check_destination(backup, previous.decode())
+            if backup.exists() and backup.read_bytes() != previous:
+                raise RuntimeError(f"Preserving changed launcher backup: {backup}")
+            backups[path] = (backup, previous)
     if not args.apply:
         print(json.dumps(result if args.plan_json else {"read_only": True, "release": release, "launchers": list(map(str, launchers))}))
         return
@@ -145,11 +152,13 @@ def main():
     if args.smoke_check:
         subprocess.run([str(python), "-E", "-B", str(destination / "tools/localai.py"), "--self-check"], check=True)
     # Backup changed owned entry points before replacing them atomically.
-    for index, path in enumerate(launchers):
+    for path in launchers:
         path.parent.mkdir(parents=True, exist_ok=True)
-        if path.exists() and path.read_text() != script:
-            backup = root / "backups" / ("client-" + release) / (str(index) + "-localai")
-            setup.write_same(backup, path.read_text())
+        if path in backups:
+            backup, previous = backups[path]
+            if path.read_bytes() != previous:
+                raise RuntimeError(f"Preserving launcher changed after planning: {path}")
+            setup.write_same(backup, previous.decode())
         temporary = path.with_name(path.name + ".localai-new")
         setup.write_same(temporary, script, executable=True)
         temporary.replace(path)

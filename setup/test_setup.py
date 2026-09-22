@@ -147,6 +147,72 @@ class SetupChecks(unittest.TestCase):
             self.assertEqual(snapshot(), unsafe_before)  # Refuse; never repair permissions or promote.
         self.assertEqual(shim.stat().st_mode & 0o777, 0o777)
 
+    def test_identical_client_updates_preserve_distinct_launcher_backups(self):
+        root = self.root / "Library/Application Support/LocalAI"
+        profile = setup.load_profile(setup.HERE / "accepted-profile.json")
+        setup.write_same(root / "install-profile.json", setup.encode(profile))
+        setup.write_same(root / "xdg/config/opencode/opencode.json",
+                         setup.encode(setup.render(root, self.root / "node", profile)))
+        marker = root / profile["model_parent"] / setup.model_id(profile) / ".localai-download.json"
+        setup.write_same(marker, setup.encode({k: profile[k] for k in ("repository", "revision")}))
+        interpreters = [self.root / ("package-" + name) / "python" for name in "abcd"]
+        for path in interpreters:
+            setup.write_same(path, "#!/bin/sh\nexit 0\n", executable=True)
+
+        def deploy(python, apply):
+            output = io.StringIO()
+            with patch.object(Path, "home", return_value=self.root), \
+                 patch.object(sys, "argv", ["deploy", "--entry-python", str(python),
+                                            "--apply" if apply else "--plan-json"]), \
+                 contextlib.redirect_stdout(output):
+                deploy_client.main()
+            return json.loads(output.getvalue())
+
+        def snapshot():
+            return {str(p): (p.read_bytes(), p.stat().st_ino, p.stat().st_mtime_ns)
+                    for p in self.root.rglob("*") if p.is_file()}
+
+        deploy(interpreters[0], True)
+        manifest = json.loads((root / "client/deployment.json").read_text())
+        backup_root = root / "backups" / ("client-" + manifest["release"])
+        legacy = backup_root / "0-localai"
+        setup.write_same(legacy, "# immutable earlier launcher backup\n")
+        legacy_before = (legacy.read_bytes(), legacy.stat().st_ino, legacy.stat().st_mtime_ns)
+        previous = manifest["launcher"].encode()
+        preserved = []
+        for python in interpreters[1:3]:
+            before = snapshot()
+            plan = deploy(python, False)
+            self.assertEqual(snapshot(), before)  # Planning cannot write backups or activation.
+            self.assertEqual(plan["release"], manifest["release"])
+            deploy(python, True)
+            for index in range(4):
+                backup = backup_root / hashlib.sha256(previous).hexdigest() / (str(index) + "-localai")
+                self.assertEqual(backup.read_bytes(), previous)
+                preserved.append((backup, previous))
+            previous = plan["launcher"].encode()
+            before = snapshot()
+            deploy(python, True)
+            for path, data in preserved:
+                self.assertEqual(path.read_bytes(), data)
+                self.assertEqual((path.read_bytes(), path.stat().st_ino, path.stat().st_mtime_ns), before[str(path)])
+        self.assertEqual((legacy.read_bytes(), legacy.stat().st_ino, legacy.stat().st_mtime_ns), legacy_before)
+
+        collision = backup_root / hashlib.sha256(previous).hexdigest() / "0-localai"
+        setup.write_same(collision, "# changed backup must not be overwritten\n")
+        for flags in (False, True):
+            before = snapshot()
+            with self.assertRaisesRegex(RuntimeError, "Preserving existing/changed"):
+                deploy(interpreters[3], flags)
+            self.assertEqual(snapshot(), before)
+        collision.unlink()
+        collision.symlink_to(legacy)
+        for flags in (False, True):
+            with self.assertRaisesRegex(RuntimeError, "Refusing symlink"):
+                deploy(interpreters[3], flags)
+        self.assertEqual((root / "kryn").read_bytes(), previous)
+        self.assertEqual(legacy.read_bytes(), legacy_before[0])
+
     def test_owned_profile_rejects_changed_defaults(self):
         config = localai.expected_config()
         localai.validate_owned_config(config)

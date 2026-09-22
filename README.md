@@ -2,7 +2,7 @@
 
 A local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.8](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.8) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.9](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.9) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## Start coding
 
@@ -101,6 +101,8 @@ Both interfaces use the **same local OpenCode server, model, tools and saved ses
 
 To open the GUI after an ordinary launch, use `/web` and copy its **plain local address** into your browser. Use an address such as `http://127.0.0.1:PORT/`, without credentials or query parameters. The pinned upstream client’s credential-bearing link can cause a `BrowserAttachments` error; its token-only link can leave assets waiting for authentication. KRYN’s `--web` opens the clean address and uses the browser’s normal sign-in dialog. If a credential-bearing link was already opened, navigate to the plain address, reload the page, and reopen the session.
 
+Final browser checks verified Default/Fast switching and one native automatic approval, but the complete permission-toggle roundtrip remains unqualified because reopening the command palette timed out in the test. The terminal controls were exercised separately.
+
 The GUI has its own permission preferences. A terminal running with `--auto` can still approve requests for the same session while you use the GUI. Use a normal prompted launch when you want explicit approvals in both interfaces. Select the project KRYN was launched in; to work on another project, exit and relaunch there so the shell write boundary follows it. Treat the pairing password, link and QR code as private.
 
 In the GUI, hover over the prompt area to reveal the **Default** effort button beside the model, then choose Default or Fast. It is also reachable with Tab and Enter; the pinned upstream interface hides it when neither hovered nor focused.
@@ -128,10 +130,10 @@ Requirements:
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.8 --repo PranavMishra28/kryn \
+     gh release download v0.1.9 --repo PranavMishra28/kryn \
        --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.8
+     python3 install-kryn.py --tag v0.1.9
    )
    ```
 
@@ -146,7 +148,7 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.8`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.9`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -162,7 +164,7 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
 | `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.8` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.9` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn uninstall` | Deactivate owned command launchers; keep models, sessions, caches, settings and packages. |
 | `kryn improve status` | Inspect experimental background improvement. |
@@ -173,7 +175,7 @@ Run these commands in **Terminal**, outside the KRYN interface:
 
 Updates and removal refuse changed or unowned files. `kryn uninstall` stops only the verified idle runtime and removes KRYN's four owned launcher aliases; it does not erase data, runtime settings, the oMLX app, or GitHub credentials. Rerun the verified tagged installer from **First installation** to reactivate or repair a missing owned launcher or guidance file. Repeating deactivation through the retained package is a no-op. There is no automatic disk purge.
 
-Interrupted activation and rollback retain recovery journals. Rerun the current verified release installer to recover, especially if a rollback already restored an older launcher whose package predates this recovery fix. Do not delete transaction journals or edit activation files during recovery; unrelated changes are preserved by refusing the operation.
+Package updates with unchanged client code preserve distinct backups for each prior launcher, including when the package interpreter changes. Interrupted activation and rollback retain recovery journals. Rerun the current verified release installer to recover, especially if a rollback already restored an older launcher whose package predates this recovery fix. Do not delete transaction journals or edit activation files during recovery; unrelated changes are preserved by refusing the operation.
 
 If memory protection stops a session, KRYN cancels its work, retains the native session and completed file writes, and stops its verified idle model server to release memory. Check `kryn status`; once `memory.pressure` is `normal`, run `kryn --continue` from the same project. The server starts automatically. Memory pressure can recur if the desktop workload leaves insufficient room for the model. If search or browser services are unavailable, local coding can still launch; inspect their connection status with `kryn doctor`.
 
@@ -197,7 +199,7 @@ Each file write is limited to 12,000 UTF-8 bytes; larger components should use s
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.8 remains a prerelease for owner testing. The [productionization qualification](evals/history/2026-09-22-production/qualification.json) records 172 setup tests, 21 helper tests, 39 JavaScript tests and 18 grader self-test cases passing. Native probes verified durable failed-check tracking across restart and blocking an unchanged fourth shell call after a warning. The 8,192-token cache probe returned correct original and changed facts on cold and reused paths. These are mechanism checks, not proof of general engineering quality.
+Version 0.1.9 remains a prerelease for owner testing. Version 0.1.8 was withdrawn after its published-update check exposed a launcher-backup collision; this release fixes that path without replacing the earlier tag or assets. The [productionization qualification](evals/history/2026-09-22-production/qualification.json) records 172 setup tests, 21 helper tests, 39 JavaScript tests and 18 grader self-test cases passing. Native probes verified durable failed-check tracking across restart and blocking an unchanged fourth shell call after a warning. The 8,192-token cache probe returned correct original and changed facts on cold and reused paths. These are mechanism checks, not proof of general engineering quality.
 
 The same-model comparison completed both bug-fix repeats in each of minimal OpenCode, incumbent KRYN and candidate KRYN. No arm completed the feature task within its 240-second budget. The external Requests trial timed out and still failed both bug cases. Qwen3.8-27B oQ4 and Qwen3-Coder-30B-A3B Q4 failed the memory-pressure qualification and were rolled back; the 9B profile remains selected. The comparison establishes no statistical harness uplift or frontier parity.
 
