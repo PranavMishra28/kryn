@@ -239,7 +239,7 @@ def runtime_settings(root, profile=None):
 
 
 def model_settings(profile=None):
-    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 49152, "max_tokens": 8192,
+    return {"version": 1, "models": {model_id(profile or load_profile()): {"max_context_window": 65536, "max_tokens": 8192,
             "enable_thinking": True, "mtp_enabled": False,
             "mtp_num_draft_tokens": 3, "vlm_mtp_enabled": False, "dflash_enabled": False,
             "specprefill_enabled": False, "turboquant_kv_enabled": False,
