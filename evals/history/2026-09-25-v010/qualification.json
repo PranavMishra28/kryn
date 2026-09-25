@@ -34,12 +34,31 @@
     "Single disposable coding task only",
     "Initial oMLX app showed a menu-bar alert and lost control of an idle server; the operator dismissed it, verified and stopped the orphaned listener, then restarted through the official CLI",
     "GUI permission roundtrip unqualified",
-    "Public release-asset installation and non-owner clean install unqualified",
-    "Update and rollback unqualified",
+    "Clean non-owner install, repair, uninstall and offline recovery unqualified",
     "Sustained application acceptance unqualified",
     "No frontier parity evidence",
     "Both ten-minute UI Agent trials timed out despite backend tests passing; one generated page passed an independent browser outcome check after timeout"
   ],
+  "public_release": {
+    "tag": "v0.1.10",
+    "source_revision": "e9c90ff6fe41cae6ef17f7fecdd2e2adf2f54246",
+    "wheel_sha256": "8d41f4cdf64b15546a5ded3d1a26d65cbf28194246a3afbbc65802466135059f",
+    "prerelease": true,
+    "checks": {
+      "anonymous_asset_download_and_sha256": "PASS",
+      "public_installer_over_existing_owner_install": "PASS",
+      "doctor_deep": "PASS",
+      "guarded_inference_after_install": "PASS",
+      "rollback_to_prior_candidate": "PASS",
+      "public_updater_restored_release": "PASS",
+      "guarded_inference_after_update": "PASS",
+      "doctor_deep_after_update": "PASS",
+      "external_project_tui_launch": "PASS"
+    },
+    "end_state_source_revision": "e9c90ff6fe41cae6ef17f7fecdd2e2adf2f54246",
+    "end_state_pressure": "normal",
+    "scope": "Owner Mac with existing dependencies and models. Guarded inference is a protocol smoke, not an engineering task. TUI launch reached Agent with 2/2 tools; no GUI task was run after publication."
+  },
   "task_06": {
     "trials": [
       {
