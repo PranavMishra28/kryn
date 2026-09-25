@@ -104,3 +104,21 @@ test('long recorded requests cannot crowd out current Git and file evidence', t 
   assert.match(capsule, /coverage is partial/);
   assert.ok(capsule.length <= 8000);
 });
+
+test('overflow keeps the latest request and an explicit truncation notice', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  execFileSync('git', ['init', '-q'], { cwd: root });
+  const names = Array.from({ length: 6 }, (_, index) => `changed-${index}-` + 'p'.repeat(130) + '.js');
+  for (const name of names) fs.writeFileSync(path.join(root, name), 'z'.repeat(500));
+  const summary = '## Relevant Files\n' + names.slice(0, 4).map(name => '- `' + name + '`: current').join('\n');
+  const messages = [{ content: '<conversation-checkpoint><summary>' + summary + '</summary>' +
+    '<recent-context>' + 'r'.repeat(2000) + '</recent-context></conversation-checkpoint>' }];
+  const requests = ['A'.repeat(6000), 'B'.repeat(2000), 'C'.repeat(2000),
+    'D'.repeat(1900) + ' Latest criterion: retry after 503.'];
+  const capsule = contextCapsule(root, messages, null, { total: 4, clipped: true, requests });
+  assert.ok(capsule.length <= 8000);
+  assert.match(capsule, /Latest criterion: retry after 503/);
+  assert.match(capsule, /Further current evidence omitted/);
+  assert.match(capsule, /Native transcript remains available outside this prompt/);
+});

@@ -389,7 +389,7 @@ export default {
         let next = { owner: 'kryn.product', schema: 1, total: count(previous.total + 1),
           clipped: previous.clipped || text.length > limit, requests };
         if (Buffer.byteLength(JSON.stringify(next)) > 30000) next = { ...next, clipped: true,
-          requests: requests.map(value => value.slice(0, 1000)) };
+          requests: requests.map(value => boundedExcerpt(value, 1000)) };
         item.recorded = recordedRequests(writeJSON(item.continuityFile, next, true));
       }
     });

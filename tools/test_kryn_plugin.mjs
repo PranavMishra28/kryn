@@ -264,11 +264,13 @@ test('long user requests retain late acceptance criteria across compaction and r
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   const messages = [{ content: '<conversation-checkpoint><summary>## Requirements\n- omitted\n</summary></conversation-checkpoint>' }];
   try {
-    const initial = 'Build the app. ' + 'x'.repeat(7000) + ' Final acceptance: preserve the seed on failed import.';
+    const initial = 'Build the app. ' + '漢'.repeat(7000) + ' Final acceptance: preserve the seed on failed import.';
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: initial } });
     await f.emit('session.compaction.ended');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
-    const later = 'Keep working. ' + 'y'.repeat(3000) + ' Latest constraint: no detached server.';
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue. ' + '漢'.repeat(3000) + ' Interim constraint: preserve IDs.' } });
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue. ' + '漢'.repeat(3000) + ' Interim constraint: no network.' } });
+    const later = 'Keep working. ' + '漢'.repeat(3000) + ' Latest constraint: no detached server.';
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: later } });
     await f.emit('session.compaction.ended');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
@@ -281,7 +283,9 @@ test('long user requests retain late acceptance criteria across compaction and r
     const file = path.join(f.root, 'learning', 'continuity', fs.readdirSync(path.join(f.root, 'learning', 'continuity'))[0]);
     const record = JSON.parse(fs.readFileSync(file, 'utf8'));
     assert.equal(record.clipped, true);
-    assert.ok(record.requests.every(request => request.length <= 6000));
+    assert.equal(record.requests.length, 4);
+    assert.ok(record.requests.every(request => request.length <= 1000),
+      'oversized multibyte history uses the bounded emergency record');
   } finally { await cleanup(); f.remove(); }
 });
 
