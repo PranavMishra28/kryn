@@ -15,7 +15,6 @@ KRYN's wheel contains KRYN source, configuration, lockfiles and evaluation mater
 | CPython | uv-managed runtime; [Python license](https://docs.python.org/3/license.html) and bundled dependency notices apply. Runtime bytes are not included in KRYN's wheel. |
 | uv 0.11.16 fallback | Separately downloaded original-publisher artifact; [MIT/Apache-2.0 licensing](https://github.com/astral-sh/uv/tree/0.11.16). |
 | hatchling 1.32.4 | MIT; [upstream](https://github.com/pypa/hatch). Build dependency only, not needed by the installed runtime. |
-| GitHub CLI | Required by the published v0.1.9 installer; current development source downloads public assets without it. [MIT license](https://github.com/cli/cli/blob/trunk/LICENSE). GitHub's service terms govern release access. |
 
 The oMLX download can fall back to the [unaffiliated SourceForge mirror](https://sourceforge.net/projects/omlx.mirror/files/v0.6.4/) when the publisher asset is missing. KRYN requires the original pinned image hash from either source; the mirror is a transport fallback, not a new runtime or publisher endorsement.
 

@@ -2,7 +2,7 @@
 
 A local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
 
-[Release v0.1.9](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.9) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release v0.1.10](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.10) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 Contributing or working on KRYN with a coding agent? Start with the [repository map](AGENTS.md), [development commands](CONTRIBUTING.md) and [current evidence ledger](plan.md).
 
@@ -21,7 +21,7 @@ mkdir -p "$HOME/Developer/my-app"
 cd "$HOME/Developer/my-app" && kryn
 ```
 
-KRYN starts its local model server automatically, prints a short readiness line after runtime, tool, and memory preflight checks, then opens the OpenCode terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. In current source, new sessions start in **Agent** mode. The published v0.1.9 still starts in **Build** until a newer release is qualified. For example:
+KRYN starts its local model server automatically, prints a short readiness line after runtime, tool, and memory preflight checks, then opens the OpenCode terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. New sessions start in **Agent** mode. For example:
 
 ```text
 Inspect this project, explain how to run it, and implement a small todo app with tests. Run the tests and report the results.
@@ -110,31 +110,29 @@ In the GUI, hover over the prompt area to reveal the **Default** effort button b
 
 ## First installation
 
-The published v0.1.9 installer remains restricted to the configured GitHub owner. New source revisions remove that restriction, but public installation is not qualified or published yet. The steps below describe the available v0.1.9 release.
+The v0.1.10 installer fetches public release assets over HTTPS without a GitHub account. This is a prerelease while installed-product qualification continues.
 
 Requirements:
 
 - Native Apple Silicon, macOS 26 or 27, and at least **48 GiB unified memory**. Release validation used an M4 Max with 48 GiB.
-- `python3` and GitHub CLI (`gh`) available in Terminal; Google Chrome installed at `/Applications/Google Chrome.app`.
-- Internet access for installation and GitHub login. Allow space for roughly **8.22 GB of model files**, dependencies, and the installer's **40 GiB free-space reserve**.
+- `python3` and `curl` available in Terminal; Google Chrome installed at `/Applications/Google Chrome.app`.
+- Internet access for installation. Allow space for roughly **8.22 GB of model files**, dependencies, and the installer's **40 GiB free-space reserve**.
 
-1. Sign in to the authorized GitHub account. Credentials must be stored in **macOS Keychain**; plaintext tokens and token environment overrides are refused.
-
-   ```sh
-   gh auth login --hostname github.com --web
-   ```
-
-2. Download the tagged release, verify its checksums, and run the installer:
+1. Download the tagged release, verify its checksums, and run the installer:
 
    ```sh
    (
      set -eu
      kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
      cd "$kryn_stage"
-     gh release download v0.1.9 --repo PranavMishra28/kryn \
-       --pattern install-kryn.py --pattern '*.whl' --pattern SHA256SUMS
+     kryn_tag=v0.1.10
+     kryn_base="https://github.com/PranavMishra28/kryn/releases/download/$kryn_tag"
+     for kryn_asset in install-kryn.py "kryn-${kryn_tag#v}-py3-none-any.whl" SHA256SUMS; do
+       curl --fail --location --proto '=https' --proto-redir '=https' \
+         --output "$kryn_asset" "$kryn_base/$kryn_asset"
+     done
      shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag v0.1.9
+     python3 install-kryn.py --tag "$kryn_tag"
    )
    ```
 
@@ -142,14 +140,14 @@ Requirements:
 
    If the pinned oMLX publisher asset returns 404/410, the installer reports the failure and tries the unaffiliated SourceForge mirror. Both locations must match the same pinned SHA256; a checksum failure stops installation. The mirror's complete 805,799,490-byte image was verified against that pin during release validation.
 
-3. Make the launcher available in this Terminal, check the installed version, then follow **Start coding** above:
+2. Make the launcher available in this Terminal, check the installed version, then follow **Start coding** above:
 
    ```sh
    export PATH="$HOME/.local/bin:$PATH"
    kryn --version
    ```
 
-   Expected version: `KRYN 0.1.9`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 0.1.10`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Maintenance and troubleshooting
 
@@ -164,8 +162,7 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn status` | Inspect host memory pressure, runtime, owner session and background improvement state. |
 | `kryn doctor` | Check configuration, dependencies, runtime health and tool connections. A stopped server is reported as unavailable; launching KRYN starts it. |
 | `kryn doctor --deep` | Also verify installed model and browser dependency files; slower, without inference. |
-| `kryn login` | Renew the owner session online. A verified session permits seven days of offline startup. |
-| `kryn update v0.1.9` | Install the exact release tag through the verified updater. Substitute a newer published tag when available. |
+| `kryn update v0.1.10` | Install the exact public release tag through the verified updater. Substitute a newer published tag when available. |
 | `kryn rollback` | Restore the previous retained installation after an update. |
 | `kryn uninstall` | Deactivate owned command launchers; keep models, sessions, caches, settings and packages. |
 | `kryn improve status` | Inspect experimental background improvement. |
@@ -200,7 +197,7 @@ Each file write is limited to 12,000 UTF-8 bytes; larger components should use s
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
-Version 0.1.9 remains a prerelease for owner testing. Version 0.1.8 was withdrawn after its published-update check exposed a launcher-backup collision; this release fixes that path without replacing the earlier tag or assets. The [productionization qualification](evals/history/2026-09-22-production/qualification.json) records 172 setup tests, 21 helper tests, 39 JavaScript tests and 18 grader self-test cases passing. Native probes verified durable failed-check tracking across restart and blocking an unchanged fourth shell call after a warning. The 8,192-token cache probe returned correct original and changed facts on cold and reused paths. These are mechanism checks, not proof of general engineering quality.
+Version 0.1.10 is the first public-installation prerelease. It adds Agent and Ask primary modes, a guarded startup header, and compatibility with the tested Chrome 154 line. The [v0.1.10 candidate qualification](evals/history/2026-09-25-v010/qualification.json) records one installed Agent coding task passing its independent grader, deep dependency checks, and a guarded restart. Two ten-minute UI Agent trials timed out; one generated page passed an independent browser outcome check afterward, but the Agent did not complete the task. The [earlier v0.1.9 qualification](evals/history/2026-09-22-production/qualification.json) records broader mechanism checks and failed application acceptance. These results do not prove sustained engineering quality or frontier parity.
 
 The same-model comparison completed both bug-fix repeats in each of minimal OpenCode, incumbent KRYN and candidate KRYN. No arm completed the feature task within its 240-second budget. The external Requests trial timed out and still failed both bug cases. Qwen3.8-27B oQ4 and Qwen3-Coder-30B-A3B Q4 failed the memory-pressure qualification and were rolled back; the 9B profile remains selected. The comparison establishes no statistical harness uplift or frontier parity.
 

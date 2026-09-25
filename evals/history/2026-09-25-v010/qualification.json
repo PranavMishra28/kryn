@@ -1,0 +1,84 @@
+{
+  "candidate_source_revision": "3699b2b7d59b0e10ca9c7364fa849eb245881dec",
+  "candidate_wheel_sha256": "70062b287ba0f4fbfb04f57066e1dcdb5f471b84ad0303b094bb9707a0c70ebe",
+  "installed_version": "0.1.10",
+  "checks": {
+    "direct_wheel_install": "PASS",
+    "doctor_deep_after_runtime_start": "PASS",
+    "browser_mcp_connected": "PASS",
+    "search_mcp_connected": "PASS",
+    "guarded_protocol_smoke": "PASS",
+    "stop_restart_protocol_smoke": "PASS",
+    "external_tui_launch": "PASS"
+  },
+  "task_02": {
+    "run": "public-v010-coding-1",
+    "agent": "agent",
+    "variant": "default",
+    "driver_completed": true,
+    "model_completed": true,
+    "routing_verified": true,
+    "wall_seconds": 173.095,
+    "grade": "PASS",
+    "existing_tests_passed": true,
+    "interventions": 0,
+    "event_errors": 0,
+    "resource_guard_clean": true,
+    "pressure_levels": [
+      1
+    ],
+    "swap_peak_growth_bytes": 0,
+    "max_sampled_listener_phys_footprint_bytes": 12092595424
+  },
+  "limitations": [
+    "Single disposable coding task only",
+    "Initial oMLX app showed a menu-bar alert and lost control of an idle server; the operator dismissed it, verified and stopped the orphaned listener, then restarted through the official CLI",
+    "GUI permission roundtrip unqualified",
+    "Public release-asset installation and non-owner clean install unqualified",
+    "Update and rollback unqualified",
+    "Sustained application acceptance unqualified",
+    "No frontier parity evidence",
+    "Both ten-minute UI Agent trials timed out despite backend tests passing; one generated page passed an independent browser outcome check after timeout"
+  ],
+  "task_06": {
+    "trials": [
+      {
+        "variant": "baseline",
+        "run": "public-v010-browser-1",
+        "driver_completed": false,
+        "model_completed": false,
+        "routing_verified": true,
+        "timed_out": true,
+        "wall_seconds": 608.434,
+        "grade": "PARTIAL",
+        "automatic_backend_passed": true,
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "source_revision": "3699b2b7d59b0e10ca9c7364fa849eb245881dec"
+      },
+      {
+        "variant": "browse-guidance",
+        "run": "public-v010-browser-guided-1",
+        "driver_completed": false,
+        "model_completed": false,
+        "routing_verified": true,
+        "timed_out": true,
+        "wall_seconds": 608.126,
+        "grade": "PARTIAL",
+        "automatic_backend_passed": true,
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "source_revision": "80a2544ac18d3f23c1e23da1b3c685b4c2367ba5"
+      }
+    ],
+    "baseline_generated_ui_independent_browser_check": "PASS",
+    "baseline_browser_report_sha256": "b93d44a07caa7195289e14d07ca507463b2532f9f7d9ec8d2c61f282b6a1a282",
+    "browser_check_scope": "Save/reload at 390x844 and 1280x800, accessible invalid-minutes feedback, injected 503 preserving input, exactly one successful retry, console/network inspection. This outcome check ran after the timed-out Agent trial and does not make that trial completed.",
+    "guidance_uplift": "Not established; both drivers timed out. The guided trial still attempted skill browse, then used two native Browse delegations and five browser calls; neither navigation reached a verifiable form flow.",
+    "guided_trial_timeout_detail": "The final Browse child waited about 328 seconds on an unanswered native question requesting evaluator creation of the controlled .fail-next marker. The frozen task prompt explicitly required that evaluator handoff; the timeout is not evidence of a model or shell stall."
+  }
+}
