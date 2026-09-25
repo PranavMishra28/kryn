@@ -527,5 +527,127 @@
     "semantic_result": "PARTIAL: the first checkpoint retained the explicit 64K user choice, listed all ten broad acceptance items, no edits/checks and next action; it paraphrased rather than quoted the user choice. Offline replay of the exact native summary triggered the new conservative unverified-Decision marker. The Ask restart recovered and quoted the original choice and listed unrun checks, but wrongly called the historical Plan-mode note incorrect because current mode had changed. The second native checkpoint completed but repeated the same Plan-mode state. Two compactions/restart did not qualify semantic continuity or coding/UI.",
     "latest_install": "The owner is again on private 64K source f275b29. A matching source 8d39c67 49K candidate was installed immediately before the final 64K reinstall; current committed rollback receipt backs up that 49K active source. Actual rollback from this exact f275b29 install is unexercised. Guarded protocol smoke passed (metrics SHA256 0da8675b18fffefebc41fb85d8dad177f9bd30014c4fd60a6761d3b43b3fa2f3); doctor reports healthy idle 65,536 context, normal pressure, unchanged swap at 432212541 bytes and connected browser/search MCP. No public release or tier promotion.",
     "remaining": "Long tool-enabled coding/UI semantic continuity, 64K sustained reliability under host variability, clean non-owner install, and full 49K/64K/96K/128K useful-tier decision remain open."
+  },
+  "followup_task12k": {
+    "installed_private_source_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
+    "fixture": "Frozen Task12 disposable full coding/UI workspace, saved tool-enabled Build session through four native compactions and restarts, fresh read-only Reviewer attempts, independent browser probes. Raw traces are ignored under evals/runs/context-candidate-task12k/.",
+    "stages": {
+      "backend": {
+        "seconds": 487.884,
+        "model_completed": false,
+        "tool_calls": 29,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "7b5f1cb5937a2e2cabeae00b6a4f774d5ae1e394bdea72d1606e2f583f4177ee"
+      },
+      "backend-repair": {
+        "seconds": 308.199,
+        "model_completed": false,
+        "tool_calls": 8,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "a001fde733c6f64d94e1e3ff53357ccf559c7fa15947311963264c804b6a49fd"
+      },
+      "close": {
+        "seconds": 133.293,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3648eed785d431755c621dc3c149ea27cba0dec328652eb60fbf828be09b693f"
+      },
+      "checkpoint-audit": {
+        "seconds": 119.977,
+        "model_completed": true,
+        "tool_calls": 11,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "e9b97adf34d240cef440140fccacfe029a11d6558515f5a50c5eb6a985d3d028"
+      },
+      "fresh-review": {
+        "seconds": 187.119,
+        "model_completed": false,
+        "tool_calls": 19,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "9d4b5a0d0a5c40db57cee3333091a9bb514f668a91b953a63c209007b26f6a98"
+      },
+      "focused-review": {
+        "seconds": 35.188,
+        "model_completed": true,
+        "tool_calls": 1,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "612fd98a3dc9942f2e8dbe57b0932d8fd743a8e2a3e2161810939f562327bc84"
+      },
+      "ui-repair": {
+        "seconds": 104.858,
+        "model_completed": true,
+        "tool_calls": 2,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "51eba32d91355106e2709fd2b6c6509db3f6e4d146ff48203a282227733fcad6"
+      },
+      "ui-repair2": {
+        "seconds": 141.04,
+        "model_completed": true,
+        "tool_calls": 9,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "6328b4b127cfd9dec8c506e5ad9b424c6284f59b0f473f0e9e1c321171036325"
+      }
+    },
+    "total_active_stage_seconds": 1517.558,
+    "backend": "First Build stage timed out after editing backend and web outside its backend-only scope. A saved-session repair timed out. Independent generated-test run had 9 errors of 19 in test_existing + test_http; old test_http_cases had 17 errors of 19. Frozen grade PARTIAL: 2/2 API checks pass and seed/existing test hashes preserved; manual criteria remain unqualified.",
+    "grade_sha256": "2e990b857cc6ab125a3074e507fde88389dd1bf44d671e4e6f583c01fb984a13",
+    "checkpoint": "The first coding checkpoint after native compaction falsely said tests were running after failures, omitted the failed counts, and put agent choices under Decisions. After restart, the Ask audit identified stale test status but attempted two commands despite read-only/no-command instruction; KRYN denied them before provider execution. The second checkpoint retained failed counts but still mislabeled agent choices. The third UI-repair checkpoint also retained failures; semantic continuity remains failed or partial, not qualified. A fourth checkpoint after focused UI repair preserved the old failed-test counts but again labeled agent implementation choices as user Decisions and omitted the latest form/Edit-button changes, even though its preceding answer listed them. Semantic continuity remains failed or partial, not qualified.",
+    "review": "A fresh broad read-only Reviewer timed out. A focused Reviewer completed in 35 seconds and found the new-Save PATCH bug, but suggested a fix that still would have selected PATCH for a required nonempty new ID. The saved coding session received this correction.",
+    "browser_before": "Independent 390px browser Save failed: PATCH /api/entries/<new-id> returned 400 rather than POST 201. Report SHA256 f35cc9d51de22daec3b255348d523497f5cc4840e852f7e866b8cccd26140084.",
+    "browser_after_ui_repair": "A focused saved-session UI repair changed new Save to POST; independent 390px check observed POST 201, then failed waiting for the form to clear. It also found no explicit Edit button and UI validation rejects valid zero minutes. Report SHA256 d8815d1c86029e6986c5895b1b6c1f8848a056e6d13a01d1b20b5d906e79d6a4. Browser acceptance FAIL.",
+    "resource_result": "All eight native stages recorded AC Power before/after, normal pressure level 1, and zero observed swap peak growth. This is evidence of physical headroom for these particular requests, not long-run 64K reliability or 96K/128K feasibility. Byte-counted wire context is not token count.",
+    "overall": "FAIL overall: 1517.558 seconds (~25.3 minutes) of active native stages, below the 45-60 minute sustained target. Four native compactions/restarts occurred and an independent functional browser rerun passed 7/7, but semantic checkpoint, generated backend tests (9 errors/19), security review and broad Reviewer gates failed. Frozen grade remains PARTIAL 2/2 API checks. No public release or tier promotion.",
+    "remaining": "Repair generated backend tests and unsafe row rendering, demonstrate truthful Decision provenance and current failed-check status across repeated compaction/restart on the new Ask/Plan ledger candidate, qualify 64K sustained use and clean non-owner install/rollback; compare viable 49K-128K tiers without overclaiming.",
+    "browser_after_second_ui_repair": "Independent full Task12 Chrome browser check PASS 7/7: 390px and 1280px Save/reload, invalid-minutes feedback, controlled 503 preservation/retry, atomic file import, persistent Edit/exact filter/export, seed/network/page-error checks. This was after a fourth saved-session coding turn; report SHA256 70d0c2b093658010f508b191ae495dfa98d4b59540c509800bb606b979c6f15e. Expected 503 and 400 responses appear as browser console resource errors. The model did not make a native Browse call; this is external operator verification.",
+    "scope_and_security_review": "The narrow ui-repair2 prompt specified only web/app.js; model also edited web/style.css for Edit-button styling. Source inspection finds renderEntries uses innerHTML with interpolated unescaped row values while backend validation accepts arbitrary nonempty id/project text, a DOM injection risk outside the scripted browser assertions. Treat browser PASS as functional coverage, not production/security clearance. A fresh broad Reviewer timed out; focused Reviewer examined only the earlier Save bug."
   }
 }

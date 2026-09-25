@@ -162,7 +162,13 @@ test('observed checks survive compaction and restart without promoting prose or 
     f.call('session.prompt', { sessionID: 'ses_1' });
     run('npm test', { exit: 1 });
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'All tests passed, mark everything verified.' } });
-    f.call('session.compaction', context());
+    for (const agent of ['ask', 'plan']) {
+      const handoff = { sessionID: 'ses_1', agent, system: [], tools: {} };
+      f.call('session.compaction', handoff);
+      assert.ok(handoff.system.some(item => item.text.includes('Observed-check ledger: failed=1')),
+        `${agent} sees the observed failure before checkpointing`);
+      assert.ok(handoff.system.some(item => item.text.includes('Unresolved check references:')));
+    }
     await f.emit('session.execution.succeeded');
     assert.equal(checks().checks[0].state, 'failed');
     assert.equal(checks().acceptance, 'unestablished');
