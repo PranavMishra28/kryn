@@ -516,6 +516,18 @@ test('truncated top-level Build output gets two bounded native continuations, ne
   } finally { await cleanup(); f.remove(); }
 });
 
+test('new Agent sessions retain bounded output recovery', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const original = f.ctx.session.get;
+  f.ctx.session.get = async args => ({ ...await original(args), agent: 'agent' });
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.emit('session.step.ended', { finish: 'length', tokens: { output: 8192 } });
+    assert.equal(f.continuations.length, 1);
+    assert.equal(f.continuations[0].delivery, 'steer');
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('output recovery respects interruption, user steering, read-only roles and child ownership', async () => {
   for (const changed of [{ parentID: 'ses_parent' }, { agent: 'audit' }, { agent: 'reviewer' },
     { outcome: 'interrupted', time: { idle: new Date(Date.now() + 1000).toISOString() } },
@@ -608,6 +620,35 @@ test('Audit parent stays read-only after one fresh foreground Reviewer and ordin
   } finally { await cleanup(); f.remove(); }
 });
 
+test('Ask denies mutations even under auto and Agent retains coding guidance', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const ask = { sessionID: 'ses_ask', agent: 'ask', system: [], tools: {
+      read: {}, grep: {}, search_web_search_exa: {}, edit: {}, shell: {}, subagent: {}, unknown_mutation: {},
+    } };
+    f.call('session.context', ask);
+    assert.deepEqual(Object.keys(ask.tools).sort(), ['grep', 'read', 'search_web_search_exa']);
+    assert.match(ask.system.map(part => part.text).join('\n'), /Ask mode: investigate/);
+    for (const action of ['edit', 'shell', 'subagent', 'unknown_mutation']) {
+      const permission = { sessionID: 'ses_ask', agent: 'ask', action, resources: ['*'], effect: 'allow' };
+      f.call('permission.evaluate', permission);
+      assert.equal(permission.effect, 'deny');
+      assert.throws(() => f.call('tool.execute.before', {
+        sessionID: 'ses_ask', agent: 'ask', tool: action, input: {},
+      }));
+    }
+    for (const agent of ['agent', 'build']) {
+      const context = { sessionID: 'ses_' + agent, agent, system: [], tools: { edit: {}, shell: {} } };
+      f.call('session.context', context);
+      assert.ok(context.tools.edit && context.tools.shell);
+      assert.match(context.system.map(part => part.text).join('\n'), /Build one runnable vertical slice/);
+    }
+    const plan = { sessionID: 'ses_plan', agent: 'plan', system: [], tools: {} };
+    f.call('session.context', plan);
+    assert.match(plan.system.map(part => part.text).join('\n'), /Plan mode: inspect/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('one native task yields metadata-only unknown outcome; nonzero shell exit is a failed check', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
@@ -682,12 +723,12 @@ test('Browse includes saved-output reading in its bounded browser/research tools
     assert.deepEqual([...BROWSER_TOOLS].sort(), [...browser].sort());
     assert.equal(allowed.length, 23);
     for (const hook of ['context', 'generate', 'compaction']) {
-      for (const agent of ['browse', 'build', 'plan', 'general', 'reviewer', 'explore', 'audit']) {
+      for (const agent of ['browse', 'build', 'agent', 'ask', 'plan', 'general', 'reviewer', 'explore', 'audit']) {
         const event = { sessionID: 'ses_' + agent, agent, system: [], tools: { ...registry } };
         f.call('session.' + hook, event);
         const expected = agent === 'browse' ? allowed
           : agent === 'audit' ? [...readOnly, 'subagent'].sort()
-          : ['reviewer', 'explore'].includes(agent) ? readOnly : Object.keys(registry).sort();
+          : ['ask', 'reviewer', 'explore'].includes(agent) ? readOnly : Object.keys(registry).sort();
         assert.deepEqual(Object.keys(event.tools).sort(), expected, agent + ' ' + hook);
         for (const name of expected) assert.equal(event.tools[name], registry[name]);
       }

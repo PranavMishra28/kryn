@@ -55,14 +55,14 @@ In your shell:
   kryn improve failures       List error-triggered regression incidents
 
 Inside the terminal interface:
-  /agents   or Ctrl+X then A   Choose Build, Plan, Browse or Audit
+  /agents   or Ctrl+X then A   Choose Ask, Plan or Agent
   /effort   or Ctrl+T          Switch Default (thinking on) / Fast (thinking off)
   /settings                   Display, reasoning visibility and permission settings
   /permissions                Open settings from the visible permission indicator
   /web      (also /pair)       Show the local GUI address and temporary credentials
   /sessions                   Open a saved session
   /status                     Inspect native tool and service status
-  /deliver your task          Build a small milestone and verify it
+  /deliver your task          Build a small milestone and verify it in Agent
   /research your topic        Search primary sources with citations
   /audit                      Request a fresh read-only review
   /handoff                    Summarize work, checks and next steps
@@ -103,6 +103,15 @@ def local_reference(ref, *, legacy=False):
 def expected_config():
     # The deployer copies the reviewed template and pins its selected model.
     config = json.loads((PROJECT / "setup/opencode.template.json").read_text())
+    def root_paths(value):
+        if isinstance(value, str):
+            return value.replace("__ROOT__", str(ROOT))
+        if isinstance(value, list):
+            return [root_paths(item) for item in value]
+        if isinstance(value, dict):
+            return {key: root_paths(item) for key, item in value.items()}
+        return value
+    config = root_paths(config)
     files = product_plugin_files(PROJECT)
     identity = hashlib.sha256(b''.join(files[name] for name in sorted(files))).hexdigest()[:16]
     profile = PROJECT / "setup/install-profile.json"
@@ -167,11 +176,17 @@ def validate_owned_config(config):
     require(config.get("update") == "disable" and config.get("share") == "disabled",
             "Automatic updates/sharing must remain disabled")
     for section in ("agents", "commands"):
+        require(set(config.get(section, {})) == set(expected_profile[section]),
+                f"Owned {section} catalog differs from this release")
         for name, item in config.get(section, {}).items():
             require(local_reference(item.get("model")), f"Owned {section}/{name} must pin local/qwen")
         for name, item in expected_profile[section].items():
             require(same_reference(config.get(section, {}).get(name, {}).get("model"), item.get("model")),
                     f"Expected release model reference for {section}/{name}")
+            if section == "agents":
+                require(all(config[section][name].get(key) == item.get(key)
+                            for key in ("mode", "hidden", "permissions", "system")),
+                        f"Expected release permissions and visibility for {section}/{name}")
             if section == "commands":
                 require(all(config[section][name].get(key) == item.get(key) for key in ("agent", "subagent")),
                         f"Expected release command routing for {name}")

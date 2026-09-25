@@ -136,7 +136,7 @@
       "effect": "ask"
     }
   ],
-  "default_agent": "build",
+  "default_agent": "agent",
   "websearch": false,
   "snapshots": true,
   "mcp": {
@@ -171,6 +171,7 @@
   },
   "agents": {
     "build": {
+      "hidden": true,
       "model": "local/qwen",
       "permissions": [
         {
@@ -210,8 +211,35 @@
         }
       ]
     },
-    "plan": {
+    "agent": {
+      "mode": "primary",
+      "description": "Implement and verify changes in the current project",
+      "model": "local/qwen",
+      "permissions": [
+        { "action": "subagent", "resource": "explore", "effect": "allow" },
+        { "action": "subagent", "resource": "general", "effect": "allow" },
+        { "action": "subagent", "resource": "reviewer", "effect": "allow" },
+        { "action": "subagent", "resource": "browse", "effect": "allow" },
+        { "action": "browser_*", "resource": "*", "effect": "deny" },
+        { "action": "search_*", "resource": "*", "effect": "deny" },
+        { "action": "execute", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "ask": {
+      "mode": "primary",
+      "description": "Investigate and answer without changing project files",
       "model": "local/qwen#fast",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "subagent", "resource": "*", "effect": "deny" },
+        { "action": "execute", "resource": "*", "effect": "deny" },
+        { "action": "browser_*", "resource": "*", "effect": "deny" },
+        { "action": "peekaboo_*", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "plan": {
+      "model": "local/qwen",
       "permissions": [
         {
           "action": "browser_*",
@@ -322,6 +350,7 @@
     },
     "reviewer": {
       "mode": "all",
+      "hidden": true,
       "description": "Read-only review for correctness and regressions",
       "model": "local/qwen",
       "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
@@ -372,6 +401,7 @@
       "model": "local/qwen#fast"
     },
     "browse": {
+      "hidden": true,
       "model": "local/qwen#fast",
       "permissions": [
         {
@@ -515,6 +545,7 @@
     },
     "audit": {
       "mode": "primary",
+      "hidden": true,
       "description": "Read-only audit with one fresh Reviewer",
       "model": "local/qwen",
       "system": "Coordinate a read-only audit. Inspect relevant files and available diff/check evidence, then delegate exactly once to a fresh Reviewer with no sessionID, model override, or background execution. Supply acceptance criteria, changed paths and actual evidence. Wait for the Reviewer, then report findings without fixing them. Do not claim tests ran unless their results are available. You remain read-only until the user explicitly switches agents.",
@@ -581,13 +612,13 @@
       "template": "Review current changes for correctness, regressions and missing tests. Report actionable findings with file and line references. Do not edit files. $ARGUMENTS"
     },
     "deliver": {
-      "agent": "build",
+      "agent": "agent",
       "model": "local/qwen",
       "subagent": false,
       "template": "Deliver $ARGUMENTS. First state the smallest useful milestone and observable acceptance criteria. Inspect relevant code and tests, implement that milestone, run suitable checks, and inspect the real output or browser UI when relevant. Preserve user changes. After two repair cycles without new evidence, summarize the blocker and next hypothesis instead of repeating the same attempt. Use one foreground child at a time. Report actual results and unresolved risks; never weaken tests just to pass. This is a workflow instruction, not an enforced execution budget."
     },
     "handoff": {
-      "agent": "build",
+      "agent": "agent",
       "model": "local/qwen",
       "subagent": false,
       "template": "Return a concise handoff with objective, acceptance checks, completed work, actual check commands/results, unresolved failures, disproven approaches, and the next action. Reconcile with current Git and files. Use the native checkpoint; do not overwrite user-owned task files. $ARGUMENTS"

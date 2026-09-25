@@ -21,7 +21,7 @@ mkdir -p "$HOME/Developer/my-app"
 cd "$HOME/Developer/my-app" && kryn
 ```
 
-KRYN starts its local model server automatically, prints a short readiness line after runtime, tool, and memory preflight checks, then opens the OpenCode terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. New sessions start in **Build** mode. For example:
+KRYN starts its local model server automatically, prints a short readiness line after runtime, tool, and memory preflight checks, then opens the OpenCode terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. In current source, new sessions start in **Agent** mode. The published v0.1.9 still starts in **Build** until a newer release is qualified. For example:
 
 ```text
 Inspect this project, explain how to run it, and implement a small todo app with tests. Run the tests and report the results.
@@ -35,12 +35,11 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 
 | Mode | Use it for |
 |---|---|
-| **Build** | Editing code and running approved commands; thinking on by default. |
-| **Plan** | Inspecting code and discussing a plan before implementation; fast mode. |
-| **Browse** | Web search and interaction with an isolated Chrome session; fast mode. Build can delegate UI checks to Browse; you can also select it directly. |
-| **Audit** | Read-only review, configured to request one fresh Reviewer. Switch back to Build explicitly before making fixes or running tests. |
+| **Ask** | Inspect and answer using read and search tools, without edits or commands. |
+| **Plan** | Inspect code and produce an actionable plan; only native OpenCode plan files may be written. |
+| **Agent** | Edit code, run approved commands and verify results; thinking on by default. |
 
-Agent roles and reasoning effort are separate. **Build/Plan/Browse/Audit** choose the tools and task; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. The native UI remembers choices per agent/model, so check the displayed selection when resuming.
+Agent roles and reasoning effort are separate. **Ask/Plan/Agent** choose the tools and task; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. The native UI remembers choices per agent/model, so check the displayed selection when resuming. Browse and Reviewer remain available as specialists; `/audit` launches the hidden read-only Audit role. Existing Build sessions retain their saved role and can be resumed, but new work defaults to Agent.
 
 | Choice in OpenCode | Actual model behavior | Use |
 |---|---|---|
@@ -77,14 +76,14 @@ Type these commands **inside KRYN**, then press Enter:
 
 | Command | Purpose |
 |---|---|
-| `/agents` | Switch the agent role without starting a different conversation. |
+| `/agents` | Switch between Ask, Plan and Agent without starting a different conversation. |
 | `/effort` | Switch Default (thinking) / Fast (no thinking), independently of the agent role. |
 | `/settings` | Display controls, reasoning visibility and permissions (see launch modes above). |
 | `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
-| `/audit` | Enter Audit mode and review current work. |
+| `/audit` | Run a bounded read-only review through the hidden Audit role. Switch to Agent before fixing findings. |
 | `/research your topic` | Research a topic with search and source links. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
 | `/sessions` | Choose a saved session to resume. Relaunch from the same project first. |
@@ -191,13 +190,13 @@ The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **
 
 Automatic compaction reserves room for output: the 49,152-token window leaves roughly 40,960 tokens for active context before native estimation triggers a summary. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
 
-npm uses KRYN’s managed writable cache, so ordinary dependency installation does not require modifying `~/.npm` or running `sudo`. Build can delegate rendered UI checks to one foreground Browse child. KRYN attaches up to 6,000 characters of the current user request to that handoff so functional acceptance criteria are not lost in a visual-only summary. This text stays in memory outside the native conversation and survives compaction during the running client; it does not recover older criteria after a restart. Build is also instructed to finish a runnable slice and validate required services. These instructions improve the workflow but are not an enforced correctness gate.
+npm uses KRYN’s managed writable cache, so ordinary dependency installation does not require modifying `~/.npm` or running `sudo`. Agent, including saved legacy Build sessions, can delegate rendered UI checks to one foreground Browse child. KRYN attaches up to 6,000 characters of the current user request to that handoff so functional acceptance criteria are not lost in a visual-only summary. This text stays in memory outside the native conversation and survives compaction during the running client; it does not recover older criteria after a restart. Agent is also instructed to finish a runnable slice and validate required services. These instructions improve the workflow but are not an enforced correctness gate.
 
 Persistent development servers should use the native shell tool's `background:true` option in a separate call, with no trailing `&`. KRYN rejects a plain trailing background operator and gives the model that repair instruction, keeping ordinary checks in foreground calls. This guard does not parse complex shell syntax or contain deliberately detached processes.
 
 KRYN warns after three consecutive foreground shell calls return the same command result, then denies another identical call through native permissions. Two denied retries interrupt that stuck session. Changed evidence, a different action or a new user prompt resets detection. This catches the observed repeated-request loop; it is not general loop detection, and does not cover every background or parser-unrecognized command.
 
-Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
+Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Agent or saved legacy Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
 
 Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 

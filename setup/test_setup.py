@@ -213,6 +213,14 @@ class SetupChecks(unittest.TestCase):
             changed[section][name]["model"] = "local/qwen#low"
             with self.subTest(section=section), self.assertRaises(RuntimeError):
                 localai.validate_owned_config(changed)
+        changed = copy.deepcopy(config)
+        changed['agents']['ask']['permissions'][0]['effect'] = 'allow'
+        with self.assertRaisesRegex(RuntimeError, 'permissions'):
+            localai.validate_owned_config(changed)
+        changed = copy.deepcopy(config)
+        changed['agents']['full_access'] = {'model': 'local/qwen'}
+        with self.assertRaisesRegex(RuntimeError, 'catalog'):
+            localai.validate_owned_config(changed)
         for output in (None, {}, {"max_bytes": 4096}, {"max_lines": 200},
                        {"max_bytes": 51200, "max_lines": 200},
                        {"max_bytes": 4096, "max_lines": 2000}):
@@ -1113,7 +1121,7 @@ class SetupChecks(unittest.TestCase):
         root = self.root / 'A space and "quote"'
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
-        self.assertEqual(cfg["default_agent"], "build")
+        self.assertEqual(cfg["default_agent"], "agent")
         self.assertEqual(model["limit"], {"context": 49152, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
         variants = {v['id']: v['body'] for v in model['variants']}
@@ -1123,6 +1131,14 @@ class SetupChecks(unittest.TestCase):
         self.assertFalse(variants['fast']['chat_template_kwargs']['enable_thinking'])
         self.assertEqual(variants['fast']['thinking_budget'], 0)
         self.assertEqual(cfg['agents']['build']['model'], 'local/qwen')
+        self.assertTrue(cfg['agents']['build']['hidden'])  # Saved sessions retain this native ID.
+        self.assertEqual(cfg['agents']['agent']['mode'], 'primary')
+        self.assertNotIn('system', cfg['agents']['agent'])  # Native provider prompt remains in effect.
+        self.assertEqual(cfg['agents']['ask']['mode'], 'primary')
+        self.assertEqual(cfg['agents']['ask']['model'], 'local/qwen#fast')
+        self.assertEqual(cfg['agents']['plan']['model'], 'local/qwen')
+        self.assertIn({'action': 'edit', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
+        self.assertIn({'action': 'shell', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
         self.assertEqual(cfg['agents']['browse']['mode'], 'all')
         self.assertNotIn('system', cfg['agents']['build'])  # Retain the native tool-aware prompt.
         self.assertNotIn('system', cfg['agents']['browse'])
@@ -1135,6 +1151,9 @@ class SetupChecks(unittest.TestCase):
         ])
         self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
                       cfg['agents']['build']['permissions'])
+        self.assertEqual(cfg['agents']['agent']['permissions'], cfg['agents']['build']['permissions'])
+        self.assertEqual(cfg['commands']['deliver']['agent'], 'agent')
+        self.assertEqual(cfg['commands']['handoff']['agent'], 'agent')
         self.assertEqual(cfg["compaction"]["buffer"], 4096)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
         self.assertEqual(cfg["commands"]["audit"]["agent"], "audit")
