@@ -38,11 +38,36 @@ test("array order stays significant at every depth", () => {
 
 test("omitted tools retain defaults; explicit empty tools hash separately", () => {
   assert.deepEqual(wireMetadata({}), { requestModelID: null, numeric: {}, thinking: null, preserveThinking: null,
-    effort: null, tools: [], toolCount: 0, toolsSha256: null, imagePartCount: 0, imageCount: 0, images: [] });
+    effort: null, tools: [], toolCount: 0, toolsSha256: null, imagePartCount: 0, imageCount: 0, images: [],
+    contextBytes: { system: 0, developer: 0, user: 0, assistant: 0, toolResult: 0,
+      sourceToolResult: 0, shellToolResult: 0, otherToolResult: 0,
+      toolCalls: 0, toolSchemas: null, messages: 0 } });
   assert.equal(hash(null), null);
   assert.equal(hash({}), null);
   assert.equal(wireMetadata({ tools: {} }).toolCount, null);
   assert.equal(hash([]), createHash("sha256").update("[]").digest("hex"));
+});
+
+test("wire context accounting separates text, tool calls and schemas without retaining content", () => {
+  const calls = [
+    { id: "call_1", function: { name: "read", arguments: '{"file":"private-call"}' } },
+    { id: "call_2", function: { name: "shell", arguments: '{}' } },
+    { id: "call_3", function: { name: "lookup", arguments: '{}' } },
+  ];
+  const metadata = wireMetadata({ tools: [tool], messages: [
+    { role: "system", content: "private-system" },
+    { role: "user", content: [{ type: "text", text: "é" }, { type: "image_url", image_url: { url: "https://private.invalid/image" } }] },
+    { role: "assistant", content: "private-answer", tool_calls: calls },
+    { role: "tool", tool_call_id: "call_1", content: "private-source" },
+    { role: "tool", tool_call_id: "call_2", content: "private-shell" },
+    { role: "tool", tool_call_id: "call_3", content: "private-result" },
+  ] });
+  assert.deepEqual(metadata.contextBytes, { system: 14, developer: 0, user: 2, assistant: 14,
+    toolResult: 41, sourceToolResult: 14, shellToolResult: 13, otherToolResult: 14,
+    toolCalls: Buffer.byteLength(JSON.stringify(calls)),
+    toolSchemas: Buffer.byteLength(JSON.stringify([tool])), messages: 6 });
+  for (const secret of ["private-system", "private-answer", "private-source", "private-shell", "private-result", "private-call", "private.invalid"])
+    assert(!JSON.stringify(metadata).includes(secret));
 });
 
 test("existing sampling and image evidence stays intact; schema text is not logged", () => {

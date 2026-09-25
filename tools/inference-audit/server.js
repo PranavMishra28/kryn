@@ -18,9 +18,33 @@ export function wireMetadata(body) {
     if (typeof body[key] === "number" && Number.isFinite(body[key])) numeric[key] = body[key];
   const images = [];
   let imagePartCount = 0;
-  for (const message of Array.isArray(body.messages) ? body.messages : []) {
-    for (const part of Array.isArray(message.content) ? message.content : []) {
-      if (part.type !== "image_url") continue;
+  const contextBytes = { system: 0, developer: 0, user: 0, assistant: 0, toolResult: 0,
+    sourceToolResult: 0, shellToolResult: 0, otherToolResult: 0,
+    toolCalls: 0, toolSchemas: null, messages: 0 };
+  const messages = Array.isArray(body.messages) ? body.messages : [];
+  const callNames = new Map(messages.flatMap(message => Array.isArray(message?.tool_calls)
+    ? message.tool_calls.filter(call => typeof call?.id === 'string' && typeof call?.function?.name === 'string')
+      .map(call => [call.id, call.function.name]) : []));
+  contextBytes.messages = messages.length;
+  if (Array.isArray(body.tools)) contextBytes.toolSchemas = Buffer.byteLength(JSON.stringify(body.tools));
+  for (const message of messages) {
+    const role = ({ system: 'system', developer: 'developer', user: 'user',
+      assistant: 'assistant', tool: 'toolResult' })[message?.role];
+    const parts = typeof message?.content === 'string' ? [message.content] :
+      Array.isArray(message?.content) ? message.content.filter(part => part?.type === 'text')
+        .map(part => part.text).filter(text => typeof text === 'string') : [];
+    const bytes = parts.reduce((total, part) => total + Buffer.byteLength(part), 0);
+    if (role) contextBytes[role] += bytes;
+    if (role === 'toolResult') {
+      const name = callNames.get(message.tool_call_id);
+      const category = ['read', 'glob', 'grep'].includes(name) ? 'sourceToolResult' :
+        name === 'shell' ? 'shellToolResult' : 'otherToolResult';
+      contextBytes[category] += bytes;
+    }
+    if (Array.isArray(message?.tool_calls))
+      contextBytes.toolCalls += Buffer.byteLength(JSON.stringify(message.tool_calls));
+    for (const part of Array.isArray(message?.content) ? message.content : []) {
+      if (part?.type !== "image_url") continue;
       imagePartCount++;
       const url = part.image_url?.url;
       if (typeof url !== "string") continue;
@@ -41,7 +65,7 @@ export function wireMetadata(body) {
     // Covers direct wire tools, not a Code Mode catalog embedded in message text.
     toolsSha256: Array.isArray(body.tools)
       ? createHash("sha256").update(canonicalJson(body.tools)).digest("hex") : null,
-    imagePartCount, imageCount: images.length, images };
+    imagePartCount, imageCount: images.length, images, contextBytes };
 }
 
 export default {
