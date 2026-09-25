@@ -57,7 +57,7 @@ function checkpoint(messages) {
       Array.isArray(message?.content) ? message.content.filter(x => x?.type === 'text')
         .map(x => x.text).join('\n') : '';
     const match = /<conversation-checkpoint>[\s\S]*?<summary>([\s\S]*?)<\/summary>/.exec(content);
-    if (match) return match[1];
+    if (match) return { summary: match[1], recent: /<recent-context>([\s\S]*?)<\/recent-context>/.exec(content)?.[1] ?? '' };
   }
   return null;
 }
@@ -91,7 +91,8 @@ function currentFiles(root, summary) {
 }
 
 export function contextCapsule(directory, messages, savedStamp, recordedPrompts = null, firstCompaction = false) {
-  const summary = checkpoint(messages);
+  const saved = checkpoint(messages);
+  const summary = saved?.summary;
   if (!summary && !savedStamp && !(firstCompaction && recordedPrompts?.requests?.length)) return null;
   const root = fs.realpathSync(directory);
   const now = workspaceStamp(root);
@@ -112,6 +113,8 @@ export function contextCapsule(directory, messages, savedStamp, recordedPrompts 
       '; project paths ' + JSON.stringify(now.paths) +
       (now.complete ? '.' : '; fingerprint unverified: ' + now.reason + '.') : 'Git evidence: ' + now.reason + '.',
     ...files,
+    ...(saved?.recent ? ['Recent pre-checkpoint transcript tail (historical, unverified; reconcile with current files and checks): ' +
+      JSON.stringify(saved.recent.slice(-900))] : []),
     ...(!prompts.length && summary ? ['No private user-request baseline was available; consult the native transcript before claiming requirement coverage.'] : []),
     ...(prompts.length ? ['Recorded user requests are historical; the latest user message takes priority. Use these to check checkpoint requirements and user decisions; assistant proposals are not user decisions.', ...recalled,
       ...(recordedPrompts.clipped || recordedPrompts.total > prompts.length ?

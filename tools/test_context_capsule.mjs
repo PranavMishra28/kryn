@@ -80,6 +80,18 @@ test('a false native checkpoint is contradicted by durable user requirements', t
   assert.match(contextCapsule(root, messages, null), /No private user-request baseline/);
 });
 
+test('a later handoff remains visible when the checkpoint work state contradicts it', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const messages = [{ content: '<conversation-checkpoint><summary>## Work State\n### Active\n- Implement UI controls</summary>' +
+    '<recent-context>[Assistant]: UI controls were edited; browser checks remain unrun. Next: verify in browser.' +
+    '</recent-context></conversation-checkpoint>' }];
+  const capsule = contextCapsule(root, messages, null);
+  assert.match(capsule, /Recent pre-checkpoint transcript tail \(historical, unverified/);
+  assert.match(capsule, /UI controls were edited; browser checks remain unrun/);
+  assert.match(capsule, /Next: verify in browser/);
+});
+
 test('long recorded requests cannot crowd out current Git and file evidence', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
