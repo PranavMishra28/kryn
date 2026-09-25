@@ -235,10 +235,11 @@ def verify_release(current=True):
     files = manifest.get("files")
     expected = {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
             "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/protocol_probe.py", "setup/opencode.template.json",
-            "tools/session_report.py", "plugin/server.js", "plugin/package.json", "plugin/tui.tsx", "plugin/permission_display.mjs",
+            "tools/session_report.py", "plugin/server.js", "plugin/package.json", "plugin/tui.tsx", "plugin/permission_display.mjs", "plugin/context_capsule.mjs",
             "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"}
-    legacy = expected | {"tools/owner_auth.py"}
-    require(isinstance(files, dict) and (set(files) == expected or not current and set(files) == legacy),
+    previous = expected - {"plugin/context_capsule.mjs"}
+    legacy = previous | {"tools/owner_auth.py"}
+    require(isinstance(files, dict) and (set(files) == expected or not current and set(files) in (previous, legacy, expected | {"tools/owner_auth.py"})),
             "Unexpected installed release contents")
     require(hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()[:16] == release,
             "Installed release manifest identity changed")
@@ -247,7 +248,7 @@ def verify_release(current=True):
         require(not any(p.is_symlink() for p in (path, *path.parents)), "Linked release file refused")
         require(path.is_file() and path.stat().st_size <= 2 * 1024**2 and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
                 "Installed release file changed; restore its reviewed release")
-    plugin_names = ("package.json", "permission_display.mjs", "server.js", "tui.tsx")
+    plugin_names = tuple(sorted(name.removeprefix("plugin/") for name in files if name.startswith("plugin/")))
     plugin_digest = hashlib.sha256(b''.join((directory / "plugin" / name).read_bytes() for name in plugin_names)).hexdigest()[:16]
     plugin_dir = ROOT / "plugins" / plugin_digest
     require(manifest.get("plugin_directory") == str(plugin_dir), "Native plugin path differs from its content identity")

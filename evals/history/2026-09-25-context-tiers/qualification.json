@@ -1,0 +1,35 @@
+{
+  "status": "private measurement; no public tier promotion or release",
+  "machine": "M4 Max, 48 GiB unified memory, AC power",
+  "stack": "oMLX 0.6.4, Qwen3.5-9B-6bit, isolated per-tier settings, one request, 16 GiB oMLX memory ceiling",
+  "method": "Exact active input tokens verified against generation usage; Fast variant; single synthetic three-fact retrieval; 2-second host pressure/swap samples; 512 output-token allowance. Cache trials use separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
+  "tiers": [
+    {"context": 49152, "input": 40000, "result": "PASS synthetic retrieval", "prefill_seconds": 51.45, "total_seconds": 51.98, "peak_sampled_process_footprint_bytes": 14316511152, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T170650Z-44d9f1fe", "metrics_sha256": "6c56fcae83d7fc5d807c92043836f71db8db8d587717287a20a69f995308ba4b"},
+    {"context": 65536, "input": 56000, "result": "PASS synthetic retrieval", "prefill_seconds": 78.92, "total_seconds": 79.49, "peak_sampled_process_footprint_bytes": 14279417560, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T170951Z-0e926b53", "metrics_sha256": "99a588459839da7d446c5d3bf9e9290f0942843a154b9f8468c28ccded649706"},
+    {"context": 98304, "input": 80000, "result": "PASS synthetic retrieval; 237-second prefill is poor daily latency", "prefill_seconds": 237.43, "total_seconds": 238.04, "peak_sampled_process_footprint_bytes": 15121686040, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T171230Z-5db00eb0", "metrics_sha256": "5550b8f7479c9ac33fbf9bc6a954f6afa7ec2bc71e27bc38d6f323bd754f2449"},
+    {"context": 131072, "input": 112000, "result": "FAIL: oMLX prefill_memory_aborted at its 16 GiB ceiling; no complete answer or usage", "wall_seconds": 314.16, "peak_sampled_process_footprint_bytes": 16747700000, "pressure": [1], "swap_growth_bytes": 0, "runtime_idle_after": true, "run": "context-20260925T171803Z-8dd7bb3d", "metrics_sha256": "e35e7a6105ca8db14924374d8cfc536248ff40ddbad273754ebc698474379735"}
+  ],
+  "cache": {
+    "result": "PASS synthetic cold/warm correctness at 8192 input tokens in all four configurations",
+    "cold_cached_tokens": 0,
+    "repeat_cached_tokens": 6144,
+    "changed_facts_cached_tokens": 0,
+    "restored_cached_tokens": 6144,
+    "all_answers_correct": true,
+    "pressure": [1],
+    "swap_growth_bytes": 0,
+    "runs_and_sha256": {
+      "49152": ["context-20260925T170823Z-e7aaef01", "3ec2b30ebfcd9dc21e3914184ca75ce054d401a843d4e086bdda55efc48925b0"],
+      "65536": ["context-20260925T171128Z-aa9cdf73", "44e36aa7dd543948f376d28869b2ae579026ffaad2019f8db264a91599542ccf"],
+      "98304": ["context-20260925T171702Z-2e46336b", "22c2570360fea02ea94e77f83f7f3384e521fab33625ad79c3b92cca4126ba31"],
+      "131072": ["context-20260925T174628Z-d1b0a91f", "41a7d8f7da96a6ff905fd321af08f9657fe8db76cc9edd9d027883cc559c11d4"]
+    }
+  },
+  "failed_or_open_gates": [
+    "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; this was an output-budget failure, not memory pressure.",
+    "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; the adjusted probe still required exact actual usage for every reported PASS.",
+    "128K near-limit request failed under the configured memory ceiling despite normal host pressure and zero incremental swap.",
+    "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
+    "No installed thinking-mode 64K comparison or multi-stage UI task has passed; retain 49K as the public fallback."
+  ]
+}

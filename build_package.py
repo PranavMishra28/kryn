@@ -14,7 +14,7 @@ FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
     "setup/model-sha256.json", "setup/opencode.template.json", "setup/browser-package-lock.json",
     "tools/localai.py", "tools/native_client.py", "tools/context_probe.py", "tools/protocol_probe.py",
     "tools/improvement.py", "tools/learning.py", "tools/native-shell",
-    "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/session_report.py", "tools/run_native_trial.py", "tools/browser_check.mjs",
+    "tools/kryn_plugin.mjs", "tools/context_capsule.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/session_report.py", "tools/run_native_trial.py", "tools/browser_check.mjs",
     "tools/inference-audit/server.js", "tools/inference-audit/package.json",
     "evals/README.md", "evals/bench.py", "evals/checks.py", "evals/tasks.json", "evals/frozen.sha256.json"]
 

@@ -4,7 +4,7 @@ KRYN packages an OpenCode client, an oMLX runtime, and a pinned local model for 
 
 - User operation, installation, current limits: [README.md](README.md). Trust boundaries and release integrity: [SECURITY.md](SECURITY.md).
 - Package entry and transactional activation: `src/kryn/cli.py`, `src/kryn/installer.py`, `install-kryn.py`. Pinned dependency and model setup: `setup/setup.py`, `setup/accepted-profile.json`.
-- Runtime supervision and client launch: `tools/localai.py`, `tools/native_client.py`. OpenCode agents, tools and permissions: `setup/opencode.template.json`, `tools/kryn_plugin.mjs`, `tools/kryn_tui.tsx`.
+- Runtime supervision and client launch: `tools/localai.py`, `tools/native_client.py`. OpenCode agents, tools, context continuity and permissions: `setup/opencode.template.json`, `tools/kryn_plugin.mjs`, `tools/context_capsule.mjs`, `tools/kryn_tui.tsx`.
 - Incident capture and optional learning: `tools/improvement.py`, `tools/learning.py`. Evaluation contracts and historical outcomes: [evals/README.md](evals/README.md), `evals/tasks.json`, `evals/history/`.
 - Development and verification commands: [CONTRIBUTING.md](CONTRIBUTING.md). Current requirement/evidence ledger: [plan.md](plan.md).
 

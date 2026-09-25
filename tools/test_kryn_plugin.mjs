@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import plugin, { validatedOptions, assertLocal, isCheck, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
 import { permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -187,6 +188,30 @@ test('observed checks survive compaction and restart without promoting prose or 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('native checkpoint Git stamp survives restart and flags changed current source', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('git', args, { cwd: f.root, stdio: 'pipe' });
+  const file = path.join(f.root, 'app.js');
+  const messages = [{ content: '<conversation-checkpoint><summary>## Relevant Files\n- `app.js:1`: app\n</summary></conversation-checkpoint>' }];
+  try {
+    fs.writeFileSync(file, 'export const state = "first";\n');
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+    git('init', '-q'); git('add', '.');
+    git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'seed');
+    await f.emit('session.compaction.ended');
+    assert.match(f.read('trackers')[0].checkpoint_stamp, /^[a-f0-9]{64}$/);
+    let context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages };
+    f.call('session.context', context);
+    assert.match(context.system.map(x => x.text).join('\n'), /same bounded Git fingerprint/);
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    fs.writeFileSync(file, 'export const state = "second";\n');
+    context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages };
+    f.call('session.context', context);
+    assert.match(context.system.map(x => x.text).join('\n'), /STALE: workspace changed since checkpoint/);
+    assert.match(context.system.map(x => x.text).join('\n'), /second/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('timeouts, background work, workdir differences and interrupted checks remain unresolved', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   let serial = 0;
@@ -323,10 +348,11 @@ test('broad process-name kills are refused before native shell execution', async
   const call = command => f.call('tool.execute.before', {
     sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
   try {
-    for (const command of ['killall python 2>/dev/null; sleep 1', 'npm test && pkill -f python',
-                           '/usr/bin/killall Python', 'sudo pkill -f server.py'])
+    for (const command of ['killall python 2>/dev/null; sleep 1', '/usr/bin/killall Python',
+                           'sudo pkill -f server.py'])
       assert.throws(() => call(command), /broad process-name kills/);
-    for (const command of ['kill 1234', 'echo "killall python"', 'npm test'])
+    for (const command of ['kill 1234', 'echo "killall python"',
+                           "printf '%s\\n' 'example; pkill python'", 'cat <<EOF\npkill python\nEOF'])
       assert.doesNotThrow(() => call(command));
   } finally { await cleanup(); f.remove(); }
 });
