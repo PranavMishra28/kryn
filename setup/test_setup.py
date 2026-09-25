@@ -1117,6 +1117,15 @@ class SetupChecks(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_template_has_no_duplicate_keys(self):
+        def unique(pairs):
+            result = {}
+            for key, value in pairs:
+                self.assertNotIn(key, result, 'Duplicate OpenCode template key: ' + key)
+                result[key] = value
+            return result
+        json.loads((setup.HERE / 'opencode.template.json').read_text(), object_pairs_hook=unique)
+
     def test_config_uses_only_explicit_local_models_and_correct_budgets(self):
         root = self.root / 'A space and "quote"'
         cfg = setup.render(root, self.root / "node")
@@ -1140,6 +1149,10 @@ class SetupChecks(unittest.TestCase):
         self.assertIn({'action': 'edit', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
         self.assertIn({'action': 'shell', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
         self.assertEqual(cfg['agents']['browse']['mode'], 'all')
+        self.assertEqual(cfg['agents']['reviewer']['mode'], 'all')
+        self.assertFalse(cfg['agents']['audit'].get('hidden', False))
+        self.assertFalse(cfg['agents']['browse'].get('hidden', False))
+        self.assertFalse(cfg['agents']['reviewer'].get('hidden', False))
         self.assertNotIn('system', cfg['agents']['build'])  # Retain the native tool-aware prompt.
         self.assertNotIn('system', cfg['agents']['browse'])
         output = str(root / 'xdg/data/opencode/tool-output')

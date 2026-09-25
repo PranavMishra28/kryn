@@ -350,7 +350,6 @@
     },
     "reviewer": {
       "mode": "all",
-      "hidden": true,
       "description": "Read-only review for correctness and regressions",
       "model": "local/qwen",
       "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
@@ -401,7 +400,7 @@
       "model": "local/qwen#fast"
     },
     "browse": {
-      "hidden": true,
+      "mode": "all",
       "model": "local/qwen#fast",
       "permissions": [
         {
@@ -540,12 +539,10 @@
           "effect": "allow"
         }
       ],
-      "mode": "all",
       "description": "Inspect and test rendered interfaces in the isolated browser; report observed flows, console errors and screenshots"
     },
     "audit": {
       "mode": "primary",
-      "hidden": true,
       "description": "Read-only audit with one fresh Reviewer",
       "model": "local/qwen",
       "system": "Coordinate a read-only audit. Inspect relevant files and available diff/check evidence, then delegate exactly once to a fresh Reviewer with no sessionID, model override, or background execution. Supply acceptance criteria, changed paths and actual evidence. Wait for the Reviewer, then report findings without fixing them. Do not claim tests ran unless their results are available. You remain read-only until the user explicitly switches agents.",

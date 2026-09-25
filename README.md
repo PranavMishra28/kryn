@@ -39,7 +39,7 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 | **Plan** | Inspect code and produce an actionable plan; only native OpenCode plan files may be written. |
 | **Agent** | Edit code, run approved commands and verify results; thinking on by default. |
 
-Agent roles and reasoning effort are separate. **Ask/Plan/Agent** choose the tools and task; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. The native UI remembers choices per agent/model, so check the displayed selection when resuming. Browse and Reviewer remain available as specialists; `/audit` launches the hidden read-only Audit role. Existing Build sessions retain their saved role and can be resumed, but new work defaults to Agent.
+Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the new everyday choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. Browse, Reviewer and Audit remain selectable for existing read-only sessions and specialist use. OpenCode remembers choices per agent/model, so check the displayed selection when resuming. Old Build sessions remain available; the native picker may select equivalent Agent when resuming them. A future migration must resolve this before the picker can contain only three primary roles.
 
 | Choice in OpenCode | Actual model behavior | Use |
 |---|---|---|
