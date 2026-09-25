@@ -168,6 +168,9 @@ test('observed checks survive compaction and restart without promoting prose or 
       assert.ok(handoff.system.some(item => item.text.includes('Observed-check ledger: failed=1')),
         `${agent} sees the observed failure before checkpointing`);
       assert.ok(handoff.system.some(item => item.text.includes('Unresolved check references:')));
+      assert.ok(handoff.system.some(item => item.text.includes('This role cannot execute checks')));
+      assert.ok(!handoff.system.some(item => item.text.includes('Rerun relevant checks')),
+        `${agent} receives no command-execution instruction`);
     }
     await f.emit('session.execution.succeeded');
     assert.equal(checks().checks[0].state, 'failed');
