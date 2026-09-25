@@ -4,6 +4,7 @@ import io
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -70,10 +71,26 @@ class KrynChecks(unittest.TestCase):
         for bad in (sample(2), sample(4), {}, sample(pid=99)):
             with self.subTest(bad=bad), patch.object(localai, 'resources', return_value=bad), \
                  patch.object(localai, 'runtime_identity', return_value=42), \
+                 patch.object(localai, 'show_startup') as banner, \
                  patch.object(localai.subprocess, 'Popen') as popen, \
                  patch.object(localai, 'interrupt_owned_sessions'), self.assertRaises(RuntimeError):
-                localai.guarded_run(Mock(), ['native'], Path('/owned'), {})
+                localai.guarded_run(Mock(), ['native'], Path('/owned'), {}, startup='ready')
             popen.assert_not_called()
+            banner.assert_not_called()
+
+    def test_startup_header_only_in_interactive_terminals(self):
+        class Terminal(io.StringIO):
+            def isatty(self): return True
+        with patch.object(localai.sys, 'stdout', io.StringIO()) as output:
+            localai.show_startup('oMLX connected')
+            self.assertEqual(output.getvalue(), '')
+        output = Terminal()
+        with patch.object(localai.sys, 'stdout', output), \
+             patch.object(localai.shutil, 'get_terminal_size', return_value=os.terminal_size((20, 24))):
+            localai.show_startup('oMLX connected · OpenCode ready')
+        self.assertEqual(output.getvalue().splitlines()[1], 'KRYN')
+        self.assertLessEqual(len(output.getvalue().splitlines()[2]), 20)
+        self.assertNotIn('\x1b', output.getvalue())
 
     def test_web_uses_clean_loopback_url_inside_the_existing_resource_guard(self):
         with patch.object(localai.subprocess, 'run', return_value=Mock(returncode=0)) as opened:

@@ -21,7 +21,7 @@ mkdir -p "$HOME/Developer/my-app"
 cd "$HOME/Developer/my-app" && kryn
 ```
 
-KRYN starts its local model server automatically and opens the OpenCode terminal interface. Wait for startup, then type your request and press **Enter**. New sessions start in **Build** mode. For example:
+KRYN starts its local model server automatically, prints a short readiness line after runtime, tool, and memory preflight checks, then opens the OpenCode terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. New sessions start in **Build** mode. For example:
 
 ```text
 Inspect this project, explain how to run it, and implement a small todo app with tests. Run the tests and report the results.
