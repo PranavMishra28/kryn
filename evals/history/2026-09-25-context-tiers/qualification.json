@@ -87,6 +87,21 @@
     "runtime_stopped": true,
     "scope": "Offline first-compaction hook tests passed, but this installed package has no completed native semantic-compaction evidence."
   },
+  "first_compaction_live_64k": {
+    "candidate_source_revision": "8dfddf0379cdd4dc2e96c341c989fd75a14bd0a9",
+    "protocol_retry": {"result": "PASS guarded smoke under current desktop load", "private_run": "LocalAI/runs/protocol-20260925T210413Z-89cf8e79", "metrics_sha256": "e253433a8fbb58d4b92d039cf80a7eb4f38c07b889a804a72ed30d3d29499af4"},
+    "fixture": "Fresh disposable CSV expense-tool planning stage with explicit goal, four acceptance criteria, constraints, one user decision, no checks yet, and a next action; Fast variant with native tools denied",
+    "result": "PARTIAL: first native compaction completed after a completed planning turn, retained goal/criteria/next action, but promoted assistant-proposed SQLite and file layout into Decisions and omitted explicit unrun-check status. This is not decision/failure provenance acceptance.",
+    "driver_completed": true,
+    "native_compaction_completed": true,
+    "elapsed_seconds": 28.458,
+    "pressure": [1],
+    "swap_peak_growth_bytes": 0,
+    "private_run": "/private/tmp/kryn-first-compaction-20260925/evidence/first",
+    "driver_sha256": "60929176d279b1c46bb779887f6dd337dd4187e28a57a43e38e6b605baf942f7",
+    "export_sha256": "c801b83dabfa1f67b1be8f03e4e36c51461deb121864c25127fc813f02bea2e6",
+    "follow_up": "Compaction guidance now distinguishes user decisions from assistant proposals and observed failures from unrun checks; retest this change in a new installed candidate."
+  },
   "failed_or_open_gates": [
     "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
     "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",
@@ -94,6 +109,6 @@
     "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
     "96K and 128K thinking requests at their tested near-limit inputs produced sustained host memory warnings and were canceled; neither tier is suitable for the daily profile on current evidence. The 128K Fast result required a raised 20 GiB isolated ceiling and does not overturn its thinking failure.",
     "64K thinking passed one cold and one warm synthetic near-limit retrieval, but three large-context agent starts and one ordinary short task then hit host pressure. The short task's edited artifact passed its focused grader, while the session did not complete. The owner elected to retain 64K as an experimental setting; the failures preclude a reliability claim or public tier promotion.",
-    "A post-rollback 49K guarded inference smoke was not authorized, so its behavior under the current host load is not established. A newer 64K first-compaction candidate installed but its protocol smoke was canceled on host pressure before the native test could start. Multiple compactions/restart and sustained UI work remain unqualified."
+    "A post-rollback 49K guarded inference smoke was not authorized, so its behavior under the current host load is not established. A newer 64K first-compaction candidate installed but its protocol smoke was canceled on host pressure before the native test could start. A later guarded protocol retry and first native compaction completed under green pressure, but the summary promoted assistant suggestions to decisions and omitted no-checks-run status. Updated guidance is not installed-tested. Multiple compactions/restart and sustained UI work remain unqualified."
   ]
 }

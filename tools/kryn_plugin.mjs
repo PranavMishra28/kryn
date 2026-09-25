@@ -400,7 +400,7 @@ export default {
     await ctx.session.hook('generate', instructions);
     await ctx.session.hook('compaction', event => {
       if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
-      event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements; decisions and why under Decisions; failed checks with actual results under Important Context; and one concrete next action. Label uncertain or historical claims as such.' });
+      event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements. Under Decisions, record only choices the user actually made, with their reason if given; keep your own implementation ideas labeled as proposals. Under Important Context, distinguish observed failed checks from checks not yet run; never infer a pass from prose. Preserve one concrete next action. Label uncertain or historical claims as such, and reconcile the summary against the recorded user requests below.' });
       instructions(event, true); tracker(session(event.sessionID));
     });
     await ctx.session.hook('retry', event => {

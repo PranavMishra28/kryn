@@ -113,7 +113,7 @@ export function contextCapsule(directory, messages, savedStamp, recordedPrompts 
       (now.complete ? '.' : '; fingerprint unverified: ' + now.reason + '.') : 'Git evidence: ' + now.reason + '.',
     ...files,
     ...(!prompts.length && summary ? ['No private user-request baseline was available; consult the native transcript before claiming requirement coverage.'] : []),
-    ...(prompts.length ? ['Recorded user requests are historical; the latest user message takes priority.', ...recalled,
+    ...(prompts.length ? ['Recorded user requests are historical; the latest user message takes priority. Use these to check checkpoint requirements and user decisions; assistant proposals are not user decisions.', ...recalled,
       ...(recordedPrompts.clipped || recordedPrompts.total > prompts.length ?
         ['Recorded request coverage is partial; consult the native transcript before claiming all criteria are retained.'] : [])] : []),
     'Native transcript remains available outside this prompt. Re-read relevant files and rerun acceptance checks before claiming current success.'
