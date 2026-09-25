@@ -350,14 +350,14 @@ export default {
         item.recorded = recordedRequests(writeJSON(item.continuityFile, next, true));
       }
     });
-    const instructions = event => {
+    const instructions = (event, firstCompaction = false) => {
       assertHealthy();
       const item = session(event.sessionID);
       item.agent = event.agent;
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
-      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded);
+      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded, firstCompaction);
       if (capsule) event.system.push({ type: 'text', text: capsule });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
@@ -401,7 +401,7 @@ export default {
     await ctx.session.hook('compaction', event => {
       if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
       event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements; decisions and why under Decisions; failed checks with actual results under Important Context; and one concrete next action. Label uncertain or historical claims as such.' });
-      instructions(event); tracker(session(event.sessionID));
+      instructions(event, true); tracker(session(event.sessionID));
     });
     await ctx.session.hook('retry', event => {
       const item = start(event.sessionID, 'retry-' + Date.now());
