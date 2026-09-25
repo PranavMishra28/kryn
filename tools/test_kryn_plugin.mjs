@@ -323,11 +323,11 @@ test('broad process-name kills are refused before native shell execution', async
   const call = command => f.call('tool.execute.before', {
     sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
   try {
-    for (const command of ['killall python 2>/dev/null; sleep 1', 'npm test && pkill -f python',
+    for (const command of ['killall python 2>/dev/null; sleep 1', 'command sudo -n pkill -f python',
                            '/usr/bin/killall Python', 'sudo pkill -f server.py',
                            'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python'])
       assert.throws(() => call(command), /broad process-name kills/);
-    for (const command of ['kill 1234', 'echo "killall python"', 'sudo -n echo pkill', 'npm test'])
+    for (const command of ['kill 1234', 'echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test'])
       assert.doesNotThrow(() => call(command));
   } finally { await cleanup(); f.remove(); }
 });
