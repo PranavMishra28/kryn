@@ -475,7 +475,7 @@ export default {
       // Catch the observed direct process-name kills. This is not a shell parser
       // or process isolation; quoted text and heredocs must stay usable.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
-          /^\s*(?:(?:command|sudo)\s+)*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)(?=\s|[;&|]|$)/.test(event.input.command))
+          /^\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)(?=\s|[;&|]|$)/.test(event.input.command))
         throw new Error('KRYN refuses broad process-name kills. Stop only a verified process you own by exact PID or native shell lifecycle.');
       // Recognize only a plain terminal background operator. Do not rewrite or
       // pretend to parse quoted, escaped, commented or multiline shell syntax.
