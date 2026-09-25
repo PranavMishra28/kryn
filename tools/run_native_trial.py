@@ -23,6 +23,15 @@ from protocol_probe import memory_snapshot, request as protocol_request
 from context_probe import ResourceGuard, resources, summarize_resources
 
 
+def power_source():
+    try:
+        result = subprocess.run(["pmset", "-g", "batt"], capture_output=True, text=True, timeout=5)
+        match = re.search(r"Now drawing from '([^']+)'", result.stdout) if result.returncode == 0 else None
+        return match.group(1) if match else None
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
 EXA_TOOLS = {"search_web_fetch_exa", "search_web_search_advanced_exa", "search_web_search_exa"}
 
 
@@ -1042,7 +1051,7 @@ def main():
               "ready_tools": ready_tools, "expected_tools": str(args.expected_tools.resolve()) if args.expected_tools else None,
               "config_sha256": hashlib.sha256(config_bytes).hexdigest(),
               "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
-              "memory_before": memory_snapshot(), "interventions": 0,
+              "memory_before": memory_snapshot(), "power_before": power_source(), "interventions": 0,
               "fixture_only_permissions": True, "completed": False, "model_completed": False}
     started = time.monotonic()
     samples, sampling_stop = [], threading.Event()
@@ -1249,6 +1258,7 @@ def main():
             report["completed"] &= report["routing_verified"]
         report["wall_seconds"] = round(time.monotonic() - started, 3)
         report["memory_after"] = memory_snapshot()
+        report["power_after"] = power_source()
         report["resources"] = summarize_resources(samples)
         if monitor is not None:
             summary = report["resources"]
