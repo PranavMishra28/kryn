@@ -409,7 +409,8 @@ export default {
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
         'Verification observations: this prompt has observed ' + item.browserCalls + ' completed browser calls; calls alone do not prove acceptance. A delegated Browse result must supply its own observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation. If browser work is requested, delegate Browse before reporting it as verified.' });
-      if (AGENT_ROLES.has(event.agent) && options.observe) {
+      // Failed checks must remain visible during Ask/Plan handoffs as well as edits.
+      if (options.observe) {
         const ledger = item.verification;
         const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
         const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
