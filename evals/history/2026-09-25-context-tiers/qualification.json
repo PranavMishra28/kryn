@@ -4,62 +4,10 @@
   "stack": "oMLX 0.6.4, Qwen3.5-9B-6bit, isolated per-tier settings, one request, 16 GiB oMLX memory ceiling",
   "method": "Exact active input tokens verified against generation usage on passing runs; single synthetic three-fact retrieval; host pressure/swap samples. The initial tier table used Fast and a 512 output-token allowance. Follow-up thinking runs used a 2048 thinking budget and 4096 output-token allowance. Cache trials used separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
   "tiers": [
-    {
-      "context": 49152,
-      "input": 40000,
-      "result": "PASS synthetic retrieval",
-      "prefill_seconds": 51.45,
-      "total_seconds": 51.98,
-      "peak_sampled_process_footprint_bytes": 14316511152,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T170650Z-44d9f1fe",
-      "metrics_sha256": "6c56fcae83d7fc5d807c92043836f71db8db8d587717287a20a69f995308ba4b"
-    },
-    {
-      "context": 65536,
-      "input": 56000,
-      "result": "PASS synthetic retrieval",
-      "prefill_seconds": 78.92,
-      "total_seconds": 79.49,
-      "peak_sampled_process_footprint_bytes": 14279417560,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T170951Z-0e926b53",
-      "metrics_sha256": "99a588459839da7d446c5d3bf9e9290f0942843a154b9f8468c28ccded649706"
-    },
-    {
-      "context": 98304,
-      "input": 80000,
-      "result": "PASS synthetic retrieval; 237-second prefill is poor daily latency",
-      "prefill_seconds": 237.43,
-      "total_seconds": 238.04,
-      "peak_sampled_process_footprint_bytes": 15121686040,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T171230Z-5db00eb0",
-      "metrics_sha256": "5550b8f7479c9ac33fbf9bc6a954f6afa7ec2bc71e27bc38d6f323bd754f2449"
-    },
-    {
-      "context": 131072,
-      "input": 112000,
-      "result": "FAIL: oMLX prefill_memory_aborted at its 16 GiB ceiling; no complete answer or usage",
-      "wall_seconds": 314.16,
-      "peak_sampled_process_footprint_bytes": 16747700000,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "runtime_idle_after": true,
-      "run": "context-20260925T171803Z-8dd7bb3d",
-      "metrics_sha256": "e35e7a6105ca8db14924374d8cfc536248ff40ddbad273754ebc698474379735"
-    }
+    {"context": 49152, "input": 40000, "result": "PASS synthetic retrieval", "prefill_seconds": 51.45, "total_seconds": 51.98, "peak_sampled_process_footprint_bytes": 14316511152, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T170650Z-44d9f1fe", "metrics_sha256": "6c56fcae83d7fc5d807c92043836f71db8db8d587717287a20a69f995308ba4b"},
+    {"context": 65536, "input": 56000, "result": "PASS synthetic retrieval", "prefill_seconds": 78.92, "total_seconds": 79.49, "peak_sampled_process_footprint_bytes": 14279417560, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T170951Z-0e926b53", "metrics_sha256": "99a588459839da7d446c5d3bf9e9290f0942843a154b9f8468c28ccded649706"},
+    {"context": 98304, "input": 80000, "result": "PASS synthetic retrieval; 237-second prefill is poor daily latency", "prefill_seconds": 237.43, "total_seconds": 238.04, "peak_sampled_process_footprint_bytes": 15121686040, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T171230Z-5db00eb0", "metrics_sha256": "5550b8f7479c9ac33fbf9bc6a954f6afa7ec2bc71e27bc38d6f323bd754f2449"},
+    {"context": 131072, "input": 112000, "result": "FAIL: oMLX prefill_memory_aborted at its 16 GiB ceiling; no complete answer or usage", "wall_seconds": 314.16, "peak_sampled_process_footprint_bytes": 16747700000, "pressure": [1], "swap_growth_bytes": 0, "runtime_idle_after": true, "run": "context-20260925T171803Z-8dd7bb3d", "metrics_sha256": "e35e7a6105ca8db14924374d8cfc536248ff40ddbad273754ebc698474379735"}
   ],
   "cache": {
     "result": "PASS synthetic cold/warm correctness at 8192 input tokens in all four configurations",
@@ -68,27 +16,13 @@
     "changed_facts_cached_tokens": 0,
     "restored_cached_tokens": 6144,
     "all_answers_correct": true,
-    "pressure": [
-      1
-    ],
+    "pressure": [1],
     "swap_growth_bytes": 0,
     "runs_and_sha256": {
-      "49152": [
-        "context-20260925T170823Z-e7aaef01",
-        "3ec2b30ebfcd9dc21e3914184ca75ce054d401a843d4e086bdda55efc48925b0"
-      ],
-      "65536": [
-        "context-20260925T171128Z-aa9cdf73",
-        "44e36aa7dd543948f376d28869b2ae579026ffaad2019f8db264a91599542ccf"
-      ],
-      "98304": [
-        "context-20260925T171702Z-2e46336b",
-        "22c2570360fea02ea94e77f83f7f3384e521fab33625ad79c3b92cca4126ba31"
-      ],
-      "131072": [
-        "context-20260925T174628Z-d1b0a91f",
-        "41a7d8f7da96a6ff905fd321af08f9657fe8db76cc9edd9d027883cc559c11d4"
-      ]
+      "49152": ["context-20260925T170823Z-e7aaef01", "3ec2b30ebfcd9dc21e3914184ca75ce054d401a843d4e086bdda55efc48925b0"],
+      "65536": ["context-20260925T171128Z-aa9cdf73", "44e36aa7dd543948f376d28869b2ae579026ffaad2019f8db264a91599542ccf"],
+      "98304": ["context-20260925T171702Z-2e46336b", "22c2570360fea02ea94e77f83f7f3384e521fab33625ad79c3b92cca4126ba31"],
+      "131072": ["context-20260925T174628Z-d1b0a91f", "41a7d8f7da96a6ff905fd321af08f9657fe8db76cc9edd9d027883cc559c11d4"]
     }
   },
   "thinking_49k": {
@@ -99,101 +33,18 @@
     "answer_correct": true,
     "prefill_seconds": 52.16,
     "total_seconds": 63.76,
-    "pressure": [
-      1
-    ],
+    "pressure": [1],
     "swap_growth_bytes": 0,
     "run": "context-20260925T185013Z-a4c36838",
     "metrics_sha256": "7d606ffab85ea58874fce5c2ba3f743a2deed56ceb771e47ced89b2a8ebaeb46",
     "measurement_note": "A previous retry at a +2 template offset answered correctly but had 39,998 actual input tokens and was excluded from PASS; think-mode exact offset was 0. Its ignored metrics are context-20260925T184843Z-b4d3253a/e21cfe45734a234cd46ed88a734441faa74752073f4c912543cb768df93f2ff8. A sandboxed preflight stopped before generation because host telemetry was unavailable."
   },
   "follow_up_tier_trials": [
-    {
-      "context": 65536,
-      "ceiling_gib": 16,
-      "variant": "think",
-      "input": 56000,
-      "result": "PASS one exact-input synthetic cold retrieval",
-      "cached_tokens": 0,
-      "time_to_first_reasoning_seconds": 84.89,
-      "total_seconds": 101.29,
-      "completion_tokens": 714,
-      "peak_sampled_process_footprint_bytes": 14693260968,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T193213Z-5577b3f8",
-      "metrics_sha256": "1f2c2f2eb5632d847f6b69d2dd17fd8461447e10f93431667d62c1d88094077a"
-    },
-    {
-      "context": 65536,
-      "ceiling_gib": 16,
-      "variant": "think",
-      "input": 56000,
-      "result": "PASS same-nonce synthetic warm retrieval; exact usage and correct answer",
-      "cached_tokens": 55296,
-      "time_to_first_reasoning_seconds": 2.95,
-      "total_seconds": 14.17,
-      "completion_tokens": 431,
-      "peak_sampled_process_footprint_bytes": 14328897528,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T193442Z-0e93dcca",
-      "metrics_sha256": "c1c80b4321c5d1a441fe4ea03eda667757320af4aa68a9acb3f1c65c1eee13fe"
-    },
-    {
-      "context": 131072,
-      "ceiling_gib": 20,
-      "variant": "fast",
-      "input": 112000,
-      "result": "PASS one synthetic cold retrieval under isolated raised ceiling; slow and not safe evidence for thinking mode",
-      "cached_tokens": 0,
-      "time_to_first_content_seconds": 208.16,
-      "total_seconds": 208.85,
-      "peak_sampled_process_footprint_bytes": 18597436976,
-      "pressure": [
-        1
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T193746Z-b5182d0d",
-      "metrics_sha256": "2d414486ee50c5d352454888777efbc806335c1aacde404e4b58a39cf534bab1"
-    },
-    {
-      "context": 131072,
-      "ceiling_gib": 20,
-      "variant": "think",
-      "input_requested": 112000,
-      "result": "FAIL: sustained host memory warning; canceled before completed response or actual usage",
-      "wall_seconds": 127.18,
-      "peak_sampled_process_footprint_bytes": 16455786464,
-      "pressure": [
-        1,
-        2
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T194206Z-fff35fbd",
-      "metrics_sha256": "fcbb6aac881c95babc749393a94b89cca374306c2fcc645465e22a90b87adfab"
-    },
-    {
-      "context": 98304,
-      "ceiling_gib": 16,
-      "variant": "think",
-      "input_requested": 80000,
-      "result": "FAIL: sustained host memory warning after 371 seconds; canceled before completed response or actual usage",
-      "wall_seconds": 371.41,
-      "time_to_first_reasoning_seconds": 358.62,
-      "peak_sampled_process_footprint_bytes": 15666568680,
-      "pressure": [
-        1,
-        2
-      ],
-      "swap_growth_bytes": 0,
-      "run": "context-20260925T194503Z-946ca2ff",
-      "metrics_sha256": "42139e5707897d5bb11e3dce397976d63ded711204dc1b1a6d0b5f59735a4d83"
-    }
+    {"context": 65536, "ceiling_gib": 16, "variant": "think", "input": 56000, "result": "PASS one exact-input synthetic cold retrieval", "cached_tokens": 0, "time_to_first_reasoning_seconds": 84.89, "total_seconds": 101.29, "completion_tokens": 714, "peak_sampled_process_footprint_bytes": 14693260968, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T193213Z-5577b3f8", "metrics_sha256": "1f2c2f2eb5632d847f6b69d2dd17fd8461447e10f93431667d62c1d88094077a"},
+    {"context": 65536, "ceiling_gib": 16, "variant": "think", "input": 56000, "result": "PASS same-nonce synthetic warm retrieval; exact usage and correct answer", "cached_tokens": 55296, "time_to_first_reasoning_seconds": 2.95, "total_seconds": 14.17, "completion_tokens": 431, "peak_sampled_process_footprint_bytes": 14328897528, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T193442Z-0e93dcca", "metrics_sha256": "c1c80b4321c5d1a441fe4ea03eda667757320af4aa68a9acb3f1c65c1eee13fe"},
+    {"context": 131072, "ceiling_gib": 20, "variant": "fast", "input": 112000, "result": "PASS one synthetic cold retrieval under isolated raised ceiling; slow and not safe evidence for thinking mode", "cached_tokens": 0, "time_to_first_content_seconds": 208.16, "total_seconds": 208.85, "peak_sampled_process_footprint_bytes": 18597436976, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T193746Z-b5182d0d", "metrics_sha256": "2d414486ee50c5d352454888777efbc806335c1aacde404e4b58a39cf534bab1"},
+    {"context": 131072, "ceiling_gib": 20, "variant": "think", "input_requested": 112000, "result": "FAIL: sustained host memory warning; canceled before completed response or actual usage", "wall_seconds": 127.18, "peak_sampled_process_footprint_bytes": 16455786464, "pressure": [1, 2], "swap_growth_bytes": 0, "run": "context-20260925T194206Z-fff35fbd", "metrics_sha256": "fcbb6aac881c95babc749393a94b89cca374306c2fcc645465e22a90b87adfab"},
+    {"context": 98304, "ceiling_gib": 16, "variant": "think", "input_requested": 80000, "result": "FAIL: sustained host memory warning after 371 seconds; canceled before completed response or actual usage", "wall_seconds": 371.41, "time_to_first_reasoning_seconds": 358.62, "peak_sampled_process_footprint_bytes": 15666568680, "pressure": [1, 2], "swap_growth_bytes": 0, "run": "context-20260925T194503Z-946ca2ff", "metrics_sha256": "42139e5707897d5bb11e3dce397976d63ded711204dc1b1a6d0b5f59735a4d83"}
   ],
   "installed_64k_agent_trial": {
     "candidate_source_revision": "e75ff8319c3ba18956cba626a6edd27b91b43363",
@@ -204,30 +55,9 @@
     "full_prompt_count_endpoint_tokens": 52417,
     "bounded_prompt_count_endpoint_tokens": 26296,
     "attempts": [
-      {
-        "stage": "agent-long",
-        "prompt": "full",
-        "wall_seconds": 25.37,
-        "preflight_passed": true,
-        "tool_calls": 0,
-        "driver_sha256": "77ad8c52ff5af3967b6a7c111cf0f16118e8507ef039b2c34ef9868f22a1040f"
-      },
-      {
-        "stage": "agent-long-retry",
-        "prompt": "full",
-        "wall_seconds": 14.72,
-        "preflight_passed": true,
-        "tool_calls": 0,
-        "driver_sha256": "de25f98917d9367b39b0a8ff0696c7d89e0a9c25a3f03748ce393cd339d64193"
-      },
-      {
-        "stage": "agent-bounded",
-        "prompt": "bounded excerpts with all three distributed requirements and source file available",
-        "wall_seconds": 60.38,
-        "preflight_passed": true,
-        "tool_calls": 0,
-        "driver_sha256": "540120dd83f906b9b801fac8a726d766a1dd081b0b1136d659808b17feb82d98"
-      }
+      {"stage": "agent-long", "prompt": "full", "wall_seconds": 25.37, "preflight_passed": true, "tool_calls": 0, "driver_sha256": "77ad8c52ff5af3967b6a7c111cf0f16118e8507ef039b2c34ef9868f22a1040f"},
+      {"stage": "agent-long-retry", "prompt": "full", "wall_seconds": 14.72, "preflight_passed": true, "tool_calls": 0, "driver_sha256": "de25f98917d9367b39b0a8ff0696c7d89e0a9c25a3f03748ce393cd339d64193"},
+      {"stage": "agent-bounded", "prompt": "bounded excerpts with all three distributed requirements and source file available", "wall_seconds": 60.38, "preflight_passed": true, "tool_calls": 0, "driver_sha256": "540120dd83f906b9b801fac8a726d766a1dd081b0b1136d659808b17feb82d98"}
     ],
     "resource_observation": "Host pressure changed from normal to warning on each attempt; oMLX sampled process footprint peaked around 12 GiB on these stages; swap stayed at 432212541 bytes. Cursor and Chrome processes were active. The data does not isolate a fixed 64K model limit from the machine's total workload.",
     "rollback": "PASS: kryn rollback restored the prior private 49K continuity package and stopped the owned oMLX runtime; offline installed model settings read back max_context_window=49152. A post-rollback guarded inference smoke was requested but not authorized, so current-load agent reliability at 49K is unqualified. The owner then explicitly chose 64K; the same private 64K candidate was reinstalled and offline settings read back max_context_window=65536. A subsequent private 64K candidate was installed; at that time its immediate rollback target was an older 64K candidate. On September 25, a current 49K context build at source f6bc471 was installed and checked, then the private 64K candidate at source 8dfddf0 was reinstalled. Its committed transaction was inspected: the previous active receipt points to f6bc471. The actual rollback from this latest install has not been executed."
@@ -240,16 +70,8 @@
     "driver_sha256": "d5cb9a76df3d5fb5f932b5d7a1f1961e974fd774b4e2ea58ff1c208dfec380e7",
     "artifact_result": "PASS: frozen Task02 grader ran 2 checks against the modified production file and preserved original test/data files; this does not turn the aborted agent workflow into a pass",
     "grade_sha256": "b5adb472a9f84478f30e4ebc74e3fa77bd13a17849a8fce1f6959a7de6a1183d",
-    "provider_reported_cumulative_usage": {
-      "uncached_input": 42116,
-      "cache_read": 245760,
-      "output": 6916,
-      "reasoning_reported": 0
-    },
-    "pressure": [
-      1,
-      2
-    ],
+    "provider_reported_cumulative_usage": {"uncached_input": 42116, "cache_read": 245760, "output": 6916, "reasoning_reported": 0},
+    "pressure": [1, 2],
     "compaction": "not admitted because agent prompt remained incomplete",
     "scope": "Shows a short task can reach edits and pass focused artifact checks at 64K, but under the current desktop load sustained agent completion still failed. Cumulative usage is not active context length."
   },
@@ -260,29 +82,20 @@
     "result": "FAIL: guarded protocol smoke stopped for sustained host memory warning before generation completed; the planned native first-compaction task was not started",
     "private_protocol_run": "LocalAI/runs/protocol-20260925T205517Z-10c15ee5",
     "metrics_sha256": "d1d4d318626b7804970b8c86bc1624f0645583d05bcd71d59d09f44042af28de",
-    "pressure": [
-      1,
-      2
-    ],
+    "pressure": [1, 2],
     "swap_growth_bytes": 0,
     "runtime_stopped": true,
     "scope": "Offline first-compaction hook tests passed, but this installed package has no completed native semantic-compaction evidence."
   },
   "first_compaction_live_64k": {
     "candidate_source_revision": "8dfddf0379cdd4dc2e96c341c989fd75a14bd0a9",
-    "protocol_retry": {
-      "result": "PASS guarded smoke under current desktop load",
-      "private_run": "LocalAI/runs/protocol-20260925T210413Z-89cf8e79",
-      "metrics_sha256": "e253433a8fbb58d4b92d039cf80a7eb4f38c07b889a804a72ed30d3d29499af4"
-    },
+    "protocol_retry": {"result": "PASS guarded smoke under current desktop load", "private_run": "LocalAI/runs/protocol-20260925T210413Z-89cf8e79", "metrics_sha256": "e253433a8fbb58d4b92d039cf80a7eb4f38c07b889a804a72ed30d3d29499af4"},
     "fixture": "Fresh disposable CSV expense-tool planning stage with explicit goal, four acceptance criteria, constraints, one user decision, no checks yet, and a next action; Fast variant with native tools denied",
     "result": "PARTIAL: first native compaction completed after a completed planning turn, retained goal/criteria/next action, but promoted assistant-proposed SQLite and file layout into Decisions and omitted explicit unrun-check status. This is not decision/failure provenance acceptance.",
     "driver_completed": true,
     "native_compaction_completed": true,
     "elapsed_seconds": 28.458,
-    "pressure": [
-      1
-    ],
+    "pressure": [1],
     "swap_peak_growth_bytes": 0,
     "private_run": "/private/tmp/kryn-first-compaction-20260925/evidence/first",
     "driver_sha256": "60929176d279b1c46bb779887f6dd337dd4187e28a57a43e38e6b605baf942f7",
@@ -293,33 +106,11 @@
     "candidate_source_revision": "6582565cc63d783051fec07da864cef4f03c7d6e",
     "candidate_wheel_sha256": "ac2e6603b2f72b48efc90049438d30b9a287c687271c4571788dcee4144d51a3",
     "installed_release_identity": "91fc02925b9844bf",
-    "protocol_smoke": {
-      "result": "PASS",
-      "private_run": "LocalAI/runs/protocol-20260925T210953Z-ab0f93a8",
-      "metrics_sha256": "265681c16afbebcc21afb4dec3f4cb4e294c322eefce9061b6ea076aea38cc15"
-    },
+    "protocol_smoke": {"result": "PASS", "private_run": "LocalAI/runs/protocol-20260925T210953Z-ab0f93a8", "metrics_sha256": "265681c16afbebcc21afb4dec3f4cb4e294c322eefce9061b6ea076aea38cc15"},
     "fixture": "Fresh disposable CSV expense-tool planning session, exact initial request as prior first-compaction test; native tools denied; 64K Fast; two native compactions separated by server restart, then one edited TASK.md and another restart",
-    "first_compaction": {
-      "result": "PASS narrow semantic check: original goal, all four acceptance criteria, constraints, exact user decision and next action retained; assistant proposals were not promoted to decisions. The summary did not explicitly say checks were unrun.",
-      "driver_completed": true,
-      "seconds": 26.602,
-      "driver_sha256": "38957f6d41f6250598a094bcdb40bfc17c9bedc9123ccf0c2d6f4f3cd36a3047",
-      "export_sha256": "418cfb79d5f2b5688aad1715773fb79763f73761a117c5bab102c4b6acdbc639"
-    },
-    "restart_and_second_compaction": {
-      "result": "PASS narrow semantic check: without opening files, recalled all four acceptance criteria, constraints, exact user decision, no checks run and next action; second native compaction retained these facts.",
-      "driver_completed": true,
-      "seconds": 27.149,
-      "driver_sha256": "c16b2310551e5c8a850c0f633ff953e64efb3038409f68427afc4154034d0b54",
-      "export_sha256": "f0c86eddad6e92a6a074e4079181698db5f5f0514662385eb9d7b1f13b39903d"
-    },
-    "stale_checkpoint_restart": {
-      "result": "PASS narrow check: after TASK.md changed, a restarted session reported the checkpoint/workspace mismatch, named TASK.md, instructed rereading before implementation and did not claim checks passed.",
-      "driver_completed": true,
-      "seconds": 13.977,
-      "driver_sha256": "d9976a2c2e3808dffbad35b88ee17aa3b9ecf69c8ce4902fe838b8ad3f205942",
-      "export_sha256": "6fd81f5548997f5f429d96376544e5bf8629fcc095c6d17729b3a7e9ede285a1"
-    },
+    "first_compaction": {"result": "PASS narrow semantic check: original goal, all four acceptance criteria, constraints, exact user decision and next action retained; assistant proposals were not promoted to decisions. The summary did not explicitly say checks were unrun.", "driver_completed": true, "seconds": 26.602, "driver_sha256": "38957f6d41f6250598a094bcdb40bfc17c9bedc9123ccf0c2d6f4f3cd36a3047", "export_sha256": "418cfb79d5f2b5688aad1715773fb79763f73761a117c5bab102c4b6acdbc639"},
+    "restart_and_second_compaction": {"result": "PASS narrow semantic check: without opening files, recalled all four acceptance criteria, constraints, exact user decision, no checks run and next action; second native compaction retained these facts.", "driver_completed": true, "seconds": 27.149, "driver_sha256": "c16b2310551e5c8a850c0f633ff953e64efb3038409f68427afc4154034d0b54", "export_sha256": "f0c86eddad6e92a6a074e4079181698db5f5f0514662385eb9d7b1f13b39903d"},
+    "stale_checkpoint_restart": {"result": "PASS narrow check: after TASK.md changed, a restarted session reported the checkpoint/workspace mismatch, named TASK.md, instructed rereading before implementation and did not claim checks passed.", "driver_completed": true, "seconds": 13.977, "driver_sha256": "d9976a2c2e3808dffbad35b88ee17aa3b9ecf69c8ce4902fe838b8ad3f205942", "export_sha256": "6fd81f5548997f5f429d96376544e5bf8629fcc095c6d17729b3a7e9ede285a1"},
     "resources": "All three stages: normal sampled host pressure and zero incremental swap. Total measured active stage time 67.728 seconds; this is a narrow planning/restart fixture, not a sustained coding/UI pass.",
     "rollback_target": "PASS receipt inspection only: current 64K transaction at source 6582565 has committed prior active receipt at source d1aab47 (49K matching context code); actual rollback from this latest install remains unexercised."
   },
@@ -336,15 +127,6 @@
     "offline_doctor": "PASS: model max_model_len 65536, runtime healthy, idle, normal host pressure, browser/search MCP connected; no generation in doctor.",
     "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
   },
-  "failed_or_open_gates": [
-    "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
-    "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",
-    "128K near-limit request failed under the configured memory ceiling despite normal host pressure and zero incremental swap.",
-    "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
-    "96K and 128K thinking requests at their tested near-limit inputs produced sustained host memory warnings and were canceled; neither tier is suitable for the daily profile on current evidence. The 128K Fast result required a raised 20 GiB isolated ceiling and does not overturn its thinking failure.",
-    "64K thinking passed one cold and one warm synthetic near-limit retrieval, but three large-context agent starts and one ordinary short task then hit host pressure. The short task's edited artifact passed its focused grader, while the session did not complete. The owner elected to retain 64K as an experimental setting; the failures preclude a reliability claim or public tier promotion.",
-    "A post-rollback 49K guarded inference smoke was not authorized, so its behavior under the current host load is not established. A newer 64K first-compaction candidate installed but its protocol smoke was canceled on host pressure before the native test could start. A later guarded protocol retry and first native compaction completed under green pressure, but the summary promoted assistant suggestions to decisions and omitted no-checks-run status. Updated guidance passed a narrow installed two-compaction/restart/stale-file fixture, but the first summary omitted explicit no-checks-run status; the later turn and second summary recovered it. Sustained coding/UI work remains unqualified."
-  ],
   "latest_private_64k_install": {
     "source_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
     "context_tokens": 65536,
@@ -359,5 +141,14 @@
     "finding": "oMLX exposes opt-in TurboQuant KV with 2-8 bit depths. It is disabled in KRYN. This is an option to test for larger contexts, not proof that 96K/128K is reliable or useful.",
     "reported_cold_warm_risk": "https://github.com/jundot/omlx/issues/3690 reports silent wrong-answer detail retrieval on reused prefixes with 4-bit TurboQuant on a related Qwen3.5 architecture under oMLX 0.6.4. This is an external report, not a KRYN reproduction and not evidence about 8-bit.",
     "qualification_needed": "An isolated bit-depth trial must pass exact-input, cold and warm cache retrieval, task quality, latency, host pressure and swap gates before changing the daily profile. Do not enable 4-bit based on memory savings alone."
-  }
+  },
+  "failed_or_open_gates": [
+    "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
+    "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",
+    "128K near-limit request failed under the configured memory ceiling despite normal host pressure and zero incremental swap.",
+    "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
+    "96K and 128K thinking requests at their tested near-limit inputs produced sustained host memory warnings and were canceled; neither tier is suitable for the daily profile on current evidence. The 128K Fast result required a raised 20 GiB isolated ceiling and does not overturn its thinking failure.",
+    "64K thinking passed one cold and one warm synthetic near-limit retrieval, but three large-context agent starts and one ordinary short task then hit host pressure. The short task's edited artifact passed its focused grader, while the session did not complete. The owner elected to retain 64K as an experimental setting; the failures preclude a reliability claim or public tier promotion.",
+    "A post-rollback 49K guarded inference smoke was not authorized, so its behavior under the current host load is not established. A newer 64K first-compaction candidate installed but its protocol smoke was canceled on host pressure before the native test could start. A later guarded protocol retry and first native compaction completed under green pressure, but the summary promoted assistant suggestions to decisions and omitted no-checks-run status. Updated guidance passed a narrow installed two-compaction/restart/stale-file fixture, but the first summary omitted explicit no-checks-run status; the later turn and second summary recovered it. Sustained coding/UI work remains unqualified."
+  ]
 }
