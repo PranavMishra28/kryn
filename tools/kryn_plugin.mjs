@@ -148,11 +148,18 @@ export function pruneTrackers(directory, now = Date.now()) {
     if (index >= 500 || item.modified < now - 30 * 86400_000) fs.unlinkSync(item.file);
 }
 
-// Only simple test commands count. Exit zero remains evidence of a command, not task correctness.
-export function isCheck(command) {
-  if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
-  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
+// Only simple test commands count. A literal cd and stderr merge preserve
+// the test's exit status; other shell control syntax remains unobserved.
+function simpleCheck(command) {
+  if (typeof command !== 'string' || command.length > 4096) return null;
+  let value = command.trim();
+  const cd = /^cd\s+(?:\/[A-Za-z0-9_./-]+|\.[A-Za-z0-9_./-]*)\s*&&\s*(.+)$/.exec(value);
+  if (cd) value = cd[1];
+  value = value.replace(/\s+2>&1$/, '');
+  if (/[;&|`$\n\r<>]/.test(value)) return null;
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(value) ? value : null;
 }
+export const isCheck = command => simpleCheck(command) !== null;
 function verificationLedger(saved) {
   if (saved === undefined) return { schema: 1, coverage: 'observed_checks_only', acceptance: 'unestablished',
     complete: true, generation: 0, checks: [] };
@@ -187,11 +194,12 @@ function recordedRequests(saved) {
   return saved;
 }
 function checkIdentity(event, directory) {
-  if (event.tool !== 'shell' || !isCheck(event.input?.command)) return null;
+  const observed = event.tool === 'shell' ? simpleCheck(event.input?.command) : null;
+  if (!observed) return null;
   const command = event.input.command.trim();
   let workdir = path.resolve(directory, typeof event.input.workdir === 'string' ? event.input.workdir : directory);
   try { workdir = fs.realpathSync(workdir); } catch { /* A failed directory remains a distinct unverified check. */ }
-  const kind = /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(build|lint|typecheck)(?:\s|$)/.exec(command)?.[1] ?? 'test';
+  const kind = /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(build|lint|typecheck)(?:\s|$)/.exec(observed)?.[1] ?? 'test';
   return { key: sha(JSON.stringify([directory, workdir, command])), kind,
     message_id: typeof event.messageID === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(event.messageID) ? event.messageID : null,
     call_id_sha256: typeof event.id === 'string' && event.id.length > 0 && event.id.length <= 160 ? sha(event.id) : null };

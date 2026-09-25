@@ -44,6 +44,14 @@
     "rollback_target": "Committed installed 64K transaction at 037f5ea has prior active receipt at 49K context source cd9dd1e; actual rollback from this latest install remains unexercised",
     "scope": "One syntactic case only. Shell indirection, unsupported syntax and other tools remain outside this guard. Sustained coding/UI acceptance did not pass."
   },
+  "followup_task12d": {
+    "candidate_source_revision": "037f5ea199d5b6af9c565d4f076dc225708f50bf",
+    "fixture": "Fresh frozen Task12, disposable workspace, saved native Build session; raw traces in ignored evals/runs/context-candidate-task12d/",
+    "import_stage": {"result": "FAIL: 360-second limit reached after 29 tool calls with implementation/test edits, no final turn or compaction; owned session interrupted and settled idle", "seconds": 366.948, "pressure": [1], "swap_peak_growth_bytes": 0, "driver_sha256": "95e7aaf7a0a25a71bd9250741636154f75fd804a89436756defa86ed1d06ffad"},
+    "repair_after_restart": {"result": "PARTIAL: resumed saved session, model turn and first native compaction completed. An independent rerun of test_stage1 and test_existing passed 29 tests. The native checkpoint nevertheless described those checks as still running and made rerun the next action; check continuity not qualified.", "seconds": 196.317, "pressure": [1], "swap_peak_growth_bytes": 0, "driver_sha256": "73635d05a58172296d41880d23b6247eef6fe9c4600c32ea1538fe0668ed5bfc", "export_sha256": "3ac24269718a2e94b13b9568db82aba3fa0e0f6bd3980066dd8ec728f466531e"},
+    "frozen_grade": {"status": "PARTIAL", "automatic_checks": "2 passed", "manual_browser_ui_review_handoff": "NOT_TESTED", "grade_sha256": "52c6ea60c7ff90eab08fcfc6228310d24401c377f36bb20ed0ed0df4c74fef48"},
+    "observed_check_gap": "The agent used a literal cd <workspace> && python3 -B -m unittest ... 2>&1 shell command, while the tracker recognized only bare test commands. Candidate source now recognizes that exact non-masking wrapper and exposes its result in the checkpoint hook; offline tests pass, installed retest pending. Other shell control syntax remains unobserved."
+  },
   "accepted_mechanism_changes": [
     "Private bounded request continuity survives simulated two compactions and restart; legacy missing baseline is marked partial.",
     "Current Git/file evidence is bounded and old checkpoint fingerprints are marked stale; plain Relevant Files bullets now retrieve current source in offline tests.",
