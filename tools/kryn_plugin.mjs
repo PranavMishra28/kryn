@@ -2,6 +2,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import * as fs from 'node:fs';
 import path from 'node:path';
+import { contextCapsule, workspaceStamp } from './context_capsule.mjs';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
@@ -203,6 +204,7 @@ export default {
           (pin.schema === 1 && pin.workflowScope !== undefined))
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
+        checkpointStamp: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
         verification: verificationLedger(), previousTracker: null, shellRepeat: null };
@@ -214,6 +216,10 @@ export default {
         item.verification = verificationLedger(item.previousTracker.verification);
         if (!item.previousTracker.verification) item.verification.complete = false;
         item.checkpoint = item.previousTracker.native_checkpoint_event ?? null;
+        const saved = item.previousTracker.checkpoint_stamp;
+        if (saved !== undefined && saved !== null && !HASH.test(saved))
+          throw new Error('KRYN saved checkpoint stamp changed');
+        item.checkpointStamp = saved ?? null;
         staleChecks(item); // A restarted process cannot attest that project files stayed unchanged.
       }
       else if (options.observe && existingPin) item.verification.complete = false; // Old/pruned history is not an empty proof ledger.
@@ -234,6 +240,7 @@ export default {
       writeJSON(path.join(folders.trackers, item.key + '.json'), { owner: 'kryn.product', schema: 1,
         task_id: item.turn?.task_id ?? item.previousTracker?.task_id ?? null, champion_revision: item.pin.revision,
         native_session_id: item.native_session_id, native_checkpoint_event: item.checkpoint,
+        checkpoint_stamp: item.checkpointStamp,
         state, counts: item.turn ? Object.fromEntries(Object.entries(item.turn).filter(([key]) => key !== 'started' && key !== 'task_id')) : item.previousTracker?.counts ?? {},
         verification: item.verification,
         updated_at: new Date().toISOString(),
@@ -324,6 +331,8 @@ export default {
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
+      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp);
+      if (capsule) event.system.push({ type: 'text', text: capsule });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
       if (event.agent === 'plan') event.system.push({ type: 'text', text: PLAN_GUIDANCE });
@@ -365,6 +374,7 @@ export default {
     await ctx.session.hook('generate', instructions);
     await ctx.session.hook('compaction', event => {
       if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
+      event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements; decisions and why under Decisions; failed checks with actual results under Important Context; and one concrete next action. Label uncertain or historical claims as such.' });
       instructions(event); tracker(session(event.sessionID));
     });
     await ctx.session.hook('retry', event => {
@@ -593,6 +603,8 @@ export default {
           const item = start(id, event.id);
           item.turn.compactions = count(item.turn.compactions + 1);
           item.checkpoint = event.id;
+          const stamp = workspaceStamp(ctx.location.directory);
+          item.checkpointStamp = stamp.complete ? stamp.stamp : null;
           tracker(item);
         }
         if (event.type === 'session.execution.succeeded') finish(id, session(id).truncated ? 'incomplete' : 'unknown');

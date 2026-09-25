@@ -6,7 +6,7 @@ NODE ?= node
 check: docs-check
 	$(PYTHON) -B -m unittest discover -s setup
 	$(PYTHON) -B -m unittest discover -s tools -p 'test_*.py'
-	$(NODE) --test tools/test_kryn_plugin.mjs tools/inference-audit/server.test.js
+	$(NODE) --test tools/test_kryn_plugin.mjs tools/test_context_capsule.mjs tools/inference-audit/server.test.js
 	$(PYTHON) -B tools/run_native_trial.py --self-check
 	$(PYTHON) -B evals/bench.py verify
 	$(PYTHON) -B evals/bench.py selftest

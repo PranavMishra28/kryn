@@ -334,7 +334,7 @@ def perform(args, folder, report):
         n = (r.get("json") or {}).get("input_tokens")
         if r.get("http_status") != 200 or r.get("transport_error") or type(n) is not int or n <= 0:
             raise RuntimeError("No trustworthy token-count API response; exact-size testing unavailable")
-        return n
+        return n + args.template_token_offset
 
     def send(label, messages, target, expected, oversize=False):
         nonlocal baseline_swap
@@ -343,7 +343,8 @@ def perform(args, folder, report):
             raise RuntimeError("Measured input exceeds text admission or the declared conservative planning budget")
         if not idle(label + "-before"):
             raise RuntimeError("Runtime is not idle on the expected model; no generation sent")
-        payload = protocol.body(args.model, "xhigh", messages, 1 if oversize else args.max_tokens)
+        payload = protocol.body(args.model, args.variant, messages, 1 if oversize else args.max_tokens)
+        payload["thinking_budget"] = 0 if oversize else args.thinking_budget
         dispatch = {"stage": label, "attempted": False}
         report.setdefault("dispatches", []).append(dispatch)
         settled = False
@@ -414,8 +415,10 @@ def perform(args, folder, report):
         nonce = report["run_nonce"] + "-" + str(target)
         messages, units, preflight_tokens, seen = calibrate(target, count, lambda n: prompt(n, nonce))
         report["calibrations"].append({"target_tokens": target, "units": units,
-            "counted_tokens": preflight_tokens, "api_samples": seen,
-            "count_endpoint": COUNT_PATH, "template": "single user message; Qwen default/xhigh thinking"})
+            "predicted_generation_tokens": preflight_tokens,
+            "counted_tokens": preflight_tokens - args.template_token_offset,
+            "template_token_offset": args.template_token_offset, "adjusted_samples": seen,
+            "count_endpoint": COUNT_PATH, "template": "single user message; Qwen " + args.variant})
         if args.mode == "oversize":
             send("oversize", messages, target, FACTS["A"], oversize=True)
             break
@@ -494,7 +497,7 @@ def self_check():
     guard = ResourceGuard(50, 2)
     guard.check(green)
     assert guard.check({**green, "listener_processes": [{"pid": 2, "rss_bytes": 100}]})
-    args = SimpleNamespace(base_url="http://127.0.0.1", model="test", mode="cache", timeout=1,
+    args = SimpleNamespace(base_url="http://127.0.0.1", model="test", mode="cache", variant="think", thinking_budget=3072, template_token_offset=0, timeout=1,
         max_tokens=128, input_tokens=[512], server_context_limit=4096, planning_budget=4096,
         sample_interval=.01, warning_samples=2, max_swap_growth_mib=512, min_cache_fraction=.5)
     sent, busy, bad_repeat, bad_telemetry, fault = [], False, False, False, None
@@ -573,6 +576,10 @@ def main():
     p.add_argument("--nonce", help="optional fixed fixture ID for exact request replay across configurations")
     p.add_argument("--runs-dir", type=Path)
     p.add_argument("--mode", choices=("cache", "context", "oversize"), default="cache")
+    p.add_argument("--variant", choices=("fast", "think"), default="think", help="match the agent's fast or thinking request while measuring context")
+    p.add_argument("--thinking-budget", type=int, help="reasoning budget; defaults to up to 3072 in think while leaving 256 output tokens, or 0 in fast")
+    p.add_argument("--template-token-offset", type=int, default=0,
+                   help="measured generation-minus-count endpoint offset for this model and variant; actual usage must still match")
     p.add_argument("--input-tokens", default="8192", help="exact input counts, comma separated; not combined windows")
     p.add_argument("--server-context-limit", type=int, help="text-prompt admission limit, checked against max_model_len; not a combined window")
     p.add_argument("--planning-budget", type=int, help="optional probe-only conservative input+requested-output budget; never changes the runtime")
@@ -583,6 +590,8 @@ def main():
     p.add_argument("--min-cache-fraction", type=float, default=0.5)
     p.add_argument("--max-swap-growth-mib", type=int, default=512)
     args = p.parse_args()
+    if args.thinking_budget is None:
+        args.thinking_budget = min(3072, max(0, args.max_tokens - 256)) if args.variant == "think" else 0
     if args.self_check:
         self_check()
         return 0
@@ -597,8 +606,10 @@ def main():
             raise ValueError("input counts must be within 512..131072")
         if args.mode == "cache" and len(args.input_tokens) != 1:
             raise ValueError("cache mode accepts exactly one input size")
-        if args.server_context_limit is not None and not 1024 <= args.server_context_limit <= 131008:
-            raise ValueError("server context limit must be within 1024..131008")
+        if args.server_context_limit is not None and not 1024 <= args.server_context_limit <= 131072:
+            raise ValueError("server context limit must be within 1024..131072")
+        if not -64 <= args.template_token_offset <= 64:
+            raise ValueError("template token offset must be within -64..64")
         if args.mode == "oversize" and args.server_context_limit is None:
             raise ValueError("oversize mode requires the observed --server-context-limit")
         if args.mode != "oversize" and args.server_context_limit is not None and any(
@@ -609,6 +620,8 @@ def main():
             raise ValueError("planning budget must be 1024..262144 and cover input+requested output; omit for oversize")
         if not 1 <= args.max_tokens <= 4096 or not 0 < args.timeout <= 3600:
             raise ValueError("max-tokens must be 1..4096; timeout must be >0 and <=3600")
+        if args.thinking_budget < 0 or args.thinking_budget >= args.max_tokens and args.mode != "oversize":
+            raise ValueError("thinking budget must be nonnegative and leave output room")
         if not 1 <= args.sample_interval <= 60 or not 0 < args.min_cache_fraction <= 1 or args.max_swap_growth_mib < 0:
             raise ValueError("invalid telemetry interval, cache threshold or swap budget")
         if not 1 <= args.warning_samples <= 10:
@@ -621,7 +634,8 @@ def main():
     folder = args.runs_dir / ("context-" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + run_id[:8])
     folder.mkdir()
     report = {"schema_version": 2, "probe_revision": 3, "run_nonce": nonce,
-        "model": args.model, "base_url": args.base_url, "mode": args.mode,
+        "model": args.model, "base_url": args.base_url, "mode": args.mode, "variant": args.variant,
+        "thinking_budget": args.thinking_budget,
         "server_context_limit_asserted_by_operator": args.server_context_limit,
         "requested_output_max_tokens": 1 if args.mode == "oversize" else args.max_tokens,
         "planning_budget_tokens": args.planning_budget, "min_cache_fraction": args.min_cache_fraction,

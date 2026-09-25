@@ -281,6 +281,9 @@ def isolate_trial_config(config, target, managed):
     if len(products) != 1:
         raise RuntimeError("Expected exactly one requested KRYN product plugin")
     source = Path(products[0]["package"]).resolve()
+    product_names = ("server.js", "tui.tsx", "permission_display.mjs", "package.json")
+    if (source / "context_capsule.mjs").is_file():
+        product_names += ("context_capsule.mjs",)
     fresh = not target.exists()
     target.mkdir(parents=True, mode=0o700, exist_ok=True)
     config_root, product = target / "config", target / "product"
@@ -290,7 +293,7 @@ def isolate_trial_config(config, target, managed):
     hashes = {"config": {}, "product": {}}
     for origin, destination, names, key in (
         (managed, config_root, ("AGENTS.md", "cli.json"), "config"),
-        (source, product, ("server.js", "tui.tsx", "permission_display.mjs", "package.json"), "product"),
+        (source, product, product_names, "product"),
     ):
         for name in names:
             if name == "cli.json" and not (origin / name).exists():
@@ -716,7 +719,7 @@ def self_check():
         original.mkdir()
         for name in ("AGENTS.md", "cli.json", "opencode.json"):
             (managed / name).write_text(name)
-        for name in ("server.js", "tui.tsx", "permission_display.mjs", "package.json"):
+        for name in ("server.js", "tui.tsx", "permission_display.mjs", "context_capsule.mjs", "package.json"):
             (original / name).write_text(name)
         config = {"plugins": [{"package": str(original), "options": {"profileId": "test"}}]}
         isolated, product, hashes = isolate_trial_config(config, root / "frozen", managed)
@@ -729,6 +732,10 @@ def self_check():
                  "source": {"type": "local", "path": str(product / "server.js")}}
         assert plugin_active({"data": [entry]}, "kryn.product", product)
         assert not plugin_active({"data": []}, "kryn.product", product)
+        (original / "context_capsule.mjs").unlink()
+        legacy = {"plugins": [{"package": str(original), "options": {"profileId": "test"}}]}
+        _, old_product, old_hashes = isolate_trial_config(legacy, root / "legacy", managed)
+        assert "context_capsule.mjs" not in old_hashes["product"] and hashes_match(old_product, old_hashes["product"])
         assert not plugin_active({"data": [entry]}, "kryn.product", original)
         failed = copy.deepcopy(entry)
         failed["state"] = {"status": "failed", "error": "Duplicate plugin ID: kryn.product"}
