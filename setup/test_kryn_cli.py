@@ -45,6 +45,12 @@ class KrynChecks(unittest.TestCase):
         self.enterContext(patch.object(localai, 'owned_config', return_value={}))
         self.enterContext(patch.object(localai.improvement, 'record_outcome'))
 
+    def test_chrome_compatibility_lines_are_explicit(self):
+        for version in ('153.0.7499.170', '154.0.8037.58'):
+            self.assertTrue(localai.supported_chrome_version(version))
+        for version in ('152.0.0.0', '155.0.0.0', '154.0.8037', '154.0.8037.58-dev', None):
+            self.assertFalse(localai.supported_chrome_version(version))
+
     def guarded(self, samples, child, outcome=None, **options):
         outcome = {} if outcome is None else outcome
         server = Mock(env={}, directory=Path('/owned/project'), url='http://127.0.0.1:12345')
