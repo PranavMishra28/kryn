@@ -223,6 +223,14 @@ test('private user requirements survive two compactions and restart when native 
     git('init', '-q'); git('add', '.');
     git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'seed');
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Build atomic import and preserve seed data.' } });
+    const ordinary = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: [] };
+    f.call('session.context', ordinary);
+    assert.ok(!ordinary.system.some(x => x.text.includes('Build atomic import and preserve seed data')),
+      'ordinary pre-checkpoint turns do not repeat the request');
+    const first = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: [] };
+    f.call('session.compaction', first);
+    assert.match(first.system.map(x => x.text).join('\n'), /Build atomic import and preserve seed data/,
+      'the first native compaction sees the durable request before writing a checkpoint');
     await f.emit('session.compaction.ended');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     let event = context(); f.call('session.context', event);

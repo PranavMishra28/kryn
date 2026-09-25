@@ -90,9 +90,9 @@ function currentFiles(root, summary) {
   return lines;
 }
 
-export function contextCapsule(directory, messages, savedStamp, recordedPrompts = null) {
+export function contextCapsule(directory, messages, savedStamp, recordedPrompts = null, firstCompaction = false) {
   const summary = checkpoint(messages);
-  if (!summary && !savedStamp) return null;
+  if (!summary && !savedStamp && !(firstCompaction && recordedPrompts?.requests?.length)) return null;
   const root = fs.realpathSync(directory);
   const now = workspaceStamp(root);
   const state = !savedStamp || !now.complete ? 'unverified' :
