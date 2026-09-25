@@ -212,6 +212,46 @@ test('native checkpoint Git stamp survives restart and flags changed current sou
   } finally { await cleanup(); f.remove(); }
 });
 
+test('private user requirements survive two compactions and restart when native summary drops the task', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('git', args, { cwd: f.root, stdio: 'pipe' });
+  const summary = [{ content: '<conversation-checkpoint><summary>## Objective\n- No user conversation or task objective was provided.\n## Requirements\n- (none)\n</summary></conversation-checkpoint>' }];
+  const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: summary });
+  try {
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export default 1;\n');
+    git('init', '-q'); git('add', '.');
+    git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'seed');
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Build atomic import and preserve seed data.' } });
+    await f.emit('session.compaction.ended');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    let event = context(); f.call('session.context', event);
+    assert.match(event.system.map(x => x.text).join('\n'), /CHECKPOINT CONTRADICTION/);
+    assert.match(event.system.map(x => x.text).join('\n'), /Build atomic import and preserve seed data/);
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Also verify the mobile error state.' } });
+    await f.emit('session.compaction.ended');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    event = context(); f.call('session.context', event);
+    const injected = event.system.map(x => x.text).join('\n');
+    assert.match(injected, /Build atomic import and preserve seed data/);
+    assert.match(injected, /Also verify the mobile error state/);
+    assert.ok(!JSON.stringify(f.read('trackers')).includes('atomic import'));
+    const file = path.join(f.root, 'learning', 'continuity', fs.readdirSync(path.join(f.root, 'learning', 'continuity'))[0]);
+    assert.equal(fs.statSync(file).mode & 0o077, 0);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('resumed pins without a private request baseline mark continuity partial', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: [] });
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue the existing task.' } });
+    const file = path.join(f.root, 'learning', 'continuity', fs.readdirSync(path.join(f.root, 'learning', 'continuity'))[0]);
+    assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).clipped, true);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('timeouts, background work, workdir differences and interrupted checks remain unresolved', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   let serial = 0;
@@ -854,7 +894,7 @@ test('bounded pin admission preserves old sessions and tracker retention preserv
   } finally { await cleanup(); f.remove(); }
 });
 
-test('Browse handoff retains current user criteria through compaction without persisting prompt text', async () => {
+test('Browse handoff retains current user criteria through compaction without putting text in metadata trackers', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     const request = 'Private acceptance: valid login shows Welcome; invalid login shows an error.';

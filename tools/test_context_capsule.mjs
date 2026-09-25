@@ -35,6 +35,9 @@ test('native checkpoint receives bounded current evidence and detects changed di
   assert.match(capsule, /export const mode = \\"second\\"/);
   assert.ok(capsule.length <= 4000);
   assert.equal(contextCapsule(root, [], null), null, 'no checkpoint means no extra context');
+  const plain = [{ content: '<conversation-checkpoint><summary>## Relevant Files\n- src/app.js: current implementation\n</summary></conversation-checkpoint>' }];
+  assert.match(contextCapsule(root, plain, saved.stamp), /export const mode = \\"second\\"/,
+    'model-written file bullets without backticks still retrieve current source');
 });
 
 test('automatic retrieval skips symlinks and fails closed on oversized Git evidence', t => {
@@ -63,4 +66,29 @@ test('busy Git workspaces expose bounded current paths without claiming a comple
   const text = contextCapsule(root, [], 'a'.repeat(64));
   assert.match(text, /changed paths 33/);
   assert.match(text, /fingerprint unverified: more than 32 changed paths/);
+});
+
+test('a false native checkpoint is contradicted by durable user requirements', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const messages = [{ content: '<conversation-checkpoint><summary>## Objective\n- No user conversation or task objective was provided.\n## Requirements\n- (none)\n</summary></conversation-checkpoint>' }];
+  const recorded = { total: 1, clipped: false, requests: ['Build a form with atomic import and keep existing seed data.'] };
+  const text = contextCapsule(root, messages, null, recorded);
+  assert.match(text, /CHECKPOINT CONTRADICTION/);
+  assert.match(text, /atomic import and keep existing seed data/);
+  assert.ok(text.length <= 8000);
+  assert.match(contextCapsule(root, messages, null), /No private user-request baseline/);
+});
+
+test('long recorded requests cannot crowd out current Git and file evidence', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, 'src'));
+  fs.writeFileSync(path.join(root, 'src', 'app.js'), 'export const current = true;\n');
+  const messages = [{ content: '<conversation-checkpoint><summary>## Relevant Files\n- src/app.js: implementation\n</summary></conversation-checkpoint>' }];
+  const recorded = { total: 7, clipped: true, requests: ['A'.repeat(6000), 'B'.repeat(2000), 'C'.repeat(2000), 'D'.repeat(2000)] };
+  const capsule = contextCapsule(root, messages, null, recorded);
+  assert.match(capsule, /export const current = true/);
+  assert.match(capsule, /coverage is partial/);
+  assert.ok(capsule.length <= 8000);
 });

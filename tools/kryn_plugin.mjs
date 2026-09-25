@@ -27,7 +27,7 @@ const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
-const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, use the Browse subagent with the actual local URL and explicit acceptance criteria; wait for its observations and fix reported failures. Use native background shell support for dev servers rather than appending &. Stop only a verified process you own; never use killall or pkill. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
+const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, delegate the Browse agent with the native subagent tool, actual local URL and explicit acceptance criteria; Browse is an agent, not a skill. Wait for its observations and fix reported failures. Use native background shell support for dev servers rather than appending &. Follow the project's documented launch command with isolated test data; read the resulting URL before probing it. Stop only a verified process you own; never use killall or pkill. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
 const PLAN_GUIDANCE = 'Plan mode: inspect the project and produce an actionable plan with acceptance checks. Do not edit project files or run shell commands. Native plan-file writes are allowed only in the OpenCode plan directory. To implement, switch to Agent.';
 const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Agent for repairs.";
 const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
@@ -139,6 +139,17 @@ function verificationLedger(saved) {
   }
   return saved;
 }
+function recordedRequests(saved) {
+  if (saved === undefined) return { owner: 'kryn.product', schema: 1, total: 0, clipped: false, requests: [] };
+  if (!saved || Object.keys(saved).sort().join(',') !== 'clipped,owner,requests,schema,total' ||
+      saved.owner !== 'kryn.product' || saved.schema !== 1 ||
+      !Number.isSafeInteger(saved.total) || saved.total < 0 || typeof saved.clipped !== 'boolean' ||
+      !Array.isArray(saved.requests) || saved.requests.length > 4 ||
+      saved.requests.length > saved.total || (saved.total > 0 && saved.requests.length === 0) ||
+      saved.requests.some(value => typeof value !== 'string' || !value || value.length > 6000))
+    throw new Error('KRYN saved user-request continuity changed');
+  return saved;
+}
 function checkIdentity(event, directory) {
   if (event.tool !== 'shell' || !isCheck(event.input?.command)) return null;
   const command = event.input.command.trim();
@@ -174,7 +185,7 @@ export default {
     const options = validatedOptions(ctx.options);
     ownedDirectory(options.stateDir);
     const learning = ownedDirectory(path.join(options.stateDir, 'learning'), true);
-    const folders = Object.fromEntries(['events', 'pins', 'trackers', 'incidents'].map(name =>
+    const folders = Object.fromEntries(['events', 'pins', 'trackers', 'incidents', 'continuity'].map(name =>
       [name, ownedDirectory(path.join(learning, name), true)]));
     if (options.observe) pruneTrackers(folders.trackers);
     const sessions = new Map();
@@ -205,9 +216,12 @@ export default {
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         checkpointStamp: null,
+        continuityFile: path.join(folders.continuity, key + '.json'), recorded: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
         verification: verificationLedger(), previousTracker: null, shellRepeat: null };
+      item.recorded = recordedRequests(fs.existsSync(item.continuityFile) ? ownedFile(item.continuityFile) : undefined);
+      if (existingPin && item.recorded.total === 0) item.recorded.clipped = true;
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
         item.previousTracker = ownedFile(previous);
@@ -323,6 +337,18 @@ export default {
       const text = event.prompt?.text;
       item.userRequest = typeof text === 'string' ? (text.length <= 6000 ? text :
         text.slice(0, 3000) + '\n[Middle omitted; verification scope may be incomplete.]\n' + text.slice(-3000)) : '';
+      if (typeof text === 'string' && text && event.metadata?.source !== 'kryn.output-recovery') {
+        const previous = item.recorded;
+        const limit = previous.total ? 2000 : 6000;
+        const requests = previous.total ?
+          [previous.requests[0], ...previous.requests.slice(1).slice(-2), text.slice(0, limit)] :
+          [text.slice(0, limit)];
+        let next = { owner: 'kryn.product', schema: 1, total: count(previous.total + 1),
+          clipped: previous.clipped || text.length > limit, requests };
+        if (Buffer.byteLength(JSON.stringify(next)) > 30000) next = { ...next, clipped: true,
+          requests: requests.map(value => value.slice(0, 1000)) };
+        item.recorded = recordedRequests(writeJSON(item.continuityFile, next, true));
+      }
     });
     const instructions = event => {
       assertHealthy();
@@ -331,7 +357,7 @@ export default {
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
-      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp);
+      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded);
       if (capsule) event.system.push({ type: 'text', text: capsule });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });

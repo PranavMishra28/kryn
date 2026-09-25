@@ -1,0 +1,35 @@
+{
+  "status": "FAIL: private context and long-workflow candidate, no public release qualification",
+  "machine": "M4 Max, 48 GiB, AC power; public 49,152-token profile",
+  "candidate": {
+    "base_source_commit": "aa549e3",
+    "private_wheel_sha256": "71431970bae23725c0aa52bcc55bf9a2ffc8002ef289b2ae32f7789bc4cbb495",
+    "installed_release_identity": "afa8ae1990775560",
+    "scope": "Installed candidate included bounded first/latest user-request continuity; later plain-file-bullet, legacy-baseline and prompt-guidance edits were checked offline but were not part of this model run. The public v0.1.10 profile and release assets were unchanged."
+  },
+  "trial": {
+    "fixture": "Frozen Task12, isolated disposable workspace and one saved native session",
+    "raw_private_run": "evals/runs/context-candidate-task12b (ignored, not published)",
+    "plan": {"seconds": 83.185, "generation_completed": true, "native_compaction_completed": true, "semantic_result": "FAIL: checkpoint falsely said no user conversation or task", "driver_sha256": "a733f2b5d46b040bbcbcbbf5549f7d35b445ce2880c3cd2dacd946dff71cd5dd", "export_sha256": "efe87c84dc90b49276d6377ccab56707094b8de3e09d267615c31ab8658f8b07"},
+    "restart_and_recall": {"seconds": 65.403, "generation_completed": true, "native_compaction_completed": true, "semantic_result": "Recovered most task criteria and marked checks unrun; the second checkpoint retained objective, API, UI and next files, but causality of the private sidecar versus rereading TASK.md is not isolated", "driver_sha256": "8a3ede3841f18c013824fd580002f264ff024e5c08de487032e1444d7f94a1e6", "export_sha256": "f6b06e981cbb94fae8d94fa95443c8620cbff3ae382e984fcbbfc17cba6dc824"},
+    "backend": {"seconds": 607.211, "generation_completed": false, "timeout": true, "native_compaction": "not admitted because prompt incomplete", "frozen_api_checks": "2 passed", "model_focused_checks": "failed or unfinished", "pressure_warning": false, "swap_growth_bytes": 0, "driver_sha256": "2917a37e57b3badb792123f5a4ddd6f34b93535e82352b648b21f1daa3f5df76"},
+    "ui": {"seconds": 607.159, "generation_completed": false, "timeout": true, "native_compaction": "not admitted because prompt incomplete", "browser_tool_calls": 0, "guard": "direct broad pkill rejected before execution", "pressure_warning": false, "swap_growth_bytes": 0, "driver_sha256": "da422b482baf4d182f0a4e9ef0d93d7cbe76cd3dcb332ce48c1f38aa907c8716"},
+    "independent_chrome": {"checks_passed": 7, "checks_failed": 2, "passes": ["seed render", "persistent edit", "CSV file upload", "reload persistence", "CSV export", "controlled 503 feedback", "retry after 503"], "failures": ["exact project filter returned other projects", "375 px viewport overflowed to 422 px"], "result_sha256": "82ce7020b3f246cbf45a8bb9aa478a86545985d4f6e490c7c41e5b63b4c9600c", "narrow_screenshot_sha256": "8bbedbc6d0bfa71ba4c1c9ae377e9c44050d695b32051dbae5ef7d2b590695ca"},
+    "frozen_grade": {"status": "FAIL", "automatic_checks": "2 passed", "manual": "plan separation and 503 recovery passed; combined UI and semantic compaction failed; fresh reviewer and new-session final handoff not tested", "grade_sha256": "8a7a3f3c533f9afff60a6c721c46c8133598848b73c387d905459c5b70189b8a", "review_sha256": "876e1b1c1870445ca6479f6b06d6412748be3c22a726eae70579c09ce5167518"},
+    "elapsed_active_stage_seconds": 1362.958,
+    "duration_note": "About 22.7 minutes across active measured stages; not a passed sustained workflow or an idle-time claim."
+  },
+  "accepted_mechanism_changes": [
+    "Private bounded request continuity survives simulated two compactions and restart; legacy missing baseline is marked partial.",
+    "Current Git/file evidence is bounded and old checkpoint fingerprints are marked stale; plain Relevant Files bullets now retrieve current source in offline tests.",
+    "The native trial driver can request actual compaction and flags an obvious false no-task summary as semantic failure separately from structural completion.",
+    "The narrow process-name kill guard remained active during the installed UI trial."
+  ],
+  "unqualified_gates": [
+    "Explicit decisions, failed checks and next actions were not proven intact through every real compaction; the first native summary was false.",
+    "Backend and UI turns timed out; the complete application failed independent browser acceptance.",
+    "No fresh read-only reviewer or separate new-session final handoff completed.",
+    "The tier benchmark is synthetic and 128K failed the configured oMLX memory ceiling; no larger daily context tier was promoted.",
+    "No new clean install/rollback qualification was performed for this candidate."
+  ]
+}

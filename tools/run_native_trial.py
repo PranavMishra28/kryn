@@ -107,6 +107,49 @@ def runtime_is_idle(folder, label, timeout=3):
             and all(type(state.get(k)) is int and state[k] == 0 for k in ("active_requests", "waiting_requests")))
 
 
+def manual_compaction(server, session_id, workspace, folder, cancel=None):
+    """Request one native checkpoint, then wait for its persisted result."""
+    route = "/api/experimental/session/" + session_id + "/export"
+    def owned_export():
+        exported = server.request("GET", route, timeout=5)
+        info = exported.get("data", {}).get("info", {})
+        if (info.get("id") != session_id or
+                Path(info.get("location", {}).get("directory", "")).resolve() != workspace.resolve() or
+                info.get("model", {}).get("providerID") != "local" or
+                info.get("model", {}).get("id") != "qwen"):
+            raise RuntimeError("Refused compaction export outside the owned local fixture")
+        return exported
+    previous = {m.get("id") for m in owned_export()["data"]["messages"] if m.get("type") == "compaction"}
+    admitted = server.request("POST", "/api/session/" + session_id + "/compact", {}, timeout=5)
+    if admitted.get("data", {}).get("type") != "compaction":
+        raise RuntimeError("Native manual compaction was not admitted")
+    deadline = time.monotonic() + 240
+    while time.monotonic() < deadline:
+        if cancel is not None and cancel.is_set():
+            break
+        exported = owned_export()
+        rows = [m for m in exported["data"]["messages"]
+                if m.get("type") == "compaction" and m.get("id") not in previous]
+        if rows and rows[-1].get("status") in {"completed", "failed"}:
+            row = rows[-1]
+            summary = row.get("summary", "")
+            contradiction = bool((workspace / "TASK.md").is_file() and (workspace / "TASK.md").read_text().strip() and
+                re.search(r"\b(?:no user (?:conversation|input|task)|no active task|no task (?:objective|context))\b", summary, re.I))
+            result = {"admitted": True, "message_id": row.get("id"),
+                      "status": row.get("status"), "completed": row.get("status") == "completed",
+                      "summary_headings": re.findall(r"^## .+$", summary, re.M),
+                      "obvious_task_contradiction": contradiction,
+                      "semantic_qualification": "FAIL" if contradiction else "NOT_ESTABLISHED"}
+            (folder / "manual-compaction.json").write_text(json.dumps(result, indent=2) + "\n")
+            return result
+        time.sleep(1)
+    settlement = settle_owned_sessions(server, session_id, workspace, folder, interrupt=True, cancel=cancel)
+    result = {"admitted": True, "completed": False, "status": "resource_abort" if cancel and cancel.is_set() else "timeout",
+              "owned_settlement": settlement}
+    (folder / "manual-compaction.json").write_text(json.dumps(result, indent=2) + "\n")
+    return result
+
+
 def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, cancel=None):
     """Metadata-first bounded traversal. Never interrupt unrelated native sessions."""
     result = {"interrupt_requested": interrupt, "verified_sessions": [], "interrupts": [], "idle": False}
@@ -822,6 +865,29 @@ def self_check():
                     {"id": "answer", "type": "assistant", "model": local, "finish": "stop", "time": {"created": 1000, "completed": 2000}},
                     {"id": "idle", "type": "idle", "outcome": "succeeded", "time": {"created": 2100}}]}}
         root = fixture("ses_root")
+        class CompactServer:
+            def __init__(self, summary="## Objective\n- Continue task"):
+                self.started = False
+                self.summary = summary
+            def request(self, method, path, body=None, timeout=5):
+                if method == "POST":
+                    assert path == "/api/session/ses_root/compact" and body == {}
+                    self.started = True
+                    return {"data": {"type": "compaction"}}
+                assert method == "GET" and path == "/api/experimental/session/ses_root/export"
+                data = copy.deepcopy(root)
+                if self.started:
+                    data["data"]["messages"].append({"id": "cmp_1", "type": "compaction",
+                        "status": "completed", "summary": self.summary})
+                return data
+        compacted = manual_compaction(CompactServer(), "ses_root", workspace, Path(tmp))
+        assert compacted["completed"] and compacted["summary_headings"] == ["## Objective"]
+        assert compacted["semantic_qualification"] == "NOT_ESTABLISHED"
+        (workspace / "TASK.md").write_text("Build an application.\n")
+        false = manual_compaction(CompactServer("## Objective\n- No user conversation or task was provided"),
+                                  "ses_root", workspace, Path(tmp))
+        assert false["completed"] and false["obvious_task_contradiction"]
+        assert false["semantic_qualification"] == "FAIL"
         assert generation_completion([root], 900, "ses_root", {"ses_root"})["verified"]
         for key, value in (("finish", "length"), ("finish", None), ("error", {"type": "new failure"})):
             bad = copy.deepcopy(root)
@@ -917,6 +983,7 @@ def main():
     ap.add_argument("--ready-tools", action="store_true", help="wait up to 30s for connected MCP servers and a stable tool catalog before prompting")
     ap.add_argument("--expected-tools", type=Path, help="require exact equality with baseline tool-catalog.json; implies --ready-tools")
     ap.add_argument("--guard-resources", action="store_true", help="require green/idle preflight; cancel only owned sessions on sustained pressure, missing telemetry or >512 MiB swap growth")
+    ap.add_argument("--compact-after", action="store_true", help="after the turn, request and verify one native checkpoint in this disposable session; requires --guard-resources")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
     if args.self_check:
@@ -924,6 +991,8 @@ def main():
         return 0
     if args.run is None or (args.no_tools and args.session):
         ap.error("A prepared run is required; --no-tools requires a fresh session (omit --session)")
+    if args.compact_after and not args.guard_resources:
+        ap.error("--compact-after requires --guard-resources")
     ready_tools = args.ready_tools or args.expected_tools is not None
     try:
         expected_tools = canonical_tool_ids(json.loads(args.expected_tools.read_text())) if args.expected_tools else None
@@ -1077,6 +1146,22 @@ def main():
             cli_completed = child.returncode == 0 and not report.get("timed_out") and not report.get("resource_aborted")
             if monitor is not None:
                 cli_completed &= report.get("owned_settlement", {}).get("idle", False) and report.get("owned_cli_exited", False)
+            if args.compact_after and cli_completed:
+                try:
+                    report["manual_compaction"] = manual_compaction(server, session["id"], workspace, folder,
+                                                                     monitor.cancel if monitor else None)
+                except BaseException:
+                    report["owned_settlement"] = settle_owned_sessions(server, session["id"], workspace, folder,
+                        interrupt=True, cancel=monitor.cancel if monitor else None)
+                    raise
+                report["owned_settlement"] = settle_owned_sessions(server, session["id"], workspace, folder,
+                    interrupt=not report["manual_compaction"]["completed"], cancel=monitor.cancel if monitor else None)
+                cli_completed &= (report["manual_compaction"]["completed"] and
+                                  not report["manual_compaction"].get("obvious_task_contradiction") and
+                                  report["owned_settlement"]["idle"])
+            elif args.compact_after:
+                report["manual_compaction"] = {"admitted": False, "completed": False, "status": "prompt_incomplete"}
+            report["stage_finished_unix_ms"] = time.time() * 1000
             events = [json.loads(line) for line in (folder / "events.jsonl").read_text().splitlines() if line.strip()]
             event_session_ids = {event["sessionID"] for event in events if event.get("sessionID")}
             audit = [json.loads(line) for line in audit_path.read_text().splitlines() if line.strip()]
@@ -1132,7 +1217,7 @@ def main():
             if "prompt_finished_unix_ms" in report:
                 audit = [json.loads(line) for line in (folder / "inference.jsonl").read_text().splitlines() if line.strip()]
                 report["route_coverage"] = route_coverage(audit, exports, report["prompt_started_unix_ms"],
-                                                         report["prompt_finished_unix_ms"])
+                                                         report.get("stage_finished_unix_ms", report["prompt_finished_unix_ms"]))
                 report["route_coverage"]["plugin_snapshot_unchanged"] = all(
                     hashlib.sha256((audit_plugin / name).read_bytes()).hexdigest() == digest
                     for name, digest in audit_hashes.items())
