@@ -120,9 +120,10 @@
     "active_context_tokens": 65536,
     "rollback_target_source_revision": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
     "rollback_target_context_tokens": 49152,
-    "rollback_scope": "Committed activation receipt inspected; actual rollback from the latest install not exercised.",
+    "rollback_scope": "PASS actual rollback restored matching 49K source 8d39c67 and model context 49152, then the same 64K wheel was reinstalled; its new committed receipt again points to 8d39c67.",
     "guarded_protocol_smoke": "PASS at LocalAI/runs/protocol-20260925T222643Z-22255001",
     "metrics_sha256": "fba1eca44e4fc4acd037778caa927054bd5b0ed55c85453c3ecf2a31a3222fbc",
+    "post_rollback_smoke_metrics_sha256": "7082d9443c2f8b62bb734ca588a86d5acdb3b3492f62cec0961a01ba7a162522",
     "offline_doctor": "PASS: model max_model_len 65536, runtime healthy, idle, normal host pressure, browser/search MCP connected; no generation in doctor.",
     "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
   },

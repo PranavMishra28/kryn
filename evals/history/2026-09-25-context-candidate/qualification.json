@@ -192,7 +192,7 @@
     "Independent browser acceptance failed exact project filtering and persistent edit; fresh read-only review and new-session final handoff were not completed.",
     "64K remains experimental under variable host load; a focused repair turn was stopped by resource preflight before a prompt was sent. 96K/128K thinking near-limit trials failed host-pressure gates.",
     "The bounded recent-transcript and long-request head/tail capsule passed offline checks and were installed at 64K with protocol smoke; a fresh full multi-stage coding/UI semantic run on the exact latest code has not passed. Earlier narrow trials remain partial.",
-    "The current installed 64K transaction has a committed 49K rollback target but actual rollback from this latest install and clean install gate remain unexercised."
+    "Actual rollback from the latest 64K install to matching 49K source passed, then 64K reinstall and guarded smoke passed. Clean non-owner installation and long sustained coding/UI acceptance remain unexercised."
   ],
   "followup_task12e": {
     "candidate_source_revision": "ef56fc5052b8a8242eed0e886f55d6285bf995af",
@@ -296,8 +296,10 @@
     "latest_installed_wheel_sha256": "3b7155e704b5a5205e51ad817ddfa1d2de09bfdf4790a2f58a63d49f6f2ae7a3",
     "latest_guarded_protocol_metrics_sha256": "fba1eca44e4fc4acd037778caa927054bd5b0ed55c85453c3ecf2a31a3222fbc",
     "latest_install_status": "PASS private update, offline self-check, guarded protocol smoke and doctor. Active oMLX context=65536, healthy/idle, normal host pressure, browser and search MCP connected. Full native long workflow on this exact latest code not run.",
-    "latest_rollback_target": "Committed transaction receipt backs up 49K source 8d39c6736a26f7c1a9c97f135cad5fb90e0afa40; actual rollback from latest install unexercised.",
-    "bounded_overflow_fix": "Newest recorded user request now precedes lower-priority current-file excerpts in the 8K prompt; overflow retains an explicit omitted-evidence marker and verification footer. Emergency private-record truncation also keeps both ends of multibyte prompts. Offline regressions passed; this is bounded partial continuity, not complete arbitrary-history recall."
+    "latest_rollback_target": "PASS actual installed rollback: KRYN restored source 8d39c67 with oMLX max_context_window=49152 and stopped its owned runtime. The same private 64K wheel was reinstalled; active source 76c58ff, context=65536, and the committed immediate rollback receipt again points to 8d39c67.",
+    "bounded_overflow_fix": "Newest recorded user request now precedes lower-priority current-file excerpts in the 8K prompt; overflow retains an explicit omitted-evidence marker and verification footer. Emergency private-record truncation also keeps both ends of multibyte prompts. Offline regressions passed; this is bounded partial continuity, not complete arbitrary-history recall.",
+    "post_rollback_guarded_protocol_metrics_sha256": "7082d9443c2f8b62bb734ca588a86d5acdb3b3492f62cec0961a01ba7a162522",
+    "post_rollback_status": "PASS guarded protocol smoke and doctor: healthy idle 64K runtime, normal host pressure, browser/search MCP connected, zero observed swap change during smoke. This does not qualify clean non-owner installation or long Agent quality."
   },
   "current_installed_64k_narrow_trials": {
     "candidate_source_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
