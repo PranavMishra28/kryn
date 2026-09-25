@@ -79,7 +79,6 @@ class LearningTests(unittest.TestCase):
 
     def test_reflection_uses_frozen_fast_profile_and_trials_preserve_selected_variant(self):
         import context_probe
-        import owner_auth
         workspace=self.base/'run'/'workspace'; workspace.mkdir(parents=True)
         private=self.base/'private'; private.mkdir()
         config={'model':'local/qwen#think','agents':{'build':{'model':'local/qwen#think'}},
@@ -100,7 +99,7 @@ class LearningTests(unittest.TestCase):
         sample={'pressure_level':1,'swap_used_bytes':0,'listener_processes':[{'pid':123,'rss_bytes':1,'phys_footprint_bytes':1}]}
         with patch.object(native_client,'NativeServer',return_value=owner), patch.object(native_client,'background_boundary',return_value=[]), \
              patch.object(learning,'InferenceRelay',return_value=relay_owner), patch.object(learning,'settle_background',return_value={'idle':True}), \
-             patch.object(context_probe,'resources',return_value=sample), patch.object(owner_auth,'authorize'), \
+             patch.object(context_probe,'resources',return_value=sample), \
              patch.object(learning.subprocess,'Popen',return_value=child) as launch, patch.object(learning.time,'sleep'), \
              patch.object(learning,'grade',return_value={'passed':True}):
             result=learning.native_turn(self.state,config,workspace,'reflect',learning.BASELINE,120,reflection=True)
@@ -178,11 +177,10 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(safe['resources'][0]['listeners'][0]['pid'],42)
 
     def test_missing_frozen_reflection_variant_fails_without_fallback_or_process(self):
-        import owner_auth
         workspace=self.base/'workspace'; workspace.mkdir()
         config={'agents':{'build':{'model':'local/qwen#think'}},'providers':{'local':{'models':{'qwen':{
             'modelID':'test','variants':[{'id':'think'}]}}}}}
-        with patch.object(owner_auth,'authorize'), patch.object(learning,'InferenceRelay') as relay:
+        with patch.object(learning,'InferenceRelay') as relay:
             with self.assertRaisesRegex(RuntimeError,'no fallback'):
                 learning.native_turn(self.state,config,workspace,'reflect',learning.BASELINE,120,reflection=True)
         relay.assert_not_called()

@@ -111,7 +111,7 @@ In the GUI, hover over the prompt area to reveal the **Default** effort button b
 
 ## First installation
 
-The packaged installer is restricted to the configured GitHub owner. Access to the public source repository does not authorize another GitHub account to run that installer; the source remains available under the MIT license.
+The published v0.1.9 installer remains restricted to the configured GitHub owner. New source revisions remove that restriction, but public installation is not qualified or published yet. The steps below describe the available v0.1.9 release.
 
 Requirements:
 

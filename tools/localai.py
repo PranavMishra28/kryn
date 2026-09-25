@@ -25,7 +25,6 @@ from native_client import BINARY, MODEL_ID, PROJECT, ROOT, NativeServer, environ
 from context_probe import ResourceGuard, resources
 import improvement
 import learning
-import owner_auth
 
 RUNTIME = "http://127.0.0.1:8000"
 BASE_URL = RUNTIME + "/v1"
@@ -217,10 +216,13 @@ def verify_release(current=True):
     require(not current or PROJECT.resolve() == directory.resolve(),
             "This is not the installed release; run the deployed kryn command (source-kit init/self-check remain available)")
     files = manifest.get("files")
-    require(isinstance(files, dict) and {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
-            "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/owner_auth.py", "tools/protocol_probe.py", "setup/opencode.template.json",
+    expected = {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
+            "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/protocol_probe.py", "setup/opencode.template.json",
             "tools/session_report.py", "plugin/server.js", "plugin/package.json", "plugin/tui.tsx", "plugin/permission_display.mjs",
-            "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"} == set(files), "Unexpected installed release contents")
+            "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"}
+    legacy = expected | {"tools/owner_auth.py"}
+    require(isinstance(files, dict) and (set(files) == expected or not current and set(files) == legacy),
+            "Unexpected installed release contents")
     require(hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()[:16] == release,
             "Installed release manifest identity changed")
     for name, digest in files.items():
@@ -735,11 +737,7 @@ def run(args, outcome):
             health = runtime_metadata()
         except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
             health = {"healthy": False, "state": "stopped_or_unavailable"}
-        try:
-            authorization = {"authorized": True, "expires_at": owner_auth.authorize()["expires_at"]}
-        except owner_auth.AuthorizationError:
-            authorization = {"authorized": False}
-        print(json.dumps({**health, "owner_session": authorization,
+        print(json.dumps({**health, "access": "local_user",
                           "memory": memory_status(),
                           "improvement": learning.status(ROOT / "state/improvement")}, indent=2))
         return 0
@@ -846,15 +844,8 @@ def main(argv=None):
                                 argv[2] if len(argv) == 3 else None), indent=2))
         return 0
     if argv in (["login"], ["logout"]):
-        if argv[0] == "login":
-            owner_auth.login()
-            print("Owner verified with GitHub Keychain credentials. Offline session is valid for seven days.")
-        else:
-            owner_auth.logout()
-            print("KRYN owner session removed. Existing GitHub CLI authentication was preserved.")
-        return 0
+        raise RuntimeError("GitHub login is no longer required; this command is retired")
     if argv and argv[0] == "improve":
-        owner_auth.authorize()
         verify_release()
         require(len(argv) <= 2, "Usage: kryn improve [failures|status|pause|resume|disable|enable]")
         action = argv[1] if len(argv) == 2 else "status"
@@ -895,8 +886,6 @@ def main(argv=None):
         self_check()
         return 0
     command = args.command_or_project if args.command_or_project in {"init", "doctor", "status", "stop", "bench"} else "run"
-    if command not in {"status", "stop"}:
-        owner_auth.authorize()
     outcome = {"command": command, "status": "failure", "wall_seconds": 0, "exit_code": None,
                "failure_code": "unknown", "interventions": 0, "pressure_warning_samples": None,
                "swap_growth_bytes": None, "release_id": PROJECT.name if re.fullmatch(r"[a-f0-9]{16}", PROJECT.name) else None,

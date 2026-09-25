@@ -233,7 +233,7 @@ def verify_browser(root, setup=None, node=None, env=None, *, adopt=True):
     directory = root / "browser"
     tree, receipt = directory / "node_modules", directory / "integrity.json"
     if not adopt and not receipt.is_file():
-        raise RuntimeError("Existing browser integrity receipt is required; rerun the private installer")
+        raise RuntimeError("Existing browser integrity receipt is required; rerun the release installer")
     fresh = not tree.exists() and not tree.is_symlink()
     if fresh:
         if not adopt:
@@ -416,17 +416,15 @@ def recover(root):
 def install():
     os.umask(0o077)
     manifest = verify_payload()
-    setup, auth, learning = module("setup"), module("owner_auth"), module("learning")
+    setup, learning = module("setup"), module("learning")
     profile = setup.load_profile(payload() / "setup/accepted-profile.json")
     platform_check(profile)
     root = safe_path(root_path())
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    try: auth.authorize()
-    except auth.AuthorizationError: auth.login()
     uv = shutil.which("uv") or str(root / "dependencies/uv-0.11.16/uv")
     if not Path(uv).is_file(): uv = str(Path.home() / ".local/bin/uv")
     if not Path(uv).is_file():
-        raise RuntimeError("The private installer must provide uv")
+        raise RuntimeError("The release installer must provide uv")
     if not Path("/Applications/Google Chrome.app").is_dir():
         raise RuntimeError("Install Google Chrome for this qualified browser profile, then rerun the installer")
     state = root / "state/improvement"
@@ -511,8 +509,7 @@ def install():
 
 def rollback():
     verify_payload()
-    auth, learning = module("owner_auth"), module("learning")
-    auth.authorize()
+    learning = module("learning")
     root = root_path()
     with learning.foreground(root / "state/improvement"):
         if not recover(root):
@@ -527,8 +524,7 @@ def rollback():
 def uninstall():
     """Deactivate owned entry points; retain all data and installed dependencies."""
     verify_payload()
-    setup, auth, learning = module("setup"), module("owner_auth"), module("learning")
-    auth.authorize()
+    setup, learning = module("setup"), module("learning")
     root = root_path()
     with learning.foreground(root / "state/improvement"):
         recover(root)

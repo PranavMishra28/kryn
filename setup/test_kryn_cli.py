@@ -38,8 +38,7 @@ class Child:
 
 class KrynChecks(unittest.TestCase):
     def setUp(self):
-        # Separate owner-session tests cover authentication; these exercise lifecycle without production state.
-        self.enterContext(patch.object(localai.owner_auth, 'authorize', return_value={'owner_id': 90290458, 'expires_at': 9999999999}))
+        # Lifecycle checks stay isolated from production state.
         self.enterContext(patch.object(localai.learning, 'active_champion', return_value=localai.learning.BASELINE))
         self.enterContext(patch.object(localai.learning, 'start_after_exit'))
         self.enterContext(patch.object(localai, 'owned_config', return_value={}))
@@ -297,12 +296,10 @@ class KrynChecks(unittest.TestCase):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             localai.main([project, '--auto', '--permissions', 'ask'])
 
-    def test_controls_are_available_offline_without_starting_or_authorizing_services(self):
+    def test_controls_are_available_offline_without_starting_services(self):
         output = io.StringIO()
-        with patch.object(localai.owner_auth, 'authorize') as auth, \
-             patch.object(localai, 'run') as run, redirect_stdout(output):
+        with patch.object(localai, 'run') as run, redirect_stdout(output):
             self.assertEqual(localai.main(['controls']), 0)
-        auth.assert_not_called()
         run.assert_not_called()
         self.assertIn('/web', output.getvalue())
         self.assertIn('--permissions interactive', output.getvalue())
@@ -420,9 +417,27 @@ class KrynChecks(unittest.TestCase):
                     deploy_client.main()
                 self.assertEqual((foreign.read_bytes(), foreign.stat().st_mtime_ns), before)
             changed = Path(manifest['directory']) / 'tools/localai.py'
+            original = changed.read_bytes()
             changed.write_text('# changed')
             with patch.object(localai, 'ROOT', root), self.assertRaisesRegex(RuntimeError, 'release file changed'):
                 localai.verify_release(current=False)
+            changed.write_bytes(original)
+            # Source-kit init must read a verified v0.1.9 client without activating it.
+            old_directory = Path(manifest['directory'])
+            old_file = old_directory / 'tools/owner_auth.py'
+            old_file.write_text('legacy owner policy')
+            legacy_files = dict(manifest['files'])
+            legacy_files['tools/owner_auth.py'] = hashlib.sha256(old_file.read_bytes()).hexdigest()
+            legacy_id = hashlib.sha256(json.dumps(legacy_files, sort_keys=True).encode()).hexdigest()[:16]
+            legacy_directory = root / 'client' / legacy_id
+            old_directory.rename(legacy_directory)
+            legacy_manifest = {**manifest, 'release': legacy_id, 'directory': str(legacy_directory), 'files': legacy_files}
+            (root / 'client/deployment.json').write_text(json.dumps(legacy_manifest))
+            with patch.object(localai, 'ROOT', root):
+                self.assertEqual(localai.verify_release(current=False), legacy_manifest)
+                with patch.object(localai, 'PROJECT', legacy_directory), \
+                        self.assertRaisesRegex(RuntimeError, 'Unexpected installed release contents'):
+                    localai.verify_release(current=True)
 
     def test_expected_runtime_allowlist_without_secret_output(self):
         profile = setup.load_profile(setup.HERE / 'accepted-profile.json')
