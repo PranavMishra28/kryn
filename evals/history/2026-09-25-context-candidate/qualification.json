@@ -191,7 +191,7 @@
     "The two-compaction coding/UI trial completed some stages but its native checkpoint incorrectly kept already edited UI controls Active, promoted model choices to user Decisions, and claimed 503/export without end-to-end evidence.",
     "Independent browser acceptance failed exact project filtering and persistent edit; fresh read-only review and new-session final handoff were not completed.",
     "64K remains experimental under variable host load; a focused repair turn was stopped by resource preflight before a prompt was sent. 96K/128K thinking near-limit trials failed host-pressure gates.",
-    "The new bounded recent-transcript capsule passed offline checks and was installed at 64K with a guarded protocol smoke; its repeated-compaction semantic behavior is unqualified because the frozen prior Task12 session refused mixed candidate inputs before a prompt.",
+    "The bounded recent-transcript capsule passed offline checks and was installed at 64K; a fresh native checkpoint exported recent transcript and the resumed Ask turn flagged assistant-authored decisions, but the bridge’s causal contribution and sustained coding/UI continuity remain unqualified.",
     "The current installed 64K transaction has a committed 49K rollback target but actual rollback from this latest install and clean install gate remain unexercised."
   ],
   "followup_task12e": {
@@ -285,10 +285,109 @@
     "change": "Include a bounded, explicitly historical and unverified recent transcript tail alongside the native checkpoint so contradictory handoff/work-state claims are visible to the next turn. Current Git/file evidence and check ledger remain authoritative for verification.",
     "source_revision": "0651376845b8b41041299f5b8b7c9bd70293af81",
     "offline_regression": "PASS: contradictory checkpoint/handoff fixture and full make check (173 setup, 21 Python tools, 52 Node tests, driver and frozen suite).",
-    "installed_native_regression": "PARTIAL: package install, offline self-check, guarded protocol smoke and doctor passed. A saved-session recall attempt could not start: frozen Task12e trial inputs reject the changed candidate before prompt. No native repeated-compaction semantic regression has run on this revision.",
+    "installed_native_regression": "PARTIAL: private 64K package install, offline self-check, guarded protocol smoke and doctor passed. A fresh Task12f planning fixture completed three compactions across restarts with preserved broad requirements but no tools. Task12g produced a checkpoint with 1,808-character recent native transcript and a later Ask turn flagged assistant-authored Decisions; causality of the new injected tail is not isolated. The tool-enabled filter stage timed out, and full Task12 grader failed.",
     "installed_64k_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
     "installed_64k_wheel_sha256": "d8ee3b271bead2ea8ff42285610db8073849553cb07c8cebd5114d8a919f4bc4",
     "protocol_smoke_metrics_sha256": "7d7b115e0241cbfe98fa61e108c340eeaccead5ec25ca077585f663628e5e45d",
     "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised."
+  },
+  "current_installed_64k_narrow_trials": {
+    "candidate_source_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
+    "task12f": {
+      "fixture": "Fresh frozen Task12 disposable planning session, tools denied from creation; raw private traces in ignored evals/runs/context-candidate-task12f/",
+      "plan": {
+        "seconds": 22.049,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "4f8fc192c1cd001667b8bc269860a4b45fead2328cbd1a619446923b3c136a2f"
+      },
+      "restart_recall": {
+        "seconds": 27.898,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "7bd184721d19e29f07f238046d0b1457ee27756d10fdfa55b0951f5b47fa6393"
+      },
+      "third_turn": {
+        "seconds": 26.52,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "0aff6d37f81e9bbb740b6c45299ea9ec7ac15cec2eb00ee1a9582f8e3adab428"
+      },
+      "finding": "Three native compactions across restarts retained broad goal, criteria, actual user decision, no checks and next action under normal sampled pressure. The session was pinned no-tools, so the attempted Build turn only proposed commands in prose; no code was edited. This is planning continuity, not coding quality."
+    },
+    "task12g": {
+      "fixture": "Fresh frozen Task12 disposable tool-enabled Build session, narrowly prompted for exact HTTP project filtering; raw private traces in ignored evals/runs/context-candidate-task12g/",
+      "filter_build": {
+        "seconds": 187.185,
+        "model_completed": false,
+        "tool_calls": 21,
+        "native_compaction_completed": false,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "a72a8c7701430c2431e47acaa28201a56857f15b0357644da1b6ba1e81a6273b",
+        "result": "TIMEOUT after server edit and 21 tool calls; model did run 4 generated and 2 existing tests successfully after earlier test errors, but did not finish the turn or compact."
+      },
+      "independent_http": "PASS: in-process live HTTP server returned all 3 seed rows unfiltered, only t2 for project=beta and no rows for project=bet; 2 original tests passed. The generated 4 filter tests copied the production predicate into test code instead of exercising Handler, so their pass is not filter acceptance.",
+      "close_after_restart": {
+        "seconds": 50.644,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3c998e19f35a019913f8f2e9dbc3f9e3d36e8926b890607127f9e09039ba373b",
+        "result": "Completed a focused handoff and first native compaction; summary retained stage but put model edits under Decisions, and recent native transcript included the assistant handoff (1,808 chars)."
+      },
+      "checkpoint_audit": {
+        "seconds": 30.589,
+        "model_completed": true,
+        "tool_calls": 3,
+        "native_compaction_completed": false,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "402ecfc597dff5e49b7e3fcb1254855bb3938f18b865327e9ca2a9aeddea398a",
+        "result": "Resumed Ask turn flagged assistant-authored Decisions and treated historical tests/HTTP claims as unverified; read-only tools were used despite a no-tools prompt. This does not isolate whether the new transcript-tail capsule caused the correction."
+      },
+      "fresh_reviewer": {
+        "seconds": 43.649,
+        "model_completed": true,
+        "tool_calls": 7,
+        "native_compaction_completed": false,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "f2852fe785a9be2fe30ed6a8bb1fb27398c0ceb20880c87f2bfac1d3877f7a71",
+        "result": "PASS narrow review finding: native read-only Reviewer identified that generated filter tests replicated the predicate rather than exercised HTTP; it also found missing endpoints, but did not run checks."
+      },
+      "frozen_grade": {
+        "status": "FAIL (overall Task12 still incomplete after a filter-only stage)",
+        "automatic_checks": "1 of 2 passed; missing /api/import",
+        "grade_sha256": "5e6f6413e9e0751c01db7f6920893aa43a1ac09078cc22a3dbe535923eef0d43"
+      },
+      "duration": "312.067 seconds total active measured stage time including audit/review; no sustained complete coding/UI task."
+    },
+    "scope": "Latest installed 64K build supports narrow planning compactions, one incomplete coding turn, a focused close/restart and a read-only review. It has not passed full requirement preservation, browser UI, long sustained completion or actual 49K rollback."
   }
 }
