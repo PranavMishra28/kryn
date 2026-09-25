@@ -416,7 +416,11 @@ export default {
         const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
         event.system.push({ type: 'text', text: 'Observed-check ledger: ' + counts +
           (ledger.complete ? '.' : '; partial observation/provenance.') +
-          ' Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
+          ' Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. ' +
+          (AGENT_ROLES.has(event.agent)
+            ? 'Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. '
+            : 'This role cannot execute checks; report unresolved or unrun checks and hand execution to Agent. ') +
+          'State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
         if (unresolved.length) event.system.push({ type: 'text', text: 'Unresolved check references: ' +
           unresolved.slice(0, 8).map(check => check.kind + ':' + check.state + ' #' + check.key.slice(0, 12) +
             (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
