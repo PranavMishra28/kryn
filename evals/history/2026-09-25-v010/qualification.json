@@ -78,6 +78,7 @@
     "baseline_generated_ui_independent_browser_check": "PASS",
     "baseline_browser_report_sha256": "b93d44a07caa7195289e14d07ca507463b2532f9f7d9ec8d2c61f282b6a1a282",
     "browser_check_scope": "Save/reload at 390x844 and 1280x800, accessible invalid-minutes feedback, injected 503 preserving input, exactly one successful retry, console/network inspection. This outcome check ran after the timed-out Agent trial and does not make that trial completed.",
-    "guidance_uplift": "Not established; both drivers timed out and the guided trial still attempted skill browse before using subagent browse."
+    "guidance_uplift": "Not established; both drivers timed out. The guided trial still attempted skill browse, then used two native Browse delegations and five browser calls; neither navigation reached a verifiable form flow.",
+    "guided_trial_timeout_detail": "The final Browse child waited about 328 seconds on an unanswered native question requesting evaluator creation of the controlled .fail-next marker. The frozen task prompt explicitly required that evaluator handoff; the timeout is not evidence of a model or shell stall."
   }
 }
