@@ -260,6 +260,31 @@ test('resumed pins without a private request baseline mark continuity partial', 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('long user requests retain late acceptance criteria across compaction and restart', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const messages = [{ content: '<conversation-checkpoint><summary>## Requirements\n- omitted\n</summary></conversation-checkpoint>' }];
+  try {
+    const initial = 'Build the app. ' + 'x'.repeat(7000) + ' Final acceptance: preserve the seed on failed import.';
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: initial } });
+    await f.emit('session.compaction.ended');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const later = 'Keep working. ' + 'y'.repeat(3000) + ' Latest constraint: no detached server.';
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: later } });
+    await f.emit('session.compaction.ended');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages };
+    f.call('session.context', event);
+    const capsule = event.system.map(item => item.text).join('\n');
+    assert.match(capsule, /Final acceptance: preserve the seed on failed import/);
+    assert.match(capsule, /Latest constraint: no detached server/);
+    assert.match(capsule, /Middle omitted; full request remains in private native history/);
+    const file = path.join(f.root, 'learning', 'continuity', fs.readdirSync(path.join(f.root, 'learning', 'continuity'))[0]);
+    const record = JSON.parse(fs.readFileSync(file, 'utf8'));
+    assert.equal(record.clipped, true);
+    assert.ok(record.requests.every(request => request.length <= 6000));
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('timeouts, background work, workdir differences and interrupted checks remain unresolved', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   let serial = 0;
