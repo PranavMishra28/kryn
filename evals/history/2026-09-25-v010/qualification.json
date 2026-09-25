@@ -53,11 +53,15 @@
       "public_updater_restored_release": "PASS",
       "guarded_inference_after_update": "PASS",
       "doctor_deep_after_update": "PASS",
+      "uninstall_removed_only_owned_launchers": "PASS",
+      "public_installer_reactivated_after_uninstall": "PASS",
+      "guarded_inference_after_reactivation": "PASS",
+      "doctor_deep_after_reactivation": "PASS",
       "external_project_tui_launch": "PASS"
     },
     "end_state_source_revision": "e9c90ff6fe41cae6ef17f7fecdd2e2adf2f54246",
     "end_state_pressure": "normal",
-    "scope": "Owner Mac with existing dependencies and models. Guarded inference is a protocol smoke, not an engineering task. TUI launch reached Agent with 2/2 tools; no GUI task was run after publication."
+    "scope": "Owner Mac with existing dependencies and models. Uninstall marked the installation deactivated, removed all four owned launchers, and left model files present; the public installer reactivated it. Guarded inference is a protocol smoke, not an engineering task. TUI launch reached Agent with 2/2 tools; no GUI task was run after publication."
   },
   "task_06": {
     "trials": [
