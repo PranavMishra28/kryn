@@ -413,6 +413,7 @@ class KrynChecks(unittest.TestCase):
             with patch.object(Path, 'home', return_value=home), patch.object(sys, 'argv', ['deploy', '--apply']), redirect_stdout(io.StringIO()):
                 deploy_client.main()
                 deploy_client.main()
+
             manifest = json.loads((root / 'client/deployment.json').read_text())
             with patch.object(localai, 'ROOT', root):
                 self.assertEqual(localai.verify_release(current=False), manifest)
@@ -455,6 +456,32 @@ class KrynChecks(unittest.TestCase):
                 with patch.object(localai, 'PROJECT', legacy_directory), \
                         self.assertRaisesRegex(RuntimeError, 'Unexpected installed release contents'):
                     localai.verify_release(current=True)
+
+    def test_source_inspection_uses_the_verified_installed_release_profile(self):
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory)
+            (installed / 'setup').mkdir()
+            template = json.loads((localai.PROJECT / 'setup/opencode.template.json').read_text())
+            template['default_agent'] = 'build'
+            template['agents'].pop('agent')
+            template['agents'].pop('ask')
+            template['agents']['build'].pop('hidden')
+            for name in ('deliver', 'handoff'):
+                template['commands'][name]['agent'] = 'build'
+            (installed / 'setup/opencode.template.json').write_text(json.dumps(template))
+            (installed / 'setup/install-profile.json').write_bytes((localai.PROJECT / 'setup/accepted-profile.json').read_bytes())
+            with patch.object(localai, 'product_plugin_files', return_value={'server.js': b'legacy'}):
+                old_config = localai.expected_config(installed)
+                localai.validate_owned_config(old_config, project=installed)
+                with self.assertRaisesRegex(RuntimeError, 'default_agent'):
+                    localai.validate_owned_config(old_config)
+            with patch.object(localai, 'verify_release', return_value={'directory': str(installed)}), \
+                 patch.object(localai, 'validate_runtime_files'), patch.object(localai, 'model_integrity'), \
+                 patch.object(localai, 'owned_config', return_value=old_config), \
+                 patch.object(localai, 'validate_owned_config', side_effect=RuntimeError('profile checked')) as checked, \
+                 self.assertRaisesRegex(RuntimeError, 'profile checked'):
+                localai.prerequisites(source_init=True)
+            checked.assert_called_once_with(old_config, project=installed)
 
     def test_expected_runtime_allowlist_without_secret_output(self):
         profile = setup.load_profile(setup.HERE / 'accepted-profile.json')

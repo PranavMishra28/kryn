@@ -55,14 +55,14 @@ In your shell:
   kryn improve failures       List error-triggered regression incidents
 
 Inside the terminal interface:
-  /agents   or Ctrl+X then A   Choose Build, Plan, Browse or Audit
+  /agents   or Ctrl+X then A   Choose Ask, Plan or Agent (legacy roles remain)
   /effort   or Ctrl+T          Switch Default (thinking on) / Fast (thinking off)
   /settings                   Display, reasoning visibility and permission settings
   /permissions                Open settings from the visible permission indicator
   /web      (also /pair)       Show the local GUI address and temporary credentials
   /sessions                   Open a saved session
   /status                     Inspect native tool and service status
-  /deliver your task          Build a small milestone and verify it
+  /deliver your task          Build a small milestone and verify it in Agent
   /research your topic        Search primary sources with citations
   /audit                      Request a fresh read-only review
   /handoff                    Summarize work, checks and next steps
@@ -100,14 +100,24 @@ def local_reference(ref, *, legacy=False):
             and ref.get("variant") in variants | {None})
 
 
-def expected_config():
+def expected_config(project=None):
     # The deployer copies the reviewed template and pins its selected model.
-    config = json.loads((PROJECT / "setup/opencode.template.json").read_text())
-    files = product_plugin_files(PROJECT)
+    project = PROJECT if project is None else Path(project)
+    config = json.loads((project / "setup/opencode.template.json").read_text())
+    def root_paths(value):
+        if isinstance(value, str):
+            return value.replace("__ROOT__", str(ROOT))
+        if isinstance(value, list):
+            return [root_paths(item) for item in value]
+        if isinstance(value, dict):
+            return {key: root_paths(item) for key, item in value.items()}
+        return value
+    config = root_paths(config)
+    files = product_plugin_files(project)
     identity = hashlib.sha256(b''.join(files[name] for name in sorted(files))).hexdigest()[:16]
-    profile = PROJECT / "setup/install-profile.json"
+    profile = project / "setup/install-profile.json"
     if not profile.is_file():
-        profile = PROJECT / "setup/accepted-profile.json"
+        profile = project / "setup/accepted-profile.json"
     profile_id = hashlib.sha256(profile.read_bytes()).hexdigest()
     for item in config["plugins"]:
         if isinstance(item, dict):
@@ -131,7 +141,7 @@ def validate_defaults(config, expected):
         require(config.get(key) == expected.get(key), f"Expected release {key}; review profile before launch")
 
 
-def validate_route(provider, model):
+def validate_route(provider, model, project=None):
     for name, value in (("provider", provider), ("model", model)):
         require(value.get("package") == PACKAGE, f"Unexpected {name} package; refusing launch")
         require(value.get("settings", {}).get("baseURL") == BASE_URL,
@@ -142,20 +152,20 @@ def validate_route(provider, model):
             "Expected Default (thinking) and Fast (no thinking); only Fast is an explicit variant")
     require(all(v.get("settings", {}).get("baseURL") == BASE_URL for v in variants),
             "Every variant must explicitly use the local endpoint")
-    expected = expected_config()["providers"]["local"]["models"]["qwen"]
+    expected = expected_config(project)["providers"]["local"]["models"]["qwen"]
     for key in ("limit", "body"):
         require(model.get(key) == expected.get(key), f"Unexpected model {key}; review profile before launch")
     require({v["id"]: v for v in variants} == {v["id"]: v for v in expected["variants"]},
             "Reasoning variant definitions differ from this release")
 
 
-def validate_owned_config(config):
-    expected_profile = expected_config()
+def validate_owned_config(config, project=None):
+    expected_profile = expected_config(project)
     providers = config.get("providers", {})
     require(set(providers) == {"local"}, "Owned config must contain only provider local")
     models = providers["local"].get("models", {})
     require(set(models) == {"qwen"}, "Owned config must contain only model local/qwen")
-    validate_route(providers["local"], models["qwen"])
+    validate_route(providers["local"], models["qwen"], project)
     require(local_reference(config.get("model")), "Default model must be local/qwen")
     validate_defaults(config, expected_profile)
     rules = [p for p in config.get("experimental", {}).get("policies", [])
@@ -167,11 +177,17 @@ def validate_owned_config(config):
     require(config.get("update") == "disable" and config.get("share") == "disabled",
             "Automatic updates/sharing must remain disabled")
     for section in ("agents", "commands"):
+        require(set(config.get(section, {})) == set(expected_profile[section]),
+                f"Owned {section} catalog differs from this release")
         for name, item in config.get(section, {}).items():
             require(local_reference(item.get("model")), f"Owned {section}/{name} must pin local/qwen")
         for name, item in expected_profile[section].items():
             require(same_reference(config.get(section, {}).get(name, {}).get("model"), item.get("model")),
                     f"Expected release model reference for {section}/{name}")
+            if section == "agents":
+                require(all(config[section][name].get(key) == item.get(key)
+                            for key in ("mode", "hidden", "permissions", "system")),
+                        f"Expected release permissions and visibility for {section}/{name}")
             if section == "commands":
                 require(all(config[section][name].get(key) == item.get(key) for key in ("agent", "subagent")),
                         f"Expected release command routing for {name}")
@@ -179,10 +195,11 @@ def validate_owned_config(config):
 
 def prerequisites(source_init=False):
     release = verify_release(current=not source_init)
-    validate_runtime_files(Path(release["directory"]))
+    installed = Path(release["directory"])
+    validate_runtime_files(installed)
     model_integrity(source_init=source_init)
     config = owned_config()
-    validate_owned_config(config)
+    validate_owned_config(config, project=installed if source_init else None)
     for path in (BINARY, OMLX):
         require(path.is_file() and os.access(path, os.X_OK), f"Missing executable: {path}")
     marker = ROOT / MODEL_PARENT / MODEL_ID / ".localai-download.json"

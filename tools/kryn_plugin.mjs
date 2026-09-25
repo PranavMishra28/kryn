@@ -9,7 +9,8 @@ const MAX_SESSION_PINS = 500;
 const MAX_OBSERVED_CHECKS = 64;
 const READ_TOOLS = new Set(['read', 'glob', 'grep', 'webfetch', 'question',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
-const READ_ROLES = new Set(['reviewer', 'explore', 'audit']);
+const READ_ROLES = new Set(['ask', 'reviewer', 'explore', 'audit']);
+const AGENT_ROLES = new Set(['agent', 'build']); // Saved Build sessions keep their original native ID.
 const AUDIT_TOOLS = new Set([...READ_TOOLS, 'subagent']);
 const READ_ACTIONS = new Set([...READ_TOOLS, 'external_directory']);
 export const BROWSER_TOOLS = [
@@ -26,7 +27,8 @@ const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
 const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, use the Browse subagent with the actual local URL and explicit acceptance criteria; wait for its observations and fix reported failures. Use native background shell support for dev servers rather than appending &. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
-const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Build for repairs.";
+const PLAN_GUIDANCE = 'Plan mode: inspect the project and produce an actionable plan with acceptance checks. Do not edit project files or run shell commands. Native plan-file writes are allowed only in the OpenCode plan directory. To implement, switch to Agent.';
+const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Agent for repairs.";
 const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
 const count = value => Number.isFinite(value) && value >= 0 ? Math.min(Math.floor(value), 1e9) : 0;
 
@@ -322,12 +324,14 @@ export default {
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
-      if (event.agent === 'build') event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
+      if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
+      if (event.agent === 'plan') event.system.push({ type: 'text', text: PLAN_GUIDANCE });
+      if (event.agent === 'ask') event.system.push({ type: 'text', text: 'Ask mode: investigate with read and search tools, then answer with evidence and uncertainty. Do not edit files or run commands. Switch to Agent for implementation.' });
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
-      if (event.agent === 'build') event.system.push({ type: 'text', text:
+      if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
         'Verification observations: this prompt has observed ' + item.browserCalls + ' completed browser calls; calls alone do not prove acceptance. A delegated Browse result must supply its own observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation. If browser work is requested, delegate Browse before reporting it as verified.' });
-      if (event.agent === 'build' && options.observe) {
+      if (AGENT_ROLES.has(event.agent) && options.observe) {
         const ledger = item.verification;
         const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
         const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
@@ -352,7 +356,7 @@ export default {
         for (const name of Object.keys(event.tools ?? {}))
           if (!(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(name)) delete event.tools[name];
       if (READ_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
-        'Your current role is read-only. You cannot run tests or start a dev server using shell, execute, or a helper agent. If the user asks for execution, explain that they must select Build with /agents first. Do not invent a tool or repeatedly attempt a denied action.' });
+        'Your current role is read-only. You cannot run tests or start a dev server using shell, execute, or a helper agent. If the user asks for execution, explain that they must select Agent with /agents first. Do not invent a tool or repeatedly attempt a denied action.' });
       if (event.agent === 'browse')
         for (const name of Object.keys(event.tools ?? {}))
           if (!BROWSE_TOOLS.has(name)) delete event.tools[name];
@@ -447,7 +451,7 @@ export default {
       if (event.tool === 'subagent') {
         if (activeChildren.has(event.sessionID)) throw new Error('KRYN allows one foreground child at a time');
         if (!event.input || typeof event.input !== 'object') throw new Error('KRYN invalid subagent input');
-        if (event.agent === 'build' && event.input.agent === 'browse') {
+        if (AGENT_ROLES.has(event.agent) && event.input.agent === 'browse') {
           const request = session(event.sessionID).userRequest;
           if (request && typeof event.input.prompt === 'string') event.input = { ...event.input,
             prompt: event.input.prompt + '\n\nCurrent user request, preserved for acceptance criteria:\n' + request +
@@ -562,11 +566,11 @@ export default {
           if (event.data.finish === 'length' && !item.stopped) {
             const epoch = item.promptEpoch;
             const info = await ctx.session.get({ sessionID: id });
-            // Only continue a top-level Build turn. A child belongs to its parent's
+            // Only continue a top-level Agent or legacy Build turn. A child belongs to its parent's
             // native lifecycle; explicit interruption/revert/user steering wins.
             if (controller.signal.aborted || item.stopped || epoch !== item.promptEpoch ||
                 info.id !== id || !sameLocation(info.location) || info.parentID || info.revert ||
-                info.agent !== 'build' || info.model?.providerID !== 'local' || info.model?.id !== 'qwen' ||
+                !AGENT_ROLES.has(info.agent) || info.model?.providerID !== 'local' || info.model?.id !== 'qwen' ||
                 (['interrupted', 'failed'].includes(info.outcome) &&
                  new Date(info.time?.idle).getTime() >= item.turn.started)) continue;
             tracker(item, 'incomplete');
