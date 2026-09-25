@@ -673,8 +673,6 @@ def _native_turn(directory, config, workspace, prompt, champion, seconds, *, ref
     """One genuine native session; no custom tool/agent loop."""
     from native_client import NativeServer, BINARY, background_boundary
     from context_probe import ResourceGuard, resources, summarize_resources
-    import owner_auth
-    owner_auth.authorize()  # Offline identity/expiry check; no credentials enter children.
     model_id = config["providers"]["local"]["models"]["qwen"]["modelID"]
     reference, variant = configured_reference(config)
     if reflection:

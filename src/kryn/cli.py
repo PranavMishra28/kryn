@@ -45,10 +45,10 @@ def main():
         deployment = safe_json(root / "client/deployment.json")
         directory = Path(deployment["directory"])
         if directory.parent != root / "client" or not directory.name.isalnum():
-            raise RuntimeError("Invalid installed client identity; run the private installer")
+            raise RuntimeError("Invalid installed client identity; run the release installer")
         script = directory / "tools/localai.py"
         if not script.is_file() or script.is_symlink():
-            raise RuntimeError("Installed client is missing; run the private installer")
+            raise RuntimeError("Installed client is missing; run the release installer")
         # Keep the venv's interpreter path: resolving its symlink would lose package context.
         os.execv(sys.executable, [sys.executable, "-E", "-B", str(script), *args])
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.CalledProcessError) as error:

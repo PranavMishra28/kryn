@@ -3,6 +3,7 @@ import hashlib
 from contextlib import nullcontext, redirect_stdout
 import importlib.util
 import io
+import io
 import json
 import os
 from pathlib import Path
@@ -39,10 +40,10 @@ class PackageTests(unittest.TestCase):
         self.enterContext(patch.object(Path, "home", return_value=home))
         self.enterContext(patch.object(installer, "root_path", return_value=root))
         self.enterContext(patch.object(installer, "verify_payload", return_value={"source_revision": "a" * 40}))
-        setup, auth, learning = Mock(), Mock(), Mock()
+        setup, learning = Mock(), Mock()
         setup.encode.side_effect = lambda value: json.dumps(value, indent=2) + "\n"
         learning.foreground.side_effect = lambda _: nullcontext()
-        self.enterContext(patch.object(installer, "module", side_effect=lambda name: {"setup": setup, "owner_auth": auth, "learning": learning}[name]))
+        self.enterContext(patch.object(installer, "module", side_effect=lambda name: {"setup": setup, "learning": learning}[name]))
         self.enterContext(redirect_stdout(io.StringIO()))
         self.runtime_guard = self.enterContext(patch.object(installer, "guard_runtime"))
         directory = root / "client" / ("a" * 16)
@@ -117,7 +118,7 @@ class PackageTests(unittest.TestCase):
         self.assertFalse(two.exists())
 
     def test_interrupted_rollback_resumes_without_rolling_back_another_generation(self):
-        auth, learning = Mock(), Mock()
+        learning = Mock()
         learning.foreground.side_effect = lambda _: nullcontext()
         count = len(installer.activation_paths(self.root))
         # Cut after the intent journal and after every restored activation file,
@@ -130,7 +131,7 @@ class PackageTests(unittest.TestCase):
                 with patch.object(Path, "home", return_value=home), \
                         patch.object(installer, "root_path", return_value=root), \
                         patch.object(installer, "verify_payload", return_value={}), \
-                        patch.object(installer, "module", side_effect=lambda name: {"owner_auth": auth, "learning": learning}[name]), \
+                        patch.object(installer, "module", side_effect=lambda name: {"learning": learning}[name]), \
                         patch.object(installer, "guard_runtime"):
                     paths = installer.activation_paths(root)
                     active = root / "packages/active.json"
@@ -205,52 +206,38 @@ class PackageTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             installer.verify_payload(base, manifest)
 
-    def test_bootstrap_owner_policy_precedes_release_access_without_visibility_gate(self):
-        status = {"hosts": {"github.com": [{"active": True, "state": "success", "tokenSource": "keyring"}]}}
-        responses = [status, {"id": 90290458, "type": "User"}]
-        def github(args, **kwargs):
-            self.assertTrue(kwargs["capture_output"])
-            return subprocess.CompletedProcess(args, 0, json.dumps(responses.pop(0)), "")
-        with patch.dict(os.environ, {"GH_CONFIG_DIR": str(self.root)}, clear=True), patch.object(bootstrap.subprocess, "run", side_effect=github) as runner:
-            bootstrap.secure_owner("/test/gh")
-            self.assertEqual(runner.call_count, 2)
-            self.assertFalse(any("repo" in call.args[0] for call in runner.call_args_list))
-            responses[:] = [status, {"id": 1, "type": "User"}]
-            runner.reset_mock()
-            with self.assertRaisesRegex(RuntimeError, "only the verified"):
-                bootstrap.secure_owner("/test/gh")
-            self.assertEqual(runner.call_count, 2)
-            self.assertFalse(any("release" in call.args[0] for call in runner.call_args_list))
-            (self.root / "hosts.yml").write_text("github.com:\n  oauth_token: synthetic-secret\n")
-            runner.reset_mock()
-            with self.assertRaisesRegex(RuntimeError, "Plaintext"):
-                bootstrap.secure_owner("/test/gh")
-            runner.assert_not_called()
+    def test_bootstrap_downloads_publicly_without_using_account_credentials(self):
+        wheel_bytes = b"synthetic-wheel"
+        wheel_name = "kryn-0.1.0-py3-none-any.whl"
+        sums = (hashlib.sha256(wheel_bytes).hexdigest() + "  " + wheel_name + "\n" +
+                "a" * 64 + "  install-kryn.py\n").encode()
+        base = "https://github.com/" + bootstrap.REPO + "/releases/download/v0.1.0/"
+        seen = []
+        def open_public(request, **kwargs):
+            seen.append(request.full_url)
+            self.assertIsNone(request.get_header("Authorization"))
+            self.assertEqual(kwargs["timeout"], 60)
+            return io.BytesIO(sums if request.full_url.endswith("SHA256SUMS") else wheel_bytes)
+        opener = Mock(open=open_public)
+        with patch.dict(os.environ, {"GH_TOKEN": "synthetic-secret", "GITHUB_TOKEN": "another-secret"}), \
+                patch.object(bootstrap.urllib.request, "build_opener", return_value=opener):
+            wheel, digest = bootstrap.public_release("v0.1.0", self.root)
+        self.assertEqual(seen, [base + "SHA256SUMS", base + wheel_name])
+        self.assertEqual(wheel.read_bytes(), wheel_bytes)
+        self.assertEqual(digest, hashlib.sha256(wheel_bytes).hexdigest())
+        corrupt = self.root / "corrupt"; corrupt.mkdir()
+        def changed(request, **kwargs):
+            return io.BytesIO(sums if request.full_url.endswith("SHA256SUMS") else b"changed-wheel")
+        with patch.object(bootstrap.urllib.request, "build_opener", return_value=Mock(open=changed)):
+            with self.assertRaisesRegex(RuntimeError, "checksum failed"):
+                bootstrap.public_release("v0.1.0", corrupt)
 
-    def test_bootstrap_auth_failures_do_not_relay_captured_secrets(self):
-        with patch.dict(os.environ, {"GH_CONFIG_DIR": str(self.root)}, clear=True):
-            for result in (subprocess.CompletedProcess([], 1, "synthetic-secret", "synthetic-secret"),
-                           subprocess.CompletedProcess([], 0, '["synthetic-secret"]', ""),
-                           subprocess.CompletedProcess([], 0, '{"hosts": []}', "")):
-                with patch.object(bootstrap.subprocess, "run", return_value=result):
-                    with self.assertRaises(RuntimeError) as raised:
-                        bootstrap.secure_owner("/test/gh")
-                    self.assertNotIn("synthetic-secret", str(raised.exception))
-            with patch.object(bootstrap.subprocess, "run", side_effect=subprocess.TimeoutExpired([], 30, "synthetic-secret")):
-                with self.assertRaises(RuntimeError) as raised:
-                    bootstrap.secure_owner("/test/gh")
-                self.assertNotIn("synthetic-secret", str(raised.exception))
-
-    def test_bootstrap_token_environment_denied_before_auth_or_download(self):
-        with patch.dict(os.environ, {"GH_TOKEN": "synthetic-secret"}, clear=True), \
-                patch.object(sys, "argv", ["install-kryn.py", "--tag", "v0.1.0"]), \
-                patch.object(bootstrap.platform, "system", return_value="Darwin"), \
-                patch.object(bootstrap.platform, "machine", return_value="arm64"), \
-                patch.object(bootstrap.shutil, "which", return_value="/test/gh"), \
-                patch.object(bootstrap.subprocess, "run") as runner:
-            with self.assertRaisesRegex(RuntimeError, "environment"):
-                bootstrap.main()
-            runner.assert_not_called()
+    def test_bootstrap_rejects_insecure_release_redirects(self):
+        request = bootstrap.urllib.request.Request("https://github.com/PranavMishra28/kryn")
+        redirect = bootstrap.HTTPSReleaseRedirect()
+        for target in ("http://github.com/file", "https://untrusted.invalid/file"):
+            with self.subTest(target=target), self.assertRaisesRegex(RuntimeError, "trusted HTTPS"):
+                redirect.redirect_request(request, None, 302, "Found", {}, target)
 
     def test_runtime_stop_uses_installed_profile_and_rejects_unrelated_or_busy(self):
         directory = self.root / "client" / ("a" * 16)
@@ -301,11 +288,11 @@ class PackageTests(unittest.TestCase):
         setup.load_profile.return_value = {"files": {"shard": "hash"}}
         setup.model_destination.return_value = (model, model / "marker", "marker")
         setup.plugin_files.return_value = {}
-        auth, learning = Mock(), Mock()
+        learning = Mock()
         learning.foreground.side_effect = lambda _: nullcontext()
         original_is_dir = Path.is_dir
         with patch.object(installer, "verify_payload", return_value={}), \
-                patch.object(installer, "module", side_effect=lambda name: {"setup": setup, "owner_auth": auth, "learning": learning}[name]), \
+                patch.object(installer, "module", side_effect=lambda name: {"setup": setup, "learning": learning}[name]), \
                 patch.object(installer, "root_path", return_value=root), \
                 patch.object(installer, "activation_paths", return_value=[root / "packages/active.json"]), \
                 patch.object(installer, "platform_check"), patch.object(installer, "recover"), \

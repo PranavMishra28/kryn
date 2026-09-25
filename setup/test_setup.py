@@ -42,7 +42,6 @@ class SetupChecks(unittest.TestCase):
                      patch.object(localai, "ensure_runtime", return_value={"healthy": True, "active_requests": 0, "waiting_requests": 0}), \
                      patch.object(localai, "dependency_report", return_value={}), \
                      patch.object(localai, "await_runtime_idle"), \
-                     patch.object(localai.owner_auth, "authorize", return_value={"owner_id": 90290458}), \
                      patch.object(localai.learning, "foreground", return_value=contextlib.nullcontext()), \
                      patch.object(localai.learning, "active_champion", return_value=localai.learning.BASELINE), \
                      patch.object(localai.learning, "start_after_exit"), \
@@ -58,13 +57,6 @@ class SetupChecks(unittest.TestCase):
                 self.assertEqual(order, ["readiness", "tui"])
                 self.assertEqual("search" in error.getvalue(), state != "connected")
                 owner.__exit__.assert_called_once()
-
-    def test_missing_owner_session_prevents_native_start(self):
-        with patch.object(localai.owner_auth, "authorize", side_effect=localai.owner_auth.AuthorizationError("login required")), \
-             patch.object(localai, "NativeServer") as server, \
-             self.assertRaisesRegex(localai.owner_auth.AuthorizationError, "login required"):
-            localai.main([str(self.root)])
-        server.assert_not_called()
 
     def test_profile_pin_paths_and_memory(self):
         profile = setup.load_profile()

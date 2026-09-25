@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a checksum-verified GitHub release for the authorized owner."""
+"""Install a checksum-verified public GitHub release."""
 import argparse
 import hashlib
 import json
@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.parse
 import urllib.request
 import zipfile
 
@@ -38,68 +39,64 @@ def safe(path):
     return path
 
 
-def secure_owner(gh):
-    """Bootstrap equivalent of the packaged auth boundary; never disclose subprocess output."""
-    hosts = Path(os.environ.get("GH_CONFIG_DIR", str(Path.home() / ".config/gh"))) / "hosts.yml"
-    if hosts.is_file() and re.search(r"^\s*oauth_token:\s*\S+", hosts.read_text(), re.M):
-        raise RuntimeError("Plaintext GitHub token storage is refused; use gh's OS credential store")
-    def read(arguments):
-        try:
-            result = subprocess.run([gh, *arguments], capture_output=True, text=True, timeout=30)
-        except (OSError, subprocess.SubprocessError):
-            raise RuntimeError("Secure GitHub identity check failed; check network and gh authentication") from None
-        if result.returncode: raise RuntimeError("Secure GitHub identity check failed; check network and gh authentication")
-        try:
-            value = json.loads(result.stdout)
-            if not isinstance(value, dict): raise ValueError()
-            return value
-        except ValueError: raise RuntimeError("Unexpected GitHub identity response") from None
-    status = read(["auth", "status", "--active", "--hostname", "github.com", "--json", "hosts"])
-    hosts = status.get("hosts")
-    accounts = hosts.get("github.com") if isinstance(hosts, dict) else None
-    if (not isinstance(accounts, list) or len(accounts) != 1 or not isinstance(accounts[0], dict) or accounts[0].get("active") is not True or
-            accounts[0].get("state") != "success" or accounts[0].get("tokenSource") != "keyring"):
-        raise RuntimeError("Secure GitHub login required: gh auth login --hostname github.com --web")
-    user = read(["api", "--hostname", "github.com", "user"])
-    if type(user.get("id")) is not int or user["id"] != 90290458 or user.get("type") != "User":
-        raise RuntimeError("This release authorizes only the verified repository owner")
-    # Repository visibility is independent of the owner's installation policy.
-    # Release access is checked by the subsequent authenticated download.
+class HTTPSReleaseRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        target = urllib.parse.urlsplit(newurl)
+        if target.scheme != "https" or target.hostname not in {
+                "github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"}:
+            raise RuntimeError("Release redirect left trusted HTTPS hosts")
+        return super().redirect_request(request, fp, code, msg, headers, newurl)
+
+
+def download_public(url, destination, limit):
+    """Fetch public release bytes without GitHub CLI, account config or auth headers."""
+    request = urllib.request.Request(url, headers={"User-Agent": "KRYN-installer"})
+    opener = urllib.request.build_opener(HTTPSReleaseRedirect())
+    with opener.open(request, timeout=60) as response, destination.open("xb") as stream:
+        size = 0
+        while chunk := response.read(1024 * 1024):
+            size += len(chunk)
+            if size > limit:
+                raise RuntimeError("Release asset exceeds its download limit")
+            stream.write(chunk)
+
+
+def public_release(tag, work):
+    base = f"https://github.com/{REPO}/releases/download/{tag}/"
+    checksum = work / "SHA256SUMS"
+    download_public(base + "SHA256SUMS", checksum, 65536)
+    wheel_name = f"kryn-{tag[1:]}-py3-none-any.whl"
+    sums = {}
+    for line in checksum.read_text().splitlines():
+        if line.strip():
+            value, name = line.split(maxsplit=1)
+            name = name.lstrip(" *")
+            if not re.fullmatch(r"[a-f0-9]{64}", value) or name in sums:
+                raise RuntimeError("Invalid release checksums")
+            sums[name] = value
+    if set(sums) != {wheel_name, "install-kryn.py"}:
+        raise RuntimeError("Release checksums do not match the requested version")
+    wheel = work / wheel_name
+    download_public(base + wheel_name, wheel, 50 * 1024**2)
+    if sha(wheel) != sums[wheel_name]:
+        raise RuntimeError("Release wheel checksum failed")
+    return wheel, sums[wheel_name]
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
     args = parser.parse_args()
-    if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", args.tag):
+    if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", args.tag):
         raise RuntimeError("Use an exact release tag")
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         raise RuntimeError("This installer supports native Apple Silicon macOS")
-    gh = shutil.which("gh")
-    if not gh:
-        raise RuntimeError("Install GitHub CLI and use gh auth login --hostname github.com --web first")
-    if any(os.environ.get(k) for k in ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN")):
-        raise RuntimeError("Use GitHub CLI's OS credential store instead of token environment variables")
-    secure_owner(gh)
-    # The verified package renews the bounded offline owner session before activation.
     os.umask(0o077)
     root = safe(Path.home() / "Library/Application Support/LocalAI")
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    with tempfile.TemporaryDirectory(prefix=".private-release-", dir=root) as work:
+    with tempfile.TemporaryDirectory(prefix=".kryn-release-", dir=root) as work:
         work = Path(work)
-        run([gh, "release", "download", args.tag, "--repo", REPO, "--pattern", "*.whl", "--pattern", "SHA256SUMS", "--dir", work])
-        wheels = list(work.glob("*.whl"))
-        if len(wheels) != 1: raise RuntimeError("Expected one wheel in this release")
-        wheel = wheels[0]
-        sums = {}
-        for line in (work / "SHA256SUMS").read_text().splitlines():
-            if line.strip():
-                value, name = line.split(maxsplit=1)
-                name = name.lstrip(" *")
-                if not re.fullmatch(r"[a-f0-9]{64}", value) or name in sums: raise RuntimeError("Invalid release checksums")
-                sums[name] = value
-        expected = sums.get(wheel.name)
-        if expected is None or sha(wheel) != expected: raise RuntimeError("Release wheel checksum failed")
+        wheel, expected = public_release(args.tag, work)
         # Reject path traversal, links, and non-package data before pip touches the wheel.
         with zipfile.ZipFile(wheel) as bundle:
             names = bundle.namelist()
@@ -110,8 +107,9 @@ def main():
                     raise RuntimeError("Unsafe wheel entry")
                 if not (item.filename.startswith("kryn/") or re.match(r"kryn-[^/]+\.dist-info/", item.filename)):
                     raise RuntimeError("Unexpected wheel top-level contents")
+        env = {key: value for key, value in os.environ.items()
+               if not any(part in key.upper() for part in ("TOKEN", "API_KEY", "SECRET"))}
         uv = shutil.which("uv") or str(Path.home() / ".local/bin/uv")
-        env = os.environ.copy()
         env["UV_CACHE_DIR"] = str(root / "uv-cache")
         if not Path(uv).is_file():
             target = safe(root / "dependencies/uv-0.11.16/uv")

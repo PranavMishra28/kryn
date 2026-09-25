@@ -38,8 +38,7 @@ class Child:
 
 class KrynChecks(unittest.TestCase):
     def setUp(self):
-        # Separate owner-session tests cover authentication; these exercise lifecycle without production state.
-        self.enterContext(patch.object(localai.owner_auth, 'authorize', return_value={'owner_id': 90290458, 'expires_at': 9999999999}))
+        # Lifecycle checks stay isolated from production state.
         self.enterContext(patch.object(localai.learning, 'active_champion', return_value=localai.learning.BASELINE))
         self.enterContext(patch.object(localai.learning, 'start_after_exit'))
         self.enterContext(patch.object(localai, 'owned_config', return_value={}))
@@ -297,12 +296,10 @@ class KrynChecks(unittest.TestCase):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             localai.main([project, '--auto', '--permissions', 'ask'])
 
-    def test_controls_are_available_offline_without_starting_or_authorizing_services(self):
+    def test_controls_are_available_offline_without_starting_services(self):
         output = io.StringIO()
-        with patch.object(localai.owner_auth, 'authorize') as auth, \
-             patch.object(localai, 'run') as run, redirect_stdout(output):
+        with patch.object(localai, 'run') as run, redirect_stdout(output):
             self.assertEqual(localai.main(['controls']), 0)
-        auth.assert_not_called()
         run.assert_not_called()
         self.assertIn('/web', output.getvalue())
         self.assertIn('--permissions interactive', output.getvalue())
