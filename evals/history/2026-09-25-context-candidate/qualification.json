@@ -292,11 +292,11 @@
     "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised.",
     "long_request_fix": "Private first/recent request records and bounded prompt excerpts now retain both beginning and end with an explicit middle-omission marker; raw history remains outside prompt. A regression retained late acceptance and constraint text through two compactions and restart. This does not prove arbitrary middle criteria are retained.",
     "latest_public_candidate_source_revision": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
-    "latest_installed_private_64k_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
-    "latest_installed_wheel_sha256": "8dfdce103fea1715f1bb1df41780b1b24857bf851ab4fab5ff9b888c095afdc4",
-    "latest_guarded_protocol_metrics_sha256": "0da8675b18fffefebc41fb85d8dad177f9bd30014c4fd60a6761d3b43b3fa2f3",
-    "latest_install_status": "PASS private install, offline self-check, guarded protocol smoke and doctor at 65,536 context; narrow Task12j Plan/restart compactions completed, but semantic role-state error leaves long workflow unqualified.",
-    "latest_rollback_target": "Current f275b29 committed install receipt backs up matching 49K source 8d39c67, installed immediately before the latest 64K activation. A prior actual rollback to 8d39c67 passed; actual rollback from f275b29 remains unexercised.",
+    "latest_installed_private_64k_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "latest_installed_wheel_sha256": "57159247727c122bb0f324ea1c2f0eb2eda1f356dce838a3bb77261773fe3674",
+    "latest_guarded_protocol_metrics_sha256": "34bcd230f30866f9891499977634de153651bd1510f8dc253563f6221ca3c6f3",
+    "latest_install_status": "PASS private source 4506b32 package smoke, install, guarded protocol smoke and healthy idle doctor at 65,536 context. Narrow controlled failed-check retention passed three native compactions across two Ask restarts; the last checkpoint still had stale Next Move, so semantic continuity and long workflow remain unqualified.",
+    "latest_rollback_target": "An actual kryn rollback from prior private f275b29 restored matching 49K source 8d39c67 and stopped only the owned runtime. Private 64K source 4506b32 was then installed; its committed transaction backs up the 8d39c67 active receipt. Actual rollback from 4506b32 is unexercised.",
     "bounded_overflow_fix": "Newest recorded user request now precedes lower-priority current-file excerpts in the 8K prompt; overflow retains an explicit omitted-evidence marker and verification footer. Emergency private-record truncation also keeps both ends of multibyte prompts. Offline regressions passed; this is bounded partial continuity, not complete arbitrary-history recall.",
     "post_rollback_guarded_protocol_metrics_sha256": "7082d9443c2f8b62bb734ca588a86d5acdb3b3492f62cec0961a01ba7a162522",
     "post_rollback_status": "PASS guarded protocol smoke and doctor: healthy idle 64K runtime, normal host pressure, browser/search MCP connected, zero observed swap change during smoke. This does not qualify clean non-owner installation or long Agent quality."
@@ -650,5 +650,71 @@
     "browser_after_second_ui_repair": "Independent full Task12 Chrome browser check PASS 7/7: 390px and 1280px Save/reload, invalid-minutes feedback, controlled 503 preservation/retry, atomic file import, persistent Edit/exact filter/export, seed/network/page-error checks. This was after a fourth saved-session coding turn; report SHA256 70d0c2b093658010f508b191ae495dfa98d4b59540c509800bb606b979c6f15e. Expected 503 and 400 responses appear as browser console resource errors. The model did not make a native Browse call; this is external operator verification.",
     "scope_and_security_review": "The narrow ui-repair2 prompt specified only web/app.js; model also edited web/style.css for Edit-button styling. Source inspection finds renderEntries uses innerHTML with interpolated unescaped row values while backend validation accepts arbitrary nonempty id/project text, a confirmed DOM injection outside the scripted browser assertions. Treat browser PASS as functional coverage, not production/security clearance. A fresh broad Reviewer timed out; focused Reviewer examined only the earlier Save bug.",
     "security_probe": "FAIL: in an owned disposable loopback server and fresh headless Chrome, POST /api/entries accepted an HTML-bearing project (201), and the generated app executed its onerror handler when renderEntries interpolated the row into innerHTML. This is a confirmed DOM injection in the Task12k generated app, not KRYN UI. Report SHA256 7d1d4023cfc118d84b2077ec88ee82327d45fe632fc22ac731fc70f7388102af."
+  },
+  "followup_installed_ask_ledger_4506": {
+    "installed_private_source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "private_wheel_sha256": "57159247727c122bb0f324ea1c2f0eb2eda1f356dce838a3bb77261773fe3674",
+    "fixture": "Disposable Task02 workspace with one operator-committed intentionally failing unittest. This is a controlled failed-check handoff mechanism probe, not Task02 coding acceptance or a held-out benchmark. Raw private transcripts are ignored under the private 64K worktree evals/runs/context64-ask-ledger-1/.",
+    "installation": "Source passed make check (173 setup, 21 Python tools, 56 Node, driver self-check and frozen verify) and package smoke. Existing f275b29 64K installation rolled back to matching 8d39c67 49K active source; current 4506b32 64K package then installed with a committed immediate 49K receipt. The rollback left oMLX stopped, so it did not rerun 49K inference on this exact rollback.",
+    "protocol_metrics_sha256": "34bcd230f30866f9891499977634de153651bd1510f8dc253563f6221ca3c6f3",
+    "stages": {
+      "observed-failure": {
+        "wall_seconds": 28.893,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "product_plugin_sha256": "bc0d49c92c02222683821b48a0a724fa71baafd8b8474caa0996bd15208b991f",
+        "driver_sha256": "b2bef57438e088a5f51bc1dc6db7a2fe92f1aefb3164fad3b3a4563810972f87",
+        "export_sha256": "59d00e6048b1c767f2bbf196324a9bcf764b64ac90a76961c0d124423a7d1a7e"
+      },
+      "ask-restart-correct": {
+        "wall_seconds": 76.008,
+        "model_completed": true,
+        "tool_calls": 8,
+        "tool_errors": [
+          {
+            "tool": "glob",
+            "error": "Permission denied: external_directory"
+          }
+        ],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "product_plugin_sha256": "bc0d49c92c02222683821b48a0a724fa71baafd8b8474caa0996bd15208b991f",
+        "driver_sha256": "7454a0ee3f58ff739e15383694e3b7cf95bde9dfd5896b98ddf419878b80d4ab",
+        "export_sha256": "37f8cb9cca5597be22e9ac964d796c19418a99ca0ca57eb75d2e66a716cbce2f"
+      },
+      "ask-restart-2": {
+        "wall_seconds": 34.933,
+        "model_completed": true,
+        "tool_calls": 0,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "product_plugin_sha256": "bc0d49c92c02222683821b48a0a724fa71baafd8b8474caa0996bd15208b991f",
+        "driver_sha256": "972e15c6d12b49859cc18c21658a1aa5c9771a61490e43c4ac720de2e1eb0d12",
+        "export_sha256": "e6d9ccabf59fd5c28c4f89255956382004b2bf900b05487440ef93bcc3b7eb39"
+      }
+    },
+    "operator_error": "An initial Ask restart used an incorrect saved session ID; driver stopped with HTTP 404 before sending a model prompt. Ignored raw driver SHA256 5bfa17dd6e0b26810a113a5de1a4063b470debe947c33f181725062526471d31. The corrected restart used the verified owned session ID. This operator error is excluded from model-quality interpretation.",
+    "semantic_result": "NARROW PASS for controlled failure retention: Build executed exactly one failing unittest (exit 1), first checkpoint kept failed test and Decisions none, Ask restart reported it unresolved, and second Ask restart again reported failed=1, broader Task02 behavior unimplemented/unverified, Decisions none. Three native compactions across two server restarts completed. PARTIAL overall: first Ask answer overidentified baseline test_existing.py as full Task02 acceptance; the second Ask answer corrected that after explicit user steering, but the third checkpoint still gave a stale self-referential Next Move and mislabeled test_existing.py as broader acceptance. One Ask read attempt was denied for external_directory. No commands executed in Ask. This does not prove Task12, autonomous semantic repair, or sustained coding/UI.",
+    "resources": "All three successful stages were on AC power, sampled normal pressure only, and zero swap peak growth. Guarded smoke passed, and doctor after the trials reported healthy idle 65,536 runtime, browser/search connected, normal pressure, swap 432212541 bytes. No 45-60 minute active use was proved.",
+    "next_action": "Investigate the native compaction summary/update path and test an evidence-bound fix against fresh long coding/UI, including checkpoint next-action freshness. Retain 64K experimentally and its matching 49K rollback target. 96K/128K and clean non-owner install remain unqualified."
   }
 }

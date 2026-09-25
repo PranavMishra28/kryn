@@ -1,5 +1,5 @@
 {
-  "status": "Private measurement: owner retains experimental 64K at source f275b29 with a matching 49K immediate rollback receipt and guarded protocol smoke; sustained Agent and useful-tier gates remain failed/open. No public tier promotion or release.",
+  "status": "Private measurement: owner retains experimental 64K at source 4506b32 with a matching 49K immediate rollback receipt and guarded protocol smoke; sustained Agent and useful-tier gates remain failed/open. No public tier promotion or release.",
   "machine": "M4 Max, 48 GiB unified memory, AC power",
   "stack": "oMLX 0.6.4, Qwen3.5-9B-6bit, isolated per-tier settings, one request, 16 GiB oMLX memory ceiling",
   "method": "Exact active input tokens verified against generation usage on passing runs; single synthetic three-fact retrieval; host pressure/swap samples. The initial tier table used Fast and a 512 output-token allowance. Follow-up thinking runs used a 2048 thinking budget and 4096 output-token allowance. Cache trials used separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
@@ -128,13 +128,14 @@
     "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
   },
   "latest_private_64k_install": {
-    "source_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
+    "source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
     "context_tokens": 65536,
     "rollback_receipt_source": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
     "rollback_receipt_context_tokens": 49152,
-    "rollback_scope": "An actual rollback to 8d39c67 from an earlier 64K installation passed. The owner installed matching 49K source immediately before the latest 64K source, and its committed receipt backs up that 49K state. Actual rollback from f275b29 has not run.",
-    "guarded_protocol_metrics_sha256": "0da8675b18fffefebc41fb85d8dad177f9bd30014c4fd60a6761d3b43b3fa2f3",
-    "doctor": "PASS healthy idle runtime at 65,536 context, normal pressure, browser/search MCP connected, swap 432212541 bytes. This does not qualify sustained coding."
+    "rollback_scope": "Actual rollback from prior f275b29 64K to matching 8d39c67 49K succeeded, stopping the owned runtime; source 4506b32 64K was then installed with that 49K active source as its immediate committed backup. Actual rollback from 4506b32 is unexercised.",
+    "guarded_protocol_metrics_sha256": "34bcd230f30866f9891499977634de153651bd1510f8dc253563f6221ca3c6f3",
+    "doctor": "PASS healthy idle runtime at 65,536 context, normal pressure, browser/search MCP connected, swap 432212541 bytes after narrow three-compaction Ask probe. This does not qualify sustained coding.",
+    "disk_scope": "About 37 GiB host disk free at observation, below the installer 40 GiB reserve before adding challenger weights. No model challenger was downloaded or qualified."
   },
   "compression_research": {
     "source": "https://github.com/jundot/omlx/blob/main/omlx/model_settings.py",
