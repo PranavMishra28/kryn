@@ -17,6 +17,7 @@ docs-check:
 
 package-smoke:
 	@set -eu; stage=$$(mktemp -d "$${TMPDIR:-/tmp}/kryn-package-smoke.XXXXXX"); \
+	stage=$$(cd "$$stage" && pwd -P); \
 	trap 'rm -rf "$$stage"' EXIT; \
 	export UV_CACHE_DIR="$$stage/uv-cache"; \
 	$(PYTHON) -B build_package.py $(BUILD_FLAGS) --out-dir "$$stage/dist"; \
