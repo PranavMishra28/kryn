@@ -398,9 +398,15 @@ test('broad process-name kills are refused before native shell execution', async
   try {
     for (const command of ['killall python 2>/dev/null; sleep 1', 'command sudo -n pkill -f python',
                            '/usr/bin/killall Python', 'sudo pkill -f server.py',
-                           'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python'])
+                           'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python',
+                           'echo ready; pkill -f server.py', 'false || killall Python',
+                           'echo ready && sudo -n pkill -f server.py',
+                           'cd ./workspace && python -m taskboard_lite.server &\nsleep 2\npkill -f "taskboard_lite.server"',
+                           'cat <<EOF\npkill is only data\nEOF\npkill -f server.py'])
       assert.throws(() => call(command), /broad process-name kills/);
-    for (const command of ['kill 1234', 'echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test'])
+    for (const command of ['kill 1234', 'echo "killall python"', "cat <<'EOF'\nkillall python\nEOF",
+                           "printf '%s\\n' 'example; pkill python'", 'echo "first\npkill second"',
+                           'echo ready # pkill is only a comment', 'sudo -n echo pkill', 'npm test'])
       assert.doesNotThrow(() => call(command));
   } finally { await cleanup(); f.remove(); }
 });
