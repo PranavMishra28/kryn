@@ -361,10 +361,13 @@ test('pruned or legacy trackers cannot imply complete historical observation', a
 test('Python startup flags preserve failed-check incident classification', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    for (const command of ['python3 -B -m unittest -v', 'python3.13 -I -B -m pytest', 'python -EB -m unittest'])
+    for (const command of ['python3 -B -m unittest -v', 'python3.13 -I -B -m pytest', 'python -EB -m unittest',
+                           'cd /private/tmp/fixture && python3 -B -m unittest test_stage1 -v 2>&1'])
       assert.equal(isCheck(command), true);
     assert.equal(isCheck('python3 -c "import unittest"'), false);
     assert.equal(isCheck('python3 -B -m unittest; true'), false);
+    assert.equal(isCheck('cd /private/tmp/fixture && python3 -B -m unittest 2>&1; true'), false);
+    assert.equal(isCheck('cd /private/tmp/fixture || python3 -B -m unittest'), false);
     f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.execution.started');
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'shell', status: 'completed',
@@ -372,6 +375,20 @@ test('Python startup flags preserve failed-check incident classification', async
     await f.emit('session.execution.succeeded');
     assert.equal(f.read('incidents')[0].check_failures, 1);
     assert.ok(f.read('incidents')[0].triggers.includes('check_failed'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('a literal cd wrapped test reaches the native observed-check ledger', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_1', id: 'call_1', tool: 'shell',
+      input: { command: `cd ${f.root} && python3 -B -m unittest test_stage1 -v 2>&1` } };
+    f.call('tool.execute.before', event);
+    f.call('tool.execute.after', { ...event, status: 'completed', result: { output: { exit: 0 } } });
+    const context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    f.call('session.compaction', context);
+    assert.equal(f.read('trackers')[0].verification.checks[0].state, 'passed');
+    assert.ok(context.system.some(item => item.text.includes('passed=1')));
   } finally { await cleanup(); f.remove(); }
 });
 
