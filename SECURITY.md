@@ -6,14 +6,14 @@ Use [GitHub private vulnerability reporting](https://github.com/PranavMishra28/k
 
 Include the KRYN version, macOS version, affected component, expected and observed behavior, and a minimal reproduction using disposable data. Omit tokens, credentials, private source code, session transcripts and raw browser profiles. Redact local paths and diagnostic output before sharing them.
 
-This project currently distributes v0.1.9 as an owner-testing prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
+This project currently distributes v0.1.10 as a public-installation prerelease. There is no guaranteed response time or long-term maintenance commitment for older versions. Report issues against the latest published release when possible; security fixes will be identified in release notes.
 
 ## Trust and data boundaries
 
 - **Graphical companion:** `--web` opens only the clean loopback URL on the same owned server. Login uses its random per-launch password; KRYN does not put credentials in the opened URL or process arguments. Keep the password and native pairing QR private and do not save this temporary password in your browser. The terminal remains the resource supervisor; exiting it disconnects the GUI. GUI preferences are separate, but a connected autoaccept terminal may answer permission requests for the same session. No LAN binding or unauthenticated proxy is introduced.
 
 
-- **Release access:** Published v0.1.9 still checks the configured GitHub owner's identity. Current development source downloads public release assets through credential-free HTTPS and no longer gates local use on an owner session. Public installation from a new release still needs qualification. Rolling back to v0.1.9 restores its old owner policy.
+- **Release access:** v0.1.10 downloads public release assets through credential-free HTTPS and does not gate local use on an owner session. Public installation still needs qualification. Rolling back to v0.1.9 restores its old owner policy.
 - **Deactivation:** `kryn uninstall` verifies ownership receipts and refuses modified files, stops only the verified idle runtime, and removes owned launcher aliases transactionally. It retains private data, settings, dependencies and credentials; it is not secure erasure or a recursive purge. The verified release installer can reactivate retained state.
 - **Local inference:** The configured model endpoint is `127.0.0.1:8000`. The managed configuration permits the local provider. This does not prevent tools from using the network: search queries reach Exa, and browser requests reach visited sites.
 - **Project trust:** KRYN can read code, edit files and execute approved commands. Treat repository instructions, plugins, configuration and dependencies as trusted executable inputs. Ordinary shell writes are restricted to the project and owned state/temp/log paths. Native file tools, browser/MCP tools, formatters and persistent PTY sessions are outside that guard; reads, network access and process signaling are not isolated. A permitted shell command can signal other processes owned by your account. This is not a sandbox for hostile repositories.

@@ -1,6 +1,6 @@
 # KRYN execution ledger — 2026-09-25
 
-This is the single requirement/evidence ledger for the current product goal. `Implemented` means code exists; `mechanism checked` means a narrow test ran; `qualified` requires representative installed use. Recheck evidence after a relevant edit or merge. Baseline: `main` at `3936bea`, release v0.1.9 is a prerelease. The target Mac is an M4 Max, 48 GB, macOS 26.6.2, with 46 GiB free at this audit. AC was detected, but the battery still reported discharging; sustained trials must record the actual state.
+This is the single requirement/evidence ledger for the current product goal. `Implemented` means code exists; `mechanism checked` means a narrow test ran; `qualified` requires representative installed use. Recheck evidence after a relevant edit or merge. Baseline: `main` at `3122fd3`, installed release v0.1.9 is a prerelease. The target Mac is an M4 Max, 48 GB, macOS 26.6.2, with 47 GiB free at this audit. Sustained trials must record the actual power state.
 
 | Requirement | Current implementation / evidence | Remaining acceptance gate | Status |
 |---|---|---|---|
@@ -14,4 +14,4 @@ This is the single requirement/evidence ledger for the current product goal. `Im
 | Benchmark comparison | `evals/bench.py`, `evals/external_requests.py`; one Requests trial timed out and failed | Predeclared same-model harness comparison, model challenger comparison, practical official benchmark subset, distribution of verified outcomes | Open; no parity or uplift claim |
 | Release and sustain | v0.1.9 package/transaction checks and [qualification](evals/history/2026-09-22-production/qualification.json) | 45–60 minutes of qualified work, skeptical fresh review, non-owner release-artifact install, security and recovery gates | Open; last final workload stopped at 24.2 minutes |
 
-Next dependency order: merge repository entry/check contract; remove owner-only distribution gate without weakening installation integrity; finish native controls; run bounded profile selection; improve evidence and application acceptance; qualify and ship. Advance the ledger only with linked tests, actual run artifacts, and current source revision. Private transcripts and machine state stay outside this repository.
+Next dependency order: install and qualify the public release artifact; verify update/rollback and native controls; run bounded profile selection; improve evidence and application acceptance; complete sustained qualification. Advance the ledger only with linked tests, actual run artifacts, and current source revision. Private transcripts and machine state stay outside this repository.
