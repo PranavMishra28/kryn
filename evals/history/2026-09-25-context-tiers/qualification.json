@@ -114,6 +114,18 @@
     "resources": "All three stages: normal sampled host pressure and zero incremental swap. Total measured active stage time 67.728 seconds; this is a narrow planning/restart fixture, not a sustained coding/UI pass.",
     "rollback_target": "PASS receipt inspection only: current 64K transaction at source 6582565 has committed prior active receipt at source d1aab47 (49K matching context code); actual rollback from this latest install remains unexercised."
   },
+  "current_private_64k_install": {
+    "source_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
+    "wheel_sha256": "d8ee3b271bead2ea8ff42285610db8073849553cb07c8cebd5114d8a919f4bc4",
+    "active_context_tokens": 65536,
+    "rollback_target_source_revision": "0651376845b8b41041299f5b8b7c9bd70293af81",
+    "rollback_target_context_tokens": 49152,
+    "rollback_scope": "Committed activation receipt inspected; actual rollback from the latest install not exercised.",
+    "guarded_protocol_smoke": "PASS at LocalAI/runs/protocol-20260925T220651Z-b90345ce",
+    "metrics_sha256": "7d7b115e0241cbfe98fa61e108c340eeaccead5ec25ca077585f663628e5e45d",
+    "offline_doctor": "PASS: model max_model_len 65536, runtime healthy, idle, normal host pressure, browser/search MCP connected; no generation in doctor.",
+    "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
+  },
   "failed_or_open_gates": [
     "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
     "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",

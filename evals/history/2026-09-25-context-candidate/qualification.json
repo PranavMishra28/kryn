@@ -191,7 +191,7 @@
     "The two-compaction coding/UI trial completed some stages but its native checkpoint incorrectly kept already edited UI controls Active, promoted model choices to user Decisions, and claimed 503/export without end-to-end evidence.",
     "Independent browser acceptance failed exact project filtering and persistent edit; fresh read-only review and new-session final handoff were not completed.",
     "64K remains experimental under variable host load; a focused repair turn was stopped by resource preflight before a prompt was sent. 96K/128K thinking near-limit trials failed host-pressure gates.",
-    "The new bounded recent-transcript capsule passed offline checks only; installed native compaction/restart behavior is unqualified.",
+    "The new bounded recent-transcript capsule passed offline checks and was installed at 64K with a guarded protocol smoke; its repeated-compaction semantic behavior is unqualified because the frozen prior Task12 session refused mixed candidate inputs before a prompt.",
     "The current installed 64K transaction has a committed 49K rollback target but actual rollback from this latest install and clean install gate remain unexercised."
   ],
   "followup_task12e": {
@@ -283,8 +283,12 @@
   },
   "context_capsule_followup": {
     "change": "Include a bounded, explicitly historical and unverified recent transcript tail alongside the native checkpoint so contradictory handoff/work-state claims are visible to the next turn. Current Git/file evidence and check ledger remain authoritative for verification.",
-    "source_revision": "uncommitted candidate at recording time",
+    "source_revision": "0651376845b8b41041299f5b8b7c9bd70293af81",
     "offline_regression": "PASS: contradictory checkpoint/handoff fixture and full make check (173 setup, 21 Python tools, 52 Node tests, driver and frozen suite).",
-    "installed_native_regression": "NOT_TESTED; current 64K installation predates this change."
+    "installed_native_regression": "PARTIAL: package install, offline self-check, guarded protocol smoke and doctor passed. A saved-session recall attempt could not start: frozen Task12e trial inputs reject the changed candidate before prompt. No native repeated-compaction semantic regression has run on this revision.",
+    "installed_64k_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
+    "installed_64k_wheel_sha256": "d8ee3b271bead2ea8ff42285610db8073849553cb07c8cebd5114d8a919f4bc4",
+    "protocol_smoke_metrics_sha256": "7d7b115e0241cbfe98fa61e108c340eeaccead5ec25ca077585f663628e5e45d",
+    "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised."
   }
 }
