@@ -80,6 +80,19 @@ test('a false native checkpoint is contradicted by durable user requirements', t
   assert.match(contextCapsule(root, messages, null), /No private user-request baseline/);
 });
 
+test('checkpoint decisions require a verbatim anchor in retained user requests', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const recorded = { total: 1, clipped: false, requests: ['Keep the 64K context tier for now.'] };
+  const summary = '## Decisions\n- User: "Keep the 64K context tier for now."\n' +
+    '- Wrote Store-only tests to avoid HTTP setup\n## Work State\n- Filter edited\n';
+  const messages = [{ content: `<conversation-checkpoint><summary>${summary}</summary></conversation-checkpoint>` }];
+  assert.match(contextCapsule(root, messages, null, recorded), /CHECKPOINT DECISIONS UNVERIFIED: 1 item/);
+  const supported = summary.replace('- Wrote Store-only tests to avoid HTTP setup\n', '');
+  const clean = [{ content: `<conversation-checkpoint><summary>${supported}</summary></conversation-checkpoint>` }];
+  assert.doesNotMatch(contextCapsule(root, clean, null, recorded), /CHECKPOINT DECISIONS UNVERIFIED/);
+});
+
 test('a later handoff remains visible when the checkpoint work state contradicts it', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
