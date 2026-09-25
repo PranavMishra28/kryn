@@ -28,6 +28,42 @@ const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
 const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, delegate the Browse agent with the native subagent tool, actual local URL and explicit acceptance criteria; Browse is an agent, not a skill. Wait for its observations and fix reported failures. Use native background shell support for dev servers rather than appending &. Follow the project's documented launch command with isolated test data; read the resulting URL before probing it. Stop only a verified process you own; never use killall or pkill. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
+const PROCESS_NAME_KILL = /^\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)(?=\s|[;&|]|$)/;
+function broadProcessNameKill(command) {
+  // Inspect simple command positions, including chains and separate lines.
+  // Quoted literals and heredoc bodies are data. This is not a shell parser.
+  let segment = '', quote = null, escaped = false, heredoc = null;
+  for (const line of command.split(/\r?\n/)) {
+    if (heredoc) {
+      if ((heredoc.tabs ? line.replace(/^\t+/, '') : line) === heredoc.word) heredoc = null;
+      continue;
+    }
+    let nextHeredoc = null;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (escaped) { segment += char; escaped = false; continue; }
+      if (char === '\\' && quote !== "'") { segment += char; escaped = true; continue; }
+      if (quote) { segment += char; if (char === quote) quote = null; continue; }
+      if (char === "'" || char === '"') { quote = char; segment += char; continue; }
+      if (char === '#' && (i === 0 || /\s/.test(line[i - 1]))) break;
+      if (char === '<' && line[i + 1] === '<') {
+        const match = /^<<(-?)\s*(?:'([^']+)'|"([^"]+)"|([A-Za-z_][\w]*))/.exec(line.slice(i));
+        if (match) nextHeredoc = { word: match[2] || match[3] || match[4], tabs: !!match[1] };
+      }
+      if (';&|'.includes(char)) {
+        if (PROCESS_NAME_KILL.test(segment)) return true;
+        segment = '';
+      } else segment += char;
+    }
+    if (!escaped && !quote) {
+      if (PROCESS_NAME_KILL.test(segment)) return true;
+      segment = '';
+    }
+    heredoc = nextHeredoc;
+    escaped = false;
+  }
+  return PROCESS_NAME_KILL.test(segment);
+}
 const PLAN_GUIDANCE = 'Plan mode: inspect the project and produce an actionable plan with acceptance checks. Do not edit project files or run shell commands. Native plan-file writes are allowed only in the OpenCode plan directory. To implement, switch to Agent.';
 const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Agent for repairs.";
 const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
@@ -472,10 +508,10 @@ export default {
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
         throw new Error('KRYN Browse tool is outside the qualified surface');
-      // Catch direct process-name kills without parsing quotes or heredocs.
-      // This is not whole-process isolation.
+      // Catch observed process-name kills in simple shell command positions.
+      // Indirection remains outside this guard; this is not process isolation.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
-          /^\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)(?=\s|[;&|]|$)/.test(event.input.command))
+          broadProcessNameKill(event.input.command))
         throw new Error('KRYN refuses broad process-name kills. Stop only a verified process you own by exact PID or native shell lifecycle.');
       // Recognize only a plain terminal background operator. Do not rewrite or
       // pretend to parse quoted, escaped, commented or multiline shell syntax.

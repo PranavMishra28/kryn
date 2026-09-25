@@ -19,6 +19,13 @@
     "elapsed_active_stage_seconds": 1362.958,
     "duration_note": "About 22.7 minutes across active measured stages; not a passed sustained workflow or an idle-time claim."
   },
+  "followup_task12c": {
+    "candidate_source_revision": "6582565cc63d783051fec07da864cef4f03c7d6e",
+    "fixture": "Fresh frozen Task12 disposable workspace; one Plan stage followed by one Build backend-import stage; raw private traces remain in ignored evals/runs/context-candidate-task12c/",
+    "plan": {"result": "FAIL: native Plan used question despite an explicit no-question prompt; unattended driver dismissed it, turn interrupted before compaction, workspace unchanged", "seconds": 62.647, "tool_calls": 17, "pressure": [1], "swap_peak_growth_bytes": 0, "driver_sha256": "f7f3a363e55a016a15e05bb1583a3692e5326f494debe79390099678fe90365c"},
+    "backend_import": {"result": "FAIL/incomplete: 26 tool calls over 272.51 seconds; server and a new test file edited, but no completed turn or compaction. The agent used three compound multiline shell calls containing pkill -f taskboard_lite.server; the then-current direct-command guard did not reject them. The operator interrupted the exact owned driver after detecting the bypass; native session and CLI settled idle.", "initial_checks": "pytest unavailable; subsequent unittest setup errors observed; no passing backend result established", "pressure": [1], "swap_peak_growth_bytes": 0, "driver_sha256": "1a727edea84af8eee81baa271ba66e023d0320396828acb4f58dff1ee4d951e4", "events_sha256": "63c850db2e57a0f26e21426beb8d53f56bfa48772388a0a3a9240e4bc1bcda41"},
+    "follow_up": "Candidate source now scans simple chained and multiline shell command positions, ignoring quoted literals and heredoc bodies; focused tests pass. This fix has not yet been installed or exercised in a native run. Shell indirection remains outside the guard."
+  },
   "accepted_mechanism_changes": [
     "Private bounded request continuity survives simulated two compactions and restart; legacy missing baseline is marked partial.",
     "Current Git/file evidence is bounded and old checkpoint fingerprints are marked stale; plain Relevant Files bullets now retrieve current source in offline tests.",
