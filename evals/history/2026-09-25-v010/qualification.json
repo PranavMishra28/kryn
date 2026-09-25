@@ -106,5 +106,22 @@
     "browser_check_scope": "Save/reload at 390x844 and 1280x800, accessible invalid-minutes feedback, injected 503 preserving input, exactly one successful retry, console/network inspection. This outcome check ran after the timed-out Agent trial and does not make that trial completed.",
     "guidance_uplift": "Not established; both drivers timed out. The guided trial still attempted skill browse, then used two native Browse delegations and five browser calls; neither navigation reached a verifiable form flow.",
     "guided_trial_timeout_detail": "The final Browse child waited about 328 seconds on an unanswered native question requesting evaluator creation of the controlled .fail-next marker. The frozen task prompt explicitly required that evaluator handoff; the timeout is not evidence of a model or shell stall."
+  },
+  "post_release_task_06_probe": {
+    "run": "public-v010-browser-handoff-2",
+    "installed_source_revision": "e9c90ff6fe41cae6ef17f7fecdd2e2adf2f54246",
+    "evaluator_driver_revision": "6c80f84edcbc53f359638662e6c2f07a7c4c5066",
+    "wall_seconds": 478.687,
+    "operator_interrupted": true,
+    "reason": "The Agent made four broad process-name killall python shell calls while troubleshooting its disposable server. The ordinary shell write boundary does not isolate process signaling; the run was stopped to avoid further attempts.",
+    "driver_completed": false,
+    "evaluator_marker_handoff_events": 0,
+    "automatic_backend_passed": true,
+    "grade": "PARTIAL",
+    "browser_flows": "NOT_TESTED",
+    "pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "owned_sessions_settled": true,
+    "temporary_fixture_server_stopped": true
   }
 }

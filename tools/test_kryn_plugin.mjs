@@ -318,6 +318,19 @@ test('plain detached servers require native background ownership without rewriti
   } finally { await cleanup(); f.remove(); }
 });
 
+test('broad process-name kills are refused before native shell execution', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const call = command => f.call('tool.execute.before', {
+    sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
+  try {
+    for (const command of ['killall python 2>/dev/null; sleep 1', 'npm test && pkill -f python',
+                           '/usr/bin/killall Python', 'sudo pkill -f server.py'])
+      assert.throws(() => call(command), /broad process-name kills/);
+    for (const command of ['kill 1234', 'echo "killall python"', 'npm test'])
+      assert.doesNotThrow(() => call(command));
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('native locationless lifecycle settles only already owned sessions', async () => {
   for (const outcome of ['succeeded', 'failed', 'interrupted']) {
     const f = fixture(); const cleanup = await plugin.setup(f.ctx);
