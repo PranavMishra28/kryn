@@ -83,7 +83,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
-| `/audit` | Run a bounded read-only review through the hidden Audit role. Switch to Agent before fixing findings. |
+| `/audit` | Run a bounded read-only review through the Audit role. Switch to Agent before fixing findings. |
 | `/research your topic` | Research a topic with search and source links. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
 | `/sessions` | Choose a saved session to resume. Relaunch from the same project first. |
