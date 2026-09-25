@@ -35,23 +35,8 @@ jobs:
           kryn_python="$(uv python find --managed-python 3.13.13)"
           dirname "$kryn_python" >> "$GITHUB_PATH"
       - name: Existing offline regressions
-        run: |
-          git diff --check
-          python -B -m unittest discover -s setup
-          python -B -m unittest discover -s tools -p 'test_*.py'
-          node --test tools/test_kryn_plugin.mjs tools/inference-audit/server.test.js
-          python -B tools/run_native_trial.py --self-check
-      - name: Frozen acceptance grader checks
-        run: |
-          python -B evals/bench.py verify
-          python -B evals/bench.py selftest
+        run: make check
       - name: Curated wheel and outside-checkout smoke
-        run: |
-          python -B build_package.py
-          python -m venv "$RUNNER_TEMP/kryn-package-smoke"
-          uv pip install --python "$RUNNER_TEMP/kryn-package-smoke/bin/python" --no-index --no-deps dist/*.whl
-          cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/kryn-package-smoke/bin/python" -I -B -m kryn --package-check
-          "$RUNNER_TEMP/kryn-package-smoke/bin/python" -I -B -m kryn --version
+        run: make package-smoke
       - name: Tracked source remains unchanged
         run: git diff --exit-code
