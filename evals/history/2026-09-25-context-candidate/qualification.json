@@ -50,7 +50,18 @@
     "import_stage": {"result": "FAIL: 360-second limit reached after 29 tool calls with implementation/test edits, no final turn or compaction; owned session interrupted and settled idle", "seconds": 366.948, "pressure": [1], "swap_peak_growth_bytes": 0, "driver_sha256": "95e7aaf7a0a25a71bd9250741636154f75fd804a89436756defa86ed1d06ffad"},
     "repair_after_restart": {"result": "PARTIAL: resumed saved session, model turn and first native compaction completed. An independent rerun of test_stage1 and test_existing passed 29 tests. The native checkpoint nevertheless described those checks as still running and made rerun the next action; check continuity not qualified.", "seconds": 196.317, "pressure": [1], "swap_peak_growth_bytes": 0, "driver_sha256": "73635d05a58172296d41880d23b6247eef6fe9c4600c32ea1538fe0668ed5bfc", "export_sha256": "3ac24269718a2e94b13b9568db82aba3fa0e0f6bd3980066dd8ec728f466531e"},
     "frozen_grade": {"status": "PARTIAL", "automatic_checks": "2 passed", "manual_browser_ui_review_handoff": "NOT_TESTED", "grade_sha256": "52c6ea60c7ff90eab08fcfc6228310d24401c377f36bb20ed0ed0df4c74fef48"},
-    "observed_check_gap": "The agent used a literal cd <workspace> && python3 -B -m unittest ... 2>&1 shell command, while the tracker recognized only bare test commands. Candidate source now recognizes that exact non-masking wrapper and exposes its result in the checkpoint hook; offline tests pass, installed retest pending. Other shell control syntax remains unobserved."
+    "observed_check_gap": "The agent used a literal cd <workspace> && python3 -B -m unittest ... 2>&1 shell command, while the tracker recognized only bare test commands. Candidate source now recognizes that exact non-masking wrapper and exposes its result in the checkpoint hook; offline tests and a narrow installed compaction/restart retest pass. Other shell control syntax remains unobserved."
+  },
+  "observed_check_installed_retest": {
+    "candidate_source_revision": "ef56fc5052b8a8242eed0e886f55d6285bf995af",
+    "candidate_wheel_sha256": "48eaf1f97d79a29848927ba35e8cfcb598cb8509296fe1ac1711c9932cc3dd23",
+    "installed_release_identity": "f13038bdeb8632c7",
+    "protocol_smoke": {"result": "PASS", "private_run": "LocalAI/runs/protocol-20260925T214245Z-5e9cb20e", "metrics_sha256": "65a04bdbf0aed1c2c1060f6edfea0341bce9bffd545214e0b9a7729836679724"},
+    "fixture": "Fresh disposable one-test Python repository and a literal cd <workspace> && python3 -B -m unittest test_sample -v 2>&1 native shell call",
+    "first_turn_and_compaction": {"result": "PASS narrow check: one observed shell test passed, private tracker recorded passed, native summary retained actual result and no implementation edits", "seconds": 22.992, "driver_sha256": "18499e6cedd750a5dcfc5f8e777e5dcae2b63346725029e8d9188dac00761dba", "export_sha256": "d570aa587a331867b6e51ee93c5c1d047e5853fee26dc411f76c7880c8baa1c5"},
+    "restart_recall": {"result": "PASS narrow stale labeling: no tools called; model recalled prior pass without inventing a rerun, and saved tracker labeled the observation stale after restart. Its explanation inferred runtime-state reasons; the tracker actually marks old observations stale because current project files cannot be attested from the prior process.", "seconds": 14.246, "driver_sha256": "a8b07f28c9dfa50c7e7defcba322c3cfe7efce7fe1a8ba75743146831e0d42ee", "export_sha256": "e887b9fb1c24a97c9a77c481a8ec219a89e7db78a7200394e9d8ae66bcdd4d1c"},
+    "resources": "Both stages: normal sampled pressure and zero incremental swap; 37.238 seconds active measured time, not a sustained coding/UI pass",
+    "rollback_target": "Committed current 64K transaction at ef56fc5 points to prior 49K active receipt at ae788d1; actual rollback from current install remains unexercised"
   },
   "accepted_mechanism_changes": [
     "Private bounded request continuity survives simulated two compactions and restart; legacy missing baseline is marked partial.",
