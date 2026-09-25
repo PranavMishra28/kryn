@@ -377,7 +377,7 @@ def ensure_runtime():
             connection.settimeout(1)
             require(connection.connect_ex(("127.0.0.1", 8000)) != 0,
                     "Port 8000 is occupied but runtime metadata failed; inspect it before starting oMLX")
-    print("Starting the owned oMLX app…", flush=True)
+    print("Starting the owned oMLX app…", file=sys.stderr, flush=True)
     runtime_command("start")
     return runtime_metadata()
 
@@ -549,7 +549,18 @@ def memory_status():
             "runtime_footprint_bytes": listeners[0].get("phys_footprint_bytes") if len(listeners) == 1 else None}
 
 
-def guarded_run(server, command, project, outcome, timeout=None, *, web=False):
+def show_startup(status):
+    """A static interactive header, after readiness checks and before native UI."""
+    if not status or not sys.stdout.isatty():
+        return
+    width = shutil.get_terminal_size(fallback=(80, 24)).columns
+    if width < 8:
+        return
+    line = status if len(status) <= width else status[:width - 1] + "…"
+    print("\nKRYN\n" + line, flush=True)
+
+
+def guarded_run(server, command, project, outcome, timeout=None, *, web=False, startup=None):
     """Monitor the native client; OpenCode still owns every agent/tool decision."""
     guard = ResourceGuard(512 * 1024**2, 2)
     guard.pid = runtime_identity()
@@ -585,6 +596,7 @@ def guarded_run(server, command, project, outcome, timeout=None, *, web=False):
                                    " Let memory pressure settle, then run kryn --continue.")
             if index < 2:
                 time.sleep(2)
+        show_startup(startup)
         started = time.monotonic()
         child = subprocess.Popen(command, cwd=project, env=server.env)
         if web:
@@ -809,8 +821,12 @@ def run(args, outcome):
                     executable.extend(["--session", args.session])
             outcome["failure_code"] = "resource"
             invoked = True
+            startup = None
+            if command not in {"doctor", "bench"}:
+                mode = "Auto" if getattr(args, "auto", False) or permissions == "auto" else "Saved" if permissions == "interactive" else "Ask"
+                startup = f"oMLX connected · OpenCode ready · {len(mcp) - len(unavailable)}/{len(mcp)} tools connected · Permissions {mode}"
             code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None,
-                               web=getattr(args, "web", False) is True)
+                               web=getattr(args, "web", False) is True, startup=startup)
             outcome["failure_code"] = "none" if code == 0 else "verification" if command == "bench" else "unknown"
             return code
     finally:
