@@ -417,9 +417,27 @@ class KrynChecks(unittest.TestCase):
                     deploy_client.main()
                 self.assertEqual((foreign.read_bytes(), foreign.stat().st_mtime_ns), before)
             changed = Path(manifest['directory']) / 'tools/localai.py'
+            original = changed.read_bytes()
             changed.write_text('# changed')
             with patch.object(localai, 'ROOT', root), self.assertRaisesRegex(RuntimeError, 'release file changed'):
                 localai.verify_release(current=False)
+            changed.write_bytes(original)
+            # Source-kit init must read a verified v0.1.9 client without activating it.
+            old_directory = Path(manifest['directory'])
+            old_file = old_directory / 'tools/owner_auth.py'
+            old_file.write_text('legacy owner policy')
+            legacy_files = dict(manifest['files'])
+            legacy_files['tools/owner_auth.py'] = hashlib.sha256(old_file.read_bytes()).hexdigest()
+            legacy_id = hashlib.sha256(json.dumps(legacy_files, sort_keys=True).encode()).hexdigest()[:16]
+            legacy_directory = root / 'client' / legacy_id
+            old_directory.rename(legacy_directory)
+            legacy_manifest = {**manifest, 'release': legacy_id, 'directory': str(legacy_directory), 'files': legacy_files}
+            (root / 'client/deployment.json').write_text(json.dumps(legacy_manifest))
+            with patch.object(localai, 'ROOT', root):
+                self.assertEqual(localai.verify_release(current=False), legacy_manifest)
+                with patch.object(localai, 'PROJECT', legacy_directory), \
+                        self.assertRaisesRegex(RuntimeError, 'Unexpected installed release contents'):
+                    localai.verify_release(current=True)
 
     def test_expected_runtime_allowlist_without_secret_output(self):
         profile = setup.load_profile(setup.HERE / 'accepted-profile.json')

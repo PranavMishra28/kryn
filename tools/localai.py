@@ -216,10 +216,13 @@ def verify_release(current=True):
     require(not current or PROJECT.resolve() == directory.resolve(),
             "This is not the installed release; run the deployed kryn command (source-kit init/self-check remain available)")
     files = manifest.get("files")
-    require(isinstance(files, dict) and {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
+    expected = {"tools/localai.py", "tools/native_client.py", "tools/native-shell",
             "tools/context_probe.py", "tools/improvement.py", "tools/learning.py", "tools/protocol_probe.py", "setup/opencode.template.json",
             "tools/session_report.py", "plugin/server.js", "plugin/package.json", "plugin/tui.tsx", "plugin/permission_display.mjs",
-            "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"} == set(files), "Unexpected installed release contents")
+            "setup/install-profile.json", "setup/runtime-profile.json", "setup/AGENTS.md"}
+    legacy = expected | {"tools/owner_auth.py"}
+    require(isinstance(files, dict) and (set(files) == expected or not current and set(files) == legacy),
+            "Unexpected installed release contents")
     require(hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()[:16] == release,
             "Installed release manifest identity changed")
     for name, digest in files.items():
