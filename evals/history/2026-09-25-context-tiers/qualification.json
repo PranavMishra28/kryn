@@ -1,8 +1,8 @@
 {
-  "status": "private measurement; no public tier promotion or release",
+  "status": "private measurement; 64K selected for candidate agent testing, no public tier promotion or release",
   "machine": "M4 Max, 48 GiB unified memory, AC power",
   "stack": "oMLX 0.6.4, Qwen3.5-9B-6bit, isolated per-tier settings, one request, 16 GiB oMLX memory ceiling",
-  "method": "Exact active input tokens verified against generation usage; Fast variant; single synthetic three-fact retrieval; 2-second host pressure/swap samples; 512 output-token allowance. Cache trials use separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
+  "method": "Exact active input tokens verified against generation usage on passing runs; single synthetic three-fact retrieval; host pressure/swap samples. The initial tier table used Fast and a 512 output-token allowance. Follow-up thinking runs used a 2048 thinking budget and 4096 output-token allowance. Cache trials used separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
   "tiers": [
     {"context": 49152, "input": 40000, "result": "PASS synthetic retrieval", "prefill_seconds": 51.45, "total_seconds": 51.98, "peak_sampled_process_footprint_bytes": 14316511152, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T170650Z-44d9f1fe", "metrics_sha256": "6c56fcae83d7fc5d807c92043836f71db8db8d587717287a20a69f995308ba4b"},
     {"context": 65536, "input": 56000, "result": "PASS synthetic retrieval", "prefill_seconds": 78.92, "total_seconds": 79.49, "peak_sampled_process_footprint_bytes": 14279417560, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T170951Z-0e926b53", "metrics_sha256": "99a588459839da7d446c5d3bf9e9290f0942843a154b9f8468c28ccded649706"},
@@ -39,11 +39,19 @@
     "metrics_sha256": "7d606ffab85ea58874fce5c2ba3f743a2deed56ceb771e47ced89b2a8ebaeb46",
     "measurement_note": "A previous retry at a +2 template offset answered correctly but had 39,998 actual input tokens and was excluded from PASS; think-mode exact offset was 0. Its ignored metrics are context-20260925T184843Z-b4d3253a/e21cfe45734a234cd46ed88a734441faa74752073f4c912543cb768df93f2ff8. A sandboxed preflight stopped before generation because host telemetry was unavailable."
   },
+  "follow_up_tier_trials": [
+    {"context": 65536, "ceiling_gib": 16, "variant": "think", "input": 56000, "result": "PASS one exact-input synthetic cold retrieval", "cached_tokens": 0, "time_to_first_reasoning_seconds": 84.89, "total_seconds": 101.29, "completion_tokens": 714, "peak_sampled_process_footprint_bytes": 14693260968, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T193213Z-5577b3f8", "metrics_sha256": "1f2c2f2eb5632d847f6b69d2dd17fd8461447e10f93431667d62c1d88094077a"},
+    {"context": 65536, "ceiling_gib": 16, "variant": "think", "input": 56000, "result": "PASS same-nonce synthetic warm retrieval; exact usage and correct answer", "cached_tokens": 55296, "time_to_first_reasoning_seconds": 2.95, "total_seconds": 14.17, "completion_tokens": 431, "peak_sampled_process_footprint_bytes": 14328897528, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T193442Z-0e93dcca", "metrics_sha256": "c1c80b4321c5d1a441fe4ea03eda667757320af4aa68a9acb3f1c65c1eee13fe"},
+    {"context": 131072, "ceiling_gib": 20, "variant": "fast", "input": 112000, "result": "PASS one synthetic cold retrieval under isolated raised ceiling; slow and not safe evidence for thinking mode", "cached_tokens": 0, "time_to_first_content_seconds": 208.16, "total_seconds": 208.85, "peak_sampled_process_footprint_bytes": 18597436976, "pressure": [1], "swap_growth_bytes": 0, "run": "context-20260925T193746Z-b5182d0d", "metrics_sha256": "2d414486ee50c5d352454888777efbc806335c1aacde404e4b58a39cf534bab1"},
+    {"context": 131072, "ceiling_gib": 20, "variant": "think", "input_requested": 112000, "result": "FAIL: sustained host memory warning; canceled before completed response or actual usage", "wall_seconds": 127.18, "peak_sampled_process_footprint_bytes": 16455786464, "pressure": [1, 2], "swap_growth_bytes": 0, "run": "context-20260925T194206Z-fff35fbd", "metrics_sha256": "fcbb6aac881c95babc749393a94b89cca374306c2fcc645465e22a90b87adfab"},
+    {"context": 98304, "ceiling_gib": 16, "variant": "think", "input_requested": 80000, "result": "FAIL: sustained host memory warning after 371 seconds; canceled before completed response or actual usage", "wall_seconds": 371.41, "time_to_first_reasoning_seconds": 358.62, "peak_sampled_process_footprint_bytes": 15666568680, "pressure": [1, 2], "swap_growth_bytes": 0, "run": "context-20260925T194503Z-946ca2ff", "metrics_sha256": "42139e5707897d5bb11e3dce397976d63ded711204dc1b1a6d0b5f59735a4d83"}
+  ],
   "failed_or_open_gates": [
     "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
     "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",
     "128K near-limit request failed under the configured memory ceiling despite normal host pressure and zero incremental swap.",
     "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
-    "No installed thinking-mode 64K comparison or multi-stage UI task has passed; retain 49K as the public fallback."
+    "96K and 128K thinking requests at their tested near-limit inputs produced sustained host memory warnings and were canceled; neither tier is suitable for the daily profile on current evidence. The 128K Fast result required a raised 20 GiB isolated ceiling and does not overturn its thinking failure.",
+    "64K thinking passed one cold and one warm synthetic near-limit retrieval; coding quality, installed-agent behavior, multiple compactions and restart, and sustained UI work remain unqualified. Retain 49K as the tested rollback/public fallback."
   ]
 }

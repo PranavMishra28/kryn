@@ -503,7 +503,7 @@ class KrynChecks(unittest.TestCase):
                          ('global',['scheduler','max_concurrent_requests'],2), ('global',['memory','prefill_memory_guard'],False),
                          ('global',['memory','memory_guard_custom_ceiling_gb'],32), ('global',['cache','ssd_cache_max_size'],'16GB'),
                          ('global',['cache','hot_cache_max_size'],'1GB')]
-        for key, value in [('max_context_window',65536),('max_tokens',16384),('mtp_enabled',True),
+        for key, value in [('max_context_window',49152),('max_tokens',16384),('mtp_enabled',True),
                            ('mtp_num_draft_tokens',4),('vlm_mtp_enabled',True),('dflash_enabled',True),
                            ('specprefill_enabled',True),('turboquant_kv_enabled',True),('qwen35_ane_prefill_enabled',True)]:
             modifications.append(('model',['models',localai.MODEL_ID,key],value))
