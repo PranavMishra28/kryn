@@ -292,11 +292,11 @@
     "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised.",
     "long_request_fix": "Private first/recent request records and bounded prompt excerpts now retain both beginning and end with an explicit middle-omission marker; raw history remains outside prompt. A regression retained late acceptance and constraint text through two compactions and restart. This does not prove arbitrary middle criteria are retained.",
     "latest_public_candidate_source_revision": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
-    "latest_installed_private_64k_revision": "76c58ff67e478d4df138299cac837d3235ae69ab",
-    "latest_installed_wheel_sha256": "3b7155e704b5a5205e51ad817ddfa1d2de09bfdf4790a2f58a63d49f6f2ae7a3",
-    "latest_guarded_protocol_metrics_sha256": "fba1eca44e4fc4acd037778caa927054bd5b0ed55c85453c3ecf2a31a3222fbc",
-    "latest_install_status": "PASS private update, offline self-check, guarded protocol smoke and doctor. Active oMLX context=65536, healthy/idle, normal host pressure, browser and search MCP connected. Full native long workflow on this exact latest code not run.",
-    "latest_rollback_target": "PASS actual installed rollback: KRYN restored source 8d39c67 with oMLX max_context_window=49152 and stopped its owned runtime. The same private 64K wheel was reinstalled; active source 76c58ff, context=65536, and the committed immediate rollback receipt again points to 8d39c67.",
+    "latest_installed_private_64k_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
+    "latest_installed_wheel_sha256": "8dfdce103fea1715f1bb1df41780b1b24857bf851ab4fab5ff9b888c095afdc4",
+    "latest_guarded_protocol_metrics_sha256": "0da8675b18fffefebc41fb85d8dad177f9bd30014c4fd60a6761d3b43b3fa2f3",
+    "latest_install_status": "PASS private install, offline self-check, guarded protocol smoke and doctor at 65,536 context; narrow Task12j Plan/restart compactions completed, but semantic role-state error leaves long workflow unqualified.",
+    "latest_rollback_target": "Current f275b29 committed install receipt backs up matching 49K source 8d39c67, installed immediately before the latest 64K activation. A prior actual rollback to 8d39c67 passed; actual rollback from f275b29 remains unexercised.",
     "bounded_overflow_fix": "Newest recorded user request now precedes lower-priority current-file excerpts in the 8K prompt; overflow retains an explicit omitted-evidence marker and verification footer. Emergency private-record truncation also keeps both ends of multibyte prompts. Offline regressions passed; this is bounded partial continuity, not complete arbitrary-history recall.",
     "post_rollback_guarded_protocol_metrics_sha256": "7082d9443c2f8b62bb734ca588a86d5acdb3b3492f62cec0961a01ba7a162522",
     "post_rollback_status": "PASS guarded protocol smoke and doctor: healthy idle 64K runtime, normal host pressure, browser/search MCP connected, zero observed swap change during smoke. This does not qualify clean non-owner installation or long Agent quality."
@@ -491,5 +491,41 @@
     "power_caveat": "Post-run pmset reported Battery Power at 56%; the native driver did not capture per-stage power before/after for these trials. Driver source now captures both for future trials. Do not treat these as AC benchmarks.",
     "decision": "The prompt-only test-quality instruction was reverted on both source branches after the failed repeat. The private 64K candidate 91cce8c was rolled back to installed 76c58ff, retaining its previously tested immediate 49K rollback target; guarded protocol smoke after rollback passed, metrics SHA256 7f365a10c1fd849f3c9a848ca6dff7de47382532eb4df17a6183ea4540c1af4f. Doctor reports healthy idle 65,536 context, normal pressure, browser/search connected. No public release or tier promotion.",
     "remaining": "Full Task12 coding/UI, semantic compaction across repeated restarts, sustained 64K reliability, clean non-owner install and 49K-128K useful-tier qualification remain open."
+  },
+  "followup_task12j": {
+    "installed_private_source_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
+    "private_wheel_sha256": "8dfdce103fea1715f1bb1df41780b1b24857bf851ab4fab5ff9b888c095afdc4",
+    "fixture": "Fresh frozen Task12 disposable no-tools Plan followed by saved-session Ask restart; raw transcripts are ignored under evals/runs/context-candidate-task12j/. This is planning continuity only.",
+    "plan": {
+      "seconds": 28.589,
+      "model_completed": true,
+      "tool_calls": 0,
+      "native_compaction_completed": true,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "8aa0379354b12d907998d510433022d2b86fc991c022360b72fb495b61a9adf2",
+      "export_sha256": "c48c55c2f85d89ea44fc736b1062c8d78d11ee49ab0306a8eff050ad7b1b8757"
+    },
+    "recall_after_restart": {
+      "seconds": 28.194,
+      "model_completed": true,
+      "tool_calls": 0,
+      "native_compaction_completed": true,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "a98a9e4ca3c3f3cf9ab952a25a192885ecd0984599db6b991e2c9558a11a06ff",
+      "export_sha256": "9c146f9aa7e85c21d5f65a5b0df2a17d411599786e6d92e5158a1e2763015d87"
+    },
+    "semantic_result": "PARTIAL: the first checkpoint retained the explicit 64K user choice, listed all ten broad acceptance items, no edits/checks and next action; it paraphrased rather than quoted the user choice. Offline replay of the exact native summary triggered the new conservative unverified-Decision marker. The Ask restart recovered and quoted the original choice and listed unrun checks, but wrongly called the historical Plan-mode note incorrect because current mode had changed. The second native checkpoint completed but repeated the same Plan-mode state. Two compactions/restart did not qualify semantic continuity or coding/UI.",
+    "latest_install": "The owner is again on private 64K source f275b29. A matching source 8d39c67 49K candidate was installed immediately before the final 64K reinstall; current committed rollback receipt backs up that 49K active source. Actual rollback from this exact f275b29 install is unexercised. Guarded protocol smoke passed (metrics SHA256 0da8675b18fffefebc41fb85d8dad177f9bd30014c4fd60a6761d3b43b3fa2f3); doctor reports healthy idle 65,536 context, normal pressure, unchanged swap at 432212541 bytes and connected browser/search MCP. No public release or tier promotion.",
+    "remaining": "Long tool-enabled coding/UI semantic continuity, 64K sustained reliability under host variability, clean non-owner install, and full 49K/64K/96K/128K useful-tier decision remain open."
   }
 }
