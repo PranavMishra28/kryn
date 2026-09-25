@@ -191,7 +191,7 @@
     "The two-compaction coding/UI trial completed some stages but its native checkpoint incorrectly kept already edited UI controls Active, promoted model choices to user Decisions, and claimed 503/export without end-to-end evidence.",
     "Independent browser acceptance failed exact project filtering and persistent edit; fresh read-only review and new-session final handoff were not completed.",
     "64K remains experimental under variable host load; a focused repair turn was stopped by resource preflight before a prompt was sent. 96K/128K thinking near-limit trials failed host-pressure gates.",
-    "The bounded recent-transcript capsule passed offline checks and was installed at 64K; a fresh native checkpoint exported recent transcript and the resumed Ask turn flagged assistant-authored decisions, but the bridge’s causal contribution and sustained coding/UI continuity remain unqualified.",
+    "The bounded recent-transcript and long-request head/tail capsule passed offline checks and were installed at 64K with protocol smoke; a fresh full multi-stage coding/UI semantic run on the exact latest code has not passed. Earlier narrow trials remain partial.",
     "The current installed 64K transaction has a committed 49K rollback target but actual rollback from this latest install and clean install gate remain unexercised."
   ],
   "followup_task12e": {
@@ -289,7 +289,14 @@
     "installed_64k_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
     "installed_64k_wheel_sha256": "d8ee3b271bead2ea8ff42285610db8073849553cb07c8cebd5114d8a919f4bc4",
     "protocol_smoke_metrics_sha256": "7d7b115e0241cbfe98fa61e108c340eeaccead5ec25ca077585f663628e5e45d",
-    "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised."
+    "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised.",
+    "long_request_fix": "Private first/recent request records and bounded prompt excerpts now retain both beginning and end with an explicit middle-omission marker; raw history remains outside prompt. A regression retained late acceptance and constraint text through two compactions and restart. This does not prove arbitrary middle criteria are retained.",
+    "latest_public_candidate_source_revision": "69b6d9b76bd9165b7988cc7cbae6e6de369c7014",
+    "latest_installed_private_64k_revision": "181a0469479f1fa25c8f93eac71a44419016f5fb",
+    "latest_installed_wheel_sha256": "a5404941c0d4815b51d2808f57aec844bc6dd167e332319378a03cbfee667f3d",
+    "latest_guarded_protocol_metrics_sha256": "4053b9af6830a1f3d069e4678d055a4acaad332ed028b7ff63ee1d24e9c8516e",
+    "latest_install_status": "PASS private update, offline self-check, guarded protocol smoke and doctor. Active oMLX context=65536, healthy/idle, normal host pressure, browser and search MCP connected. No native long workflow was run on this exact latest code.",
+    "latest_rollback_target": "Committed transaction receipt backs up 49K source 69b6d9b76bd9165b7988cc7cbae6e6de369c7014; actual rollback from latest install unexercised."
   },
   "current_installed_64k_narrow_trials": {
     "candidate_source_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",

@@ -115,14 +115,14 @@
     "rollback_target": "PASS receipt inspection only: current 64K transaction at source 6582565 has committed prior active receipt at source d1aab47 (49K matching context code); actual rollback from this latest install remains unexercised."
   },
   "current_private_64k_install": {
-    "source_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
-    "wheel_sha256": "d8ee3b271bead2ea8ff42285610db8073849553cb07c8cebd5114d8a919f4bc4",
+    "source_revision": "181a0469479f1fa25c8f93eac71a44419016f5fb",
+    "wheel_sha256": "a5404941c0d4815b51d2808f57aec844bc6dd167e332319378a03cbfee667f3d",
     "active_context_tokens": 65536,
-    "rollback_target_source_revision": "0651376845b8b41041299f5b8b7c9bd70293af81",
+    "rollback_target_source_revision": "69b6d9b76bd9165b7988cc7cbae6e6de369c7014",
     "rollback_target_context_tokens": 49152,
     "rollback_scope": "Committed activation receipt inspected; actual rollback from the latest install not exercised.",
-    "guarded_protocol_smoke": "PASS at LocalAI/runs/protocol-20260925T220651Z-b90345ce",
-    "metrics_sha256": "7d7b115e0241cbfe98fa61e108c340eeaccead5ec25ca077585f663628e5e45d",
+    "guarded_protocol_smoke": "PASS at LocalAI/runs/protocol-20260925T222304Z-01603c2c",
+    "metrics_sha256": "4053b9af6830a1f3d069e4678d055a4acaad332ed028b7ff63ee1d24e9c8516e",
     "offline_doctor": "PASS: model max_model_len 65536, runtime healthy, idle, normal host pressure, browser/search MCP connected; no generation in doctor.",
     "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
   },
