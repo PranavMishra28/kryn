@@ -25,9 +25,23 @@
       "131072": ["context-20260925T174628Z-d1b0a91f", "41a7d8f7da96a6ff905fd321af08f9657fe8db76cc9edd9d027883cc559c11d4"]
     }
   },
+  "thinking_49k": {
+    "result": "PASS one synthetic retrieval with exact 40,000 actual input tokens and 4,096 output allowance; sustained coding remains unqualified",
+    "thinking_budget": 2048,
+    "actual_input_tokens": 40000,
+    "completion_tokens": 592,
+    "answer_correct": true,
+    "prefill_seconds": 52.16,
+    "total_seconds": 63.76,
+    "pressure": [1],
+    "swap_growth_bytes": 0,
+    "run": "context-20260925T185013Z-a4c36838",
+    "metrics_sha256": "7d606ffab85ea58874fce5c2ba3f743a2deed56ceb771e47ced89b2a8ebaeb46",
+    "measurement_note": "A previous retry at a +2 template offset answered correctly but had 39,998 actual input tokens and was excluded from PASS; think-mode exact offset was 0. Its ignored metrics are context-20260925T184843Z-b4d3253a/e21cfe45734a234cd46ed88a734441faa74752073f4c912543cb768df93f2ff8. A sandboxed preflight stopped before generation because host telemetry was unavailable."
+  },
   "failed_or_open_gates": [
-    "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; this was an output-budget failure, not memory pressure.",
-    "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; the adjusted probe still required exact actual usage for every reported PASS.",
+    "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
+    "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",
     "128K near-limit request failed under the configured memory ceiling despite normal host pressure and zero incremental swap.",
     "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
     "No installed thinking-mode 64K comparison or multi-stage UI task has passed; retain 49K as the public fallback."
