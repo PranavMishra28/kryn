@@ -439,7 +439,7 @@ export default {
       // This catches observed broad process-name kills, not arbitrary shell
       // indirection; the ordinary shell boundary is not whole-process isolation.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
-          /(?:^|[;&|\n])\s*(?:(?:command|sudo)\s+)*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)\b/.test(event.input.command))
+          /(?:^|[;&|\n])\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)\b/.test(event.input.command))
         throw new Error('KRYN refuses broad process-name kills. Stop only a verified process you own by exact PID or native shell lifecycle.');
       // Recognize only a plain terminal background operator. Do not rewrite or
       // pretend to parse quoted, escaped, commented or multiline shell syntax.
