@@ -492,6 +492,10 @@ def mcp_status(server, config):
         time.sleep(0.5)
 
 
+def supported_chrome_version(version):
+    return isinstance(version, str) and re.fullmatch(r"(?:153|154)\.\d+\.\d+\.\d+", version) is not None
+
+
 def dependency_report(config):
     """Read-only checks; these are compatibility checks, not model acceptance."""
     free = shutil.disk_usage(ROOT).free
@@ -506,7 +510,7 @@ def dependency_report(config):
     require(chrome.is_file(), "Google Chrome is missing; browser tools are unavailable")
     with chrome.open("rb") as stream:
         browser_version = plistlib.load(stream).get("CFBundleShortVersionString", "")
-    require(re.fullmatch(r"153\.\d+\.\d+\.\d+", browser_version), "Chrome major differs from the tested compatibility line")
+    require(supported_chrome_version(browser_version), "Chrome major differs from the tested compatibility lines")
     browser = config.get("mcp", {}).get("servers", {}).get("browser", {})
     node = browser.get("command", [None])[0]
     require(node is not None, "Browser Node executable is not configured")
