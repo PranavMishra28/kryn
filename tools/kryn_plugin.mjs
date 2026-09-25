@@ -2,7 +2,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { contextCapsule, workspaceStamp } from './context_capsule.mjs';
+import { boundedExcerpt, contextCapsule, workspaceStamp } from './context_capsule.mjs';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
@@ -379,14 +379,13 @@ export default {
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0; item.browserCalls = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
       const text = event.prompt?.text;
-      item.userRequest = typeof text === 'string' ? (text.length <= 6000 ? text :
-        text.slice(0, 3000) + '\n[Middle omitted; verification scope may be incomplete.]\n' + text.slice(-3000)) : '';
+      item.userRequest = typeof text === 'string' ? boundedExcerpt(text, 6000) : '';
       if (typeof text === 'string' && text && event.metadata?.source !== 'kryn.output-recovery') {
         const previous = item.recorded;
         const limit = previous.total ? 2000 : 6000;
         const requests = previous.total ?
-          [previous.requests[0], ...previous.requests.slice(1).slice(-2), text.slice(0, limit)] :
-          [text.slice(0, limit)];
+          [previous.requests[0], ...previous.requests.slice(1).slice(-2), boundedExcerpt(text, limit)] :
+          [boundedExcerpt(text, limit)];
         let next = { owner: 'kryn.product', schema: 1, total: count(previous.total + 1),
           clipped: previous.clipped || text.length > limit, requests };
         if (Buffer.byteLength(JSON.stringify(next)) > 30000) next = { ...next, clipped: true,
