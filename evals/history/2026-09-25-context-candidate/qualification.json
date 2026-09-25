@@ -398,6 +398,98 @@
       },
       "duration": "312.067 seconds total active measured stage time including audit/review; no sustained complete coding/UI task."
     },
-    "scope": "Latest installed 64K build supports narrow planning compactions, one incomplete coding turn, a focused close/restart and a read-only review. It has not passed full requirement preservation, browser UI, long sustained completion or actual 49K rollback."
+    "scope": "Earlier narrow trials did not pass full requirement preservation, browser UI or sustained completion. An actual matching 49K rollback/reinstall passed later; this older subsection is not the latest installation state."
+  },
+  "followup_task12h_i": {
+    "fixture": "Two fresh frozen Task12 filter stages with identical prompt SHA256 c0cf10b0079fa1b136af620fc22d9ccc4a8b61139c01b48850839db215870abf; ignored private traces under evals/runs/context-candidate-task12h/ and task12i/. The two runs differ in installed product guidance and stochastic model behavior; this pair is not an uplift estimate.",
+    "baseline_product_source": "76c58ff67e478d4df138299cac837d3235ae69ab",
+    "changed_private_product_source": "91cce8c4c583a48808a3dafccab53d5c7367387d",
+    "task12h_baseline": {
+      "seconds": 184.315,
+      "model_completed": true,
+      "tool_calls": 19,
+      "native_compaction_completed": true,
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "wire_requests": 18,
+      "first_wire_context_bytes": {
+        "system": 9811,
+        "developer": 0,
+        "user": 707,
+        "assistant": 0,
+        "toolResult": 0,
+        "sourceToolResult": 0,
+        "shellToolResult": 0,
+        "otherToolResult": 0,
+        "toolCalls": 0,
+        "toolSchemas": 11732,
+        "messages": 2
+      },
+      "last_wire_context_bytes": {
+        "system": 11697,
+        "developer": 0,
+        "user": 3430,
+        "assistant": 1906,
+        "toolResult": 26089,
+        "sourceToolResult": 15029,
+        "shellToolResult": 10827,
+        "otherToolResult": 233,
+        "toolCalls": 14197,
+        "toolSchemas": 11732,
+        "messages": 39
+      },
+      "driver_sha256": "f076d9ed44ac258bccb767d32c7d0a2cd4dda3121196472c2f9c0c66e01c3288",
+      "export_sha256": "ea0f4a693a73fddd04a446dde663438533b31fdcd02ef522d7f0655b896a251d",
+      "grade_sha256": "4edd745f2c8103cc22a4b2e27c9dd4393b234e71e0dae1f47df8709cf884386f",
+      "result": "FAIL overall Task12: filter route implementation passed an independent live Handler HTTP probe (all/exact/nonmatch/Unicode); generated 5 tests copied filtering logic instead of calling Handler. Existing 2 tests passed. Frozen grade failed missing import endpoint. Checkpoint mislabeled two agent implementation choices as user Decisions."
+    },
+    "task12i_guidance": {
+      "seconds": 145.547,
+      "model_completed": true,
+      "tool_calls": 15,
+      "native_compaction_completed": true,
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "wire_requests": 13,
+      "first_wire_context_bytes": {
+        "system": 9950,
+        "developer": 0,
+        "user": 707,
+        "assistant": 0,
+        "toolResult": 0,
+        "sourceToolResult": 0,
+        "shellToolResult": 0,
+        "otherToolResult": 0,
+        "toolCalls": 0,
+        "toolSchemas": 11732,
+        "messages": 2
+      },
+      "last_wire_context_bytes": {
+        "system": 11740,
+        "developer": 0,
+        "user": 3430,
+        "assistant": 1656,
+        "toolResult": 18362,
+        "sourceToolResult": 15050,
+        "shellToolResult": 3148,
+        "otherToolResult": 164,
+        "toolCalls": 10736,
+        "toolSchemas": 11732,
+        "messages": 30
+      },
+      "driver_sha256": "93d596aaaabc335029ece40f9a4954a61e4b2b69b46461e9d0b52b68efb0ddd1",
+      "export_sha256": "061b5024bdbc872616ecaddfc3c6fa8b4535b4917c845add12b96f270a2bd487",
+      "grade_sha256": "060ec74fb4b7176d62d08414b70b16dd90a44db96f423551e7d23b8c12f5e512",
+      "result": "FAIL overall Task12: a proposed Build-guidance sentence about production-path tests did not prevent a copied predicate test; agent modified existing test_existing.py (frozen preservation failed). Three model tests passed but did not exercise Handler; independent HTTP probe passed nonempty exact names, while ?project= returned all. Frozen grade failed missing import endpoint. Checkpoint again mislabeled two agent choices as user Decisions."
+    },
+    "context_measurement": "Metadata-only wire bytes, not token counts. The first request used roughly 9.8 KiB system text plus 11.5 KiB direct tool schemas before file evidence. The final baseline request included 26,089 text bytes of tool results, 14,197 bytes of tool-call JSON and 11,732 bytes of tool schemas; the task was far below the configured 64K token window. This small-stage quality failure is not evidence of context exhaustion.",
+    "compaction_provenance": "Both native summaries put unquoted agent implementation/test choices under Decisions despite existing guidance to reserve it for user choices. Candidate source now flags checkpoint Decision bullets lacking an exact quoted anchor in retained user requests. Offline replay of both real summaries flags two items each; no installed restart qualification yet. The check is conservative and not semantic proof even when a quote matches.",
+    "power_caveat": "Post-run pmset reported Battery Power at 56%; the native driver did not capture per-stage power before/after for these trials. Driver source now captures both for future trials. Do not treat these as AC benchmarks.",
+    "decision": "The prompt-only test-quality instruction was reverted on both source branches after the failed repeat. The private 64K candidate 91cce8c was rolled back to installed 76c58ff, retaining its previously tested immediate 49K rollback target; guarded protocol smoke after rollback passed, metrics SHA256 7f365a10c1fd849f3c9a848ca6dff7de47382532eb4df17a6183ea4540c1af4f. Doctor reports healthy idle 65,536 context, normal pressure, browser/search connected. No public release or tier promotion.",
+    "remaining": "Full Task12 coding/UI, semantic compaction across repeated restarts, sustained 64K reliability, clean non-owner install and 49K-128K useful-tier qualification remain open."
   }
 }
