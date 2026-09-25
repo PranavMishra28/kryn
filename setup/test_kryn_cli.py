@@ -43,6 +43,7 @@ class KrynChecks(unittest.TestCase):
         self.enterContext(patch.object(localai.learning, 'active_champion', return_value=localai.learning.BASELINE))
         self.enterContext(patch.object(localai.learning, 'start_after_exit'))
         self.enterContext(patch.object(localai, 'owned_config', return_value={}))
+        self.enterContext(patch.object(localai.improvement, 'record_outcome'))
 
     def guarded(self, samples, child, outcome=None, **options):
         outcome = {} if outcome is None else outcome

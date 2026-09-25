@@ -4,6 +4,8 @@ A local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal in
 
 [Release v0.1.9](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.9) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
+Contributing or working on KRYN with a coding agent? Start with the [repository map](AGENTS.md), [development commands](CONTRIBUTING.md) and [current evidence ledger](plan.md).
+
 ## Start coding
 
 If KRYN is already installed, open **Terminal**, replace the path below with your project's folder, and run:
