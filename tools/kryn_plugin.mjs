@@ -2,7 +2,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { boundedExcerpt, contextCapsule, workspaceStamp } from './context_capsule.mjs';
+import { boundedExcerpt, contextCapsule, maskUnverifiedDecisions, workspaceStamp } from './context_capsule.mjs';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
@@ -402,6 +402,9 @@ export default {
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
       const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded, firstCompaction);
       if (capsule) event.system.push({ type: 'text', text: capsule });
+      const maskedDecisions = maskUnverifiedDecisions(event.messages, item.recorded);
+      if (maskedDecisions) event.system.push({ type: 'text', text: 'The model-facing checkpoint omitted ' + maskedDecisions +
+        ' unverified Decision claim(s). The original checkpoint and user requests remain in native history. Do not repeat those claims as user choices without a matching user quote.' });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
       if (event.agent === 'plan') event.system.push({ type: 'text', text: PLAN_GUIDANCE });
@@ -448,7 +451,7 @@ export default {
     await ctx.session.hook('generate', instructions);
     await ctx.session.hook('compaction', event => {
       if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
-      event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements. Under Decisions, write none unless the user explicitly chose; for each choice quote a short exact phrase from their request and include their reason if given. Label your own implementation choices as agent decisions under Work State instead. Under Important Context, distinguish observed failed checks from checks not yet run; never infer a pass from prose. Preserve one concrete next action. Label uncertain or historical claims as such, and reconcile the summary against the recorded user requests below.' });
+      event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements. Under Decisions, write none unless the user explicitly chose; format each supported choice as `- User: "exact phrase from request"` and include their reason if given. Label your own implementation choices as agent decisions under Work State instead. Under Important Context, distinguish observed failed checks from checks not yet run; never infer a pass from prose. Preserve one concrete next action. Label uncertain or historical claims as such, and reconcile the summary against the recorded user requests below.' });
       instructions(event, true); tracker(session(event.sessionID));
     });
     await ctx.session.hook('retry', event => {
