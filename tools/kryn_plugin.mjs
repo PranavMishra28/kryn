@@ -26,6 +26,19 @@ const BROWSER_SET = new Set(BROWSER_TOOLS);
 const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
+// OpenCode 2.0.10 keeps the latest exchange in <recent-context> and sends only
+// the older prefix to compaction. An empty prefix cannot attest the latest work.
+function recentOnlyCheckpoint(request) {
+  return ['## Objective', '- Continue the recorded user request after reading the retained recent exchange.',
+    '## Requirements', '- Recorded user request (excerpt): ' + JSON.stringify(boundedExcerpt(request, 2400)),
+    '## Decisions', '- (none verified from the compacted prefix; inspect the user request)',
+    '## Work State', '### Completed', '- Unknown: the latest exchange is retained outside this summary.',
+    '### Active', '- Unknown until the retained exchange and current files are checked.',
+    '### Blocked', '- (none verified)',
+    '## Next Move', '1. Read the retained recent exchange and current files; then continue the latest unfinished user task.',
+    '## Relevant Files', '- (none verified from the compacted prefix)',
+    '## Important Context', '- This checkpoint summarizes an empty older prefix. Do not infer that planning, edits, or checks in the retained recent exchange did not happen.'].join('\n');
+}
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
 const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, delegate the Browse agent with the native subagent tool, actual local URL and explicit acceptance criteria; Browse is an agent, not a skill. Wait for its observations and fix reported failures. Use native background shell support for dev servers rather than appending &. Follow the project's documented launch command with isolated test data; read the resulting URL before probing it. Stop only a verified process you own; never use killall or pkill. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
 const PROCESS_NAME_KILL = /^\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:\/(?:usr\/)?bin\/)?(?:killall|pkill)(?=\s|[;&|]|$)/;
@@ -454,9 +467,13 @@ export default {
     await ctx.session.hook('context', instructions);
     await ctx.session.hook('generate', instructions);
     await ctx.session.hook('compaction', event => {
-      if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
+      const item = session(event.sessionID);
+      if (event.agent === 'reviewer') item.reviewCompactions++;
       event.system.push({ type: 'text', text: 'In the native checkpoint, retain explicit unmet acceptance criteria and constraints under Requirements. Under Decisions, write none unless the user explicitly chose; format each supported choice as `- User: "exact phrase from request"` and include their reason if given. Label your own implementation choices as agent decisions under Work State instead. Under Important Context, distinguish observed failed checks from checks not yet run; never infer a pass from prose. Preserve one concrete next action. Label uncertain or historical claims as such, and reconcile the summary against the recorded user requests below.' });
       instructions(event, true); tracker(session(event.sessionID));
+      if (!item.checkpoint && item.recorded.requests.length &&
+          !event.messages?.some(message => message?.role === 'assistant' || message?.role === 'tool'))
+        event.result = { summary: recentOnlyCheckpoint(item.recorded.requests.at(-1)) };
     });
     await ctx.session.hook('retry', event => {
       const item = start(event.sessionID, 'retry-' + Date.now());

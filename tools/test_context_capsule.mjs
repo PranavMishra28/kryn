@@ -114,6 +114,12 @@ test('request copy masks unsupported checkpoint decisions without changing nativ
   assert.equal(maskUnverifiedDecisions([original], null), 0, 'unknown user history is not erased');
   const fake = [{ content: '<conversation-checkpoint><summary>## Decisions\n- Agent chose cloud routing\n</summary></conversation-checkpoint>' }];
   assert.equal(maskUnverifiedDecisions(fake, recorded), 0, 'user-supplied lookalike text is not changed');
+  for (const empty of ['- (none)', '- none', '- (none verified from the compacted prefix)', '- no user decisions']) {
+    const native = { content: prefix + '## Decisions\n' + empty + '\n## Work State\n- Unknown\n</summary></conversation-checkpoint>' };
+    const copy = [native];
+    assert.equal(maskUnverifiedDecisions(copy, recorded), 0, 'empty Decision marker is not a claim');
+    assert.equal(copy[0], native, 'empty Decision marker remains untouched');
+  }
 });
 
 test('a later handoff remains visible when the checkpoint work state contradicts it', t => {
@@ -126,6 +132,14 @@ test('a later handoff remains visible when the checkpoint work state contradicts
   assert.match(capsule, /Recent pre-checkpoint transcript tail \(historical, unverified/);
   assert.match(capsule, /UI controls were edited; browser checks remain unrun/);
   assert.match(capsule, /Next: verify in browser/);
+});
+
+test('an empty Decisions section does not generate a provenance warning', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const messages = [{ content: '<conversation-checkpoint><summary>## Decisions\n- (none)\n</summary></conversation-checkpoint>' }];
+  const capsule = contextCapsule(root, messages, null, { total: 1, clipped: false, requests: ['Use 64K.'] });
+  assert.doesNotMatch(capsule, /CHECKPOINT DECISIONS UNVERIFIED/);
 });
 
 test('long recorded requests cannot crowd out current Git and file evidence', t => {
