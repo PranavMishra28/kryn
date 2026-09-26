@@ -1,0 +1,54 @@
+{
+  "status": "REJECTED: no verified useful-work improvement; bounded Git-diff injection and extra Reviewer guidance were reverted",
+  "fixture": "Same frozen Task12 source diff (server.py and web/app.js) and identical broad/focused read-only review prompts in separate private run IDs. Raw prompts, exports and telemetry remain ignored under evals/runs/context64-c34-12u/ and evals/runs/context64-c35-review/.",
+  "baseline": {
+    "installed_source": "8d5def3c15e0488c35e832d078efb9d26aa30e72",
+    "broad": {
+      "completed": false,
+      "wall_seconds": 187.894,
+      "tool_calls": 27,
+      "tool_errors": 7,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "6ff11178b8be827a754e1c3531cf15d2edc276d77ca17fb79c32b84be9a78b50"
+    },
+    "focused": {
+      "completed": true,
+      "wall_seconds": 39.817,
+      "tool_calls": 3,
+      "tool_errors": 0,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "0ac2148ca0fbf8f4e05d10fe1c10220e29dd61183dbd8e3471a5ba126cc9296d",
+      "quality": "Correctly found the PUT-versus-required-POST mismatch and substring filtering; incorrectly said the server had no PUT handler and asserted an unproven path-traversal exploit."
+    }
+  },
+  "challenger": {
+    "installed_source": "ac2db9a4f66d95eeaee56c8fc78fe9876c90c553",
+    "wheel_sha256": "0a06ede75767dc9e8765e9d13697175652f143afb838797d18483bdb78bb8b71",
+    "change": "Injected up to 6,000 characters of current tracked Git diff into Reviewer system context and added a prompt caution about unsupported security claims; did not change Reviewer tools or authority.",
+    "broad": {
+      "completed": false,
+      "wall_seconds": 187.841,
+      "tool_calls": 22,
+      "tool_errors": 6,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "e9172df8d06d19e215f5ff008f410dd5ed8ae54e3a0a5f057140f5e35a21f879",
+      "native_export_sha256": "ce541468cef62cb78209f84fda953b8c3f93e2780656ea39030a87e00f4001f3"
+    },
+    "focused": {
+      "completed": true,
+      "wall_seconds": 40.195,
+      "tool_calls": 3,
+      "tool_errors": 0,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "58ca4b50d285bf2b7ffe7a424e482d1e1584f6f47bb6e50f419e743bb52efefa",
+      "native_export_sha256": "e0c82f24040babc5d05f9087ad9d10130f213d51681ea265c4f9625de4c23d75",
+      "quality": "Found PUT-versus-required-POST; described the generated Delete button's missing server handler as implied by PATCH although deletion is not a Task12 requirement; falsely claimed import lacks atomic duplicate rejection although Store.add uses a primary key and transaction; listed exact filtering as unreviewed despite the requested file showing substring matching."
+    }
+  },
+  "disposition": "Broad review timed out under both conditions; focused review speed and call count were unchanged, and both outputs contained unsupported claims. The extra changing diff text consumed bounded context without a demonstrated task-quality gain, so NO CHANGE won. A narrowly scoped Reviewer prompt with explicit project-relative files remains a useful operator technique, not a qualified automatic harness improvement.",
+  "restore": "The private 64K wheel from source 8d5def3 was reinstalled transactionally. Its first guarded smoke stopped at preflight without generation; a single retry after normal pressure passed, and package check/doctor confirmed source 8d5def3, healthy idle 65,536-token runtime, normal pressure and unchanged 415435325-byte swap. This is not a new long-workflow or public-release qualification."
+}
