@@ -119,6 +119,21 @@ class SetupChecks(unittest.TestCase):
                                 env={**setup.os.environ, "HOME": str(self.root)}, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.root / ".local/bin/localai").read_text(), release["launcher"])
+        config_file = install_root / "xdg/config/opencode/opencode.json"
+        original_config = config_file.read_text()
+        mismatched = json.loads(original_config)
+        next(item for item in mismatched["plugins"] if isinstance(item, dict))["package"] = str(install_root / "plugins/previous")
+        config_file.write_text(setup.encode(mismatched))
+        before_deploy = ((install_root / "client/deployment.json").read_bytes(),
+                         (self.root / ".local/bin/localai").read_bytes())
+        with patch.object(Path, "home", return_value=self.root), \
+             patch.object(sys, "argv", ["deploy_client.py", "--apply"]), \
+             patch.object(setup, "model_settings", return_value=server_settings), \
+             self.assertRaisesRegex(RuntimeError, "plugin reference differs"):
+            deploy_client.main()
+        self.assertEqual(((install_root / "client/deployment.json").read_bytes(),
+                          (self.root / ".local/bin/localai").read_bytes()), before_deploy)
+        config_file.write_text(original_config)
         shim = directory / "tools/native-shell"
         self.assertEqual(shim.read_bytes(), native_client.SHELL_SHIM_BYTES)
         self.assertTrue(os.access(shim, os.X_OK))
@@ -256,7 +271,7 @@ class SetupChecks(unittest.TestCase):
         inventory["models"]["data"][0]["variants"].reverse()
         localai.validate_inventory(inventory)  # List order is not reasoning-profile drift.
         mutations = [
-            (("models", "data", 0, "limit", "context"), 49152),
+            (("models", "data", 0, "limit", "context"), 65536),
             (("models", "data", 0, "limit", "output"), 16384),
             (("models", "data", 0, "body", "max_tokens"), 16384),
             (("models", "data", 0, "body", "chat_template_kwargs", "reasoning_effort"), "low"),
@@ -324,7 +339,7 @@ class SetupChecks(unittest.TestCase):
             changed["status"]["model_memory_max"] = value
             with self.subTest(ceiling=value), self.assertRaises(RuntimeError):
                 localai.validate_runtime_metadata(changed)
-        for value in (None, 49152, "32768", True):
+        for value in (None, 65536, "32768", True):
             changed = copy.deepcopy(results)
             changed["models"]["data"][0]["max_model_len"] = value
             with self.subTest(context=value), self.assertRaises(RuntimeError):
@@ -1131,7 +1146,7 @@ class SetupChecks(unittest.TestCase):
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
         self.assertEqual(cfg["default_agent"], "agent")
-        self.assertEqual(model["limit"], {"context": 65536, "output": 8192})
+        self.assertEqual(model["limit"], {"context": 49152, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
         variants = {v['id']: v['body'] for v in model['variants']}
         self.assertEqual(set(variants), {'fast'})  # Native UI adds Default itself.
