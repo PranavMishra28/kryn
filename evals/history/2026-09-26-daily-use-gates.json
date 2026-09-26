@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private daily-use qualification; no product promotion or public release",
+  "installed_owner_source": "b0214cb",
+  "candidate": {
+    "status": "Uncommitted private conservative-checkpoint composition with merged main guards; not installed or merged",
+    "context_capsule_sha256": "aa092a6b11b5a458293146acdb83d0fdf87091d5a04fc9f4d1b80a40a6982aea",
+    "kryn_plugin_sha256": "bd77d0910a47caa0e9f7b54c1ffe90f07e5fae6cd28c51870f8879065793464c",
+    "offline": "make check passed; native agent behavior remains unqualified"
+  },
+  "task09": {
+    "frozen_grade": "FAIL",
+    "automatic": "Original tests, preserved seed files, ten external checkpoints, and final CSV rows passed",
+    "manual": "9/10 turns read current CSV before edit; turn 6 edited first and piped unittest through head without pipefail, obscuring its exit status",
+    "comparison": "Earlier baseline was 8/10 and automatic file-tail candidate 2/10 in single runs. File-tail was reverted. Correlation does not establish the exact regression mechanism or reliable improvement.",
+    "native_compactions": "10/10 completed across saved-session restarts",
+    "active_wall_seconds": 461.743,
+    "resources": "All guard preflights passed; sampled pressure level 1 and zero swap growth",
+    "operator_grade_sha256": "86d855cd0a3f3a526017dd96aa33fa380e2b532295de776053b654716584c561",
+    "frozen_grade_sha256": "9370949da17a45358ca0ef3cbe017fe7aab6b2340e9e33ce684eafaa8c651b8f",
+    "raw_evidence_private": "/private/tmp/kryn-conservative-checkpoint/evals/runs/u09e"
+  },
+  "task06": {
+    "frozen_grade": "FAIL",
+    "automatic": "Original backend tests and preserved seed files passed",
+    "workflow": "One saved Agent session completed two guarded compactions across restart; a fresh Reviewer completed; normal sampled pressure and zero swap growth",
+    "browser": "Save/reload, duplicate feedback, and controlled 503 with explicit retry passed. After the second Agent repair, a 390px viewport still had 460px document scroll width and clipped entry text. General invalid-field focus was not tested in this fixture.",
+    "review": "Operator confirmed responsive failure and two unsolicited UI defects. Native Reviewer noticed overflow but contradicted observed 503 behavior and proposed unsupported requirements.",
+    "autonomy": "FAIL after two Agent repair attempts. An earlier application pass required operator repair and is not autonomous completion.",
+    "frozen_grade_sha256": "fc0589b9dd2310e50ad42c52fcca1f8d8c51e2ddaffd70e1b91c6a5e75c0bb8c",
+    "browser_failure_sha256": "98b695dc41f6bda54a5600e616a18d03e04e16218b2cad6217fee378c259d40c",
+    "operator_review_sha256": "441f6c1ad3b1047e17dca560cc0443c80ceb5620256e4a92ca8f7d0fb52c1125",
+    "raw_evidence_private": "/private/tmp/kryn-conservative-checkpoint/evals/runs/u06e"
+  },
+  "remaining_gates": {
+    "reliable_current_file_read_and_check_results": "FAIL",
+    "uninterrupted_coding_ui_compaction_restart_browser_review": "FAIL",
+    "representative_49k_64k_96k_128k_tier_selection": "INCOMPLETE; 64K stays experimental with guard and rollback",
+    "clean_nonowner_install_and_rollback": "BLOCKED; about 30 GiB free, below model download plus 40 GiB reserve",
+    "final_profile_45_to_60_minute_active_endurance": "UNRUN"
+  },
+  "next_action": "Change approach to current-file grounding and browser-verified repair rather than adding prompt or excerpt rules. Keep candidate unmerged; resume clean install when disk meets the installer reserve; run endurance on a qualified final profile."
+}
