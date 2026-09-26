@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private frozen Task06 and checkpoint continuation; no product qualification or public release",
+  "task06c": {
+    "first_agent_correction": "Duplicate feedback passed, but after entries rendered at 390px the document still scrolled to 460px. Agent changed main/input widths without addressing #entries.",
+    "first_agent_driver_sha256": "998e1ad19f3b97dec09eca83716f3fd08bca8a2b13e25ea9a84b35493c2c3703",
+    "first_operator_browser_sha256": "d13581b46f7624920a9df643ddffae52e6bdcd2ebc7048c3900f1cfd7ce5fdb0",
+    "second_agent_correction": "Initial 390px document width reached 390px, but Agent rendered stored project strings with innerHTML on load/save/import. Independent browser inserted a harmless strong tag through the existing API and saw it become a DOM element after reload. Security/application gate failed.",
+    "second_agent_driver_sha256": "b3c7867fe0cca2f2066b5cd76561e05639a2f3cab34020e07d3bd2e6404fc080",
+    "second_operator_browser_sha256": "912df953cf9684168a87f79e392e1b1ad9075a1b8a7244f4fd6488f1a4d43458",
+    "operator_recovery": "After two Agent attempts, operator restored textContent rendering, removed the excess CSS, and added #entries{overflow-wrap:anywhere}. Independent browser then passed 390px/1280px layout, literal stored markup, zero-minute save/reload, duplicate feedback, invalid field, and evaluator-controlled 503 with one retry. Node syntax, original 2 Python tests, and git diff check passed. The UI remains a basic JSON display.",
+    "operator_final_browser_sha256": "356bff238835be8c603358958701810c9818b8b37aaf379c628c4dc5d22a2345",
+    "uninterrupted_autonomy": "FAIL; operator changed the fixture to reach final application pass",
+    "independent_review": "FAIL for autonomous product qualification; operator review detected the stored-markup regression, while local Reviewer quality remains unqualified"
+  },
+  "private_checkpoint_screen": {
+    "change": "The latest recorded user request gets a 1600-character bound in the private conservative checkpoint and resumed context capsule, preserving a 1166-character browser-evidence handoff that the earlier 600-character bound clipped in the middle. Raw history remains outside the prompt.",
+    "source_status": "Uncommitted private candidate, not installed or proposed for merge",
+    "offline_checks": "make check PASS, including a focused latest-failure/next-action regression",
+    "native": "A fresh Ask session completed two guarded native compactions across restarts. The final no-tool Ask turn correctly recalled 457px versus 390px overflow, generic duplicate feedback, and the inspection/fix/browser-recheck next action as historical evidence. All three stages completed with no tool errors, normal sampled pressure, and zero swap growth.",
+    "setup_driver_sha256": "92cd7c3536e5fc2abb348e65640d2488de16cb18793a1eba3844bd2729331beb",
+    "failure_driver_sha256": "612b4ac6158d5d1f6ba1c8b7b5d3ecb0996faf95767f41fbf21ce3c422f0118f",
+    "resume_driver_sha256": "b57905fb2bb05246b331ee8a3e55397f45536762f74a746066f5a2cec6bb1a0b",
+    "limits": "The checkpoint still labels external browser failures as quoted user-request history rather than a first-class failed check. This is a read-only handoff screen, not an uninterrupted long coding/UI pass, Task09 regression, or review qualification. The larger excerpt needs comparison against Task09 before installation."
+  },
+  "remaining_gates": {
+    "task09_default_read_before_edit": "FAIL",
+    "autonomous_long_coding_ui_compaction_restart_review": "FAIL",
+    "representative_49k_to_128k_tier_selection": "INCOMPLETE",
+    "clean_non_owner_install": "BLOCKED: roughly 30 GiB free versus model download plus 40 GiB reserve",
+    "final_profile_active_endurance": "UNRUN"
+  }
+}
