@@ -311,12 +311,15 @@ test('plain test output cannot hide a failed exit', async () => {
       'cd /workspace && python -m pytest test_existing.py -v 2>&1 || echo "unavailable"',
       'python3 -B -m unittest -v || true', 'npm test || echo failed',
       'cd /workspace && python -m unittest discover -v 2>&1 | head -50',
-      'pytest -q | tail -5', 'pytest|head -1']) {
+      'pytest -q | tail -5', 'pytest|head -1',
+      'cd /workspace && python3 -B -m unittest test_existing.Existing -v; echo "Exit status: $?"',
+      'python -m pytest -q; printf "done"', 'npm test; true']) {
       assert.equal(masksCheckFailure(command), true);
       assert.throws(() => call(command), /hides failure/);
     }
     for (const command of ['python3 -B -m unittest -v', 'pytest', 'echo "pytest || true"',
-      'python -m pytest || python test_existing.py', 'npm test && echo done']) {
+      'python -m pytest || python test_existing.py', 'npm test && echo done',
+      'python3 -B -m unittest -v; exit $?', 'echo "python -m unittest; echo done"']) {
       assert.equal(masksCheckFailure(command), false);
       assert.doesNotThrow(() => call(command));
     }
