@@ -177,6 +177,7 @@ test('a later handoff remains visible when the checkpoint work state contradicts
     '<recent-context>[Assistant]: UI controls were edited; browser checks remain unrun. Next: verify in browser.' +
     '</recent-context></conversation-checkpoint>' }];
   const capsule = nativeCapsule(root, messages, null);
+  assert.match(capsule, /CHECKPOINT WORK STATE AND NEXT MOVE MAY BE STALE/);
   assert.match(capsule, /Recent pre-checkpoint transcript tail \(historical, unverified/);
   assert.match(capsule, /UI controls were edited; browser checks remain unrun/);
   assert.match(capsule, /Next: verify in browser/);

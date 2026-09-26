@@ -1,5 +1,5 @@
 {
-  "status": "private measurement; 64K installed agent gate failed but owner chose to retain experimental 64K with a freshly installed 49K context candidate as the immediate rollback target; an actual rollback from this latest install is still untested; no public tier promotion or release",
+  "status": "Historical private measurement: source 4506b32 ran experimental 64K with a matching 49K immediate rollback receipt and guarded protocol smoke; sustained Agent and useful-tier gates remained failed/open. Later installed candidates are recorded in plan.md. No public tier promotion or release.",
   "machine": "M4 Max, 48 GiB unified memory, AC power",
   "stack": "oMLX 0.6.4, Qwen3.5-9B-6bit, isolated per-tier settings, one request, 16 GiB oMLX memory ceiling",
   "method": "Exact active input tokens verified against generation usage on passing runs; single synthetic three-fact retrieval; host pressure/swap samples. The initial tier table used Fast and a 512 output-token allowance. Follow-up thinking runs used a 2048 thinking budget and 4096 output-token allowance. Cache trials used separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
@@ -102,6 +102,47 @@
     "export_sha256": "c801b83dabfa1f67b1be8f03e4e36c51461deb121864c25127fc813f02bea2e6",
     "follow_up": "Compaction guidance now distinguishes user decisions from assistant proposals and observed failures from unrun checks; retest this change in a new installed candidate."
   },
+  "decision_provenance_retest": {
+    "candidate_source_revision": "6582565cc63d783051fec07da864cef4f03c7d6e",
+    "candidate_wheel_sha256": "ac2e6603b2f72b48efc90049438d30b9a287c687271c4571788dcee4144d51a3",
+    "installed_release_identity": "91fc02925b9844bf",
+    "protocol_smoke": {"result": "PASS", "private_run": "LocalAI/runs/protocol-20260925T210953Z-ab0f93a8", "metrics_sha256": "265681c16afbebcc21afb4dec3f4cb4e294c322eefce9061b6ea076aea38cc15"},
+    "fixture": "Fresh disposable CSV expense-tool planning session, exact initial request as prior first-compaction test; native tools denied; 64K Fast; two native compactions separated by server restart, then one edited TASK.md and another restart",
+    "first_compaction": {"result": "PASS narrow semantic check: original goal, all four acceptance criteria, constraints, exact user decision and next action retained; assistant proposals were not promoted to decisions. The summary did not explicitly say checks were unrun.", "driver_completed": true, "seconds": 26.602, "driver_sha256": "38957f6d41f6250598a094bcdb40bfc17c9bedc9123ccf0c2d6f4f3cd36a3047", "export_sha256": "418cfb79d5f2b5688aad1715773fb79763f73761a117c5bab102c4b6acdbc639"},
+    "restart_and_second_compaction": {"result": "PASS narrow semantic check: without opening files, recalled all four acceptance criteria, constraints, exact user decision, no checks run and next action; second native compaction retained these facts.", "driver_completed": true, "seconds": 27.149, "driver_sha256": "c16b2310551e5c8a850c0f633ff953e64efb3038409f68427afc4154034d0b54", "export_sha256": "f0c86eddad6e92a6a074e4079181698db5f5f0514662385eb9d7b1f13b39903d"},
+    "stale_checkpoint_restart": {"result": "PASS narrow check: after TASK.md changed, a restarted session reported the checkpoint/workspace mismatch, named TASK.md, instructed rereading before implementation and did not claim checks passed.", "driver_completed": true, "seconds": 13.977, "driver_sha256": "d9976a2c2e3808dffbad35b88ee17aa3b9ecf69c8ce4902fe838b8ad3f205942", "export_sha256": "6fd81f5548997f5f429d96376544e5bf8629fcc095c6d17729b3a7e9ede285a1"},
+    "resources": "All three stages: normal sampled host pressure and zero incremental swap. Total measured active stage time 67.728 seconds; this is a narrow planning/restart fixture, not a sustained coding/UI pass.",
+    "rollback_target": "PASS receipt inspection only: current 64K transaction at source 6582565 has committed prior active receipt at source d1aab47 (49K matching context code); actual rollback from this latest install remains unexercised."
+  },
+  "prior_private_64k_install_76c58ff": {
+    "source_revision": "76c58ff67e478d4df138299cac837d3235ae69ab",
+    "wheel_sha256": "3b7155e704b5a5205e51ad817ddfa1d2de09bfdf4790a2f58a63d49f6f2ae7a3",
+    "active_context_tokens": 65536,
+    "rollback_target_source_revision": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
+    "rollback_target_context_tokens": 49152,
+    "rollback_scope": "PASS actual rollback restored matching 49K source 8d39c67 and model context 49152, then the same 64K wheel was reinstalled; its new committed receipt again points to 8d39c67.",
+    "guarded_protocol_smoke": "PASS at LocalAI/runs/protocol-20260925T222643Z-22255001",
+    "metrics_sha256": "fba1eca44e4fc4acd037778caa927054bd5b0ed55c85453c3ecf2a31a3222fbc",
+    "post_rollback_smoke_metrics_sha256": "7082d9443c2f8b62bb734ca588a86d5acdb3b3492f62cec0961a01ba7a162522",
+    "offline_doctor": "PASS: model max_model_len 65536, runtime healthy, idle, normal host pressure, browser/search MCP connected; no generation in doctor.",
+    "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
+  },
+  "subsequent_private_64k_install_4506b32": {
+    "source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "context_tokens": 65536,
+    "rollback_receipt_source": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
+    "rollback_receipt_context_tokens": 49152,
+    "rollback_scope": "Actual rollback from prior f275b29 64K to matching 8d39c67 49K succeeded, stopping the owned runtime; source 4506b32 64K was then installed with that 49K active source as its immediate committed backup. Actual rollback from 4506b32 is unexercised.",
+    "guarded_protocol_metrics_sha256": "34bcd230f30866f9891499977634de153651bd1510f8dc253563f6221ca3c6f3",
+    "doctor": "PASS healthy idle runtime at 65,536 context, normal pressure, browser/search MCP connected, swap 432212541 bytes after narrow three-compaction Ask probe. This does not qualify sustained coding.",
+    "disk_scope": "About 37 GiB host disk free at observation, below the installer 40 GiB reserve before adding challenger weights. No model challenger was downloaded or qualified."
+  },
+  "compression_research": {
+    "source": "https://github.com/jundot/omlx/blob/main/omlx/model_settings.py",
+    "finding": "oMLX exposes opt-in TurboQuant KV with 2-8 bit depths. It is disabled in KRYN. This is an option to test for larger contexts, not proof that 96K/128K is reliable or useful.",
+    "reported_cold_warm_risk": "https://github.com/jundot/omlx/issues/3690 reports silent wrong-answer detail retrieval on reused prefixes with 4-bit TurboQuant on a related Qwen3.5 architecture under oMLX 0.6.4. This is an external report, not a KRYN reproduction and not evidence about 8-bit.",
+    "qualification_needed": "An isolated bit-depth trial must pass exact-input, cold and warm cache retrieval, task quality, latency, host pressure and swap gates before changing the daily profile. Do not enable 4-bit based on memory savings alone."
+  },
   "failed_or_open_gates": [
     "An initial 49K thinking probe with only 512 output tokens ended at the length limit before an answer; a later 4,096-output-token synthetic retry passed at 40,000 exact input tokens.",
     "The oMLX token-count endpoint omitted Fast chat-template settings and undercounted actual generation by two tokens at 8192 and 40000; think mode used offset zero. Every reported PASS required exact actual usage.",
@@ -109,6 +150,6 @@
     "Synthetic repeated-word retrieval and 8192-token cache probes do not establish coding quality, long-run memory stability, repeated compaction/restart retention, or a useful larger daily tier.",
     "96K and 128K thinking requests at their tested near-limit inputs produced sustained host memory warnings and were canceled; neither tier is suitable for the daily profile on current evidence. The 128K Fast result required a raised 20 GiB isolated ceiling and does not overturn its thinking failure.",
     "64K thinking passed one cold and one warm synthetic near-limit retrieval, but three large-context agent starts and one ordinary short task then hit host pressure. The short task's edited artifact passed its focused grader, while the session did not complete. The owner elected to retain 64K as an experimental setting; the failures preclude a reliability claim or public tier promotion.",
-    "A post-rollback 49K guarded inference smoke was not authorized, so its behavior under the current host load is not established. A newer 64K first-compaction candidate installed but its protocol smoke was canceled on host pressure before the native test could start. A later guarded protocol retry and first native compaction completed under green pressure, but the summary promoted assistant suggestions to decisions and omitted no-checks-run status. Updated guidance is not installed-tested. Multiple compactions/restart and sustained UI work remain unqualified."
+    "A post-rollback 49K guarded inference smoke was not authorized, so its behavior under the current host load is not established. A newer 64K first-compaction candidate installed but its protocol smoke was canceled on host pressure before the native test could start. A later guarded protocol retry and first native compaction completed under green pressure, but the summary promoted assistant suggestions to decisions and omitted no-checks-run status. Updated guidance passed a narrow installed two-compaction/restart/stale-file fixture, but the first summary omitted explicit no-checks-run status; the later turn and second summary recovered it. Sustained coding/UI work remains unqualified."
   ]
 }

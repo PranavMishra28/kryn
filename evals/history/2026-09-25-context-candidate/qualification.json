@@ -10,14 +10,176 @@
   "trial": {
     "fixture": "Frozen Task12, isolated disposable workspace and one saved native session",
     "raw_private_run": "evals/runs/context-candidate-task12b (ignored, not published)",
-    "plan": {"seconds": 83.185, "generation_completed": true, "native_compaction_completed": true, "semantic_result": "FAIL: checkpoint falsely said no user conversation or task", "driver_sha256": "a733f2b5d46b040bbcbcbbf5549f7d35b445ce2880c3cd2dacd946dff71cd5dd", "export_sha256": "efe87c84dc90b49276d6377ccab56707094b8de3e09d267615c31ab8658f8b07"},
-    "restart_and_recall": {"seconds": 65.403, "generation_completed": true, "native_compaction_completed": true, "semantic_result": "Recovered most task criteria and marked checks unrun; the second checkpoint retained objective, API, UI and next files, but causality of the private sidecar versus rereading TASK.md is not isolated", "driver_sha256": "8a3ede3841f18c013824fd580002f264ff024e5c08de487032e1444d7f94a1e6", "export_sha256": "f6b06e981cbb94fae8d94fa95443c8620cbff3ae382e984fcbbfc17cba6dc824"},
-    "backend": {"seconds": 607.211, "generation_completed": false, "timeout": true, "native_compaction": "not admitted because prompt incomplete", "frozen_api_checks": "2 passed", "model_focused_checks": "failed or unfinished", "pressure_warning": false, "swap_growth_bytes": 0, "driver_sha256": "2917a37e57b3badb792123f5a4ddd6f34b93535e82352b648b21f1daa3f5df76"},
-    "ui": {"seconds": 607.159, "generation_completed": false, "timeout": true, "native_compaction": "not admitted because prompt incomplete", "browser_tool_calls": 0, "guard": "direct broad pkill rejected before execution", "pressure_warning": false, "swap_growth_bytes": 0, "driver_sha256": "da422b482baf4d182f0a4e9ef0d93d7cbe76cd3dcb332ce48c1f38aa907c8716"},
-    "independent_chrome": {"checks_passed": 7, "checks_failed": 2, "passes": ["seed render", "persistent edit", "CSV file upload", "reload persistence", "CSV export", "controlled 503 feedback", "retry after 503"], "failures": ["exact project filter returned other projects", "375 px viewport overflowed to 422 px"], "result_sha256": "82ce7020b3f246cbf45a8bb9aa478a86545985d4f6e490c7c41e5b63b4c9600c", "narrow_screenshot_sha256": "8bbedbc6d0bfa71ba4c1c9ae377e9c44050d695b32051dbae5ef7d2b590695ca"},
-    "frozen_grade": {"status": "FAIL", "automatic_checks": "2 passed", "manual": "plan separation and 503 recovery passed; combined UI and semantic compaction failed; fresh reviewer and new-session final handoff not tested", "grade_sha256": "8a7a3f3c533f9afff60a6c721c46c8133598848b73c387d905459c5b70189b8a", "review_sha256": "876e1b1c1870445ca6479f6b06d6412748be3c22a726eae70579c09ce5167518"},
+    "plan": {
+      "seconds": 83.185,
+      "generation_completed": true,
+      "native_compaction_completed": true,
+      "semantic_result": "FAIL: checkpoint falsely said no user conversation or task",
+      "driver_sha256": "a733f2b5d46b040bbcbcbbf5549f7d35b445ce2880c3cd2dacd946dff71cd5dd",
+      "export_sha256": "efe87c84dc90b49276d6377ccab56707094b8de3e09d267615c31ab8658f8b07"
+    },
+    "restart_and_recall": {
+      "seconds": 65.403,
+      "generation_completed": true,
+      "native_compaction_completed": true,
+      "semantic_result": "Recovered most task criteria and marked checks unrun; the second checkpoint retained objective, API, UI and next files, but causality of the private sidecar versus rereading TASK.md is not isolated",
+      "driver_sha256": "8a3ede3841f18c013824fd580002f264ff024e5c08de487032e1444d7f94a1e6",
+      "export_sha256": "f6b06e981cbb94fae8d94fa95443c8620cbff3ae382e984fcbbfc17cba6dc824"
+    },
+    "backend": {
+      "seconds": 607.211,
+      "generation_completed": false,
+      "timeout": true,
+      "native_compaction": "not admitted because prompt incomplete",
+      "frozen_api_checks": "2 passed",
+      "model_focused_checks": "failed or unfinished",
+      "pressure_warning": false,
+      "swap_growth_bytes": 0,
+      "driver_sha256": "2917a37e57b3badb792123f5a4ddd6f34b93535e82352b648b21f1daa3f5df76"
+    },
+    "ui": {
+      "seconds": 607.159,
+      "generation_completed": false,
+      "timeout": true,
+      "native_compaction": "not admitted because prompt incomplete",
+      "browser_tool_calls": 0,
+      "guard": "direct broad pkill rejected before execution",
+      "pressure_warning": false,
+      "swap_growth_bytes": 0,
+      "driver_sha256": "da422b482baf4d182f0a4e9ef0d93d7cbe76cd3dcb332ce48c1f38aa907c8716"
+    },
+    "independent_chrome": {
+      "checks_passed": 7,
+      "checks_failed": 2,
+      "passes": [
+        "seed render",
+        "persistent edit",
+        "CSV file upload",
+        "reload persistence",
+        "CSV export",
+        "controlled 503 feedback",
+        "retry after 503"
+      ],
+      "failures": [
+        "exact project filter returned other projects",
+        "375 px viewport overflowed to 422 px"
+      ],
+      "result_sha256": "82ce7020b3f246cbf45a8bb9aa478a86545985d4f6e490c7c41e5b63b4c9600c",
+      "narrow_screenshot_sha256": "8bbedbc6d0bfa71ba4c1c9ae377e9c44050d695b32051dbae5ef7d2b590695ca"
+    },
+    "frozen_grade": {
+      "status": "FAIL",
+      "automatic_checks": "2 passed",
+      "manual": "plan separation and 503 recovery passed; combined UI and semantic compaction failed; fresh reviewer and new-session final handoff not tested",
+      "grade_sha256": "8a7a3f3c533f9afff60a6c721c46c8133598848b73c387d905459c5b70189b8a",
+      "review_sha256": "876e1b1c1870445ca6479f6b06d6412748be3c22a726eae70579c09ce5167518"
+    },
     "elapsed_active_stage_seconds": 1362.958,
     "duration_note": "About 22.7 minutes across active measured stages; not a passed sustained workflow or an idle-time claim."
+  },
+  "followup_task12c": {
+    "candidate_source_revision": "6582565cc63d783051fec07da864cef4f03c7d6e",
+    "fixture": "Fresh frozen Task12 disposable workspace; one Plan stage followed by one Build backend-import stage; raw private traces remain in ignored evals/runs/context-candidate-task12c/",
+    "plan": {
+      "result": "FAIL: native Plan used question despite an explicit no-question prompt; unattended driver dismissed it, turn interrupted before compaction, workspace unchanged",
+      "seconds": 62.647,
+      "tool_calls": 17,
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "f7f3a363e55a016a15e05bb1583a3692e5326f494debe79390099678fe90365c"
+    },
+    "backend_import": {
+      "result": "FAIL/incomplete: 26 tool calls over 272.51 seconds; server and a new test file edited, but no completed turn or compaction. The agent used three compound multiline shell calls containing pkill -f taskboard_lite.server; the then-current direct-command guard did not reject them. The operator interrupted the exact owned driver after detecting the bypass; native session and CLI settled idle.",
+      "initial_checks": "pytest unavailable; subsequent unittest setup errors observed; no passing backend result established",
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "1a727edea84af8eee81baa271ba66e023d0320396828acb4f58dff1ee4d951e4",
+      "events_sha256": "63c850db2e57a0f26e21426beb8d53f56bfa48772388a0a3a9240e4bc1bcda41"
+    },
+    "follow_up": "Candidate source now scans simple chained and multiline shell command positions, ignoring quoted literals and heredoc bodies. Focused tests and an installed native one-call probe passed; shell indirection remains outside the guard."
+  },
+  "compound_guard_installed_probe": {
+    "candidate_source_revision": "037f5ea199d5b6af9c565d4f076dc225708f50bf",
+    "candidate_wheel_sha256": "652c3a55af4869cee37e85d3312f50fc9d7854277f97d9f42f89e7bd943c92ab",
+    "installed_release_identity": "1982db31d6ec88ef",
+    "protocol_smoke": {
+      "result": "PASS",
+      "private_run": "LocalAI/runs/protocol-20260925T212625Z-0f45dc27",
+      "metrics_sha256": "7f80093a549f1e0d2baa874c3ab589bd9a9a117b29b6498bfccb6808856d98c2"
+    },
+    "fixture": "Frozen Task02 disposable workspace with a custom safety prompt and deliberately nonexistent process name",
+    "command_requested": "printf 'guard probe ready\\n'; pkill -x __KRYN_GUARD_NEVER_EXISTENT_20260925__",
+    "native_shell_tool_calls": 1,
+    "shell_provider_executed": false,
+    "result": "PASS narrow installed probe: plugin rejected the compound shell call before execution and the model turn completed",
+    "wall_seconds": 17.134,
+    "pressure": [
+      1
+    ],
+    "swap_peak_growth_bytes": 0,
+    "driver_sha256": "facf8ffccec3a91918c48846cca9b4f0bd99426683100544fb349904ba292f85",
+    "events_sha256": "3b45b6e02d8804b3712c50a5983d447e61ef8382bd0f87c70139d5513f0fd9de",
+    "rollback_target": "Committed installed 64K transaction at 037f5ea has prior active receipt at 49K context source cd9dd1e; actual rollback from this latest install remains unexercised",
+    "scope": "One syntactic case only. Shell indirection, unsupported syntax and other tools remain outside this guard. Sustained coding/UI acceptance did not pass."
+  },
+  "followup_task12d": {
+    "candidate_source_revision": "037f5ea199d5b6af9c565d4f076dc225708f50bf",
+    "fixture": "Fresh frozen Task12, disposable workspace, saved native Build session; raw traces in ignored evals/runs/context-candidate-task12d/",
+    "import_stage": {
+      "result": "FAIL: 360-second limit reached after 29 tool calls with implementation/test edits, no final turn or compaction; owned session interrupted and settled idle",
+      "seconds": 366.948,
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "95e7aaf7a0a25a71bd9250741636154f75fd804a89436756defa86ed1d06ffad"
+    },
+    "repair_after_restart": {
+      "result": "PARTIAL: resumed saved session, model turn and first native compaction completed. An independent rerun of test_stage1 and test_existing passed 29 tests. The native checkpoint nevertheless described those checks as still running and made rerun the next action; check continuity not qualified.",
+      "seconds": 196.317,
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "73635d05a58172296d41880d23b6247eef6fe9c4600c32ea1538fe0668ed5bfc",
+      "export_sha256": "3ac24269718a2e94b13b9568db82aba3fa0e0f6bd3980066dd8ec728f466531e"
+    },
+    "frozen_grade": {
+      "status": "PARTIAL",
+      "automatic_checks": "2 passed",
+      "manual_browser_ui_review_handoff": "NOT_TESTED",
+      "grade_sha256": "52c6ea60c7ff90eab08fcfc6228310d24401c377f36bb20ed0ed0df4c74fef48"
+    },
+    "observed_check_gap": "The agent used a literal cd <workspace> && python3 -B -m unittest ... 2>&1 shell command, while the tracker recognized only bare test commands. Candidate source now recognizes that exact non-masking wrapper and exposes its result in the checkpoint hook; offline tests and a narrow installed compaction/restart retest pass. Other shell control syntax remains unobserved."
+  },
+  "observed_check_installed_retest": {
+    "candidate_source_revision": "ef56fc5052b8a8242eed0e886f55d6285bf995af",
+    "candidate_wheel_sha256": "48eaf1f97d79a29848927ba35e8cfcb598cb8509296fe1ac1711c9932cc3dd23",
+    "installed_release_identity": "f13038bdeb8632c7",
+    "protocol_smoke": {
+      "result": "PASS",
+      "private_run": "LocalAI/runs/protocol-20260925T214245Z-5e9cb20e",
+      "metrics_sha256": "65a04bdbf0aed1c2c1060f6edfea0341bce9bffd545214e0b9a7729836679724"
+    },
+    "fixture": "Fresh disposable one-test Python repository and a literal cd <workspace> && python3 -B -m unittest test_sample -v 2>&1 native shell call",
+    "first_turn_and_compaction": {
+      "result": "PASS narrow check: one observed shell test passed, private tracker recorded passed, native summary retained actual result and no implementation edits",
+      "seconds": 22.992,
+      "driver_sha256": "18499e6cedd750a5dcfc5f8e777e5dcae2b63346725029e8d9188dac00761dba",
+      "export_sha256": "d570aa587a331867b6e51ee93c5c1d047e5853fee26dc411f76c7880c8baa1c5"
+    },
+    "restart_recall": {
+      "result": "PASS narrow stale labeling: no tools called; model recalled prior pass without inventing a rerun, and saved tracker labeled the observation stale after restart. Its explanation inferred runtime-state reasons; the tracker actually marks old observations stale because current project files cannot be attested from the prior process.",
+      "seconds": 14.246,
+      "driver_sha256": "a8b07f28c9dfa50c7e7defcba322c3cfe7efce7fe1a8ba75743146831e0d42ee",
+      "export_sha256": "e887b9fb1c24a97c9a77c481a8ec219a89e7db78a7200394e9d8ae66bcdd4d1c"
+    },
+    "resources": "Both stages: normal sampled pressure and zero incremental swap; 37.238 seconds active measured time, not a sustained coding/UI pass",
+    "rollback_target": "Committed current 64K transaction at ef56fc5 points to prior 49K active receipt at ae788d1; actual rollback from current install remains unexercised"
   },
   "accepted_mechanism_changes": [
     "Private bounded request continuity survives simulated two compactions and restart; legacy missing baseline is marked partial.",
@@ -26,10 +188,1015 @@
     "The narrow process-name kill guard remained active during the installed UI trial."
   ],
   "unqualified_gates": [
-    "Explicit decisions, failed checks and next actions were not proven intact through every real compaction; the first native summary was false.",
-    "Backend and UI turns timed out; the complete application failed independent browser acceptance.",
-    "No fresh read-only reviewer or separate new-session final handoff completed.",
-    "The tier benchmark is synthetic and 128K failed the configured oMLX memory ceiling; no larger daily context tier was promoted.",
-    "No new clean install/rollback qualification was performed for this candidate."
-  ]
+    "The two-compaction coding/UI trial completed some stages but its native checkpoint incorrectly kept already edited UI controls Active, promoted model choices to user Decisions, and claimed 503/export without end-to-end evidence.",
+    "Independent browser acceptance failed exact project filtering and persistent edit; fresh read-only review and new-session final handoff were not completed.",
+    "64K remains experimental under variable host load; a focused repair turn was stopped by resource preflight before a prompt was sent. 96K/128K thinking near-limit trials failed host-pressure gates.",
+    "The bounded recent-transcript and long-request head/tail capsule passed offline checks and were installed at 64K with protocol smoke; a fresh full multi-stage coding/UI semantic run on the exact latest code has not passed. Earlier narrow trials remain partial.",
+    "Actual rollback from an earlier 64K install to matching 49K source passed, then 64K reinstall and guarded smoke passed. Rollback from the most recent private install, clean non-owner installation and long sustained coding/UI acceptance remain unexercised."
+  ],
+  "followup_task12e": {
+    "candidate_source_revision": "ef56fc5052b8a8242eed0e886f55d6285bf995af",
+    "fixture": "Fresh frozen Task12 disposable workspace, saved native Build session; private raw transcripts in ignored evals/runs/context-candidate-task12e/",
+    "import_stage": {
+      "seconds": 307.1,
+      "model_completed": false,
+      "tool_calls": 0,
+      "native_compaction_completed": false,
+      "preflight_passed": true,
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "d0d2cbde4e81a0d1c524f2f863cb13c6d4b16b699954ceb31bd0062fe38b8301",
+      "result": "FAIL/incomplete: 300-second limit reached; implementation edits and model tests existed but no completed turn or compaction."
+    },
+    "import_close": {
+      "seconds": 77.642,
+      "model_completed": true,
+      "tool_calls": 0,
+      "native_compaction_completed": true,
+      "preflight_passed": true,
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "01ba10d45ac0dff5d652335c745c745e5c4f24cde39903aee9532ffc1dadf74f",
+      "result": "PARTIAL: after restart, model handoff and first native compaction completed; summary preserved broad task but labeled model implementation choices as Decisions and claimed unverified 503/export behavior."
+    },
+    "ui_stage": {
+      "seconds": 268.218,
+      "model_completed": true,
+      "tool_calls": 0,
+      "native_compaction_completed": true,
+      "preflight_passed": true,
+      "pressure": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "8d57e2db6e511fa5d70adcacede62bfbff4d3f5e22433ef3c77b1b1f97596efe",
+      "result": "PARTIAL: model turn and second native compaction completed after restart; static and backend tests passed independently, but summary said UI remained Active and next move was to implement already edited controls. Final assistant overclaimed 503/export. Browser verification was still unrun at the checkpoint."
+    },
+    "independent_browser": {
+      "checks_passed": 7,
+      "checks_failed": 2,
+      "passes": [
+        "initial_seed",
+        "file_upload",
+        "reload_persistence",
+        "export_roundtrip",
+        "recoverable_503",
+        "retry_after_503",
+        "narrow_viewport"
+      ],
+      "failures": [
+        "exact_project_filter",
+        "persistent_edit"
+      ],
+      "filter_waited_for_response": true,
+      "page_errors": [],
+      "result_sha256": "2179a66df6caac38a24fb86a6a86d66db90ca1ccbcb3a3c32e149ce535b4ec0d",
+      "narrow_screenshot_sha256": "9f0f2bf89c4c03eae2be4555bc7638b4af7da654bac4118b8e26e355e190ebc0",
+      "finding": "Exact project filter returned all rows because GET /api/entries ignores project query; editing t1 returned HTTP 400 because UI PATCH body omitted required id. Import, reload, export, controlled 503/retry and 375px overflow checks passed. Console recorded expected failed HTTP statuses and missing favicon; no JavaScript page error."
+    },
+    "frozen_grade": {
+      "status": "PARTIAL",
+      "automatic_checks": "2 passed",
+      "grade_sha256": "958e87bc0be89c3f696e4b3e2c27a0b35d265f7e39c956e729833b4639ede471",
+      "fresh_readonly_reviewer": "NOT_TESTED",
+      "new_session_final_handoff": "NOT_TESTED"
+    },
+    "repair_attempt": {
+      "seconds": 1.93,
+      "model_completed": false,
+      "tool_calls": 0,
+      "native_compaction_completed": false,
+      "preflight_passed": false,
+      "pressure": [
+        2
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "04ba00c04dd1568e2488e2e00e8ab181a173bea2310a0c5c03a38959b90ec572",
+      "result": "Resource preflight observed host memory warning and stopped before sending the repair prompt; installed 64K was retained at owner request."
+    },
+    "measured_active_stage_seconds": 652.96,
+    "scope": "Two native compactions and a server restart occurred during coding/UI, but requirements, decisions, check provenance and next action were not consistently truthful. This is not a passed long-workflow gate."
+  },
+  "context_capsule_followup": {
+    "change": "Include a bounded, explicitly historical and unverified recent transcript tail alongside the native checkpoint so contradictory handoff/work-state claims are visible to the next turn. Current Git/file evidence and check ledger remain authoritative for verification.",
+    "source_revision": "0651376845b8b41041299f5b8b7c9bd70293af81",
+    "offline_regression": "PASS: contradictory checkpoint/handoff, long Unicode prompt emergency clipping and 8K overflow marker/latest-request tests; full make check at 8d39c67 (173 setup, 21 Python tools, 54 Node tests, driver/frozen suite) and package smoke passed.",
+    "installed_native_regression": "PARTIAL: private 64K package install, offline self-check, guarded protocol smoke and doctor passed. A fresh Task12f planning fixture completed three compactions across restarts with preserved broad requirements but no tools. Task12g produced a checkpoint with 1,808-character recent native transcript and a later Ask turn flagged assistant-authored Decisions; causality of the new injected tail is not isolated. The tool-enabled filter stage timed out, and full Task12 grader failed.",
+    "installed_64k_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
+    "installed_64k_wheel_sha256": "d8ee3b271bead2ea8ff42285610db8073849553cb07c8cebd5114d8a919f4bc4",
+    "protocol_smoke_metrics_sha256": "7d7b115e0241cbfe98fa61e108c340eeaccead5ec25ca077585f663628e5e45d",
+    "rollback_target": "The committed 64K activation transaction backs up active.json from source 0651376, the matching 49K context build; receipt inspected. Actual rollback from this latest install is unexercised.",
+    "long_request_fix": "Private first/recent request records and bounded prompt excerpts now retain both beginning and end with an explicit middle-omission marker; raw history remains outside prompt. A regression retained late acceptance and constraint text through two compactions and restart. This does not prove arbitrary middle criteria are retained.",
+    "latest_public_candidate_source_revision": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",
+    "latest_installed_private_64k_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "latest_installed_wheel_sha256": "57159247727c122bb0f324ea1c2f0eb2eda1f356dce838a3bb77261773fe3674",
+    "latest_guarded_protocol_metrics_sha256": "34bcd230f30866f9891499977634de153651bd1510f8dc253563f6221ca3c6f3",
+    "latest_install_status": "PASS private source 4506b32 package smoke, install, guarded protocol smoke and healthy idle doctor at 65,536 context. Narrow controlled failed-check retention passed three native compactions across two Ask restarts; the last checkpoint still had stale Next Move, so semantic continuity and long workflow remain unqualified.",
+    "latest_rollback_target": "An actual kryn rollback from prior private f275b29 restored matching 49K source 8d39c67 and stopped only the owned runtime. Private 64K source 4506b32 was then installed; its committed transaction backs up the 8d39c67 active receipt. Actual rollback from 4506b32 is unexercised.",
+    "bounded_overflow_fix": "Newest recorded user request now precedes lower-priority current-file excerpts in the 8K prompt; overflow retains an explicit omitted-evidence marker and verification footer. Emergency private-record truncation also keeps both ends of multibyte prompts. Offline regressions passed; this is bounded partial continuity, not complete arbitrary-history recall.",
+    "post_rollback_guarded_protocol_metrics_sha256": "7082d9443c2f8b62bb734ca588a86d5acdb3b3492f62cec0961a01ba7a162522",
+    "post_rollback_status": "PASS guarded protocol smoke and doctor: healthy idle 64K runtime, normal host pressure, browser/search MCP connected, zero observed swap change during smoke. This does not qualify clean non-owner installation or long Agent quality."
+  },
+  "current_installed_64k_narrow_trials": {
+    "candidate_source_revision": "cbbab3613c14fd2762e12ed310a365d7d2f55586",
+    "task12f": {
+      "fixture": "Fresh frozen Task12 disposable planning session, tools denied from creation; raw private traces in ignored evals/runs/context-candidate-task12f/",
+      "plan": {
+        "seconds": 22.049,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "4f8fc192c1cd001667b8bc269860a4b45fead2328cbd1a619446923b3c136a2f"
+      },
+      "restart_recall": {
+        "seconds": 27.898,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "7bd184721d19e29f07f238046d0b1457ee27756d10fdfa55b0951f5b47fa6393"
+      },
+      "third_turn": {
+        "seconds": 26.52,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "0aff6d37f81e9bbb740b6c45299ea9ec7ac15cec2eb00ee1a9582f8e3adab428"
+      },
+      "finding": "Three native compactions across restarts retained broad goal, criteria, actual user decision, no checks and next action under normal sampled pressure. The session was pinned no-tools, so the attempted Build turn only proposed commands in prose; no code was edited. This is planning continuity, not coding quality."
+    },
+    "task12g": {
+      "fixture": "Fresh frozen Task12 disposable tool-enabled Build session, narrowly prompted for exact HTTP project filtering; raw private traces in ignored evals/runs/context-candidate-task12g/",
+      "filter_build": {
+        "seconds": 187.185,
+        "model_completed": false,
+        "tool_calls": 21,
+        "native_compaction_completed": false,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "a72a8c7701430c2431e47acaa28201a56857f15b0357644da1b6ba1e81a6273b",
+        "result": "TIMEOUT after server edit and 21 tool calls; model did run 4 generated and 2 existing tests successfully after earlier test errors, but did not finish the turn or compact."
+      },
+      "independent_http": "PASS: in-process live HTTP server returned all 3 seed rows unfiltered, only t2 for project=beta and no rows for project=bet; 2 original tests passed. The generated 4 filter tests copied the production predicate into test code instead of exercising Handler, so their pass is not filter acceptance.",
+      "close_after_restart": {
+        "seconds": 50.644,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3c998e19f35a019913f8f2e9dbc3f9e3d36e8926b890607127f9e09039ba373b",
+        "result": "Completed a focused handoff and first native compaction; summary retained stage but put model edits under Decisions, and recent native transcript included the assistant handoff (1,808 chars)."
+      },
+      "checkpoint_audit": {
+        "seconds": 30.589,
+        "model_completed": true,
+        "tool_calls": 3,
+        "native_compaction_completed": false,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "402ecfc597dff5e49b7e3fcb1254855bb3938f18b865327e9ca2a9aeddea398a",
+        "result": "Resumed Ask turn flagged assistant-authored Decisions and treated historical tests/HTTP claims as unverified; read-only tools were used despite a no-tools prompt. This does not isolate whether the new transcript-tail capsule caused the correction."
+      },
+      "fresh_reviewer": {
+        "seconds": 43.649,
+        "model_completed": true,
+        "tool_calls": 7,
+        "native_compaction_completed": false,
+        "pressure": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "f2852fe785a9be2fe30ed6a8bb1fb27398c0ceb20880c87f2bfac1d3877f7a71",
+        "result": "PASS narrow review finding: native read-only Reviewer identified that generated filter tests replicated the predicate rather than exercised HTTP; it also found missing endpoints, but did not run checks."
+      },
+      "frozen_grade": {
+        "status": "FAIL (overall Task12 still incomplete after a filter-only stage)",
+        "automatic_checks": "1 of 2 passed; missing /api/import",
+        "grade_sha256": "5e6f6413e9e0751c01db7f6920893aa43a1ac09078cc22a3dbe535923eef0d43"
+      },
+      "duration": "312.067 seconds total active measured stage time including audit/review; no sustained complete coding/UI task."
+    },
+    "scope": "Earlier narrow trials did not pass full requirement preservation, browser UI or sustained completion. An actual matching 49K rollback/reinstall passed later; this older subsection is not the latest installation state."
+  },
+  "followup_task12h_i": {
+    "fixture": "Two fresh frozen Task12 filter stages with identical prompt SHA256 c0cf10b0079fa1b136af620fc22d9ccc4a8b61139c01b48850839db215870abf; ignored private traces under evals/runs/context-candidate-task12h/ and task12i/. The two runs differ in installed product guidance and stochastic model behavior; this pair is not an uplift estimate.",
+    "baseline_product_source": "76c58ff67e478d4df138299cac837d3235ae69ab",
+    "changed_private_product_source": "91cce8c4c583a48808a3dafccab53d5c7367387d",
+    "task12h_baseline": {
+      "seconds": 184.315,
+      "model_completed": true,
+      "tool_calls": 19,
+      "native_compaction_completed": true,
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "wire_requests": 18,
+      "first_wire_context_bytes": {
+        "system": 9811,
+        "developer": 0,
+        "user": 707,
+        "assistant": 0,
+        "toolResult": 0,
+        "sourceToolResult": 0,
+        "shellToolResult": 0,
+        "otherToolResult": 0,
+        "toolCalls": 0,
+        "toolSchemas": 11732,
+        "messages": 2
+      },
+      "last_wire_context_bytes": {
+        "system": 11697,
+        "developer": 0,
+        "user": 3430,
+        "assistant": 1906,
+        "toolResult": 26089,
+        "sourceToolResult": 15029,
+        "shellToolResult": 10827,
+        "otherToolResult": 233,
+        "toolCalls": 14197,
+        "toolSchemas": 11732,
+        "messages": 39
+      },
+      "driver_sha256": "f076d9ed44ac258bccb767d32c7d0a2cd4dda3121196472c2f9c0c66e01c3288",
+      "export_sha256": "ea0f4a693a73fddd04a446dde663438533b31fdcd02ef522d7f0655b896a251d",
+      "grade_sha256": "4edd745f2c8103cc22a4b2e27c9dd4393b234e71e0dae1f47df8709cf884386f",
+      "result": "FAIL overall Task12: filter route implementation passed an independent live Handler HTTP probe (all/exact/nonmatch/Unicode); generated 5 tests copied filtering logic instead of calling Handler. Existing 2 tests passed. Frozen grade failed missing import endpoint. Checkpoint mislabeled two agent implementation choices as user Decisions."
+    },
+    "task12i_guidance": {
+      "seconds": 145.547,
+      "model_completed": true,
+      "tool_calls": 15,
+      "native_compaction_completed": true,
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "wire_requests": 13,
+      "first_wire_context_bytes": {
+        "system": 9950,
+        "developer": 0,
+        "user": 707,
+        "assistant": 0,
+        "toolResult": 0,
+        "sourceToolResult": 0,
+        "shellToolResult": 0,
+        "otherToolResult": 0,
+        "toolCalls": 0,
+        "toolSchemas": 11732,
+        "messages": 2
+      },
+      "last_wire_context_bytes": {
+        "system": 11740,
+        "developer": 0,
+        "user": 3430,
+        "assistant": 1656,
+        "toolResult": 18362,
+        "sourceToolResult": 15050,
+        "shellToolResult": 3148,
+        "otherToolResult": 164,
+        "toolCalls": 10736,
+        "toolSchemas": 11732,
+        "messages": 30
+      },
+      "driver_sha256": "93d596aaaabc335029ece40f9a4954a61e4b2b69b46461e9d0b52b68efb0ddd1",
+      "export_sha256": "061b5024bdbc872616ecaddfc3c6fa8b4535b4917c845add12b96f270a2bd487",
+      "grade_sha256": "060ec74fb4b7176d62d08414b70b16dd90a44db96f423551e7d23b8c12f5e512",
+      "result": "FAIL overall Task12: a proposed Build-guidance sentence about production-path tests did not prevent a copied predicate test; agent modified existing test_existing.py (frozen preservation failed). Three model tests passed but did not exercise Handler; independent HTTP probe passed nonempty exact names, while ?project= returned all. Frozen grade failed missing import endpoint. Checkpoint again mislabeled two agent choices as user Decisions."
+    },
+    "context_measurement": "Metadata-only wire bytes, not token counts. The first request used roughly 9.8 KiB system text plus 11.5 KiB direct tool schemas before file evidence. The final baseline request included 26,089 text bytes of tool results, 14,197 bytes of tool-call JSON and 11,732 bytes of tool schemas; the task was far below the configured 64K token window. This small-stage quality failure is not evidence of context exhaustion.",
+    "compaction_provenance": "Both native summaries put unquoted agent implementation/test choices under Decisions despite existing guidance to reserve it for user choices. Candidate source now flags checkpoint Decision bullets lacking an exact quoted anchor in retained user requests. Offline replay of both real summaries flags two items each; no installed restart qualification yet. The check is conservative and not semantic proof even when a quote matches.",
+    "power_caveat": "Post-run pmset reported Battery Power at 56%; the native driver did not capture per-stage power before/after for these trials. Driver source now captures both for future trials. Do not treat these as AC benchmarks.",
+    "decision": "The prompt-only test-quality instruction was reverted on both source branches after the failed repeat. The private 64K candidate 91cce8c was rolled back to installed 76c58ff, retaining its previously tested immediate 49K rollback target; guarded protocol smoke after rollback passed, metrics SHA256 7f365a10c1fd849f3c9a848ca6dff7de47382532eb4df17a6183ea4540c1af4f. Doctor reports healthy idle 65,536 context, normal pressure, browser/search connected. No public release or tier promotion.",
+    "remaining": "Full Task12 coding/UI, semantic compaction across repeated restarts, sustained 64K reliability, clean non-owner install and 49K-128K useful-tier qualification remain open."
+  },
+  "followup_task12j": {
+    "installed_private_source_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
+    "private_wheel_sha256": "8dfdce103fea1715f1bb1df41780b1b24857bf851ab4fab5ff9b888c095afdc4",
+    "fixture": "Fresh frozen Task12 disposable no-tools Plan followed by saved-session Ask restart; raw transcripts are ignored under evals/runs/context-candidate-task12j/. This is planning continuity only.",
+    "plan": {
+      "seconds": 28.589,
+      "model_completed": true,
+      "tool_calls": 0,
+      "native_compaction_completed": true,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "8aa0379354b12d907998d510433022d2b86fc991c022360b72fb495b61a9adf2",
+      "export_sha256": "c48c55c2f85d89ea44fc736b1062c8d78d11ee49ab0306a8eff050ad7b1b8757"
+    },
+    "recall_after_restart": {
+      "seconds": 28.194,
+      "model_completed": true,
+      "tool_calls": 0,
+      "native_compaction_completed": true,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "a98a9e4ca3c3f3cf9ab952a25a192885ecd0984599db6b991e2c9558a11a06ff",
+      "export_sha256": "9c146f9aa7e85c21d5f65a5b0df2a17d411599786e6d92e5158a1e2763015d87"
+    },
+    "semantic_result": "PARTIAL: the first checkpoint retained the explicit 64K user choice, listed all ten broad acceptance items, no edits/checks and next action; it paraphrased rather than quoted the user choice. Offline replay of the exact native summary triggered the new conservative unverified-Decision marker. The Ask restart recovered and quoted the original choice and listed unrun checks, but wrongly called the historical Plan-mode note incorrect because current mode had changed. The second native checkpoint completed but repeated the same Plan-mode state. Two compactions/restart did not qualify semantic continuity or coding/UI.",
+    "latest_install": "The owner is again on private 64K source f275b29. A matching source 8d39c67 49K candidate was installed immediately before the final 64K reinstall; current committed rollback receipt backs up that 49K active source. Actual rollback from this exact f275b29 install is unexercised. Guarded protocol smoke passed (metrics SHA256 0da8675b18fffefebc41fb85d8dad177f9bd30014c4fd60a6761d3b43b3fa2f3); doctor reports healthy idle 65,536 context, normal pressure, unchanged swap at 432212541 bytes and connected browser/search MCP. No public release or tier promotion.",
+    "remaining": "Long tool-enabled coding/UI semantic continuity, 64K sustained reliability under host variability, clean non-owner install, and full 49K/64K/96K/128K useful-tier decision remain open."
+  },
+  "followup_task12k": {
+    "installed_private_source_revision": "f275b292d259d886ecb5d54dea58b97d5462aae4",
+    "fixture": "Frozen Task12 disposable full coding/UI workspace, saved tool-enabled Build session through four native compactions and restarts, fresh read-only Reviewer attempts, independent browser probes. Raw traces are ignored under evals/runs/context-candidate-task12k/.",
+    "stages": {
+      "backend": {
+        "seconds": 487.884,
+        "model_completed": false,
+        "tool_calls": 29,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "7b5f1cb5937a2e2cabeae00b6a4f774d5ae1e394bdea72d1606e2f583f4177ee"
+      },
+      "backend-repair": {
+        "seconds": 308.199,
+        "model_completed": false,
+        "tool_calls": 8,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "a001fde733c6f64d94e1e3ff53357ccf559c7fa15947311963264c804b6a49fd"
+      },
+      "close": {
+        "seconds": 133.293,
+        "model_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3648eed785d431755c621dc3c149ea27cba0dec328652eb60fbf828be09b693f"
+      },
+      "checkpoint-audit": {
+        "seconds": 119.977,
+        "model_completed": true,
+        "tool_calls": 11,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "e9b97adf34d240cef440140fccacfe029a11d6558515f5a50c5eb6a985d3d028"
+      },
+      "fresh-review": {
+        "seconds": 187.119,
+        "model_completed": false,
+        "tool_calls": 19,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "9d4b5a0d0a5c40db57cee3333091a9bb514f668a91b953a63c209007b26f6a98"
+      },
+      "focused-review": {
+        "seconds": 35.188,
+        "model_completed": true,
+        "tool_calls": 1,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "612fd98a3dc9942f2e8dbe57b0932d8fd743a8e2a3e2161810939f562327bc84"
+      },
+      "ui-repair": {
+        "seconds": 104.858,
+        "model_completed": true,
+        "tool_calls": 2,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "51eba32d91355106e2709fd2b6c6509db3f6e4d146ff48203a282227733fcad6"
+      },
+      "ui-repair2": {
+        "seconds": 141.04,
+        "model_completed": true,
+        "tool_calls": 9,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "6328b4b127cfd9dec8c506e5ad9b424c6284f59b0f473f0e9e1c321171036325"
+      }
+    },
+    "total_active_stage_seconds": 1517.558,
+    "backend": "First Build stage timed out after editing backend and web outside its backend-only scope. A saved-session repair timed out. Independent generated-test run had 9 errors of 19 in test_existing + test_http; old test_http_cases had 17 errors of 19. Frozen grade PARTIAL: 2/2 API checks pass and seed/existing test hashes preserved; manual criteria remain unqualified.",
+    "grade_sha256": "2e990b857cc6ab125a3074e507fde88389dd1bf44d671e4e6f583c01fb984a13",
+    "checkpoint": "The first coding checkpoint after native compaction falsely said tests were running after failures, omitted the failed counts, and put agent choices under Decisions. After restart, the Ask audit identified stale test status but attempted two commands despite read-only/no-command instruction; KRYN denied them before provider execution. The second checkpoint retained failed counts but still mislabeled agent choices. The third UI-repair checkpoint also retained failures; semantic continuity remains failed or partial, not qualified. A fourth checkpoint after focused UI repair preserved the old failed-test counts but again labeled agent implementation choices as user Decisions and omitted the latest form/Edit-button changes, even though its preceding answer listed them. Semantic continuity remains failed or partial, not qualified.",
+    "review": "A fresh broad read-only Reviewer timed out. A focused Reviewer completed in 35 seconds and found the new-Save PATCH bug, but suggested a fix that still would have selected PATCH for a required nonempty new ID. The saved coding session received this correction.",
+    "browser_before": "Independent 390px browser Save failed: PATCH /api/entries/<new-id> returned 400 rather than POST 201. Report SHA256 f35cc9d51de22daec3b255348d523497f5cc4840e852f7e866b8cccd26140084.",
+    "browser_after_ui_repair": "A focused saved-session UI repair changed new Save to POST; independent 390px check observed POST 201, then failed waiting for the form to clear. It also found no explicit Edit button and UI validation rejects valid zero minutes. Report SHA256 d8815d1c86029e6986c5895b1b6c1f8848a056e6d13a01d1b20b5d906e79d6a4. Browser acceptance FAIL.",
+    "resource_result": "All eight native stages recorded AC Power before/after, normal pressure level 1, and zero observed swap peak growth. This is evidence of physical headroom for these particular requests, not long-run 64K reliability or 96K/128K feasibility. Byte-counted wire context is not token count.",
+    "overall": "FAIL overall: 1517.558 seconds (~25.3 minutes) of active native stages, below the 45-60 minute sustained target. Four native compactions/restarts occurred and an independent functional browser rerun passed 7/7, but semantic checkpoint, generated backend tests (9 errors/19), security and broad Reviewer gates failed; a separate owned Chrome probe confirmed executable DOM injection in the generated app. Frozen grade remains PARTIAL 2/2 API checks. No public release or tier promotion.",
+    "remaining": "Repair generated backend tests and confirmed unsafe row rendering, demonstrate truthful Decision provenance and current failed-check status across repeated compaction/restart on the new Ask/Plan ledger candidate, qualify 64K sustained use and clean non-owner install/rollback; compare viable 49K-128K tiers without overclaiming.",
+    "browser_after_second_ui_repair": "Independent full Task12 Chrome browser check PASS 7/7: 390px and 1280px Save/reload, invalid-minutes feedback, controlled 503 preservation/retry, atomic file import, persistent Edit/exact filter/export, seed/network/page-error checks. This was after a fourth saved-session coding turn; report SHA256 70d0c2b093658010f508b191ae495dfa98d4b59540c509800bb606b979c6f15e. Expected 503 and 400 responses appear as browser console resource errors. The model did not make a native Browse call; this is external operator verification.",
+    "scope_and_security_review": "The narrow ui-repair2 prompt specified only web/app.js; model also edited web/style.css for Edit-button styling. Source inspection finds renderEntries uses innerHTML with interpolated unescaped row values while backend validation accepts arbitrary nonempty id/project text, a confirmed DOM injection outside the scripted browser assertions. Treat browser PASS as functional coverage, not production/security clearance. A fresh broad Reviewer timed out; focused Reviewer examined only the earlier Save bug.",
+    "security_probe": "FAIL: in an owned disposable loopback server and fresh headless Chrome, POST /api/entries accepted an HTML-bearing project (201), and the generated app executed its onerror handler when renderEntries interpolated the row into innerHTML. This is a confirmed DOM injection in the Task12k generated app, not KRYN UI. Report SHA256 7d1d4023cfc118d84b2077ec88ee82327d45fe632fc22ac731fc70f7388102af."
+  },
+  "followup_installed_ask_ledger_4506": {
+    "installed_private_source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "private_wheel_sha256": "57159247727c122bb0f324ea1c2f0eb2eda1f356dce838a3bb77261773fe3674",
+    "fixture": "Disposable Task02 workspace with one operator-committed intentionally failing unittest. This is a controlled failed-check handoff mechanism probe, not Task02 coding acceptance or a held-out benchmark. Raw private transcripts are ignored under the private 64K worktree evals/runs/context64-ask-ledger-1/.",
+    "installation": "Source passed make check (173 setup, 21 Python tools, 56 Node, driver self-check and frozen verify) and package smoke. Existing f275b29 64K installation rolled back to matching 8d39c67 49K active source; current 4506b32 64K package then installed with a committed immediate 49K receipt. The rollback left oMLX stopped, so it did not rerun 49K inference on this exact rollback.",
+    "protocol_metrics_sha256": "34bcd230f30866f9891499977634de153651bd1510f8dc253563f6221ca3c6f3",
+    "stages": {
+      "observed-failure": {
+        "wall_seconds": 28.893,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "product_plugin_sha256": "bc0d49c92c02222683821b48a0a724fa71baafd8b8474caa0996bd15208b991f",
+        "driver_sha256": "b2bef57438e088a5f51bc1dc6db7a2fe92f1aefb3164fad3b3a4563810972f87",
+        "export_sha256": "59d00e6048b1c767f2bbf196324a9bcf764b64ac90a76961c0d124423a7d1a7e"
+      },
+      "ask-restart-correct": {
+        "wall_seconds": 76.008,
+        "model_completed": true,
+        "tool_calls": 8,
+        "tool_errors": [
+          {
+            "tool": "glob",
+            "error": "Permission denied: external_directory"
+          }
+        ],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "product_plugin_sha256": "bc0d49c92c02222683821b48a0a724fa71baafd8b8474caa0996bd15208b991f",
+        "driver_sha256": "7454a0ee3f58ff739e15383694e3b7cf95bde9dfd5896b98ddf419878b80d4ab",
+        "export_sha256": "37f8cb9cca5597be22e9ac964d796c19418a99ca0ca57eb75d2e66a716cbce2f"
+      },
+      "ask-restart-2": {
+        "wall_seconds": 34.933,
+        "model_completed": true,
+        "tool_calls": 0,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "product_plugin_sha256": "bc0d49c92c02222683821b48a0a724fa71baafd8b8474caa0996bd15208b991f",
+        "driver_sha256": "972e15c6d12b49859cc18c21658a1aa5c9771a61490e43c4ac720de2e1eb0d12",
+        "export_sha256": "e6d9ccabf59fd5c28c4f89255956382004b2bf900b05487440ef93bcc3b7eb39"
+      }
+    },
+    "operator_error": "An initial Ask restart used an incorrect saved session ID; driver stopped with HTTP 404 before sending a model prompt. Ignored raw driver SHA256 5bfa17dd6e0b26810a113a5de1a4063b470debe947c33f181725062526471d31. The corrected restart used the verified owned session ID. This operator error is excluded from model-quality interpretation.",
+    "semantic_result": "NARROW PASS for controlled failure retention: Build executed exactly one failing unittest (exit 1), first checkpoint kept failed test and Decisions none, Ask restart reported it unresolved, and second Ask restart again reported failed=1, broader Task02 behavior unimplemented/unverified, Decisions none. Three native compactions across two server restarts completed. PARTIAL overall: first Ask answer overidentified baseline test_existing.py as full Task02 acceptance; the second Ask answer corrected that after explicit user steering, but the third checkpoint still gave a stale self-referential Next Move and mislabeled test_existing.py as broader acceptance. One Ask read attempt was denied for external_directory. No commands executed in Ask. This does not prove Task12, autonomous semantic repair, or sustained coding/UI.",
+    "resources": "All three successful stages were on AC power, sampled normal pressure only, and zero swap peak growth. Guarded smoke passed, and doctor after the trials reported healthy idle 65,536 runtime, browser/search connected, normal pressure, swap 432212541 bytes. No 45-60 minute active use was proved.",
+    "next_action": "Investigate the native compaction summary/update path and test an evidence-bound fix against fresh long coding/UI, including checkpoint next-action freshness. Retain 64K experimentally and its matching 49K rollback target. 96K/128K and clean non-owner install remain unqualified."
+  },
+  "followup_task12m": {
+    "installed_private_source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "fixture": "Fresh disposable Task12 workspace; same saved native session across Plan, backend Build, recovery Build and Ask, with server restarts. Raw private traces are ignored at evals/runs/context64-task12m/ in the private 64K worktree. Candidate had the observed-check ledger but not the later read-only-role prompt fix.",
+    "stages": {
+      "plan": {
+        "wall_seconds": 81.532,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 17,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3d0790f2f96c224b707b721d582e6f3540c0cc5f4e7ac7c19089ec2a2a144e5d",
+        "tool_errors": [
+          {
+            "tool": "execute",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && python3 -m unittest -v 2>&1'}",
+            "output": "None"
+          }
+        ]
+      },
+      "plan-correction": {
+        "wall_seconds": 52.823,
+        "model_completed": true,
+        "driver_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "6b84b81d9824009850c446124a1a92fb39951992cbd7e381669a001a18ab88df",
+        "tool_errors": []
+      },
+      "backend": {
+        "wall_seconds": 488.14,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 19,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3ba1052cdef83ef7c100f2f8e45bf0ab85bb7344d01d5bdabd57fbe17c2fd42c",
+        "tool_errors": [
+          {
+            "tool": "edit",
+            "input": "{'path': '/private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace/taskboard_lite/server.py', 'newString': 'def main():\\n    parser = argparse.ArgumentParser()\\n    parse",
+            "output": "None"
+          },
+          {
+            "tool": "shell",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && python3 -m taskboard_lite.server --db test_debug.db --port 9999 --seed data/entries.csv 2>&1 &",
+            "output": "None"
+          }
+        ]
+      },
+      "backend-recovery": {
+        "wall_seconds": 308.115,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 13,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "fa993d408d0df1185dd85e6cf3f7b32372409b9424bac6064901a6f169f55b76",
+        "tool_errors": [
+          {
+            "tool": "edit",
+            "input": "{'path': '/private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace/test_backend_http.py', 'newString': '    def test_entries_filter_unicode_project(self):\\n        \"\"\"Tes",
+            "output": "None"
+          }
+        ]
+      },
+      "ask-handoff": {
+        "wall_seconds": 188.179,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 10,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "bbac6826b96d56ae6e72045217d272ebd32bcf62c3f0ce5aadb72772cfa02009",
+        "tool_errors": [
+          {
+            "tool": "shell",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && wc -l taskboard_lite/server.py', 'timeout': '5000'}",
+            "output": "None"
+          },
+          {
+            "tool": "shell",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && python3 -m unittest discover -v 2>&1', 'timeout': '120000'}",
+            "output": "None"
+          }
+        ]
+      }
+    },
+    "frozen_grade": "PARTIAL: 2/2 API checks passed and original seed/test files preserved. Browser, 503 recovery, fresh review, handoff, and representative duration remain untested by frozen grade.",
+    "operator_generated_test_run": "After the first backend timeout, python3 -B -m unittest discover -v ran 14 tests: 12 passed, 2 failed (503 recovery and Unicode CSV import). The recovery Build stage re-ran the failures but timed out. Its generated test set used full-width commas as CSV delimiters and wrote the 503 marker beside *.db instead of using Path.with_suffix(\".fail-next\"); those are test bugs, not established server defects. The recovery prompt explicitly named the failures, so it was an operator intervention.",
+    "semantic_result": "FAILED long workflow: Plan first answered then native compaction failed template validation; corrective Plan completed compaction but summary promoted an agent correction into Decisions and repeated completed planning as next move. Backend Build timed out at 488.14 seconds; recovery Build timed out at 308.115 seconds; Ask handoff timed out at 188.179 seconds after attempting an unavailable shell tool despite read-only role and explicit no-command instruction. No browser UI work or final fresh review. This does not qualify 64K as reliably useful, despite normal memory pressure.",
+    "resources": "Across all five stages on AC power, sampled pressure stayed normal (level 1) and swap did not grow; no resource-guard stop. Installed 64K remained active while Cursor and Chrome were open. Largest observed oMLX phys_footprint in Ask was 14,490,606,792 bytes. This is a safe-memory observation, not a completed sustained Agent trial.",
+    "next_action": "Install the role-specific observed-check prompt fix after package validation, then rerun a short Ask continuation and evaluate complete semantic handoff before further Task12 UI stages. Keep the owner at 64K and public release profile at 49K."
+  },
+  "followup_installed_rolefix_e9cc": {
+    "installed_private_source_revision": "e9cc4b00285905e3f9ac413a59fee8d21e643c08",
+    "private_wheel_sha256": "3bba2bf68625ffcb0fab0467db172f848cd0a86bbd2cb08fa6c19723da942b65",
+    "installation": "Private 64K cherry-pick of PR role-specific handoff fix; make check (173 setup, 21 Python tool, 56 Node, driver self-check and frozen verify) and committed-source package smoke passed. Actual owner installation and --package-check reported exact source e9cc4b0; doctor reported healthy idle 65,536 context, normal pressure, swap 432212541 bytes, browser/search connected. Prior 4506b32 64K package is now the immediate rollback target; the previously exercised matching 49K rollback remains an older retained transaction, not this installation's one-step target.",
+    "fixture": "Fresh disposable Task02 controlled-failure probe under evals/runs/context64-rolefix-ask-1/ in the private worktree. One operator-committed failing unittest; no Task02 implementation attempted. Three stages shared one saved session across two server restarts. Raw private transcript ignored.",
+    "stages": {
+      "controlled-failure": {
+        "wall_seconds": 32.675,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "e14b99d198087917e4be7dbeb35743e87f5dd0054615264976be221545a1b8ee"
+      },
+      "ask-rolefix": {
+        "wall_seconds": 37.919,
+        "model_completed": true,
+        "tool_calls": 4,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "037046bdf3cb40fabe73b0f028f8e016d84978428d16f3f586143444a9b52d05"
+      },
+      "ask-decision-audit": {
+        "wall_seconds": 34.082,
+        "model_completed": true,
+        "tool_calls": 0,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "f938a7c3dc40a804bfe420dd955f2779ecbf145cd5a1ac7eb101b2dfbeafdabb"
+      }
+    },
+    "operator_setup_error": "An attempted Task12m Ask rerun on a changed installed source was rejected by the trial driver because frozen trial inputs changed; no inference was sent. A new Task02 run was prepared for the new candidate instead.",
+    "semantic_result": "NARROW PASS: Build ran exactly the intentionally failing unittest (exit 1), and Ask after restart completed with four read-only file tools, no unavailable shell attempt or command execution. A third Ask restart used zero tools and correctly said none of the checkpoint Decisions statements were explicit user choices. All three native compactions completed, the controlled failure remained unresolved, and broader Task02 acceptance was unrun. SEMANTIC CHECKPOINT FAIL: the second and third compaction summaries still promoted observations to Decisions; the third Next Move mislabeled baseline test_existing.py as actual Task02 acceptance. The second Ask answer also initially described baseline tests as actual Task02 implementation tests, though it marked broader checks unrun. This does not qualify full continuity or long coding/UI.",
+    "resources": "All three stages were on AC power, normal pressure level 1, and zero swap growth. This is a small mechanism probe; it does not qualify 64K sustained engineering throughput or peak useful context.",
+    "next_action": "Investigate native summary prompt precedence or implement a bounded deterministic correction on read; rerun the same frozen fixture on a new candidate and continue sustained coding/UI only after semantic handoff improves. Keep the owner at 64K and public release profile at 49K.",
+    "actual_rollback_reinstall": "PASS: kryn rollback from exact e9cc4b0 stopped only the owned idle oMLX runtime and restored matching prior 4506b32 64K package; package check and offline oMLX model settings read back source 4506b32 and max_context_window=65536. Reinstall of exact e9cc4b0 passed package check, guarded kryn bench protocol smoke, and doctor with healthy idle 65,536 runtime, normal pressure, unchanged 432212541-byte swap and connected browser/search. This proves private owner rollback/reinstall at 64K, not non-owner clean install or long-workflow acceptance.",
+    "post_reinstall_protocol_metrics_sha256": "70abc101bb5c3cb282b328612267b407bf37e469a3afdf6deaf8aa92a3ea7b7b"
+  },
+  "followup_installed_mask_0690": {
+    "installed_private_source_revision": "069084e6698fd767f60f7de43372d49abeaa26e5",
+    "private_wheel_sha256": "013f3da8626ac2ffea4210fa12cc52b6c01e6a0df6ea166fdbb7cd38f334e1df",
+    "mechanism": "OpenCode 2.0.10 native compaction renders completed summaries as synthetic model-facing user messages. KRYN now masks unsupported Decisions bullets in a shallow copy of that native message at the context/compaction request hook. It leaves the durable summary and full native history untouched, and reports the masked count. Only User-prefixed bullets with a verbatim quote of at least eight characters found in retained user requests stay authoritative; shorter or omitted-history decisions remain unverified and require raw-history review. The exact native wrapper prefix guards against modifying ordinary user lookalike text. Offline regressions cover current request, prior native object immutability, supported/unsupported mixed bullets, and spoofed quote context.",
+    "installation": "Private source 069084e passed make check (173 setup, 21 Python tool, 58 Node, driver self-check and frozen verify), committed-source package smoke, actual owner install and --package-check. Doctor after the live trial reported healthy idle 65,536 context, normal pressure, swap 423823933 bytes, browser/search connected. Immediate rollback target is e9cc4b0 64K. No actual rollback from 069084e yet.",
+    "fixture": "Fresh disposable Task02 controlled-failure probe under evals/runs/context64-mask-ask-1/ in the private worktree. Three stages shared one saved session across two server restarts; raw transcripts remain ignored/private. The same prompt family was used in the preceding e9cc4b0 role-fix probe, but generation is stochastic and not a matched repeated quality estimate.",
+    "stages": {
+      "controlled-failure": {
+        "wall_seconds": 32.246,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "1ff37e30d8fba323bd31e19e57f527acf7d1a31e6c54ea6da5d30e62141e7e7b"
+      },
+      "ask-mask": {
+        "wall_seconds": 33.103,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "67c3cb7b8246e8a023146b225c9bab6ab7617954ed726707fb736980d99f5fbf"
+      },
+      "ask-decision-audit": {
+        "wall_seconds": 38.07,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "1d95d01c16a15267ea1b426eca1a4fb3671f7c2ad77c92e291ab1254e609427c"
+      }
+    },
+    "semantic_result": "NARROW PASS for this run: the controlled unittest failed exit 1; two Ask restarts made no shell attempt, preserved the failure as unresolved, stated broader Task02 acceptance unrun, and produced three structurally completed native checkpoints on AC power with normal pressure and zero swap growth. All three checkpoint Decisions sections were (none). The third answer incorrectly described the checkpoint as saying (none verified from recorded user requests) and quoted a paraphrase as a user request; do not treat it as perfect semantic fidelity. No native false-Decision summary occurred in this new run, so the live masking branch was not exercised; only offline tests prove that branch. The prior e9cc4b0 run remains failed for repeated false Decisions. Long coding/UI continuity and 64K throughput remain unqualified.",
+    "next_action": "Use a fresh frozen fixture that yields a false Decision checkpoint or an explicitly labelled synthetic native checkpoint to exercise the masking path live; then retest the full long coding/UI workflow. Keep 64K installed and release profile 49K."
+  },
+  "followup_installed_child_provenance_bce6": {
+    "installed_private_source_revision": "bce6887fd98c8e4230603f2c206f7c6b696ac1ae",
+    "private_wheel_sha256": "7effb19147ba162427268f50c2c14fc6075c5927e27eefecddc444434cb327ae",
+    "fixture": "Fresh disposable Task02 workspace and a saved native Build session. The prompt requested one native Explore subagent to inspect a date-range bug; no code edits or shell commands were requested. Raw private traces are ignored under evals/runs/context64-child-prompt-1/ in the private 64K worktree.",
+    "source_validation": "PR source 956c331 and private source bce6887 each passed make check (173 setup, 21 Python tool, 59 Node, driver self-check and frozen verify) plus committed-source package smoke. PR CI offline-and-package passed. The private branch was pushed; the owner installed bce6887 and --package-check returned the exact source revision.",
+    "live_probe": {
+      "agent": "Build with native Explore child",
+      "wall_seconds": 77.577,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 2,
+      "tool_errors": [
+        "Mistaken skill(id=explore) call failed before the agent corrected to the native subagent tool."
+      ],
+      "parent_session_id": "ses_f24dc9883ffehS2o9is3DaJVqa",
+      "child_session_id": "ses_f24dc556fffeoXjFczmF5hK0Te",
+      "child_parent_id_verified": true,
+      "child_user_request_continuity_record_exists": false,
+      "parent_user_request_continuity_record_exists": true,
+      "parent_recorded_request_count": 1,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "max_sampled_runtime_phys_footprint_bytes": 11598732512,
+      "driver_sha256": "bf85e5d68d9f0794a8d6478d21b31cc7de75044330e881900c1fb21e1ab6ffb3"
+    },
+    "post_probe_doctor": "PASS: installed source bce6887, healthy idle 65,536-context oMLX metadata, normal pressure, unchanged swap 423823933 bytes, browser and search MCP connected. Doctor does not itself generate or interact with the browser.",
+    "result": "NARROW PASS: native child prompt was excluded from durable user-request continuity while the parent prompt was retained. The resource guard admitted and completed one compaction. The mistaken skill call and prior Task12m failures remain quality evidence; this trial did not exercise the false-Decision mask, repeated restart, coding/UI, or sustained throughput gates.",
+    "remaining": "Keep owner on private guarded 64K as requested. Full semantic continuity, long coding/UI and review/browser acceptance, useful 49K-128K tier decision, and clean non-owner install remain unqualified. Public release profile stays 49K; PR remains open.",
+    "actual_rollback_reinstall": "PASS: rollback from exact bce6887 stopped the owned oMLX runtime and restored matching 069084e private 64K source; --package-check confirmed 069084e. Reinstall from the exact previously checked bce6887 package restored source bce6887 and 65,536 context. Guarded kryn bench protocol smoke passed (metrics SHA256 39cd4142f105780425111ef703655ae6d7676878e0df8b81e5a37e5a7cf61465); doctor reported healthy idle 65,536-context runtime, normal pressure, unchanged swap 423823933 bytes, browser and search MCP connected. This is existing-owner private recovery, not clean non-owner install or long-workflow acceptance."
+  },
+  "followup_task12n_bce6": {
+    "installed_private_source_revision": "bce6887fd98c8e4230603f2c206f7c6b696ac1ae",
+    "fixture": "Fresh frozen Task12 disposable workspace. Same saved native session through Plan, backend Build, and operator-steered backend recovery; each driver invocation restarted the native server. Raw private traces are ignored under evals/runs/context64-final-12n/.",
+    "stages": {
+      "plan": {
+        "wall_seconds": 117.274,
+        "model_completed": true,
+        "tool_calls": 22,
+        "tool_errors": [
+          {
+            "tool": "write",
+            "error": "Cannot use write to modify files outside the Plan directory: /Users/pranav/.opencode/plan"
+          }
+        ],
+        "native_compaction": {
+          "admitted": true,
+          "message_id": "msg_0db2bb7e7001kdOs1xCxMQiWfS",
+          "status": "completed",
+          "completed": true,
+          "summary_headings": [
+            "## Objective",
+            "## Requirements",
+            "## Decisions",
+            "## Work State",
+            "## Next Move",
+            "## Relevant Files",
+            "## Important Context"
+          ],
+          "obvious_task_contradiction": false,
+          "semantic_qualification": "NOT_ESTABLISHED"
+        },
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "782237d96d3a8acaae3bf3828be5a3f5313dc53d016107675d051352d034fdd1"
+      },
+      "backend": {
+        "wall_seconds": 608.125,
+        "model_completed": false,
+        "tool_calls": 46,
+        "tool_errors": [
+          {
+            "tool": "edit",
+            "error": "Could not find oldString in /private/tmp/kryn-64-retest/evals/runs/context64-final-12n/workspace/taskboard_lite/server.py. It must match exactly, including whitespace and indentation."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "execute",
+            "error": "No tool named \"execute\" is currently available. Please use a tool from the available tool list."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "edit",
+            "error": "No changes to apply: oldString and newString are identical."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "edit",
+            "error": "Could not find oldString in /private/tmp/kryn-64-retest/evals/runs/context64-final-12n/workspace/taskboard_lite/server.py. It must match exactly, including whitespace and indentation."
+          }
+        ],
+        "native_compaction": {
+          "admitted": false,
+          "completed": false,
+          "status": "prompt_incomplete"
+        },
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "0850cd721d5a549522230890344ebc4aef41b84181ff5a1e7a146c9a6cf56a0f"
+      },
+      "backend-recovery": {
+        "wall_seconds": 248.223,
+        "model_completed": false,
+        "tool_calls": 8,
+        "tool_errors": [],
+        "native_compaction": {
+          "admitted": false,
+          "completed": false,
+          "status": "prompt_incomplete"
+        },
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "e9881bd8a181031753dfdd2ee42376286200df7d92449bacffb7a85b0e8f3a01"
+      }
+    },
+    "semantic_result": "FAIL: Plan completed inspection and its answer, but native compaction said the transcript was unavailable, marked Plan work unfinished, and repeated the planning step. The retained recent-context held the completed exchange. Pinned OpenCode 2.0.10 splitHistory supplied only the older prefix to the compaction model; wire evidence showed three messages and zero assistant/tool content. KRYN sidecar supplied user requirements, not current work state.",
+    "application_result": "FAIL: backend Build timed out after 608.125 seconds and 46 tool calls, with eight tool errors including four refused trailing-ampersand server starts, one unavailable execute call, and edit mismatches/no-op. Operator-steered recovery timed out after 248.223 seconds and eight tool calls without tool errors. Frozen grade remained PARTIAL: 2/2 API checks passed, while UI/browser/review/handoff were unrun. The correction is counted separately from autonomous success.",
+    "resource_result": "All three stages ran on Battery Power before/after, normal pressure level 1 and zero observed swap growth; no resource-guard stop. This does not qualify 64K sustained useful throughput or AC-power performance.",
+    "source_fix_after_trial": "A first-compaction hook now supplies a deterministic structured checkpoint when the selected older prefix has no assistant/tool work and a retained parent user request exists. It says current work state is unknown and points to native recent-context instead of asking the model to infer unseen work. A separate provenance fix treats (none) and no-user-decision bullets as empty markers rather than false Decision claims. Focused tests and make check passed locally; private packaging, installation and live retest pending.",
+    "remaining": "The installed bce6887 trial failed semantic checkpoint and sustained coding/UI. The new source mechanism is not yet installed or qualified. Keep owner on 64K; do not promote public profile or release."
+  },
+  "followup_installed_recent_only_6790": {
+    "installed_private_source_revision": "67901e8bd55c5b137fb8f0fab6fc091baa3972f5",
+    "private_wheel_sha256": "c74c354c6485291d2446c6efd0e47187871eb21ecc25348375d998f3d33b34a7",
+    "fixture": "Fresh frozen Task12 Plan workspace, one saved native session through Plan and two Ask restarts. Raw transcripts are ignored under evals/runs/context64-fallback-12o/ in the private 64K worktree.",
+    "source_validation": "PR code 6ef2f61 and private code 67901e8 passed make check (173 setup, 21 Python tool, 61 Node, driver self-check and frozen verify) and committed-source package smoke. The owner installed private 67901e8; --package-check returned the exact source. Initial doctor showed a transient host pressure warning; a later doctor before trial and post-trial doctor passed at 65,536 context with normal pressure and unchanged swap 423823933 bytes. CI on the PR passed. Driver-only source c6cad81/e92dc45 subsequently passed make check/self-check and PR CI; it is not an installed behavior change.",
+    "stages": {
+      "plan": {
+        "wall_seconds": 83.266,
+        "driver_completed": false,
+        "model_completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 17,
+        "tool_errors": 0,
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "8b3b69cee008cca0a8e242d0f295c9f368bbb12035d20a662f8c76ef2fa80e5c"
+      },
+      "ask-recall": {
+        "wall_seconds": 70.393,
+        "driver_completed": true,
+        "model_completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 4,
+        "tool_errors": 0,
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "989eb692c7f1a4fe78d33578a55a5ea3b320d20b4942f412f90e561ad3b814d3"
+      },
+      "ask-decisions": {
+        "wall_seconds": 49.906,
+        "driver_completed": true,
+        "model_completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "378265d04e31f87d0d766a2a99a5eb895edb9817160c0781e7da5a6354531b5e"
+      }
+    },
+    "first_checkpoint": "NARROW PASS of content: the native compaction hook supplied a deterministic structured summary for an empty older prefix; it carried the Task12 request excerpt, labeled unseen current work unknown, and pointed to retained recent-context. The Plan answer had completed inspection; the checkpoint did not falsely mark it undone. This compaction made no model inference request. The original plan-stage driver.json says completed=false solely because its then-current route audit required a model HTTP call for every compaction. Independent replay of the exact saved audit and export with the corrected, self-checked driver returns route_coverage verified=true, one plugin-supplied compaction, zero uncovered requests and zero rejected audit events. Preserve the original failed driver record; do not relabel it as an originally passed run.",
+    "restart_recall": "NARROW PASS: after a native-server restart, read-only Ask used four read tools, no errors or shell, correctly reported that Plan inspection/criteria were complete and implementation and tests had not run. Its next model-generated checkpoint was structurally incomplete (missing Important Context) and falsely put four implementation observations under user Decisions.",
+    "second_restart_provenance": "NARROW PASS: after a second restart, Ask used zero tools, correctly reported no explicit user implementation decisions and that only Plan work had occurred. The third native checkpoint completed with Decisions: (none verified from recorded user requests). Offline replay of the exact second saved checkpoint through installed maskUnverifiedDecisions with the three actual prompts returned four masked rows and model-facing Decisions: (none verified from recorded user requests). The model-facing hook payload itself was not captured, so this is convergent evidence rather than a full wire-content proof.",
+    "resources": "All three stages were on Battery Power before/after at normal pressure level 1, zero observed swap growth, no resource-guard stop. This does not establish plugged-in sustained performance or 64K useful tier qualification.",
+    "remaining": "Full Task12 coding/UI workflow, semantic fidelity across longer work, independent browser/reviewer acceptance, 49K-128K useful-tier decision and clean non-owner install remain unqualified. Keep private guarded 64K installed as requested; public 49K release profile and v0.1.10 remain unchanged."
+  },
+  "followup_installed_precise_8ec3": {
+    "installed_private_source_revision": "8ec3f11942ec0482ceb811b0805b200d6cfcdaae",
+    "private_wheel_sha256": "81026c0e02277c662a4c9a1e225a3ee04d730fc4e37f259fc60b71272bc74a9a",
+    "change": "The deterministic recent-only checkpoint now says the selected older prefix has no visible assistant/tool work, rather than inaccurately calling the entire older prefix empty. The self-checked route auditor accepts both exact known wording versions, preserving earlier raw trial replay.",
+    "source_validation": "PR source 6450f95 and private source 8ec3f11 passed make check (173 setup, 21 Python tool, 61 Node, driver self-check and frozen verify) and committed-source package smoke. Private source 8ec3f11 was pushed, installed as a verified wheel, and passed --package-check, guarded protocol smoke, and post-trial doctor at 65,536 context, normal pressure and unchanged 423823933-byte swap. PR CI offline-and-package passed.",
+    "probes": {
+      "context64-precise-02p": {
+        "wall_seconds": 55.657,
+        "driver_completed": true,
+        "native_compaction_completed": true,
+        "plugin_supplied_compactions": 0,
+        "routing_verified": true,
+        "tool_errors": [],
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "03490fc459e87c17cce64eb98cdb8a74a6f1fcf05d32686d8b3a6c8bb4752b28"
+      },
+      "context64-precise-12q": {
+        "wall_seconds": 70.239,
+        "driver_completed": true,
+        "native_compaction_completed": true,
+        "plugin_supplied_compactions": 1,
+        "routing_verified": true,
+        "tool_errors": [
+          {
+            "tool": "execute",
+            "error": "No tool named \"execute\" is currently available. Please use a tool from the available tool list."
+          }
+        ],
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "4d4e2483a8fa5b5548d6ca919e49524e79348d1730e228351784bbdff67ef106"
+      }
+    },
+    "semantic_result": "NARROW PASS: a fresh Task12 Plan turn completed and its first compaction used the installed plugin-supplied checkpoint with the precise wording, retained 21,337 characters of native recent-context and route_coverage verified=true with one plugin-supplied compaction and no uncovered model requests. The Plan turn had one unavailable execute tool error. A separate Task02 Ask run completed with ordinary model-generated compaction and no tool errors; it did not exercise the deterministic fallback. Neither probe proves later restart fidelity or full application quality.",
+    "resources": "Both fresh probes ran on Battery Power before/after, normal pressure level 1, zero observed swap growth and no resource-guard stop. These are short mechanism tests, not sustained useful-tier qualification.",
+    "remaining": "Full coding/UI with repeated compaction/restart, independent browser/reviewer, 49K-128K useful-tier selection, latest exact private rollback and clean non-owner install remain unqualified. Keep private 64K installed as requested; public 49K release profile and v0.1.10 remain unchanged."
+  }
 }
