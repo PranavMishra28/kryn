@@ -979,5 +979,120 @@
     "result": "NARROW PASS: native child prompt was excluded from durable user-request continuity while the parent prompt was retained. The resource guard admitted and completed one compaction. The mistaken skill call and prior Task12m failures remain quality evidence; this trial did not exercise the false-Decision mask, repeated restart, coding/UI, or sustained throughput gates.",
     "remaining": "Keep owner on private guarded 64K as requested. Full semantic continuity, long coding/UI and review/browser acceptance, useful 49K-128K tier decision, and clean non-owner install remain unqualified. Public release profile stays 49K; PR remains open.",
     "actual_rollback_reinstall": "PASS: rollback from exact bce6887 stopped the owned oMLX runtime and restored matching 069084e private 64K source; --package-check confirmed 069084e. Reinstall from the exact previously checked bce6887 package restored source bce6887 and 65,536 context. Guarded kryn bench protocol smoke passed (metrics SHA256 39cd4142f105780425111ef703655ae6d7676878e0df8b81e5a37e5a7cf61465); doctor reported healthy idle 65,536-context runtime, normal pressure, unchanged swap 423823933 bytes, browser and search MCP connected. This is existing-owner private recovery, not clean non-owner install or long-workflow acceptance."
+  },
+  "followup_task12n_bce6": {
+    "installed_private_source_revision": "bce6887fd98c8e4230603f2c206f7c6b696ac1ae",
+    "fixture": "Fresh frozen Task12 disposable workspace. Same saved native session through Plan, backend Build, and operator-steered backend recovery; each driver invocation restarted the native server. Raw private traces are ignored under evals/runs/context64-final-12n/.",
+    "stages": {
+      "plan": {
+        "wall_seconds": 117.274,
+        "model_completed": true,
+        "tool_calls": 22,
+        "tool_errors": [
+          {
+            "tool": "write",
+            "error": "Cannot use write to modify files outside the Plan directory: /Users/pranav/.opencode/plan"
+          }
+        ],
+        "native_compaction": {
+          "admitted": true,
+          "message_id": "msg_0db2bb7e7001kdOs1xCxMQiWfS",
+          "status": "completed",
+          "completed": true,
+          "summary_headings": [
+            "## Objective",
+            "## Requirements",
+            "## Decisions",
+            "## Work State",
+            "## Next Move",
+            "## Relevant Files",
+            "## Important Context"
+          ],
+          "obvious_task_contradiction": false,
+          "semantic_qualification": "NOT_ESTABLISHED"
+        },
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "782237d96d3a8acaae3bf3828be5a3f5313dc53d016107675d051352d034fdd1"
+      },
+      "backend": {
+        "wall_seconds": 608.125,
+        "model_completed": false,
+        "tool_calls": 46,
+        "tool_errors": [
+          {
+            "tool": "edit",
+            "error": "Could not find oldString in /private/tmp/kryn-64-retest/evals/runs/context64-final-12n/workspace/taskboard_lite/server.py. It must match exactly, including whitespace and indentation."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "execute",
+            "error": "No tool named \"execute\" is currently available. Please use a tool from the available tool list."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "edit",
+            "error": "No changes to apply: oldString and newString are identical."
+          },
+          {
+            "tool": "shell",
+            "error": "Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls."
+          },
+          {
+            "tool": "edit",
+            "error": "Could not find oldString in /private/tmp/kryn-64-retest/evals/runs/context64-final-12n/workspace/taskboard_lite/server.py. It must match exactly, including whitespace and indentation."
+          }
+        ],
+        "native_compaction": {
+          "admitted": false,
+          "completed": false,
+          "status": "prompt_incomplete"
+        },
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "0850cd721d5a549522230890344ebc4aef41b84181ff5a1e7a146c9a6cf56a0f"
+      },
+      "backend-recovery": {
+        "wall_seconds": 248.223,
+        "model_completed": false,
+        "tool_calls": 8,
+        "tool_errors": [],
+        "native_compaction": {
+          "admitted": false,
+          "completed": false,
+          "status": "prompt_incomplete"
+        },
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "e9881bd8a181031753dfdd2ee42376286200df7d92449bacffb7a85b0e8f3a01"
+      }
+    },
+    "semantic_result": "FAIL: Plan completed inspection and its answer, but native compaction said the transcript was unavailable, marked Plan work unfinished, and repeated the planning step. The retained recent-context held the completed exchange. Pinned OpenCode 2.0.10 splitHistory supplied only the older prefix to the compaction model; wire evidence showed three messages and zero assistant/tool content. KRYN sidecar supplied user requirements, not current work state.",
+    "application_result": "FAIL: backend Build timed out after 608.125 seconds and 46 tool calls, with eight tool errors including four refused trailing-ampersand server starts, one unavailable execute call, and edit mismatches/no-op. Operator-steered recovery timed out after 248.223 seconds and eight tool calls without tool errors. Frozen grade remained PARTIAL: 2/2 API checks passed, while UI/browser/review/handoff were unrun. The correction is counted separately from autonomous success.",
+    "resource_result": "All three stages ran on Battery Power before/after, normal pressure level 1 and zero observed swap growth; no resource-guard stop. This does not qualify 64K sustained useful throughput or AC-power performance.",
+    "source_fix_after_trial": "A first-compaction hook now supplies a deterministic structured checkpoint when the selected older prefix has no assistant/tool work and a retained parent user request exists. It says current work state is unknown and points to native recent-context instead of asking the model to infer unseen work. A separate provenance fix treats (none) and no-user-decision bullets as empty markers rather than false Decision claims. Focused tests and make check passed locally; private packaging, installation and live retest pending.",
+    "remaining": "The installed bce6887 trial failed semantic checkpoint and sustained coding/UI. The new source mechanism is not yet installed or qualified. Keep owner on 64K; do not promote public profile or release."
   }
 }

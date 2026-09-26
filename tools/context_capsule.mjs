@@ -70,7 +70,7 @@ function checkpoint(messages) {
 }
 
 const decisionRow = row => /^\s*[-*]\s+/.test(row) &&
-  !/^\s*[-*]\s*(?:none|no user decision)\b/i.test(row);
+  !/^\s*[-*]\s*(?:\(?none\b|no user decisions?\b)/i.test(row);
 const anchoredDecision = (row, requests) => {
   if (!/^\s*[-*]\s*User\s*:/i.test(row)) return false;
   const quotes = [...row.matchAll(/["“]([^"”]{8,})["”]/g)].map(match => match[1].normalize('NFKC'));

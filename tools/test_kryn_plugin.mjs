@@ -277,6 +277,21 @@ test('private user requirements survive two compactions and restart when native 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('first compaction of a retained-only exchange cannot invent unfinished work', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Implement import and verify the API.' } });
+    const emptyPrefix = { sessionID: 'ses_1', agent: 'build', system: [], messages: [{ role: 'user', content: 'Synthetic setup only' }], tools: {} };
+    f.call('session.compaction', emptyPrefix);
+    assert.match(emptyPrefix.result.summary, /Implement import and verify the API/);
+    assert.match(emptyPrefix.result.summary, /latest exchange is retained outside this summary/);
+    assert.doesNotMatch(emptyPrefix.result.summary, /not yet completed/);
+    const withWork = { sessionID: 'ses_1', agent: 'build', system: [], messages: [{ role: 'assistant', content: 'Finished work' }], tools: {} };
+    f.call('session.compaction', withWork);
+    assert.equal(withWork.result, undefined, 'visible work remains with native model summarization');
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('child prompts are never recorded as user decisions', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
