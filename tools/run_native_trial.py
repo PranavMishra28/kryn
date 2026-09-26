@@ -478,6 +478,13 @@ def generation_completion(exports, started_ms, root_id, required_ids):
 
 def route_coverage(audit, exports, started_ms, finished_ms):
     """Cross-check persisted native generations, not just a nonempty audit prefix."""
+    def supplied_recent_only(message):
+        summary = message.get("summary", "")
+        return (message.get("type") == "compaction" and message.get("status") == "completed"
+                and bool(message.get("recent")) and
+                summary.startswith("## Objective\n- Continue the recorded user request after reading the retained recent exchange.\n")
+                and summary.endswith("This checkpoint summarizes an empty older prefix. Do not infer that planning, edits, or checks in the retained recent exchange did not happen."))
+
     def millis(record):
         return dt.datetime.fromisoformat(record["time"].replace("Z", "+00:00")).timestamp() * 1000
     ready = [millis(r) for r in audit if r.get("event") == "ready"]
@@ -506,13 +513,14 @@ def route_coverage(audit, exports, started_ms, finished_ms):
                       and lower <= millis(r) <= upper]
             requests = [i for i, r in scoped if r.get("event") == "http.request" and r.get("ok") is True
                         and i not in used_requests]
-            covered = bool(requests) and any(r.get("event") == "wire.options" for _, r in scoped) and any(
+            provided = kind == "compaction" and not requests and supplied_recent_only(message)
+            covered = provided or bool(requests) and any(r.get("event") == "wire.options" for _, r in scoped) and any(
                 r.get("event") == "http.response" and r.get("status") == 200 for _, r in scoped)
             if covered:
                 used_requests.update(requests)
             rows.append({"session_id": sid, "message_id": message.get("id"), "kind": kind,
                          "created_ms": created, "completed_ms": completed, "coverage_window_ms": [lower, upper],
-                         "covered": covered})
+                         "covered": covered, "plugin_supplied_recent_only": provided})
             if kind == "primary":
                 previous_completion = upper
     last_completion = max([finished_ms] + [r["completed_ms"] or r["coverage_window_ms"][1] for r in rows])
@@ -525,7 +533,8 @@ def route_coverage(audit, exports, started_ms, finished_ms):
             "rejected_audit_events": rejected,
             "uncovered_generation_requests": uncovered,
             "lifecycle_brackets_prompt": bracketed, "ready_count": len(ready), "closed_count": len(closed),
-            "native_generations": rows, "last_completion_ms": last_completion,
+            "native_generations": rows, "plugin_supplied_compactions": sum(r["plugin_supplied_recent_only"] for r in rows),
+            "last_completion_ms": last_completion,
             "scope": "Persisted assistant/compaction messages from this invocation; non-persisted helpers cannot be independently enumerated from these exports. This is not OS-wide network proof."}
 
 
@@ -836,6 +845,18 @@ def self_check():
     compacted = copy.deepcopy(exported)
     compacted[0]["data"]["messages"].append({"id": "compact", "type": "compaction", "status": "completed", "time": {"created": 2100}})
     assert not route_coverage(trace, compacted, 900, 2500)["verified"]
+    supplied = copy.deepcopy(compacted)
+    supplied[0]["data"]["messages"][-1].update(
+        summary="## Objective\n- Continue the recorded user request after reading the retained recent exchange.\n"
+                "## Important Context\n- This checkpoint summarizes an empty older prefix. Do not infer that planning, edits, or checks in the retained recent exchange did not happen.",
+        recent="[User]: Build the app.\n[Assistant]: Planned the app.")
+    assert route_coverage(trace, supplied, 900, 2500)["verified"]
+    assert route_coverage(trace, supplied, 900, 2500)["plugin_supplied_compactions"] == 1
+    missing_recent = copy.deepcopy(supplied)
+    missing_recent[0]["data"]["messages"][-1]["recent"] = ""
+    assert not route_coverage(trace, missing_recent, 900, 2500)["verified"]
+    stray = trace[:-1] + [audit_row("http.request", 2200, sessionID="test", kind="compaction", ok=True)] + trace[-1:]
+    assert not route_coverage(stray, supplied, 900, 2500)["verified"]
     compact_trace = [audit_row(event, stamp, sessionID="test", kind="compaction", **details) for event, stamp, details in (
         ("http.request", 2200, {"ok": True}), ("wire.options", 2201, {}), ("http.response", 2202, {"status": 200}))]
     assert route_coverage(trace[:-1] + compact_trace + trace[-1:], compacted, 900, 2500)["verified"]
