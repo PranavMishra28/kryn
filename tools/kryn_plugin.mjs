@@ -132,13 +132,13 @@ export function pruneTrackers(directory, now = Date.now()) {
 // Only simple test commands count. Exit zero remains evidence of a command, not task correctness.
 export function isCheck(command) {
   if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
-  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*(?:-m\s+(?:unittest|pytest)(?:\s|$)|(?:\.\/)?(?:[A-Za-z0-9_-]+\/)*test_[A-Za-z0-9_-]+\.py(?:\s|$))|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
 }
 // Refuse only plain check commands whose shell fallback would hide the check's exit.
 export function masksCheckFailure(command) {
   if (typeof command !== 'string' || command.length > 4096) return false;
   const plain = command.trim().replace(/^cd\s+(?:\/[A-Za-z0-9_./-]+|\.[A-Za-z0-9_./-]*)\s*&&\s*/, '');
-  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)\b|pytest\b|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)\b|node\s+--test\b|go\s+test\b|cargo\s+test\b)[^'"`\n\r;|]*\s*(?:\|(?:\|\s*(?:true\b|echo\b)|\s*(?:head|tail)(?:\s|$))|;\s*(?:echo\b|printf\b|true\b|:(?:\s|$)))/.test(plain);
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*(?:-m\s+(?:unittest|pytest)\b|(?:\.\/)?(?:[A-Za-z0-9_-]+\/)*test_[A-Za-z0-9_-]+\.py\b)|pytest\b|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)\b|node\s+--test\b|go\s+test\b|cargo\s+test\b)[^'"`\n\r;|]*\s*(?:\|(?:\|\s*(?:true\b|echo\b)|\s*(?:head|tail)(?:\s|$))|;\s*(?:echo\b|printf\b|true\b|:(?:\s|$)))/.test(plain);
 }
 function verificationLedger(saved) {
   if (saved === undefined) return { schema: 1, coverage: 'observed_checks_only', acceptance: 'unestablished',

@@ -288,9 +288,11 @@ test('pruned or legacy trackers cannot imply complete historical observation', a
 test('Python startup flags preserve failed-check incident classification', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    for (const command of ['python3 -B -m unittest -v', 'python3.13 -I -B -m pytest', 'python -EB -m unittest'])
+    for (const command of ['python3 -B -m unittest -v', 'python3.13 -I -B -m pytest', 'python -EB -m unittest',
+      'python test_existing.py', 'python3 -B ./test_existing.py', 'python3 -B tests/test_existing.py'])
       assert.equal(isCheck(command), true);
     assert.equal(isCheck('python3 -c "import unittest"'), false);
+    assert.equal(isCheck('python app.py'), false);
     assert.equal(isCheck('python3 -B -m unittest; true'), false);
     f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.execution.started');
@@ -299,6 +301,22 @@ test('Python startup flags preserve failed-check incident classification', async
     await f.emit('session.execution.succeeded');
     assert.equal(f.read('incidents')[0].check_failures, 1);
     assert.ok(f.read('incidents')[0].triggers.includes('check_failed'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('direct Python test script results enter the observed-check ledger across restart', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const call = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_script', id: 'call_script',
+      tool: 'shell', input: { command: 'python test_existing.py' } };
+    f.call('tool.execute.before', call);
+    f.call('tool.execute.after', { ...call, status: 'completed', result: { output: { exit: 0 } } });
+    assert.equal(f.read('trackers')[0].verification.checks[0].state, 'passed');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    assert.equal(f.read('trackers')[0].verification.checks[0].state, 'stale',
+      'a restarted process must not claim the prior test still passes');
   } finally { await cleanup(); f.remove(); }
 });
 
@@ -313,7 +331,8 @@ test('plain test output cannot hide a failed exit', async () => {
       'cd /workspace && python -m unittest discover -v 2>&1 | head -50',
       'pytest -q | tail -5', 'pytest|head -1',
       'cd /workspace && python3 -B -m unittest test_existing.Existing -v; echo "Exit status: $?"',
-      'python -m pytest -q; printf "done"', 'npm test; true']) {
+      'python -m pytest -q; printf "done"', 'npm test; true',
+      'python test_existing.py; echo done']) {
       assert.equal(masksCheckFailure(command), true);
       assert.throws(() => call(command), /hides failure/);
     }
