@@ -1,0 +1,42 @@
+{
+  "status": "NARROW_INSTALLED_PASS",
+  "source": {
+    "pr_candidate_with_checkpoint_binding": "3cc05843bd837be28f5b2db1e40601f38bc71d2f",
+    "installed_private_64k": "b754fdcffb85c77fbb53e01ecb870a732ec030cc",
+    "installed_wheel_sha256": "55b7510dc2e46faa8cbb7c183dbc22acfc308b126ee7b486db7d39bf94e64e66"
+  },
+  "mechanism": "The pinned OpenCode 2.0.10 compaction event's summary hashes to the same SHA-256 as the exported native checkpoint summary. KRYN stores that hash outside the model prompt and matches it before retrieving current files or masking unsupported Decisions. Existing checkpoints without a stored hash use the legacy wrapper path.",
+  "installed_trial": {
+    "suite": "2026-09-19.2",
+    "task": "02",
+    "run": "context64-checkpoint-hash-02a",
+    "record": {
+      "wall_seconds": 25.086,
+      "turn_completed": true,
+      "native_compaction_completed": true,
+      "tracker_hash_matches_exported_summary": true,
+      "tool_errors": 0,
+      "pressure_max": 1,
+      "swap_growth_bytes": 0,
+      "power": "battery"
+    },
+    "restart_and_recall": {
+      "wall_seconds": 55.838,
+      "turn_completed": true,
+      "second_native_compaction_completed": true,
+      "tracker_hash_matches_latest_exported_summary": true,
+      "answer": "Recalled all six stated acceptance items, reported no code inspection/edit or tests, and gave Agent handoff as next action.",
+      "tool_errors": 0,
+      "pressure_max": 1,
+      "swap_growth_bytes": 0,
+      "power": "battery"
+    },
+    "raw_private_evidence": "evals/runs/context64-checkpoint-hash-02a/evidence"
+  },
+  "installation": {
+    "direct_deploy_attempt": "Activating only a new client left old OpenCode plugin config; doctor refused launch. Previous client was redeployed and doctor passed. This reproduced the missing deploy-client preflight.",
+    "transactional_install": "The candidate wheel's kryn install then updated config and client together. Exact package check and post-trial doctor passed at 65,536 context.",
+    "guard_fix": "A source regression now requires the configured plugin directory before direct deploy; installed validation of that later source is pending."
+  },
+  "limitations": "Two short Ask turns do not prove long coding/UI continuity, repeated useful-tier performance, clean non-owner installation, or public release readiness."
+}

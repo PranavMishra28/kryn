@@ -1,0 +1,46 @@
+{
+  "status": "FAILED_SCREEN",
+  "scope": "One predeclared, paired, API-only Task12 screen at private 64K. Neither turn completed; this does not qualify the context tier or the full coding/UI workflow.",
+  "source": {
+    "private_install_commit": "8ec3f11942ec0482ceb811b0805b200d6cfcdaae",
+    "model": "Qwen3.5-9B-6bit",
+    "context_tokens": 65536,
+    "fixture_suite": "2026-09-19.2",
+    "same_initial_fixture_hashes": true,
+    "same_prompt_sha256": "6bfc606e09d8b4fb553398612760bc1ab3fa35df492ea092c7b874e08da42324"
+  },
+  "declared_pass_bar": "Complete the API turn within 300 seconds, pass the frozen Task12 automatic checks, have zero tool errors and no resource warning.",
+  "trials": [
+    {
+      "run": "context64-api-fast-a",
+      "variant": "fast",
+      "verified_wire_thinking_budget": 0,
+      "wall_seconds": 308.231,
+      "completed": false,
+      "stop": "300-second prompt timeout and verified native interruption",
+      "tool_calls": 46,
+      "tool_errors": ["malformed question options", "unsafe trailing ampersand in a shell server start"],
+      "frozen_automatic": "2/2 passed; full Task12 grade PARTIAL because manual coding/UI checks were not run",
+      "native_compaction": "not admitted because prompt did not complete",
+      "resource": "148 samples, pressure level 1, 0 swap growth, no guard warning",
+      "power": "battery",
+      "raw_private_evidence": "evals/runs/context64-api-fast-a/evidence/api"
+    },
+    {
+      "run": "context64-api-default-a",
+      "variant": "default",
+      "verified_wire_thinking_budget": 3072,
+      "wall_seconds": 308.195,
+      "completed": false,
+      "stop": "300-second prompt timeout and verified native interruption",
+      "tool_calls": 52,
+      "tool_errors": ["unsafe trailing ampersand in a shell server start, twice", "broad process-name kill refused"],
+      "frozen_automatic": "2/2 passed; full Task12 grade PARTIAL because manual coding/UI checks were not run",
+      "native_compaction": "not admitted because prompt did not complete",
+      "resource": "148 samples, pressure level 1, 0 swap growth, no guard warning",
+      "power": "battery",
+      "raw_private_evidence": "evals/runs/context64-api-default-a/evidence/api"
+    }
+  ],
+  "decision": "Do not switch the installed default variant or claim an API or full workflow pass. The paired screen offers no completion or reliability advantage for fast. Keep the private 64K install; prioritize completed long coding/UI work, honest checkpoints, and guarded tier qualification."
+}
