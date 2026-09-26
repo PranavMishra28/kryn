@@ -1,0 +1,39 @@
+{
+  "scope": "Private frozen Task12 daily-use trial on installed experimental 64K KRYN; no public release, version bump, tier promotion, or model-quality claim",
+  "source": "249d10a28fc704162daa4b376d2971d12ecc5ed4",
+  "model": "Qwen3.5-9B-6bit; Fast without thinking for initial build, Default with thinking for handoff and resumed build",
+  "raw_private_run": "evals/runs/t12endurance1 (ignored; includes native exports, browser reports, DB, screenshots, model-final.patch and operator control)",
+  "frozen_task": "Plan, implement raw CSV import/atomic rejection, persistent PATCH, exact project filter, export, browser controls and recoverable 503; then fresh review, compaction/restart and sustained active work",
+  "stages": {
+    "plan": "PASS read-only native turn, 90.325 seconds, manual compaction completed",
+    "backend": "FAIL native turn timed out at 606.643 seconds while attempting to manage a persistent test server in a foreground shell; no completed-turn compaction",
+    "ui": "FAIL native turn timed out at 606.878 seconds; first independent browser check sent PATCH for a new row (400 instead of POST 201)",
+    "repair_save": "FAIL native turn timed out at 246.723 seconds; its code advanced independent browser checks through both viewports, invalid feedback, real 503/retry and atomic CSV upload, but no Edit button was present",
+    "handoff": "PASS native Ask turn and manual compaction after a fresh server process, 153.227 seconds; stored checkpoint still put agent choices under Decisions, marked no active/blocked work and omitted the failed Edit gate from Next Move",
+    "resume_audit": "PASS read-only Ask turn after another server restart, 52.825 seconds; identified the Edit blocker, but repeated unsupported model-test pass claims",
+    "resume_build": "PASS native Default Agent turn and manual compaction, 153.249 seconds; changed Edit text but broke visible row ID and still destroyed the child control with li.textContent +=",
+    "fresh_reviewer": "FAIL fresh read-only Reviewer timed out at 186.666 seconds without a completed review"
+  },
+  "independent_checks": {
+    "backend": "PASS 7/7 operator-owned live API checks: seed, exact filter, CSV import, three atomic rejection classes, PATCH response, export round-trip and process-restart persistence; original two tests passed",
+    "frozen_automatic": "PASS 2/2 backend tests with original test and seed hashes preserved; overall frozen grade PARTIAL because manual gates failed",
+    "browser_1": "FAIL first Save: PATCH 400 for a new row",
+    "browser_2": "FAIL after 5/7 checks passed: row had no role=button, name=Edit",
+    "browser_3": "FAIL first viewport after POST 201 and API persistence: saved row ID absent from rendered list after reload",
+    "source_cause": "web/app.js appended an Edit link, then assigned li.textContent +=, replacing child nodes; changing the link label also omitted row.id from visible text",
+    "operator_control": "PASS 7/7 full browser checks only in a separate copy after an operator changed the edit element to a button, preserved row text before append, and changed the filter's accessible label to 'Filter project'. This is diagnostic control, not an autonomous KRYN result or a fix in the frozen model workspace."
+  },
+  "resources": "All guarded stages observed normal pressure and zero swap growth. This establishes safe sampled behavior for these turns, not sustained 64K reliability or 96K/128K qualification.",
+  "duration": "1909.870 seconds (31.83 minutes) of Plan/build/handoff/resume stage wall time excluding the failed Reviewer and operator control; below the 45–60 minute useful-work gate, and some timed-out time was spent on ineffective server management",
+  "gate_status": {
+    "task09_read_before_edit": "Earlier automatic file-tail candidate reverted; corrected native current-read guard passed a separate 10/10 frozen run. Cause of the original 2/10 stochastic regression remains unproven; do not restore file-tail without paired evidence.",
+    "coding_ui": "FAIL model artifact; operator-only control passes",
+    "semantic_compaction_restart": "FAIL stored handoff checkpoint; narrow resumed blocker recall passed, but false check claims remained",
+    "fresh_independent_model_review": "FAIL timeout; operator source/browser review identified the DOM defect",
+    "sustained_endurance": "FAIL duration below threshold and application acceptance incomplete",
+    "clean_install": "Owner private rollback/reinstall passed previously; non-owner clean install and offline recovery remain unqualified because a separate standard macOS account is unavailable",
+    "context_tier": "64K stays guarded and experimental; 49K public profile unchanged; useful 49K/64K/96K/128K qualification remains open",
+    "release": "CLOSED"
+  },
+  "next_blocker": "Use independent browser outcomes as the UI acceptance signal, isolate why the available Browse tools were not used during Agent work, and prove a model-produced Task12 pass with truthful compaction/restart before clean-install and endurance gates. Do not add another prompt rule for the same DOM failure."
+}
