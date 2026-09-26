@@ -1,0 +1,71 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private daily-use qualification only; no public version, tag, release or browser candidate promotion",
+  "main_fix": {
+    "pr": "https://github.com/PranavMishra28/kryn/pull/17",
+    "merge": "f1d7f84f4deb59d69d9f251db33504fd90032352",
+    "result": "Plain unittest | head/tail test-exit masking is refused; focused test, make check, package smoke, CI and narrow native pre-execution probe passed. Task09 read-before-edit remains unqualified."
+  },
+  "owner_64k": {
+    "source_revision": "c4e18e2a8a5f55fe815b3aea7128d60a3f0acc84",
+    "composition": "Private b0214cb guarded 64K build plus merged pipeline guard only; no direct-browser or Browse-diagnostic edits",
+    "package_sha256": "e2ec358113c54827af26c8267dcf3b0cb9d8abe6860c719371a15d023fc0a40e",
+    "activation": "PASS: transactional install, self-check, rollback restored b0214cb, reinstall restored c4e18e2, package-check and doctor passed",
+    "rollback_transaction_sha256": "d65a32e0e4bdca19dc93fe6a836f104f55ce136379ceb46eaf8b301bea41ec95",
+    "installed_guarded_inference": {
+      "status": "PASS narrow routing smoke",
+      "wall_seconds": 12.456,
+      "pressure": "normal",
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "d0af6227d6e3634de7fe1d85734614b75e6f0f81b5b6185a368ffbc37986eaf6"
+    },
+    "limit": "64K remains experimental; short smoke does not qualify long context or endurance."
+  },
+  "browser_routing_screens": {
+    "u06f": {
+      "status": "FAIL",
+      "finding": "Installed Agent tried unavailable Browse skill, then asked for tools and stopped; no compaction/browser",
+      "wall_seconds": 98.17,
+      "driver_sha256": "4fd9dc547708b61c3d36d3e3018ec7532e2fbb18323a8993688bc05daca8154a"
+    },
+    "u06g": {
+      "status": "REJECTED",
+      "finding": "Private reactive skill error reached native Browse subagent, but full Agent task timed out with out-of-scope browsing/edit and no compaction",
+      "wall_seconds": 608.521,
+      "driver_sha256": "f2cf7bc8ee3e6b74c8ef2f868fdc9d980a84bc2b39622c687b9043220f12af34"
+    },
+    "u06h": {
+      "status": "REJECTED",
+      "finding": "Private direct-browser Agent used browser tools but timed out; independent browser found blank 503 message, undefined success count, and false duplicate success; no compaction",
+      "wall_seconds": 607.962,
+      "driver_sha256": "540a5214b96eb88def549a1ce6a45d58df042d23010d4997273f970cd50facf0",
+      "grade_sha256": "cb34b925c01605df99cd63792c0aa923eb0c947d92125e3e00f307f7575c4d88"
+    }
+  },
+  "staged_frozen_task06": {
+    "run": "u06i",
+    "installed_source": "c4e18e2",
+    "artifact_grade": "PASS: original backend checks and independent browser acceptance at 390 and 1280, controlled 503 then 201, one saved row after reload, duplicate 400 with input retained, no page exceptions",
+    "artifact_grade_sha256": "bc6b3bbd4f059a485a71a865139f53b836924a7889b4d2b71e80da5b1bbde98f",
+    "browser_sha256": "bcd02fdf1cc5b169d389911d7368756ecc655c36413030ef07f4a776513d2312",
+    "independent_review_sha256": "96106b84505f4f67d8db72b8c56cc545d43fd7fdfeeace2fabead27aed5e0f94",
+    "workflow_gate": "FAIL: Agent implementation stage timed out at 306.786s; feedback repair stage timed out at 186.731s. Both were automatically interrupted with no resource guard warning; model wrote a side test with a bad suffix assertion and repeatedly mutated disposable DB while debugging.",
+    "checkpoint_restart": "PARTIAL/FAIL semantic: one manual compaction after interrupted turn and one after a completed Ask restart; structural headings passed. First checkpoint promoted implementation facts to Decisions and had stale next actions. Restarted Ask read current evidence, diagnosed side-test mismatch correctly, but attempted one shell tool denied by read-only role. Second checkpoint again promoted implementation facts to Decisions and said browser validation was next despite current independent browser evidence.",
+    "driver_sha256": {
+      "implement": "9607060a8a9a1fbc073aca1b0a0d569b0a5f7bf23077f77d199650299237b866",
+      "repair": "a4db7b5260011612e2bdcc69aa88aea362dd4ca87191478cc49be35c2a807c69",
+      "restart": "5e115139426a262b8cc9e13149002e480ffc3ce7228763de9e9969801ccf7b74"
+    },
+    "resources": "All three guarded stages had normal sampled pressure and zero swap growth."
+  },
+  "gate_status": {
+    "task09_read_before_edit": "FAIL: reverted file-tail regression; 9/10 conservative single run, not reliable",
+    "full_coding_ui_workflow": "FAIL despite u06i artifact PASS",
+    "semantic_compaction_restart": "FAIL; structurally completed twice, stale/unsupported claims remain",
+    "49k_64k_96k_128k_qualification": "INCOMPLETE; 64K experimental with guard and tested rollback",
+    "nonowner_clean_install": "BLOCKED: second macOS account/admin credentials unavailable; same-owner reinstall is not this gate",
+    "final_profile_active_endurance": "UNRUN"
+  },
+  "next_blocker": "Bound Agent work and eliminate repeated side-test/DB churn through an evidence-driven workflow change; repair semantic checkpoint provenance/staleness before claiming continuity. Then run genuine non-owner clean install and final-profile active endurance. Do not add more browser-routing prompt rules.",
+  "raw_evidence_private": "/private/tmp/kryn-conservative-checkpoint/evals/runs/u06{f,g,h,i}"
+}
