@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private same-model frozen Task09 screen of a narrow native edit guard; no public release or 64K promotion",
+  "trigger": "Earlier Task09 conservative run edited data/endurance.csv before reading it on turn 6. The automatic file-tail candidate had regressed to 2/10 read-before-edit and was reverted; causal attribution of that stochastic regression remains unproven.",
+  "change": "For Agent and saved Build, native edit of an existing regular project file at most 1 MiB requires a successful native read of its current bytes during the same user turn. A changed file hash or new user turn requires a new read. The fingerprint is bounded and in-memory only.",
+  "mechanism": "The guard refused one edit-first tool call before execution on frozen turn 9. The model then read data/endurance.csv and completed the edit, tests, Git diff, checkpoint, and native compaction.",
+  "frozen_task09": {
+    "run": "u09g",
+    "grade": "PASS",
+    "turns": 10,
+    "external_checkpoints_passed": 10,
+    "successful_edits_with_current_read": 10,
+    "actual_guard_refusals_recovered": 1,
+    "completed_driver_reports": 9,
+    "step08_driver_gap": "Operator turn interruption occurred after native assistant stop and completed compaction, before final driver.json. The saved session export, original tests, CSV and exact checkpoint were independently recovered; no duplicate prompt was sent. This is not a fully attested uninterrupted ten-driver run.",
+    "real_two_test_command_passes": 10,
+    "git_diff_observed": 10,
+    "native_compactions_completed": 10,
+    "sampled_pressure": "normal",
+    "swap_growth_bytes": 0,
+    "grade_sha256": "09f6ca99500571eb6eba9c9d5979638a1ecbbe7e4a1550e85bab327e264127bc",
+    "independent_operator_sha256": "6a798dbce9260132c3db3a605fb3fe5cfbc46895216b0b74d2759998deeded18",
+    "step09_driver_sha256": "0f0fb8ced56cd831552b232469bbe6b4a9467b785276060e9490bd31c308629f",
+    "step08_recovery_sha256": "e50d85ab8492a91b4bc88d6f299b9e5368046a976799a6e818b5f6a6d6ee907e"
+  },
+  "offline": "Focused native-hook regression and full make check passed on the main-derived branch; companion private 64K plugin tests passed. Candidate package smoke and CI pending.",
+  "limits": "Only native edit is guarded. Shell writes, native write, non-regular/symlink files, and files larger than 1 MiB are not covered. A single stochastic task run does not establish reliable improvement over baseline or whole-agent correctness. 64K remains experimental with guard and rollback.",
+  "next_gate": "Review/package/CI/merge this safe narrow fix, compose it into the private owner build only after qualification, then return to coding/UI semantic checkpoint and completion failures."
+}

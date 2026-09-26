@@ -323,6 +323,34 @@ test('plain test output cannot hide a failed exit', async () => {
   } finally { await cleanup(); f.remove(); }
 });
 
+test('an existing project file must be read in the current turn before native edit', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const file = path.join(f.root, 'data', 'endurance.csv');
+  fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'id,project\ne05,endurance\n');
+  let serial = 0;
+  const call = (tool, status = 'completed', given = './data/endurance.csv') => {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + (++serial),
+      id: 'call_' + serial, tool, input: { path: given } };
+    f.call('tool.execute.before', event);
+    f.call('tool.execute.after', { ...event, status, result: { output: {} } });
+  };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.throws(() => call('edit'), /current read/);
+    call('read', 'error');
+    assert.throws(() => call('edit'), /current read/, 'a failed read does not ground an edit');
+    call('read', 'completed', file);
+    assert.doesNotThrow(() => call('edit'));
+    fs.appendFileSync(file, 'e06,endurance\n');
+    assert.throws(() => call('edit'), /current read/, 'changed bytes invalidate the read');
+    call('read');
+    assert.doesNotThrow(() => call('edit'));
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.throws(() => call('edit'), /current read/, 'the next user turn needs current evidence');
+    assert.doesNotThrow(() => call('edit', 'completed', './new-file.csv'), 'new files need no prior read');
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('plain detached servers require native background ownership without rewriting shell syntax', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const call = input => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'shell', input });

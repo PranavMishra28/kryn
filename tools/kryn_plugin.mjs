@@ -32,6 +32,24 @@ const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the reques
 const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
 const count = value => Number.isFinite(value) && value >= 0 ? Math.min(Math.floor(value), 1e9) : 0;
 
+// A native edit may carry an oldString copied from a previous checkpoint.
+// Keep only a bounded, in-memory fingerprint of files read in this user turn.
+function projectSnapshot(directory, given) {
+  if (typeof given !== 'string' || !given || given.length > 4096) return null;
+  const root = fs.realpathSync(directory);
+  const file = path.resolve(root, given);
+  if (!file.startsWith(root + path.sep)) return null;
+  try {
+    if (fs.realpathSync(file) !== file) return null;
+    const stat = fs.statSync(file);
+    if (!stat.isFile() || stat.size > 1024 * 1024) return null;
+    return { file, hash: sha(fs.readFileSync(file)) };
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
 export function validatedOptions(options) {
   if (!options || typeof options.stateDir !== 'string' || !path.isAbsolute(options.stateDir))
     throw new Error('KRYN requires an absolute owned stateDir');
@@ -211,7 +229,7 @@ export default {
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
-        verification: verificationLedger(), previousTracker: null, shellRepeat: null };
+        verification: verificationLedger(), previousTracker: null, shellRepeat: null, recentReads: new Map() };
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
         item.previousTracker = ownedFile(previous);
@@ -316,6 +334,7 @@ export default {
       const item = session(event.sessionID);
       staleChecks(item); tracker(item);
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
+      item.recentReads.clear();
       item.shellRepeat = null;
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0; item.browserCalls = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
@@ -420,6 +439,11 @@ export default {
     await ctx.tool.hook('execute.before', event => {
       assertHealthy();
       const item = session(event.sessionID);
+      if (AGENT_ROLES.has(event.agent) && event.tool === 'edit') {
+        const current = projectSnapshot(ctx.location.directory, event.input?.path);
+        if (current && item.recentReads.get(current.file) !== current.hash)
+          throw new Error('KRYN requires a current read of this file before editing it. Read the file in this turn, then retry the edit.');
+      }
       const identity = shellIdentity(event, ctx.location.directory);
       if (!identity) item.shellRepeat = null;
       else {
@@ -487,6 +511,13 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      if (event.status === 'completed' && ['read', 'edit'].includes(event.tool)) {
+        const current = projectSnapshot(ctx.location.directory, event.input?.path);
+        if (current) {
+          if (item.recentReads.size >= 64) item.recentReads.delete(item.recentReads.keys().next().value);
+          item.recentReads.set(current.file, current.hash);
+        }
+      }
       const repeat = item.shellRepeat, call = callHash(event.id);
       if (repeat && call && repeat.call === call && repeat.input === shellIdentity(event, ctx.location.directory)) {
         const output = event.result?.output;
