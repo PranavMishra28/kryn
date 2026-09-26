@@ -53,6 +53,11 @@ def main():
     config = json.loads(config_path.read_text()) if config_path.is_file() else {}
     if not args.plan_json and config.get("providers", {}).get("local", {}).get("models", {}).get("qwen", {}).get("modelID") != model:
         raise RuntimeError("Owned OpenCode config disagrees with the chosen profile")
+    plugin_dir = setup.plugin_directory(root)
+    if not args.plan_json:
+        configured = [item.get("package") for item in config.get("plugins", []) if isinstance(item, dict)]
+        if configured != [str(plugin_dir)]:
+            raise RuntimeError("Owned OpenCode plugin reference differs from this client; run the package's kryn install to update both transactionally")
     marker = root / profile["model_parent"] / model / ".localai-download.json"
     setup.check_destination(marker, setup.encode({key: profile[key] for key in ("repository", "revision")}))
     if not marker.is_file():
@@ -101,7 +106,6 @@ def main():
             if (not stat.S_ISREG(info.st_mode) or info.st_uid not in {0, os.geteuid()}
                     or info.st_nlink != 1 or info.st_mode & 0o022 or not os.access(path, os.X_OK)):
                 raise RuntimeError(f"Preserving unsafe existing release shim: {path}")
-    plugin_dir = setup.plugin_directory(root)
     for name, data in setup.plugin_files().items():
         path = plugin_dir / name
         if any(p.is_symlink() for p in (path, *path.parents)) or (path.exists() and path.read_bytes() != data):

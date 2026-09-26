@@ -15,4 +15,6 @@ From the repository root:
 
 `make check` is offline and safe for CI. Live evaluations require an installed KRYN and an independently reviewed run; follow [evals/README.md](evals/README.md) and keep private transcripts out of Git. Do not refresh `evals/frozen.sha256.json` to make a candidate pass. Historical failures belong in `evals/history/`.
 
+For an installed candidate, run the candidate wheel's `kryn install` so OpenCode config, product plugin, client, and rollback receipt change in one transaction. `setup/deploy_client.py` is an internal stage; it refuses activation when the current config points to another plugin directory.
+
 For a change, identify the owning layer from [AGENTS.md](AGENTS.md), reproduce the behavior, add a targeted regression where it checks a real contract, run relevant checks, then inspect the actual diff. Update the user docs and [plan.md](plan.md) when the behavior or its qualification status changes. A release additionally needs package smoke, a clean external installation/update/rollback check, live product qualification, and review of [SECURITY.md](SECURITY.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Do not publish capability claims beyond evidence.
