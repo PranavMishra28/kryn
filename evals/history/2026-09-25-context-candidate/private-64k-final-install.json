@@ -1,0 +1,59 @@
+{
+  "status": "Private 64K remains installed and usable for local coding; sustained quality/public-release qualification remains failed/open.",
+  "installed": {
+    "source_revision": "60e3a3df9d4f0be075beec43eaec937a43475dd9",
+    "wheel_sha256": "3cd75b14d8608eafae9de39d5350294707f74f6cada3b94742a90b6a51cf72fd",
+    "payload_manifest_sha256": "825e89bbf7ed4cc177dab522855b4505636bd5b40213b169d18dbec32bdbfe03",
+    "context_tokens": 65536,
+    "rollback_receipt_source_revision": "6f2c627312246a573cf33fee817bbe0f33e52941",
+    "package_check": "PASS exact source",
+    "doctor": "PASS healthy idle 65,536 model, normal pressure, browser/search connected after guarded smoke",
+    "protocol_smoke": {
+      "passed": true,
+      "metrics_sha256": "00daa9f1449d84f8ec6aa5b4e4f2e03c31556b14ad2e0f68ccbd4dea602cc9f5"
+    }
+  },
+  "source_validation": "PR source e0910e3 and private source 60e3a3d passed make check (173 setup, 21 Python tool, 64 Node, native driver self-check and frozen verify). Both passed committed-source package smoke. Private source was built as a clean wheel and installed transactionally.",
+  "rollback_reinstall": {
+    "result": "PASS for prior private source 6f2c627: actual rollback restored matching 7d93090 64K package, exact package check passed, then reinstall restored exact 6f2c627, guarded protocol smoke and doctor passed. The latest 60e3a3d installation has a committed one-step 64K rollback receipt for 6f2c627, but actual rollback from 60e3a3d is not exercised."
+  },
+  "installed_narrow_probe": {
+    "candidate_source_revision": "6f2c627312246a573cf33fee817bbe0f33e52941",
+    "fixture": "Fresh frozen Task02 Ask-only session, two native compactions across a native-server restart, no code edits. Raw exports and resource samples remain in ignored private evals/runs/context64-c31-02/.",
+    "stages": {
+      "record": {
+        "wall_seconds": 25.603,
+        "completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "pressure_levels_observed": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "c295898810b9fce5f9ed719516b8b75f6a6512cbdcd508af9c073f61d3e25614"
+      },
+      "recall": {
+        "wall_seconds": 24.096,
+        "completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "pressure_levels_observed": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "b74d982b922b86e14ee6febf6c870113955df55cb6097048f88abb9f0b377169"
+      }
+    },
+    "semantic_result": "NARROW PASS for recall: the second answer retained all six criteria and said implementation/tests were unrun. Both native checkpoints still mislabeled planned file inspection as Active work; the second also attributed requirements to AGENTS.md despite a direct user prompt. This is not a full semantic checkpoint pass.",
+    "resources": "Both stages sampled normal pressure level 1 and zero swap growth."
+  },
+  "unqualified_gates": [
+    "The 47.277-minute Task12 sliced coding/UI trial needed operator steering and three coding timeouts; native checkpoint work/next-action claims went stale. See task12r-sliced.json.",
+    "Latest installed 60e3a3d still needs a live long multi-compaction coding/UI and reviewer run.",
+    "Representative 49K/64K/96K/128K quality, latency, cold/warm correctness and safe-pressure tier decision remain unqualified.",
+    "Latest-source rollback and clean non-owner install remain unqualified.",
+    "No public release, tag, version bump, or frontier-equivalence claim."
+  ]
+}
