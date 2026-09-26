@@ -119,6 +119,23 @@
     "frozen_grade_sha256": "d16359509c6cabab068d69e58d65ff0ff00da438f2950ab0720a676f23f72fc2",
     "interpretation": "Fast mode helped the narrow CSV procedure in one run but worsened this coding/UI attempt. The Agent generated an invalid delayed retry, failed responsive layout, edited an API file the task required intact, and did not complete either stage. Do not promote fast mode for coding/UI from the Task09 result."
   },
+  "task06_default_milestones": {
+    "run": "context64-c46-06-milestones",
+    "frozen_grade": "PASS",
+    "workflow": "Fresh default-mode Task06 fixture; form milestone, syntax-repair feedback, independent Chrome, fresh read-only Reviewer, supported safe-render repair, final Chrome and status-only Ask restart in one saved session.",
+    "native_compactions": 2,
+    "saved_session_restarts": "PASS, structural",
+    "original_api_tests": "2/2 PASS",
+    "independent_browser": "PASS: save/reload, invalid and duplicate feedback, evaluator-controlled 503 preserving input and exactly one explicit retry, 390x844 and 1280x800 with no overflow or page errors.",
+    "independent_markup_probe": "PASS after repair: stored <strong> value rendered as literal text with zero strong DOM nodes.",
+    "semantic_checkpoint": "FAIL: both raw native summaries categorized Agent choices under user Decisions; final Ask handoff corrected provenance but did not repair the stored checkpoints.",
+    "review": "FAIL as a harness gate: fresh local Reviewer timed out at 180 seconds after 20 reads and emitted several unsupported/out-of-scope findings. Its one supported unescaped-innerHTML finding was independently confirmed and fixed.",
+    "autonomy": "FAIL: syntax-repair turn asked an unnecessary confirmation question and exited incomplete; evaluator supplied the next focused repair prompt.",
+    "resource": "Normal sampled pressure and zero swap growth in guarded stages.",
+    "operator_audit_sha256": "0678d7a92fc3686d590441ff887b7a01dc1bf22a199fd1fdd224a219511b626a",
+    "frozen_grade_sha256": "1c8020d0ebea6bb211afd5496729ae4e990bb2e73cd6ec108065dc60f7e93a07",
+    "interpretation": "This staged frozen coding/UI fixture passes independently checked functional acceptance and demonstrates a supported review finding repaired across compaction and restart. The combined user gate remains FAIL because stored checkpoint semantics and local review/autonomy did not pass."
+  },
   "owner_rollback_reinstall": {
     "status": "PASS, narrow",
     "description": "Actual rollback to matching prior 64K source 7f99d6f, then reinstall of fd77cd5; exact package check, guarded protocol smoke and doctor passed at 65,536 context with normal pressure."
