@@ -358,17 +358,26 @@ export default {
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
         'Verification observations: this prompt has observed ' + item.browserCalls + ' completed browser calls; calls alone do not prove acceptance. A delegated Browse result must supply its own observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation. If browser work is requested, delegate Browse before reporting it as verified.' });
-      if (AGENT_ROLES.has(event.agent) && options.observe) {
+      if (options.observe) {
         const ledger = item.verification;
         const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
         const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
         event.system.push({ type: 'text', text: 'Observed-check ledger: ' + counts +
           (ledger.complete ? '.' : '; partial observation/provenance.') +
-          ' Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
+          ' Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. ' +
+          (AGENT_ROLES.has(event.agent)
+            ? 'Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. '
+            : 'This role cannot execute checks; report unresolved or unrun checks and hand execution to Agent. ') +
+          'State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
         if (unresolved.length) event.system.push({ type: 'text', text: 'Unresolved check references: ' +
           unresolved.slice(0, 8).map(check => check.kind + ':' + check.state + ' #' + check.key.slice(0, 12) +
             (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
           (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
+        const stale = ledger.checks.filter(check => check.state === 'stale');
+        if (stale.length) event.system.push({ type: 'text', text: 'Historical stale check references (previously passed; current result unknown): ' +
+          stale.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
+            (check.message_id ? ' at ' + check.message_id : '')).join('; ') +
+          (stale.length > 4 ? '; ' + (stale.length - 4) + ' older records retained in the private tracker.' : '.') });
       }
       if (event.agent === 'reviewer') {
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +
