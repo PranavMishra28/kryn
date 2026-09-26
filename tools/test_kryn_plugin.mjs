@@ -285,6 +285,7 @@ test('first compaction of a retained-only exchange cannot invent unfinished work
     f.call('session.compaction', emptyPrefix);
     assert.match(emptyPrefix.result.summary, /Implement import and verify the API/);
     assert.match(emptyPrefix.result.summary, /latest exchange is retained outside this summary/);
+    assert.match(emptyPrefix.result.summary, /no visible assistant or tool work in the selected older prefix/);
     assert.doesNotMatch(emptyPrefix.result.summary, /not yet completed/);
     const withWork = { sessionID: 'ses_1', agent: 'build', system: [], messages: [{ role: 'assistant', content: 'Finished work' }], tools: {} };
     f.call('session.compaction', withWork);
