@@ -193,6 +193,8 @@ npm uses KRYN’s managed writable cache, so ordinary dependency installation do
 
 Persistent development servers should use the native shell tool's `background:true` option in a separate call, with no trailing `&`. KRYN rejects a plain trailing background operator and gives the model that repair instruction, keeping ordinary checks in foreground calls. This guard does not parse complex shell syntax or contain deliberately detached processes.
 
+Run tests as standalone commands. KRYN refuses simple test commands followed by `|| true`, `|| echo`, `| head`, or `| tail`, because those forms can hide the test's exit status. This is a narrow guard, not a shell parser.
+
 KRYN warns after three consecutive foreground shell calls return the same command result, then denies another identical call through native permissions. Two denied retries interrupt that stuck session. Changed evidence, a different action or a new user prompt resets detection. This catches the observed repeated-request loop; it is not general loop detection, and does not cover every background or parser-unrecognized command.
 
 Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Agent or saved legacy Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
