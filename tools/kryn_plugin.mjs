@@ -2,7 +2,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { boundedExcerpt, contextCapsule, maskCheckpointClaims, reviewDiff, workspaceStamp } from './context_capsule.mjs';
+import { boundedExcerpt, contextCapsule, maskCheckpointClaims, workspaceStamp } from './context_capsule.mjs';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
@@ -79,7 +79,7 @@ function broadProcessNameKill(command) {
 }
 const PLAN_GUIDANCE = 'Plan mode: inspect the project and produce an actionable plan with acceptance checks. Do not edit project files or run shell commands. Native plan-file writes are allowed only in the OpenCode plan directory. To implement, switch to Agent.';
 const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Agent for repairs.";
-const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. State security issues only when a concrete input-to-effect path is established; otherwise label them hypotheses. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
+const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
 const count = value => Number.isFinite(value) && value >= 0 ? Math.min(Math.floor(value), 1e9) : 0;
 
 export function validatedOptions(options) {
@@ -496,7 +496,6 @@ export default {
           (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
       }
       if (event.agent === 'reviewer') {
-        event.system.push({ type: 'text', text: reviewDiff(ctx.location.directory) });
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +
           ' tool attempts, ' + item.reviewCompactions + ' compactions. After 48 attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
         if (item.reviewCalls >= 48 || item.reviewCompactions >= 2) {
