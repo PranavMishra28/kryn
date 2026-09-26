@@ -716,5 +716,125 @@
     "semantic_result": "NARROW PASS for controlled failure retention: Build executed exactly one failing unittest (exit 1), first checkpoint kept failed test and Decisions none, Ask restart reported it unresolved, and second Ask restart again reported failed=1, broader Task02 behavior unimplemented/unverified, Decisions none. Three native compactions across two server restarts completed. PARTIAL overall: first Ask answer overidentified baseline test_existing.py as full Task02 acceptance; the second Ask answer corrected that after explicit user steering, but the third checkpoint still gave a stale self-referential Next Move and mislabeled test_existing.py as broader acceptance. One Ask read attempt was denied for external_directory. No commands executed in Ask. This does not prove Task12, autonomous semantic repair, or sustained coding/UI.",
     "resources": "All three successful stages were on AC power, sampled normal pressure only, and zero swap peak growth. Guarded smoke passed, and doctor after the trials reported healthy idle 65,536 runtime, browser/search connected, normal pressure, swap 432212541 bytes. No 45-60 minute active use was proved.",
     "next_action": "Investigate the native compaction summary/update path and test an evidence-bound fix against fresh long coding/UI, including checkpoint next-action freshness. Retain 64K experimentally and its matching 49K rollback target. 96K/128K and clean non-owner install remain unqualified."
+  },
+  "followup_task12m": {
+    "installed_private_source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
+    "fixture": "Fresh disposable Task12 workspace; same saved native session across Plan, backend Build, recovery Build and Ask, with server restarts. Raw private traces are ignored at evals/runs/context64-task12m/ in the private 64K worktree. Candidate had the observed-check ledger but not the later read-only-role prompt fix.",
+    "stages": {
+      "plan": {
+        "wall_seconds": 81.532,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 17,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3d0790f2f96c224b707b721d582e6f3540c0cc5f4e7ac7c19089ec2a2a144e5d",
+        "tool_errors": [
+          {
+            "tool": "execute",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && python3 -m unittest -v 2>&1'}",
+            "output": "None"
+          }
+        ]
+      },
+      "plan-correction": {
+        "wall_seconds": 52.823,
+        "model_completed": true,
+        "driver_completed": true,
+        "tool_calls": 0,
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "6b84b81d9824009850c446124a1a92fb39951992cbd7e381669a001a18ab88df",
+        "tool_errors": []
+      },
+      "backend": {
+        "wall_seconds": 488.14,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 19,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "3ba1052cdef83ef7c100f2f8e45bf0ab85bb7344d01d5bdabd57fbe17c2fd42c",
+        "tool_errors": [
+          {
+            "tool": "edit",
+            "input": "{'path': '/private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace/taskboard_lite/server.py', 'newString': 'def main():\\n    parser = argparse.ArgumentParser()\\n    parse",
+            "output": "None"
+          },
+          {
+            "tool": "shell",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && python3 -m taskboard_lite.server --db test_debug.db --port 9999 --seed data/entries.csv 2>&1 &",
+            "output": "None"
+          }
+        ]
+      },
+      "backend-recovery": {
+        "wall_seconds": 308.115,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 13,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "fa993d408d0df1185dd85e6cf3f7b32372409b9424bac6064901a6f169f55b76",
+        "tool_errors": [
+          {
+            "tool": "edit",
+            "input": "{'path': '/private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace/test_backend_http.py', 'newString': '    def test_entries_filter_unicode_project(self):\\n        \"\"\"Tes",
+            "output": "None"
+          }
+        ]
+      },
+      "ask-handoff": {
+        "wall_seconds": 188.179,
+        "model_completed": false,
+        "driver_completed": false,
+        "tool_calls": 10,
+        "native_compaction_completed": false,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "bbac6826b96d56ae6e72045217d272ebd32bcf62c3f0ce5aadb72772cfa02009",
+        "tool_errors": [
+          {
+            "tool": "shell",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && wc -l taskboard_lite/server.py', 'timeout': '5000'}",
+            "output": "None"
+          },
+          {
+            "tool": "shell",
+            "input": "{'command': 'cd /private/tmp/kryn-64-retest/evals/runs/context64-task12m/workspace && python3 -m unittest discover -v 2>&1', 'timeout': '120000'}",
+            "output": "None"
+          }
+        ]
+      }
+    },
+    "frozen_grade": "PARTIAL: 2/2 API checks passed and original seed/test files preserved. Browser, 503 recovery, fresh review, handoff, and representative duration remain untested by frozen grade.",
+    "operator_generated_test_run": "After the first backend timeout, python3 -B -m unittest discover -v ran 14 tests: 12 passed, 2 failed (503 recovery and Unicode CSV import). The recovery Build stage re-ran the failures but timed out. Its generated test set used full-width commas as CSV delimiters and wrote the 503 marker beside *.db instead of using Path.with_suffix(\".fail-next\"); those are test bugs, not established server defects. The recovery prompt explicitly named the failures, so it was an operator intervention.",
+    "semantic_result": "FAILED long workflow: Plan first answered then native compaction failed template validation; corrective Plan completed compaction but summary promoted an agent correction into Decisions and repeated completed planning as next move. Backend Build timed out at 488.14 seconds; recovery Build timed out at 308.115 seconds; Ask handoff timed out at 188.179 seconds after attempting an unavailable shell tool despite read-only role and explicit no-command instruction. No browser UI work or final fresh review. This does not qualify 64K as reliably useful, despite normal memory pressure.",
+    "resources": "Across all five stages on AC power, sampled pressure stayed normal (level 1) and swap did not grow; no resource-guard stop. Installed 64K remained active while Cursor and Chrome were open. Largest observed oMLX phys_footprint in Ask was 14,490,606,792 bytes. This is a safe-memory observation, not a completed sustained Agent trial.",
+    "next_action": "Install the role-specific observed-check prompt fix after package validation, then rerun a short Ask continuation and evaluate complete semantic handoff before further Task12 UI stages. Keep the owner at 64K and public release profile at 49K."
   }
 }
