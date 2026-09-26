@@ -1094,5 +1094,63 @@
     "resource_result": "All three stages ran on Battery Power before/after, normal pressure level 1 and zero observed swap growth; no resource-guard stop. This does not qualify 64K sustained useful throughput or AC-power performance.",
     "source_fix_after_trial": "A first-compaction hook now supplies a deterministic structured checkpoint when the selected older prefix has no assistant/tool work and a retained parent user request exists. It says current work state is unknown and points to native recent-context instead of asking the model to infer unseen work. A separate provenance fix treats (none) and no-user-decision bullets as empty markers rather than false Decision claims. Focused tests and make check passed locally; private packaging, installation and live retest pending.",
     "remaining": "The installed bce6887 trial failed semantic checkpoint and sustained coding/UI. The new source mechanism is not yet installed or qualified. Keep owner on 64K; do not promote public profile or release."
+  },
+  "followup_installed_recent_only_6790": {
+    "installed_private_source_revision": "67901e8bd55c5b137fb8f0fab6fc091baa3972f5",
+    "private_wheel_sha256": "c74c354c6485291d2446c6efd0e47187871eb21ecc25348375d998f3d33b34a7",
+    "fixture": "Fresh frozen Task12 Plan workspace, one saved native session through Plan and two Ask restarts. Raw transcripts are ignored under evals/runs/context64-fallback-12o/ in the private 64K worktree.",
+    "source_validation": "PR code 6ef2f61 and private code 67901e8 passed make check (173 setup, 21 Python tool, 61 Node, driver self-check and frozen verify) and committed-source package smoke. The owner installed private 67901e8; --package-check returned the exact source. Initial doctor showed a transient host pressure warning; a later doctor before trial and post-trial doctor passed at 65,536 context with normal pressure and unchanged swap 423823933 bytes. CI on the PR passed. Driver-only source c6cad81/e92dc45 subsequently passed make check/self-check and PR CI; it is not an installed behavior change.",
+    "stages": {
+      "plan": {
+        "wall_seconds": 83.266,
+        "driver_completed": false,
+        "model_completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 17,
+        "tool_errors": 0,
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "8b3b69cee008cca0a8e242d0f295c9f368bbb12035d20a662f8c76ef2fa80e5c"
+      },
+      "ask-recall": {
+        "wall_seconds": 70.393,
+        "driver_completed": true,
+        "model_completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 4,
+        "tool_errors": 0,
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "989eb692c7f1a4fe78d33578a55a5ea3b320d20b4942f412f90e561ad3b814d3"
+      },
+      "ask-decisions": {
+        "wall_seconds": 49.906,
+        "driver_completed": true,
+        "model_completed": true,
+        "native_compaction_completed": true,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "378265d04e31f87d0d766a2a99a5eb895edb9817160c0781e7da5a6354531b5e"
+      }
+    },
+    "first_checkpoint": "NARROW PASS of content: the native compaction hook supplied a deterministic structured summary for an empty older prefix; it carried the Task12 request excerpt, labeled unseen current work unknown, and pointed to retained recent-context. The Plan answer had completed inspection; the checkpoint did not falsely mark it undone. This compaction made no model inference request. The original plan-stage driver.json says completed=false solely because its then-current route audit required a model HTTP call for every compaction. Independent replay of the exact saved audit and export with the corrected, self-checked driver returns route_coverage verified=true, one plugin-supplied compaction, zero uncovered requests and zero rejected audit events. Preserve the original failed driver record; do not relabel it as an originally passed run.",
+    "restart_recall": "NARROW PASS: after a native-server restart, read-only Ask used four read tools, no errors or shell, correctly reported that Plan inspection/criteria were complete and implementation and tests had not run. Its next model-generated checkpoint was structurally incomplete (missing Important Context) and falsely put four implementation observations under user Decisions.",
+    "second_restart_provenance": "NARROW PASS: after a second restart, Ask used zero tools, correctly reported no explicit user implementation decisions and that only Plan work had occurred. The third native checkpoint completed with Decisions: (none verified from recorded user requests). Offline replay of the exact second saved checkpoint through installed maskUnverifiedDecisions with the three actual prompts returned four masked rows and model-facing Decisions: (none verified from recorded user requests). The model-facing hook payload itself was not captured, so this is convergent evidence rather than a full wire-content proof.",
+    "resources": "All three stages were on Battery Power before/after at normal pressure level 1, zero observed swap growth, no resource-guard stop. This does not establish plugged-in sustained performance or 64K useful tier qualification.",
+    "remaining": "Full Task12 coding/UI workflow, semantic fidelity across longer work, independent browser/reviewer acceptance, 49K-128K useful-tier decision and clean non-owner install remain unqualified. Keep private guarded 64K installed as requested; public 49K release profile and v0.1.10 remain unchanged."
   }
 }
