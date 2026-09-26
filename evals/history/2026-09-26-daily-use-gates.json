@@ -36,8 +36,8 @@
     "reliable_current_file_read_and_check_results": "FAIL",
     "uninterrupted_coding_ui_compaction_restart_browser_review": "FAIL",
     "representative_49k_64k_96k_128k_tier_selection": "INCOMPLETE; 64K stays experimental with guard and rollback",
-    "clean_nonowner_install_and_rollback": "BLOCKED; about 30 GiB free, below model download plus 40 GiB reserve",
+    "clean_nonowner_install_and_rollback": "BLOCKED; disk now about 52 GiB free after clearing inactive Bazel output caches, but no second macOS account is available and sudo requires credentials. No non-owner install or rollback was attempted.",
     "final_profile_45_to_60_minute_active_endurance": "UNRUN"
   },
-  "next_action": "Change approach to current-file grounding and browser-verified repair rather than adding prompt or excerpt rules. Keep candidate unmerged; resume clean install when disk meets the installer reserve; run endurance on a qualified final profile."
+  "next_action": "Change approach to current-file grounding and browser-verified repair rather than adding prompt or excerpt rules. The experimental context PR was closed unmerged after safe fixes were split. Resume clean install with a genuine second macOS account; run endurance on a qualified final profile."
 }
