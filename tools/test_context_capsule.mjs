@@ -88,6 +88,20 @@ test('native checkpoint receives bounded current evidence and detects changed di
     'model-written file bullets without backticks still retrieve current source');
 });
 
+test('a checkpoint file reference without a line number includes current head and tail', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, 'endurance.csv'), 'id,minutes\n' +
+    Array.from({ length: 80 }, (_, index) => `e${String(index + 1).padStart(2, '0')},${index + 1}\n`).join(''));
+  const summary = '## Relevant Files\n- `endurance.csv`: current rows\n';
+  const messages = [{ content: `<conversation-checkpoint><summary>${summary}</summary></conversation-checkpoint>` }];
+  const capsule = nativeCapsule(root, messages);
+  assert.match(capsule, /id,minutes/);
+  assert.match(capsule, /e80,80/);
+  assert.match(capsule, /Middle omitted; read the current file/);
+  assert.ok(capsule.length <= 4000);
+});
+
 test('automatic retrieval skips symlinks and fails closed on oversized Git evidence', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
   const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-outside-'));

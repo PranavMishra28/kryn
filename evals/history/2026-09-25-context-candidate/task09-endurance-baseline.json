@@ -1,0 +1,223 @@
+{
+  "trial": "context64-c34-09-endurance",
+  "source": "8d5def3c15e0488c35e832d078efb9d26aa30e72",
+  "installed_tier_tokens": 65536,
+  "suite": "2026-09-19.2",
+  "task": "09",
+  "grade": "FAIL",
+  "automatic_assertions": {
+    "preserved_test_existing.py": true,
+    "preserved_data/entries.csv": true,
+    "ten_valid_checkpoints": true,
+    "final_endurance_rows": true
+  },
+  "manual_checks": {
+    "ten_sequential_turns": "PASS",
+    "file_shell_test_tool_results_complete": "FAIL"
+  },
+  "total_active_wall_seconds": 552.846,
+  "turns": [
+    {
+      "turn": 1,
+      "wall_seconds": 56.337,
+      "tool_calls": 10,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "697ce3b80be7abe63480505d9b287622f29e2a409bee4b00b75f8559dcb1ef20",
+      "events_sha256": "6a9bf70135d06d470d115199a55c189bbc01034fa1fdea5e7d71693082ecdedc"
+    },
+    {
+      "turn": 2,
+      "wall_seconds": 47.194,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "d62fad9f11b069459d5f8bb5a66db4869c78179c329b3d9d2686b7aaa6451e95",
+      "events_sha256": "1005348a080377f79a29715899c64bde2378ae525745a48f5af3670d8b735c0d"
+    },
+    {
+      "turn": 3,
+      "wall_seconds": 51.236,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "7073de97b06fd7ac2cb1d12021673811f822217140996d9892339421603ac27c",
+      "events_sha256": "ed50973d994f50024cf9624c0bccb98fa5affd0c743d0b22a2333db8119c6914"
+    },
+    {
+      "turn": 4,
+      "wall_seconds": 51.881,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "7ded4375514be513bcc4c88d139c9c29f7f2dbafccaf0794ef388895479c15fc",
+      "events_sha256": "611971b523eefe6aeae7c88d6789dd1f3a2b904956fa1c1c22a4b4482a0c4ff7"
+    },
+    {
+      "turn": 5,
+      "wall_seconds": 65.43,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "e9e7fe87fb4963e98ad60a22248e7977708807539b370a20bed78f51f1a56aea",
+      "events_sha256": "060107adfc05eabb7ff4449b95326e41f451e57c484d246636546c858c0b7e07"
+    },
+    {
+      "turn": 6,
+      "wall_seconds": 50.921,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "a38b840ff146799153ea076fda58cb1b3be4be1ce401f83a356a9a542e8818cb",
+      "events_sha256": "694a7475bc0b30a40a921232d6d0490b3adb918a542d171c383f1064723b5c5e"
+    },
+    {
+      "turn": 7,
+      "wall_seconds": 55.077,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "042bd44df35eedbe5d33263c67719c5fb1951d7a1c80c5bf6af5ee31c306a95d",
+      "events_sha256": "dd32c7d61434460a62e9f2acf73ea34f2ad37324667b135db56d3ec7b4b6cfbe"
+    },
+    {
+      "turn": 8,
+      "wall_seconds": 56.194,
+      "tool_calls": 6,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": true,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "74d619737527531fe8f8de8095e2315e3f7c1c526c8e974b7c14e2ddc3f7320c",
+      "events_sha256": "558975487e67cdfb58ce0e078cfe0f9140105aad21772023c99d095b6557c469"
+    },
+    {
+      "turn": 9,
+      "wall_seconds": 71.164,
+      "tool_calls": 8,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": false,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "99f15670ab05648c69ff45a220e864e0850ff48f24b3cde177ba273314dbb588",
+      "events_sha256": "98aa8bac7f4197d2eda32ce2a1407d2365c69b66efd6f55d2ec05f14a40f3411"
+    },
+    {
+      "turn": 10,
+      "wall_seconds": 47.412,
+      "tool_calls": 5,
+      "tool_errors": [],
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "read_before_edit": false,
+      "original_tests_pass": true,
+      "git_diff_inspected": true,
+      "power": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "warning_or_critical": false,
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "64b12a1dd53fab399fd7f4a2986aa3102340989bd4b2f75c801b14331773076d",
+      "events_sha256": "4217330343311bee9663c464ae80eb0e9c6aa02f9862416249671963b53f82da"
+    }
+  ],
+  "findings": [
+    "Ten external checkpoints passed; ten native compactions and server restarts used one saved session.",
+    "Final CSV is exact: e01..e10, 55 minutes. Original seed and tests remain unchanged.",
+    "Turns 9 and 10 failed the explicit read-before-edit procedure. Turn 9 temporarily duplicated e08 and repaired it after reading Git diff/current file.",
+    "All ten turns tried unavailable pytest before a passing unittest fallback.",
+    "Native checkpoint relevant-file references without line numbers supplied only the first few lines; late rows were omitted from bounded current-file evidence. The failure suggests this retrieval gap contributed but does not establish causation.",
+    "This is append/data continuity only, not sustained coding/UI or retained-recent-exchange qualification."
+  ],
+  "raw_evidence_private": "/private/tmp/kryn-64-retest/evals/runs/context64-c34-09-endurance",
+  "operator_audit_sha256": "4090ae254491dd96b80b9a4dac2946f3e52b9e50109da14af2659fe934b697ed",
+  "review_sha256": "7349be8bd927ee4724cecb0fc47190509ade41ad2149bedcde1f3576c2ad445c",
+  "grade_sha256": "ae94c63cad5923f730de4b50e441d890dbe2d7b911619060325bb25fb4157479"
+}
