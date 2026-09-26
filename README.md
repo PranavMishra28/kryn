@@ -175,6 +175,8 @@ Updates and removal refuse changed or unowned files. `kryn uninstall` stops only
 
 Package updates with unchanged client code preserve distinct backups for each prior launcher, including when the package interpreter changes. Interrupted activation and rollback retain recovery journals. Rerun the current verified release installer to recover, especially if a rollback already restored an older launcher whose package predates this recovery fix. Do not delete transaction journals or edit activation files during recovery; unrelated changes are preserved by refusing the operation.
 
+Direct client deployment refuses to pair new client files with a different configured OpenCode plugin path. The verified package installer from **First installation** can update an unchanged older owned config transactionally. If that installer reports a customized config, review and restore the last owned config before retrying; it will not overwrite your changes.
+
 If memory protection stops a session, KRYN cancels its work, retains the native session and completed file writes, and stops its verified idle model server to release memory. Check `kryn status`; once `memory.pressure` is `normal`, run `kryn --continue` from the same project. The server starts automatically. Memory pressure can recur if the desktop workload leaves insufficient room for the model. If search or browser services are unavailable, local coding can still launch; inspect their connection status with `kryn doctor`.
 
 Application state, sessions, caches and installed packages live under `~/Library/Application Support/LocalAI`; the oMLX application lives under `~/Applications/oMLX.app`, with settings in `~/.omlx`. Keep private session data out of bug reports and commits.
