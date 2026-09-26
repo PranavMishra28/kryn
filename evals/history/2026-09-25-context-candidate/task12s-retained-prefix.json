@@ -1,0 +1,43 @@
+{
+  "candidate_source_revision": "60e3a3df9d4f0be075beec43eaec937a43475dd9",
+  "context_tokens": 65536,
+  "fixture": "Fresh frozen Task12 Plan in a disposable workspace, saved native session restarted into Ask; latest installed private source at trial time. Raw prompts and exports remain ignored in evals/runs/context64-c32-12s/.",
+  "stages": {
+    "plan": {
+      "wall_seconds": 79.369,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 22124,
+      "tool_calls": 23,
+      "tool_errors": 8,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "a32a44b38c64baffb136097d0d89a1fcbffacc39820c588abafa4d2308a8e5be",
+      "native_export_sha256": "6b99d8952279823ca9fa84aaf4d5568585ab657fcf505bc1c192f2665fb9881b"
+    },
+    "ask-recall": {
+      "wall_seconds": 63.217,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 4263,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "09293ea68c792d440fcd698f5b4990d392b96c444c6fbaa7715c408b680d184c",
+      "native_export_sha256": "f56d607e1654f9a241496cc1888b23944e3088351c2d77ff25c2d44aec3d9a74"
+    }
+  },
+  "semantic_result": "PARTIAL/FAIL: Plan completed inspection and an ordered answer. Its first native checkpoint truthfully said latest work was unknown because OpenCode kept 22,124 characters of the newest exchange outside the older prefix. On restart, Ask correctly said Plan completed and implementation/tests/browser checks were unrun, but falsely said no native compaction had occurred. The second checkpoint again promoted agent/task constraints to Decisions and listed planned coding as Active work. Eight Plan tool errors were path references missing the leading /; Ask used zero tools.",
+  "resource_result": "Both stages had normal sampled host pressure and zero observed swap growth; no resource guard abort. This short probe does not qualify sustained 64K use.",
+  "source_followup": "PR source adds exact-root guidance to Plan and injects the previously observed native compaction marker into the resumed model context. Both changes have focused offline regressions, but neither was part of this trial or proves full semantic continuity.",
+  "remaining": [
+    "Repeat the retained-prefix restart probe on the updated installed source to verify the two narrow corrections.",
+    "Long autonomous coding/UI and semantic checkpoint acceptance remain failed.",
+    "No public context-tier promotion or release."
+  ]
+}

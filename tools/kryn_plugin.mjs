@@ -453,6 +453,8 @@ export default {
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
+      if (item.previousTracker?.native_checkpoint_event) event.system.push({ type: 'text', text:
+        'Native continuity evidence: this saved session has an observed native compaction event from a previous KRYN plugin process. Do not claim that no compaction occurred. Its Work State and Next Move are historical claims, not proof that listed actions ran; reconcile retained recent-context and current files. This marker does not prove edits, tests, browser checks, or a fresh native session.' });
       const checkpointIdentity = item.checkpointHash ?? (item.checkpoint ? 'legacy' : null);
       const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded, firstCompaction, checkpointIdentity);
       if (capsule) event.system.push({ type: 'text', text: capsule });
@@ -461,7 +463,7 @@ export default {
         ' unverified Decision claim(s). The original checkpoint and user requests remain in native history. Do not repeat those claims as user choices without a matching user quote.' });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
-      if (READ_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
+      if (READ_ROLES.has(event.agent) || event.agent === 'plan') event.system.push({ type: 'text', text:
         'Exact project root: ' + ctx.location.directory + '. Read ./file relative to this root or use the complete absolute path including its leading /. Do not use /workspace or omit the leading /.' });
       if (event.agent === 'plan') event.system.push({ type: 'text', text: PLAN_GUIDANCE });
       if (event.agent === 'ask') event.system.push({ type: 'text', text: 'Ask mode: investigate with read and search tools, then answer with evidence and uncertainty. Do not edit files or run commands. Switch to Agent for implementation.' });
