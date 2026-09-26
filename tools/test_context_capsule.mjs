@@ -49,6 +49,17 @@ test('native checkpoint receives bounded current evidence and detects changed di
   fs.writeFileSync(path.join(root, 'src/app.js'), 'export const mode = "first";\n');
   const saved = workspaceStamp(root);
   assert.equal(saved.complete, true);
+  run('add', 'src/app.js');
+  const staged = workspaceStamp(root);
+  assert.notEqual(staged.stamp, saved.stamp, 'staging alone must change the fingerprint');
+  fs.writeFileSync(path.join(root, 'src/app.js'), 'export const mode = "second";\n');
+  const partial = workspaceStamp(root);
+  run('add', 'src/app.js');
+  fs.writeFileSync(path.join(root, 'src/app.js'), 'export const mode = "second";\n');
+  const restaged = workspaceStamp(root);
+  assert.notEqual(restaged.stamp, partial.stamp, 'index-only hunk changes must not hide behind the same worktree bytes');
+  run('reset', '-q');
+  fs.writeFileSync(path.join(root, 'src/app.js'), 'export const mode = "first";\n');
   const summary = '## Objective\n- Build UI\n## Requirements\n- Keep form state\n' +
     '## Relevant Files\n- `src/app.js:1`: current implementation\n- `../outside`: unrelated\n';
   const messages = [{ role: 'user', content: [{ type: 'text',

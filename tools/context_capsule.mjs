@@ -27,6 +27,8 @@ export function workspaceStamp(directory) {
     try { head = git(root, 'rev-parse', '--verify', 'HEAD').toString().trim(); }
     catch { head = 'unborn'; }
     const status = git(root, 'status', '--porcelain=v1', '-z', '--untracked-files=all');
+    // Status names and working-tree bytes do not reveal index-only hunk changes.
+    const staged = git(root, 'diff', '--cached', '--raw', '--abbrev=64', '-z');
     const entries = status.toString('utf8').split('\0').filter(Boolean);
     const files = [];
     for (let index = 0; index < entries.length; index++) {
@@ -55,7 +57,7 @@ export function workspaceStamp(directory) {
       contents.push([name, value]);
     }
     return { ...visible, complete: true,
-      stamp: hash(JSON.stringify([head, status.toString('base64'), contents])) };
+      stamp: hash(JSON.stringify([head, status.toString('base64'), staged.toString('base64'), contents])) };
   } catch { return { complete: false, reason: 'Git evidence unavailable' }; }
 }
 
