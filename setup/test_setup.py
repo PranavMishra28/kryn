@@ -271,7 +271,7 @@ class SetupChecks(unittest.TestCase):
         inventory["models"]["data"][0]["variants"].reverse()
         localai.validate_inventory(inventory)  # List order is not reasoning-profile drift.
         mutations = [
-            (("models", "data", 0, "limit", "context"), 65536),
+            (("models", "data", 0, "limit", "context"), model["limit"]["context"] + 16384),
             (("models", "data", 0, "limit", "output"), 16384),
             (("models", "data", 0, "body", "max_tokens"), 16384),
             (("models", "data", 0, "body", "chat_template_kwargs", "reasoning_effort"), "low"),
@@ -339,7 +339,7 @@ class SetupChecks(unittest.TestCase):
             changed["status"]["model_memory_max"] = value
             with self.subTest(ceiling=value), self.assertRaises(RuntimeError):
                 localai.validate_runtime_metadata(changed)
-        for value in (None, 65536, "32768", True):
+        for value in (None, localai.SERVER_CONTEXT + 16384, "32768", True):
             changed = copy.deepcopy(results)
             changed["models"]["data"][0]["max_model_len"] = value
             with self.subTest(context=value), self.assertRaises(RuntimeError):
@@ -1146,7 +1146,7 @@ class SetupChecks(unittest.TestCase):
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
         self.assertEqual(cfg["default_agent"], "agent")
-        self.assertEqual(model["limit"], {"context": 49152, "output": 8192})
+        self.assertEqual(model["limit"], {"context": localai.SERVER_CONTEXT, "output": 8192})
         self.assertEqual(model["body"]["max_tokens"], model["limit"]["output"])
         variants = {v['id']: v['body'] for v in model['variants']}
         self.assertEqual(set(variants), {'fast'})  # Native UI adds Default itself.
