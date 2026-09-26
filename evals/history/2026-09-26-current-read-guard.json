@@ -2,7 +2,7 @@
   "date": "2026-09-26",
   "scope": "Private same-model frozen Task09 screen of a narrow native edit guard; no public release or 64K promotion",
   "trigger": "Earlier Task09 conservative run edited data/endurance.csv before reading it on turn 6. The automatic file-tail candidate had regressed to 2/10 read-before-edit and was reverted; causal attribution of that stochastic regression remains unproven.",
-  "change": "For Agent and saved Build, native edit of an existing regular project file at most 1 MiB requires a successful native read of its current bytes during the same user turn. A changed file hash or new user turn requires a new read. The fingerprint is bounded and in-memory only.",
+  "change": "For Agent and saved Build, native edit of an existing regular project file at most 1 MiB requires a completed native read in the same user turn. The file fingerprint must remain stable from before to after the read. A changed file hash, an edit that changes the file, or a new user turn requires another read. Fingerprints are bounded and in memory only.",
   "mechanism": "The guard refused one edit-first tool call before execution on frozen turn 9. The model then read data/endurance.csv and completed the edit, tests, Git diff, checkpoint, and native compaction.",
   "frozen_task09": {
     "run": "u09g",
@@ -23,7 +23,8 @@
     "step09_driver_sha256": "0f0fb8ced56cd831552b232469bbe6b4a9467b785276060e9490bd31c308629f",
     "step08_recovery_sha256": "e50d85ab8492a91b4bc88d6f299b9e5368046a976799a6e818b5f6a6d6ee907e"
   },
-  "offline": "Focused native-hook regression and full make check passed on the main-derived branch; companion private 64K plugin tests passed. Candidate package smoke and CI pending.",
+  "offline": "First revision passed full make check, clean package smoke and CI. Revised source passed focused plugin tests; full check, package smoke and CI remain pending.",
   "limits": "Only native edit is guarded. Shell writes, native write, non-regular/symlink files, and files larger than 1 MiB are not covered. A single stochastic task run does not establish reliable improvement over baseline or whole-agent correctness. 64K remains experimental with guard and rollback.",
-  "next_gate": "Review/package/CI/merge this safe narrow fix, compose it into the private owner build only after qualification, then return to coding/UI semantic checkpoint and completion failures."
+  "next_gate": "Native-validate the revised guard, rerun full checks and CI, merge the narrow fix, then complete a fresh coding/UI compaction-and-restart run. Keep 64K private and experimental.",
+  "review_correction": "Independent PR review found two real holes in the first implementation: completed edits refreshed the read fingerprint, and the fingerprint was captured only after read completion. The revised source fingerprints before native read, accepts it only if unchanged after completion, and never counts edits as reads. Focused regression tests cover both failures. Frozen u09g ran the earlier guard revision; this correction still needs native validation."
 }

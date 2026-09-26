@@ -229,7 +229,8 @@ export default {
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
-        verification: verificationLedger(), previousTracker: null, shellRepeat: null, recentReads: new Map() };
+        verification: verificationLedger(), previousTracker: null, shellRepeat: null,
+        recentReads: new Map(), pendingReads: new Map() };
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
         item.previousTracker = ownedFile(previous);
@@ -335,6 +336,7 @@ export default {
       staleChecks(item); tracker(item);
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
       item.recentReads.clear();
+      item.pendingReads.clear();
       item.shellRepeat = null;
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0; item.browserCalls = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
@@ -439,6 +441,13 @@ export default {
     await ctx.tool.hook('execute.before', event => {
       assertHealthy();
       const item = session(event.sessionID);
+      if (event.tool === 'read' && event.id) {
+        const beforeRead = projectSnapshot(ctx.location.directory, event.input?.path);
+        if (beforeRead) {
+          if (item.pendingReads.size >= 64) item.pendingReads.delete(item.pendingReads.keys().next().value);
+          item.pendingReads.set(event.id, beforeRead);
+        }
+      }
       if (AGENT_ROLES.has(event.agent) && event.tool === 'edit') {
         const current = projectSnapshot(ctx.location.directory, event.input?.path);
         if (current && item.recentReads.get(current.file) !== current.hash)
@@ -511,9 +520,13 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
-      if (event.status === 'completed' && ['read', 'edit'].includes(event.tool)) {
-        const current = projectSnapshot(ctx.location.directory, event.input?.path);
-        if (current) {
+      if (event.tool === 'read' && event.id) {
+        const beforeRead = item.pendingReads.get(event.id);
+        item.pendingReads.delete(event.id);
+        const current = beforeRead && event.status === 'completed' ?
+          projectSnapshot(ctx.location.directory, event.input?.path) : null;
+        // Only a file stable across the native read counts as current evidence.
+        if (current && current.file === beforeRead.file && current.hash === beforeRead.hash) {
           if (item.recentReads.size >= 64) item.recentReads.delete(item.recentReads.keys().next().value);
           item.recentReads.set(current.file, current.hash);
         }

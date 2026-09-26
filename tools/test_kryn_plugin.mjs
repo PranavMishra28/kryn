@@ -328,10 +328,11 @@ test('an existing project file must be read in the current turn before native ed
   const file = path.join(f.root, 'data', 'endurance.csv');
   fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'id,project\ne05,endurance\n');
   let serial = 0;
-  const call = (tool, status = 'completed', given = './data/endurance.csv') => {
+  const call = (tool, status = 'completed', given = './data/endurance.csv', onExecute) => {
     const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + (++serial),
       id: 'call_' + serial, tool, input: { path: given } };
     f.call('tool.execute.before', event);
+    onExecute?.();
     f.call('tool.execute.after', { ...event, status, result: { output: {} } });
   };
   try {
@@ -340,14 +341,31 @@ test('an existing project file must be read in the current turn before native ed
     call('read', 'error');
     assert.throws(() => call('edit'), /current read/, 'a failed read does not ground an edit');
     call('read', 'completed', file);
+    assert.doesNotThrow(() => call('edit', 'completed', file,
+      () => fs.appendFileSync(file, 'e06,endurance\n')));
+    assert.throws(() => call('edit'), /current read/, 'a successful edit never refreshes the read');
+    call('read');
     assert.doesNotThrow(() => call('edit'));
     fs.appendFileSync(file, 'e06,endurance\n');
     assert.throws(() => call('edit'), /current read/, 'changed bytes invalidate the read');
     call('read');
     assert.doesNotThrow(() => call('edit'));
     f.call('session.prompt', { sessionID: 'ses_1' });
+    const changedDuringRead = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_race',
+      id: 'call_race', tool: 'read', input: { path: file } };
+    f.call('tool.execute.before', changedDuringRead);
+    fs.appendFileSync(file, 'e07,endurance\n');
+    f.call('tool.execute.after', { ...changedDuringRead, status: 'completed', result: { output: {} } });
+    assert.throws(() => call('edit'), /current read/, 'a file changed during read is not current evidence');
+    call('read');
+    assert.doesNotThrow(() => call('edit'));
+    f.call('session.prompt', { sessionID: 'ses_1' });
     assert.throws(() => call('edit'), /current read/, 'the next user turn needs current evidence');
-    assert.doesNotThrow(() => call('edit', 'completed', './new-file.csv'), 'new files need no prior read');
+    assert.doesNotThrow(() => call('edit', 'completed', './new-file.csv',
+      () => fs.writeFileSync(path.join(f.root, 'new-file.csv'), 'new\n')),
+    'new files need no prior read');
+    assert.throws(() => call('edit', 'completed', './new-file.csv'), /current read/,
+      'creating a file with edit does not authorize the next edit');
   } finally { await cleanup(); f.remove(); }
 });
 
