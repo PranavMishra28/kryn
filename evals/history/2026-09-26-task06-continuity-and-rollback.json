@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private daily-use Task06 qualification on guarded 64K candidate b936708; no public release, tag, version bump or 64K promotion",
+  "installed_candidate": {
+    "source_revision": "b93670874f3b230f3fc7e271393c6c77c909fd5d",
+    "wheel_sha256": "877b52036bbf3ebe0252d63282d18fd9152e1932f717a8b5be22edd0e9f6da16",
+    "owner_rollback_reinstall": "PASS: rollback restored prior private b55d build; reinstall restored exact b936 wheel; doctor reported a healthy 65536-token runtime, normal pressure, connected browser/search, and guarded protocol smoke passed",
+    "rollback_transaction_sha256": "2b2d2b7495d6c9581044dc869fe4472f000f9eeb8e3c080989060d5ac9e1382a",
+    "reinstall_transaction_sha256": "2542e370b2c931b7827361da57df1b689981466badfbbd2d39778b214d3a4563",
+    "limit": "Owner rollback and reinstall are not a genuine clean install under another macOS account. 64K remains experimental with its memory guard and rollback."
+  },
+  "frozen_task06_default_agent": {
+    "run": "u06k",
+    "implementation": "FAIL workflow: Agent timed out after 366.742 seconds and 53 tool calls. Its first generated Save handler threw before POST; repair turn timed out after 246.669 seconds. The corrected Save POST reached 201, but the 390px page still overflowed to 457px.",
+    "compaction": "FAIL semantic: completed native checkpoint after interruption claimed agent implementation choices as user Decisions and stale server/work state.",
+    "independent_browser": "FAIL: full acceptance stopped at mobile overflow. A controlled 503 probe did produce POST 503 then 201 with input retained and one row. A browser style injection isolated unwrapped long entry text in #entries as the overflow cause; no candidate source fix was made.",
+    "independent_review": "FAIL quality: read-only local Reviewer noticed overflow but misattributed it to form input widths and added unsupported out-of-scope blockers.",
+    "driver_sha256": {
+      "implementation": "beda68414ac083a594472ffab97c6d047d643f2f5a15e15bf6cb94be9ad95fc7",
+      "repair": "4d9bcb5c7193902efa030b82844bd7daa3e728189dcd831bec801a8c08a74aec"
+    },
+    "browser_sha256": "050acd1894f8947de4832899df54260511b2a6cca41c6f3ce744a767222ce995"
+  },
+  "frozen_task06_fast_agent": {
+    "run": "u06l",
+    "artifact_grade": "PASS: original two backend tests plus independent browser checks at 390x844 and 1280x800; valid save and reload, accessible invalid minutes, evaluator-injected POST 503 then one manual retry POST 201, one saved retry row, no page exceptions or failed requests",
+    "artifact_grade_sha256": "c057a6427a26c7e5af5d839a49c58ee568a60ae7f11e57c8e912ec6260e0aeb2",
+    "browser_sha256": "32ad0ed3e39b1ce34e3ceea2021d9c16a70269ce9970df9727bfd85b08477fc9",
+    "workflow": "FAIL: initial fast turn ended in an unanswered interactive clarification; the answered follow-up timed out after 306.765 seconds and 11 tool calls, without native browser use or a final answer. It wrote an HTTP-only side test and attempted a 17439-byte write denied by the 12000-byte guard. Independent operator browser verification happened afterward and is not evidence of Agent completion.",
+    "first_compaction": "FAIL semantic: manually completed after the interrupted coding turn, but incorrectly claimed app.js was still empty and needed rewriting, despite the current implemented file.",
+    "restart": "PARTIAL: a separate native-server process resumed the exact saved session in read-only Ask mode. The 88.851-second turn completed, read current files, identified stale rewrite claims, and left browser checks unverified from its own view.",
+    "second_compaction": "FAIL semantic: structurally completed, but promoted evaluator configuration to user Decisions and claimed browser_test.html existed when it did not. Persistent checkpoint truth is not qualified even though the restart caught some stale claims.",
+    "driver_sha256": {
+      "initial": "e68d515311b57486564d5871a0caade1dfba16b903204374fe4eb414ed59af35",
+      "implementation": "4a63ca4bc24a0592ff0a9a70a8bea5e8f138c817bac1491410d4f98f23cb5905",
+      "restart": "229264cc73771968492655ed5a2013b75c695c222e4f537ca605803d1d138c74"
+    }
+  },
+  "gate_status": {
+    "task09_current_read": "PASS one corrected 10/10 trial with guard refusals and recovery; long-workflow reliability remains unqualified",
+    "task06_artifact_browser": "PASS on fast u06l only",
+    "complete_coding_ui_agent_workflow": "FAIL: both default and fast Agent implementation turns timed out",
+    "semantic_compaction_restart": "FAIL: two u06l native checkpoints contain stale or invented claims; the restarted turn partially recovered by reading current files",
+    "64k_context_tier": "EXPERIMENTAL with healthy guard/rollback; 49K/64K/96K/128K quality-latency-memory comparison remains incomplete",
+    "nonowner_clean_install": "BLOCKED: no authorized second macOS login/admin credentials available; same-owner rollback/reinstall passed",
+    "sustained_final_profile_endurance": "UNRUN",
+    "public_release": "CLOSED"
+  },
+  "next_blocker": "Get a bounded Agent coding/UI run to finish and verify its own work, then replace or constrain semantically untrusted checkpoint claims using current evidence rather than more prompt rules. Re-run compaction/restart and independent review before clean-install and endurance qualification.",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/u06{k,l}"
+}
