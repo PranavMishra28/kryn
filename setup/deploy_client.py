@@ -57,7 +57,7 @@ def main():
     if not args.plan_json:
         configured = [item.get("package") for item in config.get("plugins", []) if isinstance(item, dict)]
         if configured != [str(plugin_dir)]:
-            raise RuntimeError("Owned OpenCode plugin reference differs from this client; run the package's kryn install to update both transactionally")
+            raise RuntimeError("Owned OpenCode plugin reference differs from this client; use the verified package installer for an unchanged older config, or review and restore a customized config before retrying")
     marker = root / profile["model_parent"] / model / ".localai-download.json"
     setup.check_destination(marker, setup.encode({key: profile[key] for key in ("repository", "revision")}))
     if not marker.is_file():
