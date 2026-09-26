@@ -1152,5 +1152,51 @@
     "second_restart_provenance": "NARROW PASS: after a second restart, Ask used zero tools, correctly reported no explicit user implementation decisions and that only Plan work had occurred. The third native checkpoint completed with Decisions: (none verified from recorded user requests). Offline replay of the exact second saved checkpoint through installed maskUnverifiedDecisions with the three actual prompts returned four masked rows and model-facing Decisions: (none verified from recorded user requests). The model-facing hook payload itself was not captured, so this is convergent evidence rather than a full wire-content proof.",
     "resources": "All three stages were on Battery Power before/after at normal pressure level 1, zero observed swap growth, no resource-guard stop. This does not establish plugged-in sustained performance or 64K useful tier qualification.",
     "remaining": "Full Task12 coding/UI workflow, semantic fidelity across longer work, independent browser/reviewer acceptance, 49K-128K useful-tier decision and clean non-owner install remain unqualified. Keep private guarded 64K installed as requested; public 49K release profile and v0.1.10 remain unchanged."
+  },
+  "followup_installed_precise_8ec3": {
+    "installed_private_source_revision": "8ec3f11942ec0482ceb811b0805b200d6cfcdaae",
+    "private_wheel_sha256": "81026c0e02277c662a4c9a1e225a3ee04d730fc4e37f259fc60b71272bc74a9a",
+    "change": "The deterministic recent-only checkpoint now says the selected older prefix has no visible assistant/tool work, rather than inaccurately calling the entire older prefix empty. The self-checked route auditor accepts both exact known wording versions, preserving earlier raw trial replay.",
+    "source_validation": "PR source 6450f95 and private source 8ec3f11 passed make check (173 setup, 21 Python tool, 61 Node, driver self-check and frozen verify) and committed-source package smoke. Private source 8ec3f11 was pushed, installed as a verified wheel, and passed --package-check, guarded protocol smoke, and post-trial doctor at 65,536 context, normal pressure and unchanged 423823933-byte swap. PR CI offline-and-package passed.",
+    "probes": {
+      "context64-precise-02p": {
+        "wall_seconds": 55.657,
+        "driver_completed": true,
+        "native_compaction_completed": true,
+        "plugin_supplied_compactions": 0,
+        "routing_verified": true,
+        "tool_errors": [],
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "03490fc459e87c17cce64eb98cdb8a74a6f1fcf05d32686d8b3a6c8bb4752b28"
+      },
+      "context64-precise-12q": {
+        "wall_seconds": 70.239,
+        "driver_completed": true,
+        "native_compaction_completed": true,
+        "plugin_supplied_compactions": 1,
+        "routing_verified": true,
+        "tool_errors": [
+          {
+            "tool": "execute",
+            "error": "No tool named \"execute\" is currently available. Please use a tool from the available tool list."
+          }
+        ],
+        "power_before": "Battery Power",
+        "power_after": "Battery Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "4d4e2483a8fa5b5548d6ca919e49524e79348d1730e228351784bbdff67ef106"
+      }
+    },
+    "semantic_result": "NARROW PASS: a fresh Task12 Plan turn completed and its first compaction used the installed plugin-supplied checkpoint with the precise wording, retained 21,337 characters of native recent-context and route_coverage verified=true with one plugin-supplied compaction and no uncovered model requests. The Plan turn had one unavailable execute tool error. A separate Task02 Ask run completed with ordinary model-generated compaction and no tool errors; it did not exercise the deterministic fallback. Neither probe proves later restart fidelity or full application quality.",
+    "resources": "Both fresh probes ran on Battery Power before/after, normal pressure level 1, zero observed swap growth and no resource-guard stop. These are short mechanism tests, not sustained useful-tier qualification.",
+    "remaining": "Full coding/UI with repeated compaction/restart, independent browser/reviewer, 49K-128K useful-tier selection, latest exact private rollback and clean non-owner install remain unqualified. Keep private 64K installed as requested; public 49K release profile and v0.1.10 remain unchanged."
   }
 }
