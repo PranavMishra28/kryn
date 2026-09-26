@@ -31,6 +31,22 @@
     "frozen_grade_sha256": "e9f299283d317a1801a6c35d3fc08b842de22edfedf42b874a613cc0ceb0586a",
     "interpretation": "FAIL. All external checkpoints and the final CSV passed; six of ten turns edited before a fresh read. The revert did not prove reliable procedure. One stochastic run is not a causal estimate."
   },
+  "task09_fast_variant": {
+    "run": "context64-c44b-09-fast-screen",
+    "frozen_grade": "PASS",
+    "same_saved_session": true,
+    "native_compactions": 10,
+    "external_checkpoints_passed": 10,
+    "read_before_first_edit": "10/10",
+    "original_tests_and_git_diff": "10/10 each",
+    "active_stage_seconds": 564.565,
+    "tool_errors": 17,
+    "normal_sampled_pressure": true,
+    "swap_peak_growth_bytes": 0,
+    "operator_audit_sha256": "2a5790e9bdba4cd74c8119a3368d8f0a143d965b05cd9a0cfd0c9a4063f78d73",
+    "frozen_grade_sha256": "c7e23fa16d27a4194d187ca2542f10471f6514c600e091790abca5099e9dea0a",
+    "interpretation": "One fast-variant run passed the frozen CSV endurance rubric and improved explicit read-before-edit from 4/10 in the fresh default rerun to 10/10. It was slower than that rerun, retried unavailable pytest in every turn, made path and command errors late, and its first raw checkpoint mislabeled agent actions as Decisions. One stochastic run does not qualify fast as a general default or fix semantic continuity."
+  },
   "task12": {
     "run": "context64-c41-12-daily",
     "frozen_grade": "FAIL",
@@ -90,6 +106,18 @@
     "operator_summary_sha256": "089858212887faa9001ae5b552394fa26375d8031d283a7e2290ddaf0804d105",
     "frozen_grade_sha256": "02657f09a1fc0f0a909b1ead19f9698c838baf11923b31493a11fa69d255ec30",
     "interpretation": "Frozen browser/fixture PASS after evaluator supplied the 503 trigger and the Agent repaired narrow CSS; composite workflow FAIL because checkpoint provenance and fresh Reviewer findings were wrong. This was not an unassisted one-shot pass."
+  },
+  "task06_fast_variant": {
+    "run": "context64-c45-06-fast",
+    "frozen_grade": "FAIL",
+    "build_and_focused_repair": "Both timed out at 300 seconds without native compaction; 307.817 and 307.760 seconds wall time.",
+    "independent_browser": "FAIL: final partial artifact overflowed at 390x844; after a controlled 503, delayed retry threw submit is not defined and saved zero rows after 1.4 seconds.",
+    "original_api_preservation": "FAIL: agent changed the frozen server's fail-next marker path, causing the frozen HTTP test to fail (expected 503, got 201).",
+    "normal_sampled_pressure": true,
+    "swap_peak_growth_bytes": 0,
+    "operator_audit_sha256": "0f60d82a449f7c081b303bf344bac5c90655cace3b9e4e776abee40bd7812667",
+    "frozen_grade_sha256": "d16359509c6cabab068d69e58d65ff0ff00da438f2950ab0720a676f23f72fc2",
+    "interpretation": "Fast mode helped the narrow CSV procedure in one run but worsened this coding/UI attempt. The Agent generated an invalid delayed retry, failed responsive layout, edited an API file the task required intact, and did not complete either stage. Do not promote fast mode for coding/UI from the Task09 result."
   },
   "owner_rollback_reinstall": {
     "status": "PASS, narrow",
