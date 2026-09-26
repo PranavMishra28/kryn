@@ -892,5 +892,58 @@
     "next_action": "Investigate native summary prompt precedence or implement a bounded deterministic correction on read; rerun the same frozen fixture on a new candidate and continue sustained coding/UI only after semantic handoff improves. Keep the owner at 64K and public release profile at 49K.",
     "actual_rollback_reinstall": "PASS: kryn rollback from exact e9cc4b0 stopped only the owned idle oMLX runtime and restored matching prior 4506b32 64K package; package check and offline oMLX model settings read back source 4506b32 and max_context_window=65536. Reinstall of exact e9cc4b0 passed package check, guarded kryn bench protocol smoke, and doctor with healthy idle 65,536 runtime, normal pressure, unchanged 432212541-byte swap and connected browser/search. This proves private owner rollback/reinstall at 64K, not non-owner clean install or long-workflow acceptance.",
     "post_reinstall_protocol_metrics_sha256": "70abc101bb5c3cb282b328612267b407bf37e469a3afdf6deaf8aa92a3ea7b7b"
+  },
+  "followup_installed_mask_0690": {
+    "installed_private_source_revision": "069084e6698fd767f60f7de43372d49abeaa26e5",
+    "private_wheel_sha256": "013f3da8626ac2ffea4210fa12cc52b6c01e6a0df6ea166fdbb7cd38f334e1df",
+    "mechanism": "OpenCode 2.0.10 native compaction renders completed summaries as synthetic model-facing user messages. KRYN now masks unsupported Decisions bullets in a shallow copy of that native message at the context/compaction request hook. It leaves the durable summary and full native history untouched, and reports the masked count. Only User-prefixed bullets with a verbatim quote of at least eight characters found in retained user requests stay authoritative; shorter or omitted-history decisions remain unverified and require raw-history review. The exact native wrapper prefix guards against modifying ordinary user lookalike text. Offline regressions cover current request, prior native object immutability, supported/unsupported mixed bullets, and spoofed quote context.",
+    "installation": "Private source 069084e passed make check (173 setup, 21 Python tool, 58 Node, driver self-check and frozen verify), committed-source package smoke, actual owner install and --package-check. Doctor after the live trial reported healthy idle 65,536 context, normal pressure, swap 423823933 bytes, browser/search connected. Immediate rollback target is e9cc4b0 64K. No actual rollback from 069084e yet.",
+    "fixture": "Fresh disposable Task02 controlled-failure probe under evals/runs/context64-mask-ask-1/ in the private worktree. Three stages shared one saved session across two server restarts; raw transcripts remain ignored/private. The same prompt family was used in the preceding e9cc4b0 role-fix probe, but generation is stochastic and not a matched repeated quality estimate.",
+    "stages": {
+      "controlled-failure": {
+        "wall_seconds": 32.246,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "1ff37e30d8fba323bd31e19e57f527acf7d1a31e6c54ea6da5d30e62141e7e7b"
+      },
+      "ask-mask": {
+        "wall_seconds": 33.103,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "67c3cb7b8246e8a023146b225c9bab6ab7617954ed726707fb736980d99f5fbf"
+      },
+      "ask-decision-audit": {
+        "wall_seconds": 38.07,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "1d95d01c16a15267ea1b426eca1a4fb3671f7c2ad77c92e291ab1254e609427c"
+      }
+    },
+    "semantic_result": "NARROW PASS for this run: the controlled unittest failed exit 1; two Ask restarts made no shell attempt, preserved the failure as unresolved, stated broader Task02 acceptance unrun, and produced three structurally completed native checkpoints on AC power with normal pressure and zero swap growth. All three checkpoint Decisions sections were (none). The third answer incorrectly described the checkpoint as saying (none verified from recorded user requests) and quoted a paraphrase as a user request; do not treat it as perfect semantic fidelity. No native false-Decision summary occurred in this new run, so the live masking branch was not exercised; only offline tests prove that branch. The prior e9cc4b0 run remains failed for repeated false Decisions. Long coding/UI continuity and 64K throughput remain unqualified.",
+    "next_action": "Use a fresh frozen fixture that yields a false Decision checkpoint or an explicitly labelled synthetic native checkpoint to exercise the masking path live; then retest the full long coding/UI workflow. Keep 64K installed and release profile 49K."
   }
 }
