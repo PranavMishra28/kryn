@@ -1,21 +1,21 @@
 {
-  "status": "Private 64K remains installed and usable for local coding; sustained quality/public-release qualification remains failed/open.",
+  "status": "Private 64K source 396aa70 is installed and passes package check, guarded inference and doctor. Full semantic/workflow/public-release qualification remains failed/open.",
   "installed": {
-    "source_revision": "60e3a3df9d4f0be075beec43eaec937a43475dd9",
-    "wheel_sha256": "3cd75b14d8608eafae9de39d5350294707f74f6cada3b94742a90b6a51cf72fd",
-    "payload_manifest_sha256": "825e89bbf7ed4cc177dab522855b4505636bd5b40213b169d18dbec32bdbfe03",
+    "source_revision": "396aa70afbaafc0520f07cea1a6884ae8a55e74c",
+    "wheel_sha256": "8b6801dc2c1cf82db883c6c006bfd73920812300a09ded5783204db443980a80",
+    "payload_manifest_sha256": "ec7be1cc9b246a5380fc5047daf61510036fcec6c1a10d2bab606fe306449ab4",
     "context_tokens": 65536,
-    "rollback_receipt_source_revision": "6f2c627312246a573cf33fee817bbe0f33e52941",
+    "rollback_receipt_source_revision": "60e3a3df9d4f0be075beec43eaec937a43475dd9",
     "package_check": "PASS exact source",
     "doctor": "PASS healthy idle 65,536 model, normal pressure, browser/search connected after guarded smoke",
     "protocol_smoke": {
       "passed": true,
-      "metrics_sha256": "00daa9f1449d84f8ec6aa5b4e4f2e03c31556b14ad2e0f68ccbd4dea602cc9f5"
+      "metrics_sha256": "d46d27adc56e93786b0f32d44cbe6ec11c35b4169dc3bfbabb965f5a019eb283"
     }
   },
-  "source_validation": "PR source e0910e3 and private source 60e3a3d passed make check (173 setup, 21 Python tool, 64 Node, native driver self-check and frozen verify). Both passed committed-source package smoke. Private source was built as a clean wheel and installed transactionally.",
+  "source_validation": "PR source 74045d1 and private source 396aa70 passed make check (173 setup, 21 Python tool, 64 Node, native driver self-check and frozen verify), committed-source package smoke and CI offline-and-package. Private source was built as a clean wheel and installed transactionally.",
   "rollback_reinstall": {
-    "result": "PASS for prior private source 6f2c627: actual rollback restored matching 7d93090 64K package, exact package check passed, then reinstall restored exact 6f2c627, guarded protocol smoke and doctor passed. The latest 60e3a3d installation has a committed one-step 64K rollback receipt for 6f2c627, but actual rollback from 60e3a3d is not exercised."
+    "result": "PASS latest-source existing-owner rollback: actual rollback from 396aa70 restored matching 60e3a3d 64K package, exact package check passed; reinstall of 396aa70 restored the exact source; guarded protocol smoke and post-reinstall doctor passed at 65,536 context with normal pressure and browser/search connected. This is not a clean non-owner installation."
   },
   "installed_narrow_probe": {
     "candidate_source_revision": "6f2c627312246a573cf33fee817bbe0f33e52941",
@@ -51,9 +51,23 @@
   },
   "unqualified_gates": [
     "The 47.277-minute Task12 sliced coding/UI trial needed operator steering and three coding timeouts; native checkpoint work/next-action claims went stale. See task12r-sliced.json.",
-    "Latest installed 60e3a3d still needs a live long multi-compaction coding/UI and reviewer run.",
+    "Latest installed source 396aa70 passed only a narrow Plan/Ask retained-prefix retest, not a long autonomous coding/UI and reviewer run. Raw summaries still misclassify Decisions and Active work.",
     "Representative 49K/64K/96K/128K quality, latency, cold/warm correctness and safe-pressure tier decision remain unqualified.",
-    "Latest-source rollback and clean non-owner install remain unqualified.",
+    "Clean non-owner install remains unqualified; latest exact-source existing-owner rollback/reinstall passed.",
     "No public release, tag, version bump, or frontier-equivalence claim."
-  ]
+  ],
+  "preceding_install_60e3a3d": {
+    "source_revision": "60e3a3df9d4f0be075beec43eaec937a43475dd9",
+    "wheel_sha256": "3cd75b14d8608eafae9de39d5350294707f74f6cada3b94742a90b6a51cf72fd",
+    "payload_manifest_sha256": "825e89bbf7ed4cc177dab522855b4505636bd5b40213b169d18dbec32bdbfe03",
+    "context_tokens": 65536,
+    "rollback_receipt_source_revision": "6f2c627312246a573cf33fee817bbe0f33e52941",
+    "package_check": "PASS exact source",
+    "doctor": "PASS healthy idle 65,536 model, normal pressure, browser/search connected after guarded smoke",
+    "protocol_smoke": {
+      "passed": true,
+      "metrics_sha256": "00daa9f1449d84f8ec6aa5b4e4f2e03c31556b14ad2e0f68ccbd4dea602cc9f5"
+    }
+  },
+  "latest_installed_probe": "task12t-installed-retest.json"
 }

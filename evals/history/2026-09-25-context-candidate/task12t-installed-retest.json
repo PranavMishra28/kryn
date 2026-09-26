@@ -1,0 +1,57 @@
+{
+  "candidate_source_revision": "396aa70afbaafc0520f07cea1a6884ae8a55e74c",
+  "context_tokens": 65536,
+  "fixture": "Fresh frozen Task12 Plan in a disposable workspace, same short Plan and Ask recall prompts as preceding context64-c32-12s screen. One saved native session across three guarded stages and two native-server restarts. Raw prompts, exports and telemetry remain ignored under evals/runs/context64-c33-12t/.",
+  "stages": {
+    "plan": {
+      "wall_seconds": 68.644,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 20078,
+      "tool_calls": 14,
+      "tool_errors": 0,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "b96f477f721aa64c3ebf5bb70e67e2db3986b883076006de70fb28457066c624",
+      "native_export_sha256": "e4424b2cbe0bdfe62cd11cdc1af68119940e2a658ca0f4b03c0e7e69a092fc2d"
+    },
+    "ask-recall": {
+      "wall_seconds": 61.318,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 3234,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "2c6f09c2527adf47f651c9716e24c863dc7d35863ff9cc7f9b4192405eb6877d",
+      "native_export_sha256": "789d078494a90a52220e6268e7da3c573bb96bc3262dbeb8780444f6e98421d0"
+    },
+    "ask-provenance": {
+      "wall_seconds": 47.653,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 2196,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "fe4b306ea9e03e3746526868e6d3bef956e37531b54155a298566b964c5da376",
+      "native_export_sha256": "19b77f17831b71fc662194999f9c1d3bd65ff5b0b6e3a0c76fd98cac3d039ae6"
+    }
+  },
+  "measured_active_stage_seconds": 177.615,
+  "result": "NARROW PASS: Plan completed with 14 read calls and zero tool errors, versus 23 calls and eight missing-leading-slash path errors in the preceding run. Its first checkpoint correctly said the latest exchange was unseen in the older prefix while OpenCode retained 20,078 recent characters. Ask recalled completed planning and no implementation edits; on a direct follow-up it said native compaction occurred and no user implementation choice was made. All three stages completed native compaction, with normal sampled pressure and zero observed swap growth.",
+  "semantic_limit": "The first Ask answer did not mention compaction. The direct provenance answer said yes but cited an inexact system phrase and made unverified supporting claims about hashes; it is not complete provenance fidelity. The second and third raw native summaries still promoted agent/task choices to Decisions and described planned coding as Active. Model-facing masking and the observed-compaction marker helped the direct answer, but the full semantic checkpoint and sustained coding/UI gates still fail.",
+  "remaining": [
+    "Repeat a long autonomous coding/UI task with semantically correct compaction/restart, independent browser and reviewer acceptance.",
+    "Complete useful-tier comparison of 49K through feasible 128K with representative quality, latency, memory/swap, and cold/warm correctness.",
+    "Clean non-owner install remains unqualified; latest exact-source owner rollback/reinstall is recorded separately."
+  ]
+}
