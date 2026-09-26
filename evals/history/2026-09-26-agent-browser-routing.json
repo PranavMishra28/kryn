@@ -1,0 +1,36 @@
+{
+  "scope": "Paired read-only browser diagnosis on the frozen Task12 artifact using the installed private guarded 64K model; this is not a completed coding/UI task or release qualification",
+  "source": "249d10a28fc704162daa4b376d2971d12ecc5ed4 with an uncommitted evaluation-only driver switch; product fix is separately reviewed on this branch",
+  "raw_private_run": "evals/runs/t12endurance1/evidence/agent-browser-{baseline,direct,inherit}; raw exports and screenshots are ignored",
+  "frozen_input": {
+    "prompt_sha256": "98025b03f328a91c15bc25dce3d15c8826522bfa7c2022b4d1917d8208e5b783",
+    "app_js_sha256": "2c57780b0db4fc8817ebed86d34543d2def7fd08021911410634b517b15d82e6",
+    "question": "At 390px, check whether saved row IDs are visible and whether Edit is a clickable button; do not edit source"
+  },
+  "baseline": {
+    "driver_sha256": "defb25055171eaac98906186f3df79389cc34209c43f2c97469229ce69ba7a79",
+    "result": "FAIL timeout after 187.804 seconds; 64 calls to unavailable skill browse, no browser call or diagnosis"
+  },
+  "intermediate_allow": {
+    "driver_sha256": "adb8afca890c5d0910e43be04c5728e6ea6761c34eedd7a05084cf58bd357198",
+    "result": "Completed in 119.641 seconds with browser calls and both defects identified; broader role-specific allow was not selected"
+  },
+  "selected_inherit": {
+    "driver_sha256": "be315daed7f04c0144d02f9a1ddcce6c58ce9710a684130676965c8b0e1d2429",
+    "requested_config_sha256": "67d80ba2e90e6e78ccb6c6b5a47e1c670d6e48706bd6a920ce8ce85bd46ba58f",
+    "result": "PASS narrow screen in 57.168 seconds: six browser calls, no tool errors, correctly reported invisible saved IDs and nonclickable Edit, no source writes",
+    "change": "Remove Agent's browser_* deny so it inherits the existing global browser permission; saved Build receives the same change",
+    "guard": "Normal sampled pressure, no observed warning, zero swap growth"
+  },
+  "limits": "The disposable driver auto-approved browser actions, preserving the explicit unsafe-code denial; ordinary daily use still follows Ask/Auto. This screen does not prove an unprompted daily permission roundtrip, full Task12 repair, compaction truthfulness, independent model review, endurance or clean installation.",
+  "gate_status": {
+    "agent_browser_routing": "PASS narrow diagnostic screen; installed-product roundtrip pending",
+    "coding_ui": "FAIL frozen Task12 model artifact",
+    "semantic_compaction_restart": "FAIL prior Task12 checkpoint",
+    "endurance": "FAIL",
+    "clean_install": "UNQUALIFIED non-owner",
+    "context_tier": "64K guarded private experiment; 49K public profile unchanged",
+    "release": "CLOSED"
+  },
+  "next_blocker": "Verify the source change in a private package install and then rerun the frozen model-produced Task12 UI acceptance across compaction and restart."
+}

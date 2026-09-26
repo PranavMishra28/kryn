@@ -1180,6 +1180,11 @@ class SetupChecks(unittest.TestCase):
         self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
                       cfg['agents']['build']['permissions'])
         self.assertEqual(cfg['agents']['agent']['permissions'], cfg['agents']['build']['permissions'])
+        self.assertNotIn({'action': 'browser_*', 'resource': '*', 'effect': 'deny'},
+                         cfg['agents']['agent']['permissions'])
+        self.assertIn({'action': 'browser_*', 'resource': '*', 'effect': 'ask'}, cfg['permissions'])
+        self.assertIn({'action': 'browser_browser_run_code_unsafe', 'resource': '*', 'effect': 'deny'},
+                      cfg['permissions'])
         self.assertEqual(cfg['commands']['deliver']['agent'], 'agent')
         self.assertEqual(cfg['commands']['handoff']['agent'], 'agent')
         self.assertEqual(cfg["compaction"]["buffer"], 4096)

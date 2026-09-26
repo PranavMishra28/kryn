@@ -195,11 +195,6 @@
           "effect": "allow"
         },
         {
-          "action": "browser_*",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
           "action": "search_*",
           "resource": "*",
           "effect": "deny"
@@ -220,7 +215,6 @@
         { "action": "subagent", "resource": "general", "effect": "allow" },
         { "action": "subagent", "resource": "reviewer", "effect": "allow" },
         { "action": "subagent", "resource": "browse", "effect": "allow" },
-        { "action": "browser_*", "resource": "*", "effect": "deny" },
         { "action": "search_*", "resource": "*", "effect": "deny" },
         { "action": "execute", "resource": "*", "effect": "deny" }
       ]
