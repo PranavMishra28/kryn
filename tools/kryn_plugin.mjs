@@ -272,7 +272,7 @@ export default {
           (pin.schema === 1 && pin.workflowScope !== undefined))
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
-        checkpointStamp: null,
+        checkpointStamp: null, checkpointHash: null,
         continuityFile: path.join(folders.continuity, key + '.json'), recorded: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
@@ -291,6 +291,10 @@ export default {
         if (saved !== undefined && saved !== null && !HASH.test(saved))
           throw new Error('KRYN saved checkpoint stamp changed');
         item.checkpointStamp = saved ?? null;
+        const savedHash = item.previousTracker.checkpoint_hash;
+        if (savedHash !== undefined && savedHash !== null && !HASH.test(savedHash))
+          throw new Error('KRYN saved checkpoint hash changed');
+        item.checkpointHash = savedHash ?? null;
         staleChecks(item); // A restarted process cannot attest that project files stayed unchanged.
       }
       else if (options.observe && existingPin) item.verification.complete = false; // Old/pruned history is not an empty proof ledger.
@@ -311,7 +315,7 @@ export default {
       writeJSON(path.join(folders.trackers, item.key + '.json'), { owner: 'kryn.product', schema: 1,
         task_id: item.turn?.task_id ?? item.previousTracker?.task_id ?? null, champion_revision: item.pin.revision,
         native_session_id: item.native_session_id, native_checkpoint_event: item.checkpoint,
-        checkpoint_stamp: item.checkpointStamp,
+        checkpoint_stamp: item.checkpointStamp, checkpoint_hash: item.checkpointHash,
         state, counts: item.turn ? Object.fromEntries(Object.entries(item.turn).filter(([key]) => key !== 'started' && key !== 'task_id')) : item.previousTracker?.counts ?? {},
         verification: item.verification,
         updated_at: new Date().toISOString(),
@@ -417,9 +421,10 @@ export default {
       if (item.pin.instructions) event.system.push({ type: 'text', text:
         'KRYN validated workflow guidance (subordinate to current user authorization and safety):\n' + item.pin.instructions });
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
-      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded, firstCompaction);
+      const checkpointIdentity = item.checkpointHash ?? (item.checkpoint ? 'legacy' : null);
+      const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded, firstCompaction, checkpointIdentity);
       if (capsule) event.system.push({ type: 'text', text: capsule });
-      const maskedDecisions = maskUnverifiedDecisions(event.messages, item.recorded);
+      const maskedDecisions = maskUnverifiedDecisions(event.messages, item.recorded, checkpointIdentity);
       if (maskedDecisions) event.system.push({ type: 'text', text: 'The model-facing checkpoint omitted ' + maskedDecisions +
         ' unverified Decision claim(s). The original checkpoint and user requests remain in native history. Do not repeat those claims as user choices without a matching user quote.' });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
@@ -701,6 +706,7 @@ export default {
           const item = start(id, event.id);
           item.turn.compactions = count(item.turn.compactions + 1);
           item.checkpoint = event.id;
+          item.checkpointHash = typeof event.data?.text === 'string' ? sha(event.data.text) : null;
           const stamp = workspaceStamp(ctx.location.directory);
           item.checkpointStamp = stamp.complete ? stamp.stamp : null;
           tracker(item);
