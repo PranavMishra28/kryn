@@ -37,7 +37,7 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 |---|---|
 | **Ask** | Inspect and answer using read and search tools, without edits or commands. |
 | **Plan** | Inspect code and produce an actionable plan; only native OpenCode plan files may be written. |
-| **Agent** | Edit code, run approved commands and verify results; thinking on by default. |
+| **Agent** | Edit code, run approved commands and use browser tools to verify rendered results; thinking on by default. |
 
 Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the new everyday choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. Browse, Reviewer and Audit remain selectable for existing read-only sessions and specialist use. OpenCode remembers choices per agent/model, so check the displayed selection when resuming. Old Build sessions remain available; the native picker may select equivalent Agent when resuming them. A future migration must resolve this before the picker can contain only three primary roles.
 
@@ -50,7 +50,7 @@ There are only **two choices**. OpenCode always supplies a `Default` entry for t
 
 Qwen exposes `enable_thinking`; oMLX additionally supports a thinking-token cap. Thinking and the answer share the 8,192-token output limit. The cap keeps reasoning from consuming the whole response; it is not a guarantee of intelligence or runtime. “Show reasoning” in `/settings` changes visibility only, not whether the model thinks. Saved conversations remain available; removed effort selections fall back to Default in the native picker. Check the selection before continuing an older session.
 
-Edits normally proceed without a separate approval; shell and browser actions can ask. For a trusted project, explicitly opt into native automatic approvals for one launch:
+Edits normally proceed without a separate approval; shell and browser actions can ask. Agent can use the connected browser directly or delegate Browse; browser actions retain the normal Ask/Auto permission setting, and unsafe browser code remains denied. For a trusted project, explicitly opt into native automatic approvals for one launch:
 
 ```sh
 cd "/absolute/path/to/your/project" && kryn --auto
