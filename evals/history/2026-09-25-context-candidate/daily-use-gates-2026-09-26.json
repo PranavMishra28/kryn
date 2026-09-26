@@ -1,0 +1,103 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private installed 64K daily-use candidate, after reverting automatic unnumbered file-tail retrieval; frozen eval suite 2026-09-19.2. Private raw session transcripts and user state are not included.",
+  "installed_source": "fd77cd57b0a1686383e8a7a35dcc8229110b0e1f",
+  "public_profile_tokens": 49152,
+  "private_experimental_tokens": 65536,
+  "power": "AC Power",
+  "task09": {
+    "run": "context64-c41-09-revert",
+    "frozen_grade": "FAIL",
+    "automatic_passed": true,
+    "manual": {
+      "ten_sequential_turns": "PASS",
+      "file_shell_test_tool_results_complete": "FAIL"
+    },
+    "same_saved_session": true,
+    "native_compactions": 10,
+    "external_checkpoints_passed": 10,
+    "read_current_file_before_first_edit_turns": [
+      1,
+      3,
+      5,
+      9
+    ],
+    "read_current_file_before_first_edit_count": 4,
+    "original_tests_run_in_agent_count": 7,
+    "active_stage_seconds": 516.497,
+    "normal_sampled_pressure": true,
+    "swap_peak_growth_bytes": 0,
+    "operator_audit_sha256": "acf20232e9961b80fd7df26641f6b97d8aacbb4e9b149d5801d3a3f315b4905c",
+    "frozen_grade_sha256": "e9f299283d317a1801a6c35d3fc08b842de22edfedf42b874a613cc0ceb0586a",
+    "interpretation": "FAIL. All external checkpoints and the final CSV passed; six of ten turns edited before a fresh read. The revert did not prove reliable procedure. One stochastic run is not a causal estimate."
+  },
+  "task12": {
+    "run": "context64-c41-12-daily",
+    "frozen_grade": "FAIL",
+    "automatic_passed": true,
+    "manual": {
+      "plan_build_separation": "PASS",
+      "browser_upload_edit_filter_export": "FAIL",
+      "503_recovery": "PASS",
+      "fresh_review_readonly": "FAIL",
+      "native_compaction": "FAIL",
+      "new_session_handoff": "FAIL",
+      "representative_duration_recorded": "PASS"
+    },
+    "active_stage_seconds": 1416.93,
+    "pressure": "normal in all guarded stages",
+    "swap_growth_bytes": 0,
+    "independent_browser": {
+      "create_reload_filter_export_503_responsive_safe_text": "PASS",
+      "edit_persistent": "FAIL: GET /api/entries/t1 404 then POST /api/entries 400, minutes stayed 30",
+      "import_explicit_click": "FAIL: file selection posted /api/import before click"
+    },
+    "checkpoint_semantics": "FAIL: handoff-repair native summary put agent implementation choices under Decisions without user quotes.",
+    "fresh_reviewer": "Read-only; first two findings supported, third project-filter finding unsupported because server uses exact equality and client trims.",
+    "operator_summary_sha256": "b2c919db5e8531001c3f5ab52c81f4b32754b156ec0578332b836358688870d8",
+    "frozen_grade_sha256": "b7fa92ab49dd0a75610ef0c0a258927a58983d7ef2e6d10589ebe6134ce1e793",
+    "interpretation": "FAIL. Full coding/UI gate did not pass despite 2/2 frozen API checks; edit and explicit import failed in an isolated browser, and checkpoint provenance and reviewer quality failed."
+  },
+  "task06": {
+    "run": "context64-c41-06-daily",
+    "frozen_grade": "PASS",
+    "automatic_passed": true,
+    "manual": {
+      "isolated_browser": "PASS",
+      "valid_form_and_reload": "PASS",
+      "invalid_form_accessible_error": "PASS",
+      "503_preserves_input_single_retry": "PASS",
+      "responsive_screenshots": "PASS",
+      "console_network_inspected": "PASS"
+    },
+    "active_stage_seconds": 592.149,
+    "native_restart_with_compaction": true,
+    "browser_observations": {
+      "narrowOverflow": false,
+      "reloadPersisted": true,
+      "invalidFocused": true,
+      "invalidNotSaved": true,
+      "duplicatePreserved": true,
+      "temporary503Seen": true,
+      "after503Rows": 0,
+      "retryRows": 1,
+      "retryCleared": true,
+      "wideOverflow": false,
+      "pageErrors": []
+    },
+    "semantic_continuity": "FAIL: resumed answer reconciled evaluator result, but raw native checkpoint still listed agent CSS choice under Decisions and earlier checkpoint asked for already-consumed marker.",
+    "fresh_review": "FAIL: completed four read calls but all three proposed findings were unsupported by current code/independent browser results.",
+    "operator_summary_sha256": "089858212887faa9001ae5b552394fa26375d8031d283a7e2290ddaf0804d105",
+    "frozen_grade_sha256": "02657f09a1fc0f0a909b1ead19f9698c838baf11923b31493a11fa69d255ec30",
+    "interpretation": "Frozen browser/fixture PASS after evaluator supplied the 503 trigger and the Agent repaired narrow CSS; composite workflow FAIL because checkpoint provenance and fresh Reviewer findings were wrong. This was not an unassisted one-shot pass."
+  },
+  "owner_rollback_reinstall": {
+    "status": "PASS, narrow",
+    "description": "Actual rollback to matching prior 64K source 7f99d6f, then reinstall of fd77cd5; exact package check, guarded protocol smoke and doctor passed at 65,536 context with normal pressure."
+  },
+  "non_owner_clean_install": {
+    "status": "UNQUALIFIED",
+    "description": "About 32 GiB filesystem free; fresh model download plus installer reserve needs more room. No owner model or user data was removed to force this test."
+  },
+  "release_gate": "FAIL; public release, tag, version bump and context PR merge remain paused."
+}
