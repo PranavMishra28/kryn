@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-26",
+  "scope": "Narrow private OpenCode hook trial; no product promotion or release qualification",
+  "candidate_source": "6e52d4f41b533707252592b002a59523d1c5be5e",
+  "plugin_sha256": "7fb30f2c270b206c2a217fa18405d953cf3a45dc67b7e82542eb3aae5cc52fb6",
+  "run": "guardpipe01/pipeline-guard",
+  "prompted_shell_command": "python -m unittest discover -v 2>&1 | head -50",
+  "observed": "The native Agent attempted the exact shell command once. KRYN's tool.execute.before hook refused it with the fallback-or-output-pipeline error; the command did not execute. The Agent reported the refusal.",
+  "driver": "Completed in 21.299 seconds with one expected denied tool call; trial inputs and routing verified, owned sessions/CLI/server settled, normal sampled pressure, zero swap growth",
+  "checks": "Focused hook regression, full make check, and clean candidate package smoke passed",
+  "driver_sha256": "1ea730e66660064ba41b525cfea700aca6bb0ec1c52d115d4313c1bff254b5f2",
+  "session_export_sha256": "d1578b23a3b4163fb3c4512e4d944e75cdc441dbfa0df35e3d38bea84713caf1",
+  "raw_evidence_private": "/private/tmp/kryn-conservative-checkpoint/evals/runs/guardpipe01/evidence/pipeline-guard",
+  "remaining": "This proves one native denial route, not reliable read-before-edit, coding/UI acceptance, complete shell parsing, install/rollback, endurance, or release readiness."
+}
