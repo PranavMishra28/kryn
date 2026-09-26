@@ -494,8 +494,6 @@ export default {
             (check.diagnostic ? ' reason=' + check.diagnostic : '') +
             (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
           (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
-        if (AGENT_ROLES.has(event.agent) && unresolved.some(check => check.diagnostic === 'pytest unavailable'))
-          event.system.push({ type: 'text', text: 'Pytest was unavailable in this session. Use an available runner for the existing tests; retry pytest only if the environment changes. Preserve the earlier failed invocation as an environment diagnosis.' });
       }
       if (event.agent === 'reviewer') {
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +

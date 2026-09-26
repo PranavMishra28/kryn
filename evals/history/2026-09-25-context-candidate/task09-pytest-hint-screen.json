@@ -1,0 +1,56 @@
+{
+  "trial": "context64-c39-09-pytest",
+  "source": "13f33b14dfceb324823a9b2fbff7cc288780325f",
+  "tier_tokens": 65536,
+  "scope": "Two-turn targeted early screen; remaining Task09 turns intentionally not released. The frozen grade is FAIL because ten checkpoints/final rows are absent, not because this short trial was presented as a full endurance pass.",
+  "change": "When a failed observed check has diagnostic pytest unavailable, append a model-facing hint to use an available runner and preserve the failure record.",
+  "mechanism_test": "Offline test verifies the hint appears after restart and the failed check remains in the private ledger.",
+  "stages": [
+    {
+      "turn": 1,
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "pytest_attempts": 5,
+      "direct_original_test_pass": true,
+      "tool_calls": 11,
+      "wall_seconds": 60.426,
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "events_sha256": "29673f45db94ad33b920e901d65c87ed904d6087ee7253f6a3149ee9bb371c0d"
+    },
+    {
+      "turn": 2,
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "pytest_attempts": 1,
+      "direct_original_test_pass": true,
+      "tool_calls": 5,
+      "wall_seconds": 45.169,
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "events_sha256": "3a10552abd3e886f6db10694893b44c5f89e0dc46583b860cd934750dc163df5"
+    }
+  ],
+  "tracker_failed_checks": [
+    [
+      "pytest",
+      "failed",
+      "pytest unavailable",
+      1
+    ],
+    [
+      "pytest",
+      "failed",
+      "pytest unavailable",
+      1
+    ]
+  ],
+  "result": "REJECTED: turn 2 retried pytest despite the prior unavailable result, then passed the original tests with a direct Python command.",
+  "private_tracker_sha256": "95019f1a0a506ea1a495b44397764578cd2a310fa36334110d6a4e2d6caa88a6",
+  "raw_evidence_private": "evals/runs/context64-c39-09-pytest",
+  "grade_sha256": "7c877c3018cce6695d9ca926378a3c61268439f879db9da6cf279ff8158dbc6e"
+}

@@ -229,10 +229,6 @@ test('failed test runner and bounded diagnosis survive restart without retaining
     const text = handoff.system.map(part => part.text).join('\n');
     assert.match(text, /runner=pytest exit=1 reason=pytest unavailable/);
     assert.doesNotMatch(text, /SYNTHETIC_SECRET_SOURCE|test_existing\.py/);
-    const resumedAgent = { ...handoff, agent: 'agent', system: [] };
-    f.call('session.context', resumedAgent);
-    assert.match(resumedAgent.system.map(part => part.text).join('\n'), /Use an available runner for the existing tests; retry pytest only if the environment changes/);
-    assert.equal(f.read('trackers')[0].verification.checks[0].state, 'failed');
   } finally { await cleanup(); f.remove(); }
 });
 
