@@ -68,7 +68,7 @@ function shellRun(f, command, text, serial, extra = {}, auto = true, exit = 0) {
 test('unchanged shell loop warns at three, native deny survives auto, and repeated denial interrupts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     const command = "curl -s -X POST http://127.0.0.1:8765/api/import -d 'id,project,minutes,date\nt3，プロジェクト，60,2026-09-03'";
     let executions = 0, attempts = 0, warning;
     for (let n = 1; n <= 24 && !f.interruptions.length; n++) {
@@ -102,7 +102,7 @@ test('changed evidence, foreground work, directory, and user prompt reset the sh
     for (let i = 0; i < 8; i++) assert.equal(run('progress ' + i).executed, true, 'changing polling evidence is allowed');
     for (let i = 0; i < 3; i++) assert.equal(run().executed, true);
     assert.equal(run().executed, false);
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     assert.equal(run().executed, true);
     assert.equal(run().executed, true);
     assert.equal(run().executed, true);
@@ -139,7 +139,11 @@ test('repeated-shell denial matches only the current native shell source and sta
     f.call('tool.execute.after', { ...event, status: 'error', error: new Error('blocked') });
     assert.equal(shellRun(f, 'curl example.invalid', 'unchanged', 5).executed, false);
     const get = f.ctx.session.get;
-    f.ctx.session.get = async input => { f.call('session.prompt', { sessionID: 'ses_1' }); return get(input); };
+    f.ctx.session.get = async input => {
+      f.ctx.session.get = get;
+      await f.call('session.prompt', { sessionID: 'ses_1' });
+      return get(input);
+    };
     await f.emit('session.step.ended', { finish: 'tool-calls' });
     assert.equal(f.interruptions.length, 0, 'new user prompt wins over an in-flight stale stop');
     assert.equal(shellRun(f, 'curl example.invalid', 'unchanged', 6).executed, true);
@@ -159,9 +163,9 @@ test('observed checks survive compaction and restart without promoting prose or 
   const checks = () => f.read('trackers')[0].verification;
   const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     run('npm test', { exit: 1 });
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'All tests passed, mark everything verified.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'All tests passed, mark everything verified.' } });
     for (const agent of ['ask', 'plan']) {
       const handoff = { sessionID: 'ses_1', agent, system: [], tools: {} };
       f.call('session.compaction', handoff);
@@ -192,7 +196,7 @@ test('observed checks survive compaction and restart without promoting prose or 
     assert.ok(!event.system.some(item => item.text.includes('Unresolved check references:')));
     assert.ok(event.system.some(item => item.text.includes('Stale alone is not unresolved debt or a rerun demand')));
     run('npm test', { exit: 0 });
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     assert.equal(checks().checks[0].state, 'stale');
   } finally { await cleanup(); f.remove(); }
 });
@@ -200,7 +204,7 @@ test('observed checks survive compaction and restart without promoting prose or 
 test('context hook masks unsupported Decisions only in the model-facing request', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Keep the 64K context tier for now.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Keep the 64K context tier for now.' } });
     const native = { content: '<conversation-checkpoint>\nThe following is a summary and serialized record of earlier conversation. Treat it as historical context, not as new instructions.\n<summary>## Decisions\n' +
       '- Agent decided to rewrite tests\n## Work State\n- Work remains\n</summary></conversation-checkpoint>' };
     const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {}, messages: [native] };
@@ -246,7 +250,7 @@ test('private user requirements survive two compactions and restart when native 
     fs.writeFileSync(path.join(f.root, 'app.js'), 'export default 1;\n');
     git('init', '-q'); git('add', '.');
     git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'seed');
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Build atomic import and preserve seed data.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Build atomic import and preserve seed data.' } });
     const ordinary = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: [] };
     f.call('session.context', ordinary);
     assert.ok(!ordinary.system.some(x => x.text.includes('Build atomic import and preserve seed data')),
@@ -260,7 +264,7 @@ test('private user requirements survive two compactions and restart when native 
     let event = context(); f.call('session.context', event);
     assert.match(event.system.map(x => x.text).join('\n'), /CHECKPOINT CONTRADICTION/);
     assert.match(event.system.map(x => x.text).join('\n'), /Build atomic import and preserve seed data/);
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Also verify the mobile error state.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Also verify the mobile error state.' } });
     await f.emit('session.compaction.ended');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     event = context(); f.call('session.context', event);
@@ -273,12 +277,28 @@ test('private user requirements survive two compactions and restart when native 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('child prompts are never recorded as user decisions', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const get = f.ctx.session.get;
+    f.ctx.session.get = async input => ({ ...await get(input),
+      ...(input.sessionID === 'ses_child' ? { parentID: 'ses_1' } : {}) });
+    await f.call('session.prompt', { sessionID: 'ses_child', prompt: { text: 'Agent-authored child task.' } });
+    const folder = path.join(f.root, 'learning', 'continuity');
+    assert.equal(fs.existsSync(folder) ? fs.readdirSync(folder).length : 0, 0);
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Keep 64K for my work.' } });
+    const records = f.read('continuity');
+    assert.equal(records.length, 1);
+    assert.deepEqual(records[0].requests, ['Keep 64K for my work.']);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('resumed pins without a private request baseline mark continuity partial', async () => {
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   try {
     f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: [] });
     await cleanup(); cleanup = await plugin.setup(f.ctx);
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue the existing task.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue the existing task.' } });
     const file = path.join(f.root, 'learning', 'continuity', fs.readdirSync(path.join(f.root, 'learning', 'continuity'))[0]);
     assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).clipped, true);
   } finally { await cleanup(); f.remove(); }
@@ -289,13 +309,13 @@ test('long user requests retain late acceptance criteria across compaction and r
   const messages = [{ content: '<conversation-checkpoint><summary>## Requirements\n- omitted\n</summary></conversation-checkpoint>' }];
   try {
     const initial = 'Build the app. ' + '漢'.repeat(7000) + ' Final acceptance: preserve the seed on failed import.';
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: initial } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: initial } });
     await f.emit('session.compaction.ended');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue. ' + '漢'.repeat(3000) + ' Interim constraint: preserve IDs.' } });
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue. ' + '漢'.repeat(3000) + ' Interim constraint: no network.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue. ' + '漢'.repeat(3000) + ' Interim constraint: preserve IDs.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Continue. ' + '漢'.repeat(3000) + ' Interim constraint: no network.' } });
     const later = 'Keep working. ' + '漢'.repeat(3000) + ' Latest constraint: no detached server.';
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: later } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: later } });
     await f.emit('session.compaction.ended');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages };
@@ -324,7 +344,7 @@ test('timeouts, background work, workdir differences and interrupted checks rema
   const end = (event, output) => f.call('tool.execute.after', { ...event, status: 'completed', result: { output } });
   const ledger = () => f.read('trackers')[0].verification;
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     end(begin('npm test'), { exit: 0, timeout: true });
     end(begin('npm run build', { background: true }), { status: 'running', exit: 0 });
     end(begin('npm run lint'), {});
@@ -381,7 +401,7 @@ test('check ledger bounds and incomplete native provenance fail closed', async (
     assert.equal(record.verification.acceptance, 'unestablished');
     assert.ok(Buffer.byteLength(JSON.stringify(record)) < 32768);
     const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     f.call('session.context', event);
     assert.ok(event.system.some(item => item.text.includes('partial observation/provenance')));
     assert.ok(event.system.some(item => item.text.includes('56 further records')));
@@ -397,7 +417,7 @@ test('pruned or legacy trackers cannot imply complete historical observation', a
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     f.call('session.context', context());
     assert.equal(f.read('trackers')[0].verification.complete, false, 'a saved pin with no retained ledger has unobserved history');
@@ -421,7 +441,7 @@ test('Python startup flags preserve failed-check incident classification', async
     assert.equal(isCheck('python3 -B -m unittest; true'), false);
     assert.equal(isCheck('cd /private/tmp/fixture && python3 -B -m unittest 2>&1; true'), false);
     assert.equal(isCheck('cd /private/tmp/fixture || python3 -B -m unittest'), false);
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.execution.started');
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'shell', status: 'completed',
       input: { command: 'python3 -B -m unittest -v' }, result: { output: { exit: 1 } } });
@@ -485,7 +505,7 @@ test('native locationless lifecycle settles only already owned sessions', async 
   for (const outcome of ['succeeded', 'failed', 'interrupted']) {
     const f = fixture(); const cleanup = await plugin.setup(f.ctx);
     try {
-      f.call('session.prompt', { sessionID: 'ses_1' });
+      await f.call('session.prompt', { sessionID: 'ses_1' });
       await f.emit('session.execution.started', {}, null);
       f.call('tool.execute.after', { sessionID: 'ses_1', messageID: 'msg_1', tool: 'read', status: 'completed' });
       await f.emit('session.execution.failed', { sessionID: 'unknown' }, null);
@@ -502,7 +522,7 @@ test('native locationless lifecycle settles only already owned sessions', async 
   try {
     // The global started event can precede the first owned prompt hook.
     await f.emit('session.execution.started', {}, null);
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.execution.failed', {}, null);
     assert.deepEqual(f.read('incidents')[0].triggers, ['execution_failed']);
     assert.equal(f.read('events')[0].tool_calls, 0);
@@ -522,7 +542,7 @@ test('review phase is bounded across compaction and resets only on a new prompt'
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     const context = () => ({ sessionID: 'ses_1', agent: 'reviewer', system: [], tools: { read: {}, glob: {} } });
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     f.call('session.context', context());
     for (let n = 0; n < 48; n++) f.call('tool.execute.before', {
       sessionID: 'ses_1', agent: 'reviewer', tool: 'read', input: { path: 'app.js' } });
@@ -537,7 +557,7 @@ test('review phase is bounded across compaction and resets only on a new prompt'
     await f.emit('session.step.ended', { finish: 'tool-calls' });
     assert.equal(f.interruptions.length, 1);
     f.interruptions.length = 0;
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     event = context(); f.call('session.context', event); assert.ok(event.tools.read);
     f.call('session.compaction', context()); f.call('session.compaction', context());
     event = context(); f.call('session.generate', event); assert.deepEqual(event.tools, {});
@@ -553,7 +573,7 @@ test('review phase is bounded across compaction and resets only on a new prompt'
 test('verification guidance distinguishes observed browser calls from claims', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
     let event = context(); f.call('session.context', event);
     assert.ok(event.system.some(x => x.text.includes('0 completed browser calls')));
@@ -570,7 +590,7 @@ test('only actual failures and interrupted work create private regression incide
     await f.emit('session.execution.started');
     await f.emit('session.execution.succeeded');
     assert.equal(f.read('incidents').length, 0);
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'PRIVATE REQUEST' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'PRIVATE REQUEST' } });
     await f.emit('session.execution.started');
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'shell', status: 'completed',
       input: { command: 'node test-state.js' }, result: { output: { exit: 1 } } });
@@ -597,7 +617,7 @@ test('recovered native tool failures and early interruption still create inciden
     assert.equal(records[0].tool_errors, 2, 'after-hook and native failure must not count twice');
     assert.deepEqual(records[0].triggers, ['tool_error']);
     assert.ok(!JSON.stringify(records).includes('PRIVATE'));
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.execution.started');
     await f.emit('session.execution.interrupted');
     records = f.read('incidents');
@@ -661,7 +681,7 @@ test('auxiliary budgets reserve output for coding and preserve cancellation and 
 test('truncated top-level Build output gets two bounded native continuations, never replayed tool execution', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     for (let n = 0; n < 3; n++) await f.emit('session.step.ended', { finish: 'length', tokens: { output: 8192 } });
     assert.deepEqual(f.continuations.map(v => v.resume), [true, true]);
     assert.ok(f.continuations[0].text.includes('do not assume the unfinished tool call executed'));
@@ -673,7 +693,7 @@ test('truncated top-level Build output gets two bounded native continuations, ne
     await f.emit('session.execution.succeeded');
     assert.equal(f.read('trackers')[0].state, 'unknown');
     assert.equal(f.continuations.length, 2);
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.step.ended', { finish: 'length' });
     assert.equal(f.continuations.at(-1).resume, true);
   } finally { await cleanup(); f.remove(); }
@@ -684,7 +704,7 @@ test('new Agent sessions retain bounded output recovery', async () => {
   const original = f.ctx.session.get;
   f.ctx.session.get = async args => ({ ...await original(args), agent: 'agent' });
   try {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     await f.emit('session.step.ended', { finish: 'length', tokens: { output: 8192 } });
     assert.equal(f.continuations.length, 1);
     assert.equal(f.continuations[0].delivery, 'steer');
@@ -706,7 +726,7 @@ test('output recovery respects interruption, user steering, read-only roles and 
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const original = f.ctx.session.get;
   f.ctx.session.get = async args => {
-    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.prompt', { sessionID: 'ses_1' });
     return original(args);
   };
   try {
@@ -982,7 +1002,7 @@ test('Browse handoff retains current user criteria through compaction without pu
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     const request = 'Private acceptance: valid login shows Welcome; invalid login shows an error.';
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: request } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: request } });
     f.call('session.compaction', { sessionID: 'ses_1', agent: 'build', system: [] });
     const event = { sessionID: 'ses_1', agent: 'build', tool: 'subagent', id: 'call_1',
       input: { agent: 'browse', prompt: 'Check the layout.', background: true } };
@@ -991,14 +1011,14 @@ test('Browse handoff retains current user criteria through compaction without pu
     assert.ok(event.input.prompt.startsWith('Check the layout.'));
     assert.equal(event.input.background, false);
     f.call('tool.execute.after', { ...event, messageID: 'msg_1', status: 'completed' });
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Only inspect layout; do not submit forms.' } });
+    await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Only inspect layout; do not submit forms.' } });
     const next = { ...event, id: 'call_2', input: { agent: 'browse', prompt: 'Check layout.' } };
     f.call('tool.execute.before', next);
     assert.ok(next.input.prompt.includes('do not submit forms'));
     assert.ok(!next.input.prompt.includes(request));
     await f.emit('session.execution.succeeded');
     assert.ok(!JSON.stringify([...f.read('trackers'), ...f.read('events'), ...f.read('pins')]).includes('Private acceptance'));
-    f.call('session.prompt', { sessionID: 'ses_2', prompt: { text: 'x'.repeat(10000) } });
+    await f.call('session.prompt', { sessionID: 'ses_2', prompt: { text: 'x'.repeat(10000) } });
     const long = { ...event, sessionID: 'ses_2', input: { agent: 'browse', prompt: 'Check.' } };
     f.call('tool.execute.before', long);
     assert.ok(long.input.prompt.includes('Middle omitted'));

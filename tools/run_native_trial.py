@@ -129,6 +129,12 @@ def manual_compaction(server, session_id, workspace, folder, cancel=None):
             raise RuntimeError("Refused compaction export outside the owned local fixture")
         return exported
     previous = {m.get("id") for m in owned_export()["data"]["messages"] if m.get("type") == "compaction"}
+    if cancel is not None and cancel.is_set():
+        settlement = settle_owned_sessions(server, session_id, workspace, folder, interrupt=True, cancel=cancel)
+        result = {"admitted": False, "completed": False, "status": "resource_abort",
+                  "owned_settlement": settlement}
+        (folder / "manual-compaction.json").write_text(json.dumps(result, indent=2) + "\n")
+        return result
     admitted = server.request("POST", "/api/session/" + session_id + "/compact", {}, timeout=5)
     if admitted.get("data", {}).get("type") != "compaction":
         raise RuntimeError("Native manual compaction was not admitted")
@@ -892,6 +898,18 @@ def self_check():
         compacted = manual_compaction(CompactServer(), "ses_root", workspace, Path(tmp))
         assert compacted["completed"] and compacted["summary_headings"] == ["## Objective"]
         assert compacted["semantic_qualification"] == "NOT_ESTABLISHED"
+        class CancelBeforeAdmission(CompactServer):
+            def request(self, method, path, body=None, timeout=5):
+                response = super().request(method, path, body, timeout)
+                if method == "GET": cancelled.set()
+                return response
+        cancelled = threading.Event()
+        server = CancelBeforeAdmission()
+        from unittest.mock import patch
+        with patch(__name__ + ".settle_owned_sessions", return_value={"idle": True}) as settle:
+            aborted = manual_compaction(server, "ses_root", workspace, Path(tmp), cancel=cancelled)
+        assert aborted["status"] == "resource_abort" and not aborted["admitted"] and not server.started
+        settle.assert_called_once()
         (workspace / "TASK.md").write_text("Build an application.\n")
         false = manual_compaction(CompactServer("## Objective\n- No user conversation or task was provided"),
                                   "ses_root", workspace, Path(tmp))
