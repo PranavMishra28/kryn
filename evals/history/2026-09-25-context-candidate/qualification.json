@@ -945,5 +945,38 @@
     },
     "semantic_result": "NARROW PASS for this run: the controlled unittest failed exit 1; two Ask restarts made no shell attempt, preserved the failure as unresolved, stated broader Task02 acceptance unrun, and produced three structurally completed native checkpoints on AC power with normal pressure and zero swap growth. All three checkpoint Decisions sections were (none). The third answer incorrectly described the checkpoint as saying (none verified from recorded user requests) and quoted a paraphrase as a user request; do not treat it as perfect semantic fidelity. No native false-Decision summary occurred in this new run, so the live masking branch was not exercised; only offline tests prove that branch. The prior e9cc4b0 run remains failed for repeated false Decisions. Long coding/UI continuity and 64K throughput remain unqualified.",
     "next_action": "Use a fresh frozen fixture that yields a false Decision checkpoint or an explicitly labelled synthetic native checkpoint to exercise the masking path live; then retest the full long coding/UI workflow. Keep 64K installed and release profile 49K."
+  },
+  "followup_installed_child_provenance_bce6": {
+    "installed_private_source_revision": "bce6887fd98c8e4230603f2c206f7c6b696ac1ae",
+    "private_wheel_sha256": "7effb19147ba162427268f50c2c14fc6075c5927e27eefecddc444434cb327ae",
+    "fixture": "Fresh disposable Task02 workspace and a saved native Build session. The prompt requested one native Explore subagent to inspect a date-range bug; no code edits or shell commands were requested. Raw private traces are ignored under evals/runs/context64-child-prompt-1/ in the private 64K worktree.",
+    "source_validation": "PR source 956c331 and private source bce6887 each passed make check (173 setup, 21 Python tool, 59 Node, driver self-check and frozen verify) plus committed-source package smoke. PR CI offline-and-package passed. The private branch was pushed; the owner installed bce6887 and --package-check returned the exact source revision.",
+    "live_probe": {
+      "agent": "Build with native Explore child",
+      "wall_seconds": 77.577,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 2,
+      "tool_errors": [
+        "Mistaken skill(id=explore) call failed before the agent corrected to the native subagent tool."
+      ],
+      "parent_session_id": "ses_f24dc9883ffehS2o9is3DaJVqa",
+      "child_session_id": "ses_f24dc556fffeoXjFczmF5hK0Te",
+      "child_parent_id_verified": true,
+      "child_user_request_continuity_record_exists": false,
+      "parent_user_request_continuity_record_exists": true,
+      "parent_recorded_request_count": 1,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "max_sampled_runtime_phys_footprint_bytes": 11598732512,
+      "driver_sha256": "bf85e5d68d9f0794a8d6478d21b31cc7de75044330e881900c1fb21e1ab6ffb3"
+    },
+    "post_probe_doctor": "PASS: installed source bce6887, healthy idle 65,536-context oMLX metadata, normal pressure, unchanged swap 423823933 bytes, browser and search MCP connected. Doctor does not itself generate or interact with the browser.",
+    "result": "NARROW PASS: native child prompt was excluded from durable user-request continuity while the parent prompt was retained. The resource guard admitted and completed one compaction. The mistaken skill call and prior Task12m failures remain quality evidence; this trial did not exercise the false-Decision mask, repeated restart, coding/UI, or sustained throughput gates.",
+    "remaining": "Keep owner on private guarded 64K as requested. Full semantic continuity, long coding/UI and review/browser acceptance, useful 49K-128K tier decision, rollback from bce6887, and clean non-owner install remain unqualified. Public release profile stays 49K; PR remains open."
   }
 }
