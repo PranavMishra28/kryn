@@ -8,7 +8,6 @@ const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
 const MAX_SESSION_PINS = 500;
 const MAX_OBSERVED_CHECKS = 64;
-const REVIEW_TOOL_LIMIT = 16;
 const READ_TOOLS = new Set(['read', 'glob', 'grep', 'webfetch', 'question',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const READ_ROLES = new Set(['ask', 'reviewer', 'explore', 'audit']);
@@ -393,7 +392,7 @@ export default {
         const triggers = [state === 'failed' ? 'execution_failed' : null,
           state === 'incomplete' && (interrupted || t.tool_calls) ? 'execution_incomplete' : null,
           t.tool_errors ? 'tool_error' : null, t.check_failures ? 'check_failed' : null,
-          item.reviewCalls >= REVIEW_TOOL_LIMIT || item.reviewCompactions >= 2 ? 'review_bound' : null]
+          item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null]
           .filter(Boolean);
         if (triggers.length) {
           writeJSON(path.join(folders.incidents, t.task_id + '.json'), {
@@ -498,8 +497,8 @@ export default {
       }
       if (event.agent === 'reviewer') {
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +
-          ' tool attempts, ' + item.reviewCompactions + ' compactions. After ' + REVIEW_TOOL_LIMIT + ' attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
-        if (item.reviewCalls >= REVIEW_TOOL_LIMIT || item.reviewCompactions >= 2) {
+          ' tool attempts, ' + item.reviewCompactions + ' compactions. After 48 attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
+        if (item.reviewCalls >= 48 || item.reviewCompactions >= 2) {
           item.reviewClosing = true;
           for (const name of Object.keys(event.tools ?? {})) delete event.tools[name];
           event.system.push({ type: 'text', text: 'The review tool budget is exhausted. Return your partial review now. Do not request another tool or claim checks ran. A new focused review can inspect remaining scope.' });
@@ -586,7 +585,7 @@ export default {
       observeCheck(item, event, true);
       if (event.agent === 'reviewer') {
         const item = session(event.sessionID);
-        if (item.reviewCalls >= REVIEW_TOOL_LIMIT || item.reviewCompactions >= 2)
+        if (item.reviewCalls >= 48 || item.reviewCompactions >= 2)
           throw new Error('KRYN review tool phase ended. Return partial findings and unreviewed scope now.');
         item.reviewCalls++;
       }

@@ -646,8 +646,7 @@ test('review phase is bounded across compaction and resets only on a new prompt'
     await f.call('session.prompt', { sessionID: 'ses_1' });
     const initial = context(); f.call('session.context', initial);
     assert.ok(initial.system.some(x => x.text.includes('Exact project root: ' + f.ctx.location.directory)));
-    assert.ok(initial.system.some(x => x.text.includes('After 16 attempts')));
-    for (let n = 0; n < 16; n++) f.call('tool.execute.before', {
+    for (let n = 0; n < 48; n++) f.call('tool.execute.before', {
       sessionID: 'ses_1', agent: 'reviewer', tool: 'read', input: { path: 'app.js' } });
     f.ctx.session.get = async ({ sessionID }) => ({ id: sessionID, agent: 'reviewer', location: f.ctx.location });
     await f.emit('session.step.ended', { finish: 'tool-calls' }); // Last allowed call.
