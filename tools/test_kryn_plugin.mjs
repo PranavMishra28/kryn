@@ -302,16 +302,18 @@ test('Python startup flags preserve failed-check incident classification', async
   } finally { await cleanup(); f.remove(); }
 });
 
-test('plain test fallbacks cannot hide a failed exit', async () => {
+test('plain test output cannot hide a failed exit', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const call = command => f.call('tool.execute.before', {
     sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
   try {
     for (const command of ['pytest 2>&1 || true',
       'cd /workspace && python -m pytest test_existing.py -v 2>&1 || echo "unavailable"',
-      'python3 -B -m unittest -v || true', 'npm test || echo failed']) {
+      'python3 -B -m unittest -v || true', 'npm test || echo failed',
+      'cd /workspace && python -m unittest discover -v 2>&1 | head -50',
+      'pytest -q | tail -5', 'pytest|head -1']) {
       assert.equal(masksCheckFailure(command), true);
-      assert.throws(() => call(command), /fallback hides failure/);
+      assert.throws(() => call(command), /hides failure/);
     }
     for (const command of ['python3 -B -m unittest -v', 'pytest', 'echo "pytest || true"',
       'python -m pytest || python test_existing.py', 'npm test && echo done']) {
