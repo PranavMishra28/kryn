@@ -88,7 +88,7 @@ test('native checkpoint receives bounded current evidence and detects changed di
     'model-written file bullets without backticks still retrieve current source');
 });
 
-test('a checkpoint file reference without a line number includes current head and tail', t => {
+test('a checkpoint file reference without a line number does not imply a full file read', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-context-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.writeFileSync(path.join(root, 'endurance.csv'), 'id,minutes\n' +
@@ -97,8 +97,7 @@ test('a checkpoint file reference without a line number includes current head an
   const messages = [{ content: `<conversation-checkpoint><summary>${summary}</summary></conversation-checkpoint>` }];
   const capsule = nativeCapsule(root, messages);
   assert.match(capsule, /id,minutes/);
-  assert.match(capsule, /e80,80/);
-  assert.match(capsule, /Middle omitted; read the current file/);
+  assert.doesNotMatch(capsule, /e80,80/);
   assert.ok(capsule.length <= 4000);
 });
 

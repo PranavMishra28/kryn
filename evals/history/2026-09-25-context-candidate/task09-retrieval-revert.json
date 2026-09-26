@@ -1,0 +1,17 @@
+{
+  "decision": "revert automatic file-tail retrieval from the unmerged context candidate",
+  "suite": "2026-09-19.2",
+  "task": "09",
+  "baseline_source": "8d5def3c15e0488c35e832d078efb9d26aa30e72",
+  "tail_candidate_source": "7f99d6fd523e8552fa2efc73867aee69d28c2598",
+  "source_difference": "The only functional source difference was tools/context_capsule.mjs: unnumbered checkpoint file references changed from the first 420 characters of the current file to a bounded head-and-tail excerpt.",
+  "baseline_pre_edit_reads": 8,
+  "candidate_pre_edit_reads": 2,
+  "baseline_first_tool_turns_3_to_8": "read data/endurance.csv",
+  "candidate_first_tool_turns_3_to_8": "edit data/endurance.csv",
+  "both_external_grades": "FAIL",
+  "both_final_csvs": "correct",
+  "interpretation": "Showing all rows of this small CSV in the checkpoint may have encouraged the agent to edit without a fresh read. The paired runs are stochastic, so this is a plausible mechanism, not proven causation. The tail change did not meet the declared read-before-edit gate and has been removed from the candidate source.",
+  "raw_baseline": "/private/tmp/kryn-64-retest/evals/runs/context64-c34-09-endurance",
+  "raw_candidate": "/private/tmp/kryn-64-retest/evals/runs/context64-c37-09-tail"
+}
