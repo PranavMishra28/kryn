@@ -255,7 +255,7 @@ test('pre-diagnosis saved check records remain readable after upgrade', async ()
   } finally { await cleanup(); f.remove(); }
 });
 
-test('context hook masks unsupported Decisions only in the model-facing request', async () => {
+test('context hook masks unsupported Decisions and superseded actions only in the model-facing request', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Keep the 64K context tier for now.' } });
@@ -268,6 +268,26 @@ test('context hook masks unsupported Decisions only in the model-facing request'
     assert.doesNotMatch(event.messages[0].content, /Agent decided to rewrite tests/);
     assert.match(event.messages[0].content, /## Decisions\n- \(none verified from recorded user requests\)/);
     assert.ok(event.system.some(part => part.text.includes('model-facing checkpoint omitted 1')));
+    const newerSummary = '## Work State\n### Completed\n- API done\n### Active\n- Implement UI next\n' +
+      '## Next Move\n1. Implement UI next\n## Relevant Files\n- `web/app.js`: UI\n';
+    await f.emit('session.compaction.ended', { text: newerSummary });
+    const newer = { content: nativeSummary(newerSummary).replace('<recent-context>\n\n</recent-context>',
+      '<recent-context>\n[Assistant]: UI done; browser Save failed.\n</recent-context>') };
+    const resumed = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {}, messages: [newer] };
+    f.call('session.context', resumed);
+    assert.match(newer.content, /Implement UI next/, 'raw native history remains untouched');
+    assert.doesNotMatch(resumed.messages[0].content, /Implement UI next/);
+    assert.match(resumed.messages[0].content, /### Completed\n- API done/);
+    assert.match(resumed.messages[0].content, /browser Save failed/);
+    assert.ok(resumed.system.some(part => part.text.includes('withheld 2 older Active/Next Move')));
+    const generated = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {},
+      messages: structuredClone(resumed.messages) };
+    f.call('session.generate', generated);
+    assert.ok(generated.system.some(part => part.text.includes('CHECKPOINT WORK STATE AND NEXT MOVE MAY BE STALE')),
+      'a second hook on the model-facing copy retains authenticated checkpoint evidence');
+    assert.doesNotMatch(generated.messages[0].content, /Implement UI next/);
+    assert.ok(!generated.system.some(part => part.text.includes('withheld 2 older Active/Next Move')),
+      'a second hook does not report already-withheld claims as newly removed');
   } finally { await cleanup(); f.remove(); }
 });
 

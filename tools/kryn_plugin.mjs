@@ -2,7 +2,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { boundedExcerpt, contextCapsule, maskUnverifiedDecisions, workspaceStamp } from './context_capsule.mjs';
+import { boundedExcerpt, contextCapsule, maskCheckpointClaims, workspaceStamp } from './context_capsule.mjs';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
@@ -295,7 +295,7 @@ export default {
           (pin.schema === 1 && pin.workflowScope !== undefined))
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
-        checkpointStamp: null, checkpointHash: null,
+        checkpointStamp: null, checkpointHash: null, modelFacingCheckpointHash: null,
         continuityFile: path.join(folders.continuity, key + '.json'), recorded: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
@@ -455,12 +455,18 @@ export default {
       event.system.push({ type: 'text', text: TRACKER_GUIDANCE });
       if (item.previousTracker?.native_checkpoint_event) event.system.push({ type: 'text', text:
         'Native continuity evidence: this saved session has an observed native compaction event from a previous KRYN plugin process. Do not claim that no compaction occurred. Its Work State and Next Move are historical claims, not proof that listed actions ran; reconcile retained recent-context and current files. This marker does not prove edits, tests, browser checks, or a fresh native session.' });
-      const checkpointIdentity = item.checkpointHash ?? (item.checkpoint ? 'legacy' : null);
+      const checkpointIdentity = item.checkpointHash ?
+        [item.checkpointHash, ...(item.modelFacingCheckpointHash ? [item.modelFacingCheckpointHash] : [])] :
+        (item.checkpoint ? 'legacy' : null);
       const capsule = contextCapsule(ctx.location.directory, event.messages, item.checkpointStamp, item.recorded, firstCompaction, checkpointIdentity);
       if (capsule) event.system.push({ type: 'text', text: capsule });
-      const maskedDecisions = maskUnverifiedDecisions(event.messages, item.recorded, checkpointIdentity);
-      if (maskedDecisions) event.system.push({ type: 'text', text: 'The model-facing checkpoint omitted ' + maskedDecisions +
+      const masked = maskCheckpointClaims(event.messages, item.recorded, checkpointIdentity);
+      if (masked.decisions || masked.superseded)
+        item.modelFacingCheckpointHash = masked.maskedHash;
+      if (masked.decisions) event.system.push({ type: 'text', text: 'The model-facing checkpoint omitted ' + masked.decisions +
         ' unverified Decision claim(s). The original checkpoint and user requests remain in native history. Do not repeat those claims as user choices without a matching user quote.' });
+      if (masked.superseded) event.system.push({ type: 'text', text: 'The model-facing checkpoint withheld ' + masked.superseded +
+        ' older Active/Next Move section(s) because native recent-context contains later work. The original checkpoint remains in native history. Reconcile recent work and current evidence before choosing the next action.' });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
       if (READ_ROLES.has(event.agent) || event.agent === 'plan') event.system.push({ type: 'text', text:
@@ -746,6 +752,7 @@ export default {
           item.turn.compactions = count(item.turn.compactions + 1);
           item.checkpoint = event.id;
           item.checkpointHash = typeof event.data?.text === 'string' ? sha(event.data.text) : null;
+          item.modelFacingCheckpointHash = null;
           const stamp = workspaceStamp(ctx.location.directory);
           item.checkpointStamp = stamp.complete ? stamp.stamp : null;
           tracker(item);
