@@ -138,7 +138,7 @@ export function isCheck(command) {
 export function masksCheckFailure(command) {
   if (typeof command !== 'string' || command.length > 4096) return false;
   const plain = command.trim().replace(/^cd\s+(?:\/[A-Za-z0-9_./-]+|\.[A-Za-z0-9_./-]*)\s*&&\s*/, '');
-  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)\b|pytest\b|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)\b|node\s+--test\b|go\s+test\b|cargo\s+test\b)[^'"`\n\r;|]*\s*\|(?:\|\s*(?:true\b|echo\b)|\s*(?:head|tail)(?:\s|$))/.test(plain);
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)\b|pytest\b|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)\b|node\s+--test\b|go\s+test\b|cargo\s+test\b)[^'"`\n\r;|]*\s*(?:\|(?:\|\s*(?:true\b|echo\b)|\s*(?:head|tail)(?:\s|$))|;\s*(?:echo\b|printf\b|true\b|:(?:\s|$)))/.test(plain);
 }
 function verificationLedger(saved) {
   if (saved === undefined) return { schema: 1, coverage: 'observed_checks_only', acceptance: 'unestablished',
