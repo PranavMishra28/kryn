@@ -483,7 +483,9 @@ def route_coverage(audit, exports, started_ms, finished_ms):
         return (message.get("type") == "compaction" and message.get("status") == "completed"
                 and bool(message.get("recent")) and
                 summary.startswith("## Objective\n- Continue the recorded user request after reading the retained recent exchange.\n")
-                and summary.endswith("This checkpoint summarizes an empty older prefix. Do not infer that planning, edits, or checks in the retained recent exchange did not happen."))
+                and summary.endswith((
+                    "This checkpoint summarizes an empty older prefix. Do not infer that planning, edits, or checks in the retained recent exchange did not happen.",
+                    "This checkpoint has no visible assistant or tool work in the selected older prefix. Do not infer that planning, edits, or checks in the retained recent exchange did not happen.")))
 
     def millis(record):
         return dt.datetime.fromisoformat(record["time"].replace("Z", "+00:00")).timestamp() * 1000
@@ -852,6 +854,11 @@ def self_check():
         recent="[User]: Build the app.\n[Assistant]: Planned the app.")
     assert route_coverage(trace, supplied, 900, 2500)["verified"]
     assert route_coverage(trace, supplied, 900, 2500)["plugin_supplied_compactions"] == 1
+    precise = copy.deepcopy(supplied)
+    precise[0]["data"]["messages"][-1]["summary"] = precise[0]["data"]["messages"][-1]["summary"].replace(
+        "This checkpoint summarizes an empty older prefix.",
+        "This checkpoint has no visible assistant or tool work in the selected older prefix.")
+    assert route_coverage(trace, precise, 900, 2500)["verified"]
     missing_recent = copy.deepcopy(supplied)
     missing_recent[0]["data"]["messages"][-1]["recent"] = ""
     assert not route_coverage(trace, missing_recent, 900, 2500)["verified"]
