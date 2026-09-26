@@ -23,8 +23,27 @@
     "step09_driver_sha256": "0f0fb8ced56cd831552b232469bbe6b4a9467b785276060e9490bd31c308629f",
     "step08_recovery_sha256": "e50d85ab8492a91b4bc88d6f299b9e5368046a976799a6e818b5f6a6d6ee907e"
   },
-  "offline": "First revision passed full make check, clean package smoke and CI. Revised source passed focused plugin tests; full check, package smoke and CI remain pending.",
+  "offline": "Revised source passed focused plugin tests, full make check, clean package smoke and PR CI. The installed private composition passed the same local checks and the frozen Task09 run.",
   "limits": "Only native edit is guarded. Shell writes, native write, non-regular/symlink files, and files larger than 1 MiB are not covered. A single stochastic task run does not establish reliable improvement over baseline or whole-agent correctness. 64K remains experimental with guard and rollback.",
-  "next_gate": "Native-validate the revised guard, rerun full checks and CI, merge the narrow fix, then complete a fresh coding/UI compaction-and-restart run. Keep 64K private and experimental.",
-  "review_correction": "Independent PR review found two real holes in the first implementation: completed edits refreshed the read fingerprint, and the fingerprint was captured only after read completion. The revised source fingerprints before native read, accepts it only if unchanged after completion, and never counts edits as reads. Focused regression tests cover both failures. Frozen u09g ran the earlier guard revision; this correction still needs native validation."
+  "next_gate": "Merge the narrow guard after updated CI, then complete a fresh coding/UI task through compaction, restart, browser checks and independent review. Keep 64K private and experimental.",
+  "review_correction": "Independent PR review found two real holes in the first implementation: completed edits refreshed the read fingerprint, and the fingerprint was captured only after read completion. The revised source fingerprints before native read, accepts it only if unchanged after completion, and never counts edits as reads. Focused regressions pass. The corrected installed private 64K build passed a separate frozen ten-turn native Task09 trial.",
+  "frozen_task09_corrected": {
+    "run": "u09h",
+    "private_source_revision": "b93670874f3b230f3fc7e271393c6c77c909fd5d",
+    "grade": "PASS",
+    "external_checkpoints_passed": 10,
+    "complete_native_drivers": 10,
+    "completed_native_compactions": 10,
+    "successful_edits_with_current_read": 10,
+    "edit_first_refusals_recovered": 3,
+    "real_two_test_results_passed": 10,
+    "git_diffs_observed": 10,
+    "sampled_pressure": "normal",
+    "swap_growth_bytes": 0,
+    "failed_test_attempts_before_success": 17,
+    "quality_limit": "Repeated attempts to run unavailable pytest/tests paths wasted time. Each turn eventually ran the existing two tests with exit 0 and complete output. This remains one run, not a reliability distribution or long coding/UI qualification.",
+    "grade_sha256": "c54c774d26c19b94e39f0855aa813c48e4ed237efd1902c8a119f0acf44d1215",
+    "operator_audit_sha256": "c16691e233de57770956bce75329f2b0cb908e5b89b238dcbfce4e10cf69b56a",
+    "step04_driver_sha256": "58455dccad00d6976ab88b3f868b13f300f6f916c32ac80989925e028d5e3743"
+  }
 }
