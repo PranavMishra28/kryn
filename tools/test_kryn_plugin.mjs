@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import plugin, { validatedOptions, assertLocal, isCheck, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
+import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
 import { permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -560,6 +560,25 @@ test('a literal cd wrapped test reaches the native observed-check ledger', async
     f.call('session.compaction', context);
     assert.equal(f.read('trackers')[0].verification.checks[0].state, 'passed');
     assert.ok(context.system.some(item => item.text.includes('passed=1')));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('plain test fallbacks cannot hide a failed exit', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const call = command => f.call('tool.execute.before', {
+    sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
+  try {
+    for (const command of ['pytest 2>&1 || true',
+      'cd /workspace && python -m pytest test_existing.py -v 2>&1 || echo "unavailable"',
+      'python3 -B -m unittest -v || true', 'npm test || echo failed']) {
+      assert.equal(masksCheckFailure(command), true);
+      assert.throws(() => call(command), /fallback hides failure/);
+    }
+    for (const command of ['python3 -B -m unittest -v', 'pytest', 'echo "pytest || true"',
+      'python -m pytest || python test_existing.py', 'npm test && echo done']) {
+      assert.equal(masksCheckFailure(command), false);
+      assert.doesNotThrow(() => call(command));
+    }
   } finally { await cleanup(); f.remove(); }
 });
 
