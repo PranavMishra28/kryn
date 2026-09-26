@@ -181,6 +181,8 @@ test('observed checks survive compaction and restart without promoting prose or 
     assert.equal(checks().checks[0].state, 'stale', 'a restart cannot attest unchanged project files');
     assert.ok(!event.system.some(item => item.text.includes('Unresolved check references:')));
     assert.ok(event.system.some(item => item.text.includes('Stale alone is not unresolved debt or a rerun demand')));
+    assert.ok(event.system.some(item => item.text.includes('Historical stale check references') &&
+      item.text.includes('previously passed; current result unknown') && item.text.includes('at msg_')));
     run('npm test', { exit: 0 });
     f.call('session.prompt', { sessionID: 'ses_1' });
     assert.equal(checks().checks[0].state, 'stale');
@@ -314,9 +316,12 @@ test('direct Python test script results enter the observed-check ledger across r
     f.call('tool.execute.after', { ...call, status: 'completed', result: { output: { exit: 0 } } });
     assert.equal(f.read('trackers')[0].verification.checks[0].state, 'passed');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
-    f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    const context = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', context);
     assert.equal(f.read('trackers')[0].verification.checks[0].state, 'stale',
       'a restarted process must not claim the prior test still passes');
+    assert.ok(context.system.some(item => item.text.includes('Historical stale check references') &&
+      item.text.includes('previously passed; current result unknown') && item.text.includes('at msg_script')));
   } finally { await cleanup(); f.remove(); }
 });
 
