@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private Mac qualification follow-up; no public release, tag, version change, or frontier-equivalence claim.",
+  "task09_read_before_edit": {
+    "paired_baseline_vs_tail": "8/10 versus 2/10; candidate file-tail retrieval reverted in PR #11 and private installed source",
+    "post_revert_default": "4/10 in one separate full run; exact CSV/checkpoints passed but procedure failed",
+    "fast_single_run": "10/10, but 17 tool errors and no general coding/UI promotion",
+    "deterministic_read_barrier": "Full ten-turn private run had five denied blind edits and frozen grade FAIL; later two structural screens also incurred edit errors. Candidate discarded; no further prompt rules added.",
+    "read_barrier_grade_sha256": "1452daad6dbc17b51278f910879f8e8e15e04aa04f91728d82233de9b5aed7a0"
+  },
+  "task06_coding_ui": {
+    "final_application_grade": "PASS after operator correction and agent recovery; original tests and isolated Chrome browser flows passed",
+    "final_grade_sha256": "32731cac37f2d65ba17d3dea44b1dc4b200d4cbbaef6fc4a462983049af76ebd",
+    "final_browser_sha256": "3ca131f21928c55e66251d69dd9f6b2d85eddb921230dde20640e928667692b4",
+    "uninterrupted_workflow": "FAIL: stage5 discarded uncommitted form code with git checkout; stage6 restored it from an evaluator patch. Raw compactions had stale Next Move and unsupported Decisions; restarted handoff and local Reviewer were unreliable."
+  },
+  "continuity_diagnosis": {
+    "conservative_checkpoint": "Private deterministic checkpoint avoided unsupported Decisions text but its restarted handoff still ignored a failed browser report; not promoted.",
+    "conservative_handoff_events_sha256": "eec1e27a4f5c26afee363adde9e5b19db19baf264c205790692b14053cc70e63",
+    "fresh_no_compaction_control": "FAIL: fresh Ask read narrowOverflow=true and 457px scroll width at a 390px viewport, then incorrectly called the responsive check passed. Compaction is not the sole cause.",
+    "fresh_control_events_sha256": "d6e26ad1f80c94780bf00d4d582197f9889f9cb8ed0d4d1765a5dd43fbfd2082"
+  },
+  "safe_daily_fixes": {
+    "merged_main": [
+      "#13 reject plain shell test fallbacks hiding failed exits",
+      "#14 keep Reviewer noninteractive"
+    ],
+    "private_64k_composed_source": "b0214cba091951054f992a5aa5152e4f953a2ae0",
+    "branch": "candidate/64k-safe-update",
+    "wheel_sha256": "fd9586331ed6ae64256b42b35a08261e1ae3df0cdfd840d1f18254560c19ad38",
+    "qualification": "make check PASS; private wheel package check PASS; guarded Reviewer finished with no question/tool errors, normal pressure/zero swap growth, but substantive review quality FAIL; stable installed-source smoke returned READY with no tool errors, normal pressure/zero swap growth.",
+    "reviewer_driver_sha256": "ddfd6fe7c295309410c629e962b2485cc82a60544c7973cb84986d193cb28e93",
+    "installed_smoke_driver_sha256": "59b7229c1e432aaff4269a5c8fae6cc310f1f39aeb004285320b6b5bb6d03e01",
+    "owner_install": "Private candidate active from persistent owned package environment; exact prior fd77cd5 restored in rollback exercise, then b0214cb reinstalled. Doctor healthy at 65536, browser/search 2/2; terminal launch reached Agent and exited cleanly. Public release profile remains unchanged."
+  },
+  "remaining_gates": {
+    "semantic_compaction_and_restart": "FAIL",
+    "uninterrupted_frozen_coding_ui_with_independent_review": "FAIL",
+    "task09_read_before_edit_default": "FAIL",
+    "49k_64k_96k_128k_representative_tier_comparison": "INCOMPLETE",
+    "clean_non_owner_install": "BLOCKED: about 30 GiB free, below model download plus 40 GiB reserve; no unrelated data removed",
+    "45_to_60_minute_active_endurance": "UNRUN on final qualified profile"
+  },
+  "next_blocker": "Use deterministic acceptance evidence for browser/check outcomes and qualify it on an uninterrupted long coding/UI task. Do not promote a public release on current evidence."
+}
