@@ -1,0 +1,45 @@
+{
+  "scope": "Private paired Task12 screens on the installed guarded 64K profile; fixed frozen prompt/artifact per pair, one run per arm; no public release or model-quality claim",
+  "change": "Remove browser-call and Reviewer-read counters from per-generation system guidance; keep verification wording, observed-check ledger, native Reviewer hard limit, compaction and raw history",
+  "source": {
+    "baseline_private": "089042d5589c0d2a7bf5e6a29e90e15d8b783a19",
+    "candidate_private": "6117aad059aeae4a8f528a79d59a133b61168fa8",
+    "raw_runs": "evals/runs/t12browserinstalled1, t12stableguidance1, t12reviewstable1 (ignored, including session exports and screenshots)"
+  },
+  "browser_diagnosis": {
+    "artifact_web_app_js_sha256": "2c57780b0db4fc8817ebed86d34543d2def7fd08021911410634b517b15d82e6",
+    "prompt_sha256": "98025b03f328a91c15bc25dce3d15c8826522bfa7c2022b4d1917d8208e5b783",
+    "baseline_driver_sha256": "5d399f81be57396c165f7b6f486871b8296212c84b4f4b379e0bb7ff60f972e9",
+    "candidate_driver_sha256": "bd7996e43e07fa63fcda3d3d831f33d4c8cdbeda87e3210dabb83b915ae6490f",
+    "baseline": "Completed correct diagnosis in 141.893 seconds, 16 tool calls, 15 generations, 50,088 uncached input tokens and 161,792 cache-read tokens; last generation 6,839 uncached/10,240 cached",
+    "candidate": "Completed correct diagnosis in 156.544 seconds, 22 tool calls, 16 generations, 35,503 uncached input tokens and 223,232 cache-read tokens; last generation 1,583 uncached/18,432 cached",
+    "interpretation": "Prompt-prefix reuse improved, but wall time did not because the candidate made more calls and generated more output; this pair does not establish an end-to-end browser speedup"
+  },
+  "fresh_reviewer": {
+    "baseline_driver_sha256": "78be70e14952116edfcf79fe9b4a7d89232204bfc3d6e3a5b816a2b5f320203c",
+    "candidate_driver_sha256": "5e95e92df032797ef59666e6b58f211d74b4e1b18c89398f617eab1f386c57fa",
+    "baseline": "Timed out at 187.740 seconds after 17 tool calls; 131,099 uncached input tokens, 65,536 cache-read tokens; last generation 17,984 uncached/4,096 cached",
+    "candidate": "Completed in 148.210 seconds after 21 tool calls; 39,251 uncached input tokens, 276,480 cache-read tokens; last generation 181 uncached/26,624 cached",
+    "quality": "FAIL. The completed local review alleged XSS although the UI uses createTextNode, treated duplicate IDs caught by Store.add as unhandled, and missed a reproduced URL-encoded ID PATCH failure. Completion and cache improvement are not review correctness."
+  },
+  "frozen_task12_follow_up": {
+    "browser_report_sha256": "e0de5d9931f6bf55a6a7df3a839f59f5dbc3c05e161e1dd6f9821ac924f3294e",
+    "artifact": "PASS 7/7 unchanged independent browser flows, both viewports, real 503/retry, upload, persistent edit, exact filter, export, seeds and no unhandled page errors; original automatic grader 2/2",
+    "agent_completion": "FAIL three resumed Agent turns timed out at 607.855, 247.850 and 187.806 seconds despite source progress; all guarded, normal sampled pressure and zero swap growth",
+    "compaction_restart": "One native manual compaction completed and a restarted same-session Agent read and edited current HTML, but its turn timed out. Checkpoint summary described only an older compacted prefix; newer turns remained in native history. Full semantic continuity and a completed post-restart turn remain unqualified.",
+    "independent_source_review": "FAIL. An operator reproduced POST 201 followed by PATCH 400 for ID 'review space id' because the client percent-encodes the path while the server compares against an unencoded ID. Model-created side test scripts also contain stale absolute paths/ports."
+  },
+  "resources": "Both paired screens and Task12 turns sampled normal host pressure with no swap growth; these short runs do not prove sustained 64K reliability or a 49K–128K useful-tier choice.",
+  "gates": {
+    "prompt_cache_mechanism": "PASS narrow paired evidence",
+    "coding_ui_artifact": "PASS frozen browser and automatic checks; source review FAIL",
+    "bounded_agent_completion": "FAIL",
+    "semantic_compaction_restart": "UNQUALIFIED",
+    "accurate_independent_model_review": "FAIL",
+    "clean_nonowner_install": "UNQUALIFIED",
+    "endurance": "FAIL",
+    "context_tier": "64K private experiment with guard and rollback; public 49K unchanged",
+    "release": "CLOSED"
+  },
+  "next_blocker": "Use smaller independently graded Agent milestones or a bounded turn-completion mechanism, then repair the reproduced source defect and prove a completed post-compaction restart and accurate review. Do not add more prompt rules for the same timeout."
+}

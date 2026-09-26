@@ -228,7 +228,7 @@ export default {
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
-        reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0, browserCalls: 0,
+        reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
         verification: verificationLedger(), previousTracker: null, shellRepeat: null,
         recentReads: new Map(), pendingReads: new Map() };
       const previous = path.join(folders.trackers, key + '.json');
@@ -338,7 +338,7 @@ export default {
       item.recentReads.clear();
       item.pendingReads.clear();
       item.shellRepeat = null;
-      item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0; item.browserCalls = 0;
+      item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
       const text = event.prompt?.text;
       item.userRequest = typeof text === 'string' ? (text.length <= 6000 ? text :
@@ -357,7 +357,7 @@ export default {
       if (event.agent === 'ask') event.system.push({ type: 'text', text: 'Ask mode: investigate with read and search tools, then answer with evidence and uncertainty. Do not edit files or run commands. Switch to Agent for implementation.' });
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
-        'Verification observations: this prompt has observed ' + item.browserCalls + ' completed browser calls; calls alone do not prove acceptance. Direct browser calls or a delegated Browse result must supply actual observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation.' });
+        'Verification observations: browser calls alone do not prove acceptance. Direct browser calls or a delegated Browse result must supply actual observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation.' });
       if (options.observe) {
         const ledger = item.verification;
         const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
@@ -380,8 +380,7 @@ export default {
           (stale.length > 4 ? '; ' + (stale.length - 4) + ' older records retained in the private tracker.' : '.') });
       }
       if (event.agent === 'reviewer') {
-        event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nReview progress: ' + item.reviewCalls +
-          ' tool attempts, ' + item.reviewCompactions + ' compactions. After 48 attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
+        event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nAfter 48 tool attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
         if (item.reviewCalls >= 48 || item.reviewCompactions >= 2) {
           item.reviewClosing = true;
           for (const name of Object.keys(event.tools ?? {})) delete event.tools[name];
@@ -565,7 +564,6 @@ export default {
         }
       }
       observeCheck(item, event);
-      if (event.tool.startsWith('browser_') && event.status === 'completed') item.browserCalls++;
       const t = item.turn;
       if (event.status === 'completed') t.tool_calls = count(t.tool_calls + 1);
       // Native session.tool.failed is authoritative, including errors that skip
