@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import plugin, { validatedOptions, assertLocal, isCheck, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
+import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
 import { permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -299,6 +299,25 @@ test('Python startup flags preserve failed-check incident classification', async
     await f.emit('session.execution.succeeded');
     assert.equal(f.read('incidents')[0].check_failures, 1);
     assert.ok(f.read('incidents')[0].triggers.includes('check_failed'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('plain test fallbacks cannot hide a failed exit', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const call = command => f.call('tool.execute.before', {
+    sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
+  try {
+    for (const command of ['pytest 2>&1 || true',
+      'cd /workspace && python -m pytest test_existing.py -v 2>&1 || echo "unavailable"',
+      'python3 -B -m unittest -v || true', 'npm test || echo failed']) {
+      assert.equal(masksCheckFailure(command), true);
+      assert.throws(() => call(command), /fallback hides failure/);
+    }
+    for (const command of ['python3 -B -m unittest -v', 'pytest', 'echo "pytest || true"',
+      'python -m pytest || python test_existing.py', 'npm test && echo done']) {
+      assert.equal(masksCheckFailure(command), false);
+      assert.doesNotThrow(() => call(command));
+    }
   } finally { await cleanup(); f.remove(); }
 });
 

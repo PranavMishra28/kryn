@@ -116,6 +116,12 @@ export function isCheck(command) {
   if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
   return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
 }
+// Refuse only plain check commands whose shell fallback would hide the check's exit.
+export function masksCheckFailure(command) {
+  if (typeof command !== 'string' || command.length > 4096) return false;
+  const plain = command.trim().replace(/^cd\s+(?:\/[A-Za-z0-9_./-]+|\.[A-Za-z0-9_./-]*)\s*&&\s*/, '');
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)\b|pytest\b|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)\b|node\s+--test\b|go\s+test\b|cargo\s+test\b)[^'"`\n\r;|]*\s+\|\|\s*(?:true\b|echo\b)/.test(plain);
+}
 function verificationLedger(saved) {
   if (saved === undefined) return { schema: 1, coverage: 'observed_checks_only', acceptance: 'unestablished',
     complete: true, generation: 0, checks: [] };
@@ -436,6 +442,8 @@ export default {
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
         throw new Error('KRYN Browse tool is outside the qualified surface');
+      if (event.tool === 'shell' && masksCheckFailure(event.input?.command))
+        throw new Error('KRYN refuses a check command whose || fallback hides failure. Run the check by itself, then inspect its exit status.');
       // Catch direct process-name kills without parsing quotes or heredocs.
       // This is not whole-process isolation.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
