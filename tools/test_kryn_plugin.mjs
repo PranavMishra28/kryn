@@ -202,6 +202,51 @@ test('observed checks survive compaction and restart without promoting prose or 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('failed test runner and bounded diagnosis survive restart without retaining tool output', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_1', id: 'call_1', tool: 'shell',
+      input: { command: 'python -m pytest test_existing.py -v', workdir: f.root } };
+    f.call('tool.execute.before', event);
+    f.call('tool.execute.after', { ...event, status: 'completed', result: { output: {
+      status: 'completed', exit: 1, output: 'No module named pytest\nSYNTHETIC_SECRET_SOURCE' } } });
+    let record = f.read('trackers')[0].verification.checks[0];
+    assert.equal(record.runner, 'pytest');
+    assert.equal(record.exit_code, 1);
+    assert.equal(record.diagnostic, 'pytest unavailable');
+    assert.doesNotMatch(JSON.stringify(record), /SYNTHETIC_SECRET_SOURCE|test_existing\.py/);
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const handoff = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {}, messages: [] };
+    f.call('session.context', handoff);
+    const text = handoff.system.map(part => part.text).join('\n');
+    assert.match(text, /runner=pytest exit=1 reason=pytest unavailable/);
+    assert.doesNotMatch(text, /SYNTHETIC_SECRET_SOURCE|test_existing\.py/);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('pre-diagnosis saved check records remain readable after upgrade', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_1', id: 'call_1', tool: 'shell',
+      input: { command: 'npm test', workdir: f.root } };
+    f.call('tool.execute.before', event);
+    f.call('tool.execute.after', { ...event, status: 'completed', result: { output: { status: 'completed', exit: 1 } } });
+    await cleanup();
+    const folder = path.join(f.root, 'learning', 'trackers');
+    const file = path.join(folder, fs.readdirSync(folder)[0]);
+    const old = JSON.parse(fs.readFileSync(file, 'utf8'));
+    for (const key of ['runner', 'exit_code', 'diagnostic']) delete old.verification.checks[0][key];
+    fs.writeFileSync(file, JSON.stringify(old) + '\n');
+    cleanup = await plugin.setup(f.ctx);
+    f.call('session.context', { sessionID: 'ses_1', agent: 'ask', system: [], tools: {}, messages: [] });
+    const check = f.read('trackers')[0].verification.checks[0];
+    assert.equal(check.state, 'failed');
+    assert.equal(check.runner, 'unknown');
+    assert.equal(check.exit_code, null);
+    assert.equal(check.diagnostic, null);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('context hook masks unsupported Decisions only in the model-facing request', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
@@ -877,7 +922,7 @@ test('one native task yields metadata-only unknown outcome; nonzero shell exit i
     assert.equal(records[0].family, 'json_cli');
     assert.equal(f.read('trackers')[0].counts.retries, 1);
     const all = JSON.stringify([...records, ...f.read('trackers')]);
-    for (const value of ['SYNTHETIC_SECRET', 'PRIVATE_PROMPT', 'https://', 'python3', 'pytest', f.root])
+    for (const value of ['SYNTHETIC_SECRET', 'PRIVATE_PROMPT', 'https://', 'python3 -m unittest', 'pytest -q', f.root])
       assert.equal(all.includes(value), false);
     assert.deepEqual(Object.keys(records[0]).sort(), ['schema', 'task_id', 'champion_revision', 'profile_id', 'state', 'wall_seconds',
       'tool_calls', 'tool_errors', 'check_passes', 'check_failures', 'compactions', 'corrections', 'output_tokens', 'family', 'completed_at'].sort());

@@ -173,6 +173,21 @@ function simpleCheck(command) {
   return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(value) ? value : null;
 }
 export const isCheck = command => simpleCheck(command) !== null;
+const CHECK_RUNNERS = new Set(['pytest', 'unittest', 'npm', 'pnpm', 'yarn', 'bun', 'node', 'go', 'cargo', 'unknown']);
+const CHECK_DIAGNOSTICS = new Set(['pytest unavailable', 'test failure', 'test error', 'timeout', 'tool error', 'nonzero exit']);
+function checkRunner(command) {
+  const observed = simpleCheck(command);
+  if (!observed) return 'unknown';
+  const python = /^python(?:3(?:\.\d+)?)?(?:\s+-[BEI]+)*\s+-m\s+(pytest|unittest)(?:\s|$)/.exec(observed);
+  return python?.[1] ?? (/^pytest(?:\s|$)/.test(observed) ? 'pytest' : observed.split(/\s+/)[0]);
+}
+function checkDiagnostic(output, runner) {
+  const text = typeof output?.output === 'string' ? output.output : '';
+  if (runner === 'pytest' && /No module named pytest|(?:command not found|not found): pytest/i.test(text)) return 'pytest unavailable';
+  if (/\b(?:FAILED|FAIL:|AssertionError)\b/.test(text)) return 'test failure';
+  if (/\b(?:ERROR:|Traceback|ModuleNotFoundError)\b/.test(text)) return 'test error';
+  return 'nonzero exit';
+}
 function verificationLedger(saved) {
   if (saved === undefined) return { schema: 1, coverage: 'observed_checks_only', acceptance: 'unestablished',
     complete: true, generation: 0, checks: [] };
@@ -184,7 +199,9 @@ function verificationLedger(saved) {
       new Set(saved.checks.map(check => check.key)).size !== saved.checks.length)
     throw new Error('KRYN saved verification ledger changed');
   for (const check of saved.checks) {
-    if (!check || Object.keys(check).sort().join(',') !== 'call_id_sha256,generation,key,kind,message_id,observed_at,state' ||
+    const keys = check && Object.keys(check).sort().join(',');
+    if (!check || !['call_id_sha256,generation,key,kind,message_id,observed_at,state',
+                   'call_id_sha256,diagnostic,exit_code,generation,key,kind,message_id,observed_at,runner,state'].includes(keys) ||
         typeof check.key !== 'string' || !HASH.test(check.key) || !['test', 'build', 'lint', 'typecheck'].includes(check.kind) ||
         !['pending', 'failed', 'passed', 'stale'].includes(check.state) ||
         !Number.isSafeInteger(check.generation) || check.generation < 0 || check.generation > saved.generation ||
@@ -192,6 +209,12 @@ function verificationLedger(saved) {
         !(check.message_id === null || typeof check.message_id === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(check.message_id)) ||
         !(check.call_id_sha256 === null || typeof check.call_id_sha256 === 'string' && HASH.test(check.call_id_sha256)))
       throw new Error('KRYN saved verification ledger changed');
+    if (keys === 'call_id_sha256,generation,key,kind,message_id,observed_at,state')
+      Object.assign(check, { runner: 'unknown', exit_code: null, diagnostic: null });
+    if (!CHECK_RUNNERS.has(check.runner) ||
+        !(check.exit_code === null || Number.isSafeInteger(check.exit_code) && check.exit_code >= 0 && check.exit_code <= 65535) ||
+        !(check.diagnostic === null || CHECK_DIAGNOSTICS.has(check.diagnostic)))
+      throw new Error('KRYN saved verification detail changed');
   }
   return saved;
 }
@@ -213,7 +236,7 @@ function checkIdentity(event, directory) {
   let workdir = path.resolve(directory, typeof event.input.workdir === 'string' ? event.input.workdir : directory);
   try { workdir = fs.realpathSync(workdir); } catch { /* A failed directory remains a distinct unverified check. */ }
   const kind = /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(build|lint|typecheck)(?:\s|$)/.exec(observed)?.[1] ?? 'test';
-  return { key: sha(JSON.stringify([directory, workdir, command])), kind,
+  return { key: sha(JSON.stringify([directory, workdir, command])), kind, runner: checkRunner(command),
     message_id: typeof event.messageID === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(event.messageID) ? event.messageID : null,
     call_id_sha256: typeof event.id === 'string' && event.id.length > 0 && event.id.length <= 160 ? sha(event.id) : null };
 }
@@ -334,7 +357,8 @@ export default {
       let check = ledger.checks.find(value => value.key === identity.key);
       if (!check) {
         if (ledger.checks.length === MAX_OBSERVED_CHECKS) { ledger.complete = false; tracker(item); return; }
-        check = { ...identity, state: 'pending', generation: ledger.generation, observed_at: Date.now() };
+        check = { ...identity, state: 'pending', generation: ledger.generation, observed_at: Date.now(),
+          exit_code: null, diagnostic: null };
         ledger.checks.push(check);
       }
       if (before) Object.assign(check, identity, { state: 'pending', generation: ledger.generation });
@@ -343,11 +367,18 @@ export default {
         ledger.complete = false; tracker(item); return;
       } else {
         const output = event.result?.output;
-        if (event.status === 'error' || output?.timeout === true) check.state = 'failed';
+        if (event.status === 'error' || output?.timeout === true) {
+          check.state = 'failed'; check.exit_code = null;
+          check.diagnostic = output?.timeout === true ? 'timeout' : 'tool error';
+        }
         else if (event.status !== 'completed' || !output ||
                  ![undefined, 'completed'].includes(output.status) ||
                  ![undefined, false].includes(output.timeout) || !Number.isInteger(output.exit)) check.state = 'pending';
-        else check.state = output.exit !== 0 ? 'failed' : check.generation === ledger.generation ? 'passed' : 'stale';
+        else {
+          check.state = output.exit !== 0 ? 'failed' : check.generation === ledger.generation ? 'passed' : 'stale';
+          check.exit_code = output.exit;
+          check.diagnostic = output.exit !== 0 ? checkDiagnostic(output, check.runner) : null;
+        }
       }
       check.observed_at = Date.now();
       tracker(item);
@@ -448,6 +479,8 @@ export default {
           'State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
         if (unresolved.length) event.system.push({ type: 'text', text: 'Unresolved check references: ' +
           unresolved.slice(0, 8).map(check => check.kind + ':' + check.state + ' #' + check.key.slice(0, 12) +
+            ' runner=' + check.runner + (check.exit_code === null ? '' : ' exit=' + check.exit_code) +
+            (check.diagnostic ? ' reason=' + check.diagnostic : '') +
             (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
           (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
       }
