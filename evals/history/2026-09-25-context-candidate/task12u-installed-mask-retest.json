@@ -1,0 +1,54 @@
+{
+  "candidate_source_revision": "8d5def3c15e0488c35e832d078efb9d26aa30e72",
+  "wheel_sha256": "bc706c1af763dedc6ab19da36aed82c2fcc08cde03b66b0ded80234e4422bb95",
+  "context_tokens": 65536,
+  "installation": "Clean-source private wheel installed transactionally on the existing owner Mac. Exact installed package check passed; guarded kryn bench protocol smoke passed; doctor reported healthy idle Qwen3.5-9B-6bit at 65,536 context, normal pressure, 415435325-byte swap, connected browser/search. This is not a non-owner clean install.",
+  "fixture": "Fresh frozen Task12 Plan then two Ask turns in one saved native session, with a native-server restart between stages and compaction after every stage. Raw exports, prompts, telemetry and plugin snapshots remain ignored under evals/runs/context64-c34-12u/ in the private 64K worktree.",
+  "stages": {
+    "plan": {
+      "wall_seconds": 62.927,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 18853,
+      "tool_calls": 14,
+      "tool_errors": 0,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "0cb50daf7bbebe186ca305d0d56d0c687e76e98168612be221c0519e9645016a",
+      "native_export_sha256": "f829368a3aca39ab9d1130711c9d243b2d356cefe6db15093c636c41bc293e1d"
+    },
+    "ask_recall": {
+      "wall_seconds": 59.062,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 2675,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "8d80d516e0af65dba5c4eb05e5793ddaa61dffd6c25d8a1541a76aec0aa1fad2",
+      "native_export_sha256": "849ed3412148c60a3f530ec25ded3cd245aa5d8d9a2f016ff8207bd2d2278175"
+    },
+    "ask_provenance": {
+      "wall_seconds": 38.635,
+      "completed": true,
+      "native_compaction_completed": true,
+      "compaction_recent_characters": 2316,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "pressure_levels_observed": [1],
+      "swap_peak_growth_bytes": 0,
+      "driver_sha256": "46ba8013798240057e5e1caea590d5e96bcfc1cd01ec180f76ee9b3506d50a7a",
+      "native_export_sha256": "98ee80b965494815bffd17c6925e6799c34bc4a6b7d8489be7a078b15384b3b3"
+    }
+  },
+  "measured_active_stage_seconds": 160.624,
+  "narrow_result": "Plan made 14 read calls with zero tool errors. After the first restart, Ask recalled completed planning, acceptance criteria and the next coding action while correctly saying no implementation edits or tests ran. After the second restart, Ask explicitly said compaction occurred, Plan completed, no implementation edits/tests/server/browser checks ran, no user implementation choices were made, and checkpoint Active/Next Move bullets were plans rather than observed execution. The exact source regression verifies that SHA-bound request-copy masking preserves native raw history and retained recent context, including a cloned second hook.",
+  "semantic_limit": "Raw second and third native summaries still put agent/task choices in Decisions and planned backend coding in Active. The final Ask cited an inexact system-reminder phrase as direct provenance evidence. Native request-body capture did not independently prove which model-facing prompt clauses were used; the answer is consistent with the masking mechanism but is not a full semantic checkpoint acceptance pass.",
+  "resource_limit": "All stages ran on AC Power with normal sampled pressure and zero observed swap growth. Short sampled stages cannot establish 64K sustained reliability or quality versus other tiers.",
+  "remaining": [
+    "Run and independently verify a long autonomous coding/UI/reviewer workflow with truthful compaction and restart state.",
+    "Complete representative 49K/64K/96K/128K useful-tier quality, latency, pressure/swap and cold/warm correctness decision; retain guarded private 64K meanwhile.",
+    "Qualify clean non-owner installation and rollback before proposing a public release."
+  ]
+}
