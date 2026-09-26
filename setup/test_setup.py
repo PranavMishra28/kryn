@@ -119,6 +119,21 @@ class SetupChecks(unittest.TestCase):
                                 env={**setup.os.environ, "HOME": str(self.root)}, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.root / ".local/bin/localai").read_text(), release["launcher"])
+        config_file = install_root / "xdg/config/opencode/opencode.json"
+        original_config = config_file.read_text()
+        mismatched = json.loads(original_config)
+        next(item for item in mismatched["plugins"] if isinstance(item, dict))["package"] = str(install_root / "plugins/previous")
+        config_file.write_text(setup.encode(mismatched))
+        before_deploy = ((install_root / "client/deployment.json").read_bytes(),
+                         (self.root / ".local/bin/localai").read_bytes())
+        with patch.object(Path, "home", return_value=self.root), \
+             patch.object(sys, "argv", ["deploy_client.py", "--apply"]), \
+             patch.object(setup, "model_settings", return_value=server_settings), \
+             self.assertRaisesRegex(RuntimeError, "plugin reference differs"):
+            deploy_client.main()
+        self.assertEqual(((install_root / "client/deployment.json").read_bytes(),
+                          (self.root / ".local/bin/localai").read_bytes()), before_deploy)
+        config_file.write_text(original_config)
         shim = directory / "tools/native-shell"
         self.assertEqual(shim.read_bytes(), native_client.SHELL_SHIM_BYTES)
         self.assertTrue(os.access(shim, os.X_OK))
