@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-26",
+  "run": "Private frozen Task06 u06t on installed 64K candidate 249d10a; raw fixture, transcripts, DB and screenshots remain outside the repository",
+  "candidate_source": "249d10a28fc704162daa4b376d2971d12ecc5ed4",
+  "stages": [
+    {
+      "name": "Agent implementation",
+      "completed": true,
+      "wall_seconds": 130.191,
+      "native_compaction_completed": true,
+      "driver_sha256": "7f6d46e0c0e6d65788626df64471550eff073ba74d830ea1b6b0df089b7255e3",
+      "source_review": "FAIL: non-existent input ID selectors made success throw; unrelated import/filter/export handlers included an undefined variable. Original tests passed but did not exercise the UI."
+    },
+    {
+      "name": "Agent repair in saved session after native server restart",
+      "completed": true,
+      "wall_seconds": 95.44,
+      "native_compaction_completed": true,
+      "driver_sha256": "bf6a7f36bd30394c8bb0c9f424ef08f79170f8f88d913dcc94cc1523ede8fb61",
+      "source_review": "PASS for frozen scope: only app.js changed; real form name attributes used, extra handlers removed, entries rendered as text nodes in li elements, original tests and diff check passed."
+    },
+    {
+      "name": "Read-only Ask reconciliation after second compaction and restart",
+      "completed": true,
+      "wall_seconds": 28.883,
+      "driver_sha256": "1585e349f884d13211676b5f6fbb7459c9fb024fd1b5bc30dee54eb0234dfd8f",
+      "semantic_review": "PARTIAL: recovered criteria and current files without presenting Agent choices as user decisions, but incorrectly treated the exactly-one manual retry criterion as missing automatic retry logic. It correctly left browser checks unverified from its own read-only view."
+    }
+  ],
+  "independent_acceptance": {
+    "frozen_grade": "PASS, original automatic 2/2 and all six manual checks",
+    "grade_sha256": "132c597c5e83e7e24d9ba059734c233f6d23823d86594df52ef9c4e29307e8a2",
+    "browser_report_sha256": "de2b2ca7b0d9887d5fb6ccd359208c76bd683ad153693fbbabb9102c0da37521",
+    "operator_source_review_sha256": "2ef0b66b85a1519c4e3ff6e9b6926ec6e819295f324d808258a2392009e634f2",
+    "final_app_js_sha256": "e540e421fba885b85e072bec66b62c714d2f1dd38ad69ed10bfde5ca4e0ab872",
+    "observed": "Fresh isolated browser at 390x844 and 1280x800 saved/reloaded valid rows, showed labelled invalid minutes without persistence, injected real POST 503, preserved fields, then accepted one manual retry with one row; no page errors or unexpected failed network requests. Mobile and desktop screenshots were inspected."
+  },
+  "resource_result": "All three native stages ran on AC power with normal guarded pressure, no intervention and unchanged sampled swap; doctor after the run reported healthy idle 65,536 context and connected browser/search tools.",
+  "release_gate_result": {
+    "staged_coding_ui_artifact": "PASS after operator-found repair",
+    "fully_autonomous_one_shot": "FAIL: first Agent output had serious source defects",
+    "stored_semantic_checkpoint": "FAIL: both native summaries classified Agent implementation choices under user Decisions, despite explicit compaction guidance",
+    "model_facing_restart": "PARTIAL: false Decisions were withheld, but criterion interpretation was imperfect",
+    "local_automated_reviewer": "FAIL in earlier broad and focused trials; operator independently reviewed this artifact",
+    "context_tier_selection": "INCOMPLETE: 64K remains private experimental with guard and rollback",
+    "nonowner_install_and_final_profile_endurance": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  }
+}
