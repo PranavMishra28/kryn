@@ -761,11 +761,30 @@ test('Browse includes saved-output reading in its bounded browser/research tools
         f.call('session.' + hook, event);
         const expected = agent === 'browse' ? allowed
           : agent === 'audit' ? [...readOnly, 'subagent'].sort()
-          : ['ask', 'reviewer', 'explore'].includes(agent) ? readOnly : Object.keys(registry).sort();
+          : agent === 'reviewer' ? readOnly.filter(name => name !== 'question')
+          : ['ask', 'explore'].includes(agent) ? readOnly : Object.keys(registry).sort();
         assert.deepEqual(Object.keys(event.tools).sort(), expected, agent + ' ' + hook);
         for (const name of expected) assert.equal(event.tools[name], registry[name]);
       }
     }
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('Reviewer returns findings without opening a user question', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    for (const hook of ['context', 'generate', 'compaction']) {
+      const event = { sessionID: 'ses_1', agent: 'reviewer', system: [], tools: { read: {}, question: {} } };
+      f.call('session.' + hook, event);
+      assert.deepEqual(Object.keys(event.tools), ['read']);
+    }
+    const permission = { sessionID: 'ses_1', agent: 'reviewer', action: 'question', effect: 'allow' };
+    f.call('permission.evaluate', permission);
+    assert.equal(permission.effect, 'deny');
+    assert.match(permission.message, /return findings/);
+    assert.throws(() => f.call('tool.execute.before', {
+      sessionID: 'ses_1', agent: 'reviewer', tool: 'question', input: { questions: [] },
+    }), /return findings/);
   } finally { await cleanup(); f.remove(); }
 });
 
