@@ -215,6 +215,14 @@ test('failed test runner and bounded diagnosis survive restart without retaining
     assert.equal(record.exit_code, 1);
     assert.equal(record.diagnostic, 'pytest unavailable');
     assert.doesNotMatch(JSON.stringify(record), /SYNTHETIC_SECRET_SOURCE|test_existing\.py/);
+    const retry = { ...event, messageID: 'msg_2', id: 'call_2' };
+    f.call('tool.execute.before', retry);
+    record = f.read('trackers')[0].verification.checks[0];
+    assert.equal(record.state, 'pending');
+    assert.equal(record.exit_code, null);
+    assert.equal(record.diagnostic, null);
+    f.call('tool.execute.after', { ...retry, status: 'completed', result: { output: {
+      status: 'completed', exit: 1, output: 'No module named pytest' } } });
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     const handoff = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {}, messages: [] };
     f.call('session.context', handoff);

@@ -361,7 +361,8 @@ export default {
           exit_code: null, diagnostic: null };
         ledger.checks.push(check);
       }
-      if (before) Object.assign(check, identity, { state: 'pending', generation: ledger.generation });
+      if (before) Object.assign(check, identity, { state: 'pending', generation: ledger.generation,
+        exit_code: null, diagnostic: null });
       else if (check.call_id_sha256 !== identity.call_id_sha256) {
         // An older concurrent completion must not settle a newer invocation.
         ledger.complete = false; tracker(item); return;
