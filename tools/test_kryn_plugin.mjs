@@ -559,10 +559,13 @@ test('broad process-name kills are refused before native shell execution', async
                            'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python',
                            'echo ready; pkill -f server.py', 'false || killall Python',
                            'echo ready && sudo -n pkill -f server.py',
+                           'true && (pkill -f devserver)', 'true && { pkill -f devserver; }',
+                           'echo $(killall Python)',
+                           'echo `pkill -f devserver`',
                            'cd ./workspace && python -m taskboard_lite.server &\nsleep 2\npkill -f "taskboard_lite.server"',
                            'cat <<EOF\npkill is only data\nEOF\npkill -f server.py'])
       assert.throws(() => call(command), /broad process-name kills/);
-    for (const command of ['kill 1234', 'echo "killall python"', "cat <<'EOF'\nkillall python\nEOF",
+    for (const command of ['kill 1234', 'echo "killall python"', 'echo "(pkill -f devserver)"', "cat <<'EOF'\nkillall python\nEOF",
                            "printf '%s\\n' 'example; pkill python'", 'echo "first\npkill second"',
                            'echo ready # pkill is only a comment', 'sudo -n echo pkill', 'npm test'])
       assert.doesNotThrow(() => call(command));
@@ -611,7 +614,8 @@ test('review phase is bounded across compaction and resets only on a new prompt'
   try {
     const context = () => ({ sessionID: 'ses_1', agent: 'reviewer', system: [], tools: { read: {}, glob: {} } });
     await f.call('session.prompt', { sessionID: 'ses_1' });
-    f.call('session.context', context());
+    const initial = context(); f.call('session.context', initial);
+    assert.ok(initial.system.some(x => x.text.includes('Exact project root: ' + f.ctx.location.directory)));
     for (let n = 0; n < 48; n++) f.call('tool.execute.before', {
       sessionID: 'ses_1', agent: 'reviewer', tool: 'read', input: { path: 'app.js' } });
     f.ctx.session.get = async ({ sessionID }) => ({ id: sessionID, agent: 'reviewer', location: f.ctx.location });
@@ -810,7 +814,7 @@ test('write budget uses UTF-8 bytes and leaves small edits available', async () 
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     assert.doesNotThrow(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { content: 'a'.repeat(12000) } }));
-    assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { content: '🐴'.repeat(3001) } }), /12,000/);
+    assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { content: '🐴'.repeat(3001) } }), /12004 UTF-8 bytes; the limit is 12,000/);
     assert.doesNotThrow(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'edit', input: { newString: 'small correction' } }));
     assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'write', input: { path: f.root.slice(1) + '/index.html', content: 'test' } }), /leading/);
     for (const target of ['./index.html', f.root + '/index.html'])

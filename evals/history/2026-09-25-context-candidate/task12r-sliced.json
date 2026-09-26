@@ -1,0 +1,274 @@
+{
+  "trial": "context64-sliced-12r",
+  "candidate_source_revision": "7d93090e1b45520745ac112e1b647ad8528b7713",
+  "context_tokens": 65536,
+  "provenance": "Frozen Task12 disposable fixture with saved native session for implementation stages. Raw prompts, transcripts, browser script/screenshots and per-stage telemetry remain ignored in the private worktree; hashes below identify those raw artifacts. Later code fixes were made after this trial and are not retroactively credited.",
+  "stages": {
+    "api-implementation": {
+      "wall_seconds": 219.812,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 29,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "6e9697751d8a2a2eda68172957a48a57141b56fa9ac3bd839b7e8168cc512bb3"
+    },
+    "checkpoint-audit": {
+      "wall_seconds": 38.187,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "a3d7793df22ba3b90597487248b0d1fd52ffb56ebb7ae56fb900719f618903eb"
+    },
+    "api-http": {
+      "wall_seconds": 308.681,
+      "completed": false,
+      "model_completed": false,
+      "native_compaction_completed": false,
+      "tool_calls": 38,
+      "tool_errors": 2,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "faf6595f85c2e73d08bce2cddae092eb57dcf48bd6afce70bcc74bde66868eee"
+    },
+    "api-http-recovery": {
+      "wall_seconds": 427.712,
+      "completed": false,
+      "model_completed": false,
+      "native_compaction_completed": false,
+      "tool_calls": 11,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "16078beb8233e6c4be13acd015635db46cbfb6764bfdf21b564a832e9d8d092c"
+    },
+    "api-handoff": {
+      "wall_seconds": 97.76,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "10af0476c6fba812aabca1fded8100af314a3cec451b9ee9cec7aadb87dc36c4"
+    },
+    "ui-implementation": {
+      "wall_seconds": 428.224,
+      "completed": false,
+      "model_completed": false,
+      "native_compaction_completed": false,
+      "tool_calls": 9,
+      "tool_errors": 2,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "4badb41fe4918522ce6896d34c79cb83a4a7f6ab4f1e291e1e097a5dcc780c7b"
+    },
+    "ui-recovery": {
+      "wall_seconds": 436.849,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 4,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "ba9971435abb98ac86fcf8b23769a16c2954025609a62cbcb6ce215367cb2266"
+    },
+    "ui-browser-correction": {
+      "wall_seconds": 206.615,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 7,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "d03727a13022d6f431e87de79e46aca7fa7c09b11cef6d91e54d16b27650e3c8"
+    },
+    "ui-edge-correction": {
+      "wall_seconds": 134.418,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 5,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "ba7b1a71ed51d120cc086d0328e2d05c1dbaf3892cd37e64fa62feaffbdef16c"
+    },
+    "ui-final-fix": {
+      "wall_seconds": 131.608,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 5,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "Battery Power",
+      "power_after": "AC Power",
+      "driver_sha256": "bbb86c0ecef7f2b0a7592a1357c5eb47dc3a3f590acf7dd1c801063c6ffee04b"
+    },
+    "fresh-review": {
+      "wall_seconds": 260.456,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 18,
+      "tool_errors": 6,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "Battery Power",
+      "power_after": "Battery Power",
+      "driver_sha256": "2c6e2c2258c52082cf7ee24b550df2fb89b026636a22019b547d5aa92e4e5f01"
+    },
+    "fresh-handoff": {
+      "wall_seconds": 146.27,
+      "completed": true,
+      "model_completed": true,
+      "native_compaction_completed": true,
+      "tool_calls": 24,
+      "tool_errors": 0,
+      "resource_guard_clean": true,
+      "pressure_levels_observed": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "power_before": "AC Power",
+      "power_after": "AC Power",
+      "driver_sha256": "7807ccf6855c37492141fa6e1dea352760f5dc61f0791ca8693d4c284829b39a"
+    }
+  },
+  "measured_active_stage_seconds": 2836.592,
+  "completed_stages": 9,
+  "native_compactions_completed": 9,
+  "tool_calls": 150,
+  "tool_errors": 10,
+  "frozen_grade": {
+    "status": "PARTIAL",
+    "automatic_checks_passed": true,
+    "automatic_checks_count": 2,
+    "grade_sha256": "28d889216786566cc9a820bd5fc51d12bcb3ab77a91300b4d74d8b032116dd6d",
+    "manual_fields": {
+      "plan_build_separation": "NOT_TESTED",
+      "browser_upload_edit_filter_export": "NOT_TESTED",
+      "503_recovery": "NOT_TESTED",
+      "fresh_review_readonly": "NOT_TESTED",
+      "native_compaction": "NOT_TESTED",
+      "new_session_handoff": "NOT_TESTED",
+      "representative_duration_recorded": "NOT_TESTED"
+    }
+  },
+  "independent_browser": {
+    "result": "PASS on final operator-run functional/responsive scenario after multiple steered corrections; not a native Browse-agent completion",
+    "checks": {
+      "seed_count": 3,
+      "narrow_overflow": false,
+      "create_persisted": true,
+      "filter_visible_ids": [
+        "browser-new",
+        "t1",
+        "t3"
+      ],
+      "filter_case_visible_ids": [],
+      "edit_persisted": true,
+      "create_after_edit_persisted": true,
+      "import_on_selection": false,
+      "import_persisted": true,
+      "message_after_import_click": "Imported successfully!",
+      "export_roundtrip": true,
+      "retry_marker_consumed": true,
+      "message_after_503": "Service unavailable. Click Import again to retry.",
+      "selected_file_retained": true,
+      "retry_persisted": true,
+      "message_after_retry": "Imported successfully!",
+      "wide_overflow": false
+    },
+    "error_count": 0,
+    "browser_result_sha256": "58c353a5078e07ee7c3ffdae9c1b7bb1030b7693b21683b65e31a5f88e1ab698",
+    "script_sha256": "62079303c290da6ffdd46436be9f7b733bf5ae217da69c51bfb35220ca6970ef",
+    "screenshot_sha256": "ea5aeef0b6d46a75eca7cbebc62f4a932e65fcd7ef5120d97ff95e320ac76a89"
+  },
+  "semantic_assessment": {
+    "result": "FAIL",
+    "findings": [
+      "Native summaries repeated obsolete work/next actions across saved-session compactions and restarts.",
+      "Unverified model implementation choices were repeatedly presented as user Decisions; model-facing masking rejected unsupported claims, but raw native history remains.",
+      "The fresh read-only review made six path errors and recommended case-insensitive filtering, contrary to the exact case-sensitive contract.",
+      "The fresh final handoff read source and distinguished operator-supplied evidence, but misconstrued a duplicate-import review finding.",
+      "Three coding stages timed out; corrections required operator steering. The 47-minute sum includes preflight and compaction across discrete stages, so it is not a continuous autonomous completion."
+    ]
+  },
+  "resource_assessment": {
+    "result": "PASS sampled guard for these stages only",
+    "pressure_levels": [
+      1
+    ],
+    "max_swap_peak_growth_bytes": 0,
+    "caveat": "Sampled pressure and swap do not establish reliable 64K useful-tier quality or all host loads."
+  },
+  "remaining_gates": [
+    "Repeat the multi-stage coding/UI trial on the latest installed source with semantically correct checkpoint/restart handoff and no operator steering.",
+    "Qualify 49K, 64K, 96K and 128K tiers for representative quality, latency, memory/swap, and cold/warm correctness; 96K/128K previous near-limit runs failed pressure.",
+    "Complete clean non-owner install and rollback from the latest exact private source.",
+    "Resolve generated backend test quality, broader browser/accessibility/security review and native Browse acceptance before public release."
+  ]
+}

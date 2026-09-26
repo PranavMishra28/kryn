@@ -63,7 +63,7 @@ function broadProcessNameKill(command) {
         const match = /^<<(-?)\s*(?:'([^']+)'|"([^"]+)"|([A-Za-z_][\w]*))/.exec(line.slice(i));
         if (match) nextHeredoc = { word: match[2] || match[3] || match[4], tabs: !!match[1] };
       }
-      if (';&|'.includes(char)) {
+      if (';&|()`{}'.includes(char)) {
         if (PROCESS_NAME_KILL.test(segment)) return true;
         segment = '';
       } else segment += char;
@@ -460,6 +460,8 @@ export default {
         ' unverified Decision claim(s). The original checkpoint and user requests remain in native history. Do not repeat those claims as user choices without a matching user quote.' });
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text: WRITE_GUIDANCE + '\n' + BUILD_GUIDANCE +
         '\nExact project root: ' + ctx.location.directory + '. Use ./file for a relative path or the complete absolute path including its leading /. Do not repeat the project root as a relative path.' });
+      if (READ_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
+        'Exact project root: ' + ctx.location.directory + '. Read ./file relative to this root or use the complete absolute path including its leading /. Do not use /workspace or omit the leading /.' });
       if (event.agent === 'plan') event.system.push({ type: 'text', text: PLAN_GUIDANCE });
       if (event.agent === 'ask') event.system.push({ type: 'text', text: 'Ask mode: investigate with read and search tools, then answer with evidence and uncertainty. Do not edit files or run commands. Switch to Agent for implementation.' });
       if (event.agent === 'browse') event.system.push({ type: 'text', text: BROWSER_GUIDANCE });
@@ -595,7 +597,8 @@ export default {
         throw new Error('Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls.');
       if (event.tool === 'write' && typeof event.input?.content === 'string' &&
           Buffer.byteLength(event.input.content, 'utf8') > 12000)
-        throw new Error('KRYN limits each write to 12,000 UTF-8 bytes. Split this component into smaller files or use small edits.');
+        throw new Error('KRYN rejected ' + Buffer.byteLength(event.input.content, 'utf8') +
+          ' UTF-8 bytes; the limit is 12,000. Retry with at most 8,000 bytes per write or use small edits.');
       if (['write', 'edit'].includes(event.tool) && typeof event.input?.path === 'string' &&
           event.input.path.startsWith(ctx.location.directory.slice(1) + '/'))
         throw new Error('This path repeats the project root but omits its leading /. Use ./file or the complete absolute path under ' + ctx.location.directory);

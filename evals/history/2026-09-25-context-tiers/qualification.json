@@ -1,5 +1,5 @@
 {
-  "status": "Private measurement: owner retains experimental 64K at source 4506b32 with a matching 49K immediate rollback receipt and guarded protocol smoke; sustained Agent and useful-tier gates remain failed/open. No public tier promotion or release.",
+  "status": "Historical private measurement: source 4506b32 ran experimental 64K with a matching 49K immediate rollback receipt and guarded protocol smoke; sustained Agent and useful-tier gates remained failed/open. Later installed candidates are recorded in plan.md. No public tier promotion or release.",
   "machine": "M4 Max, 48 GiB unified memory, AC power",
   "stack": "oMLX 0.6.4, Qwen3.5-9B-6bit, isolated per-tier settings, one request, 16 GiB oMLX memory ceiling",
   "method": "Exact active input tokens verified against generation usage on passing runs; single synthetic three-fact retrieval; host pressure/swap samples. The initial tier table used Fast and a 512 output-token allowance. Follow-up thinking runs used a 2048 thinking budget and 4096 output-token allowance. Cache trials used separate 8192-token cold/repeat/changed/restored requests. Raw synthetic traces remain in ignored local evals/runs/context-tiers-20260925/.",
@@ -114,7 +114,7 @@
     "resources": "All three stages: normal sampled host pressure and zero incremental swap. Total measured active stage time 67.728 seconds; this is a narrow planning/restart fixture, not a sustained coding/UI pass.",
     "rollback_target": "PASS receipt inspection only: current 64K transaction at source 6582565 has committed prior active receipt at source d1aab47 (49K matching context code); actual rollback from this latest install remains unexercised."
   },
-  "current_private_64k_install": {
+  "prior_private_64k_install_76c58ff": {
     "source_revision": "76c58ff67e478d4df138299cac837d3235ae69ab",
     "wheel_sha256": "3b7155e704b5a5205e51ad817ddfa1d2de09bfdf4790a2f58a63d49f6f2ae7a3",
     "active_context_tokens": 65536,
@@ -127,7 +127,7 @@
     "offline_doctor": "PASS: model max_model_len 65536, runtime healthy, idle, normal host pressure, browser/search MCP connected; no generation in doctor.",
     "caveat": "The narrow protocol smoke does not qualify sustained 64K Agent use. A focused Task12e repair before this install was stopped by memory warning preflight without a prompt."
   },
-  "latest_private_64k_install": {
+  "subsequent_private_64k_install_4506b32": {
     "source_revision": "4506b3282f722dc00f7726d6a77159eee499b87e",
     "context_tokens": 65536,
     "rollback_receipt_source": "8d39c6736a26f7c1a9c97f135cad5fb90e0afa40",

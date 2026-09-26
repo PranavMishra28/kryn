@@ -189,6 +189,7 @@ export function contextCapsule(directory, messages, savedStamp, recordedPrompts 
     ...(prompts.length ? ['Recorded user requests are historical; the latest user message takes priority. Use these to check checkpoint requirements and user decisions; assistant proposals are not user decisions.', ...recalled,
       ...(recordedPrompts.clipped || recordedPrompts.total > prompts.length ?
         ['Recorded request coverage is partial; consult the native transcript before claiming all criteria are retained.'] : [])] : []),
+    ...(saved?.recent ? ['CHECKPOINT WORK STATE AND NEXT MOVE MAY BE STALE: native compaction summarized an older prefix and retained the latest exchange separately. Reconcile its newer work and checks before continuing.'] : []),
     ...(saved?.recent ? ['Recent pre-checkpoint transcript tail (historical, unverified; reconcile with current files and checks): ' +
       JSON.stringify(saved.recent.slice(-900))] : []),
     ...files

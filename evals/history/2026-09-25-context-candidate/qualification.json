@@ -192,7 +192,7 @@
     "Independent browser acceptance failed exact project filtering and persistent edit; fresh read-only review and new-session final handoff were not completed.",
     "64K remains experimental under variable host load; a focused repair turn was stopped by resource preflight before a prompt was sent. 96K/128K thinking near-limit trials failed host-pressure gates.",
     "The bounded recent-transcript and long-request head/tail capsule passed offline checks and were installed at 64K with protocol smoke; a fresh full multi-stage coding/UI semantic run on the exact latest code has not passed. Earlier narrow trials remain partial.",
-    "Actual rollback from the latest 64K install to matching 49K source passed, then 64K reinstall and guarded smoke passed. Clean non-owner installation and long sustained coding/UI acceptance remain unexercised."
+    "Actual rollback from an earlier 64K install to matching 49K source passed, then 64K reinstall and guarded smoke passed. Rollback from the most recent private install, clean non-owner installation and long sustained coding/UI acceptance remain unexercised."
   ],
   "followup_task12e": {
     "candidate_source_revision": "ef56fc5052b8a8242eed0e886f55d6285bf995af",
