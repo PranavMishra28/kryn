@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-26",
+  "scope": "Daily-use test evidence, local Reviewer accuracy, and private owner recovery. Raw task traces remain outside the repository.",
+  "merged_fixes": {
+    "exit_masking": {
+      "pr": "https://github.com/PranavMishra28/kryn/pull/22",
+      "result": "The exact Task06 unittest followed by semicolon-echo was refused before execution in a guarded private native trial; the Agent then ran the direct two-test script successfully.",
+      "private_driver_sha256": "672fc258317b634aa232b6b36b5db6e7e446995a1026077f2827e609717e5761"
+    },
+    "direct_script_ledger": {
+      "pr": "https://github.com/PranavMishra28/kryn/pull/23",
+      "result": "Direct Python test scripts are tracked. A native Agent call ran test_existing.py with exit 0; its saved record became stale, with exit 0 retained, after a server restart. This is historical test evidence, not current application acceptance.",
+      "before_restart_driver_sha256": "e0c8d70a116f396c39a0fb5065b39cd0842efe4a5bab233ede7868648b89abe9",
+      "after_restart_driver_sha256": "5a8b876bb0f83701d0c869f57bdd10cd127893ce80f2db63e5f578666b8d250a"
+    },
+    "stale_check_provenance": {
+      "pr": "https://github.com/PranavMishra28/kryn/pull/24",
+      "result": "Ask now sees a bounded stale check reference. A guarded restart probe on the installed private build recognized the prior test as a historical pass. Its answer still phrased when the test ran imprecisely, so semantic continuity is not qualified.",
+      "before_restart_driver_sha256": "1693557457d2d0d4e2983575f5ad83f23bb8808af6ee3633c53f9d163a783ddf",
+      "after_restart_driver_sha256": "ebb01c758aade01755de3570558d46eb9b058731ac8df96f473eb7956aee2490"
+    }
+  },
+  "reviewer": {
+    "run": "Private frozen Task06 u06r, focused read-only review of the exact u06m generated app.js",
+    "model_completed": true,
+    "wall_seconds": 69.289,
+    "driver_sha256": "a7d686d511f3744128aeccd90fa622c9f833d35576aae762b1f610f21f53311d",
+    "export_sha256": "15db42fdad1cb1246a6d2e4f7ebdd963167023844693f27ef72dde438fc2cefc",
+    "operator_verdict": "FAIL: both reported findings were false. The filter controls exist in index.html, and the import handler displays HTTP 400 errors. It missed the independently reproduced multipart/raw-CSV API mismatch and the filter catch ReferenceError. The prior broad Reviewer timed out. Neither review qualifies local Reviewer accuracy."
+  },
+  "private_owner_recovery": {
+    "candidate_source": "249d10a28fc704162daa4b376d2971d12ecc5ed4",
+    "wheel_sha256": "2efce2b05479f540bc2513c02a1d3eb48a88f918b30f4b9cd7a50f92129c6eee",
+    "rollback_restored_source": "a9bd79237b5075dc50be84cba6af916b6198524d",
+    "reinstall_restored_source": "249d10a28fc704162daa4b376d2971d12ecc5ed4",
+    "guarded_protocol_smoke": "PASS",
+    "protocol_metrics_sha256": "18065b2ebebb80abf9d7aaf23e018ce8ac94085dbdad86348f3bf1ae1216ed56",
+    "doctor_after_reinstall": "PASS: healthy idle 65,536 context, normal host pressure, browser/search connected",
+    "power_during_native_probes": "AC Power",
+    "resource_guard_during_native_probes": "No warning or intervention"
+  },
+  "release_gates": {
+    "task09_read_before_edit": "One corrected 10/10 frozen trial; reliability distribution still unqualified",
+    "frozen_coding_ui": "Functional browser acceptance PASS after staged repair; independent generated-source quality FAIL",
+    "repeated_compaction_restart": "FAIL: native checkpoints still contain unsupported user Decisions and stale work claims",
+    "independent_local_reviewer": "FAIL: broad review timed out and focused review produced false findings",
+    "context_tier_comparison_49k_64k_96k_128k": "INCOMPLETE; 64K remains private experimental with guard and rollback",
+    "nonowner_clean_install": "BLOCKED: no separate user-owned standard macOS account was available; managed administrator/service accounts were not used",
+    "final_profile_endurance": "UNRUN while coding/UI and semantic gates fail",
+    "public_release": "PAUSED: no tag or version bump"
+  }
+}
