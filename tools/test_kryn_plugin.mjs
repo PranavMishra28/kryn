@@ -323,6 +323,8 @@ test('private user requirements survive two compactions and restart when native 
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     let event = context(); f.call('session.context', event);
     assert.match(event.system.map(x => x.text).join('\n'), /CHECKPOINT CONTRADICTION/);
+    assert.match(event.system.map(x => x.text).join('\n'), /observed native compaction event from a previous KRYN plugin process/);
+    assert.match(event.system.map(x => x.text).join('\n'), /marker does not prove edits, tests, browser checks/);
     assert.match(event.system.map(x => x.text).join('\n'), /Build atomic import and preserve seed data/);
     await f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Also verify the mobile error state.' } });
     await f.emit('session.compaction.ended');
@@ -909,6 +911,7 @@ test('Ask denies mutations even under auto and Agent retains coding guidance', a
     const plan = { sessionID: 'ses_plan', agent: 'plan', system: [], tools: {} };
     f.call('session.context', plan);
     assert.match(plan.system.map(part => part.text).join('\n'), /Plan mode: inspect/);
+    assert.match(plan.system.map(part => part.text).join('\n'), /Exact project root: /);
   } finally { await cleanup(); f.remove(); }
 });
 
