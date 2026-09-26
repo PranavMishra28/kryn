@@ -41,3 +41,6 @@ The follow-on [private 64K Task12 trial](evals/history/2026-09-25-context-candid
 
 The private 64K Task09 endurance baseline completed ten sequential turns and checkpoints, but turns 9 and 10 edited before reading current rows. A bounded file head-and-tail retrieval fix is being compared privately; see the retained baseline evidence in the PR branch. This is not a sustained coding/UI qualification.
 
+
+The paired private 64K Task09 tail-retrieval run passed ten automatic checkpoints but failed the read-before-edit workflow gate (2/10 explicit pre-edit reads vs 8/10 baseline); the PR branch retains detailed evidence. A short Agent instruction to read the live target file after restart is under private comparison.
+
