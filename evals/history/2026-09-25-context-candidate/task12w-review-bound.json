@@ -1,0 +1,20 @@
+{
+  "status": "REJECTED: a 16-attempt Reviewer limit ended tool use faster but produced no findings; source change reverted",
+  "candidate_source_revision": "46510be4ce1ae304ed7a141345d73228fe3076ec",
+  "candidate_wheel_sha256": "590b4c9232ffe91df466daa406a908f9fd40ca5a45e480016c0a3a7ebc9ae2fd",
+  "fixture": "Fresh frozen Task12 run ID context64-c36-review with the same server.py/web/app.js diff and the same broad read-only Reviewer prompt as the earlier baseline. Raw export and telemetry remain ignored under evals/runs/context64-c36-review/.",
+  "baseline": "At the previous 48-attempt limit, the broad Reviewer timed out after 187.894 seconds, 27 calls and seven tool errors without findings. See task12v-review-diff-ab.json.",
+  "candidate": {
+    "driver_completed": true,
+    "wall_seconds": 43.124,
+    "tool_calls": 17,
+    "tool_errors": 1,
+    "tool_error": "The 17th read was denied because the 16-attempt phase ended.",
+    "pressure_levels_observed": [1],
+    "swap_peak_growth_bytes": 0,
+    "driver_sha256": "6bf9c8fa8de656be31f351a81e3af948079d339fa1574070636500d79218ee98",
+    "native_export_sha256": "434da6e44c6af066f6095fa2b908dd6b67018d32e02de7c2cede4152d4ab411e",
+    "actual_final_text": "Raw <tool_call> markup requesting web/index.html and web/style.css reads; no review findings, file-line citations or unreviewed-scope report. Driver completion is not review acceptance."
+  },
+  "disposition": "NO CHANGE: shortening a failed review without actionable findings did not improve verified engineering work per hour. The product and installed private 64K wheel were restored to source 8d5def3. Focused review prompts with exact project-relative files are the only observed usable approach, and their findings still require independent checking."
+}
