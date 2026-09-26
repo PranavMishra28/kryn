@@ -836,5 +836,59 @@
     "semantic_result": "FAILED long workflow: Plan first answered then native compaction failed template validation; corrective Plan completed compaction but summary promoted an agent correction into Decisions and repeated completed planning as next move. Backend Build timed out at 488.14 seconds; recovery Build timed out at 308.115 seconds; Ask handoff timed out at 188.179 seconds after attempting an unavailable shell tool despite read-only role and explicit no-command instruction. No browser UI work or final fresh review. This does not qualify 64K as reliably useful, despite normal memory pressure.",
     "resources": "Across all five stages on AC power, sampled pressure stayed normal (level 1) and swap did not grow; no resource-guard stop. Installed 64K remained active while Cursor and Chrome were open. Largest observed oMLX phys_footprint in Ask was 14,490,606,792 bytes. This is a safe-memory observation, not a completed sustained Agent trial.",
     "next_action": "Install the role-specific observed-check prompt fix after package validation, then rerun a short Ask continuation and evaluate complete semantic handoff before further Task12 UI stages. Keep the owner at 64K and public release profile at 49K."
+  },
+  "followup_installed_rolefix_e9cc": {
+    "installed_private_source_revision": "e9cc4b00285905e3f9ac413a59fee8d21e643c08",
+    "private_wheel_sha256": "3bba2bf68625ffcb0fab0467db172f848cd0a86bbd2cb08fa6c19723da942b65",
+    "installation": "Private 64K cherry-pick of PR role-specific handoff fix; make check (173 setup, 21 Python tool, 56 Node, driver self-check and frozen verify) and committed-source package smoke passed. Actual owner installation and --package-check reported exact source e9cc4b0; doctor reported healthy idle 65,536 context, normal pressure, swap 432212541 bytes, browser/search connected. Prior 4506b32 64K package is now the immediate rollback target; the previously exercised matching 49K rollback remains an older retained transaction, not this installation's one-step target.",
+    "fixture": "Fresh disposable Task02 controlled-failure probe under evals/runs/context64-rolefix-ask-1/ in the private worktree. One operator-committed failing unittest; no Task02 implementation attempted. Three stages shared one saved session across two server restarts. Raw private transcript ignored.",
+    "stages": {
+      "controlled-failure": {
+        "wall_seconds": 32.675,
+        "model_completed": true,
+        "tool_calls": 1,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "e14b99d198087917e4be7dbeb35743e87f5dd0054615264976be221545a1b8ee"
+      },
+      "ask-rolefix": {
+        "wall_seconds": 37.919,
+        "model_completed": true,
+        "tool_calls": 4,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "037046bdf3cb40fabe73b0f028f8e016d84978428d16f3f586143444a9b52d05"
+      },
+      "ask-decision-audit": {
+        "wall_seconds": 34.082,
+        "model_completed": true,
+        "tool_calls": 0,
+        "tool_errors": [],
+        "native_compaction_completed": true,
+        "power_before": "AC Power",
+        "power_after": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "driver_sha256": "f938a7c3dc40a804bfe420dd955f2779ecbf145cd5a1ac7eb101b2dfbeafdabb"
+      }
+    },
+    "operator_setup_error": "An attempted Task12m Ask rerun on a changed installed source was rejected by the trial driver because frozen trial inputs changed; no inference was sent. A new Task02 run was prepared for the new candidate instead.",
+    "semantic_result": "NARROW PASS: Build ran exactly the intentionally failing unittest (exit 1), and Ask after restart completed with four read-only file tools, no unavailable shell attempt or command execution. A third Ask restart used zero tools and correctly said none of the checkpoint Decisions statements were explicit user choices. All three native compactions completed, the controlled failure remained unresolved, and broader Task02 acceptance was unrun. SEMANTIC CHECKPOINT FAIL: the second and third compaction summaries still promoted observations to Decisions; the third Next Move mislabeled baseline test_existing.py as actual Task02 acceptance. The second Ask answer also initially described baseline tests as actual Task02 implementation tests, though it marked broader checks unrun. This does not qualify full continuity or long coding/UI.",
+    "resources": "All three stages were on AC power, normal pressure level 1, and zero swap growth. This is a small mechanism probe; it does not qualify 64K sustained engineering throughput or peak useful context.",
+    "next_action": "Investigate native summary prompt precedence or implement a bounded deterministic correction on read; rerun the same frozen fixture on a new candidate and continue sustained coding/UI only after semantic handoff improves. Keep the owner at 64K and public release profile at 49K."
   }
 }
