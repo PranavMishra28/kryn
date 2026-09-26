@@ -1,0 +1,221 @@
+{
+  "comparison": "private 64K frozen Task09",
+  "suite": "2026-09-19.2",
+  "source": "7f99d6fd523e8552fa2efc73867aee69d28c2598",
+  "installed_tier_tokens": 65536,
+  "change": "Checkpoint relevant-file references without an explicit line now show bounded file head and tail (all rows of this small CSV).",
+  "grade": "FAIL",
+  "automatic_assertions": {
+    "preserved_test_existing.py": true,
+    "preserved_data/entries.csv": true,
+    "ten_valid_checkpoints": true,
+    "final_endurance_rows": true
+  },
+  "manual_checks": {
+    "ten_sequential_turns": "PASS",
+    "file_shell_test_tool_results_complete": "FAIL"
+  },
+  "total_active_wall_seconds": 590.634,
+  "baseline": {
+    "source": "8d5def3c15e0488c35e832d078efb9d26aa30e72",
+    "grade": "FAIL",
+    "total_active_wall_seconds": 552.846,
+    "pre_edit_reads": 8,
+    "transient_duplicate_at_turn9": true
+  },
+  "candidate": {
+    "pre_edit_reads": 2,
+    "transient_duplicate_at_turn9": false,
+    "turns": [
+      {
+        "turn": 1,
+        "wall_seconds": 40.932,
+        "tool_calls": 7,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": true,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 0,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "14d177d2c5ed0cc71ae1fe64f54646c4bed0cc2ed252b947f54646d8bae5b607"
+      },
+      {
+        "turn": 2,
+        "wall_seconds": 50.031,
+        "tool_calls": 7,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": true,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "d882036ee20643212509d65eb8c592417948b64c701abed127e38f6ac8d3256d"
+      },
+      {
+        "turn": 3,
+        "wall_seconds": 55.486,
+        "tool_calls": 6,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "b6522d46ab4fb85383be573bd81b4ade2442072d1e19b85b78c29a36bda866df"
+      },
+      {
+        "turn": 4,
+        "wall_seconds": 59.009,
+        "tool_calls": 6,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "fa34e5b5d5e00f45fa8c02be25a1e623eaffce07f6f41b80883bf900c4887489"
+      },
+      {
+        "turn": 5,
+        "wall_seconds": 62.193,
+        "tool_calls": 5,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "06dc550fed5c221357f0819dcea79b8aaf6157c78bfcec4e574b0511b8f02099"
+      },
+      {
+        "turn": 6,
+        "wall_seconds": 66.415,
+        "tool_calls": 6,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "fc9d6b3e5f04b472c5193ba78554840c16d63ae3e5488118c30026d0e66850bf"
+      },
+      {
+        "turn": 7,
+        "wall_seconds": 62.229,
+        "tool_calls": 6,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "8ba60c311f47135d97f5ab069747a23ae571b2c3e0e5506ba1135968ad830e7f"
+      },
+      {
+        "turn": 8,
+        "wall_seconds": 64.576,
+        "tool_calls": 5,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "c9cd22d088e4f509ebb1cb896e1d2a47b4521e845dd0fdabf5472e237a3b21a5"
+      },
+      {
+        "turn": 9,
+        "wall_seconds": 63.832,
+        "tool_calls": 5,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "aa71cbf05dba2bea3cafa462a5e10b9d58392acc7b85c14a4ed61f9eaa4122c8"
+      },
+      {
+        "turn": 10,
+        "wall_seconds": 65.931,
+        "tool_calls": 6,
+        "tool_errors": [],
+        "checkpoint_pass": true,
+        "compaction_complete": true,
+        "read_before_edit": false,
+        "original_tests_pass": true,
+        "git_diff_inspected": true,
+        "unavailable_pytest_attempts": 1,
+        "power": "AC Power",
+        "pressure_levels": [
+          1
+        ],
+        "swap_peak_growth_bytes": 0,
+        "events_sha256": "6e125d35817d74badb99317a62266f74dbc2251e75bcb6180d6558ece2079fc4"
+      }
+    ]
+  },
+  "interpretation": [
+    "Both runs passed ten automatic checkpoints and produced the exact final CSV; both failed the declared read-before-edit workflow gate.",
+    "The candidate avoided the baseline turn-9 transient duplicate but made fewer explicit pre-edit reads (2/10 vs 8/10), and active stage wall time rose from 552.846s to 590.634s. This single stochastic pair does not establish causation or performance superiority.",
+    "The bounded head/tail mechanism passes offline tests, but sustained workflow quality is unqualified. A separate targeted instruction experiment is planned."
+  ],
+  "raw_evidence_private": "/private/tmp/kryn-64-retest/evals/runs/context64-c37-09-tail",
+  "operator_audit_sha256": "e8309515f4f5974286b8f5ce78b18ecd858b84d60ac13273f6eecb07c94ba1bb",
+  "review_sha256": "99a47e9112b9e239e1dd9cff0c780af8090e8cf0d0f4d55a597a9f1aca59b964",
+  "grade_sha256": "1bbc1de4ddebd08bffcde840ea65a2299fa9e4224eaf7e63c0d3623331fcbb2e"
+}

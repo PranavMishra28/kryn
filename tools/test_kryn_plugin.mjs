@@ -678,6 +678,7 @@ test('verification guidance distinguishes observed browser calls from claims', a
     await f.call('session.prompt', { sessionID: 'ses_1' });
     const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
     let event = context(); f.call('session.context', event);
+    assert.ok(event.system.some(x => x.text.includes('read the current target file; a checkpoint excerpt is not an edit base')));
     assert.ok(event.system.some(x => x.text.includes('0 completed browser calls')));
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'browser_browser_snapshot', status: 'error' });
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'browser_browser_click', status: 'completed' });
