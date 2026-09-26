@@ -1,0 +1,62 @@
+{
+  "source": "976d9244fd8050330222b037a54b176bb9d82d65",
+  "trial": "context64-c38-09-read",
+  "stages": [
+    {
+      "turn": 1,
+      "pre_edit_read": true,
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "wall_seconds": 59.678,
+      "tool_calls": 12,
+      "tool_errors": [
+        {
+          "tool": "read",
+          "error": "File not found: private/tmp/kryn-64-retest/evals/runs/context64-c38-09-read/workspace/TASK.md"
+        },
+        {
+          "tool": "read",
+          "error": "File not found: private/tmp/kryn-64-retest/evals/runs/context64-c38-09-read/workspace/data/endurance.csv"
+        }
+      ],
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "events_sha256": "02bcff02d3a889ecf3e24126a0574bfae9bb38ed9d627bc2f03dd0327083872d"
+    },
+    {
+      "turn": 2,
+      "pre_edit_read": true,
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "wall_seconds": 41.871,
+      "tool_calls": 5,
+      "tool_errors": [],
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "events_sha256": "f2a5eba2db0d0b897e57859ea313e3cd93704d37cd55b062abac83b5fdcc052c"
+    },
+    {
+      "turn": 3,
+      "pre_edit_read": false,
+      "checkpoint_pass": true,
+      "compaction_complete": true,
+      "wall_seconds": 50.416,
+      "tool_calls": 5,
+      "tool_errors": [],
+      "pressure_levels": [
+        1
+      ],
+      "swap_peak_growth_bytes": 0,
+      "events_sha256": "25e73a3f033a720802d3b277cdfc7db428b337268528f92303d545bce17fe449"
+    }
+  ],
+  "early_stop_reason": "Turn 3 edited before an explicit current-file read despite the new instruction; no full 10-turn trial was run.",
+  "grade_note": "Frozen grade FAIL is expected from intentionally unreleased turns 4-10; compare this trial only as a targeted early-screen, not an entire endurance pass.",
+  "raw_evidence_private": "/private/tmp/kryn-64-retest/evals/runs/context64-c38-09-read",
+  "operator_audit_sha256": "96e1f6a568654b8c86fa90f2f8dacd558f12d799fda8dd25cf776ab9d961d02c",
+  "grade_sha256": "fc7ab09df19196908a3ef8ef860e2c35d8d8d00378e31f3ca6bd9a093b9a751e"
+}
