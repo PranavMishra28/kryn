@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-26",
+  "scope": "Private guarded 64K Task06 evaluation using bounded native Agent milestones; no public release, tag, version bump or tier promotion",
+  "candidate": {
+    "source_revision": "1cf1d24f8f4222bfcb7eaae5e0f00b2fe0089018",
+    "private_wheel_sha256": "4f3e6a16af4d2065abda73714f8ea52c288b5c978044ae2033d93c18cc827dfc",
+    "change_from_prior_private_build": "Model-facing native checkpoint masking also withholds superseded Blocked claims when a newer retained exchange exists; focused tests, make check and package smoke passed. The stored native summary remains unmodified and is not semantically qualified.",
+    "activation": "PASS same-owner install, actual rollback to b936708, reinstall of the exact 1cf1d24 wheel, doctor at 65536 with normal pressure and connected browser/search, guarded protocol smoke",
+    "reinstall_transaction_sha256": "d1d7706c95376156b09cfbeaf446d581c5d34b6e0cc6d17bf4a8197ed8fba272",
+    "protocol_metrics_sha256": "4909640906e106c012ca6280aca6ae285f1cc2a9925bf494c397a78d3d4e1c74",
+    "limit": "Owner rollback/reinstall and short protocol smoke do not establish a non-owner clean install, sustained endurance, or a qualified 64K context tier."
+  },
+  "frozen_task06": {
+    "run": "u06m",
+    "approach": "Change from prior open-ended attempts: exact frozen task split into one implementation milestone and a failure-driven overflow repair in the same saved native session, with independent browser/review gates afterward.",
+    "implementation": "PASS bounded native Agent turn: 123.748 seconds, 16 tools, original test_existing.py exit 0, honest final answer leaving browser/503/review unverified, completed compaction.",
+    "repair_after_restart": "PASS bounded native Agent turn in the same saved session under a new native server: 102.576 seconds, 11 tools, read-before-edit guard refused two edit-first attempts and model re-read; original tests exit 0, completed second compaction.",
+    "initial_browser": "FAIL: 390px document scrollWidth 460px; #entries scrollWidth 440px/clientWidth 350px because compact raw JSON was written into a ul.",
+    "after_repair_artifact": "PASS frozen Task06 grader: original backend checks, independent Chrome at 390x844 and 1280x800, valid save/reload, labelled invalid minutes, evaluator-injected POST 503 then manual retry POST 201 with one row, no page exceptions or failed requests.",
+    "artifact_grade_sha256": "8ee287ab4e7b37ffad5eae73d0cadd5cd70ae635430b3587bebf936d2009b555",
+    "browser_sha256": "a1d3e8d2423a781052dd08064860cfc90cac9c2fd21c155e1f50b2bbd6e58d54",
+    "semantic_compaction": "FAIL: both stored native checkpoints list the Agent's implementation choices under user Decisions without user authorization. The second otherwise retains the actual failed browser check and next evaluator action. Model-facing masking does not repair the stored record.",
+    "independent_source_review": "FAIL quality: the model added out-of-scope CSV import/filter/export code. The CSV import sends multipart FormData to a raw-CSV API (isolated HTTP 400), filter's error branch references a block-scoped variable, the ul displays raw JSON rather than list items, and git diff --check finds trailing whitespace. Frozen functional acceptance is separate from this review verdict.",
+    "operator_review_sha256": "f3920e1fa8a12cf4953818f4dd8dd077a27f94fb8fffaf2c434fb1e5b8c0b303",
+    "native_reviewer": "FAIL: fresh read-only Reviewer timed out after 186.684 seconds and 25 tools without findings; one execute attempt was denied by the harness and it tried to read binary .git/index.",
+    "reviewer_driver_sha256": "b312760209d2868a5a1c80db507f2bd6dae8ed2139d4da91e0a114e32e0f260e",
+    "resources": "All three guarded native stages on AC power sampled normal pressure, with zero swap growth and no resource abort.",
+    "driver_sha256": {
+      "implementation": "564e9ec7239cb0f3813b4d0aa4c1ee6fd1cb7604d74b86ef0cbcfc0d04d78347",
+      "repair": "5d5680e3fc38b50e259f6b3b9d3e2ceaf62b7a7396873f2bc2b9327c33a5d532"
+    }
+  },
+  "gate_status": {
+    "task09_current_read": "PASS one corrected 10/10 native trial, not a reliability distribution",
+    "staged_task06_coding_browser": "PASS for exact frozen functional assertions after feedback-driven repair and restart",
+    "complete_coding_ui_quality": "FAIL independent source quality review and local Reviewer completion",
+    "semantic_compaction_restart": "FAIL unsupported Decisions in both stored native checkpoints",
+    "64k_tier": "EXPERIMENTAL with guarded runtime and tested owner rollback; 49K/64K/96K/128K comparison remains incomplete",
+    "nonowner_clean_install": "BLOCKED pending a separate authorized macOS account/admin action",
+    "final_profile_active_endurance": "UNRUN",
+    "public_release": "CLOSED"
+  },
+  "next_blocker": "Constrain generated work to the requested slice and obtain an independently reviewable clean diff; make persisted checkpoints truthful using verified state rather than more model prompt rules. Then repeat frozen long workflow, non-owner install and active endurance gates.",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/u06m"
+}
