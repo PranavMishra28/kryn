@@ -512,7 +512,8 @@ export default {
       }
       if (READ_ROLES.has(event.agent))
         for (const name of Object.keys(event.tools ?? {}))
-          if (!(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(name)) delete event.tools[name];
+          if (!(event.agent === 'audit' ? AUDIT_TOOLS : READ_TOOLS).has(name) ||
+              (event.agent === 'reviewer' && name === 'question')) delete event.tools[name];
       if (READ_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
         'Your current role is read-only. You cannot run tests or start a dev server using shell, execute, or a helper agent. If the user asks for execution, explain that they must select Agent with /agents first. Do not invent a tool or repeatedly attempt a denied action.' });
       if (event.agent === 'browse')
@@ -557,6 +558,9 @@ export default {
     });
     await ctx.session.hook('experimental.ws.handshake', () => { throw new Error('KRYN has not qualified model WebSocket transport'); });
     await ctx.permission.hook('evaluate', event => {
+      if (event.agent === 'reviewer' && event.action === 'question') {
+        event.effect = 'deny'; event.message = 'Reviewer must return findings without requesting user input.';
+      }
       const repeat = sessions.get(event.sessionID)?.shellRepeat;
       if (event.action === 'shell' && event.source?.type === 'tool' && repeat?.blockCall &&
           repeat.blockCall === callHash(event.source.id)) {
@@ -590,6 +594,7 @@ export default {
       }
       observeCheck(item, event, true);
       if (event.agent === 'reviewer') {
+        if (event.tool === 'question') throw new Error('Reviewer must return findings without requesting user input.');
         const item = session(event.sessionID);
         if (item.reviewCalls >= 48 || item.reviewCompactions >= 2)
           throw new Error('KRYN review tool phase ended. Return partial findings and unreviewed scope now.');
