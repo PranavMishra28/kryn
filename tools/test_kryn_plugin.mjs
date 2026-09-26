@@ -495,17 +495,24 @@ test('review phase is bounded across compaction and resets only on a new prompt'
   } finally { await cleanup(); f.remove(); }
 });
 
-test('verification guidance distinguishes observed browser calls from claims', async () => {
+test('browser and Reviewer tool progress leave system guidance stable while hard limits remain enforced', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     f.call('session.prompt', { sessionID: 'ses_1' });
     const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
     let event = context(); f.call('session.context', event);
-    assert.ok(event.system.some(x => x.text.includes('0 completed browser calls')));
+    const before = event.system.map(x => x.text);
+    assert.ok(before.some(x => x.includes('browser calls alone do not prove acceptance')));
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'browser_browser_snapshot', status: 'error' });
     f.call('tool.execute.after', { sessionID: 'ses_1', tool: 'browser_browser_click', status: 'completed' });
     event = context(); f.call('session.context', event);
-    assert.ok(event.system.some(x => x.text.includes('1 completed browser calls')));
+    assert.deepEqual(event.system.map(x => x.text), before);
+    const reviewer = () => ({ sessionID: 'ses_1', agent: 'reviewer', system: [], tools: { read: {} } });
+    let review = reviewer(); f.call('session.context', review);
+    const reviewBefore = review.system.map(x => x.text);
+    f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'reviewer', tool: 'read', input: { path: 'app.js' } });
+    review = reviewer(); f.call('session.context', review);
+    assert.deepEqual(review.system.map(x => x.text), reviewBefore);
   } finally { await cleanup(); f.remove(); }
 });
 
