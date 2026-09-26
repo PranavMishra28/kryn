@@ -72,8 +72,6 @@ Adjust record count only in a fresh run and record exact model-tokenizer/server 
 
 For task 12, preserve one workspace across explicit Plan → Build → actual verification → fresh Audit → Handoff/compaction → resumed work stages. Keep stage transcripts externally. A new task-12 trial starts from a fresh seed, never an earlier solution. Record useful work duration; do not add idle time to manufacture a long-running success.
 
-For a read-only Reviewer probe, supply exact project-relative source paths, the relevant task criterion and at most three requested findings per pass. Reviewer cannot run Git or test commands; provide any diff or check results in the handoff rather than asking it to execute them. Record unreviewed scope and independently verify each finding. Broad prompts on the local model timed out, while a three-file focused prompt returned findings quickly but still included unsupported claims; see [the retained A/B evidence](history/2026-09-25-context-candidate/task12v-review-diff-ab.json) and [the rejected tool-limit trial](history/2026-09-25-context-candidate/task12w-review-bound.json).
-
 ## Validation and comparison policy
 
 ```sh
