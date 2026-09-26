@@ -69,8 +69,11 @@ function checkpoint(messages, expectedHash) {
         .map(x => x.text).join('\n') : '';
     if (!content.startsWith(NATIVE_CHECKPOINT_PREFIX)) continue;
     const match = /<conversation-checkpoint>[\s\S]*?<summary>([\s\S]*?)<\/summary>/.exec(content);
-    if (match && expectedHash !== 'legacy' && hash(nativeSummaryBody(match[1])) !== expectedHash) continue;
-    if (match) return { summary: match[1], recent: /<recent-context>([\s\S]*?)<\/recent-context>/.exec(content)?.[1] ?? '' };
+    if (match && expectedHash !== 'legacy' && ![].concat(expectedHash).includes(hash(nativeSummaryBody(match[1])))) continue;
+    if (match) {
+      const afterSummary = content.slice(match.index + match[0].length);
+      return { summary: match[1], recent: /<recent-context>([\s\S]*?)<\/recent-context>/.exec(afterSummary)?.[1] ?? '' };
+    }
   }
   return null;
 }
@@ -89,46 +92,65 @@ function unverifiedDecisions(summary, prompts) {
 }
 
 // Change only the request copy. The native checkpoint and raw transcript remain durable.
-export function maskUnverifiedDecisions(messages, recordedPrompts, expectedHash) {
-  if (!Array.isArray(messages) || !recordedPrompts?.requests?.length || !expectedHash) return 0;
-  const requests = recordedPrompts.requests.join('\n').normalize('NFKC');
+export function maskCheckpointClaims(messages, recordedPrompts, expectedHash) {
+  const empty = { decisions: 0, superseded: 0, maskedHash: null };
+  if (!Array.isArray(messages) || !expectedHash) return empty;
+  const requests = recordedPrompts?.requests?.join('\n').normalize('NFKC') ?? '';
   const rewrite = text => {
-    if (!text.startsWith(NATIVE_CHECKPOINT_PREFIX)) return { updated: text, masked: 0 };
-    let masked = 0;
+    if (!text.startsWith(NATIVE_CHECKPOINT_PREFIX)) return { updated: text, ...empty };
+    let decisions = 0, superseded = 0, maskedHash = null;
+    const afterSummary = /<\/summary>([\s\S]*?)<\/conversation-checkpoint>/.exec(text)?.[1] ?? '';
+    const recent = /<recent-context>([\s\S]*?)<\/recent-context>/.exec(afterSummary)?.[1]?.trim();
     const updated = text.replace(/(<conversation-checkpoint>[\s\S]*?<summary>)([\s\S]*?)(<\/summary>)/,
       (whole, open, summary, close) => {
-        if (expectedHash !== 'legacy' && hash(nativeSummaryBody(summary)) !== expectedHash) return whole;
-        const clean = summary.replace(/(^|\n)(## Decisions\s*\n)([\s\S]*?)(?=\n## |$)/,
+        if (expectedHash !== 'legacy' && ![].concat(expectedHash).includes(hash(nativeSummaryBody(summary)))) return whole;
+        let clean = summary;
+        if (requests) clean = clean.replace(/(^|\n)(## Decisions\s*\n)([\s\S]*?)(?=\n## |$)/,
           (section, before, heading, body) => {
             const rows = body.split('\n').filter(decisionRow);
             const kept = rows.filter(row => anchoredDecision(row, requests));
-            masked = rows.length - kept.length;
-            return masked ? before + heading + (kept.length ? kept.join('\n') : '- (none verified from recorded user requests)') : section;
+            decisions = rows.length - kept.length;
+            return decisions ? before + heading + (kept.length ? kept.join('\n') : '- (none verified from recorded user requests)') : section;
           });
+        if (recent && expectedHash !== 'legacy') {
+          clean = clean.replace(/(^|\n)(### Active\s*\n)([\s\S]*?)(?=\n### |\n## |$)/g,
+            (section, before, heading) => {
+              if (section.includes('(older active claims withheld;')) return section;
+              superseded++;
+              return before + heading + '- (older active claims withheld; reconcile retained recent-context and current evidence)';
+            });
+          clean = clean.replace(/(^|\n)(## Next Move\s*\n)([\s\S]*?)(?=\n## |$)/g,
+            (section, before, heading) => {
+              if (section.includes('Reconcile retained recent-context and current files/checks')) return section;
+              superseded++;
+              return before + heading + '1. Reconcile retained recent-context and current files/checks before choosing the next action.';
+            });
+        }
+        if (decisions || superseded) maskedHash = hash(nativeSummaryBody(clean));
         return open + clean + close;
       });
-    return { updated, masked };
+    return { updated, decisions, superseded, maskedHash };
   };
   for (let index = 0; index < messages.length; index++) {
     const message = messages[index];
     if (typeof message?.content === 'string') {
-      const { updated, masked } = rewrite(message.content);
-      if (masked) messages[index] = { ...message, content: updated };
-      if (masked) return masked;
+      const result = rewrite(message.content);
+      if (result.decisions || result.superseded) messages[index] = { ...message, content: result.updated };
+      if (result.decisions || result.superseded) return { decisions: result.decisions, superseded: result.superseded, maskedHash: result.maskedHash };
     } else if (Array.isArray(message?.content)) {
       for (let partIndex = 0; partIndex < message.content.length; partIndex++) {
         const part = message.content[partIndex];
         if (part?.type !== 'text' || typeof part.text !== 'string') continue;
-        const { updated, masked } = rewrite(part.text);
-        if (!masked) continue;
+        const result = rewrite(part.text);
+        if (!result.decisions && !result.superseded) continue;
         const content = [...message.content];
-        content[partIndex] = { ...part, text: updated };
+        content[partIndex] = { ...part, text: result.updated };
         messages[index] = { ...message, content };
-        return masked;
+        return { decisions: result.decisions, superseded: result.superseded, maskedHash: result.maskedHash };
       }
     }
   }
-  return 0;
+  return empty;
 }
 
 function currentFiles(root, summary) {
