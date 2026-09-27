@@ -32,11 +32,11 @@ function localUrl(value) {
 const { values } = parseArgs({ options: {
   url: { type: 'string' }, output: { type: 'string' }, db: { type: 'string' }, task: { type: 'string' },
   task06: { type: 'boolean' }, task08: { type: 'boolean' }, task12: { type: 'boolean' },
-  'stored-html': { type: 'boolean' }, 'visible-controls': { type: 'boolean' },
+  'stored-html': { type: 'boolean' }, 'visible-controls': { type: 'boolean' }, 'quoted-import': { type: 'boolean' },
   help: { type: 'boolean' }, 'self-check': { type: 'boolean' },
 } });
 if (values.help) {
-  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html] [--visible-controls]\nAlso accepts --task06/--task08/--task12. --visible-controls adds Task 06 Filter/Import checks without changing its frozen score. Start the fixture/candidate server separately. No LLM/MCP calls.');
+  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html] [--visible-controls] [--quoted-import]\nAlso accepts --task06/--task08/--task12. Optional Task 06 controls/quoted-CSV checks do not change its frozen score. Start the fixture/candidate server separately. No LLM/MCP calls.');
 } else if (values['self-check']) {
   const rows = [{ id: 'a', project: '研究, "team"\nnext', minutes: 0, date: '2026-09-11' }];
   assert.deepEqual(parseCsv(csv(rows)), rows);
@@ -61,6 +61,7 @@ async function main() {
   try {
     assert(['06', '08', '12'].includes(task), 'Choose task 06, 08, or 12');
     assert(!values['visible-controls'] || task === '06', '--visible-controls applies to task 06 only');
+    assert(!values['quoted-import'] || task === '06', '--quoted-import applies to task 06 only');
     assert(Number(Boolean(values.task)) + ['06', '08', '12'].filter(id => values[`task${id}`]).length === 1, 'Specify exactly one task');
     const url = localUrl(values.url);
     assert(values.output && values.db, '--output and --db are required');
@@ -208,6 +209,25 @@ async function main() {
         assert(visible.trim(), 'Absent filter needs a visible empty state');
         for (const item of rows) assert(!visible.includes(item.id), `Absent filter leaked ${item.id}`);
         return { imported: row.id, importPosts: imports.length, exactFilter: true, absentFilter: true };
+      });
+    }
+    if (values['quoted-import']) {
+      await check('browser import preserves quoted comma, quote and newline', async () => {
+        const row = { id: `${prefix}-quoted`, project: 'Research, "team"\nnext', minutes: 7, date: '2026-09-13' };
+        const posts = [];
+        page.on('request', request => {
+          if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/import') posts.push(request.url());
+        });
+        await page.locator('#upload').setInputFiles({ name: 'quoted.csv', mimeType: 'text/csv', buffer: Buffer.from(csv([row])) });
+        const [response] = await Promise.all([
+          page.waitForResponse(item => new URL(item.url()).pathname === '/api/import' && item.request().method() === 'POST'),
+          page.getByRole('button', { name: /^Import$/i }).click(),
+        ]);
+        assert.equal(response.status(), 201, 'Quoted CSV import must succeed');
+        assert.equal(posts.length, 1, 'One Import click must send one POST');
+        await page.reload({ waitUntil: 'networkidle' });
+        assert.deepEqual((await apiRows()).filter(item => item.id === row.id), [row]);
+        return { imported: row.id, importPosts: posts.length };
       });
     }
     if (task === '12') {
