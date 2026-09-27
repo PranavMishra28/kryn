@@ -412,16 +412,19 @@ test('plain detached servers require native background ownership without rewriti
   } finally { await cleanup(); f.remove(); }
 });
 
-test('broad process-name kills are refused before native shell execution', async () => {
+test('direct process signals are refused before native shell execution', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const call = command => f.call('tool.execute.before', {
     sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
   try {
     for (const command of ['killall python 2>/dev/null; sleep 1', 'command sudo -n pkill -f python',
                            '/usr/bin/killall Python', 'sudo pkill -f server.py',
-                           'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python'])
-      assert.throws(() => call(command), /broad process-name kills/);
-    for (const command of ['kill 1234', 'echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test'])
+                           'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python',
+                           'kill 68115 2>/dev/null; sleep 1; python3 -m taskboard_lite.server --port 55083',
+                           'echo ready && /bin/kill -TERM 68115', 'command kill 68115',
+                           'cat <<EOF\nkill is only data\nEOF\nkill 68115'])
+      assert.throws(() => call(command), /direct process signals/);
+    for (const command of ['echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test'])
       assert.doesNotThrow(() => call(command));
   } finally { await cleanup(); f.remove(); }
 });
