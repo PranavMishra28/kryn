@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-27",
+  "scope": "Fresh guarded-64K Task06 trial with a real operator-owned fixture server and a longer bounded Build window; no public release or profile change",
+  "installed_private_source": "1cb2bafdcff5bef0a1c81eca8279af026d8cec93",
+  "frozen_run": "e06owner64e",
+  "fixture_server": "Operator started the disposable standard-library server on its documented port 8765 with a separate SQLite DB before Plan; the agent did not own or stop it.",
+  "plan": "Completed and natively compacted in 53.476 seconds.",
+  "build": "Completed and natively compacted in 261.161 seconds under a 300-second bound. It read current web files, wrote app.js/style.css, and ran the existing tests. One attempted trailing-& server shell call was denied. Frozen automatic 2/2 passed and original seed/test files were preserved.",
+  "independent_browser": "FAIL: after the first POST /api/entries returned the controlled 503, the page produced an unhandled 'response is not defined' error and no accessible failure feedback. The updated Task06 checker stopped before manual retry; it did not claim remaining browser flows passed.",
+  "independent_security_probe": "FAIL: an API-stored project value containing an img onerror handler executed JavaScript when the page rendered entries with innerHTML (POST 201; scriptExecuted=true). This is a disposable local fixture, not a live user project.",
+  "checkpoint": "FAIL semantic: native summary kept implementation decisions under Decisions, gave a stale implement-the-form Next Move after Build completed, and claimed POST /api/entries accepts a JSON array rather than the actual single-row object. Completed compaction is not a truthful handoff.",
+  "resources": "126 Build samples showed normal host pressure and zero swap growth. The failure was correctness/verification, not a memory-guard abort.",
+  "opt_in_security_check": {
+    "change": "Optional --stored-html browser check adds a stored row through the real API and requires literal text rendering with no created img element or JavaScript execution. Default frozen five-check behavior is unchanged.",
+    "negative": "Failed on the exact unassisted e06owner64e page: stored markup did not render literally.",
+    "positive": "Passed together with the five existing Task06 checks on an operator-corrected disposable page from e06mask64c.",
+    "raw_private_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06owner64e/evidence"
+  },
+  "release_gates": {
+    "bounded_plan_and_build_compaction": "PASS for this run only",
+    "autonomous_coding_ui_correctness": "FAIL",
+    "browser_and_security": "FAIL",
+    "semantic_compaction_restart": "FAIL",
+    "non_owner_clean_install": "OPEN",
+    "45_to_60_minute_green_active_endurance": "OPEN",
+    "49k_to_128k_useful_tier_comparison": "OPEN",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "The real server and longer bound removed the timeout but exposed incorrect generated 503 handling and stored HTML execution. Change the verification/implementation approach rather than adding another prompt rule; require independent browser and source evidence before promoting any local model/profile."
+}
