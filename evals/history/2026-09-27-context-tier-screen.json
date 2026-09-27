@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-27",
+  "scope": "Guarded synthetic context retrieval on the 48 GiB M4 Max; not a sustained agent or UI qualification",
+  "repository_base": "fa86d363eb8c",
+  "installed_owner_private_source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "model": "Qwen3.5-9B-6bit",
+  "fixture": "Same three-record nonce and 2048 requested output tokens; exact input tokens verified by generation usage on successful cases",
+  "local_raw_metrics": "evals/runs/context-probes/context-20260927T*/metrics.json (ignored from Git; exact run IDs below)",
+  "power_during_cases": "Not sampled. The host was on AC after the trials, which does not establish its power source during each case. Probe revision 4 adds per-sample power recording for future runs.",
+  "cases": [
+    {
+      "run_id": "context-20260927T125946Z-8604b18c",
+      "profile": "Installed owner, 65536 context, 16 GiB custom memory guard",
+      "input_tokens": 48000,
+      "result": "PASS; exact three-record answer; cold (0 cached tokens)",
+      "prefill_seconds": 63.79,
+      "total_generation_seconds": 78.83,
+      "output_tokens": 762,
+      "peak_sampled_process_footprint_bytes": 14617402664,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "run_id": "context-20260927T125946Z-8604b18c",
+      "profile": "Installed owner, 65536 context, 16 GiB custom memory guard",
+      "input_tokens": 60000,
+      "result": "FAIL before generation: prefill_memory_exceeded; estimated 16796804776 bytes over dynamic 16320875724-byte limit. This is the configured guard, not an observed host warning.",
+      "peak_sampled_process_footprint_bytes": 15001361752,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "run_id": "context-20260927T130455Z-9d85ad1e",
+      "profile": "Isolated temporary oMLX, 65536 context, 17 GiB custom memory guard",
+      "input_tokens": 60000,
+      "result": "PASS; exact three-record answer; cold (0 cached tokens)",
+      "prefill_seconds": 83.74,
+      "total_generation_seconds": 92.77,
+      "output_tokens": 438,
+      "peak_sampled_process_footprint_bytes": 16785285400,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "run_id": "context-20260927T130727Z-c3f62a99",
+      "profile": "Isolated temporary oMLX, 98304 context, 20 GiB custom memory guard",
+      "input_tokens": 90000,
+      "result": "PASS; exact three-record answer; cold (0 cached tokens)",
+      "prefill_seconds": 140.05,
+      "total_generation_seconds": 153.85,
+      "output_tokens": 586,
+      "peak_sampled_process_footprint_bytes": 19060907688,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0
+    },
+    {
+      "run_id": "context-20260927T131038Z-2fb8327f",
+      "profile": "Isolated temporary oMLX, 131072 context, 24 GiB custom memory guard",
+      "input_tokens": 120000,
+      "result": "FAIL: sustained host memory warning; guarded cancellation before successful generation",
+      "wall_seconds": 219.683812,
+      "peak_sampled_process_footprint_bytes": 22283673256,
+      "pressure_levels": [1, 2],
+      "swap_peak_growth_bytes": 0
+    }
+  ],
+  "restored_state": "Isolated server stopped and its temporary cache removed; owner oMLX restored on port 8000. Deep doctor passed at installed 65536 context and 16 GiB guard; no owner profile or public release changed.",
+  "gates": {
+    "49k_baseline": "Prior qualification only; no new paired case in this screen",
+    "64k_synthetic": "PASS at 48000/16 GiB and 60000/17 GiB; guard choice affects admission",
+    "96k_synthetic": "One 90000-token cold PASS; not qualified as a useful default",
+    "128k_synthetic": "FAIL at 120000 input due to host warning",
+    "cache_correctness": "UNTESTED at higher tiers: warm, changed-fact and restored-fact cases remain",
+    "long_workflow_quality": "UNQUALIFIED",
+    "protected_account_install": "UNQUALIFIED",
+    "sustained_active_work": "UNQUALIFIED"
+  },
+  "next_gate": "Compare cold/warm/changed/restored cache correctness and representative coding/UI quality at feasible tiers under recorded power; keep the installed 64K guard and rollback until a larger tier is reliably useful."
+}
