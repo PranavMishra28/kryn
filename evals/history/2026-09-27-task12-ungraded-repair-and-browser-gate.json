@@ -1,0 +1,20 @@
+{
+  "scope": "Post-failure, ungraded development continuation of frozen Task12 e12endurance27a; the original FAIL remains unchanged",
+  "raw_run": "evals/runs/e12repair27b (ignored private evidence; copied failed workspace, not a fresh seed)",
+  "installed_candidate": "Private 9B/64K candidate with the Node syntax-child environment fix; no public version change",
+  "model_repair_1": "Native Fast Agent completed in 82.734 seconds. It changed new-row saves to POST and replaced interpolated innerHTML with textContent. The independent Task12 browser workflow passed, including 503 recovery, upload, edit, filter and export. A separate stored-markup browser check failed: the payload was inert but pre-escaping before textContent changed the displayed literal string. Source review also found that a new duplicate ID would incorrectly PATCH because method selection was based on loaded entries rather than an explicit Edit action.",
+  "model_repair_2": "A focused follow-up native Fast turn timed out after 156.868 seconds without a file edit. Its transcript identified the required textContent and explicit-edit changes but did not apply them. This is not a successful autonomous repair.",
+  "changed_approach": "After those two unsuccessful repair attempts, the operator stopped prompting and patched only the disposable project: textContent receives raw strings, PATCH requires explicit Edit selection, and an unsupported Delete control was removed. The operator-patched project passed node --check, existing tests 2/2 and the independent functional browser suite with stored markup and duplicate-create checks. This is evaluator red/green proof, not a model pass or a fresh frozen trial.",
+  "visual_review": "FAIL for presentation quality: independent 390px and 1280px screenshots of the operator-patched disposable project show entry ID, project, minutes and date running together without readable field separation. The accumulated disposable DB makes the screenshot long, but the row-spacing defect is present in individual rows. The automated browser suite verifies behavior and basic viewport fit, not design quality.",
+  "product_evaluation_change": "Task12's normal independent browser check now requires inert exact-literal stored markup and a duplicate new-entry POST 400 without overwriting the existing row. The change does not retroactively turn either frozen trial into a pass.",
+  "evaluator_red_green": "After read-only review tightened the exact-text assertion to the newly created row ID, the operator-patched disposable project passed the complete Task12 browser check. A temporary negative control changed only that project's row.project rendering to pre-escape '<' before textContent; the corrected check failed on the new row even though older correctly rendered markup rows existed. The temporary change was restored. Both results are ungraded evaluator checks, not autonomous model success.",
+  "gate_status": {
+    "original_frozen_task12": "FAIL",
+    "ungraded_model_main_browser_workflow": "PASS before stricter security and duplicate-create checks",
+    "ungraded_model_stored_literal_and_duplicate_create": "FAIL",
+    "ungraded_model_followup": "FAIL: timeout with no edit",
+    "operator_patched_disposable_project": "PASS independent functional browser; visual presentation FAIL; not autonomous evidence",
+    "autonomous_long_workflow_and_45_to_60_minute_endurance": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  }
+}
