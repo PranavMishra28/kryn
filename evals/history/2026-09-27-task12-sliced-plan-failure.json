@@ -1,0 +1,15 @@
+{
+  "scope": "Fresh frozen Task12 e12sliced27c, bounded feature-slice approach on installed private 9B/64K owner; public release paused",
+  "raw_run": "evals/runs/e12sliced27c (ignored private evidence)",
+  "formal_grade": "FAIL: original seed remained unchanged; automatic check expected /api/import 400 but received 404; all manual fields were NOT_TESTED",
+  "plan_stage": "Native Fast Plan inspected the fixture through 18 tool calls and identified the missing endpoints and controls, then asked the unattended evaluator whether to add a GET project query, CSV preview and inline confirmation, even though TASK.md and fixture README gave the controlling criteria. The evaluator dismissed that optional question; the native session ended interrupted after 70.611 seconds. No implementation file changed and the Plan stage did not complete.",
+  "resources": "AC power, normal pressure throughout the sampled stage, complete telemetry and zero swap growth; resource health did not establish task quality.",
+  "decision": "Stop this fresh run at its first unrecovered acceptance failure. Do not count the prior operator-patched workspace or answer this question on the evaluator's behalf. Keep the original Task12 FAIL and private 64K guard/rollback; the next attempt needs a different workflow, not another prompt-rule variant.",
+  "gate_status": {
+    "plan_completion": "FAIL: unnecessary question interrupted native Plan",
+    "source_preservation": "PASS: no implementation edits",
+    "automatic_task12": "FAIL: baseline backend remains incomplete",
+    "browser_compaction_restart_review_endurance": "NOT_TESTED after Plan failure",
+    "public_release": "PAUSED"
+  }
+}
