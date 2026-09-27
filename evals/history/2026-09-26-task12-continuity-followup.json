@@ -1,0 +1,38 @@
+{
+  "scope": "Private frozen Task12 continuation on the guarded installed 64K candidate; no public release, tier promotion, or frontier-quality claim",
+  "installed_source_revision": "6117aad059aeae4a8f528a79d59a133b61168fa8",
+  "raw_evidence": "evals/runs/t12browserinstalled1 (ignored private workspace, native session exports, resource samples, test artifacts, browser traces and screenshots)",
+  "frozen_task": "Build TaskboardLite CSV upload, persistent edit, exact filter, export and browser controls; cross compaction and restart, then independently check behavior and review source.",
+  "approach_change": "The old saved Agent session timed out again at 240 seconds and proposed an incorrect path comparison. After repeated failed continuations, an independently bounded fresh Agent session repaired the known defect and completed. Its post-compaction Agent continuation fixed a second encoded-ID edge case but timed out while debugging disposable test scripts; a later read-only handoff completed. No new system-prompt rule was added.",
+  "artifact": {
+    "origin": "Production source and UI were edited by local Agent turns; the operator archived nine untracked model scratch files with stale ports/paths and stripped 13 whitespace-only lines from web/app.js after preserving raw evidence.",
+    "server_sha256": "f8a9db3dc8ee9532264a98190a020bc0afa543466577684324fb401f85c070a6",
+    "web_app_sha256": "9797419dddfdafbf8f68280b94c485e35ac01e206df4a401a5b8dcd1802df186",
+    "scratch_archive_sha256": "30c7f74fd9247ffcc9f4d0557d964157c4c97039dffde0c5ca05be3ca84e5197",
+    "original_frozen_grader": "PASS 2/2; preserved existing test and seed data",
+    "existing_tests": "PASS 2/2 with python3 -m unittest discover -v; git diff --check passed after whitespace cleanup",
+    "independent_encoded_id_regression": "PASS against imported production Handler and Store on a temporary HTTP server/database: POST 201, matching PATCH 200 and mismatched PATCH 400 for IDs containing a space, literal %20, and slash. The earlier literal-percent case was reproduced as PATCH 400 before the second Agent edit.",
+    "browser": "PASS 7/7 unchanged independent browser flows after the final source and whitespace cleanup at 390x844 and 1280x800; real injected 503/retry, upload with atomic rejection, persistent edit/filter/export, seeds, no unhandled page errors or failed requests.",
+    "browser_report_sha256": "a4f709a3300630885f745b9b5025691dd04579db97951f92fdfcd57dcccaf8e7"
+  },
+  "continuity": {
+    "native_session": "One fresh session completed an Agent turn and native compaction; the same session was reopened under new native servers for a timed-out Agent edit and a completed read-only Ask handoff, followed by a second completed compaction.",
+    "first_checkpoint": "Recorded the scoped objective, source change, and earlier space-ID and unittest checks, but had no next action before an independent literal-percent failure was supplied.",
+    "second_checkpoint": "Recorded the corrected single-decode source and a next action to rerun tests. The read-only handoff identified the new failure and current code, but described earlier HTTP and unittest runs as absent from the session instead of earlier and stale after the edit.",
+    "qualification": "FAIL full check-lineage and completed post-restart Agent gate; scoped goal and source state survived two compactions/restarts, but the evidence ledger was not fully truthful. Raw native history remains outside the prompt."
+  },
+  "installed_owner_rollback": "PASS: private 6117aad rolled back to 089042d with the owned launcher and verified package, then reinstalled 6117aad. Guarded protocol smoke passed after oMLX restart; doctor reported 65,536 context, 16 GiB model ceiling, normal pressure, idle runtime, connected browser/search and no swap growth.",
+  "independent_review": "Operator source/API/browser review closed the reproduced encoded-ID defect and found stale generated scratch tests. Earlier fresh local Reviewer completed but made false findings and missed this real defect, so accurate independent model-review quality remains FAIL. Full source review remains unqualified beyond the checked behavior.",
+  "gates": {
+    "task09_read_before_edit": "Earlier automatic file-tail change reverted; corrected guard passed one frozen 10/10 trial, not a reliability distribution",
+    "frozen_task12_automatic_and_browser": "PASS for final artifact",
+    "frozen_task12_bounded_agent_completion": "FAIL repeated timed-out Agent turns; fresh narrow repair completed once",
+    "frozen_task12_compaction_restart": "FAIL full semantic/check lineage; two completed native compactions and a completed read-only restart are narrower passes",
+    "accurate_independent_model_review": "FAIL",
+    "clean_nonowner_install": "UNQUALIFIED",
+    "representative_45_to_60_minute_endurance": "FAIL; active work included multiple intervention timeouts and cannot be counted as one accepted sustained task",
+    "context_tier": "64K remains private and guarded; public 49K unchanged; 96K/128K useful-tier comparison incomplete",
+    "release": "CLOSED"
+  },
+  "next_blocker": "Bound Agent turns and correct check-lineage across compaction/restart using a measured mechanism or smaller independently graded stages. Do not add another prompt rule for the same timeout. Then qualify accurate review, non-owner clean installation, and sustained coding/UI endurance before proposing a public release."
+}
