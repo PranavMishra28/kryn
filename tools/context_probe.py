@@ -59,6 +59,11 @@ def swap_bytes(text):
     return int(float(m[1]) * (1024 ** ("KMGT".index(m[2]) + 1) if m[2] else 1)) if m else None
 
 
+def power_source(text):
+    m = re.search(r"Now drawing from '([^']+)'", text or "")
+    return m[1] if m and m[1] in {"AC Power", "Battery Power"} else None
+
+
 @lru_cache(maxsize=1)
 def proc_memory_module():
     """Load only the inspected stdlib helper, never the omlx package or auth settings."""
@@ -83,8 +88,10 @@ def resources(base):
     _, port = protocol.endpoint(base)
     swap = command(["/usr/sbin/sysctl", "-n", "vm.swapusage"])
     pressure = command(["/usr/sbin/sysctl", "-n", "kern.memorystatus_vm_pressure_level"])
+    power = command(["/usr/bin/pmset", "-g", "batt"])
     result.update(swap_raw=swap, swap_used_bytes=swap_bytes(swap),
-                  pressure_level=int(pressure) if pressure and pressure.isdigit() else None)
+                  pressure_level=int(pressure) if pressure and pressure.isdigit() else None,
+                  power_source=power_source(power))
     pids = command(["/usr/sbin/lsof", "-nP", "-a", f"-iTCP:{port}", "-sTCP:LISTEN", "-t"])
     ids = sorted({int(x) for x in (pids or "").split() if x.isdigit()})
     processes = {pid: {"pid": pid, "rss_bytes": None, "phys_footprint_bytes": None,
@@ -158,6 +165,7 @@ def summarize_resources(samples):
     footprints = [p["phys_footprint_bytes"] for p in processes if p.get("phys_footprint_bytes") is not None]
     lifetime = [p["lifetime_max_phys_footprint_bytes"] for p in processes if p.get("lifetime_max_phys_footprint_bytes") is not None]
     levels = [s["pressure_level"] for s in samples if s.get("pressure_level") is not None]
+    power = [s["power_source"] for s in samples if s.get("power_source") is not None]
     return {"sample_count": len(samples), "max_listener_rss_bytes": max(rss) if rss else None,
             "max_sampled_listener_phys_footprint_bytes": max(footprints) if footprints else None,
             "max_observed_listener_lifetime_phys_footprint_bytes": max(lifetime) if lifetime else None,
@@ -166,6 +174,7 @@ def summarize_resources(samples):
             "swap_peak_bytes": max(swaps) if swaps else None,
             "swap_peak_growth_bytes": max(swaps) - swaps[0] if swaps else None,
             "pressure_levels_observed": sorted(set(levels)),
+            "power_sources_observed": sorted(set(power)),
             "warning_or_critical_observed": any(x & 6 for x in levels),
             "telemetry_complete": bool(samples) and all(telemetry_ready(s) for s in samples),
             "rss_available": bool(rss), "phys_footprint_available": bool(footprints),
@@ -459,6 +468,10 @@ def self_check():
     assert swap_bytes("total = 2.00G used = 1.50G free = 0.50G") == int(1.5 * 1024 ** 3)
     assert swap_bytes(None) is None
     assert swap_bytes("used = 4096") == 4096
+    assert power_source("Now drawing from 'AC Power'\n") == "AC Power"
+    assert power_source("Now drawing from 'Battery Power'\n") == "Battery Power"
+    assert power_source(None) is None
+    assert power_source("Now drawing from 'Unknown'\n") is None
     a = {"assistant": {"content": json.dumps(FACTS["A"])}}
     assert answer_matches(a, FACTS["A"]) and not answer_matches(a, FACTS["B"])
     assert not answer_matches({"assistant": {"content": "It passed."}}, FACTS["A"])
@@ -469,15 +482,16 @@ def self_check():
     assert "173" in prompt(20, "offline", "A")[0]["content"]
     assert "631" in prompt(20, "offline", "B")[0]["content"]
     telemetry = summarize_resources([
-        {"swap_used_bytes": 50, "pressure_level": 1, "listener_processes": [
+        {"swap_used_bytes": 50, "pressure_level": 1, "power_source": "AC Power", "listener_processes": [
             {"pid": 1, "rss_bytes": None, "phys_footprint_bytes": 100,
              "lifetime_max_phys_footprint_bytes": 200}]},
-        {"swap_used_bytes": 45, "pressure_level": 1, "listener_processes": [
+        {"swap_used_bytes": 45, "pressure_level": 1, "power_source": "Battery Power", "listener_processes": [
             {"pid": 1, "rss_bytes": 90, "phys_footprint_bytes": 120,
              "lifetime_max_phys_footprint_bytes": 200}]}])
     assert telemetry["max_sampled_listener_phys_footprint_bytes"] == 120
     assert telemetry["max_observed_listener_lifetime_phys_footprint_bytes"] == 200
     assert telemetry["max_listener_rss_bytes"] == 90 and telemetry["telemetry_complete"]
+    assert telemetry["power_sources_observed"] == ["AC Power", "Battery Power"]
     assert not summarize_resources([])["telemetry_complete"]
     green = {"swap_used_bytes": 100, "pressure_level": 1, "listener_processes": [
         {"pid": 1, "rss_bytes": 100, "phys_footprint_bytes": 120}]}
@@ -597,8 +611,8 @@ def main():
             raise ValueError("input counts must be within 512..131072")
         if args.mode == "cache" and len(args.input_tokens) != 1:
             raise ValueError("cache mode accepts exactly one input size")
-        if args.server_context_limit is not None and not 1024 <= args.server_context_limit <= 131008:
-            raise ValueError("server context limit must be within 1024..131008")
+        if args.server_context_limit is not None and not 1024 <= args.server_context_limit <= 131072:
+            raise ValueError("server context limit must be within 1024..131072")
         if args.mode == "oversize" and args.server_context_limit is None:
             raise ValueError("oversize mode requires the observed --server-context-limit")
         if args.mode != "oversize" and args.server_context_limit is not None and any(
@@ -620,7 +634,7 @@ def main():
     nonce = args.nonce or run_id
     folder = args.runs_dir / ("context-" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + run_id[:8])
     folder.mkdir()
-    report = {"schema_version": 2, "probe_revision": 3, "run_nonce": nonce,
+    report = {"schema_version": 2, "probe_revision": 4, "run_nonce": nonce,
         "model": args.model, "base_url": args.base_url, "mode": args.mode,
         "server_context_limit_asserted_by_operator": args.server_context_limit,
         "requested_output_max_tokens": 1 if args.mode == "oversize" else args.max_tokens,
