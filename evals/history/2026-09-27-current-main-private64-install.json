@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-27",
+  "scope": "Owner-only same-version private candidate from current main; no public release, tag, or default-profile change",
+  "main_base_revision": "e1d30632f1e6b25eb5ba347d41fe0372c21e6d30",
+  "private_candidate_revision": "c6b6ce22219139fc9ef39214f238f8d957660f34",
+  "private_wheel_sha256": "2bdd8c89274f76f9f6efc0226c1a7c96ba9398d0791e5e404d11159320ca6a2a",
+  "private_delta": "Only the three existing context settings changed from 49152 to 65536; corresponding private-branch tests updated. The 16 GiB guard and rollback profile were retained.",
+  "checks": {
+    "private_branch_make_check": "PASS: 174 setup tests, 21 tools tests, 51 Node tests, native trial self-check, frozen suite verify and self-test",
+    "private_branch_package_smoke": "PASS: wheel source revision and 48 curated payload files verified outside checkout",
+    "initial_activation": "PASS: source c6b6ce2, deep doctor, and six guarded protocol smoke cases",
+    "rollback": "PASS: actual transaction restored prior source cff0f1b5234f684151659b0e6a0aebd0d20a4a5b and its original package interpreter",
+    "reinstallation": "PASS: source c6b6ce2 reactivated, deep doctor verified pinned model/browser files and local routing, and six guarded protocol smoke cases passed",
+    "resources": "Both smoke runs had normal host pressure and unchanged sampled swap. Final runtime was healthy and idle at 65536 context with the 16 GiB guard."
+  },
+  "limits": "Protocol smoke is not a coding/UI or long-workflow acceptance test. The separate eonfolk-ci account still had no observable GUI session, so protected-account inference, independent holdout isolation, semantic compaction/restart, representative useful-tier comparison, and active endurance remain unqualified. Public releases remain paused."
+}
