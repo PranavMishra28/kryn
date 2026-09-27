@@ -32,10 +32,11 @@ function localUrl(value) {
 const { values } = parseArgs({ options: {
   url: { type: 'string' }, output: { type: 'string' }, db: { type: 'string' }, task: { type: 'string' },
   task06: { type: 'boolean' }, task08: { type: 'boolean' }, task12: { type: 'boolean' },
+  'stored-html': { type: 'boolean' },
   help: { type: 'boolean' }, 'self-check': { type: 'boolean' },
 } });
 if (values.help) {
-  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12\nAlso accepts --task06/--task08/--task12. Start the fixture/candidate server separately. No LLM/MCP calls.');
+  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html]\nAlso accepts --task06/--task08/--task12. Start the fixture/candidate server separately. No LLM/MCP calls.');
 } else if (values['self-check']) {
   const rows = [{ id: 'a', project: '研究, "team"\nnext', minutes: 0, date: '2026-09-11' }];
   assert.deepEqual(parseCsv(csv(rows)), rows);
@@ -106,6 +107,22 @@ async function main() {
     const cleared = () => page.waitForFunction(() => [...document.querySelectorAll('#entry-form input')].every(input => input.value === ''));
     const screenshot = async name => { await page.screenshot({ path: path.join(output, name), fullPage: true }); report.screenshots.push(name); };
     await page.goto(url.href, { waitUntil: 'networkidle' });
+    if (values['stored-html']) {
+      await check('stored entry text is rendered literally without executable HTML', async () => {
+        const markup = '<img src=x onerror="window.__krynStoredHtml=1">';
+        const row = { id: `${prefix}-markup`, project: markup, minutes: 1, date: '2026-09-10' };
+        const response = await context.request.post(new URL('/api/entries', url).href, { data: row, maxRedirects: 0 });
+        assert.equal(response.status(), 201, 'Security probe row must be accepted by the existing API');
+        await page.reload({ waitUntil: 'networkidle' });
+        await page.waitForFunction(id => document.querySelector('#entries')?.textContent.includes(id), row.id);
+        const list = page.locator('#entries');
+        assert((await list.innerText()).includes(markup), 'Stored markup must appear as literal text');
+        assert.equal(await list.locator('img').count(), 0, 'Stored markup created an HTML element');
+        assert.equal(await page.evaluate(() => window.__krynStoredHtml === 1), false, 'Stored markup executed JavaScript');
+        await screenshot('stored-html.png');
+        return { id: row.id, renderedAsText: true };
+      });
+    }
     if (task !== '08') {
       await check('invalid minutes produce accessible feedback without persistence', async () => {
         const row = { id: `${prefix}-invalid`, project: 'Invalid', minutes: -1, date: '2026-09-11' };
