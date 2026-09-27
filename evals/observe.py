@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from bench import ROOT, run_path, static_hashes
@@ -89,8 +90,19 @@ def observation(kind, report, returncode):
                 for c in report.get("checks", []) if c.get("pass") is False]
     if report.get("error") and not failures:
         failures.append({"check": "browser setup", "error": report["error"].splitlines()[0]})
+    posts = []
+    for request in report.get("network", []):
+        if not isinstance(request, dict) or request.get("method") != "POST" or not isinstance(request.get("url"), str):
+            continue
+        try:
+            if urlsplit(request["url"]).path == "/api/entries" and type(request.get("status")) is int:
+                posts.append(request["status"])
+        except ValueError:
+            continue
     return {"status": "PASS" if report.get("pass") and returncode == 0 else "FAIL",
-            "checks": checks, "failures": failures}
+            "checks": checks, "failures": failures, "entry_post_statuses": posts[-8:],
+            "older_entry_posts_omitted": max(0, len(posts) - 8),
+            "manual_retry_started": report.get("manualRetryStarted") if type(report.get("manualRetryStarted")) is bool else None}
 
 
 def record(run_id, kind, *, url=None, db=None, flags=()):
@@ -196,6 +208,9 @@ def status(run_id):
                             "current_review": item["kind"] != "grade" or item.get("review_sha256") == current_review,
                             "report_intact": intact, "failures": item["result"].get("failures", []),
                             "checks": item["result"].get("checks", []),
+                            "entry_post_statuses": item["result"].get("entry_post_statuses", []),
+                            "older_entry_posts_omitted": item["result"].get("older_entry_posts_omitted", 0),
+                            "manual_retry_started": item["result"].get("manual_retry_started"),
                             "manual": item["result"].get("manual", {}),
                             "automatic_passed": item["result"].get("automatic"),
                             "automatic_tests_run": item["result"].get("automatic_tests_run"),
@@ -234,6 +249,10 @@ def compact_status(run_id):
             detail.update(automatic_passed=item["automatic_passed"],
                           automatic_tests_run=item["automatic_tests_run"],
                           manual_review_record_present=item["manual_review_record_present"])
+        else:
+            detail.update(entry_post_statuses=item["entry_post_statuses"],
+                          older_entry_posts_omitted=item["older_entry_posts_omitted"],
+                          manual_retry_started=item["manual_retry_started"])
         current[key] = detail
     active_records = {item["record"] for item in full["latest_current"].values() if item is not None}
     def older_same_scope(item):
@@ -243,6 +262,8 @@ def compact_status(run_id):
                     latest["evaluator_sha256"] == item["evaluator_sha256"])
     failed = [dict(kind=h["kind"], scope=h["scope"], status=h["status"], current_source=h["current_source"],
                    current_evaluator=h["current_evaluator"],
+                   **({"entry_post_statuses": h["entry_post_statuses"],
+                       "manual_retry_started": h["manual_retry_started"]} if h["kind"] == "browser" else {}),
                    failures=bounded_failures(h), evidence_id=evidence_id(h))
               for h in full["history"] if h["failures"] and h["report_intact"] and
               h["record"] not in active_records and not older_same_scope(h)]

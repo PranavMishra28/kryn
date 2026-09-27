@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-27",
+  "run": "e06freshserver64a",
+  "scope": "Three fresh, tools-disabled native Ask turns on the installed private 64K owner model, each given the same question with progressively more source-bound evaluator detail; diagnostic screen, not coding acceptance",
+  "evaluator_change": "Browser observations now retain only up to eight /api/entries POST status integers plus a three-state marker for whether the independent checker began its deliberate manual retry. Full network URLs and raw browser transcripts remain outside the bounded status.",
+  "real_browser_controls": {
+    "failed_candidate": "Independent Chrome repeatedly saw POST 503 then POST 201 while manual_retry_started was false; the form had cleared before a deliberate retry. A stored-markup check created HTML elements. Frozen automatic tests remained 2/2 with manual fields untested.",
+    "known_good_fixture": "Full Task06 Chrome check passed, including stored markup, controlled 503, manual retry, reload, and both viewports; manualRetryStarted was true."
+  },
+  "native_ask_turns": [
+    "Baseline bounded status: completed in 30.801 seconds; named both browser failures but lacked network cause and proposed rerunning manual checks before fixing the known failure.",
+    "POST statuses added: completed in 29.420 seconds; read [503,201] but falsely called the 201 a manual retry.",
+    "Explicit retry phase added: completed in 27.423 seconds; despite manual_retry_started=false, still called the 201 a manual retry and proposed fixing the checker instead of the generated page."
+  ],
+  "resources": "All three guarded turns sampled AC power, normal memory pressure and zero swap growth; each completed without a guard abort.",
+  "disposition": "Keep the bounded, source-bound network/phase facts as operator evidence. Reject any claim that this improved local-model semantic interpretation. Stop adding fields or prompt rules for this failure; change workflow/model approach.",
+  "gates": {
+    "evaluator_failure_provenance": "PASS as an isolated mechanism",
+    "semantic_failure_causation": "FAIL in the tools-disabled model screen",
+    "autonomous_coding_ui": "FAIL from the underlying Task06 run",
+    "compaction_restart": "NOT_TESTED in these short Ask screens",
+    "public_release": "PAUSED"
+  }
+}

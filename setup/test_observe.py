@@ -12,6 +12,23 @@ import observe
 
 
 class ObservationTests(unittest.TestCase):
+    def test_browser_observation_keeps_only_bounded_post_statuses(self):
+        report = {"pass": False, "manualRetryStarted": False,
+                  "checks": [{"name": "retry", "pass": False, "error": "form cleared"}],
+                  "network": [{"method": "POST", "url": "http://127.0.0.1:8765/api/entries?private=1", "status": 503},
+                              {"method": "POST", "url": "http://127.0.0.1:8765/api/entries", "status": 201},
+                              {"method": "GET", "url": "http://127.0.0.1:8765/api/entries", "status": 200}]}
+        result = observe.observation("browser", report, 1)
+        self.assertEqual(result["entry_post_statuses"], [503, 201])
+        self.assertIs(result["manual_retry_started"], False)
+        self.assertNotIn("private", json.dumps(result))
+        report["network"] *= 5
+        result = observe.observation("browser", report, 1)
+        self.assertEqual(len(result["entry_post_statuses"]), 8)
+        self.assertEqual(result["older_entry_posts_omitted"], 2)
+        report["manualRetryStarted"] = "false"
+        self.assertIsNone(observe.observation("browser", report, 1)["manual_retry_started"])
+
     def test_browser_evaluator_change_invalidates_fingerprint(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -37,13 +54,14 @@ class ObservationTests(unittest.TestCase):
             subprocess.run(["git", "add", "app.js"], cwd=workspace, check=True)
             old = observe.source_state(workspace)
 
-            def add(number, source, outcome, failure=None, kind="browser", scope="06:base", automatic=None):
+            def add(number, source, outcome, failure=None, kind="browser", scope="06:base", automatic=None, posts=(), retry=None):
                 report = folder / f"{number}.report.json"
                 report.write_text(json.dumps({"outcome": outcome}))
                 record = {"kind": kind, "scope": scope, "source_after": source, "result": {
                     "status": outcome, "failures": failure or [], "checks": [],
                     "automatic": automatic,
-                    "automatic_tests_run": 2 if kind == "grade" else None},
+                    "automatic_tests_run": 2 if kind == "grade" else None,
+                    "entry_post_statuses": list(posts), "manual_retry_started": retry},
                     "evaluator_sha256": observe.evaluator_sha256(kind),
                     "report": str(report.relative_to(run)), "report_sha256": observe.digest(report.read_bytes())}
                 (folder / f"{number}.json").write_text(json.dumps(record))
@@ -52,7 +70,7 @@ class ObservationTests(unittest.TestCase):
             failed_report = add(1, old, "FAIL", [{"check": "503", "error": "No POST was sent"}])
             (workspace / "app.js").write_text("fixed\n")
             current = observe.source_state(workspace)
-            add(2, current, "PASS")
+            add(2, current, "PASS", posts=[201], retry=True)
             add(3, old, "FAIL", [{"check": "automatic", "error": "secret grader traceback"}], "grade", "06", False)
             add(4, current, "PARTIAL", kind="grade", scope="06", automatic=True)
             add(5, current, "FAIL", [{"check": "stored HTML", "error": "executed markup"}],
@@ -64,6 +82,8 @@ class ObservationTests(unittest.TestCase):
                 self.assertNotIn(str(run), json.dumps(summary))
                 self.assertIn("evidence_id", summary["current"]["browser:06:base"])
                 self.assertEqual(summary["current"]["browser:06:base"]["status"], "PASS")
+                self.assertEqual(summary["current"]["browser:06:base"]["entry_post_statuses"], [201])
+                self.assertIs(summary["current"]["browser:06:base"]["manual_retry_started"], True)
                 self.assertNotIn("automatic_tests_run", summary["current"]["browser:06:base"])
                 self.assertEqual(summary["current"]["browser:06:--stored-html"]["status"], "FAIL")
                 self.assertEqual(summary["current"]["browser:06:--stored-html"]["failures"][0]["error"],
