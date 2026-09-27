@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-27",
+  "scope": "Private, direct model diagnosis of one Task06 stored-markup failure; no harness change, profile promotion, or release",
+  "comparison": {
+    "intervention": "A 484-character read-only excerpt of current GET /api/entries and Store.entries/schema was added to the prior JavaScript/browser-report prompt. It specifies that rows are objects with id, project, minutes and date; it does not suggest a repair.",
+    "owner_9b": {
+      "baseline": "HTTP 200, finish_reason=length at 8192 output tokens, 139.59 s; no complete testable patch.",
+      "related_source": "HTTP 200, finish_reason=length at 8192 output tokens, 140.01 s; no complete testable patch.",
+      "resources": "Both guarded requests observed normal host pressure, zero swap growth, and no abort. This does not demonstrate a 9B quality gain from the excerpt."
+    },
+    "isolated_27b_q5": {
+      "prior_without_excerpt": "HTTP 200, finish_reason=stop, 1938 output tokens, 97.54 s. Its proposal still used JSON.stringify on actual API row objects and failed the exact-literal stored-markup browser check.",
+      "with_excerpt": "HTTP 200, finish_reason=stop, 2564 output tokens, 126.23 s. Its proposed four-field map joined row values directly into textContent, with no JSON escaping or HTML parsing.",
+      "resources": "Temporary isolated-HOME oMLX server at a 27 GiB process guard; normal sampled host pressure, zero swap growth, no warning or guard abort, 24.86 GB sampled peak process physical footprint. A single short request does not qualify sustained work or a 64K context tier.",
+      "disposable_browser": {
+        "stored_html_plus_base": "PASS: seven independent Chrome checks, including inert exact-literal stored markup, real first-save 503 followed by one manual retry, reload, responsive 390/1280 viewports, and network/console inspection.",
+        "stored_html_plus_visible_controls": "FAIL after the stored-markup, 503, and viewport checks passed: clicking the visible Import control never sent POST /api/import. The isolated renderer repair did not address the separate control defect."
+      },
+      "owner_restoration": "Temporary port closed; owner 9B/64K guarded runtime restored by kryn bench, owner oMLX settings SHA256 remained 48c1eac9eee47d57630b0dd50348c89295506b4cf91a7bbc389756769400c610, and kryn doctor --deep passed."
+    }
+  },
+  "private_raw_evidence": {
+    "location": "Ignored local directory evals/runs/model-screen-20260927/; not shipped in the package",
+    "27b_related_request_sha256": "2b99387164281a6bd67cc23b0b908f4c38bcce9feaf7a1e2238c6c5e52337bc4",
+    "27b_related_response_sha256": "0de7312d2219e1bf21ad1900d30b0358e7d5716e7c7b0afdeb84b7953c38340f",
+    "stored_html_browser_report_sha256": "11d0cb2b38cdd08a96ad8f9f8d3c93d21af6be3658d238db8b52be3670d56991",
+    "strict_browser_report_sha256": "fb1e89e2d65a889356c69edfb00a3ef07f70ad461ad78e70c5e8dce2ffc4092c"
+  },
+  "limitations": [
+    "This was a direct Reviewer request, not a native OpenCode coding turn or a compaction/restart test.",
+    "The captured prompt's app.js has SHA256 db9adaca17b91e03a752389a7ad2223bac0ff7c64b139dada324dd17372b1243, while the embedded earlier browser report names source 9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c. The disposable replay tests the prompted code; it cannot be counted as a same-source repair of that earlier observation.",
+    "One successful isolated 27B proposal does not establish reliability, long-workflow benefit, useful 49K-128K context, or safe active endurance. The owner 9B did not produce a usable repair in this comparison.",
+    "The second macOS account still has no observable gui/505 launch domain or Finder/Dock session after the reported sign-in attempt; protected-account inference remains unqualified."
+  ],
+  "decision": "Keep guarded private 9B/64K installed and public releases paused. Related API source helped one isolated 27B diagnosis but did not rescue 9B or complete the strict UI task. Next qualify a genuinely different staged coding workflow or model in native OpenCode with source-current independent checks; do not add prompt rules based on this single replay."
+}
