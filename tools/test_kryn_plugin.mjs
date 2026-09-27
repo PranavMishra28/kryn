@@ -454,6 +454,8 @@ test('direct process signals are refused before native shell execution', async (
                            'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python',
                            'kill 68115 2>/dev/null; sleep 1; python3 -m taskboard_lite.server --port 55083',
                            'echo ready && /bin/kill -TERM 68115', 'command kill 68115',
+                           'lsof -ti:62138 | xargs kill -9 2>/dev/null || true',
+                           'lsof -ti:62138 | xargs -r /bin/kill -9',
                            'cat <<EOF\nkill is only data\nEOF\nkill 68115'])
       assert.throws(() => call(command), /direct process signals/);
     for (const command of ['echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test'])
