@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-27",
+  "scope": "One cold 48000-token synthetic retrieval per 49K, 64K and 96K profile on the 48 GiB M4 Max; not a repeated quality or sustained-agent comparison",
+  "model": "Qwen3.5-9B-6bit on oMLX 0.6.4",
+  "generation_request_sha256": "310fa4e4e1a242a456cc8b35fea2afea4ffaa367cc968ceb4b125670a56f9f41",
+  "request_identity": "The full JSON body of POST /v1/chat/completions was identical across the three runs, including nonce, messages, sampler and 2048 requested output tokens; each successful usage reported exactly 48000 input and zero cached tokens.",
+  "cases": [
+    {
+      "tier": "49K",
+      "advertised_text_admission_limit": 49152,
+      "profile": "Isolated temporary oMLX, 16 GiB custom guard",
+      "raw_metrics": "evals/runs/context-probes/context-20260927T133419Z-507d8165/metrics.json",
+      "correct": true,
+      "output_tokens": 719,
+      "prefill_seconds": 63.84,
+      "total_generation_seconds": 78.02,
+      "peak_sampled_process_footprint_bytes": 15059803696,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0,
+      "power_sources": ["AC Power"]
+    },
+    {
+      "tier": "64K",
+      "advertised_text_admission_limit": 65536,
+      "profile": "Installed owner private KRYN, 16 GiB custom guard",
+      "raw_metrics": "evals/runs/context-probes/context-20260927T131957Z-b91ca7da/metrics.json",
+      "correct": true,
+      "output_tokens": 469,
+      "prefill_seconds": 63.98,
+      "total_generation_seconds": 73.18,
+      "peak_sampled_process_footprint_bytes": 14674812320,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0,
+      "power_sources": ["AC Power"]
+    },
+    {
+      "tier": "96K",
+      "advertised_text_admission_limit": 98304,
+      "profile": "Isolated temporary oMLX, 20 GiB custom guard",
+      "raw_metrics": "evals/runs/context-probes/context-20260927T133611Z-61758715/metrics.json",
+      "correct": true,
+      "output_tokens": 547,
+      "prefill_seconds": 65.06,
+      "total_generation_seconds": 75.95,
+      "peak_sampled_process_footprint_bytes": 15046024896,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0,
+      "power_sources": ["AC Power"]
+    }
+  ],
+  "comparison_limit": "Only one cold case per tier; output lengths differ because sampling is stochastic. The isolated profiles also have different context and guard ceilings. Similar 48K prefill does not prove equivalent throughput, latency distribution, quality, or sustainable 96K coding.",
+  "restored_state": "Both isolated servers stopped and their owned caches removed; owner port 8000 restored at 65536 context/16 GiB guard with deep doctor passing. About 40 GiB disk free. No public release or installed-profile change.",
+  "gates": {
+    "matched_48k_retrieval": "PASS for all three tiers as a one-case screen",
+    "96k_long_input_cache": "PASS in separate 90000-token cold/repeat/changed/restored synthetic screen",
+    "128k_host_safety": "FAIL in prior 120000-token host-warning screen",
+    "repeated_49k_64k_96k_engineering_quality": "UNQUALIFIED",
+    "long_coding_ui_compaction_restart": "UNQUALIFIED",
+    "default_profile_change": "NONE; private 64K guard and rollback remain"
+  }
+}
