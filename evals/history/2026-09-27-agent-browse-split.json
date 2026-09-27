@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-27",
+  "run": "e06repair27c",
+  "source_after_agent_sha256": "d2253374ae52fdf7f0f41ea9a42da719b5c02564fa0d883dbbc7efefa412ff7c",
+  "agent_repair": {
+    "stage": "agent-quoted-import",
+    "result": "TIMEOUT after 307.755 seconds; model_completed=false",
+    "trace": "Read and edited project files, ran shell probes, and made no browser tool call.",
+    "independent_grade": "PARTIAL: automatic 2/2 pass; six manual checks NOT_TESTED",
+    "independent_browser_quoted_import": "PASS 6/6, including real 503, 390/1280 reload, and exact quoted CSV import",
+    "independent_browser_visible_controls": "PASS 6/6",
+    "independent_browser_stored_html_and_visible_controls": "FAIL exact literal stored text; injected markup remained inert"
+  },
+  "browse_role": {
+    "first_stage": "browse-role-quoted timed out after 187.807 seconds because no upload file path was supplied; it attempted unavailable write/execute tools and became stuck in a file chooser.",
+    "supplied_file_stage": "browse-role-with-file completed in 58.886 seconds after receiving the exact existing CSV path; it used native browser navigation, upload, click, network and snapshot tools and reported POST 201 plus persistence.",
+    "independent_api_check": "Exactly one imported row persisted with its project comma, double quote and newline unchanged."
+  },
+  "resources": "All three guarded stages sampled pressure level 1 with zero swap growth.",
+  "gates": {
+    "quoted_import_artifact": "PASS, assisted and same-account only",
+    "agent_browser_self_verification": "FAIL",
+    "focused_browse_role_with_supplied_file": "PASS",
+    "full_task06_coding_ui": "FAIL: exact literal stored-text display and autonomous completion remain open",
+    "protected_evaluator_account": "UNQUALIFIED"
+  },
+  "next_approach": "Use a bounded Agent-to-Browse handoff with concrete URL and pre-existing upload fixture for diagnostic UI checks; do not infer autonomous verification from Browse success. Keep the source-bound literal-text failure open."
+}
