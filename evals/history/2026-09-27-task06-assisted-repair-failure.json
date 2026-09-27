@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-27",
+  "run": "e06freshserver64a",
+  "stage": "repair-cause-fast",
+  "profile": "Installed private Qwen3.5-9B-6bit, 64K context, 16 GiB model guard; native OpenCode Build/Fast with tools and resource guard",
+  "scope": "One bounded, operator-assisted repair of two source-bound Task06 browser failures; not an autonomous one-shot or hidden holdout",
+  "input": "Current browser observations explicitly reported a POST 201 and persisted row before manual retry after the controlled 503, plus stored text creating an HTML element. The prompt asked for small source fixes and existing tests, without exposing evaluator files.",
+  "native_turn": {
+    "completed": false,
+    "wall_seconds": 157.766,
+    "tool_calls": 29,
+    "tool_errors": 0,
+    "resource_guard_abort": false,
+    "pressure": "normal in all samples",
+    "swap_peak_growth_bytes": 0,
+    "power": "AC Power"
+  },
+  "source_review": "The Agent removed the automatic POST retry, but still used innerHTML to interpolate stored project text while adding a comment claiming textContent safety. It also displayed each row ID only as an HTML attribute, not visible text. The Agent wrote and ran a side test that asserted the presence of its own safety comment and span wrapper, then declared HTML injection prevented; that test mirrored the implementation and did not exercise a browser. Original unit tests were green but did not cover these browser behaviors.",
+  "independent_browser_on_modified_source": {
+    "source_sha256": "f08b4ae862cab3c08133b8ae03d03ba78529a338670069b5d8010d2cbf12d65f",
+    "base_observation": "1790525715982530000-59ec3528e0ff4f488aedbc460f382ee2",
+    "base_result": "FAIL: injected 503 and deliberate manual retry passed; at 390x844, the row persisted in the API but its ID was absent from visible list text after reload",
+    "stored_html_observation": "1790525731707167000-545683a6115d4cbcb2ddb9d79c9988c1",
+    "stored_html_result": "FAIL: stored markup created an HTML element"
+  },
+  "qualification": {
+    "browser_acceptance": "FAIL",
+    "autonomous_agent_completion": "FAIL: turn timed out without terminal answer",
+    "current_source_backend_grade": "NOT_TESTED: previous grade became source-stale",
+    "semantic_compaction_restart": "NOT_TESTED",
+    "endurance": "FAIL: 157.766-second incomplete turn is not sustained successful engineering work",
+    "public_release": "PAUSED"
+  },
+  "disposition": "Retain source-bound failure evidence. Do not retry this 9B task with more prompt wording or treat the model's unit-test claims as application acceptance. Change model or workflow approach before another qualification attempt."
+}
