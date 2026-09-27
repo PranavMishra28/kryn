@@ -1,0 +1,48 @@
+{
+  "scope": "Private owner-only 9B/64K/16GiB candidate derived from main; no public release or profile promotion",
+  "installed_source_revision": "1bd30147726f01b1c1ed08b2b8d1b5ac4deb9cbe",
+  "source_main_includes": "PR #106 user-request continuity fix",
+  "task09": {
+    "raw_run": "evals/runs/e09anchor27a (ignored private evidence)",
+    "automatic_grader": "PARTIAL because manual fields remain NOT_TESTED; all automatic assertions and ten intermediate checkpoints passed",
+    "native_turns_completed": 10,
+    "independent_intermediate_checkpoints_passed": 10,
+    "native_compactions_completed_in_full_export": 10,
+    "successful_edits_after_current_read": 10,
+    "edit_first_refusals_recovered": 8,
+    "real_test_runs_with_complete_zero_exit": 10,
+    "git_diff_calls_with_complete_zero_exit": 10,
+    "failed_pytest_attempts_before_discovering_existing_script": 3,
+    "agent_turn_seconds_total": 389.17,
+    "turn_resources": "All ten driver samples observed AC power, normal pressure, and zero swap growth. Manual compactions had a guard but did not persist each resource sample in this run.",
+    "operator_audit": "Full native export contained ten completed compactions. The local orchestration script falsely timed out on the tenth because it counted only the paginated recent-message API; that failed script report is retained. Source transcript and external checkpoint/driver evidence are separate.",
+    "limits": "One CSV append sequence is not a representative coding/UI task, a reliability distribution, or 45–60 minutes of active work. The lower failed-pytest count versus an older run is not causally attributed to this context change."
+  },
+  "task06": {
+    "raw_run": "evals/runs/e06stagedanchor27a (ignored private evidence)",
+    "plan": "Completed read-only in 36.603 seconds; eight read/search calls. An immediate manual compact request produced no checkpoint within 120 seconds; no compaction pass is claimed for Plan.",
+    "agent_form": "Timed out at 247.813 seconds. Generated one changed web/app.js with backend 2/2 and initial node --check passing, but independent Chrome failed exact literal stored text (JSON-escaped quotes).",
+    "compaction_after_form": "Completed (27.44 seconds), followed by a new native server for repair.",
+    "repair": "Timed out at 187.871 seconds and left web/app.js with a node --check syntax error; unchanged Chrome checker failed on a page JavaScript exception.",
+    "compaction_after_repair": "Completed (52.86 seconds), followed by saved-session Ask and fresh read-only Reviewer in new native processes.",
+    "saved_ask": "Completed and read current web/app.js, but contradicted the measured syntax error by calling the malformed line valid. Status-accuracy gate failed.",
+    "fresh_reviewer": "Completed and located the syntax error, but proposed the same malformed line and made false claims about 503 retry, reset-on-success, accessible status, and import count. Review-quality gate failed.",
+    "automatic_grader": "PARTIAL: backend passed and original data/tests preserved; browser manual fields remain NOT_TESTED by the grader, while independent browser checks failed.",
+    "resources": "All stage/compaction samples had normal pressure and zero swap growth. Most sampled AC; saved Ask sampled AC and Battery Power.",
+    "gate": "FAILED: autonomous Agent completion, browser acceptance, source correctness and truthful review. Two actual coding-stage timeouts and one syntax regression; do not repeat this prompt approach."
+  },
+  "owner_installation": {
+    "private_wheel_source": "1bd30147726f01b1c1ed08b2b8d1b5ac4deb9cbe",
+    "offline_and_package_smoke": "PASS before owner activation",
+    "activation": "PASS: same-version private wheel installed with exact 64K context and 16GiB guard",
+    "rollback": "PASS: restored prior owned source d7db0457c477065490e143a63948e4fd6c365424 without changing 64K context",
+    "reinstall": "PASS: restored exact private wheel source; kryn bench guarded protocol smoke passed; kryn doctor --deep passed with healthy 64K runtime, normal pressure and browser/search connected",
+    "protected_account": "Still unqualified: macOS has no observable gui/505 launch domain for eonfolk-ci, so protected oMLX inference cannot start headlessly. Earlier file/install checks were not rerun here."
+  },
+  "remaining": [
+    "One frozen coding/UI task with autonomous completion, passing independent browser/source checks, and truthful compaction/restart review",
+    "Repeated representative 49K/64K/96K/128K useful-tier decision; 128K safety screen failed earlier",
+    "Protected second-account inference and 45–60 minute green active endurance",
+    "Clean release candidate and public-install rollback gates after those application gates; release remains paused"
+  ]
+}
