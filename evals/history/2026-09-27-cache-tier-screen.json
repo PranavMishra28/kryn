@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-27",
+  "scope": "Guarded synthetic cold/repeat/changed/restored cache correctness; not sustained agent quality",
+  "model": "Qwen3.5-9B-6bit",
+  "fixture": "Same nonce, three signed records, 2048 requested output tokens; exact input and cached tokens checked from generation usage",
+  "raw_metrics": [
+    "evals/runs/context-probes/context-20260927T131957Z-b91ca7da/metrics.json",
+    "evals/runs/context-probes/context-20260927T132346Z-6a896a5c/metrics.json"
+  ],
+  "raw_metrics_retention": "Local ignored evaluation artifacts; this committed record retains the relevant measurements",
+  "sequences": [
+    {
+      "profile": "Installed owner, 65536 context, 16 GiB custom guard, port 8000",
+      "input_tokens": 48000,
+      "cold": {"correct": true, "cached_tokens": 0, "prefill_seconds": 63.98, "total_seconds": 73.18, "peak_sampled_process_footprint_bytes": 14674812320},
+      "repeat": {"correct": true, "cached_tokens": 47104, "cache_fraction": 0.9813333333333333, "prefill_seconds": 2.15, "total_seconds": 17.77, "peak_sampled_process_footprint_bytes": 14557371640},
+      "changed_facts": {"correct": true, "cached_tokens": 0, "prefill_seconds": 64.65, "total_seconds": 76.86, "peak_sampled_process_footprint_bytes": 14787026072},
+      "restored_original": {"correct": true, "cached_tokens": 47104, "cache_fraction": 0.9813333333333333, "prefill_seconds": 2.17, "total_seconds": 12.85, "peak_sampled_process_footprint_bytes": 13632986264},
+      "all_cases": {"power_sources_observed": ["AC Power"], "pressure_levels_observed": [1], "swap_peak_growth_bytes": 0, "synthetic_probe_pass": true}
+    },
+    {
+      "profile": "Isolated temporary oMLX, 98304 context, 20 GiB custom guard, port 8001",
+      "input_tokens": 90000,
+      "cold": {"correct": true, "cached_tokens": 0, "prefill_seconds": 140.68, "total_seconds": 156.61, "peak_sampled_process_footprint_bytes": 19089956664},
+      "repeat": {"correct": true, "cached_tokens": 88064, "cache_fraction": 0.9784888888888889, "prefill_seconds": 4.79, "total_seconds": 17.28, "peak_sampled_process_footprint_bytes": 17738655416},
+      "changed_facts": {"correct": true, "cached_tokens": 0, "prefill_seconds": 148.38, "total_seconds": 161.28, "peak_sampled_process_footprint_bytes": 18193915968},
+      "restored_original": {"correct": true, "cached_tokens": 88064, "cache_fraction": 0.9784888888888889, "prefill_seconds": 5.01, "total_seconds": 15.66, "peak_sampled_process_footprint_bytes": 17645512928},
+      "all_cases": {"power_sources_observed": ["AC Power"], "pressure_levels_observed": [1], "swap_peak_growth_bytes": 0, "synthetic_probe_pass": true},
+      "server_log_caveat": "Two oMLX scheduler warnings reported prefill above an internal max_bytes threshold near 88064 and 89999 tokens. Requests completed correctly; the host guard saw no warning. The warnings need interpretation before sustained promotion."
+    }
+  ],
+  "restored_state": "Port 8001 stopped and its owned isolated settings/cache/logs removed; owner port 8000 returned to private 65536 context and 16 GiB guard. Deep doctor, pinned model/browser integrity and native routing passed; disk returned to about 40 GiB free.",
+  "gates": {
+    "64k_synthetic_cache_correctness": "PASS for cold, repeat, changed facts and restored original at 48000 input",
+    "96k_synthetic_cache_correctness": "PASS for cold, repeat, changed facts and restored original at 90000 input",
+    "matched_49k_64k_96k_quality_latency": "UNTESTED; these input lengths differ and cannot establish a tier winner",
+    "96k_representative_coding_ui": "UNQUALIFIED",
+    "interrupted_request_cache_correctness": "UNTESTED",
+    "sustained_profile_endurance": "UNQUALIFIED",
+    "128k": "FAILED prior 120000-token host-warning screen"
+  },
+  "next_gate": "Run matched-size tier comparison and a fresh coding/UI workflow with compaction, restart and independent browser/review checks before changing the private default. Keep the 64K guard and rollback; no public release."
+}
