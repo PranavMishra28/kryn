@@ -158,11 +158,14 @@ async function main() {
         await submit('POST', 503);
         await page.waitForFunction(previous => [...document.querySelectorAll('[role="status"],[role="alert"],[aria-live]')]
           .some(el => el.textContent.trim() && el.textContent !== previous), oldMessage);
-        assert(await live.isVisible()); assert.deepEqual(await formValues(), before);
-        assert(!(await apiRows()).some(item => item.id === row.id)); await screenshot('temporary-error.png');
+        assert(await live.isVisible());
+        const afterFailure = await formValues();
+        const rowAlreadyCreated = (await apiRows()).some(item => item.id === row.id);
         await page.waitForTimeout(2200); // Detect a delayed automatic retry before the user's second Save.
+        assert(!rowAlreadyCreated && !(await apiRows()).some(item => item.id === row.id), 'Row appeared before manual retry');
+        assert.deepEqual(afterFailure, before);
         assert.deepEqual(await formValues(), before);
-        assert(!(await apiRows()).some(item => item.id === row.id), 'Row appeared before manual retry');
+        await screenshot('temporary-error.png');
         report.manualRetryStarted = true;
         await submit('POST', 201); await cleared(); await page.reload({ waitUntil: 'networkidle' });
         assert.deepEqual((await apiRows()).filter(item => item.id === row.id), [row]);
