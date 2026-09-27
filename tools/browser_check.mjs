@@ -14,6 +14,9 @@ const csv = rows => [fields, ...rows.map(row => fields.map(key => row[key]))]
   .map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n') + '\r\n';
 const canonical = rows => rows.map(row => Object.fromEntries(fields.map(key => [key, row[key]])))
   .sort((a, b) => a.id.localeCompare(b.id));
+const literalMarkupFailure = (rendered, markup) => rendered.includes(JSON.stringify(markup).slice(1, -1))
+  ? 'Stored text has JSON-escaped double quotes; the exact literal string is absent'
+  : 'Markup probe was inert, but rendered text does not include the exact stored string';
 function parseCsv(text) {
   // Reuse the standard-library CSV parser, never candidate code or a new dependency.
   const result = spawnSync('python3', ['-B', '-c',
@@ -43,7 +46,10 @@ if (values.help) {
   assert.throws(() => localUrl('https://example.com/'));
   assert.throws(() => localUrl('http://user:pass@127.0.0.1/'));
   assert.equal(localUrl('http://127.0.0.1:8765').hostname, '127.0.0.1');
-  console.log('Offline self-check passed: CSV round-trip and loopback URL restrictions. No browser started.');
+  const markup = '<img src=x onerror="window.__krynStoredHtml=1">';
+  assert.match(literalMarkupFailure(JSON.stringify([{ project: markup }]), markup), /JSON-escaped double quotes/);
+  assert.match(literalMarkupFailure('[object Object]', markup), /rendered text does not include/);
+  console.log('Offline self-check passed: CSV round-trip, loopback URL restrictions and literal-text diagnostics. No browser started.');
 } else {
   await main();
 }
@@ -123,8 +129,8 @@ async function main() {
         return { id: row.id, createdElement: false, executedScript: false };
       });
       await check('stored entry text includes the exact literal markup', async () => {
-        assert((await page.locator('#entries').innerText()).includes(markup),
-          'Markup probe was inert, but rendered text does not include the exact stored string');
+        const rendered = await page.locator('#entries').innerText();
+        assert(rendered.includes(markup), literalMarkupFailure(rendered, markup));
         await screenshot('stored-html.png');
         return { id: row.id, renderedAsText: true };
       });
