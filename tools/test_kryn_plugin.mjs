@@ -189,6 +189,51 @@ test('observed checks survive compaction and restart without promoting prose or 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('failed checks retain bounded classifications across restart without raw output', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    shellRun(f, 'python3 -B -m pytest -q', 'PRIVATE DETAIL: No module named pytest', 1, {}, true, 1);
+    shellRun(f, 'python3 -B -m unittest -v', 'FAIL: expected value PRIVATE DETAIL', 2, {}, true, 1);
+    shellRun(f, 'npm test', 'ERROR: PRIVATE DETAIL', 3, {}, true, 2);
+    const checks = f.read('trackers')[0].verification.checks;
+    assert.deepEqual(checks.map(check => [check.runner, check.exit_code, check.diagnostic]), [
+      ['pytest', 1, 'pytest unavailable'], ['unittest', 1, 'test failure'], ['npm', 2, 'test error']]);
+    assert.ok(!JSON.stringify(checks).includes('PRIVATE DETAIL'));
+    assert.ok(!JSON.stringify(checks).includes('python3 -B'));
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', event);
+    const text = event.system.map(part => part.text).join('\n');
+    assert.match(text, /runner=pytest exit=1 output-hint=pytest unavailable/);
+    assert.match(text, /runner=unittest exit=1 output-hint=test failure/);
+    assert.match(text, /runner=npm exit=2 output-hint=test error/);
+    assert.doesNotMatch(text, /PRIVATE DETAIL/);
+    assert.equal(f.read('trackers')[0].verification.acceptance, 'unestablished');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('legacy observed-check records load with unknown diagnostic detail', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    shellRun(f, 'npm test', 'old failure', 1, {}, true, 1);
+    await cleanup();
+    const folder = path.join(f.root, 'learning', 'trackers');
+    const file = path.join(folder, fs.readdirSync(folder)[0]);
+    const saved = JSON.parse(fs.readFileSync(file));
+    const check = saved.verification.checks[0];
+    delete check.runner; delete check.exit_code; delete check.diagnostic;
+    fs.writeFileSync(file, JSON.stringify(saved), { mode: 0o600 });
+    cleanup = await plugin.setup(f.ctx);
+    const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', event);
+    const migrated = f.read('trackers')[0].verification.checks[0];
+    assert.deepEqual([migrated.runner, migrated.exit_code, migrated.diagnostic], ['unknown', null, null]);
+    assert.equal(migrated.state, 'failed');
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('timeouts, background work, workdir differences and interrupted checks remain unresolved', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   let serial = 0;
@@ -867,8 +912,9 @@ test('one native task yields metadata-only unknown outcome; nonzero shell exit i
     assert.equal(records[0].family, 'json_cli');
     assert.equal(f.read('trackers')[0].counts.retries, 1);
     const all = JSON.stringify([...records, ...f.read('trackers')]);
-    for (const value of ['SYNTHETIC_SECRET', 'PRIVATE_PROMPT', 'https://', 'python3', 'pytest', f.root])
+    for (const value of ['SYNTHETIC_SECRET', 'PRIVATE_PROMPT', 'https://', 'python3 -m unittest', 'pytest -q', f.root])
       assert.equal(all.includes(value), false);
+    assert.equal(f.read('trackers')[0].verification.checks[1].runner, 'pytest');
     assert.deepEqual(Object.keys(records[0]).sort(), ['schema', 'task_id', 'champion_revision', 'profile_id', 'state', 'wall_seconds',
       'tool_calls', 'tool_errors', 'check_passes', 'check_failures', 'compactions', 'corrections', 'output_tokens', 'family', 'completed_at'].sort());
   } finally { await cleanup(); f.remove(); }

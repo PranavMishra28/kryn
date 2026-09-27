@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-27",
+  "scope": "Narrow private 64K check-ledger continuity change; no public release, profile or grader change",
+  "candidate_source_revision": "b0303c6f1116e49d4f388d6367911d325e6660d7",
+  "product_plugin_sha256": "081805736301d1a044409f71aa62291cc5eae4bf7bb3c0f496636c4e04e111ae",
+  "fixture": "Disposable Task02 workspace used only for a diagnostic command, not scored as a frozen coding task",
+  "change": "Observed simple check records now retain a fixed runner, bounded exit code and fixed failure classification. Legacy tracker records load with unknown detail. No command arguments or raw output are persisted in this ledger.",
+  "offline": "make check PASS: 174 setup Python tests, 21 tool Python tests, 51 Node tests, native-trial self-check, frozen suite verify and 18-case fixture selftest. Clean-commit make package-smoke PASS for source b0303c6.",
+  "native_probe": {
+    "run": "hintprobe27a",
+    "first_stage": "failed-check-native: guarded native Agent completed in 18.793 seconds, ran exactly one shell command, python3 -B -m pytest -q, which exited 1 because pytest was unavailable; no project edits",
+    "saved_record": "The private tracker retained runner=pytest, exit_code=1, diagnostic=pytest unavailable, state=failed, acceptance=unestablished, with a native message reference and no raw tool output",
+    "restart_stage": "failed-check-restart: new native server/process, saved session, guarded Ask completed in 16.658 seconds with zero tools and accurately distinguished the unavailable runner from a failing project test; it did not claim project acceptance",
+    "resources": "Both stages sampled AC power, normal host pressure and zero swap growth; product plugin was active before/after and local inference routing audit passed",
+    "raw_evidence": "evals/runs/hintprobe27a/evidence/failed-check-native and evals/runs/hintprobe27a/evidence/failed-check-restart (ignored private artifacts)"
+  },
+  "limits": "The native transcript also retained the raw failure, so this paired run does not isolate the ledger's contribution to the model answer or prove fewer repeated attempts. The probe did not invoke native compaction, complete a coding/UI task, run in the protected account, or establish endurance.",
+  "gates": {
+    "bounded_failure_record_across_restart": "PASS mechanism and one guarded native occurrence",
+    "model_quality_uplift": "UNQUALIFIED",
+    "full_semantic_compaction_restart": "FAIL/UNQUALIFIED",
+    "protected_account_runtime": "UNQUALIFIED: macOS still exposes no eonfolk-ci GUI session",
+    "coding_ui_endurance": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  }
+}
