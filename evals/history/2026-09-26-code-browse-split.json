@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-26",
+  "candidate": "Disposable evaluation-only code stage without browser MCP; installed product remained private guarded 64K source 4063ca6",
+  "task": "Frozen Task06 browser entry form",
+  "observations": {
+    "code_stage": "Completed and compacted with 22 tools, zero browser calls; independent browser outcome checker passed 5/5 on its artifact",
+    "broad_browse_stage": "Timed out after 47 browser calls without compaction",
+    "single_check_browse_stage": "Completed and compacted after 13 browser calls; found negative Minutes left the app's accessible status blank",
+    "repair_attempts": "Two prompt-driven edits broadened or weakened validation; an executable-test-driven continuation timed out and left fractional Minutes able to POST"
+  },
+  "conclusion": "Separating code and browser tools improved one code-stage completion but did not complete the full UI workflow. The 45-60 minute green endurance and independent final-review gates remain failed/unqualified. Do not ship a release or claim a reliable uplift from this single trial.",
+  "next_blocker": "Bounded browser completion and test-anchored validation without unchecked agent edits; then a fresh full-task trial"
+}

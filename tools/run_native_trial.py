@@ -907,6 +907,7 @@ def main():
     ap.add_argument("--thinking-budget", type=budget_value)
     ap.add_argument("--attachment", type=Path, help="image path relative to, or resolving inside, the prepared workspace")
     ap.add_argument("--no-tools", action="store_true", help="deny all tools on a fresh native session; verify wire/transcript evidence")
+    ap.add_argument("--without-browser", action="store_true", help="omit browser MCP in a disposable code stage; run browser acceptance separately")
     ap.add_argument("--ready-tools", action="store_true", help="wait up to 30s for connected MCP servers and a stable tool catalog before prompting")
     ap.add_argument("--expected-tools", type=Path, help="require exact equality with baseline tool-catalog.json; implies --ready-tools")
     ap.add_argument("--guard-resources", action="store_true", help="require green/idle preflight; cancel only owned sessions on sustained pressure, missing telemetry or >512 MiB swap growth")
@@ -918,6 +919,8 @@ def main():
     if args.run is None or (args.no_tools and args.session):
         ap.error("A prepared run is required; --no-tools requires a fresh session (omit --session)")
     ready_tools = args.ready_tools or args.expected_tools is not None
+    if args.without_browser and ready_tools:
+        ap.error("--without-browser cannot be combined with browser tool readiness checks")
     try:
         expected_tools = canonical_tool_ids(json.loads(args.expected_tools.read_text())) if args.expected_tools else None
     except (OSError, ValueError) as error:
@@ -933,6 +936,8 @@ def main():
     folder = run / "evidence" / args.stage
     folder.mkdir(parents=True, exist_ok=False)
     config = copy.deepcopy(owned_config())
+    if args.without_browser:
+        config["mcp"]["servers"].pop("browser")
     apply_budget(config, args.variant, args.thinking_budget)
     # Outside the workspace and shell's writable evidence/log directory.
     config_root, product_plugin, input_hashes = isolate_trial_config(
@@ -960,6 +965,7 @@ def main():
     (folder / "prompt.txt").write_text(prompt)
     report = {"agent": args.agent, "variant": args.variant, "expected_model_id": MODEL_ID,
               "thinking_budget_override": args.thinking_budget, "no_tools": args.no_tools,
+              "without_browser": args.without_browser,
               "attachment": image_info,
               "audit_plugin_sha256": audit_hashes,
               "trial_input_sha256": input_hashes,
