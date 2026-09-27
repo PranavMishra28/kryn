@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-27",
+  "scope": "Private guarded-64K native replay after PR #50; no public profile or release change",
+  "public_fix": "PR #50 merged as 2f62490; the checked merge tree matched the PR head. Review caught an outside-write race in the first head and it was corrected before merge.",
+  "earlier_private_candidate": {
+    "source": "bc8beaf2e8fa54a44a70c2337f3e38d2d5195c43",
+    "run": "e06chain64f",
+    "plan": "Completed and compacted in 52.145 seconds.",
+    "build": "Completed and compacted in 122.083 seconds with six tools and no errors, but made no native edit calls, so no speed or guard benefit can be attributed to PR #50. Frozen backend 2/2 and standard browser 5/5 passed.",
+    "security": "Opt-in stored-HTML check failed because API-stored markup still entered innerHTML.",
+    "resources": "Plan 26 and Build 59 samples: normal pressure level 1, zero swap growth.",
+    "disposition": "Actual rollback restored the prior guarded 64K source 1cb2baf."
+  },
+  "reviewed_private_candidate": {
+    "source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+    "installed": "Private owner package check, installation, guarded protocol smoke and doctor passed; context 65,536, model memory cap 16 GiB, pressure normal and runtime idle after testing.",
+    "rollback_reinstall": "Actual kryn rollback restored source 1cb2baf; reinstall of the exact cff0f1b private package restored that source. Guarded protocol smoke and doctor then passed with healthy idle 64K runtime, normal pressure and unchanged swap.",
+    "mechanism_probe": "e06editguard64h completed and compacted in 34.173 seconds: native read, native edit, native edit without an intervening read, node --check exit 0, no tool errors. Seventeen samples level 1 with zero swap growth. Narrow mechanism pass only.",
+    "focused_repair": "e06xss64i was seeded with the earlier model-generated page and supplied the independent stored-HTML failure. Build completed and compacted in 147.448 seconds, with two consecutive successful edits without reread and two malformed grep calls. Frozen backend 2/2 and independent browser 6/6 passed, including stored HTML, invalid input, first-save 503/manual retry, both viewports, persistence, reload and console/network. Assisted repair, not fresh unassisted Task06 acceptance.",
+    "restart": "Saved Ask after native-server restart completed and compacted in 64.172 seconds. It read TASK.md, app.js, index.html, server.py and the independent report. It repeated six reported browser passes but falsely claimed the project-filter route works, Filter and Import controls match the server, and no work remains.",
+    "controls_probe": "Live API/browser probe: an impossible project filter returned the same seven rows as unfiltered GET; selecting a CSV sent import POST 201, then clicking Import sent it again for 400 with visible 'Failed to import CSV.' Server ignores the project query on /api/entries and UI binds import to both change and click.",
+    "resources": "Repair 72 and Ask restart 32 samples: normal pressure level 1, zero swap growth.",
+    "raw_private_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06chain64f/evidence, /private/tmp/kryn-64k-pipeline/evals/runs/e06editguard64h/evidence, /private/tmp/kryn-64k-pipeline/evals/runs/e06xss64i/evidence"
+  },
+  "release_gates": {
+    "current_read_guard": "PASS isolated and narrow installed native replay",
+    "fresh_unassisted_coding_ui": "FAIL stored-HTML security regression",
+    "assisted_ui_browser": "PASS six checks; source review found visible broken controls",
+    "semantic_compaction_restart": "FAIL false route and completion claims despite current source reads",
+    "local_reviewer_accuracy": "UNQUALIFIED",
+    "49k_to_128k_useful_tier_comparison": "OPEN",
+    "non_owner_clean_install": "OPEN separate standard account requires administrator credentials",
+    "45_to_60_minute_green_active_endurance": "OPEN",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Require executable contract evidence and grounded independent review for visible controls before treating a local Agent or Ask completion as task acceptance. Do not add another prompt rule or claim full context continuity from the narrow probe."
+}
