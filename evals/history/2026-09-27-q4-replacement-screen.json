@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-27",
+  "scope": "One guarded 27B Q4 replacement-mode direct Reviewer request after stopping the idle owner 9B runtime; no installed profile or public release changed",
+  "reason": "The prior concurrent 9B-plus-27B screen hit critical host pressure and could not establish whether the 27B model alone was feasible.",
+  "request": {
+    "model": "Qwen3.8-27B-oQ4e-mtp",
+    "configured_context": 16384,
+    "prompt_sha256": "aeb69bf5375815e88f6eca56e59ddeb43d3049610de03b3e53f9fa42b889e607",
+    "settings": "Same source-bound Task06 direct-review prompt and sampler as the 9B thinking control; 4,096 max output tokens, 1,536 thinking budget, MTP disabled, no cache",
+    "temporary_server": "Only model server on loopback port 8001, 19.5 GB oMLX memory guard, one concurrent request",
+    "external_guard": "Abort on first host warning/critical sample or over 256 MiB swap growth, 0.5-second samples, 180-second timeout"
+  },
+  "result": {
+    "http_status": 200,
+    "finish_reason": "stop",
+    "output_tokens": 1809,
+    "wall_seconds": 78.616583,
+    "pressure_levels": [1],
+    "power": "AC Power",
+    "swap_start_bytes": 10848965754,
+    "swap_peak_growth_bytes": 0,
+    "max_sampled_process_footprint_bytes": 20497069400,
+    "guard_abort": false,
+    "answer_sha256": "d58d3fe7e13d3a1fb8bafee1e612588cee9abc84a5c837b91803305524d7ae7c",
+    "raw_evidence": "evals/runs/model-screen-20260927/27b-q4-replacement (ignored local artifact)"
+  },
+  "quality": "The model correctly identified JSON serialization as the failure source but proposed rows.join('\\n') for an array of row objects. A disposable real-Chrome application of that exact proposal failed the first stored-markup probe: the inserted row ID never appeared within 10 seconds, so subsequent literal-text and inert-markup assertions were not reached. JavaScript joins row objects as [object Object]. No safe repair was produced.",
+  "proposal_browser_evidence": "evals/runs/model-screen-20260927/27b-q4-replacement/proposal-browser (ignored local artifact)",
+  "owner_restore": "The temporary 27B server exited; guarded kryn bench passed and doctor reported healthy Qwen3.5-9B-6bit at 65,536 context with the private 16 GiB guard, normal pressure and zero active requests. Host swap remained about 10.3 GiB allocated from the earlier concurrent failure; this short isolated screen added no sampled swap.",
+  "decision": "The 27B model is feasible for one guarded 16K-context request as a replacement under this observed app load, unlike the failed concurrent configuration. Do not promote it: the source-bound repair failed, 64K long-workflow quality and sustained resource behavior are untested, and the existing 9B/64K profile remains the private rollback baseline.",
+  "limits": "One prompt and one short request do not establish general quality, latency distribution, 64K support, warm/cold cache correctness, or active endurance. The real browser check was a same-account disposable proposal test, not protected evaluator qualification. No full autonomous coding/UI, semantic compaction/restart, second-account inference, or public release gate passed."
+}
