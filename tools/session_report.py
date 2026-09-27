@@ -39,7 +39,7 @@ def is_check(command):
 
 def summarize(connection, session_id):
     pending, ids, sessions = [session_id], set(), []
-    tools, reads, finishes = Counter(), Counter(), Counter()
+    tools, reads, finishes, outcomes = Counter(), Counter(), Counter(), Counter()
     counts = Counter()
     usage = {kind: Counter() for kind in ('assistant', 'compaction')}
     limited = False
@@ -60,7 +60,7 @@ def summarize(connection, session_id):
         pending.extend(r[0] for r in connection.execute('SELECT id FROM session_v2 WHERE parent_id=? ORDER BY id LIMIT 65', (sid,)))
         # SQL extracts only bounded fields. Image payloads and tool output are not loaded.
         rows = connection.execute("""SELECT type,
-          json_extract(data,'$.status'), json_extract(data,'$.finish'),
+          json_extract(data,'$.status'), json_extract(data,'$.finish'), json_extract(data,'$.outcome'),
           json_extract(data,'$.tokens.output'),
           json_extract(data,'$.time.created'), json_extract(data,'$.time.completed'),
           json_extract(data,'$.tokens.input'), json_extract(data,'$.tokens.cache.read'),
@@ -68,10 +68,12 @@ def summarize(connection, session_id):
           FROM session_message WHERE session_id=? ORDER BY seq LIMIT 10001""", (sid,)).fetchall()
         if len(rows) > 10000:
             limited = True
-        for kind, status, finish, output, created, completed, uncached, cached, written, reasoning in rows[:10000]:
+        for kind, status, finish, idle_outcome, output, created, completed, uncached, cached, written, reasoning in rows[:10000]:
             message_kind = kind if kind in {'user', 'assistant', 'compaction', 'system', 'synthetic',
                                             'idle', 'agent-switched', 'model-switched'} else 'unknown'
             counts[message_kind + '_messages'] += 1
+            if kind == 'idle':
+                outcomes[idle_outcome if idle_outcome in {'succeeded', 'failed', 'interrupted', 'cancelled'} else 'unknown'] += 1
             if kind in usage:
                 bucket = usage[kind]
                 values = (uncached, cached, written, output, reasoning)
@@ -143,6 +145,8 @@ def summarize(connection, session_id):
         findings.append('No completed browser tool calls. UI success is not established by this trace.')
     if counts['tool_errors']:
         findings.append('Tool errors occurred; inspect the native transcript before classifying their cause.')
+    if any(outcomes[state] for state in ('failed', 'interrupted', 'cancelled')):
+        findings.append('A prior native execution did not succeed; inspect its saved transcript before claiming uninterrupted completion.')
     if limited:
         findings.append('Report bounds reached; counts are partial.')
     token_usage = {}
@@ -152,7 +156,8 @@ def summarize(connection, session_id):
                                                   if bucket['prompt_tokens'] else None)
     outcome = sessions[0][2] if sessions[0][2] in {'succeeded', 'failed', 'interrupted', 'cancelled'} else 'unknown'
     return {'schema': 1, 'session_id': session_id, 'session_count': len(ids),
-            'native_outcome': outcome, 'counts': dict(counts), 'tools': dict(tools),
+            'native_outcome': outcome, 'execution_outcomes': dict(outcomes),
+            'counts': dict(counts), 'tools': dict(tools),
             'token_usage': token_usage,
             'usage_note': 'Provider-reported usage summed across requests, not unique conversation tokens. '
                           'max_recorded_prompt_tokens is one native record, not the configured context limit. '
@@ -162,6 +167,7 @@ def summarize(connection, session_id):
             'partial': limited, 'findings': findings, 'acceptance_verified': False,
             'note': 'Unrecognized tool and status labels are grouped as unknown to avoid exposing malformed model output. '
                     'Only simple check commands count; compound shell expressions, running background jobs and timeouts cannot establish a check pass. '
+                    'Missing idle records or bounded history cannot prove that earlier executions succeeded. '
                     'Native completion, command exits and model-written reports do not prove task acceptance. '
                     'Compare the actual application with independent checks; copied test logic is insufficient.'}
 

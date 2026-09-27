@@ -12,6 +12,24 @@ from session_report import report
 
 
 class ReportTests(unittest.TestCase):
+    def test_native_outcome_history_survives_later_success_without_leaking_unknown_values(self):
+        with tempfile.TemporaryDirectory() as folder:
+            db = Path(folder) / 'native.db'
+            project = str(Path(folder).resolve())
+            with closing(sqlite3.connect(db)) as c, c:
+                c.executescript('CREATE TABLE session_v2 (id TEXT, parent_id TEXT, directory TEXT, idle_outcome TEXT, time_created INTEGER, time_updated INTEGER);'
+                                'CREATE TABLE session_message (session_id TEXT, seq INTEGER, type TEXT, data TEXT);')
+                c.execute('INSERT INTO session_v2 VALUES (?,?,?,?,?,?)', ('ses_outcomes', None, project, 'succeeded', 1, 3))
+                for seq, outcome in enumerate(('PRIVATE OUTCOME', 'interrupted', 'succeeded')):
+                    c.execute('INSERT INTO session_message VALUES (?,?,?,?)',
+                              ('ses_outcomes', seq, 'idle', json.dumps({'outcome': outcome})))
+            result = report(db, project)
+            self.assertEqual(result['native_outcome'], 'succeeded')
+            self.assertEqual(result['execution_outcomes'], {'unknown': 1, 'interrupted': 1, 'succeeded': 1})
+            self.assertIn('prior native execution did not succeed', ' '.join(result['findings']))
+            self.assertNotIn('PRIVATE OUTCOME', json.dumps(result))
+            self.assertFalse(result['acceptance_verified'])
+
     def test_only_settled_simple_checks_can_count_as_exit_zero(self):
         with tempfile.TemporaryDirectory() as folder:
             db = Path(folder) / 'native.db'
