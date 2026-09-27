@@ -414,6 +414,10 @@ class KrynChecks(unittest.TestCase):
             rendered = json.loads((root / 'xdg/config/opencode/opencode.json').read_text())
             with patch.object(localai, 'ROOT', root):
                 localai.validate_owned_config(rendered)
+                altered = json.loads(json.dumps(rendered))
+                next(item for item in altered['plugins'] if isinstance(item, dict))['options']['nodeBinary'] = '/other/node'
+                with self.assertRaisesRegex(RuntimeError, 'plugin policy changed'):
+                    localai.validate_owned_config(altered)
             marker = root / profile['model_parent'] / setup.model_id(profile) / '.localai-download.json'
             setup.write_same(marker, setup.encode({k: profile[k] for k in ('repository', 'revision')}))
             with patch.object(Path, 'home', return_value=home), patch.object(sys, 'argv', ['deploy', '--apply']), redirect_stdout(io.StringIO()):

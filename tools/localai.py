@@ -161,6 +161,14 @@ def validate_route(provider, model, project=None):
 
 def validate_owned_config(config, project=None):
     expected_profile = expected_config(project)
+    browser = config.get("mcp", {}).get("servers", {}).get("browser", {})
+    browser_command = browser.get("command", [])
+    require(isinstance(browser_command, list) and browser_command
+            and isinstance(browser_command[0], str) and browser_command[0],
+            "Owned browser Node executable is missing")
+    for item in expected_profile["plugins"]:
+        if isinstance(item, dict):
+            item["options"]["nodeBinary"] = browser_command[0]
     providers = config.get("providers", {})
     require(set(providers) == {"local"}, "Owned config must contain only provider local")
     models = providers["local"].get("models", {})
