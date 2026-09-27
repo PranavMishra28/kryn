@@ -18,6 +18,7 @@
     "narrow_browse": "Timed out after 25 tools, including denied source reads and repeated fetch failures; no completed checkpoint",
     "private_browse_cap_candidate": "Completed in 93.11 seconds with 11 tools but never reached the proposed 16-call cap; final answer falsely claimed no feedback anywhere and no submit handler. Candidate rejected and not installed or merged.",
     "private_screenshot_affordance_candidate": "Playwright MCP 0.0.82 returns image pixels for unnamed screenshots but only a file link for named screenshots. Earlier Browse calls named their screenshots. A private tool-description and disposable output-directory candidate passed unit checks, but its fresh Browse trial used no screenshot tool, made 23 browser calls, and again falsely denied visible feedback. Candidate rejected and not installed or merged.",
+    "fast_variant_screen": "Same installed 64K model with the supported Fast/no-thinking variant on the same narrow Task06 check: timed out after 49 browser tools and 186.831 seconds without a completed checkpoint. An unnamed screenshot returned image pixels at tool 42 and visibly contained Chrome's validation bubble. The resource guard did not abort; swap stayed unchanged. Fast is rejected as a daily Browse fix on this evidence.",
     "fresh_reviewer": "Completed and compacted but invented a project-name constraint and suggested removing useful native validation. Accuracy gate failed.",
     "formal_frozen_grade": "PARTIAL; manual model-led evidence was not qualified"
   },
