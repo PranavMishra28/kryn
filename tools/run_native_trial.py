@@ -559,6 +559,12 @@ def apply_budget(config, variant, budget):
     selected = [model] if variant == "default" else [v for v in model["variants"] if v["id"] == variant]
     if len(selected) != 1:
         raise ValueError("Expected exactly one selected variant")
+    body = selected[0].get("body", {})
+    max_tokens = body.get("max_tokens", model.get("body", {}).get("max_tokens"))
+    if type(max_tokens) is not int or max_tokens < 2048 or budget > max_tokens - 2048:
+        raise ValueError("thinking budget must leave at least 2048 output tokens")
+    if budget and body.get("chat_template_kwargs", {}).get("enable_thinking") is False:
+        raise ValueError("thinking budget cannot be set for a thinking-disabled variant")
     selected[0].setdefault("body", {})["thinking_budget"] = budget
 
 
@@ -811,6 +817,22 @@ def self_check():
     assert config["providers"]["local"]["models"]["qwen"]["body"] == {"max_tokens": 8192}
     apply_budget(config, "default", 3072)
     assert config["providers"]["local"]["models"]["qwen"]["body"]["thinking_budget"] == 3072
+    apply_budget(config, "default", 6144)
+    assert config["providers"]["local"]["models"]["qwen"]["body"]["thinking_budget"] == 6144
+    try:
+        apply_budget(config, "default", 6145)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("thinking override without answer reserve accepted")
+    assert config["providers"]["local"]["models"]["qwen"]["body"]["thinking_budget"] == 6144
+    config["providers"]["local"]["models"]["qwen"]["variants"][0]["body"]["chat_template_kwargs"] = {"enable_thinking": False}
+    try:
+        apply_budget(config, "low", 1)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("thinking override on disabled variant accepted")
     assert budget_value("8192") == 8192
     for value in ("-1", "8193"):
         try:
@@ -919,7 +941,8 @@ def main():
     ap.add_argument("--prompt", type=Path)
     ap.add_argument("--session")
     ap.add_argument("--timeout", type=int, default=1200)
-    ap.add_argument("--thinking-budget", type=budget_value)
+    ap.add_argument("--thinking-budget", type=budget_value,
+                    help="probe-only override; must leave at least 2048 output tokens and cannot enable thinking on Fast")
     ap.add_argument("--attachment", type=Path, help="image path relative to, or resolving inside, the prepared workspace")
     ap.add_argument("--no-tools", action="store_true", help="deny all tools on a fresh native session; verify wire/transcript evidence")
     ap.add_argument("--without-browser", action="store_true", help="omit browser MCP in a disposable code stage; run browser acceptance separately")
@@ -949,11 +972,14 @@ def main():
     except ValueError as error:
         ap.error(str(error))
     folder = run / "evidence" / args.stage
-    folder.mkdir(parents=True, exist_ok=False)
     config = copy.deepcopy(owned_config())
     if args.without_browser:
         config["mcp"]["servers"].pop("browser")
-    apply_budget(config, args.variant, args.thinking_budget)
+    try:
+        apply_budget(config, args.variant, args.thinking_budget)
+    except ValueError as error:
+        ap.error(str(error))
+    folder.mkdir(parents=True, exist_ok=False)
     # Outside the workspace and shell's writable evidence/log directory.
     config_root, product_plugin, input_hashes = isolate_trial_config(
         config, run / "trial-inputs" / "frozen", ROOT / "xdg/config/opencode")
