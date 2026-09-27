@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-27",
+  "scope": "Installed owner validation of merged PR #93 with the existing private 64K/16 GiB profile; no public release, tag or version bump",
+  "public_main_revision": "273aa1fb5afda1ab966cd7b727a6ca3e782f002f",
+  "private_installed_revision": "d7db0457c477065490e143a63948e4fd6c365424",
+  "private_wheel_sha256": "ff6bf61070133c30326509ef094b7b001101f65a53230397262314319db70bee",
+  "private_delta": "The prior five-file private 64K profile commit was applied on top of merged main; the 16 GiB guard and one-resident-model policy remained unchanged.",
+  "checks": {
+    "private_combination": "PASS: make check, frozen evaluator verify/selftest, and clean package smoke on d7db045",
+    "first_activation": "PASS: same-version local wheel installed transactionally; deep doctor verified model/browser hashes, native routing, connected MCP and healthy idle 65536-token runtime; guarded protocol smoke passed",
+    "installed_report": "PASS: kryn report on saved Task06 session ses_f1c3e263cffeif2aDh8D5BKdBu returned native_outcome=succeeded and execution_outcomes={interrupted:1,succeeded:1}, with acceptance_verified=false",
+    "rollback": "PASS: actual kryn rollback restored exact previous private source c6b6ce22219139fc9ef39214f238f8d957660f34; guarded protocol smoke passed after runtime restart",
+    "reinstallation": "PASS: d7db045 reinstalled and became active; guarded protocol smoke and deep doctor passed; the installed report still showed both outcomes",
+    "resources": "Final doctor reported normal host pressure, zero active requests, 65536 context and the private 16 GiB guard. The short smoke runs do not establish sustained resource behavior."
+  },
+  "limits": "This proves installed outcome accounting and transactional owner rollback/reinstall, not model use of the evidence, truthful compaction/restart, autonomous coding/UI, protected-account runtime, green endurance or useful 49K–128K tier selection. Public 49K and v0.1.10 remain unchanged; release is paused."
+}
