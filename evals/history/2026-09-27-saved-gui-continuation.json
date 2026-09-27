@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-27",
+  "scope": "Guarded owner-account NativeServer and authenticated headless Chrome against the pinned OpenCode GUI; direct session URLs, not an installed kryn --web terminal-to-GUI roundtrip",
+  "observations": {
+    "fresh_session": "PASS: a newly created Ask session opened at its exact native GUI URL with HTTP 200, matching session title, visible composer, and no page exception. DOM load took 9.262 seconds and composer readiness another 13.079 seconds.",
+    "saved_session": "PASS for recent history: an existing focused Task06 session opened at its exact GUI URL with HTTP 200, visible composer, latest user prompt and Ask answer, and no page exception. The browser received HTTP 200 for its 17-record native message request. DOM load took 9.200 seconds and composer readiness another 15.019 seconds.",
+    "oldest_history": "UNQUALIFIED: the first Task06 prompt did not appear in the initial rendered view after 20 seconds; this probe did not scroll or test the GUI's older-message loading behavior.",
+    "home_navigation": "UNQUALIFIED: the crowded owner landing page took about 21 seconds to populate rows in a separate probe; duplicate probe titles also made the click selector ambiguous. Earlier short click and screenshot timeouts are not evidence that saved-session direct navigation is broken.",
+    "cleanup": "Three sessions created in the disposable GUI workspace were identified by exact IDs, titles and directory, deleted through the native API, and verified absent. The older Task06 session was untouched."
+  },
+  "private_raw_evidence": {
+    "location": "Ignored evals/runs/gui-clean27a",
+    "fresh_report_sha256": "58ed64946f6b78afa4c639fcd244ee43baecad50b56c169576f96f4a973618f2",
+    "saved_report_sha256": "d5009c8b449fdbed0f93dba125cc9dd219b8b45eba83489f6268b085dca4dfab",
+    "cleanup_log_sha256": "501b165a3b27b8f6a91074989f0cd6890a27ff9604b1126cb62cfe6ee97cbe1b"
+  },
+  "decision": "Count native GUI direct session opening and recent-history display as narrow passes. Keep home-list latency, oldest scrollback, permission controls, installed --web cross-interface switching and new-user GUI unqualified. No model-profile or release change."
+}
