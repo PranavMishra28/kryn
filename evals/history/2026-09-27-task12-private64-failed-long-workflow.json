@@ -1,0 +1,29 @@
+{
+  "scope": "Frozen Task12 long coding/UI trial on installed private 9B/64K/16GiB candidate; raw run ignored and public release paused",
+  "installed_source_revision": "0ae67e8c05d783897699cd4c40f2c01f1febad94",
+  "raw_run": "evals/runs/e12endurance27a (ignored private evidence)",
+  "formal_grade": "FAIL: automatic backend/preservation checks passed, but independently reviewed browser upload/edit/filter/export, 503 recovery and successful handoff failed; fresh review was not tested after the application failure",
+  "stages": {
+    "plan": "Native read-only Plan completed in 70.305 seconds with normal pressure and zero swap growth; its recommendation to add an add_batch method duplicated an existing transactional Store.add method.",
+    "backend_agent": "Native Default Agent timed out at 426.752 seconds after 64 tool calls. It implemented import/PATCH/export code, but repeatedly attempted blocked shell server lifecycle patterns and never completed. Guard samples stayed normal with zero swap growth.",
+    "independent_backend": "PASS: direct evaluator-owned server calls verified valid two-row CSV import, atomic duplicate rejection without partial row, persisted PATCH, and CSV export of comma/Unicode project data. Frozen automatic tests also passed 2/2 with seed/tests preserved.",
+    "compaction": "One actual saved-session compaction completed in 27.53 seconds under guarded normal pressure and zero swap growth, before a fresh-process continuation.",
+    "frontend_agent": "Native Default Agent in the saved session timed out at 487.883 seconds after 60 tool calls, despite the evaluator owning the server. Its web/app.js passed node --check and original tests, but the stage did not complete. Guard samples stayed normal with zero swap growth.",
+    "independent_browser": "FAIL: isolated Chrome passed native invalid-minutes feedback, then the app sent PATCH /api/entries/{new-id} and received 400 for a new row; the checker timed out waiting for the required POST 503. The code selects PATCH whenever the required new ID is nonempty. The exact evaluator marker was cleaned up; no retry success is claimed.",
+    "source_review": "Stored row fields are interpolated into li.innerHTML. A separate evaluator Chrome probe inserted an img onerror project value through the real API, then observed an injected image and executedScript=true in the rendered page; this confirms stored script execution in the disposable project. The Task06 safe textContent pattern was not retained. The Agent also added an unrequested Delete control and route whose path parser expects two segments for /api/entries/{id} (three segments), and whose body calls Store.update rather than deleting. Store.add_batch duplicates transactional Store.add. These source defects were not counted as passing UI behavior."
+  },
+  "resources": "Plan, backend Agent, compaction and frontend Agent sampled AC power, normal pressure and zero swap growth; short sampled green resource behavior does not qualify sustained application quality.",
+  "measured_active_work": "About 17 minutes across Plan, two timed-out coding stages, one compaction and independent browser check. No idle time was added. This failed trial is not the required 45–60 minute green endurance.",
+  "decision": "After two timed-out coding stages and a failed independent UI gate, stop prompt variants for this 9B Task12 candidate. The next approach must address model/action quality with independent outcome evidence, not add more prompt rules or declare completion from automatic backend tests. Keep guarded private 64K and public release pause.",
+  "gate_status": {
+    "backend_api": "PASS",
+    "native_compaction_mechanism": "PASS once",
+    "autonomous_stage_completion": "FAIL twice",
+    "browser_acceptance": "FAIL: new-row save sent PATCH 400 instead of POST, and separate stored-script probe executed",
+    "truthful_fresh_review_and_handoff": "UNQUALIFIED after stopping failed trial",
+    "active_45_to_60_minute_endurance": "FAIL/UNQUALIFIED: only 17 minutes of measured active work and application failed",
+    "protected_second_account_inference": "UNQUALIFIED: macOS gui/505 launch domain still absent",
+    "representative_49k_64k_96k_128k_tier_decision": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  }
+}
