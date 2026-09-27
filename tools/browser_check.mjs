@@ -40,7 +40,7 @@ const { values } = parseArgs({ options: {
   help: { type: 'boolean' }, 'self-check': { type: 'boolean' },
 } });
 if (values.help) {
-  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html] [--visible-controls] [--quoted-import]\nAlso accepts --task06/--task08/--task12. Optional Task 06 controls/quoted-CSV checks do not change its frozen score. Start the fixture/candidate server separately. No LLM/MCP calls.');
+  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html] [--visible-controls] [--quoted-import]\nAlso accepts --task06/--task08/--task12. Stored-HTML safety and literal text are required for Task 12; --stored-html adds them to Task 06 or 08. Optional Task 06 controls/quoted-CSV checks do not change its frozen score. Start the fixture/candidate server separately. No LLM/MCP calls.');
 } else if (values['self-check']) {
   const rows = [{ id: 'a', project: '研究, "team"\nnext', minutes: 0, date: '2026-09-11' }];
   assert.deepEqual(parseCsv(csv(rows)), rows);
@@ -125,7 +125,7 @@ async function main() {
     const cleared = () => page.waitForFunction(() => [...document.querySelectorAll('#entry-form input')].every(input => input.value === ''));
     const screenshot = async name => { await page.screenshot({ path: path.join(output, name), fullPage: true }); report.screenshots.push(name); };
     await page.goto(url.href, { waitUntil: 'networkidle' });
-    if (values['stored-html']) {
+    if (values['stored-html'] || task === '12') {
       const markup = '<img src=x onerror="window.__krynStoredHtml=1">';
       const row = { id: `${prefix}-markup`, project: markup, minutes: 1, date: '2026-09-10' };
       await check('stored markup probe does not create an HTML element or execute script', async () => {
@@ -138,7 +138,9 @@ async function main() {
         return { id: row.id, createdElement: false, executedScript: false };
       });
       await check('stored entry text includes the exact literal markup', async () => {
-        const rendered = await page.locator('#entries').innerText();
+        const rowView = page.locator('#entries > *').filter({ hasText: row.id });
+        assert.equal(await rowView.count(), 1, 'Stored probe row must render exactly once');
+        const rendered = await rowView.innerText();
         assert(rendered.includes(markup), literalMarkupFailure(rendered, markup));
         await screenshot('stored-html.png');
         return { id: row.id, renderedAsText: true };
@@ -251,6 +253,13 @@ async function main() {
       });
     }
     if (task === '12') {
+      await check('new duplicate ID uses POST and cannot overwrite an existing row', async () => {
+        const original = { id: `${prefix}-390`, project: 'Browser check', minutes: 13, date: '2026-09-11' };
+        await fill({ ...original, project: 'Must not overwrite' });
+        await submit('POST', 400);
+        assert.deepEqual((await apiRows()).find(row => row.id === original.id), original);
+        await page.reload({ waitUntil: 'networkidle' });
+      });
       const imported = [{ id: `${prefix}-upload-a`, project: '研究, team', minutes: 0, date: '2026-09-13' },
         { id: `${prefix}-upload-b`, project: '研究, Team', minutes: 29, date: '2026-09-14' },
         { id: `${prefix}-upload-c`, project: '研究, team extra 🧪', minutes: 7, date: '2026-09-15' }];
