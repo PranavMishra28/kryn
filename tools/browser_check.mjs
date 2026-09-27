@@ -115,6 +115,9 @@ async function main() {
     const cleared = () => page.waitForFunction(() => [...document.querySelectorAll('#entry-form input')].every(input => input.value === ''));
     const screenshot = async name => { await page.screenshot({ path: path.join(output, name), fullPage: true }); report.screenshots.push(name); };
     await page.goto(url.href, { waitUntil: 'networkidle' });
+    if (report.pageErrors.length) await check('initial page JavaScript', () => {
+      throw new Error('Unhandled page JavaScript exception; inspect the raw browser report or run a source syntax check');
+    });
     if (values['stored-html']) {
       const markup = '<img src=x onerror="window.__krynStoredHtml=1">';
       const row = { id: `${prefix}-markup`, project: markup, minutes: 1, date: '2026-09-10' };

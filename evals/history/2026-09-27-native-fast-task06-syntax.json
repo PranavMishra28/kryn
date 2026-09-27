@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-27",
+  "run": "e06nativefastsrc27a",
+  "scope": "Fresh frozen Task06 native Fast Agent on the installed private guarded 9B/64K owner, followed by two saved-session repair stages; no public profile or release change",
+  "initial_stage": {
+    "prompt": "Frozen TASK.md verbatim; live disposable server at the documented port and ready browser/search tools",
+    "native": "The Agent read current server.py, store.py and web/app.js, used browser tools, then timed out at 368.103 s after 84 tool calls. It did not complete a terminal answer or compaction.",
+    "source_sha256": "1938bf024c28ad388e1880b797cba8693d528410733141e5fe7b1f8b70dd65b9",
+    "independent_result": "Frozen backend automatic checks passed 2/2 but review remained partial. Independent Chrome failed first-save 503: POST status 503 then automatic 201 before manual_retry_started, so the row appeared before manual retry. Optional stored-markup inertness and exact literal text passed before the same 503 failure."
+  },
+  "saved_session_repair": {
+    "intervention": "The source-bound 503/browser failure was given as focused external feedback; browser MCP was omitted from this coding stage.",
+    "native": "Timed out at 186.697 s after 17 tool calls. The Agent removed automatic retry but introduced invalid JavaScript in the 503 message. Its Python tests passed without parsing web/app.js; no compaction completed.",
+    "source_sha256": "d9a6852cd25b4b28e99bd2638424abd9e714cfbc080f17e213b35a88eeee8b8d",
+    "independent_result": "node --check failed with Missing } in template expression at line 118. Chrome recorded two page JavaScript exceptions and failed the exact-literal text check because the page script did not execute."
+  },
+  "syntax_feedback_stage": {
+    "intervention": "The actual current-source node --check error was supplied to the same saved native session.",
+    "native": "Completed in 26.538 s after one read and no edit. The answer identified the syntax problem but did not repair it; the source hash and node --check failure remained unchanged. This is a completed model turn, not a successful repair."
+  },
+  "resources": "All three guarded stages observed normal host pressure, zero swap growth and no guard abort; resource safety in these short stages does not qualify sustained endurance.",
+  "diagnostic_fix": "The raw independent Chrome report contained pageErrors, but the compact source-bound observation exposed only the later missing-text symptom. The browser checker now fails immediately on an initial page JavaScript exception, before secondary UI checks, without copying arbitrary page exception text into the compact prompt. A real fresh observation on the same broken source reports the page error first, while the known-good fixture still passes all seven base/stored-markup checks.",
+  "limitations": [
+    "The frozen Task06 text says retry must create exactly one entry but does not explicitly say user-initiated; the independent checker requires a manual retry. Preserve the failed frozen result and clarify this acceptance contract only in a separately versioned future task, without changing or weakening the frozen suite.",
+    "The three stages restarted the native client around one saved session but produced no native compaction. They do not qualify semantic handoff, complete autonomous coding/UI, second-account inference, useful 49K-128K tier selection, or 45-60-minute green active endurance.",
+    "The evaluator and candidate still ran under the same macOS account; directory separation did not establish a protected holdout boundary."
+  ],
+  "private_raw_evidence": {
+    "location": "Ignored local evals/runs/e06nativefastsrc27a/evidence/ and evals/.validation/",
+    "initial_driver_sha256": "555d9a7cbda0569e356a90fe35f0de035dab4461958ed80575087ecf240eecc9",
+    "repair_driver_sha256": "b729bef5d6f4c94fdf8e6172e703bace5e5c3a148e7046dd23a466953e7fd919",
+    "syntax_stage_driver_sha256": "2f41b7150bab1e8125fd2f9dd2b769275e14593fe7d61847a7429b72c2a1d4d4",
+    "current_failed_browser_observation_sha256": "e7608b4eb8455751be4bee68eb798af545c70c86700b75404c65809694a5a357",
+    "known_good_browser_report_sha256": "dba97700c83e7060138133ba272241bdc8fc5c5a13ef50bcb240a3a556a3fa61"
+  },
+  "decision": "Stop retrying this 9B Fast Task06 sequence with more prompt wording. Keep guarded 64K private and public release paused. Change model or workflow for the next full coding/UI trial; retain the corrected source-bound browser diagnostic."
+}
