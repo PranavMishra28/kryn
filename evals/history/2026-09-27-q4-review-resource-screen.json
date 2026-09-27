@@ -23,7 +23,7 @@
   "challenger_27b_q4": {
     "model": "Qwen3.8-27B-oQ4e-mtp",
     "temporary_context_limit": 16384,
-    "temporary_server": "Loopback port 8001, memory guard 19.5 GB, one concurrent request, no cache or MTP; terminated after trial",
+    "temporary_server": "Loopback port 8001, memory guard 19.5 GB, one concurrent request, no cache or MTP; terminated after trial. The 9B control remained loaded in the separate owner runtime during this request.",
     "http_status": null,
     "wall_seconds": 4.574294,
     "answer_received": false,
@@ -35,6 +35,6 @@
     "raw_evidence": "evals/runs/model-screen-20260927/27b-q4-matched (ignored local artifact)"
   },
   "owner_restore": "The temporary server exited and the stopped owner runtime was restarted. A guarded protocol bench passed; doctor then reported healthy Qwen3.5-9B-6bit at 65,536 context with its 16 GiB limit, normal pressure, and zero active requests. Host swap still showed about 10.6 GiB used, so this is functional recovery, not proof of immediate swap recovery.",
-  "decision": "Reject 27B Q4 as a daily-use challenger under the observed concurrent app load. Do not retry it or promote it on this Mac without a separate, safely resourced qualification. Keep the private guarded 64K 9B profile and public-release pause.",
-  "limits": "One source-bound prompt does not establish general model quality; the 27B request was cancelled before any answer, so no quality comparison is possible. The 9B control failed answer completion, not a resource gate. No long-workflow, compaction/restart, protected-account inference or endurance acceptance gate passed."
+  "decision": "The concurrent 9B-plus-27B configuration failed the host safety gate. Do not promote the 27B candidate; its isolated replacement feasibility and quality remain unqualified. Keep the private guarded 64K 9B profile and public-release pause. Do not retry the challenger until the host has recovered and a separately guarded replacement-mode trial is justified.",
+  "limits": "The owner 9B model was still resident, so this is not a 27B-only memory test. One source-bound prompt does not establish general model quality; the 27B request was cancelled before any answer, so no quality comparison is possible. The 9B control failed answer completion, not a resource gate. No long-workflow, compaction/restart, protected-account inference or endurance acceptance gate passed."
 }
