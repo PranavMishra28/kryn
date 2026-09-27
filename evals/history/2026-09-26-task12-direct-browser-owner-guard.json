@@ -1,0 +1,27 @@
+{
+  "status": "Direct-browser Task12 FAIL; private owner xargs-guard install/rollback PASS narrowly",
+  "trial": {
+    "fixture": "Frozen Task12 e12code64a saved session, direct Agent browser stage on previously installed private 64K source 4063ca6; raw evidence remains ignored under /private/tmp/kryn-64k-pipeline/evals/runs/e12code64a/evidence.",
+    "wall_seconds": 367.842,
+    "model_completed": false,
+    "native_compaction_completed": false,
+    "tool_calls": 45,
+    "resources": "176 samples at normal pressure level 1, zero observed swap growth, no resource guard abort",
+    "result": "The Agent saw PATCH 400 for a newly entered ID but treated the new Save as an invalid test, then verified an existing-row Edit. It used repeated failed file-drop calls, eventually uploaded CSV, and changed POST /api/import from documented JSON 201/count to a JSON string to match its generated UI parser. The exact final-source request returned 201 with body \"1\" (JSON string), failing the API body contract. A fresh independent 390px browser check still observed PATCH 400 for a new entry and timed out waiting for POST; later flows were not reached. One direct process signal was denied by the existing guard. The operator preserved the generated backend diff and restored the documented JSON response after the trial. Frozen automatic 2/2 and isolated backend 6/6 pass after that restoration, but Task12 remains PARTIAL and autonomous UI/semantic continuity fail.",
+    "driver_sha256": "e3119ad2d88e5c8fd46f7a63c03221ac1fffce3667c138ecf68f569fdc159dd2",
+    "browser_report_sha256": "c22f2e377b31f16e5718052bcae0c12328046954fd22666e69a7bae8802902e3",
+    "import_contract_sha256": "dbb547fe55cbbbe9d5be33b6f020f459e192afe317711d32be2aefac962d7f4b",
+    "generated_backend_diff_sha256": "07846397d30321b442d62f321d18da02382898fbb8f8e8c0d9268164ae1d30b0"
+  },
+  "private_owner_guard": {
+    "source_revision": "1cb2bafdcff5bef0a1c81eca8279af026d8cec93",
+    "scope": "Only the merged public PR #44 xargs signal guard was ported onto the previous installed private 64K source 4063ca6. Public release profile remains 49K; no tag or version bump.",
+    "validation": "Focused xargs-denial unit passed; full private make check passed including 75 Node tests, frozen fixture verification and setup checks. Isolated private package smoke passed for 49 payload files; wheel SHA256 1c56ac3ec228dbe073e4bc691437e4cb623e4c21922161d471e02bd57f531db1. Installed package check reports exact source revision.",
+    "rollback": "Transactional owner install succeeded. Actual kryn rollback restored prior source 4063ca6 and kept the 65,536-context config; reinstall restored 1cb2baf. Installed kryn bench passed guarded protocol smoke, and final doctor was healthy/idle at max_model_len 65536, normal pressure, unchanged 415435325-byte swap, browser/search connected. This is owner-account recovery, not a clean non-owner install.",
+    "protocol_metrics_sha256": "aa1ea94f0bf91cb0da19cf274e0aef5c3613ad7fc516ee7fc270f194b66da5d6",
+    "synthetic_probe": "A first 512-input-token guarded smoke answered correctly with normal pressure and zero swap growth but failed exact token-count equality: count endpoint 512 versus generation 514. The rerun with measured template offset +2 passed exact count/answer/resource checks. Neither short smoke qualifies sustained 64K use or higher context tiers.",
+    "synthetic_first_sha256": "6aa144e95cfb21229021e9821cb7e3a10ad6104b9e12859c0a19e783a2cd7d4c",
+    "synthetic_offset2_sha256": "2cc6880b7e91c0a9a30f77cd48b03c879c3fc5da874666ac7011d66b2550dfc6"
+  },
+  "remaining": "Autonomous frozen coding/UI with truthful compaction/restart and accurate review is failed. Non-owner clean install/update/rollback, 45-60 minutes of green active endurance, and 49K/64K/96K/128K useful-tier comparison remain unqualified. Keep guarded 64K private and experimental; no public release or frontier-equivalence claim."
+}
