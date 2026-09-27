@@ -10,6 +10,7 @@ import { parseArgs } from 'node:util';
 import { spawnSync } from 'node:child_process';
 
 const fields = ['id', 'project', 'minutes', 'date'];
+const pageScriptFailure = 'Unhandled page JavaScript exception; inspect the raw browser report or run a source syntax check';
 const csv = rows => [fields, ...rows.map(row => fields.map(key => row[key]))]
   .map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n') + '\r\n';
 const canonical = rows => rows.map(row => Object.fromEntries(fields.map(key => [key, row[key]])))
@@ -61,8 +62,17 @@ async function main() {
     limitations: ['Not evidence of model MCP use, model vision, review, compaction, or long-running work.'] };
   let browser, context, page, output, marker, markerOwned = false, created = false;
   const check = async (name, fn) => {
-    try { const detail = await fn(); report.checks.push({ name, pass: true, detail }); }
-    catch (error) { report.checks.push({ name, pass: false, error: error.message }); throw error; }
+    try {
+      if (report.pageErrors.length) throw new Error(pageScriptFailure);
+      const detail = await fn();
+      if (report.pageErrors.length) throw new Error(pageScriptFailure);
+      report.checks.push({ name, pass: true, detail });
+    } catch (error) {
+      const scriptError = report.pageErrors.length ? pageScriptFailure : null;
+      report.checks.push({ name: scriptError ? 'page JavaScript' : name, pass: false,
+        error: scriptError || error.message });
+      throw scriptError ? new Error(scriptError) : error;
+    }
   };
   try {
     assert(['06', '08', '12'].includes(task), 'Choose task 06, 08, or 12');
