@@ -57,7 +57,7 @@ if (values.help) {
 async function main() {
   const task = values.task ?? ['06', '08', '12'].find(id => values[`task${id}`]);
   const report = { task, kind: 'independent browser outcome verification', pass: false, checks: [],
-    screenshots: [], pageErrors: [], console: [], network: [], failedRequests: [],
+    screenshots: [], pageErrors: [], console: [], network: [], failedRequests: [], manualRetryStarted: null,
     limitations: ['Not evidence of model MCP use, model vision, review, compaction, or long-running work.'] };
   let browser, context, page, output, marker, markerOwned = false, created = false;
   const check = async (name, fn) => {
@@ -151,6 +151,7 @@ async function main() {
         await screenshot('invalid-feedback.png'); return validation;
       });
       await check('first save: real injected 503 preserves input; one manual retry creates exactly one row', async () => {
+        report.manualRetryStarted = false;
         const row = { id: `${prefix}-retry`, project: 'Retry', minutes: 17, date: '2026-09-12' };
         await fill(row); const before = await formValues(); const oldMessage = await live.innerText();
         await fs.writeFile(marker, '', { flag: 'wx' }); markerOwned = true;
@@ -162,6 +163,7 @@ async function main() {
         await page.waitForTimeout(2200); // Detect a delayed automatic retry before the user's second Save.
         assert.deepEqual(await formValues(), before);
         assert(!(await apiRows()).some(item => item.id === row.id), 'Row appeared before manual retry');
+        report.manualRetryStarted = true;
         await submit('POST', 201); await cleared(); await page.reload({ waitUntil: 'networkidle' });
         assert.deepEqual((await apiRows()).filter(item => item.id === row.id), [row]);
       });
