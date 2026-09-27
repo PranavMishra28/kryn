@@ -10,11 +10,23 @@ import sys
 import time
 from uuid import uuid4
 
-from bench import ROOT, run_path
+from bench import ROOT, run_path, static_hashes
 
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def evaluator_sha256(kind):
+    sources = {"observe.py": digest(Path(__file__).read_bytes())}
+    if kind == "grade":
+        sources["frozen.sha256.json"] = digest((ROOT / "frozen.sha256.json").read_bytes())
+        sources["frozen_files"] = static_hashes()
+    elif kind == "browser":
+        sources["browser_check.mjs"] = digest((ROOT.parent / "tools/browser_check.mjs").read_bytes())
+    else:
+        raise ValueError("Unknown evaluator kind")
+    return digest(json.dumps(sources, sort_keys=True).encode())
 
 
 def optional_hash(file):
@@ -86,6 +98,7 @@ def record(run_id, kind, *, url=None, db=None, flags=()):
     task = json.loads((run / "run.json").read_text())["task"]
     scope = task if kind == "grade" else task + ":" + ("+".join(sorted(flags)) or "base")
     before = source_state(workspace)
+    evaluator_before = evaluator_sha256(kind)
     review_before = optional_hash(run / "review.json") if kind == "grade" else None
     started_ns = time.time_ns()
     if kind == "grade":
@@ -104,6 +117,7 @@ def record(run_id, kind, *, url=None, db=None, flags=()):
     except (OSError, subprocess.TimeoutExpired) as error:
         returncode, runner_error = None, str(error)
     after = source_state(workspace)
+    evaluator_after = evaluator_sha256(kind)
     review_after = optional_hash(run / "review.json") if kind == "grade" else None
     fresh = report_path.is_file() and not report_path.is_symlink() and report_path.stat().st_mtime_ns >= started_ns
     try:
@@ -119,6 +133,9 @@ def record(run_id, kind, *, url=None, db=None, flags=()):
     if before["sha256"] != after["sha256"]:
         result["status"] = "INVALIDATED"
         result.setdefault("failures", []).append({"check": "source stability", "error": "Project files changed during check"})
+    if evaluator_before != evaluator_after:
+        result["status"] = "INVALIDATED"
+        result.setdefault("failures", []).append({"check": "evaluator stability", "error": "Evaluator changed during check"})
     if review_before != review_after:
         result["status"] = "INVALIDATED"
         result.setdefault("failures", []).append({"check": "review stability", "error": "Manual review changed during grade"})
@@ -133,8 +150,9 @@ def record(run_id, kind, *, url=None, db=None, flags=()):
             stream.write(report_path.read_bytes())
             stream.flush()
             os.fsync(stream.fileno())
-    item = {"schema": 1, "run": run_id, "kind": kind, "scope": scope, "observed_ns": started_ns,
+    item = {"schema": 2, "run": run_id, "kind": kind, "scope": scope, "observed_ns": started_ns,
             "source_before": before, "source_after": after, "review_sha256": review_after, "result": result,
+            "evaluator_sha256": evaluator_before,
             "report": str(archived.relative_to(run)) if archived else None,
             "report_sha256": digest(archived.read_bytes()) if archived else None}
     temporary = target.with_suffix(".tmp")
@@ -153,6 +171,7 @@ def status(run_id):
     task = json.loads((run / "run.json").read_text())["task"]
     current = source_state(workspace)["sha256"]
     current_review = optional_hash(run / "review.json")
+    evaluators = {kind: evaluator_sha256(kind) for kind in ("grade", "browser")}
     folder = evidence / "observations"
     history = []
     if folder.exists():
@@ -171,7 +190,9 @@ def status(run_id):
             history.append({"kind": item["kind"], "scope": item.get("scope", "unknown"),
                             "status": item["result"]["status"],
                             "source_sha256": item["source_after"]["sha256"],
+                            "evaluator_sha256": item.get("evaluator_sha256"),
                             "current_source": item["source_after"]["sha256"] == current,
+                            "current_evaluator": item.get("evaluator_sha256") == evaluators.get(item["kind"]),
                             "current_review": item["kind"] != "grade" or item.get("review_sha256") == current_review,
                             "report_intact": intact, "failures": item["result"].get("failures", []),
                             "checks": item["result"].get("checks", []),
@@ -185,10 +206,10 @@ def status(run_id):
         required.add("browser:" + task + ":base")
     keys = sorted(required | {h["kind"] + ":" + h["scope"] for h in history if h["scope"] != "unknown"})
     latest = {key: next((h for h in reversed(history) if h["kind"] + ":" + h["scope"] == key and
-                         h["current_source"] and h["current_review"] and h["report_intact"]), None)
+                         h["current_source"] and h["current_evaluator"] and h["current_review"] and h["report_intact"]), None)
               for key in keys}
     return {"run": run_id, "current_source_sha256": current, "latest_current": latest, "history": history,
-            "note": "Historical failures remain recorded. An earlier failure is not a current action when a later source-bound check passes. This same-account record is not an access boundary."}
+            "note": "Historical failures remain recorded. A result without matching source, evaluator and report provenance is not current. This same-account record is not an access boundary."}
 
 
 def compact_status(run_id):
@@ -218,8 +239,10 @@ def compact_status(run_id):
     def older_same_scope(item):
         latest = full["latest_current"].get(item["kind"] + ":" + item["scope"])
         return bool(latest and latest["record"] != item["record"] and
-                    latest["source_sha256"] == item["source_sha256"])
+                    latest["source_sha256"] == item["source_sha256"] and
+                    latest["evaluator_sha256"] == item["evaluator_sha256"])
     failed = [dict(kind=h["kind"], scope=h["scope"], status=h["status"], current_source=h["current_source"],
+                   current_evaluator=h["current_evaluator"],
                    failures=bounded_failures(h), evidence_id=evidence_id(h))
               for h in full["history"] if h["failures"] and h["report_intact"] and
               h["record"] not in active_records and not older_same_scope(h)]
@@ -230,9 +253,11 @@ def compact_status(run_id):
             "older_failures_omitted": max(0, len(failed) - 6), "total_observations": len(full["history"]),
             "older_same_source_scope_failures_omitted": sum(bool(h["failures"] and h["report_intact"] and older_same_scope(h))
                                                             for h in full["history"]),
+            "stale_evaluator_records": sum(h["current_source"] and h["report_intact"] and not h["current_evaluator"]
+                                           for h in full["history"]),
             "damaged_reports": sum(not h["report_intact"] for h in full["history"]),
             "infrastructure_errors": infrastructure[-3:],
-            "note": "Use the latest intact source-matched observation by exact scope for next actions; a weaker pass does not settle a stricter failure. Older same-source/scope failure details remain in full history, not this prompt; changed checker coverage is not inferred. Source matching does not prove unchanged runtime/data. Same-account records do not isolate the grader from candidate shell access."}
+            "note": "Use the latest intact source- and evaluator-matched observation by exact scope for next actions; a weaker pass does not settle a stricter failure. Older same-source/scope failure details remain in full history, not this prompt. Source matching does not prove unchanged runtime/data. Same-account records do not isolate the grader from candidate shell access."}
 
 
 def main():
