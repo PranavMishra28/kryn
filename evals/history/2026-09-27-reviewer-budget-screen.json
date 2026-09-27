@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-27",
+  "scope": "Read-only diagnostic on the saved same-account Task06 failure; no candidate source, installed profile or public release changed",
+  "source_run": "e06obs27b",
+  "source_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+  "current_evaluator_status": "Base browser PASS 5/5; stricter stored-HTML/visible-controls scope FAIL because exact stored markup is not visible as literal text, while the injected element remains inert; frozen automatic 2/2 PASS and six manual checks NOT_TESTED",
+  "native_reviewer": {
+    "stage": "reviewer-high-source-20260927",
+    "thinking_budget_override": 8192,
+    "answer_sha256": "c2770f95ceb96ca56f4cc55e003935eac49436e244705becad7497eb86652cb3",
+    "result": "Completed in 73.813 seconds with eight tool calls and no tool error. It read the current source and correctly located web/app.js line 74, but proposed interpolating stored row fields into innerHTML and called that safe. That would create markup from untrusted data and contradict the strict browser safety observation. No fix was applied.",
+    "resources": "36 samples, AC power, pressure level 1, zero swap growth",
+    "raw_evidence": "evals/runs/e06obs27b/evidence/reviewer-high-source-20260927 (ignored local artifact)"
+  },
+  "direct_model_controls": [
+    {
+      "thinking_budget": 8192,
+      "max_tokens": 8192,
+      "result": "HTTP 200 with finish_reason length, 8192 output tokens, reasoning text only and no final content"
+    },
+    {
+      "thinking_budget": 3072,
+      "max_tokens": 8192,
+      "result": "HTTP 200 with finish_reason length, 8192 output tokens and a long incomplete answer. It again treated literal stored markup as a reason to construct HTML and claimed innerHTML with static strings was inert, despite source-derived row interpolation being the actual proposal."
+    }
+  ],
+  "direct_model_resource_result": "Both requests sampled AC power and pressure level 1 with zero swap growth; no resource abort",
+  "direct_model_raw_evidence": "evals/runs/direct-review-20260927 (ignored local artifact)",
+  "comparison_limit": "The direct-model prompt included source inline whereas the native Reviewer read it through tools, so this is not a controlled minimal-OpenCode versus KRYN harness comparison. It does show that more thinking budget alone did not produce a trustworthy repair in these trials.",
+  "tooling_fix": "The evaluation driver now rejects thinking overrides that leave fewer than 2048 output tokens and rejects positive thinking budgets on a disabled-thinking variant before creating a stage or sending inference. Offline self-check, both pre-inference CLI refusals and the full make check passed. This is a trial guard, not a new product effort tier.",
+  "gates": {
+    "reviewer_safe_repair": "FAIL",
+    "high_effort_uplift": "NOT_ESTABLISHED",
+    "direct_request_answer_completion": "FAIL for both sampled configurations",
+    "trial_budget_validation": "PASS: offline self-check plus both CLI refusals before stage creation or inference",
+    "full_coding_ui_compaction_restart": "UNQUALIFIED",
+    "protected_evaluator_account": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  },
+  "next_action": "Keep independent browser and source evidence as the acceptance gate; do not promote high thinking or add another prompt rule. Resume a fresh protected coding/UI trial when the second macOS GUI session is available."
+}
