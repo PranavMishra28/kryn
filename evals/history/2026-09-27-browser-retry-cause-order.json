@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-27",
+  "scope": "Task06 browser checker failure ordering; no product runtime or model-profile change",
+  "change": "After the controlled 503, capture the immediate form and row state, wait through the existing 2.2-second retry window, and check persisted row absence before comparing both immediate and delayed form values. A candidate that automatically submits again now reports the actual cause without losing transient form-clear coverage.",
+  "failed_candidate": {
+    "run": "e06freshserver64a",
+    "source_sha256": "82dc9732400a815a395c1257b4b13f7fee4b6b31c3120a51de746c7d2f5be2bb",
+    "source_bound_base_observation": "1790525276892651000-534fb5777301471b91a2fd902b3f5137",
+    "base": "FAIL: Row appeared before manual retry; POST statuses [503, 201]; manual_retry_started=false",
+    "source_bound_stored_html_observation": "1790525290614405000-15c69f9cfc614fa39987f594f8aa7fd7",
+    "stored_html": "FAIL: Stored markup created an HTML element"
+  },
+  "frozen_fixture": "PASS 7/7 on the matching Task06 browser checks, including stored markup, controlled 503, deliberate manual retry, reload and both viewports; manualRetryStarted=true",
+  "additional_optional_check": "A separate run with --visible-controls and --quoted-import failed the optional absent-filter empty-state check on the frozen fixture. That check is outside the matching 7/7 Task06 browser scope and was not counted as a pass.",
+  "fast_variant_screen": "A fourth guarded, tools-disabled Ask screen on the identical snapshot completed in 24.312 seconds with normal sampled pressure, AC power and zero swap growth. It still treated the 503->201 flow as normal retry handling and proposed restoring form state after 201, missing that manual_retry_started=false means the 201 preceded any manual retry. No semantic uplift claim.",
+  "gates": {
+    "failure_cause_diagnostic": "PASS: deterministic checker and source-bound observation",
+    "frozen_fixture_regression": "PASS 7/7",
+    "local_model_failure_interpretation": "FAIL across default and fast screens",
+    "autonomous_coding_ui": "FAIL on the underlying candidate",
+    "public_release": "PAUSED"
+  }
+}
