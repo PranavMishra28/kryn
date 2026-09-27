@@ -1,0 +1,36 @@
+{
+  "scope": "Follow-up on private guarded 64K frozen Task12 run t12endurance64fresh; public release remains paused",
+  "private_source_revision": "acf9fb482bb191ec6bbc748a48ee816d1fa5d398",
+  "raw_evidence": "evals/runs/t12endurance64fresh (ignored workspace, native exports, resource samples, browser traces, screenshots, review and grade)",
+  "sequence": [
+    "A completed focused Agent repair still chose PATCH for a new Save. Independent browser evidence showed PATCH 400; a later completed Default-reasoning repair introduced explicit edit state and advanced the unchanged browser checker through both viewports, validation, and real 503/single retry.",
+    "A completed narrow Agent Import repair changed multipart upload to raw CSV. The same checker advanced through valid and atomic-invalid Import, then found a successful PATCH 200 did not clear the form. A completed Edit-state repair passed all 7/7 frozen browser flows.",
+    "Independent security review then reproduced HTML execution from a stored row ID: POST 201 and injected=true. A completed Agent DOM repair replaced server-data innerHTML rendering; the unchanged browser checker stayed 7/7 and the same injection returned injected=false.",
+    "Independent production-handler regression found PATCH 400 for URL-encoded IDs with space, literal %20, and slash. A completed Agent repair failed all 3/3 cases because it parsed the /api/entries/{id} route incorrectly and left the browser URL unencoded. The failed change was archived and reverted by the operator to preserve the last 7/7 artifact. The encoded-ID regression still fails 3/3 on final source.",
+    "A fresh read-only local Reviewer completed but inaccurately called the encoded mismatch an IDOR vulnerability, claimed the dirty workspace was clean, and proposed decoding the row ID. Its findings were not accepted as a fix. A saved-session Ask restart recognized the current encoded-ID failure but omitted most original acceptance criteria and failed-check history.",
+    "The operator normalized 21 blank lines containing trailing whitespace after archiving the exact pre-cleanup model file. No semantic operator fix was applied to the final source beyond reverting the failed encoded-ID attempt."
+  ],
+  "evidence_sha256": {
+    "final_server": "daf9fb3a27ea632e2aecb0a56ed6315a104c0962999bcb7b25a0d4c6f0a459e9",
+    "final_app": "5d2f121ae9489f57ac528e25e677176494ce5e427f2cd8c2c146b76a18e0d72c",
+    "final_browser": "f0fccfa2cc16a443e9a2e2eda1d08e103f011dee462faecb9477b9770dfac82d",
+    "final_injection": "4580b77d14934f155acfd7cdfb317b00f77ca153ac49e101a127ba0e4c78e3a5",
+    "encoded_id_regression": "32c323f5163482424cc41e11e53d9536a593ef19da8f8a5be0fe6745ea8ffcb2",
+    "manual_review": "6734cc2a7cdc5bc78428506f87c095f7dd7700bf60752d5c9d073c4052853154",
+    "frozen_grade": "0b337be1d92c6f7fcabecf5f7a8e27f3f59d941c491381215a54c72684a1866a"
+  },
+  "gates": {
+    "frozen_automatic": "PASS 2/2 with original test and seed files preserved",
+    "frozen_browser_normal_flow": "PASS 7/7 at 390x844 and 1280x800 including real 503, Import/Edit/filter/export, screenshots, console and network",
+    "stored_html_injection": "PASS final independent regression: persisted row did not execute script after earlier reproduced injected=true",
+    "encoded_id_editing": "FAIL 3/3 independent cases on final source; failed model repair reverted",
+    "frozen_task12_grade": "FAIL because fresh Reviewer accuracy, semantic handoff and representative duration failed despite automatic/browser passes",
+    "reviewer_accuracy": "FAIL; several false findings and a wrong fix proposal",
+    "semantic_compaction_restart": "FAIL; multiple completed checkpoints and a completed Ask restart did not retain original acceptance/check history fully",
+    "representative_45_to_60_minute_endurance": "FAIL: 1938.991 seconds (32.32 minutes) of all Plan/Agent/Reviewer/Ask model stages, with an earlier sustained memory warning and UI timeout",
+    "clean_nonowner_install": "UNQUALIFIED; private owner rollback/reinstall and isolated wheel installation passed, but no second-account clean install completed",
+    "context_tier": "64K remains private, guarded and rollback-capable; public 49K unchanged; 49K-128K useful-tier comparison remains incomplete",
+    "public_release": "CLOSED"
+  },
+  "next_blocker": "A small validated encoded-ID repair and accurate semantic handoff remain necessary. Then rerun a fresh, green 45-60 minute coding/UI trial and non-owner clean install before any public release proposal. Do not retry the same prompt-only encoded-ID repair or promote this operator-reverted artifact as an autonomous pass."
+}
