@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-26",
+  "scope": "Second fresh frozen Task06 on the private guarded 64K candidate; no public release or product configuration change",
+  "code_stage": {
+    "result": "Completed and compacted using the disposable code-only tool setup",
+    "wall_seconds": 208.337,
+    "tool_calls": 22,
+    "browser_tool_calls": 0,
+    "repeatability": "A prior fresh code-only Task06 stage also completed and compacted with 22 tools"
+  },
+  "independent_checks": {
+    "baseline_browser": "Failed first 390px overflow check before the model edit",
+    "final_browser": "PASS 5/5, including 390px/1280px save/reload and real 503/retry",
+    "backend": "PASS 2/2 frozen tests",
+    "invalid_minutes": "Independent full-page screenshot shows Chrome's visible labeled validation bubble; the empty app status element alone is not an acceptance defect"
+  },
+  "model_led_gates": {
+    "narrow_browse": "Timed out after 25 tools, including denied source reads and repeated fetch failures; no completed checkpoint",
+    "private_browse_cap_candidate": "Completed in 93.11 seconds with 11 tools but never reached the proposed 16-call cap; final answer falsely claimed no feedback anywhere and no submit handler. Candidate rejected and not installed or merged.",
+    "fresh_reviewer": "Completed and compacted but invented a project-name constraint and suggested removing useful native validation. Accuracy gate failed.",
+    "formal_frozen_grade": "PARTIAL; manual model-led evidence was not qualified"
+  },
+  "release_gates": "Green 45-60 minute active endurance, reliable browser review, non-owner clean install, and useful 49K-128K tier comparison remain open. Guarded 64K stays private experimental; public 49K and releases remain unchanged."
+}

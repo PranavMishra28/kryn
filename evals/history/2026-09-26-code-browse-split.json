@@ -5,7 +5,7 @@
   "observations": {
     "code_stage": "Completed and compacted with 22 tools, zero browser calls; independent browser outcome checker passed 5/5 on its artifact",
     "broad_browse_stage": "Timed out after 47 browser calls without compaction",
-    "single_check_browse_stage": "Completed and compacted after 13 browser calls; found negative Minutes left the app's accessible status blank",
+    "single_check_browse_stage": "Completed and compacted after 13 browser calls; observed an empty app status element, but a later independent full-page screenshot showed visible native validation feedback for negative Minutes",
     "repair_attempts": "Two prompt-driven edits broadened or weakened validation; an executable-test-driven continuation timed out and left fractional Minutes able to POST"
   },
   "conclusion": "Separating code and browser tools improved one code-stage completion but did not complete the full UI workflow. The 45-60 minute green endurance and independent final-review gates remain failed/unqualified. Do not ship a release or claim a reliable uplift from this single trial.",
