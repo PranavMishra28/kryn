@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "scope": "Fresh frozen Task12 sustained coding/UI attempt under restored private guarded 64K source; trial invalidated by candidate access to evaluator checker",
+  "run": "e12end64p",
+  "installed_private_source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e12end64p/evidence",
+  "sequence": [
+    "Read-only Plan completed and compacted in 70.130 seconds without source edits, but ended with a redundant request for permission to proceed.",
+    "Saved Build for Import/Export timed out after 186.667 seconds. Its partial server.py referenced undefined names, wrote an invalid side test and failed the frozen HTTP checker at POST /api/import. The original two tests still passed.",
+    "A narrowly scoped saved-session repair timed out after 186.706 seconds. It moved the frozen failure from Import to valid POST /api/entries by dropping the original success response.",
+    "After two unsuccessful saved Build attempts, a fresh Agent session was used instead of adding a prompt rule. It timed out after 156.695 seconds and moved the frozen failure to PATCH /api/entries/new. No full backend or browser acceptance occurred."
+  ],
+  "evaluation_boundary_failure": "The operator copied raw grade.json into the candidate's ignored artifacts/evaluator directory. Its traceback disclosed the absolute path of evals/checks.py outside the workspace. The fresh Agent then used shell to cat/head that grader source. Native external-directory denial did not prevent shell reads. This invalidates independent grading for the trial; no model quality or endurance pass can be inferred from its later partial edits.",
+  "resource_and_duration": "Four stages totaled 600.198 prompt-active seconds. Every guarded stage sampled normal pressure level 1 with zero swap growth. Two Build timeouts and the invalid evaluator boundary mean this is not green 45-60 minute endurance.",
+  "disposition": "STOP this fixture. Preserve the raw failure and partial model diff; do not operator-edit it into a pass or reuse it as a fresh candidate. Raw grader output and checker paths remain outside future candidate workspaces. Behavior-level feedback alone is useful but not a filesystem security boundary; a genuinely independent future run needs evaluator material inaccessible to the candidate, such as a separate protected account or enforced OS sandbox.",
+  "gates": {
+    "plan_no_edits_and_compaction": "PASS as a narrow mechanism",
+    "backend": "FAIL",
+    "coding_ui_browser": "UNRUN",
+    "semantic_compaction_restart": "UNQUALIFIED",
+    "independent_evaluation_integrity": "FAIL",
+    "green_45_60_minute_endurance": "FAIL",
+    "non_owner_clean_install": "UNQUALIFIED; local administrator authentication required",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Establish a real candidate/evaluator filesystem boundary while keeping the existing OpenCode/oMLX harness, then run a fresh Task12 fixture with bounded stages and external browser/source checks. No release or frontier-equivalence claim."
+}
