@@ -12,6 +12,18 @@ import observe
 
 
 class ObservationTests(unittest.TestCase):
+    def test_browser_evaluator_change_invalidates_fingerprint(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "evals").mkdir()
+            (root / "tools").mkdir()
+            checker = root / "tools/browser_check.mjs"
+            checker.write_text("first\n")
+            with patch.object(observe, "ROOT", root / "evals"):
+                before = observe.evaluator_sha256("browser")
+                checker.write_text("second\n")
+                self.assertNotEqual(before, observe.evaluator_sha256("browser"))
+
     def test_source_change_failure_lineage_and_report_integrity(self):
         with tempfile.TemporaryDirectory() as temporary:
             run = Path(temporary) / "trial"
@@ -32,6 +44,7 @@ class ObservationTests(unittest.TestCase):
                     "status": outcome, "failures": failure or [], "checks": [],
                     "automatic": automatic,
                     "automatic_tests_run": 2 if kind == "grade" else None},
+                    "evaluator_sha256": observe.evaluator_sha256(kind),
                     "report": str(report.relative_to(run)), "report_sha256": observe.digest(report.read_bytes())}
                 (folder / f"{number}.json").write_text(json.dumps(record))
                 return report
@@ -65,6 +78,21 @@ class ObservationTests(unittest.TestCase):
                 self.assertEqual(summary["historical_failures"][0]["failures"][0]["error"], "No POST was sent")
                 self.assertFalse(summary["historical_failures"][0]["current_source"])
                 self.assertEqual(summary["total_observations"], 6)
+                original = {kind: observe.evaluator_sha256(kind) for kind in ("grade", "browser")}
+                with patch.object(observe, "evaluator_sha256", side_effect=lambda kind: "0" * 64 if kind == "browser" else original[kind]):
+                    changed = observe.compact_status("trial")
+                    self.assertIsNone(changed["current"]["browser:06:base"])
+                    self.assertIsNone(changed["current"]["browser:06:--stored-html"])
+                    self.assertEqual(changed["current"]["grade:06"]["status"], "PARTIAL")
+                    self.assertEqual(changed["stale_evaluator_records"], 3)
+                    self.assertFalse(observe.status("trial")["history"][0]["current_evaluator"])
+                legacy = folder / "4.json"
+                item = json.loads(legacy.read_text())
+                del item["evaluator_sha256"]
+                legacy.write_text(json.dumps(item))
+                changed = observe.compact_status("trial")
+                self.assertIsNone(changed["current"]["grade:06"])
+                self.assertEqual(changed["stale_evaluator_records"], 1)
                 (run / "review.json").write_text("{}")
                 self.assertIsNone(observe.compact_status("trial")["current"]["grade:06"])
                 failed_report.write_text("tampered")
