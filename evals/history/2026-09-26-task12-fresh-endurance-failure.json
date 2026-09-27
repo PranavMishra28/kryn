@@ -1,0 +1,40 @@
+{
+  "scope": "Fresh frozen Task12 endurance attempt on installed private guarded 64K source acf9fb482bb191ec6bbc748a48ee816d1fa5d398; no public release or tier promotion",
+  "raw_private_run": "evals/runs/t12endurance64fresh (ignored native exports, resource samples, source, database and browser reports)",
+  "stages": [
+    { "name": "Plan", "active_wall_seconds": 111.458, "native_turn": "completed", "compaction": "completed" },
+    { "name": "backend Agent", "active_wall_seconds": 582.079, "native_turn": "aborted by sustained host memory warning", "compaction": "not completed" },
+    { "name": "UI Agent", "active_wall_seconds": 368.376, "native_turn": "timed out", "compaction": "not completed" },
+    { "name": "focused Save repair Agent", "active_wall_seconds": 141.74, "native_turn": "completed", "compaction": "completed" }
+  ],
+  "observed": [
+    "The frozen backend checker passed 2/2 against the interrupted Agent's source, covering the original test and HTTP import/filter/PATCH/export behavior. The Agent did not finish or hand off that turn. Its native history shows repeated self-managed server and scratch-test attempts before the resource guard stopped it; the untracked scratch test was archived in private evidence.",
+    "The broad UI stage changed 595 lines across app.js and style.css before timing out while inspecting its diff. Its first independent browser check failed at Save with a null-value page exception and no POST because the code queried nonexistent input IDs and registered competing submit handlers.",
+    "A narrow Save repair completed with a native compaction and added input IDs, but an unchanged independent browser retry still failed. It sent PATCH /api/entries/{new-id} and received 400 instead of sending POST. The source rejects empty IDs, then checks !idValue to select POST, making that branch unreachable. The page sent no subsequent POST.",
+    "Source inspection also found a multipart Import request against a raw-CSV API and unescaped row data in an innerHTML template. Those are unqualified or failing UI paths; no browser completion is claimed.",
+    "After the resource abort and after final browser testing, doctor reported healthy idle 65,536-context runtime, normal host pressure, connected browser/search, and unchanged 415435325-byte swap. One sustained host warning during the backend turn fails the resource gate even though it later settled."
+  ],
+  "source_sha256": {
+    "server_py": "daf9fb3a27ea632e2aecb0a56ed6315a104c0962999bcb7b25a0d4c6f0a459e9",
+    "app_js": "caa0b69c85bffee920de3ebcc3d156e519043a79b4fd1ecc8f9dbdb233c25d8c",
+    "index_html": "190c5c0e4ced1beda9e8d3782dee0187c3e8f56f20361a99ed5689330c29bafa",
+    "style_css": "2f4a5b8a6a23d8bc6fbe3652173d595e256212b38dba8c2164c1b031436d85da"
+  },
+  "evidence_sha256": {
+    "browser_first": "65644decfb7727599d6a21e6592d4016c639bc4468f2f99979dda86476a0ed9d",
+    "browser_after_repair": "679bf2321c37e0cca7eec7b155bc6b275a8708ed4f899f2736212eeddbaccfea",
+    "archived_model_scratch_test": "ad4c2131b7f04307b46f7d23f5c9293e5c36f462626bf4f7a3aa4161a4daf2d0"
+  },
+  "gates": {
+    "backend_automatic": "PASS 2/2 for source outcome; Agent turn incomplete",
+    "model_produced_ui": "FAILED first Save in independent browser after focused repair",
+    "bounded_agent_completion": "FAILED for backend resource abort and broad UI timeout; narrow repair completed",
+    "compaction_restart_semantics": "FAILED for full Task12; only Plan and repair checkpoint mechanics completed",
+    "representative_45_to_60_minute_active_endurance": "FAILED: 1203.653 seconds across stages, below threshold, with an abort and timeout",
+    "resource_guard": "WORKED: cancelled on sustained memory warning; that warning fails trial acceptance",
+    "clean_nonowner_install": "UNQUALIFIED; no separate standard macOS account with installation authorization was available",
+    "context_tier": "64K remains private and experimental with guard and owner rollback; public 49K unchanged",
+    "public_release": "CLOSED"
+  },
+  "next_blocker": "Use independent browser failures to drive smaller, reviewable source changes and rerun the frozen UI checks. Do not repeat the broad UI prompt or call the current model-produced artifact complete. A non-owner clean install and a sustained green coding/UI run remain necessary before release discussion."
+}
