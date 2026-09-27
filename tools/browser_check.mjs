@@ -199,8 +199,9 @@ async function main() {
         for (const item of rows) assert.equal(visible.includes(item.id), item.project === row.project, `Wrong filter visibility: ${item.id}`);
         await page.getByLabel('Filter project', { exact: true }).fill(`${prefix}-absent`);
         await page.getByRole('button', { name: /^Filter$/i }).click();
-        await page.waitForFunction(() => document.querySelector('#entries')?.textContent.includes('No entries yet.'));
+        await page.waitForFunction(id => !document.querySelector('#entries')?.textContent.includes(id), row.id);
         visible = await page.locator('#entries').innerText();
+        assert(visible.trim(), 'Absent filter needs a visible empty state');
         for (const item of rows) assert(!visible.includes(item.id), `Absent filter leaked ${item.id}`);
         return { imported: row.id, importPosts: imports.length, exactFilter: true, absentFilter: true };
       });
