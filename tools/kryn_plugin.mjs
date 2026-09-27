@@ -86,6 +86,20 @@ function projectSnapshot(directory, given) {
   }
 }
 
+function expectedEditHash(snapshot, input) {
+  const oldText = input?.oldString, newText = input?.newString;
+  if (!snapshot || typeof oldText !== 'string' || !oldText || typeof newText !== 'string' ||
+      oldText.length > 1024 * 1024 || newText.length > 1024 * 1024 ||
+      ![undefined, false].includes(input?.replaceAll)) return null;
+  const bytes = fs.readFileSync(snapshot.file);
+  if (sha(bytes) !== snapshot.hash) return null;
+  const source = bytes.toString('utf8');
+  if (!Buffer.from(source, 'utf8').equals(bytes)) return null;
+  const at = source.indexOf(oldText);
+  if (at < 0 || source.indexOf(oldText, at + oldText.length) >= 0) return null;
+  return sha(source.slice(0, at) + newText + source.slice(at + oldText.length));
+}
+
 export function validatedOptions(options) {
   if (!options || typeof options.stateDir !== 'string' || !path.isAbsolute(options.stateDir))
     throw new Error('KRYN requires an absolute owned stateDir');
@@ -267,7 +281,7 @@ export default {
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
         verification: verificationLedger(), previousTracker: null, shellRepeat: null,
-        recentReads: new Map(), pendingReads: new Map() };
+        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map() };
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
         item.previousTracker = ownedFile(previous);
@@ -374,6 +388,7 @@ export default {
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
       item.recentReads.clear();
       item.pendingReads.clear();
+      item.pendingEdits.clear();
       item.shellRepeat = null;
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
@@ -493,10 +508,13 @@ export default {
           item.pendingReads.set(event.id, beforeRead);
         }
       }
+      let editSource = null;
       if (AGENT_ROLES.has(event.agent) && event.tool === 'edit') {
-        const current = projectSnapshot(ctx.location.directory, event.input?.path);
-        if (current && item.recentReads.get(current.file) !== current.hash)
+        editSource = projectSnapshot(ctx.location.directory, event.input?.path);
+        if (editSource && item.recentReads.get(editSource.file) !== editSource.hash)
           throw new Error('KRYN requires a current read of this file before editing it. Read the file in this turn, then retry the edit.');
+        if (editSource && [...item.pendingEdits.values()].some(other => other.file === editSource.file))
+          throw new Error('KRYN requires native edits to the same file to finish one at a time.');
       }
       const identity = shellIdentity(event, ctx.location.directory);
       if (!identity) item.shellRepeat = null;
@@ -561,9 +579,26 @@ export default {
         event.input = { ...event.input, background: false };
         activeChildren.set(event.sessionID, event.id);
       }
+      if (editSource && event.id) {
+        if (item.pendingEdits.size >= 64 || item.pendingEdits.has(event.id))
+          throw new Error('KRYN native edit tracking is full or its call ID was reused; retry after pending edits finish.');
+        item.pendingEdits.set(event.id, { ...editSource,
+          expectedHash: expectedEditHash(editSource, event.input) });
+      }
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      if (event.tool === 'edit' && event.id) {
+        const beforeEdit = item.pendingEdits.get(event.id);
+        item.pendingEdits.delete(event.id);
+        const current = beforeEdit && event.status === 'completed' ?
+          projectSnapshot(ctx.location.directory, event.input?.path) : null;
+        // Credit only the exact bytes derived from a unique native replacement.
+        // A fuzzy edit or an outside write before this hook needs a fresh read.
+        if (current && current.file === beforeEdit.file &&
+            beforeEdit.expectedHash && current.hash === beforeEdit.expectedHash)
+          item.recentReads.set(current.file, current.hash);
+      }
       if (event.tool === 'read' && event.id) {
         const beforeRead = item.pendingReads.get(event.id);
         item.pendingReads.delete(event.id);

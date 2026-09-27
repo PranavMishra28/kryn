@@ -387,9 +387,9 @@ test('an existing project file must be read in the current turn before native ed
   const file = path.join(f.root, 'data', 'endurance.csv');
   fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'id,project\ne05,endurance\n');
   let serial = 0;
-  const call = (tool, status = 'completed', given = './data/endurance.csv', onExecute) => {
+  const call = (tool, status = 'completed', given = './data/endurance.csv', onExecute, editInput = {}) => {
     const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + (++serial),
-      id: 'call_' + serial, tool, input: { path: given } };
+      id: 'call_' + serial, tool, input: { path: given, ...editInput } };
     f.call('tool.execute.before', event);
     onExecute?.();
     f.call('tool.execute.after', { ...event, status, result: { output: {} } });
@@ -401,12 +401,18 @@ test('an existing project file must be read in the current turn before native ed
     assert.throws(() => call('edit'), /current read/, 'a failed read does not ground an edit');
     call('read', 'completed', file);
     assert.doesNotThrow(() => call('edit', 'completed', file,
-      () => fs.appendFileSync(file, 'e06,endurance\n')));
-    assert.throws(() => call('edit'), /current read/, 'a successful edit never refreshes the read');
-    call('read');
-    assert.doesNotThrow(() => call('edit'));
+      () => fs.appendFileSync(file, 'e06,endurance\n'),
+      { oldString: 'e05,endurance\n', newString: 'e05,endurance\ne06,endurance\n' }));
+    assert.doesNotThrow(() => call('edit', 'completed', file,
+      () => fs.appendFileSync(file, 'e07,endurance\n'),
+      { oldString: 'e06,endurance\n', newString: 'e06,endurance\ne07,endurance\n' }),
+    'a completed own edit establishes the next version for this turn');
     fs.appendFileSync(file, 'e06,endurance\n');
-    assert.throws(() => call('edit'), /current read/, 'changed bytes invalidate the read');
+    assert.throws(() => call('edit'), /current read/, 'outside changes invalidate the own-edit version');
+    call('read');
+    assert.doesNotThrow(() => call('edit', 'error', file,
+      () => fs.appendFileSync(file, 'partial,write\n')));
+    assert.throws(() => call('edit'), /current read/, 'a failed or partial edit does not establish a new version');
     call('read');
     assert.doesNotThrow(() => call('edit'));
     f.call('session.prompt', { sessionID: 'ses_1' });
@@ -425,6 +431,44 @@ test('an existing project file must be read in the current turn before native ed
     'new files need no prior read');
     assert.throws(() => call('edit', 'completed', './new-file.csv'), /current read/,
       'creating a file with edit does not authorize the next edit');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('owned edit fingerprints cannot be refreshed through overlapping edits', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const file = path.join(f.root, 'app.js'); fs.writeFileSync(file, 'let count = 0;\n');
+  const event = (id, tool) => ({ sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + id,
+    id: 'call_' + id, tool, input: { path: file, ...(tool === 'edit' ? {
+      oldString: id === 'first' ? 'let count = 0;\n' : 'let count = 1;\n',
+      newString: id === 'first' ? 'let count = 1;\n' : 'let count = 2;\n' } : {}) } });
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('tool.execute.before', event('read', 'read'));
+    f.call('tool.execute.after', { ...event('read', 'read'), status: 'completed', result: { output: {} } });
+    f.call('tool.execute.before', event('first', 'edit'));
+    assert.throws(() => f.call('tool.execute.before', event('second', 'edit')), /one at a time/);
+    fs.writeFileSync(file, 'let count = 1;\n');
+    f.call('tool.execute.after', { ...event('first', 'edit'), status: 'completed', result: { output: {} } });
+    assert.doesNotThrow(() => f.call('tool.execute.before', event('second', 'edit')));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('outside bytes written between native edit and after-hook cannot become owned evidence', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const file = path.join(f.root, 'app.js'); fs.writeFileSync(file, 'let count = 0;\n');
+  const base = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_1', input: { path: file } };
+  const read = { ...base, id: 'call_read', tool: 'read' };
+  const edit = { ...base, id: 'call_edit', tool: 'edit', input: { path: file,
+    oldString: 'let count = 0;\n', newString: 'let count = 1;\n' } };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('tool.execute.before', read);
+    f.call('tool.execute.after', { ...read, status: 'completed', result: { output: {} } });
+    f.call('tool.execute.before', edit);
+    fs.writeFileSync(file, 'let count = 1;\n'); // Native edit's expected bytes.
+    fs.appendFileSync(file, 'outside = true;\n'); // Unrelated writer before execute.after.
+    f.call('tool.execute.after', { ...edit, status: 'completed', result: { output: {} } });
+    assert.throws(() => f.call('tool.execute.before', { ...edit, id: 'call_next' }), /current read/);
   } finally { await cleanup(); f.remove(); }
 });
 

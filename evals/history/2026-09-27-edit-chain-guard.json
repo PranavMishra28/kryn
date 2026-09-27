@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-27",
+  "scope": "Narrow current-read guard efficiency fix after a failed private Task06 repair; no model, profile or release change",
+  "frozen_run": "e06owner64e repair1 on installed guarded 64K source 1cb2baf",
+  "observed_failure": {
+    "driver": "Timed out after 306.884 seconds, 16 tool calls, no completion or compaction; resource guard did not abort.",
+    "guard_loop": "Four edit calls were denied immediately after a successful edit of the same file, each requiring a fresh read of bytes the agent had just changed.",
+    "generated_artifact": "node --check and the original two tests passed, but the independent first-save browser check failed because a controlled 503 led to automatic retry and form clearing. The opt-in stored-HTML check failed because HTML was still interpolated into innerHTML.",
+    "private_raw_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06owner64e/evidence/repair1"
+  },
+  "change": "Only a completed edit whose final bytes equal the unique exact oldString/newString replacement refreshes the in-turn fingerprint. Ambiguous/fuzzy edits, failed edits, new files, outside changes before or after the completion hook, and a new user turn still require a current read. Overlapping edits to the same file are denied.",
+  "review": "The first PR head credited any bytes found in execute.after, which could misattribute an outside write between native edit and hook. Automated review identified that race; expected-result hashing and an adversarial regression closed it before merge.",
+  "verification": "Focused plugin regression passes, including failed/partial edit, outside write between edit and hook, outside change after hook, overlapping edit, read race, fresh-turn and new-file cases. Full make check and private candidate package smoke pass on the reviewed fix. The native 64K replay on the earlier candidate used no edit calls, so it cannot establish an edit-loop benefit.",
+  "release_gates": {
+    "read_guard_mechanism": "PASS isolated regression",
+    "autonomous_coding_ui": "FAIL",
+    "semantic_compaction_restart": "FAIL",
+    "non_owner_clean_install": "OPEN",
+    "green_active_endurance": "OPEN",
+    "public_release": "PAUSED"
+  }
+}
