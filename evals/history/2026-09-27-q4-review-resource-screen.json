@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-27",
+  "scope": "One matched, source-bound direct Reviewer prompt against the installed private 9B model and one already-downloaded 27B Q4 challenger; no product model/profile change",
+  "prompt_sha256": "aeb69bf5375815e88f6eca56e59ddeb43d3049610de03b3e53f9fa42b889e607",
+  "request": {
+    "prompt_chars": 4844,
+    "max_tokens": 4096,
+    "thinking_budget": 1536,
+    "sampler": "temperature 0.6, top_p 0.95, top_k 20, min_p 0, presence_penalty 0, repetition_penalty 1",
+    "resource_guard": "Abort on critical host pressure, two sustained warning samples, or over 512 MiB swap growth; 2-second samples"
+  },
+  "installed_9b_control": {
+    "model": "Qwen3.5-9B-6bit",
+    "http_status": 200,
+    "finish_reason": "length",
+    "output_tokens": 4096,
+    "wall_seconds": 72.386634,
+    "pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "quality": "The answer exhausted its output limit while reasoning about the failed literal-text check and supplied no complete, safe source repair.",
+    "raw_evidence": "evals/runs/model-screen-20260927/9b-matched (ignored local artifact)"
+  },
+  "challenger_27b_q4": {
+    "model": "Qwen3.8-27B-oQ4e-mtp",
+    "temporary_context_limit": 16384,
+    "temporary_server": "Loopback port 8001, memory guard 19.5 GB, one concurrent request, no cache or MTP; terminated after trial",
+    "http_status": null,
+    "wall_seconds": 4.574294,
+    "answer_received": false,
+    "guard_reason": "critical host memory pressure",
+    "pressure_levels": [1, 2, 4],
+    "swap_peak_growth_bytes_during_sampling": 1817570181,
+    "post_shutdown_swap_observation": "After the temporary server exited, vm.swapusage was still about 10.8 GiB used, far above the last guard sample; short sampling understated delayed swap cost.",
+    "power": "AC Power",
+    "raw_evidence": "evals/runs/model-screen-20260927/27b-q4-matched (ignored local artifact)"
+  },
+  "owner_restore": "The temporary server exited and the stopped owner runtime was restarted. A guarded protocol bench passed; doctor then reported healthy Qwen3.5-9B-6bit at 65,536 context with its 16 GiB limit, normal pressure, and zero active requests. Host swap still showed about 10.6 GiB used, so this is functional recovery, not proof of immediate swap recovery.",
+  "decision": "Reject 27B Q4 as a daily-use challenger under the observed concurrent app load. Do not retry it or promote it on this Mac without a separate, safely resourced qualification. Keep the private guarded 64K 9B profile and public-release pause.",
+  "limits": "One source-bound prompt does not establish general model quality; the 27B request was cancelled before any answer, so no quality comparison is possible. The 9B control failed answer completion, not a resource gate. No long-workflow, compaction/restart, protected-account inference or endurance acceptance gate passed."
+}
