@@ -43,6 +43,8 @@ class ObservationTests(unittest.TestCase):
                 scope="06:--stored-html")
             with patch.object(observe, "run_path", return_value=run):
                 summary = observe.compact_status("trial")
+                self.assertNotIn(str(run), json.dumps(summary))
+                self.assertIn("evidence_id", summary["current"]["browser:06:base"])
                 self.assertEqual(summary["current"]["browser:06:base"]["status"], "PASS")
                 self.assertEqual(summary["current"]["browser:06:--stored-html"]["status"], "FAIL")
                 self.assertNotIn("stored HTML", json.dumps(summary["historical_failures"]))
