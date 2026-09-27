@@ -21,6 +21,12 @@ class ReportTests(unittest.TestCase):
                 ('npm test', 'completed', {'exit': 0}),
                 ('python3.13 -I -B -m unittest -v', 'completed', {'output': {'exit': 0, 'status': 'completed'}}),
                 ('node --test', 'completed', {'exit': 1}),
+                ('python3 -B test_existing.py', 'completed', {'exit': 0}),
+                ('node --check web/app.js', 'completed', {'exit': 0}),
+                ('node browser_check.mjs --task 06', 'completed', {'exit': 1}),
+                ('node --check', 'completed', {'exit': 0}),
+                ('python3 -B not_test.py', 'completed', {'exit': 0}),
+                ('python3 -B test_existing.py | head', 'completed', {'exit': 0}),
                 ('npm test || true', 'completed', {'exit': 0}),
                 ('echo npm test', 'completed', {'exit': 0}),
                 ('npm test\ntrue', 'completed', {'exit': 0}),
@@ -47,9 +53,9 @@ class ReportTests(unittest.TestCase):
                 c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_checks', 2, 'compaction',
                           '{"status":"completed","summary":"All verification passed."}'))
             result = report(db, project)
-            self.assertEqual(result['counts']['check_commands'], 13)
-            self.assertEqual(result['counts']['check_exit_zero'], 2)
-            self.assertEqual(result['counts']['check_exit_nonzero'], 1)
+            self.assertEqual(result['counts']['check_commands'], 16)
+            self.assertEqual(result['counts']['check_exit_zero'], 4)
+            self.assertEqual(result['counts']['check_exit_nonzero'], 2)
             self.assertEqual(result['counts']['check_exit_unknown'], 10)
             self.assertEqual(sum(result['counts'][key] for key in
                                  ('check_exit_zero', 'check_exit_nonzero', 'check_exit_unknown')),

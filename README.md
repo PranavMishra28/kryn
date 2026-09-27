@@ -181,7 +181,7 @@ If memory protection stops a session, KRYN cancels its work, retains the native 
 
 Application state, sessions, caches and installed packages live under `~/Library/Application Support/LocalAI`; the oMLX application lives under `~/Applications/oMLX.app`, with settings in `~/.omlx`. Keep private session data out of bug reports and commits.
 
-`kryn report` separates uncached input, cache reads/writes, reported output and reasoning, with compaction usage reported separately. These are cumulative provider-reported counts, not unique conversation length. A zero reasoning count can mean the provider omitted the breakdown, leaving reasoning included in output. Missing usage remains unmeasured; a cache hit does not prove a correct answer. The report includes no prompts, source, command text or tool output. Unrecognized tool and status names are grouped as `unknown`, since malformed model output can put private arguments into those fields.
+`kryn report` separates uncached input, cache reads/writes, reported output and reasoning, with compaction usage reported separately. These are cumulative provider-reported counts, not unique conversation length. A zero reasoning count can mean the provider omitted the breakdown, leaving reasoning included in output. Missing usage remains unmeasured; a cache hit does not prove a correct answer. Its check counts cover simple test/build commands, direct Python test scripts, and Node syntax/browser-check scripts; compound shell commands do not count as verified checks. The report includes no prompts, source, command text or tool output. Unrecognized tool and status names are grouped as `unknown`, since malformed model output can put private arguments into those fields.
 
 ## Configuration and release scope
 
