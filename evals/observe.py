@@ -182,6 +182,7 @@ def status(run_id):
 
 def compact_status(run_id):
     full = status(run_id)
+    evidence_id = lambda item: Path(item["record"]).stem
     def bounded_failures(item):
         if item["kind"] == "grade":
             return [{"check": failure["check"], "error": "Frozen grader detail withheld from candidate handoff"
@@ -193,12 +194,12 @@ def compact_status(run_id):
         current[key] = None if item is None else {
             "status": item["status"], "failures": bounded_failures(item), "manual": item["manual"],
             "passed_checks": [c["name"] for c in item["checks"] if c["pass"] is True],
-            "record": item["record"]}
+            "evidence_id": evidence_id(item)}
     active_records = {item["record"] for item in full["latest_current"].values() if item is not None}
     failed = [dict(kind=h["kind"], scope=h["scope"], status=h["status"], current_source=h["current_source"],
-                   failures=bounded_failures(h), record=h["record"])
+                   failures=bounded_failures(h), evidence_id=evidence_id(h))
               for h in full["history"] if h["failures"] and h["report_intact"] and h["record"] not in active_records]
-    infrastructure = [dict(kind=h["kind"], failures=h["failures"], record=h["record"])
+    infrastructure = [dict(kind=h["kind"], failures=h["failures"], evidence_id=evidence_id(h))
                       for h in full["history"] if h["status"] == "ERROR" and not h["report_intact"]]
     return {"run": run_id, "current_source_sha256": full["current_source_sha256"],
             "current": current, "historical_failures": failed[-6:],
