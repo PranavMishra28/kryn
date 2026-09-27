@@ -54,6 +54,12 @@ def observation(kind, report, returncode):
         return {"status": "ERROR", "failures": [{"check": kind + " infrastructure", "error": f"exit {returncode}; no fresh report"}]}
     if kind == "grade":
         automatic = report.get("automatic", {})
+        try:
+            tests_run = json.loads(automatic.get("stdout", "").splitlines()[-1])["tests_run"]
+            if type(tests_run) is not int or tests_run < 0:
+                tests_run = None
+        except (IndexError, ValueError, KeyError, TypeError):
+            tests_run = None
         failures = []
         if not automatic.get("passed"):
             failures.append({"check": "automatic", "error": automatic.get("stderr", "")[:4000]})
@@ -64,6 +70,7 @@ def observation(kind, report, returncode):
             grade_status = "ERROR"
             failures.append({"check": "grade process", "error": "Exit status disagreed with grade report"})
         return {"status": grade_status, "automatic": automatic.get("passed"),
+                "automatic_tests_run": tests_run,
                 "manual": report.get("manual", {}), "failures": failures}
     checks = [{"name": c.get("name"), "pass": c.get("pass")} for c in report.get("checks", [])]
     failures = [{"check": c.get("name"), "error": str(c.get("error", "unknown failure"))[:1000]}
@@ -168,7 +175,11 @@ def status(run_id):
                             "current_review": item["kind"] != "grade" or item.get("review_sha256") == current_review,
                             "report_intact": intact, "failures": item["result"].get("failures", []),
                             "checks": item["result"].get("checks", []),
-                            "manual": item["result"].get("manual", {}), "record": str(file)})
+                            "manual": item["result"].get("manual", {}),
+                            "automatic_passed": item["result"].get("automatic"),
+                            "automatic_tests_run": item["result"].get("automatic_tests_run"),
+                            "manual_review_record_present": item.get("review_sha256") is not None,
+                            "record": str(file)})
     required = {"grade:" + task}
     if task in ("06", "08", "12"):
         required.add("browser:" + task + ":base")
@@ -191,10 +202,18 @@ def compact_status(run_id):
         return item["failures"]
     current = {}
     for key, item in full["latest_current"].items():
-        current[key] = None if item is None else {
+        if item is None:
+            current[key] = None
+            continue
+        detail = {
             "status": item["status"], "failures": bounded_failures(item), "manual": item["manual"],
             "passed_checks": [c["name"] for c in item["checks"] if c["pass"] is True],
             "evidence_id": evidence_id(item)}
+        if item["kind"] == "grade":
+            detail.update(automatic_passed=item["automatic_passed"],
+                          automatic_tests_run=item["automatic_tests_run"],
+                          manual_review_record_present=item["manual_review_record_present"])
+        current[key] = detail
     active_records = {item["record"] for item in full["latest_current"].values() if item is not None}
     failed = [dict(kind=h["kind"], scope=h["scope"], status=h["status"], current_source=h["current_source"],
                    failures=bounded_failures(h), evidence_id=evidence_id(h))

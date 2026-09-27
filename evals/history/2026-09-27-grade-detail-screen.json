@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "candidate": "Expose frozen grade automatic result, test count, and manual review record presence in bounded source-bound status",
+  "source_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+  "run": "e06obs27b",
+  "stage": "grade-detail-fresh",
+  "profile": "private owner 64K guarded, Ask, no browser",
+  "driver_completed": true,
+  "wall_seconds": 53.155,
+  "resource_result": "Pressure level remained 1 and swap used bytes remained 407046717 in 26 samples.",
+  "grade_observation": {
+    "status": "PARTIAL",
+    "automatic_passed": true,
+    "automatic_tests_run": 2,
+    "manual_review_record_present": false,
+    "manual_checks": "Six NOT_TESTED"
+  },
+  "semantic_result": "FAIL",
+  "findings": [
+    "The Ask answer kept the frozen-base Chrome pass and stricter supplemental failure separate.",
+    "It omitted the automatic 2/2 grade result despite the new explicit fields and said all manual checks were unqualified.",
+    "It falsely called textContent rendering executable HTML. The source uses textContent, while JSON.stringify escapes the stored markup's quotes; the exact literal-text assertion failed before the checker assessed element creation or script execution.",
+    "Its proposed JSON.stringify-per-row change would still escape quotes and is not a demonstrated repair.",
+    "One external-directory read was denied in the read-only Ask turn."
+  ],
+  "qualification": "The structured field change makes the observation more accurate, but does not pass semantic continuity or autonomous coding/UI quality. Do not publish a release or claim frontier-equivalent quality."
+}
