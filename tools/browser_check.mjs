@@ -32,11 +32,11 @@ function localUrl(value) {
 const { values } = parseArgs({ options: {
   url: { type: 'string' }, output: { type: 'string' }, db: { type: 'string' }, task: { type: 'string' },
   task06: { type: 'boolean' }, task08: { type: 'boolean' }, task12: { type: 'boolean' },
-  'stored-html': { type: 'boolean' },
+  'stored-html': { type: 'boolean' }, 'visible-controls': { type: 'boolean' },
   help: { type: 'boolean' }, 'self-check': { type: 'boolean' },
 } });
 if (values.help) {
-  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html]\nAlso accepts --task06/--task08/--task12. Start the fixture/candidate server separately. No LLM/MCP calls.');
+  console.log('browser_check.mjs --url http://127.0.0.1:PORT --output NEW_EVIDENCE_DIR --db DISPOSABLE.db --task 06|08|12 [--stored-html] [--visible-controls]\nAlso accepts --task06/--task08/--task12. --visible-controls adds Task 06 Filter/Import checks without changing its frozen score. Start the fixture/candidate server separately. No LLM/MCP calls.');
 } else if (values['self-check']) {
   const rows = [{ id: 'a', project: '研究, "team"\nnext', minutes: 0, date: '2026-09-11' }];
   assert.deepEqual(parseCsv(csv(rows)), rows);
@@ -60,6 +60,7 @@ async function main() {
   };
   try {
     assert(['06', '08', '12'].includes(task), 'Choose task 06, 08, or 12');
+    assert(!values['visible-controls'] || task === '06', '--visible-controls applies to task 06 only');
     assert(Number(Boolean(values.task)) + ['06', '08', '12'].filter(id => values[`task${id}`]).length === 1, 'Specify exactly one task');
     const url = localUrl(values.url);
     assert(values.output && values.db, '--output and --db are required');
@@ -170,6 +171,38 @@ async function main() {
         assert((await page.locator('#entries').innerText()).includes(row.id), 'Saved row must appear after reload');
         await screenshot(`viewport-${viewport.width}x${viewport.height}.png`);
         return { box, persisted: row };
+      });
+    }
+    if (values['visible-controls']) {
+      await check('visible Filter and Import controls match their labels', async () => {
+        const imports = [];
+        page.on('request', request => {
+          if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/import') imports.push(request.url());
+        });
+        const row = { id: `${prefix}-controls`, project: `${prefix}-project`, minutes: 1, date: '2026-09-11' };
+        await page.locator('#upload').setInputFiles({ name: 'controls.csv', mimeType: 'text/csv', buffer: Buffer.from(csv([row])) });
+        await page.waitForTimeout(800);
+        assert.equal(imports.length, 0, 'Selecting a CSV must not import it');
+        const [response] = await Promise.all([
+          page.waitForResponse(item => new URL(item.url()).pathname === '/api/import' && item.request().method() === 'POST'),
+          page.getByRole('button', { name: /^Import$/i }).click(),
+        ]);
+        assert.equal(response.status(), 201, 'Import click must create the row');
+        await page.waitForTimeout(800);
+        assert.equal(imports.length, 1, 'One Import click must send one POST');
+        const rows = await apiRows();
+        assert.deepEqual(rows.filter(item => item.id === row.id), [row]);
+        await page.getByLabel('Filter project', { exact: true }).fill(row.project);
+        await page.getByRole('button', { name: /^Filter$/i }).click();
+        await page.waitForFunction(id => document.querySelector('#entries')?.textContent.includes(id), row.id);
+        let visible = await page.locator('#entries').innerText();
+        for (const item of rows) assert.equal(visible.includes(item.id), item.project === row.project, `Wrong filter visibility: ${item.id}`);
+        await page.getByLabel('Filter project', { exact: true }).fill(`${prefix}-absent`);
+        await page.getByRole('button', { name: /^Filter$/i }).click();
+        await page.waitForFunction(() => document.querySelector('#entries')?.textContent.includes('No entries yet.'));
+        visible = await page.locator('#entries').innerText();
+        for (const item of rows) assert(!visible.includes(item.id), `Absent filter leaked ${item.id}`);
+        return { imported: row.id, importPosts: imports.length, exactFilter: true, absentFilter: true };
       });
     }
     if (task === '12') {
