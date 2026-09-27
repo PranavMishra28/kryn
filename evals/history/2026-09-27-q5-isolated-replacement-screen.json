@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-27",
+  "scope": "One matched direct Task06 Reviewer request to the already downloaded 27B Q5 model as the sole model server; private screen only",
+  "model": "Qwen3.8-27B-oQ5e-mtp",
+  "request": {
+    "configured_context": 16384,
+    "prompt_sha256": "aeb69bf5375815e88f6eca56e59ddeb43d3049610de03b3e53f9fa42b889e607",
+    "input_tokens": 1468,
+    "max_output_tokens": 4096,
+    "thinking_budget_tokens": 1536,
+    "mtp": "off",
+    "cache": "off"
+  },
+  "first_attempt": {
+    "memory_guard_gib": 24,
+    "result": "FAIL: oMLX aborted the request during prefill at its 22.8 GB hard watermark; finish_reason was absent, so HTTP 200 was not completion",
+    "host_pressure": "normal sampled pressure, zero swap growth",
+    "settings_hazard": "Starting a temporary omlx-cli serve with CLI flags changed the owner's global ~/.omlx/settings.json, including port, model directories, guard ceiling and cache mode. The normal KRYN owner restore refused that drift. The five changed values were restored from the installed profile and a private pre-repair copy; guarded bench and deep doctor then passed."
+  },
+  "isolated_retry": {
+    "memory_guard_gib": 27,
+    "isolation": "HOME and HF_HOME were set to a private directory only for the temporary oMLX subprocess; owner stop/restore used the real environment",
+    "http_status": 200,
+    "finish_reason": "stop",
+    "wall_seconds": 97.535862,
+    "output_tokens": 1938,
+    "max_sampled_process_footprint_bytes": 24786140928,
+    "host_pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "power": "AC Power",
+    "answer_sha256": "9d597610b0eada119f573d9c23ef68b89ac92592b34496560688992fca82c583",
+    "owner_settings_sha256_before_and_after": "48c1eac9eee47d57630b0dd50348c89295506b4cf91a7bbc389756769400c610",
+    "owner_restore": "PASS: temporary port closed; kryn bench passed and subsequent deep doctor verified healthy idle Qwen3.5-9B at 65,536 context, private 16 GiB guard, normal pressure and connected browser/search MCP"
+  },
+  "quality": {
+    "diagnosis": "Correctly identified JSON serialization as the cause of the exact-literal stored-markup failure and retained an inert textContent sink.",
+    "proposed_repair": "The proposed map handled strings and objects with a text property, then fell back to JSON.stringify(row). Actual API rows are objects with id, project, minutes and date; the fallback preserved JSON-escaped quotes.",
+    "independent_browser": "FAIL: a disposable application of the exact proposal passed inert markup, then failed the strict literal-text check: stored text still had JSON-escaped double quotes.",
+    "raw_evidence": "evals/runs/model-screen-20260927/27b-q5-guard27-isolated (ignored local artifact)"
+  },
+  "decision": "Do not promote Q5. One 16K request completed under the observed host load at a 27 GiB process guard, but the matched source-bound repair failed. The 24 GiB guard was insufficient, and 64K/sustained agent quality and resource safety remain unqualified. Keep the existing guarded private 9B/64K owner profile and rollback.",
+  "limits": "One direct request is not a 49K–128K tier benchmark, an autonomous coding/UI task, repeated compaction/restart, or 45–60 minutes of green endurance. Sampled memory peaks can miss transients. No public release, tag or version bump was made."
+}
