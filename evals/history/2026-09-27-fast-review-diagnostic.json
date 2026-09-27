@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-27",
+  "scope": "One source-bound direct 9B Fast Reviewer request before and after a browser-check diagnostic change; no candidate project or installed profile changed",
+  "source": "Previously observed Task06 app.js with JSON.stringify(rows, null, 2) rendering and the current strict stored-markup browser failure",
+  "model": "Qwen3.5-9B-6bit",
+  "request_settings": "Same source-bound prompt and sampler except one failure message, 4,096 max output tokens, thinking disabled, temperature 0.6",
+  "before": {
+    "prompt_sha256": "aeb69bf5375815e88f6eca56e59ddeb43d3049610de03b3e53f9fa42b889e607",
+    "wall_seconds": 13.720003,
+    "finish_reason": "stop",
+    "answer_sha256": "868353f1fa02a16916d99b1b1540c1092f86f1e9800853b73b0f5040b1fc55a3",
+    "quality": "Incorrectly proposed JSON.stringify(rows) without indentation. JSON still escapes the stored markup's double quotes, so the exact literal remains absent.",
+    "raw_evidence": "evals/runs/fast-review-20260927 (ignored local artifact)"
+  },
+  "after": {
+    "prompt_sha256": "0b19f8f100ff616db12845f21bd7a6aff8b03271a67367c7ded1f8d49f28e13a",
+    "wall_seconds": 19.426867,
+    "finish_reason": "stop",
+    "answer_sha256": "cd40bec8bb5b7884fa186898f5bf8a8b982e577d875b037a5c7e208afb9a7982",
+    "quality": "Correctly noticed JSON-escaped quotes but incorrectly proposed assigning the rows array directly to textContent, which renders an array of objects as [object Object]. No safe literal-text repair was produced.",
+    "raw_evidence": "evals/runs/fast-review-diagnostic-20260927 (ignored local artifact)"
+  },
+  "browser_diagnostic": "A fresh disposable copy of the unchanged Task06 source was tested in real Chrome with --stored-html. The inert-markup check passed and the exact literal-text check failed with 'Stored text has JSON-escaped double quotes; the exact literal string is absent'. The frozen/default browser scope was not changed.",
+  "resources": "Both requests sampled AC power, normal pressure level 1, zero swap growth and no guard abort; each is only one short request.",
+  "decision": "Keep the accurate, narrow browser diagnostic for operator and agent evidence. Reject any claim that this diagnostic or Fast effort fixed Reviewer action selection. Do not promote an effort setting from these two samples; change the approach to independent post-edit browser/source acceptance rather than adding more prompt rules.",
+  "gates": {
+    "browser_failure_diagnosis": "PASS for this source and exact scope",
+    "reviewer_safe_repair": "FAIL before and after",
+    "fast_effort_quality_uplift": "NOT_ESTABLISHED",
+    "autonomous_coding_ui": "UNQUALIFIED",
+    "protected_account": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  }
+}
