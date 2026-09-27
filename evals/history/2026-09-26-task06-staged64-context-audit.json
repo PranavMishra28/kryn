@@ -1,0 +1,40 @@
+{
+  "scope": "Private guarded 64K Task06 staged coding/UI and continuity audit; public release remains paused",
+  "private_source_revision": "acf9fb482bb191ec6bbc748a48ee816d1fa5d398",
+  "frozen_run": "evals/runs/t06staged64 (private, ignored raw native and browser evidence)",
+  "model_session": "ses_f1fab4fc0ffepPLwTiD6qlFGT4",
+  "model_stages": [
+    { "name": "code-stage", "completed": true, "wall_seconds": 263.985 },
+    { "name": "repair-stage", "completed": true, "wall_seconds": 281.588 },
+    { "name": "dom-safety", "completed": true, "wall_seconds": 118.941 },
+    { "name": "import-status", "completed": true, "wall_seconds": 68.419 },
+    { "name": "retry-status", "completed": true, "wall_seconds": 107.234 }
+  ],
+  "observations": [
+    "Five completed Agent stages and five native compactions crossed native server restarts in one saved session. The first artifact had list rendering, Import status, retry feedback and HTML injection defects; independent checks caught them and narrow Agent repairs followed.",
+    "The final model-produced web/app.js has SHA-256 a30835e8bc74abd3f72721b0de668a04d1fee15f8ff4a748f63c092b5fb3efe4. The frozen grader passed automatic 2/2 and six independently reviewed browser/source checks. Independent browser acceptance passed 5/5 at 390x844 and 1280x800 with actual 503 then one manual retry and persisted row. Node syntax and existing Python tests passed. Separate injection, Import 201 and 503-to-400 regressions passed.",
+    "An installed-candidate native probe refused direct kill before execution while the disposable process stayed alive. The private process guard, package check and exact owner install passed. This is not general process isolation.",
+    "A read-only Ask continuation after the fifth compaction and another restart completed in 42.89 seconds, read TASK.md/current source, and did not claim independent browser checks as its own. It omitted the observed pytest-unavailable failure despite the prompt explicitly asking whether a later direct Python pass targeted the same test file. The saved ledger proves that lineage, so semantic check continuity failed.",
+    "Native checkpoint summaries after later repairs narrowed Objective/Requirements to the latest defect and lost original browser acceptance criteria. They also retained stale evaluator next actions. The private recorded initial request and raw history remained available, but the model-facing restart answer did not fully reconcile them. This is a semantic continuity failure, not missing raw history."
+  ],
+  "evidence_sha256": {
+    "browser_report": "ff8692d7a4297d408485baf16dd6a6341a7c47d1498b48d9a7b0453b4819f5e0",
+    "independent_injection": "b7b8a55697436d58da65cd37c8edb6e46400234713ba799944e5f309f41cd4dd",
+    "independent_import": "e5c10957a9232b7837738751fc8695e56aa323624e208256cebc82c8240957d1",
+    "independent_retry_failure": "de7b42878e0178bb518c33ab7a8df4b3b775622c70d3a14bf69453b7237ebb40",
+    "review": "c2ce1a570ed94965130966f2849a3e057aa8318a7744558b7a5ae1e17043f580"
+  },
+  "gates": {
+    "frozen_task06_final_artifact": "PASS after staged Agent repairs and independent operator review; first-pass quality failed",
+    "browser_acceptance": "PASS 5/5 including two viewport screenshots, real 503, one manual retry, persistence, console and network",
+    "process_signal_refusal": "PASS for one exact direct-kill installed-candidate probe",
+    "repeated_compaction_restart_mechanics": "PASS for five completed compactions and read-only restart",
+    "semantic_continuity": "FAILED: original criteria and failed-check lineage were not fully carried into the final checkpoint/answer",
+    "unassisted_one_shot_quality": "FAILED in this run; independent findings and narrow repair prompts were necessary",
+    "nonowner_clean_install": "UNQUALIFIED",
+    "representative_45_to_60_minute_endurance": "UNQUALIFIED",
+    "49k_to_128k_tier_decision": "UNQUALIFIED; 64K remains private, guarded and rollback-capable",
+    "public_release": "CLOSED"
+  },
+  "next_blocker": "Qualify semantic task/check continuity without another generic prompt rule, then non-owner clean install and sustained active coding/UI endurance. Do not publish a release."
+}
