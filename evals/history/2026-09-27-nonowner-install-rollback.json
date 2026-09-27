@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "scope": "Fresh standard macOS account installation and unpublished candidate update/rollback; no public release or version change",
+  "account": "eonfolk-ci (UID 505; separate home)",
+  "public_release": "v0.1.10",
+  "public_release_source_revision": "e9c90ff6fe41cae6ef17f7fecdd2e2adf2f54246",
+  "local_candidate_source_revision": "60b1d257f6c8f0c03cc4fde0d364a4ec521af414",
+  "local_candidate_wheel_sha256": "d16cb8d0922f854cccc0655726b04c120d9c3cf9e94b38dcc51db15fcdc46806",
+  "results": [
+    "Downloaded the already published v0.1.10 installer, wheel and checksums as the standard account; both public assets matched SHA256SUMS. Installed managed Python, Node, OpenCode, oMLX and the pinned Qwen model into that account's separate home. No owner files or public release were changed.",
+    "The newly installed launcher reported KRYN 0.1.10. Deep doctor verified every pinned model SHA256, browser dependency files, native local routing and connected browser/search MCP. Doctor exited nonzero only because the account's oMLX runtime was not running.",
+    "Normal guarded bench could not start that account's oMLX app. A direct CLI retry reported that the account's app control socket did not exist. Only the owner account had an observable Finder/Dock GUI session and the second account's gui/505 launchd domain was unavailable. Thus end-to-end non-owner runtime remains unqualified.",
+    "Installed an unpublished same-version wheel from current main in the standard account. Its source revision became 60b1d25; KRYN rollback then restored the public e9c90ff revision. Post-rollback deep doctor again verified pinned model SHA256, browser files and native local routing. The runtime remained unavailable.",
+    "The signed app installer cache was restored by APFS clone from the owner's already verified cache for the candidate update; the local candidate wheel was not published. Final disk free was 40.25 GiB, above the 40 GiB reserve but too tight for additional large duplicate installations."
+  ],
+  "owner_restoration": "The owner account's guarded private 65,536-token cff0f1b runtime was restarted. The last guarded protocol smoke passed; doctor reported healthy idle runtime, normal pressure, unchanged 415435325-byte swap, and connected browser/search MCP. One intervening smoke failed only the model's tool-first semantic answer (HTTP 200 and complete SSE, no tool call); it is retained as a quality failure, not erased by the later pass.",
+  "gates": {
+    "non_owner_public_asset_and_package_install": "PASS",
+    "non_owner_deep_file_integrity": "PASS",
+    "unpublished_update_and_exact_rollback": "PASS",
+    "non_owner_app_runtime_and_guarded_inference": "FAIL/UNQUALIFIED: no second-account macOS GUI app control socket",
+    "independent_evaluator_isolation": "UNQUALIFIED: candidate was not run in the separate account",
+    "green_coding_ui_endurance": "FAIL/UNQUALIFIED",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Obtain a genuine second-account GUI app session and rerun its guarded runtime/inference check; then use a fresh frozen coding/UI task with independent grader material outside the candidate account and no raw grader output in its workspace. Preserve the 64K guard and rollback, and keep the public release paused."
+}
