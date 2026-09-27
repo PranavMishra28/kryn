@@ -8,8 +8,9 @@
     "generated_artifact": "node --check and the original two tests passed, but the independent first-save browser check failed because a controlled 503 led to automatic retry and form clearing. The opt-in stored-HTML check failed because HTML was still interpolated into innerHTML.",
     "private_raw_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06owner64e/evidence/repair1"
   },
-  "change": "A completed native edit refreshes the in-turn fingerprint for that exact existing file. Failed edits, new files, later outside changes and a new user turn still require a current read. Overlapping edits to the same file are denied. The pending edit is recorded only after pre-execution guards allow the call.",
-  "verification": "Focused plugin regression passes, including failed/partial edit, outside change, overlapping edit, read race, fresh-turn and new-file cases. Full make check and private candidate package smoke passed on final source. No native model replay has yet qualified a reduction in timeout or application errors.",
+  "change": "Only a completed edit whose final bytes equal the unique exact oldString/newString replacement refreshes the in-turn fingerprint. Ambiguous/fuzzy edits, failed edits, new files, outside changes before or after the completion hook, and a new user turn still require a current read. Overlapping edits to the same file are denied.",
+  "review": "The first PR head credited any bytes found in execute.after, which could misattribute an outside write between native edit and hook. Automated review identified that race; expected-result hashing and an adversarial regression closed it before merge.",
+  "verification": "Focused plugin regression passes, including failed/partial edit, outside write between edit and hook, outside change after hook, overlapping edit, read race, fresh-turn and new-file cases. Full make check and private candidate package smoke pass on the reviewed fix. The native 64K replay on the earlier candidate used no edit calls, so it cannot establish an edit-loop benefit.",
   "release_gates": {
     "read_guard_mechanism": "PASS isolated regression",
     "autonomous_coding_ui": "FAIL",
