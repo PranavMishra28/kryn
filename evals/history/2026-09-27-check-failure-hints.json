@@ -1,8 +1,9 @@
 {
   "date": "2026-09-27",
-  "scope": "Narrow private 64K check-ledger continuity change; no public release, profile or grader change",
+  "scope": "Repository-main check-ledger parity with the existing private 64K candidate; no public release, installed profile or grader change",
   "candidate_source_revision": "b0303c6f1116e49d4f388d6367911d325e6660d7",
   "product_plugin_sha256": "081805736301d1a044409f71aa62291cc5eae4bf7bb3c0f496636c4e04e111ae",
+  "installed_private_baseline": "The unchanged owner installation at source cff0f1b already contained analogous runner/exit/failure classification. This merge did not introduce that behavior to the daily private build and cannot explain its earlier repeated pytest attempts.",
   "fixture": "Disposable Task02 workspace used only for a diagnostic command, not scored as a frozen coding task",
   "change": "Observed simple check records now retain a fixed runner, bounded exit code and fixed failure classification. Legacy tracker records load with unknown detail. No command arguments or raw output are persisted in this ledger.",
   "offline": "make check PASS: 174 setup Python tests, 21 tool Python tests, 51 Node tests, native-trial self-check, frozen suite verify and 18-case fixture selftest. Clean-commit make package-smoke PASS for source b0303c6.",
@@ -14,7 +15,7 @@
     "resources": "Both stages sampled AC power, normal host pressure and zero swap growth; product plugin was active before/after and local inference routing audit passed",
     "raw_evidence": "evals/runs/hintprobe27a/evidence/failed-check-native and evals/runs/hintprobe27a/evidence/failed-check-restart (ignored private artifacts)"
   },
-  "limits": "The native transcript also retained the raw failure, so this paired run does not isolate the ledger's contribution to the model answer or prove fewer repeated attempts. The probe did not invoke native compaction, complete a coding/UI task, run in the protected account, or establish endurance.",
+  "limits": "The private installed baseline already had similar hints, and the native transcript also retained the raw failure. This run does not isolate the ledger's contribution to the model answer or prove fewer repeated attempts. The probe did not invoke native compaction, complete a coding/UI task, run in the protected account, or establish endurance.",
   "gates": {
     "bounded_failure_record_across_restart": "PASS mechanism and one guarded native occurrence",
     "model_quality_uplift": "UNQUALIFIED",
