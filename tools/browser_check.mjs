@@ -106,23 +106,6 @@ async function main() {
     const cleared = () => page.waitForFunction(() => [...document.querySelectorAll('#entry-form input')].every(input => input.value === ''));
     const screenshot = async name => { await page.screenshot({ path: path.join(output, name), fullPage: true }); report.screenshots.push(name); };
     await page.goto(url.href, { waitUntil: 'networkidle' });
-    for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
-      await check(`responsive form, save and reload ${viewport.width}x${viewport.height}`, async () => {
-        await page.setViewportSize(viewport);
-        const box = await save.boundingBox();
-        assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Page has horizontal overflow');
-        assert(box && box.width > 0 && box.height > 0 && box.x >= 0 && box.y >= 0
-          && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1, 'Save button is clipped/outside viewport');
-        await save.click({ trial: true });
-        const row = { id: `${prefix}-${viewport.width}`, project: 'Browser check', minutes: 13, date: '2026-09-11' };
-        await fill(row); await submit('POST', 201); await cleared();
-        await page.reload({ waitUntil: 'networkidle' });
-        assert.deepEqual((await apiRows()).find(item => item.id === row.id), row);
-        assert((await page.locator('#entries').innerText()).includes(row.id), 'Saved row must appear after reload');
-        await screenshot(`viewport-${viewport.width}x${viewport.height}.png`);
-        return { box, persisted: row };
-      });
-    }
     if (task !== '08') {
       await check('invalid minutes produce accessible feedback without persistence', async () => {
         const row = { id: `${prefix}-invalid`, project: 'Invalid', minutes: -1, date: '2026-09-11' };
@@ -139,7 +122,7 @@ async function main() {
         assert(!(await apiRows()).some(item => item.id === row.id));
         await screenshot('invalid-feedback.png'); return validation;
       });
-      await check('real injected 503 preserves input; one retry creates exactly one row', async () => {
+      await check('first save: real injected 503 preserves input; one manual retry creates exactly one row', async () => {
         const row = { id: `${prefix}-retry`, project: 'Retry', minutes: 17, date: '2026-09-12' };
         await fill(row); const before = await formValues(); const oldMessage = await live.innerText();
         await fs.writeFile(marker, '', { flag: 'wx' }); markerOwned = true;
@@ -148,8 +131,28 @@ async function main() {
           .some(el => el.textContent.trim() && el.textContent !== previous), oldMessage);
         assert(await live.isVisible()); assert.deepEqual(await formValues(), before);
         assert(!(await apiRows()).some(item => item.id === row.id)); await screenshot('temporary-error.png');
+        await page.waitForTimeout(2200); // Detect a delayed automatic retry before the user's second Save.
+        assert.deepEqual(await formValues(), before);
+        assert(!(await apiRows()).some(item => item.id === row.id), 'Row appeared before manual retry');
         await submit('POST', 201); await cleared(); await page.reload({ waitUntil: 'networkidle' });
         assert.deepEqual((await apiRows()).filter(item => item.id === row.id), [row]);
+      });
+    }
+    for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+      await check(`responsive form, save and reload ${viewport.width}x${viewport.height}`, async () => {
+        await page.setViewportSize(viewport);
+        const box = await save.boundingBox();
+        assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Page has horizontal overflow');
+        assert(box && box.width > 0 && box.height > 0 && box.x >= 0 && box.y >= 0
+          && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1, 'Save button is clipped/outside viewport');
+        await save.click({ trial: true });
+        const row = { id: `${prefix}-${viewport.width}`, project: 'Browser check', minutes: 13, date: '2026-09-11' };
+        await fill(row); await submit('POST', 201); await cleared();
+        await page.reload({ waitUntil: 'networkidle' });
+        assert.deepEqual((await apiRows()).find(item => item.id === row.id), row);
+        assert((await page.locator('#entries').innerText()).includes(row.id), 'Saved row must appear after reload');
+        await screenshot(`viewport-${viewport.width}x${viewport.height}.png`);
+        return { box, persisted: row };
       });
     }
     if (task === '12') {
