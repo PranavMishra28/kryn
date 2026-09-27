@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-27",
+  "run": "e06fresh64j",
+  "scope": "Fresh frozen Task06 workspace on installed private guarded 64K source cff0f1b5234f684151659b0e6a0aebd0d20a4a5b; public 49K and release state unchanged",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e06fresh64j/evidence",
+  "frozen_input": "TASK.md and fixture hashes recorded by evals/bench.py prepare; the evaluator-owned seeded server was live before the Agent prompt. No operator source edit was made.",
+  "stages": {
+    "plan": "FAILED after 67.245 seconds and 18 tools: Plan asked for confirmation of an already-authorized implementation and the evaluator dismissed it. No native compaction completed. The fixture remained unchanged.",
+    "direct_build": "FAILED after 306.726 seconds and 25 tools: the Agent timed out without compaction. It generated a 215-line web/app.js and an API-only test_browser.py that did not exercise browser behavior; attempted an unowned process kill, which the KRYN guard refused. Frozen backend checks passed 2/2, but the independent browser check passed stored-HTML and invalid-minutes checks then failed the real first-save 503 because visible error feedback vanished.",
+    "observed_repair": "FAILED after 246.680 seconds and 20 tools: a fresh bounded Agent session received the concrete browser/source failures instead of more generic prompt rules, but timed out without compaction. It removed the misleading test file. The repeated independent browser check still failed at the same real 503 feedback condition. Source review found the catch path still clears the error message, project filtering uses substring/case-folding instead of exact matching, and Import still sends multipart data to the CSV-text API."
+  },
+  "resource_evidence": "All three stages sampled pressure level 1 and zero swap growth (33, 148 and 119 samples). Direct Build and repair were bounded timeouts, not memory guard aborts. The owned runtime settled idle after each interruption.",
+  "grade": "Frozen automatic backend 2/2 passed, but the frozen grade remains PARTIAL with manual browser fields unqualified; independent browser acceptance failed. No completed coding/UI task, native compaction or restart-handoff qualification occurred in this fresh run.",
+  "disposition": "Reject this partial workspace as product evidence. Do not rerun the same broad or targeted prompt with extra rules. Keep guarded 64K experimental with the tested owner rollback; the opt-in visible-control checker from PR #52 remains available for the next independent review.",
+  "remaining_gates": [
+    "Fresh complete model-produced coding/UI task with independent browser/source review",
+    "Truthful repeated compaction and restart without evaluator-supplied failure lineage",
+    "Repeated useful 49K/64K/96K/128K quality, latency, pressure, swap and cold/warm cache comparison",
+    "Clean non-owner install and rollback",
+    "45–60 minutes of green prompt-active coding/UI endurance"
+  ],
+  "next_blocker": "Change workflow shape: make the independently run browser/source acceptance a hard stop before handoff, and use shorter independently reviewable implementation slices. Do not spend another long one-shot turn on this same fixture or publish a release."
+}
