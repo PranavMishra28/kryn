@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-27",
+  "scope": "Evaluator-only observation wrapper; no installed runtime, model, context profile, release, or frozen grader definition change",
+  "source": "evals/observe.py records a Git-visible project-file fingerprint immediately before and after running the existing frozen grader or independent Chrome checker, archives each result outside the candidate workspace, and reports source-matched current outcomes plus bounded historical failures. The compact view withholds frozen grader tracebacks.",
+  "trial": {
+    "run": "e06obs27a",
+    "seed_source_sha256": "817bb71bb8957436e67f1f7773b9c0c53f055d1658ade8247d8342dda36b9836",
+    "seed_grade": "PARTIAL: automatic 2/2 passed; six manual criteria NOT_TESTED",
+    "seed_browser": "FAIL: controlled first-save 503 check timed out waiting for an API response; the stub form navigated without sending the required POST",
+    "reviewed_source_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+    "source_change": "Copied previously reviewed Task06 web/app.js and web/style.css bytes into the fresh disposable fixture; not a new autonomous coding run",
+    "new_browser": "PASS 5/5 on the frozen base scope: invalid feedback, real 503 with preserved input and one manual retry, save/reload at 390x844 and 1280x800, seed/console/network inspection. The operator viewed the 390px screenshot; the page is functionally clear but visually basic.",
+    "supplemental_browser": "FAIL on --stored-html --visible-controls for the same reviewed source: the stored-HTML check reported 'Stored markup must appear as literal text'. A subsequent base PASS did not overwrite or resolve this stricter-scope failure.",
+    "new_grade": "PARTIAL: automatic 2/2 passed; manual review.json intentionally remained NOT_TESTED",
+    "status_result": "Current source-bound outcomes are browser:06:base PASS, browser:06:--stored-html+--visible-controls FAIL, grade:06 PARTIAL. The exact old browser timeout remains historical on the earlier source; the stricter current failure remains active. No completed base action was revived as a current failure.",
+    "raw_evidence": "Ignored private evals/runs/e06obs27a/evidence/observations/ and browser-* reports; not committed"
+  },
+  "verification": "Focused observation regression and final make check passed: 174 Python setup tests, 21 tool Python tests, 49 Node tests, native-trial self-check, frozen-suite verify and 18 fixture selftests. Final candidate package smoke passed with source_dirty=true and no release artifact.",
+  "limits": "The wrapper and raw evaluator files still run under the same macOS account as the candidate; this is not a filesystem security boundary or independent holdout qualification. No local-model handoff, compaction/restart, autonomous Task06 coding, 49K-128K tier comparison, or 45-60 minute green workload was proven by this trial. The owner guarded 64K build remains experimental; public release stays paused.",
+  "next_gate": "Run the evaluator in a protected account, feed only source-bound sanitized outcomes to a fresh long coding/UI session, and verify action selection through two native compactions and restart before treating continuity as qualified."
+}
