@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-27",
+  "scope": "Follow-up to the assisted frozen Task06 pass; diagnose why saved read-only Ask handoff loses independently checked failure lineage",
+  "run": "e06slice64l",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e06slice64l/evidence",
+  "installed_source_for_native_trials": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "observations": [
+    "An evaluator-owned continuity.json under workspace/artifacts/evaluator listed original constraints, failed-then-passed checks, current reports and the next action. The 186.703-second saved Ask timed out after repeatedly trying denied shell/Git operations and exploring .git internals. It did not read that ledger.",
+    "The fixture intentionally ignores artifacts/ in Git. OpenCode glob artifacts/**/* and glob **/*.json returned No files found even though the reports existed and direct read had worked in a prior turn. This explains the false artifact-absent claim in the read-only handoff; it does not explain all semantic mistakes.",
+    "An eval-only native Ask steps=8 cap made the next turn complete and compact in 121.827 seconds, but it falsely said the artifact directory did not exist and Git had no working changes. It spent tools reading Git objects instead of checking the evidence.",
+    "A root TASK_EVIDENCE.json index made the ignored reports discoverable via ordinary file tools. A second eight-step Ask completed and compacted in 56.151 seconds, but did not search for or read the root index, repeated the false artifact-absent/clean-worktree claims, and its checkpoint again omitted the failed-check lineage and named a nonexistent report path. A step cap bounds this role but does not establish truthful handoff."
+  ],
+  "resources": "All three guarded turns sampled normal pressure level 1 and zero swap growth; no memory abort. The failed turn was a tool/attention timeout.",
+  "private_candidate": {
+    "source": "e59812329b69ff305742609551415c370b5c162f",
+    "change": "Read-only context capsule now checks up to 32 checkpoint file references and prioritizes up to two missing paths, so a later nonexistent report path is not dropped after four valid references.",
+    "checks": "Focused 16/16, full make check and clean package smoke passed. Private install and exact rollback succeeded.",
+    "disposition": "Unpromoted. The frozen native driver correctly refused to resume the same run after installed product source changed. No mixed-source replay was counted; the prior guarded 64K source was restored, and kryn bench/doctor returned healthy idle runtime."
+  },
+  "task09_forensics": "The reverted file-tail candidate read data/endurance.csv before edit only on turns 1-2, then edited first on turns 3-10. Baseline read first on turns 3-9 and skipped on turn 10. The experimental capsule exposed bounded head/tail file contents, and the turn-3 candidate edit used the previous row already present in checkpoint context. Treating auto-injected current file text as a substitute for a fresh read is a plausible mechanism, not proven causal from one stochastic pair. The file-tail behavior remains reverted; the separate current-read guard later passed one 10/10 trial.",
+  "gates": {
+    "assisted_task06_artifact": "PASS; recorded separately",
+    "semantic_checkpoint_restart": "FAIL",
+    "ask_step_cap_as_quality_fix": "REJECTED",
+    "private_missing_path_mechanism": "OFFLINE PASS, native benefit unqualified",
+    "green_endurance": "FAIL/UNQUALIFIED",
+    "clean_non_owner_install": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Use a deterministic, source-bound evidence handoff that is discoverable despite ignored artifacts and does not rely on read-only Ask to reconstruct Git or promote its own checkpoint. Validate it on a fresh held-out coding/UI run; no more Ask prompt wording or step-cap tuning."
+}
