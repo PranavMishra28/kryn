@@ -1,0 +1,13 @@
+{
+  "scope": "One-sentence private Agent-guidance removal screened against frozen Task06, never a public release",
+  "candidate_source": "dcd250b8805ea24f66dfcf89cd5255d8daea1d11",
+  "candidate_wheel_sha256": "7dd66f856c920421481a6f037aa045deaec4c6657d9155107702bdd2b4e5fc11",
+  "hypothesis": "Blanket instruction to use browser tools in every UI turn caused Agent to over-explore after source edits and miss bounded completion.",
+  "change": "Removed only that browser sentence from private BUILD_GUIDANCE; tools and permissions were unchanged.",
+  "offline": "Full make check and committed-source package smoke passed; package installed privately at the same guarded 64K setting.",
+  "native_result": "FAIL: a fresh Task06 Plan asked a dismissed question and did not complete, so it did not compare Agent behavior. A separate fresh Agent coding slice with the evaluator-owned server ready still made 32 tool calls, including 15 browser calls, and timed out at 181.16 prompt-active seconds without compaction. Sampled pressure remained normal and swap growth was zero.",
+  "decision": "Reject the guidance change; no evidence of a bounded-completion benefit. Actual kryn rollback restored tested private source 4063ca6. Guarded protocol smoke and doctor passed afterward with healthy idle 65,536 context, normal pressure, unchanged 415435325-byte swap, and browser/search connected.",
+  "next_blocker": "Investigate completion/tool-phase control or a different workflow shape using recorded native traces. Do not keep adding prompt rules or promote this guidance candidate. The 45–60 minute green endurance, clean non-owner install, and useful-tier gates remain open.",
+  "privacy": "Raw native transcripts and fixture source remain ignored in the private worktree.",
+  "release": "Paused: no public version, tag, or asset change"
+}
