@@ -44,6 +44,8 @@ class ObservationTests(unittest.TestCase):
             add(4, current, "PARTIAL", kind="grade", scope="06", automatic=True)
             add(5, current, "FAIL", [{"check": "stored HTML", "error": "executed markup"}],
                 scope="06:--stored-html")
+            add(6, current, "FAIL", [{"check": "literal text", "error": "rendered text differs"}],
+                scope="06:--stored-html")
             with patch.object(observe, "run_path", return_value=run):
                 summary = observe.compact_status("trial")
                 self.assertNotIn(str(run), json.dumps(summary))
@@ -51,14 +53,18 @@ class ObservationTests(unittest.TestCase):
                 self.assertEqual(summary["current"]["browser:06:base"]["status"], "PASS")
                 self.assertNotIn("automatic_tests_run", summary["current"]["browser:06:base"])
                 self.assertEqual(summary["current"]["browser:06:--stored-html"]["status"], "FAIL")
+                self.assertEqual(summary["current"]["browser:06:--stored-html"]["failures"][0]["error"],
+                                 "rendered text differs")
                 self.assertTrue(summary["current"]["grade:06"]["automatic_passed"])
                 self.assertEqual(summary["current"]["grade:06"]["automatic_tests_run"], 2)
                 self.assertFalse(summary["current"]["grade:06"]["manual_review_record_present"])
                 self.assertNotIn("stored HTML", json.dumps(summary["historical_failures"]))
+                self.assertNotIn("executed markup", json.dumps(summary["historical_failures"]))
+                self.assertEqual(summary["older_same_source_scope_failures_omitted"], 1)
                 self.assertNotIn("secret grader traceback", json.dumps(summary))
                 self.assertEqual(summary["historical_failures"][0]["failures"][0]["error"], "No POST was sent")
                 self.assertFalse(summary["historical_failures"][0]["current_source"])
-                self.assertEqual(summary["total_observations"], 5)
+                self.assertEqual(summary["total_observations"], 6)
                 (run / "review.json").write_text("{}")
                 self.assertIsNone(observe.compact_status("trial")["current"]["grade:06"])
                 failed_report.write_text("tampered")
