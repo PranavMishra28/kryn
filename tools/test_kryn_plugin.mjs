@@ -486,6 +486,9 @@ test('native JavaScript writes report parser failures immediately without execut
   const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'app.js');
   const sideEffect = path.join(f.root, 'unexpected');
+  const preloadEffect = path.join(f.root, 'preloaded');
+  const preload = path.join(f.root, 'preload.cjs');
+  fs.writeFileSync(preload, `require('node:fs').writeFileSync(${JSON.stringify(preloadEffect)}, 'bad');\n`);
   const run = (id, content) => {
     const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id,
       id: 'call_' + id, tool: 'write', input: { path: 'app.js', content } };
@@ -501,7 +504,15 @@ test('native JavaScript writes report parser failures immediately without execut
     assert.match(run('broken', 'const = ;\n'), /JavaScript syntax check failed/);
     assert.match(run('fixed', `require('node:fs').writeFileSync(${JSON.stringify(sideEffect)}, 'bad');\n`), /Wrote app.js/);
     assert.equal(fs.existsSync(sideEffect), false, 'syntax validation must not run project code');
-    assert.doesNotMatch(run('fixed2', 'const valid = 1;\n'), /syntax check failed/);
+    const priorNodeOptions = process.env.NODE_OPTIONS;
+    try {
+      process.env.NODE_OPTIONS = '--require=' + preload;
+      assert.doesNotMatch(run('fixed2', 'const valid = 1;\n'), /syntax check failed/);
+    } finally {
+      if (priorNodeOptions === undefined) delete process.env.NODE_OPTIONS;
+      else process.env.NODE_OPTIONS = priorNodeOptions;
+    }
+    assert.equal(fs.existsSync(preloadEffect), false, 'the parser child must discard inherited Node preloads');
   } finally { await cleanup(); f.remove(); }
 });
 
