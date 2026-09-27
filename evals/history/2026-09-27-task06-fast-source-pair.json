@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-27",
+  "scope": "Two guarded direct 9B Fast-mode Task06 Reviewer requests, paired on the same captured JavaScript/browser prompt; private diagnostic only",
+  "settings": "Installed product Fast sampler: enable_thinking=false, thinking_budget=0, temperature=0.7, top_p=0.8, presence_penalty=1.5; max_tokens=4096. Both requests used the installed guarded 64K owner runtime.",
+  "intervention": "The related-source prompt added only a 484-character read-only excerpt of GET /api/entries and Store.entries/schema, revealing rows with id, project, minutes and date. The baseline omitted it.",
+  "cases": {
+    "fast_without_related_source": {
+      "generation": "HTTP 200, finish_reason=stop, 446 output tokens, 8.85 s, normal sampled host pressure, zero swap growth, no guard abort.",
+      "proposal": "Replaced JSON.stringify(rows, null, 2) with JSON.stringify(rows). This keeps double quotes JSON-escaped.",
+      "independent_chrome": "FAIL: stored text has JSON-escaped double quotes; the exact literal string is absent."
+    },
+    "fast_with_related_source": {
+      "generation": "HTTP 200, finish_reason=stop, 789 output tokens, 14.44 s, normal sampled host pressure, zero swap growth, no guard abort.",
+      "proposal": "Joined id, project, minutes and date directly into textContent. The code preserved the stored project string as inert literal text. The explanation still made unsupported guesses about the checker/seed.",
+      "independent_chrome": "PASS: all seven base plus stored-markup checks, including exact literal markup, inertness, real 503/manual retry and both viewports. FAIL on the separate strict visible-controls check: Import click sent no POST /api/import."
+    }
+  },
+  "comparison_to_think": "The prior 9B Think requests on these same baseline and related-source prompts both hit the 8192-token output cap without a complete patch. Fast mode removed that diagnostic loop in this one direct screen, but only Fast plus related source produced a browser-passing stored-markup repair.",
+  "limitations": [
+    "One request per condition is not a quality or latency distribution; Fast also changes sampling settings, so the observed difference cannot be attributed solely to disabling thinking.",
+    "The captured browser report's source fingerprint was stale relative to the prompted app.js. Chrome replay tested the proposed patch on that prompted source in a disposable fixture, not on a native agent's current workspace.",
+    "These were direct requests without OpenCode tools, compaction, restart or autonomous coding. The full strict UI gate and 45-60-minute green endurance still fail or remain unqualified."
+  ],
+  "private_raw_evidence": {
+    "location": "Ignored local evals/runs/model-screen-20260927/9b-fast-baseline/ and 9b-fast-related-source/",
+    "fast_baseline_response_sha256": "2e6805fc2121338a14c75b9a5465272ece22a7e47954931f84a08eba1c0fe109",
+    "fast_baseline_browser_sha256": "6294a34860dd5d8246f5bd15c7bf06a074c4fe1265950ce5a4e8e5e6ca9465b2",
+    "fast_related_response_sha256": "851389bf306f020e1cbd551d4bc8e91c649c5e428c10e60cea3a7de81ee77eae",
+    "fast_related_browser_sha256": "173e902656fd7887d75e17bdec00b517256b6a764494a819128b8623ec3c525c",
+    "fast_related_strict_browser_sha256": "2325ec8a30f406721cd1e3f5da33717e7f0309fd7142b7936aecf4bcded7cd65"
+  },
+  "decision": "Do not change the default mode or claim a full task pass from this direct screen. Test bounded current dependency retrieval and Fast mode in a fresh native OpenCode coding workflow with current-source browser and independent review checks. Keep the guarded private 64K owner profile and public release pause."
+}
