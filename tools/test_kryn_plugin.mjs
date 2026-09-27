@@ -325,6 +325,33 @@ test('direct Python test script results enter the observed-check ledger across r
   } finally { await cleanup(); f.remove(); }
 });
 
+test('browser regression and JavaScript syntax checks survive a restart without retaining commands', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const commands = [
+      'node browser_encoded_ids.mjs http://127.0.0.1:65172 artifacts/browser.json',
+      'python3 -B -m unittest -v test_encoded_ids.py test_existing.py',
+      'node --check web/app.js',
+    ];
+    for (const [index, command] of commands.entries()) {
+      assert.equal(isCheck(command), true);
+      assert.equal(shellRun(f, command, 'passed', index + 1).executed, true);
+    }
+    assert.equal(isCheck('node web/app.js'), false);
+    assert.equal(isCheck('node browser_encoded_ids.mjs | head'), false);
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const context = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', context);
+    const ledger = f.read('trackers')[0].verification;
+    assert.deepEqual(ledger.checks.map(check => [check.kind, check.state]),
+      [['test', 'stale'], ['test', 'stale'], ['lint', 'stale']]);
+    const text = context.system.map(part => part.text).join('\n');
+    assert.match(text, /stale=3/);
+    assert.doesNotMatch(JSON.stringify(ledger) + text, /browser_encoded_ids|test_encoded_ids|test_existing|web\/app\.js/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('plain test output cannot hide a failed exit', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const call = command => f.call('tool.execute.before', {
@@ -337,7 +364,9 @@ test('plain test output cannot hide a failed exit', async () => {
       'pytest -q | tail -5', 'pytest|head -1',
       'cd /workspace && python3 -B -m unittest test_existing.Existing -v; echo "Exit status: $?"',
       'python -m pytest -q; printf "done"', 'npm test; true',
-      'python test_existing.py; echo done']) {
+      'python test_existing.py; echo done',
+      'node browser_encoded_ids.mjs http://127.0.0.1:65172 | head',
+      'node --check web/app.js || true']) {
       assert.equal(masksCheckFailure(command), true);
       assert.throws(() => call(command), /hides failure/);
     }
