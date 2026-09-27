@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-27",
+  "scope": "One fresh private guarded-64K Task06 Fast-variant screen after the default-effort daily-use failure; no model/profile/release change",
+  "installed_source": "1cb2bafdcff5bef0a1c81eca8279af026d8cec93",
+  "fixture": "Frozen Task06 e06fast64d; source and evaluation files preserved",
+  "fast_plan": "FAIL: stopped at 79.477 seconds after an unavailable execute call and an unattended question; no completed Plan checkpoint.",
+  "fast_build": {
+    "status": "FAIL: direct fresh Build timed out at 186.720 seconds without a completed turn or compaction",
+    "variant": "fast (thinking budget zero), browser MCP omitted for the code-only screen",
+    "observed_work": "33 model steps, 33 tool uses (15 shell, 14 read, 2 write, 2 webfetch), 3,804 output tokens. Two shell calls tried an unmanaged trailing-& server, and webfetch targeted the fixed port 8765 rather than a verified owned fixture.",
+    "frozen_automatic": "2/2 backend tests passed; manual browser grade remained PARTIAL",
+    "source_defects": "Generated a three-attempt automatic POST retry after 503 and rendered entry fields with innerHTML.",
+    "independent_browser": "FAIL: the updated first-save 503 check observed the form cleared before manual retry. The native output was not operator-corrected for this screen.",
+    "resources": "90 samples, normal pressure throughout, zero observed swap growth; no memory-guard abort."
+  },
+  "comparison_limit": "The earlier default-effort Build used a narrower code-stage prompt and made 11 tool calls before its 186.759-second timeout; this Fast direct-task screen is not a controlled quality or throughput benchmark. Both failed bounded completion on a small UI task. Do not promote Fast or infer context-tier superiority.",
+  "raw_private_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06fast64d/evidence",
+  "gates": {
+    "autonomous_frozen_coding_ui": "FAIL",
+    "plan_build_compaction_restart": "FAIL",
+    "independent_browser": "FAIL",
+    "49k_to_128k_useful_tier_comparison": "OPEN",
+    "non_owner_clean_install": "OPEN: other standard account exists, but noninteractive sudo requires a password; no other account was changed",
+    "green_active_endurance_45_to_60_minutes": "OPEN: a failed short Build cannot qualify sustained green work",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Find a structural bounded-completion and verification path using the existing OpenCode/oMLX foundation; do not add more prompt rules or treat the Fast variant as a fix."
+}
