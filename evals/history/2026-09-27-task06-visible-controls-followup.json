@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "scope": "Follow-up to the private guarded-64K seeded Task06 repair; not a fresh frozen autonomous task or a public release",
+  "installed_private_source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "run": "e06xss64i",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e06xss64i/evidence",
+  "stages": {
+    "stored_html_repair": "Completed and compacted in 147.448 seconds. Two consecutive native edits completed without a reread. The independent browser checker passed all six form/security checks, including stored markup, a real 503/manual retry, 390px and 1280px. This was a targeted repair on a previously model-generated file, not a fresh task pass.",
+    "first_ask_restart": "Completed and compacted in 64.172 seconds after a native server restart, but falsely claimed visible Filter and Import controls matched the server and no work remained. The live probe found an absent project filter returning all seven rows and CSV selection auto-importing once before the Import button made a duplicate 400 request.",
+    "controls_repair": "Completed and compacted in 169.124 seconds. One overlapping same-file native edit was refused; the Agent used a temporary file and later removed it. The current diff only changed web/app.js. Independent backend checks passed 2/2, node --check passed, browser form/security checks passed 6/6, and a separate controls probe passed: selection caused zero POSTs, one Import click caused one 201 POST and one row, exact and absent project filters displayed the correct rows.",
+    "final_ask_restart": "Completed and compacted in 58.306 seconds after another native restart. It accurately recounted the first stored-HTML failure, the earlier false controls claim, the repair, and the independent passing probes, but the evaluator explicitly supplied that lineage and the exact report paths in the prompt. This is a narrow evidence-reading pass, not autonomous semantic-continuity qualification."
+  },
+  "resources": "Each of the four guarded stages sampled pressure level 1 with zero swap growth; 72, 32, 82 and 29 samples respectively. Prompt-active time totaled 439.050 seconds, far below the 45–60 minute green endurance gate.",
+  "independent_check_change": "PR #52 merged as 50337a7. Its opt-in --visible-controls probe leaves the frozen Task06 suite and score untouched. The repaired page passed seven checks with --stored-html --visible-controls; a copy with CSV auto-import restored passed the first five form checks then failed the new control check. make check, clean package smoke and CI passed. CodeRabbit was rate limited, so there was no fresh external review of this PR head.",
+  "gates": {
+    "task09_file_tail": "REVERTED: the earlier candidate scored 2/10 read-before-edit versus baseline 8/10; causal attribution remains unproven. The separate native current-read guard passed one corrected 10/10 trial but is not a reliability distribution.",
+    "seeded_task06_artifact": "PASS for the independent six-check form/security and separate visible-control probes after explicit evaluator feedback and Agent repair; frozen grader remains PARTIAL because its manual review fields were not filled.",
+    "fresh_unassisted_coding_ui": "FAIL/UNQUALIFIED: this run began from an earlier model-generated app.js and required targeted evaluator feedback; an earlier fresh Build had failed stored HTML.",
+    "semantic_compaction_restart": "FAIL: the first Ask restart made false current-control claims. A later explicitly cued Ask was accurate but does not erase the failure.",
+    "independent_review": "PARTIAL: independent source/browser checks found and verified the concrete defects and repair; a fresh model Reviewer and broad visual-quality judgment were not qualified.",
+    "resource_and_endurance": "Short guarded stages passed sampled pressure/swap checks; the 45–60 minute green active coding/UI run remains unqualified.",
+    "context_tier": "64K remains private and experimental with a working owner rollback; repeated 49K/64K/96K/128K quality, latency, pressure, swap and cache comparison remains unqualified.",
+    "installation": "Private owner rollback and reinstall passed; clean non-owner install/rollback remains unqualified because the standard account cannot be started unattended with noninteractive sudo.",
+    "release": "CLOSED: public main stays at 49K and version 0.1.10. No release, tag, version bump or frontier/gold-master claim."
+  },
+  "next_blocker": "Run a fresh frozen coding/UI task with a predeclared independent browser/source review that includes visible controls, then test repeated compaction/restart without supplying the failure lineage in the handoff prompt. Follow with useful context-tier comparison, clean non-owner installation and a 45–60 minute green active run."
+}
