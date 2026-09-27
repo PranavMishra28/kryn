@@ -1,0 +1,37 @@
+{
+  "scope": "Fresh frozen Task12 trial t12fresh64gate on installed private guarded 64K candidate; no public tier or release promotion",
+  "private_source_revision": "9deccf08feb7ecc0f906ed127e05041f0abf2ed7",
+  "raw_private_run": "evals/runs/t12fresh64gate (ignored workspace, native exports, checks, browser traces, screenshots, review and grade)",
+  "sequence": [
+    "Plan completed without implementation edits and compacted. The broad backend Agent timed out after 301.14 prompt-active seconds. Its source passed the frozen automatic 2/2 checker but failed three independent encoded-ID PATCH cases.",
+    "A focused Agent fixed the encoded-ID handler; operator regression passed space, literal-percent and slash IDs. A bounded UI Agent then produced source with import/filter/export controls, but independent browser Save sent PATCH 400 for a new row.",
+    "A focused Save repair advanced the unchanged browser checker through both viewports, validation, and a real 503/single retry. Upload then failed with multipart POST 400. Two upload prompt attempts failed; an operator-authored executable browser contract exposed early submission and the wrong content type/body. The first test-driven Agent attempt timed out; a narrow retry completed with one raw text/csv POST 201.",
+    "The unchanged browser checker reached 7/7, and supplemental encoded-ID browser checks passed 3/3. Independent stored-HTML regression then reproduced script execution from a persisted project value. A focused Agent removed the unsupported Delete control and escaped displayed fields; the same regression passed with injected=false and literalVisible=true. The unchanged browser checker stayed 7/7 after a fresh native-server restart.",
+    "A fresh read-only Reviewer completed before repair and identified stored-HTML execution and the unsupported Delete control, but also made false findings. A final fresh read-only Reviewer read the actual diff and operator report yet proposed out-of-scope features and misattributed HTML-safety evidence. Reviewer accuracy remains failed.",
+    "The saved multi-compaction UI session restarted in read-only Ask. It completed but treated Agent stage instructions as user choices, described the removed Delete control as current, denied earlier interrupted work, and attempted execute twice despite the read-only role. Semantic handoff remains failed. Operator checks after restart passed; review.json truthfully records the failed gates, and the frozen grade is FAIL."
+  ],
+  "evidence_sha256": {
+    "final_server": "0406f8c61de08d08f620eb8b177b5ce75b43347ce111d346feebbfc19ddb3847",
+    "final_app": "eeca9915868143de2c6f004662d75f3ca9756f5613e600d6945174e835431d2d",
+    "final_index": "96fddb5c69eef049c945994672870ccb9674073031a44c4dcea6120024d85665",
+    "browser_after_restart": "3a13acece9d3cb9159cc478297490a716eec94f8c3c73ffc103dd7d4e58a24b7",
+    "manual_review": "cb48f30488d2e1f2326642e3ab89771aa54351427324ae85bc10d219429e07eb",
+    "frozen_grade": "33761f4bb0622039643f939175dbb0c1e1550a7716d98b308142a355ee13b510"
+  },
+  "gates": {
+    "task09_file_tail_candidate": "REVERTED previously after 2/10 read-before-edit versus 8/10 baseline; current-read guard remains separate",
+    "frozen_automatic": "PASS 2/2; original test and seed files preserved",
+    "frozen_browser": "PASS 7/7 after restart at 390x844 and 1280x800, including real 503/single retry, upload/atomic rejection, persistent edit, exact filter, export, screenshots and console/network inspection",
+    "supplemental_regressions": "PASS final encoded IDs 3/3, raw CSV upload contract, and stored-HTML literal rendering after earlier reproduced failures",
+    "bounded_agent_completion": "FAIL: broad backend and first test-driven upload stages timed out without compaction; 10 of 12 native stages completed with compaction",
+    "native_compaction_mechanics": "PASS: 10 completed native compactions across 12 stages and fresh-server restarts",
+    "semantic_restart": "FAIL: stale source claims, invented user decisions, missing failure history and two denied execute attempts",
+    "reviewer_accuracy": "FAIL: final Reviewer made unsupported/out-of-scope findings despite reading current source and operator report",
+    "frozen_task12_grade": "FAIL: manual reviewer and handoff gates failed despite green source and browser outcome",
+    "representative_endurance": "FAIL: 1760.31 seconds (29.34 minutes) prompt-active across all 12 stages; 2129.70 seconds stage wall is not active inference and neither reaches the 45-60 minute green target",
+    "resource_guard": "No resource abort in this trial; post-trial doctor healthy at 65,536 context, normal pressure and unchanged 415435325-byte swap. This does not qualify a useful 64K tier versus 49K/96K/128K.",
+    "clean_nonowner_install": "UNQUALIFIED: separate-account clean install not performed; owner rollback/reinstall and guarded protocol smoke passed",
+    "public_release": "CLOSED; public 49K remains unchanged"
+  },
+  "next_blocker": "Change the semantic-continuity approach structurally rather than adding prompt rules: stale checkpoint claims and cross-session failure evidence must be reconciled with current source and tool records. Rerun a complete frozen coding/UI task with accurate review and 45-60 minutes of green active work, then non-owner clean install and useful-tier comparison before proposing a release."
+}
