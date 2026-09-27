@@ -29,9 +29,11 @@ def is_check(command):
     if not isinstance(command, str) or len(command) > 4096 or re.search(r'[;&|`$\n\r<>]', command):
         return False
     return bool(re.match(
-        r'^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*-m\s+(?:unittest|pytest)(?:\s|$)'
+        r'^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*(?:-m\s+(?:unittest|pytest)(?:\s|$)'
+        r'|(?:\.\/)?(?:[A-Za-z0-9_-]+\/)*test_[A-Za-z0-9_-]+\.py(?:\s|$))'
         r'|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)'
-        r'|node\s+(?:--test(?:\s|$)|[^\s]*test[^\s]*\.m?js(?:\s|$))'
+        r'|node\s+(?:--test(?:\s|$)|--check\s+[^\s]+(?:\s|$)'
+        r'|[^\s]*(?:test|browser_)[^\s]*\.m?js(?:\s|$))'
         r'|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))', command.strip()))
 
 
