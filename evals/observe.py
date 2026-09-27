@@ -246,6 +246,7 @@ def main():
     browser.add_argument("--db", required=True, type=Path)
     browser.add_argument("--stored-html", action="store_true")
     browser.add_argument("--visible-controls", action="store_true")
+    browser.add_argument("--quoted-import", action="store_true")
     show = sub.add_parser("status")
     show.add_argument("run")
     show.add_argument("--compact", action="store_true")
@@ -253,7 +254,7 @@ def main():
     if args.command == "status":
         print(json.dumps(compact_status(args.run) if args.compact else status(args.run), indent=2, ensure_ascii=False))
         return
-    flags = ["--" + name for name in ("stored-html", "visible-controls") if getattr(args, name.replace("-", "_"), False)] if args.command == "browser" else []
+    flags = ["--" + name for name in ("stored-html", "visible-controls", "quoted-import") if getattr(args, name.replace("-", "_"), False)] if args.command == "browser" else []
     item, target = record(args.run, args.command, url=getattr(args, "url", None), db=getattr(args, "db", None), flags=flags)
     print(json.dumps({"record": str(target), "source_sha256": item["source_after"]["sha256"], "result": item["result"]}, ensure_ascii=False))
     raise SystemExit(0 if item["result"]["status"] == "PASS" else 1)

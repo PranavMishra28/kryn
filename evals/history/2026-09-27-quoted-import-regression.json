@@ -1,0 +1,10 @@
+{
+  "date": "2026-09-27",
+  "run": "e06repair27c",
+  "source_sha256": "04c244b20b072763e5081fd0e621d8f9abbccf9c71ebcd4d010dcb18e9260133",
+  "new_scope": "browser:06:--quoted-import",
+  "result": "FAIL: base form, real 503 retry, and 390/1280 save-reload passed; quoted CSV Import sent no POST within 10 seconds",
+  "backend_control": "The same RFC-4180-style CSV shape with comma, escaped quote, and newline was POSTed directly to /api/import; it returned 201 and the exact row persisted.",
+  "evidence_id": "1790512738225024000-88ac63c3a47542ef856ddfaab599aa85",
+  "limits": "Same-account regression evidence only. This catches a generated client bug; it does not repair the client, prove Agent browser use, or qualify the protected evaluator account."
+}

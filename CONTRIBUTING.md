@@ -12,7 +12,7 @@ From the repository root:
 | `make eval-prepare TASK=02 RUN=bug-trial-1` | Prepare a fresh disposable acceptance workspace; prints the workspace and prompt. |
 | `make eval-grade RUN=bug-trial-1` | Grade that run. A pass still needs any operator evidence specified in [evals/README.md](evals/README.md). |
 | `python3 -B evals/observe.py grade bug-trial-1` | Run the frozen grader and retain a uniquely named, source-bound copy of its result under the run's private evidence directory. |
-| `python3 -B evals/observe.py browser bug-trial-1 --url http://127.0.0.1:PORT/ --db evals/runs/bug-trial-1/evidence/disposable.db` | Run the independent browser checker against an already running disposable server and record the exact result. Add `--stored-html` or `--visible-controls` only when that scope is intended. |
+| `python3 -B evals/observe.py browser bug-trial-1 --url http://127.0.0.1:PORT/ --db evals/runs/bug-trial-1/evidence/disposable.db` | Run the independent browser checker against an already running disposable server and record the exact result. Add Task 06 scopes `--stored-html`, `--visible-controls`, or `--quoted-import` when intended. |
 | `python3 -B evals/observe.py status bug-trial-1 --compact` | Show bounded source-matched grade/browser outcomes by check scope and prior failure symptoms after edits or restart. Frozen grader tracebacks stay in raw reports under `evals/runs/`. |
 | `kryn doctor` | Inspect an installed copy on a supported Mac. `kryn doctor --deep` also hashes model and browser files. |
 
