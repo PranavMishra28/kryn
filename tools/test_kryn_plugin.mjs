@@ -366,13 +366,16 @@ test('plain test output cannot hide a failed exit', async () => {
       'python -m pytest -q; printf "done"', 'npm test; true',
       'python test_existing.py; echo done',
       'node browser_encoded_ids.mjs http://127.0.0.1:65172 | head',
-      'node --check web/app.js || true']) {
+      'node browser_encoded_ids.mjs "http://127.0.0.1:65172" | head',
+      'node --check web/app.js || true',
+      'node --check "web/app.js" | tail']) {
       assert.equal(masksCheckFailure(command), true);
       assert.throws(() => call(command), /hides failure/);
     }
     for (const command of ['python3 -B -m unittest -v', 'pytest', 'echo "pytest || true"',
       'python -m pytest || python test_existing.py', 'npm test && echo done',
-      'python3 -B -m unittest -v; exit $?', 'echo "python -m unittest; echo done"']) {
+      'python3 -B -m unittest -v; exit $?', 'echo "python -m unittest; echo done"',
+      'node --check "literal | head.js"']) {
       assert.equal(masksCheckFailure(command), false);
       assert.doesNotThrow(() => call(command));
     }
