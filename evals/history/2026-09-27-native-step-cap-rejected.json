@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-27",
+  "scope": "Private OpenCode V2 native steps=8 screen on a fresh frozen Task06 fixture; no installed or public profile change",
+  "run": "e06steps64k",
+  "installed_private_source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "trial_driver_source": "Private eval-only branch candidate/edit-chain64 at 75e461081710bb920fc5c9a7d9155692df3e2ecf; --agent-steps only changed the disposable selected-agent config, not the installed package. The requested config and raw events are retained with the run.",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e06steps64k/evidence",
+  "stages": {
+    "first_capped_build": "Completed and compacted in 78.750 seconds after exactly eight model steps and 16 tool calls. It read files but made no source edit; the last text contained an unexecuted tool-call-looking string. One unavailable list call failed.",
+    "second_capped_build": "The same saved session completed and compacted in 139.281 seconds after exactly eight model steps and 14 tool calls. It wrote an HTTP-only test_browser.py but left web/app.js at its one-line initial state. It called its HTTP client a browser simulator, described JSON state dumps as screenshots, and asked the evaluator to start a server that was already live.",
+    "neutral_ask_restart": "After an actual evaluator-server restart, saved-session Ask completed and compacted in 78.944 seconds. It read TASK.md, test_browser.py and unchanged web/app.js, then falsely marked validation feedback, 503 input preservation, clearing and retry implemented, said no code change was needed, and declared the server absent based only on not seeing a DB inside the workspace. The live DB was intentionally outside the workspace.",
+    "independent_browser": "The opt-in --stored-html --visible-controls browser check failed immediately because the unchanged app.js rendered stored markup as JSON-escaped text rather than literal entry text. No full Task06 browser pass occurred. Frozen automatic backend checks passed 2/2 only, and the frozen grade remained PARTIAL."
+  },
+  "resources": "The three guarded turns sampled pressure level 1 with zero swap growth (39, 68 and 39 samples). No memory abort occurred. The evaluator-owned server was stopped after the screen.",
+  "disposition": "REJECT steps=8 as a daily Agent setting. It bounded turns and enabled native compaction but did not improve useful coding work or truthful semantic handoff. Do not increase the cap or add prompt rules based on this one failed screen; keep the option private for controlled diagnostics only.",
+  "gates": {
+    "bounded_native_turn_and_compaction": "PASS as a narrow mechanism: two saved Build turns hit eight model steps and completed native compaction; a third Ask turn completed after restart.",
+    "fresh_coding_ui": "FAIL: app.js unchanged, fake browser simulation, independent browser failure.",
+    "semantic_checkpoint_restart": "FAIL: stored checkpoint and neutral Ask promoted model choices to Decisions and made false completion/server claims despite current file reads.",
+    "endurance": "UNQUALIFIED: about five minutes of active turns, with failed application behavior, cannot satisfy 45–60 minutes of green work.",
+    "context_and_release": "64K remains private guarded with tested owner rollback; no useful-tier promotion, public release, tag, version bump or gold-master claim."
+  },
+  "next_blocker": "The verified failure is model-produced UI correctness and evidence attribution, not raw turn length. Use an independent external browser/source outcome as a hard gate and a different implementation workflow; do not promote the step cap from a termination mechanism to a quality fix."
+}
