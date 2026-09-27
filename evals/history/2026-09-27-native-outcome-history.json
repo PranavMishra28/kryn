@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-27",
+  "scope": "Private guarded 64K Task06 interruption/restart diagnostic and narrow native-report fix; no public release or profile change",
+  "run": "e06lineage64a",
+  "discarded_candidate": {
+    "source_revision": "6400d7064a76dbd019682705030c0d9978109ccf",
+    "change": "A private plugin trial duplicated failed/interrupted execution counts in a session tracker and injected a bounded hint after restart.",
+    "offline": "Focused plugin tests, make check, package smoke and a private same-version 64K owner installation passed. Guarded protocol smoke and deep doctor passed.",
+    "native": "A fresh Task06 Agent turn was interrupted after a 20-second driver timeout and nine tool calls. The private tracker retained incomplete=1 through a client restart and a later completed Ask turn; host pressure was normal and sampled swap growth zero.",
+    "semantic_result": "FAIL: the resumed Ask answer described the current Task06 checks as unverified but omitted the earlier interrupted Agent execution. The injected hint did not establish truthful failure-lineage recall.",
+    "disposition": "REJECTED, unmerged. No further prompt or tracker variant was added. The prior private 64K package was restored by an actual rollback; guarded bench and deep doctor passed."
+  },
+  "native_source_of_truth": "The pinned OpenCode session database retained two idle message outcomes for the same session: interrupted, then succeeded. Before the report fix, kryn report showed only the latest succeeded outcome and idle_messages=2, concealing the earlier interruption in the summary.",
+  "report_fix": "The read-only session report now counts allowlisted idle outcomes across the saved session and its children, groups malformed values as unknown, and flags prior failed/interrupted/cancelled executions without returning prompt, command or tool content. A real read of this run's native database returned interrupted=1 and succeeded=1 while retaining acceptance_verified=false.",
+  "qualification": "Outcome accounting is a mechanism pass, not a context-continuity or autonomous coding/UI pass. This run had one client restart but no native compaction; the model did not cite its own interrupted turn. Protected-account inference, 45–60-minute green endurance and useful 49K–128K tier selection remain open."
+}

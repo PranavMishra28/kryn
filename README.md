@@ -183,6 +183,8 @@ Application state, sessions, caches and installed packages live under `~/Library
 
 `kryn report` separates uncached input, cache reads/writes, reported output and reasoning, with compaction usage reported separately. These are cumulative provider-reported counts, not unique conversation length. A zero reasoning count can mean the provider omitted the breakdown, leaving reasoning included in output. Missing usage remains unmeasured; a cache hit does not prove a correct answer. Its check counts cover simple test/build commands, direct Python test scripts, and Node syntax/browser-check scripts; compound shell commands do not count as verified checks. The report includes no prompts, source, command text or tool output. Unrecognized tool and status names are grouped as `unknown`, since malformed model output can put private arguments into those fields.
 
+The report shows both the latest native outcome and counts of earlier execution outcomes from the saved session. A later successful read-only turn does not erase an interrupted coding turn. Those counts describe execution history, not application acceptance or the cause of an interruption.
+
 ## Configuration and release scope
 
 The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The model profile uses a **49,152-token context**, **8,192-token output limit**, **16 GiB model memory ceiling** and one active generation. Exact model hashes and tool settings are in [the accepted profile](setup/accepted-profile.json) and [the client template](setup/opencode.template.json).
