@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-27",
+  "scope": "Frozen Task06 on a guarded private 64K candidate; two native compactions and two saved-session restarts",
+  "candidate_source_revision": "5b68ca52c3e6b15a58882c9eef99107523fda431",
+  "candidate_wheel_sha256": "c9ea596faf84909f236df49516f586ba727e2a1a4dd0b06aefbd6080bbae8fea",
+  "run": "e06mask64a (private raw evidence retained outside the repository)",
+  "results": [
+    "The first autonomous Agent stage timed out at 300 seconds with 29 tool calls. It attempted a nonexistent browse skill, invalid webfetch timeout and rejected background-shell command. No sustained memory warning or swap growth occurred; the machine was on AC power.",
+    "The resulting web/app.js SHA256 was 63686038afc18dd96971b3b8392c87b2363359a9f6f7c96824eabded45accbb0. Frozen backend checks passed 2/2; original data and tests were preserved. Independent isolated Chrome checks passed save/reload at 390x844 and 1280x800, accessible invalid feedback, real 503 with preserved fields and exactly one row after manual retry, and console/network inspection. Operator-reviewed screenshots were functional but visually basic. The frozen grader reported PASS for the assisted artifact, not for autonomous completion.",
+    "Native checkpoint 1 completed but its raw summary repeated an older test/browser-blocked state, omitting the newer operator browser result and autonomous timeout. Restart 1 read the current source and retained the browser result, but conflated an auxiliary test-script failure with frozen acceptance and said the checkpoint was still pending.",
+    "Native checkpoint 2 completed and included the browser result and timeout, but also said to await the already completed checkpoint and 503 marker. Restart 2 lost the independent browser result and instructed the evaluator to repeat completed browser/503 checks. It also made three tool errors during read-only status work. This fails repeated semantic continuity despite successful native compaction calls.",
+    "The candidate change withheld all older progress sections when native recent-context existed. Focused tests passed, but the live second restart showed that valid external evidence was also lost after later prompts. The candidate was rejected and not merged or released.",
+    "KRYN rollback restored the previous owned configuration; the original private wheel was reinstalled into the managed Python environment to restore package/receipt consistency. Package check then reported cff0f1b, guarded protocol smoke passed, and doctor reported healthy idle 65,536-token runtime, normal pressure, unchanged 415435325-byte swap and connected browser/search MCP.",
+    "On the restored cff0f1b baseline, the separate saved e06owner64z Task06 session completed its second native compaction and restart. Its second raw summary and restart correctly described the final one-POST-per-click source, exact current file SHA256 db9adaca17b91e03a752389a7ad2223bac0ff7c64b139dada324dd17372b1243, backend 2/2 and independent Chrome 6/6. The restart did not preserve the earlier failed auto-retry browser check or the initial incomplete Agent turn, and called Task06 complete. Thus current functional state recovered, but full failed-check lineage and autonomous-workflow status did not.",
+    "After the user reported both accounts signed in, macOS still exposed no eonfolk-ci Finder/Dock process or gui/505 launchd domain. The second-account oMLX runtime remains unqualified; the prior public package/deep integrity/update/rollback passes still stand."
+  ],
+  "gates": {
+    "frozen_task06_assisted_functional_artifact": "PASS",
+    "autonomous_agent_completion": "FAIL: 300-second timeout and tool errors",
+    "two_native_compactions": "PASS: both calls completed; summary semantics failed",
+    "semantic_continuity_after_repeated_compaction_and_restart": "FAIL: obsolete actions revived and verified browser evidence forgotten",
+    "restored_baseline_second_compaction_and_restart": "PARTIAL: current source and acceptance result retained, prior failed-check lineage and incomplete Agent turn omitted",
+    "independent_browser_outcome": "PASS for artifact; not proof of agent browser-tool use",
+    "guarded_64k_owner_runtime_and_rollback": "PASS for restoration smoke and idle doctor; useful-tier/endurance unqualified",
+    "non_owner_app_runtime": "UNQUALIFIED: no observable second-account GUI app session",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Preserve failed-check lineage and source-bound independent outcome evidence across repeated compaction without discarding valid completed checks. Validate a smaller candidate against the restored baseline before merging product code; keep the rejected broad-mask candidate private. Then address Agent completion, non-owner app runtime, useful-tier comparison and green endurance."
+}
