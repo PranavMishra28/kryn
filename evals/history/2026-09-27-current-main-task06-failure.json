@@ -7,6 +7,7 @@
     "outcome": "TIMEOUT at 367.969 seconds; native session interrupted and settled idle",
     "changes": "Only web/app.js changed; the page added automatic retries on HTTP 503 and left the existing raw-JSON list display and style unchanged",
     "server_lifecycle": "The Agent used foreground and shell-background variants but never native background:true. Its fixture server stopped between shell calls; browser navigation repeatedly returned connection refused.",
+    "native_shell_contract": "Pinned OpenCode 2.0.10 source exposes background:true for its shell tool (packages/core/src/tool/plugin/shell.ts); the failed transcript did not use it. This is an observed tool-choice failure, not proof the option is missing.",
     "grade": "PARTIAL: frozen automatic backend 2/2 passed; all six manual browser checks remained NOT_TESTED",
     "independent_chrome": "FAIL: invalid-input accessibility check passed, but a real injected first POST 503 was followed by an automatic POST 201 and cleared all four form fields before the required deliberate retry. The checker stopped there.",
     "screenshot": "2026-09-27-current-main-task06-503.png"
@@ -25,5 +26,5 @@
     "protected_account": "UNQUALIFIED: only the owner GUI session was observable",
     "public_release": "PAUSED"
   },
-  "next_approach": "Stop prompt variations on this session. Treat native persistent-server ownership and model action selection as separate failures; screen a different model/workflow only against a fresh frozen task with actual browser/source acceptance and a protected evaluator account. Do not infer success from 23 completed browser calls or backend 2/2."
+  "next_approach": "Stop prompt variations on this session. The native shell already supports owned background servers, so assess model/tool action selection with a different model or workflow on a fresh frozen task with actual browser/source acceptance and a protected evaluator account. Do not infer success from 23 completed browser calls or backend 2/2."
 }
