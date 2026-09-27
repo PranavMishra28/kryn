@@ -1,0 +1,32 @@
+{
+  "scope": "Private guarded 64K candidate, frozen Task12; no public release or context-tier promotion",
+  "candidate_source": "4063ca6171109a7f2458b868644882c49bd6c70f",
+  "candidate_wheel_sha256": "98af453885596d99e239f976cdb67aa2e0d3e327776cfa630404d6903ec130aa",
+  "private_run": "t12mask64full",
+  "result": "PASS on frozen Task12 rubric after measured failures and targeted repair; not an uninterrupted autonomous run",
+  "automatic": "2/2 passed; original test_existing.py and seed data preserved",
+  "browser": "Unchanged independent Task12 browser checker 7/7 after saved-session restart and final repair: 390/1280 save and reload, invalid input, real POST503 and one POST201 retry, raw CSV upload with atomic 400 rejections, persistent edit, exact filter, export round-trip, seed preservation, and no page errors or failed network requests. Additional operator regressions passed for encoded-ID UI 3/3, encoded-ID Python 3/3, one-click raw text/csv upload, stored-HTML safety, labelled ID, and POST201/PATCH200.",
+  "continuity": "Plan and ten later native stages used guarded local inference; multiple native compactions completed. The saved coding session reopened under a fresh native server; read-only Ask identified the current failing ID-label assertion and one-line source cause rather than repeating an earlier completed fix. Agent then repaired the label, with independent final checks passing. A separate diagnostic read a changed file after compaction/restart and marked the checkpoint's OLD content stale.",
+  "review": "The first fresh read-only Reviewer falsely said style.css was missing and missed the broken ID label. After a machine-generated tracked-file inventory, current diff, and check receipts, a second fresh read-only Reviewer correctly identified existing files, separated its source reading from operator-run checks, and found no remaining actionable Task12 defect. Reviewer reliability is not established by this one corrected review.",
+  "failures_retained": [
+    "Broad backend Agent timed out at 306.75 seconds without compaction; its partial code passed the frozen backend grader but failed all three independent encoded-ID PATCH cases until a narrow Agent repair.",
+    "First Save repair completed but the browser still sent PATCH400 for a new row because it inserted an initial edit marker in HTML. A failing executable Save/Edit browser regression led to a focused Agent repair.",
+    "First fresh Reviewer made a false missing-file claim and missed an accessible-label defect."
+  ],
+  "duration": {
+    "native_stages": 11,
+    "prompt_active_seconds": 1476.66,
+    "stage_wall_seconds": 1812.5,
+    "endurance_gate": "FAIL: 24.61 minutes active is below 45–60 minutes and includes one timeout"
+  },
+  "resources": "All guarded native stages recorded normal sampled host pressure, no resource-guard abort, and zero incremental swap; sampling does not qualify 64K under sustained variable host load.",
+  "owner_recovery": "Actual rollback from this exact private candidate restored prior guarded 64K source 9deccf0 and stopped the owned idle runtime. Reinstall of exact candidate 4063ca6 passed package check, guarded protocol smoke, and doctor: idle 65,536 context, normal pressure, unchanged swap, browser/search connected.",
+  "remaining_gates": [
+    "45–60 minutes of green active coding/UI endurance without timeouts or resource aborts",
+    "Genuine clean installation and rollback in a separate standard macOS account; current operator account lacks noninteractive administrator authorization",
+    "Reliably useful 49K/64K/96K/128K quality, latency, pressure, swap, and cold/warm comparison; prior 96K/128K near-limit thinking trials failed pressure",
+    "Independent repeated evidence for accurate checkpoints and local Reviewer findings"
+  ],
+  "privacy": "Raw native transcripts, prompts, source, screenshots, and resource samples remain in ignored private run artifacts. This public receipt contains only gate outcomes and hashes.",
+  "release": "Paused: no tag, version bump, public asset, gold-master claim, or frontier-equivalence claim"
+}
