@@ -7,6 +7,7 @@
     "native": "PASS for completion: 61.678 seconds, nine tools, source reads before one web/app.js write, terminal answer, exact local routing and owned-session settlement. Two compound/piped check attempts were refused by the existing check guard; direct Node syntax and Python two-test commands then exited zero.",
     "focused_browser": "PASS: independent Chrome 7/7 checks at 390x844 and 1280x800 verified save/reload, exact inert stored markup, labelled invalid-minute feedback, a real 503 with preserved input, one deliberate retry producing one row, seed preservation and no page exceptions. The expected 503 appeared as a console resource error.",
     "supplemental_strict_browser": "FAIL: with visible-controls checks enabled, filter left a nonmatching row visible. The Agent added 149 lines including unsolicited filter/import code; import also expects HTTP 200 while the actual API returns 201. Do not count full UI acceptance or scope discipline as passed.",
+    "fresh_native_reviewer": "FAIL: a separate read-only Reviewer completed in 111.239 seconds with 25 tool calls, but attempted execute four times (all denied), missed the actual filter/import mistakes, and invented input-loss, XSS, and auto-retry defects. In fact form.reset runs only on 201, feedback uses textContent, and no automatic retry exists. It made no edits; local routing and resource settlement passed. This is not a trustworthy independent review.",
     "frozen_grade": "PARTIAL: automatic 2/2 passed, but the frozen grader still marks manual evidence NOT_TESTED; independent Chrome is reported separately and does not rewrite the frozen grade.",
     "resources": "30 samples all normal pressure (level 1), unchanged observed swap at 8,143,639,674 bytes, no guard abort. This 61.7-second stage is not sustained endurance.",
     "visual": "Screenshots show a functional but plain scaffold; no design-quality claim.",
@@ -17,7 +18,9 @@
     "predeclared_plan_sha256": "d02385e3c260898351581eb391911cfea4288e8807859a3472b428cd55fbe95c",
     "native_driver_sha256": "84b9bf775bc8f1da6531b74d521ff997403ff937bcf791a888a67e2d59cd8ff1",
     "focused_browser_report_sha256": "7c94b70fe907d4b308d750f8d118ff46d215e9d38db964caeaff3e9a72d84f41",
-    "strict_browser_report_sha256": "ff7adc28ba37e373ce018f06db31a33a801e56e988896ae7412e38b1f9277375"
+    "strict_browser_report_sha256": "ff7adc28ba37e373ce018f06db31a33a801e56e988896ae7412e38b1f9277375",
+    "predeclared_review_plan_sha256": "94449fafe9ae85cce4659a0fa02d65a9d30bca6ebe9364cb2bd1dee9330b06ac",
+    "native_reviewer_driver_sha256": "a5c5aa3184e19d7c5cd5a353f4a09a56b486261133db1617b06647d067b4a5c3"
   },
-  "decision": "Keep the 9B/64K guarded owner as a private, usable baseline. This bounded source-shaped slice demonstrates one fast verified Agent milestone; it does not repair full Task06, unsolicited-code behavior, stale checkpoint claims, protected-account inference, useful context tier selection, or active endurance. Do not iterate the same prompt or publish a release."
+  "decision": "Keep the 9B/64K guarded owner as a private, usable baseline. This bounded source-shaped slice demonstrates one fast verified Agent milestone; its strict UI and native Reviewer gates fail. It does not repair full Task06, unsolicited-code behavior, stale checkpoint claims, protected-account inference, useful context tier selection, or active endurance. Do not iterate the same prompt or publish a release."
 }
