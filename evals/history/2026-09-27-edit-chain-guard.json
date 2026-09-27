@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-27",
+  "scope": "Narrow current-read guard efficiency fix after a failed private Task06 repair; no model, profile or release change",
+  "frozen_run": "e06owner64e repair1 on installed guarded 64K source 1cb2baf",
+  "observed_failure": {
+    "driver": "Timed out after 306.884 seconds, 16 tool calls, no completion or compaction; resource guard did not abort.",
+    "guard_loop": "Four edit calls were denied immediately after a successful edit of the same file, each requiring a fresh read of bytes the agent had just changed.",
+    "generated_artifact": "node --check and the original two tests passed, but the independent first-save browser check failed because a controlled 503 led to automatic retry and form clearing. The opt-in stored-HTML check failed because HTML was still interpolated into innerHTML.",
+    "private_raw_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06owner64e/evidence/repair1"
+  },
+  "change": "A completed native edit refreshes the in-turn fingerprint for that exact existing file. Failed edits, new files, later outside changes and a new user turn still require a current read. Overlapping edits to the same file are denied. The pending edit is recorded only after pre-execution guards allow the call.",
+  "verification": "Focused plugin regression passes, including failed/partial edit, outside change, overlapping edit, read race, fresh-turn and new-file cases. Full make check and private candidate package smoke passed on final source. No native model replay has yet qualified a reduction in timeout or application errors.",
+  "release_gates": {
+    "read_guard_mechanism": "PASS isolated regression",
+    "autonomous_coding_ui": "FAIL",
+    "semantic_compaction_restart": "FAIL",
+    "non_owner_clean_install": "OPEN",
+    "green_active_endurance": "OPEN",
+    "public_release": "PAUSED"
+  }
+}
