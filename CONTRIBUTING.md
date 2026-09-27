@@ -20,7 +20,7 @@ From the repository root:
 
 `observe.py` records what its check process saw; it does not make a model-produced artifact autonomous or replace operator review. Its compact output uses opaque evidence IDs instead of private grader paths. A source match does not prove the server, database, or browser state is unchanged. Runs under the same macOS account are **not** an evaluator security boundary because candidate shell tools may read that account's files. Keep hidden grading material in a separate protected account before using these records as independent holdout evidence.
 
-When Chrome records an unhandled JavaScript exception on initial page load, the browser check stops before downstream UI symptoms. Inspect the private raw browser report or run a source syntax check for the exact error; arbitrary page exception text is not copied into the bounded status.
+When Chrome records an unhandled page JavaScript exception, the next browser check reports it before secondary UI symptoms. Inspect the private raw browser report or run a source syntax check for the exact error; arbitrary page exception text is not copied into the bounded status.
 
 `tools/run_native_trial.py` freezes the complete managed product-plugin file set before a disposable native turn. A changed or missing module refuses the trial before inference; use a fresh run rather than reusing a frozen input directory after changing the installed package. Its probe-only `--thinking-budget` override must leave at least 2,048 output tokens and cannot turn thinking on for Fast; invalid combinations stop before a trial stage is created.
 
