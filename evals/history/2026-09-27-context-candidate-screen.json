@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-27",
+  "scope": "Two unpublished context-continuity candidates on the guarded 64K owner runtime; no public product change",
+  "candidates": [
+    {
+      "source_revision": "02f1cbc74799d4026e8f3ba04f2624d34a3fed1a",
+      "wheel_sha256": "3c6cde2228e12573642484293e9e5c5703794676c0a87779fd89729f63d3c1c6",
+      "change": "Retain the initial request plus eight recent user turns and prioritize the newest in the bounded capsule.",
+      "trial": "e06retain64b: copied the already reviewed Task06 UI bytes into a fresh frozen fixture to isolate continuity; independent backend 2/2 and Chrome 6/6 passed. One native opening checkpoint, four neutral turns, a second checkpoint, and restart completed. The earlier operator report remained in the private request record and the restart reported the current source/browser result, but omitted the resolved failed auto-retry browser check and staged-versus-autonomous distinction. This is a context-only test, not a new autonomous coding success.",
+      "decision": "REJECTED for semantic continuity; bounded prompt retention alone did not preserve required failure lineage."
+    },
+    {
+      "source_revision": "12928f832dcad01cbd0f9fe436838af0a3c9cdf8",
+      "wheel_sha256": "9c18192e9755ff092b80de34b842bb15e92d27fa2e80463281f1b256b7595eb9",
+      "change": "Store explicit user-reported check results outside the rolling request copy, bind them to a Git fingerprint, and label them historical claims rather than independent proof.",
+      "trial": "e06evidence64c: same staged Task06 source; independent backend 2/2 and Chrome 6/6 passed. The first Ask opening turn timed out after 41 calls and six denied/malformed path reads; one precise in-repo path correction completed and compacted. The operator report then survived four neutral turns and a second native checkpoint even after its ordinary request copy fell out. The restart recalled the browser pass, historical failed revision, and lack of autonomous coding. It also invented duplicate-entry causation for the prior failure and told the evaluator to repeat the already completed .fail-next/browser check. Semantic handoff therefore failed.",
+      "decision": "REJECTED for the full gate; source-bound availability improved, but factual interpretation and next-action accuracy did not qualify."
+    }
+  ],
+  "resource_and_restoration": "Guarded trial stages ran on AC power with no resource abort and no observed swap growth (388.19 MiB used throughout those stages). Both candidates were rolled back. The original private cff0f1b wheel was reinstalled into the managed environment after configuration rollback; package check reported cff0f1b, guarded protocol smoke passed, and doctor reported healthy idle 65,536-token runtime, normal pressure and connected browser/search MCP. No public release, tag, profile or version changed.",
+  "gates": {
+    "staged_task06_functional_artifact": "PASS; source reused, not autonomous",
+    "two_native_compactions_and_restart": "PASS as lifecycle calls in both context trials",
+    "semantic_check_and_next_action_continuity": "FAIL",
+    "new_autonomous_coding": "FAIL/UNQUALIFIED",
+    "owner_64k_rollback_and_smoke": "PASS",
+    "non_owner_runtime_useful_tier_endurance_and_release": "OPEN/UNQUALIFIED"
+  },
+  "next_blocker": "Stop adding prompt or capsule rules. Establish an evaluator-owned, source-bound check record with exact outcome and failure mechanism that can be audited independently of model prose, then test whether the local model can act on it without inventing completed or pending work. The 64K owner build remains experimental; broader useful-tier and endurance gates remain open."
+}
