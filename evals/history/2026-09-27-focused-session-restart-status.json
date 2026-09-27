@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-27",
+  "scope": "One bounded read-only Fast Ask continuation of the saved focused Task06 Agent session after a native server restart; this is not a compaction or complete Task06 trial.",
+  "setup": "Predeclared 180-second limit, unchanged 9B/64K owner model, guarded resources, same disposable workspace and session ID, no browser MCP or external evidence folder exposed to the model.",
+  "result": {
+    "native": "PASS: completed in 41.954 seconds, exact local routing verified, owned session and model runtime idle, no file edit.",
+    "resources": "21 samples on AC power, all normal pressure, zero observed swap growth, no guard abort.",
+    "current_source": "The model read the full current 149-line web/app.js without truncation, plus TASK.md and the two original Python tests.",
+    "status_accuracy": "FAIL: despite that complete source read, the answer missed the independently observed filter bug (a nonmatching row remains visible) and the source/API import mismatch (expects 200, API returns 201). It instead listed browser behavior as unverified and suggested a possible filter-button enablement issue. The static-check claims are supported by the earlier saved Agent run, but no checks were rerun in this continuation.",
+    "external_evidence_limit": "The independent seven-check browser pass and strict visible-controls failure were stored outside the model-accessible workspace. Failure to recall those browser reports alone is not scored as a model memory defect. No native compaction occurred in either stage, so this cannot qualify semantic compaction continuity.",
+    "acceptance": "FAIL for source-grounded status accuracy; restart mechanics PASS; full compaction/restart gate remains open. Do not retry with another prompt-rule variant."
+  },
+  "private_raw_evidence": {
+    "location": "Ignored evals/runs/e06literal27a",
+    "predeclared_plan_sha256": "38f7241e2a97165c69e0a1067bf18284bc8257768a69bef97938caf9c88b2f27",
+    "driver_sha256": "c21cf2275236a173e54d9b1f3527619f9f3ca9c895b0eb2c718e5b6ca9575140",
+    "native_events_sha256": "2010f9b49285c3fd961160005e77a0dfb2944bb9d05f3a97cf46fe7aa4afd261",
+    "focused_browser_report_sha256": "7c94b70fe907d4b308d750f8d118ff46d215e9d38db964caeaff3e9a72d84f41",
+    "strict_browser_report_sha256": "ff7adc28ba37e373ce018f06db31a33a801e56e988896ae7412e38b1f9277375"
+  },
+  "decision": "Keep the private 9B/64K profile unchanged. The next improvement needs source-bound check evidence and a different coding/review workflow, not another prompt rule or a release claim."
+}
