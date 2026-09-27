@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-27",
+  "scope": "Private guarded 64K frozen Task12/Task06 continuation and a public browser-checker blind-spot fix; no release or version change",
+  "task09": "Earlier automatic file-tail candidate was reverted after 2/10 read-before-edit versus 8/10 baseline. The separate current-read guard passed a corrected frozen 10/10 trial; this record does not requalify it.",
+  "task12_on_installed_1cb2baf": {
+    "fresh_run": "e12slice64b",
+    "backend": "After one bounded repair, frozen automatic 2/2 and isolated six-case HTTP probe passed; seed and existing tests preserved.",
+    "ui": "First Save stage failed responsive browser check due native form navigation. A saved-session repair fixed navigation but failed the real 503 input-preservation check. After two unsuccessful attempts the operator corrected the promise control flow; only then did independent Task06 browser checks pass 5/5. Import/edit/filter/export UI remains unfinished in this run.",
+    "semantic_handoff": "Failed: Ask read current source but could not read external evaluator evidence due fixture-only permissions, then called the browser result verified and misstated empty project filtering. Native summary also listed implemented routes as unfinished."
+  },
+  "task06_on_private_5b49d8a": {
+    "fresh_run": "e06mask64c",
+    "plan": "Completed in 62.057 seconds with native compaction.",
+    "build": "Timed out after 186.759 seconds; generated code passed frozen automatic 2/2 but had no completed Build checkpoint.",
+    "checker_blind_spot": "Original independent browser suite passed 5/5 because its 503 came after two saves. An isolated first-save 503 probe observed POST 503 followed automatically by POST 201, cleared form and one row persisted before manual retry.",
+    "operator_assisted_artifact": "The operator removed the automatic retry branch. The first-save probe then observed only POST 503, retained the form after 1.8 seconds, and found no row before manual retry. The existing independent 5/5 browser suite passed again. This is not an autonomous Agent pass.",
+    "review": "Fresh read-only Reviewer timed out after 126.742 seconds without final findings; partial output endorsed the faulty retry logic. Independent model-review gate failed.",
+    "restart": "Saved-session Ask completed and compacted after restart, but attempted one denied shell call and falsely said no gates remained, attributed the full generated UI to the operator, and requested an already completed 503 check. Its native checkpoint reverted to stale preimplementation actions. Semantic continuity failed despite accessible in-workspace evidence.",
+    "formal_grade": "PARTIAL: frozen automatic 2/2 pass, manual acceptance independently observed only after operator correction; native Build/review/semantic gates failed.",
+    "resources": "All sampled Plan, Build, Reviewer and handoff pressure levels were normal; swap growth was zero. This does not qualify 45–60 minutes of green active work."
+  },
+  "browser_checker_regression": {
+    "change": "Run the controlled 503 before successful saves and wait 2.2 seconds before manual retry to detect delayed automatic POSTs.",
+    "negative": "Replayed the exact generated faulty app.js in an isolated fixture: the updated checker failed when its form cleared before manual retry.",
+    "positive": "Updated checker passed 5/5 on the operator-corrected fixture; offline self-check passed.",
+    "raw_private_evidence": "/private/tmp/kryn-64k-pipeline/evals/runs/e06mask64c/evidence/browser-check-regression"
+  },
+  "private_candidate_rollback": "The newer checkpoint-completion mask passed 65 focused Node tests, full private make check and package smoke, then failed semantic qualification in Task06. Actual owner rollback restored source 1cb2bafdcff5bef0a1c81eca8279af026d8cec93 at 65536 context; guarded protocol smoke and doctor passed with normal pressure. The mask commit remains experimental and is not proposed for public merge.",
+  "release_gates": {
+    "autonomous_frozen_coding_ui": "FAIL",
+    "semantic_compaction_restart": "FAIL",
+    "accurate_independent_model_review": "FAIL",
+    "49k_to_128k_useful_tier_comparison": "OPEN",
+    "non_owner_clean_install": "OPEN: requires a separate standard macOS account and administrator credentials; no bypass attempted",
+    "green_active_endurance_45_to_60_minutes": "OPEN",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Use the improved first-save browser gate and address bounded Agent/Reviewer completion plus evidence-grounded checkpoint semantics structurally; do not add another prompt rule or call the 64K candidate frontier-equivalent."
+}
