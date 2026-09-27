@@ -3,7 +3,8 @@
   "scope": "Owner-account authenticated headless Chrome probe of the pinned native OpenCode GUI through an isolated KRYN NativeServer. This does not validate an installed terminal-to-GUI handoff or a second macOS account.",
   "results": {
     "landing": "PASS: Basic-authenticated loopback GUI returned HTTP 200, rendered Projects, Add project, Settings, Help, and saved-session rows. No page JavaScript exception was observed. A 1280x800 screenshot was inspected.",
-    "saved_session_navigation": "UNQUALIFIED: after landing, Playwright resolved the focused Task06 session row as visible, enabled and stable, but its click action timed out at seven seconds. Earlier attempts were confounded by screenshot/font timeouts. No successful session view, composer, cross-interface change or permission roundtrip was observed. Do not classify this as a proven product navigation bug without a different probe.",
+    "saved_session_navigation": "UNQUALIFIED: after landing, Playwright resolved the focused Task06 session row as visible, enabled and stable, but its click action timed out at seven seconds. Earlier attempts were confounded by screenshot/font timeouts. A separate direct saved-session URL probe also exceeded a 40-second browser bound. No successful session view, composer, cross-interface change or permission roundtrip was observed. Do not classify this as a proven product navigation bug without a different probe.",
+    "native_session_api": "The same isolated native server returned saved-session metadata in 0.006 seconds (546 JSON bytes) and an experimental session export in 0.010 seconds (37,730 JSON bytes). The probed /messages endpoint returned HTTP error and is not a supported conclusion about the GUI's actual request path. These fast endpoints narrow but do not explain the browser timeout.",
     "ownership": "The disposable NativeServer and headless Chrome processes exited; the owner 9B/64K runtime remained healthy and idle. The ordinary OpenCode service process was not stopped.",
     "limitations": "This is an owner-account probe with an existing session database containing many evaluation sessions. It did not submit a model prompt, change permissions, or exercise a clean new-user GUI. Credentials were temporary and excluded from saved reports."
   },
@@ -11,7 +12,8 @@
     "location": "Ignored evals/runs/gui-login27a",
     "landing_screenshot_sha256": "9c74ff6d5556dd9443a57e3020c426e209d40834fb124dffe14b938ba7c18717",
     "landing_report_sha256": "9bee9f34898e24f78bc3496c213ec3616b4d5aaad99f66c01db76fa2a96e2840",
-    "final_click_stderr_sha256": "5bd04e4803663acdfecd15fdc15f0b3836d221e22e22454fab12ede13489f2d9"
+    "final_click_stderr_sha256": "5bd04e4803663acdfecd15fdc15f0b3836d221e22e22454fab12ede13489f2d9",
+    "session_api_server_log_sha256": "41fad572713d1b5f2617ad5705f22d537b3f8c9dea41f82094ed6ff40014bda7"
   },
   "decision": "Count authenticated GUI landing only. Keep saved-session navigation, terminal/GUI parity and permission controls open; use a different controlled probe rather than repeated click or screenshot retries. No release or profile change."
 }
