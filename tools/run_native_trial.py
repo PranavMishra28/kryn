@@ -99,15 +99,17 @@ def guarded_communicate(child, prompt, timeout, cancel):
             first = False
 
 
-def runtime_is_idle(folder, label, timeout=3):
+def runtime_is_idle(folder, label, timeout=3, model_id=MODEL_ID, guard_gib=None):
     response = protocol_request("http://127.0.0.1:8000", folder, label, "/api/status", timeout=timeout)
     state = response.get("json") or {}
     return (response.get("http_status") == 200 and not response.get("transport_error")
-            and state.get("default_model") == MODEL_ID
+            and state.get("default_model") == model_id
+            and (guard_gib is None or state.get("model_memory_max") == guard_gib * 1024**3)
             and all(type(state.get(k)) is int and state[k] == 0 for k in ("active_requests", "waiting_requests")))
 
 
-def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, cancel=None):
+def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, cancel=None,
+                          model_id=MODEL_ID, guard_gib=None):
     """Metadata-first bounded traversal. Never interrupt unrelated native sessions."""
     result = {"interrupt_requested": interrupt, "verified_sessions": [], "interrupts": [], "idle": False}
     deadline, quiet, sent, previous = time.monotonic() + 30, 0, set(), None
@@ -165,7 +167,7 @@ def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, c
             active = request("GET", "/api/session/active")["data"]
             if not isinstance(active, dict):
                 raise RuntimeError("Unexpected native active-session response")
-            runtime_idle = runtime_is_idle(folder, f"{label}-{attempt:03}", remaining())
+            runtime_idle = runtime_is_idle(folder, f"{label}-{attempt:03}", remaining(), model_id, guard_gib)
             good = not found.intersection(active) and runtime_idle and found == previous
             quiet = quiet + 1 if good else 0
             result["active_owned_sessions"] = sorted(found.intersection(active))
@@ -182,7 +184,8 @@ def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, c
     return result
 
 
-def run_guarded_cli(child, prompt, timeout, monitor, server, session_id, workspace, folder, report):
+def run_guarded_cli(child, prompt, timeout, monitor, server, session_id, workspace, folder, report,
+                    model_id=MODEL_ID, guard_gib=None):
     def intervention(cause):
         report["intervention_cause"] = cause
         events = report.setdefault("intervention_events", [])
@@ -204,12 +207,14 @@ def run_guarded_cli(child, prompt, timeout, monitor, server, session_id, workspa
     finally:
         try:
             report["owned_settlement"] = settle_owned_sessions(
-                server, session_id, workspace, folder, interrupt=cause is not None, cancel=monitor.cancel)
+                server, session_id, workspace, folder, interrupt=cause is not None, cancel=monitor.cancel,
+                model_id=model_id, guard_gib=guard_gib)
             if cause is None and report["owned_settlement"].get("resource_abort"):
                 intervention("resource_guard")
         except KeyboardInterrupt:
             intervention("operator_interrupt")
-            report["owned_settlement"] = settle_owned_sessions(server, session_id, workspace, folder, interrupt=True)
+            report["owned_settlement"] = settle_owned_sessions(server, session_id, workspace, folder,
+                                                                interrupt=True, model_id=model_id, guard_gib=guard_gib)
             raise
         finally:
             # This handle belongs to this invocation's native CLI, never the model runtime.
@@ -568,6 +573,21 @@ def apply_budget(config, variant, budget):
     selected[0].setdefault("body", {})["thinking_budget"] = budget
 
 
+def replacement_config(config, model_id, context, output, guard_gib):
+    """Keep the native harness while testing a sole alternate local runtime."""
+    model = config["providers"]["local"]["models"]["qwen"]
+    model["name"] = model["modelID"] = model_id
+    model["limit"].update(context=context, output=output)
+    model["body"]["max_tokens"] = output
+    model["body"]["thinking_budget"] = min(model["body"].get("thinking_budget", 0), output - 2048)
+    products = [p for p in config["plugins"] if isinstance(p, dict) and "profileId" in p.get("options", {})]
+    if len(products) != 1:
+        raise ValueError("Expected one KRYN product plugin")
+    products[0]["options"]["modelID"] = model_id
+    products[0]["options"]["profileId"] = hashlib.sha256(
+        f"replacement:{model_id}:{context}:{output}:{guard_gib}".encode()).hexdigest()
+
+
 def attachment_info(workspace, given):
     if given is None:
         return None, None
@@ -712,6 +732,7 @@ def guard_self_check():
 
 def self_check():
     import tempfile
+    from unittest.mock import patch
     guard_self_check()
     browser = {"agents": {"browse": {"permissions": [
         {"action": "browser_*", "effect": "deny"},
@@ -841,6 +862,19 @@ def self_check():
             pass
         else:
             raise AssertionError("invalid budget accepted")
+    candidate = copy.deepcopy(config)
+    candidate["providers"]["local"]["models"]["qwen"]["limit"] = {"context": 65536, "output": 8192}
+    candidate["plugins"] = [{"options": {"profileId": "owner", "modelID": MODEL_ID}}]
+    replacement_config(candidate, "Qwen3.8-27B-oQ5e-mtp", 24576, 4096, 27)
+    assert candidate["providers"]["local"]["models"]["qwen"]["modelID"] == "Qwen3.8-27B-oQ5e-mtp"
+    assert candidate["providers"]["local"]["models"]["qwen"]["limit"] == {"context": 24576, "output": 4096}
+    assert candidate["plugins"][0]["options"]["modelID"] == "Qwen3.8-27B-oQ5e-mtp"
+    with patch(__name__ + ".protocol_request", return_value={"http_status": 200, "json": {
+        "default_model": "Qwen3.8-27B-oQ5e-mtp", "model_memory_max": 27 * 1024**3,
+        "active_requests": 0, "waiting_requests": 0}}):
+        assert runtime_is_idle(Path("/tmp"), "offline", model_id="Qwen3.8-27B-oQ5e-mtp", guard_gib=27)
+        assert not runtime_is_idle(Path("/tmp"), "offline", model_id=MODEL_ID, guard_gib=27)
+        assert not runtime_is_idle(Path("/tmp"), "offline", model_id="Qwen3.8-27B-oQ5e-mtp", guard_gib=24)
     with tempfile.TemporaryDirectory() as tmp:
         workspace = Path(tmp) / "workspace"
         workspace.mkdir()
@@ -949,6 +983,10 @@ def main():
     ap.add_argument("--ready-tools", action="store_true", help="wait up to 30s for connected MCP servers and a stable tool catalog before prompting")
     ap.add_argument("--expected-tools", type=Path, help="require exact equality with baseline tool-catalog.json; implies --ready-tools")
     ap.add_argument("--guard-resources", action="store_true", help="require green/idle preflight; cancel only owned sessions on sustained pressure, missing telemetry or >512 MiB swap growth")
+    ap.add_argument("--replacement-model-id", help="probe-only sole local model; requires context, output and guard flags")
+    ap.add_argument("--replacement-context", type=int)
+    ap.add_argument("--replacement-output", type=int)
+    ap.add_argument("--replacement-guard-gib", type=int)
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
     if args.self_check:
@@ -956,6 +994,19 @@ def main():
         return 0
     if args.run is None or (args.no_tools and args.session):
         ap.error("A prepared run is required; --no-tools requires a fresh session (omit --session)")
+    replacement = (args.replacement_model_id, args.replacement_context,
+                   args.replacement_output, args.replacement_guard_gib)
+    if any(value is not None for value in replacement):
+        if (not all(value is not None for value in replacement) or
+                not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", args.replacement_model_id) or
+                not 8192 <= args.replacement_context <= 131072 or
+                not 4096 <= args.replacement_output <= 8192 or
+                args.replacement_output * 2 > args.replacement_context or
+                not 1 <= args.replacement_guard_gib <= 27 or not args.guard_resources):
+            ap.error("Replacement trials require a local model ID, 8K-128K context, 4K-8K output, a 1-27 GiB guard and --guard-resources")
+        if args.variant == "default" and args.thinking_budget is None:
+            ap.error("Replacement default variant requires an explicit --thinking-budget")
+    model_id = args.replacement_model_id or MODEL_ID
     ready_tools = args.ready_tools or args.expected_tools is not None
     if args.without_browser and ready_tools:
         ap.error("--without-browser cannot be combined with browser tool readiness checks")
@@ -973,6 +1024,9 @@ def main():
         ap.error(str(error))
     folder = run / "evidence" / args.stage
     config = copy.deepcopy(owned_config())
+    if args.replacement_model_id:
+        replacement_config(config, model_id, args.replacement_context, args.replacement_output,
+                           args.replacement_guard_gib)
     if args.without_browser:
         config["mcp"]["servers"].pop("browser")
     try:
@@ -994,7 +1048,7 @@ def main():
         {"action": "external_directory", "resource": "*", "effect": "deny"},
     ]
     allow_fixture_browser(config)
-    audit_options = {"log": str(folder / "inference.jsonl"), "expectedModelID": MODEL_ID}
+    audit_options = {"log": str(folder / "inference.jsonl"), "expectedModelID": model_id}
     if ready_tools:
         audit_options["readyTools"] = True
     audit_plugin, audit_hashes = snapshot_audit_plugin(folder)
@@ -1004,7 +1058,10 @@ def main():
     (folder / "requested-config.json").write_bytes(config_bytes)
     prompt = (args.prompt or workspace / "TASK.md").read_text()
     (folder / "prompt.txt").write_text(prompt)
-    report = {"agent": args.agent, "variant": args.variant, "expected_model_id": MODEL_ID,
+    report = {"agent": args.agent, "variant": args.variant, "expected_model_id": model_id,
+              "replacement_context": args.replacement_context,
+              "replacement_output": args.replacement_output,
+              "replacement_guard_gib": args.replacement_guard_gib,
               "thinking_budget_override": args.thinking_budget, "no_tools": args.no_tools,
               "without_browser": args.without_browser,
               "attachment": image_info,
@@ -1058,6 +1115,16 @@ def main():
             report["audit_plugin_active_before"] = plugin_active(plugin_before, "localai.inference-audit", audit_plugin)
             if not report["audit_plugin_active_before"]:
                 raise RuntimeError("Frozen audit plugin is not active before prompting")
+            if args.replacement_model_id:
+                catalog = protocol_request("http://127.0.0.1:8000", folder, "replacement-model-catalog",
+                                           "/v1/models", timeout=3)
+                matches = [row for row in (catalog.get("json") or {}).get("data", [])
+                           if row.get("id") == model_id]
+                if (catalog.get("http_status") != 200 or len(matches) != 1 or
+                        type(matches[0].get("max_model_len")) is not int or
+                        matches[0]["max_model_len"] < args.replacement_context):
+                    raise RuntimeError("Replacement runtime does not advertise the exact model and context")
+                report["replacement_runtime_max_model_len"] = matches[0]["max_model_len"]
             if ready_tools:
                 report["tool_readiness"] = wait_ready_tools(server, config, folder, expected_tools)
             if args.session:
@@ -1079,10 +1146,12 @@ def main():
                     raise RuntimeError("Guarded session must use the owned local model")
                 if session["id"] in server.request("GET", "/api/session/active", timeout=3)["data"]:
                     raise RuntimeError("Owned session is already active; no prompt sent")
-                if not runtime_is_idle(folder, "guard-idle-before"):
+                if not runtime_is_idle(folder, "guard-idle-before", model_id=model_id,
+                                       guard_gib=args.replacement_guard_gib):
                     raise RuntimeError("Expected model runtime is not idle; no prompt sent")
                 monitor.start()
-                if not runtime_is_idle(folder, "guard-idle-after-preflight"):
+                if not runtime_is_idle(folder, "guard-idle-after-preflight", model_id=model_id,
+                                       guard_gib=args.replacement_guard_gib):
                     raise RuntimeError("Expected runtime became busy during resource preflight; no prompt sent")
             command = [str(BINARY), "run", "--server", server.url, "--agent", args.agent,
                        "--model", "local/qwen" + ("#fast" if args.variant == "fast" else ""), "--format", "json", "--thinking",
@@ -1096,7 +1165,8 @@ def main():
                 try:
                     if monitor is not None:
                         run_guarded_cli(child, prompt.encode(), args.timeout, monitor, server,
-                                        session["id"], workspace, folder, report)
+                                        session["id"], workspace, folder, report,
+                                        model_id=model_id, guard_gib=args.replacement_guard_gib)
                     else:
                         child.communicate(prompt.encode(), timeout=args.timeout)
                 except subprocess.TimeoutExpired:

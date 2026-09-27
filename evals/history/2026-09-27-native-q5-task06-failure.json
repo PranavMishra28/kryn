@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-27",
+  "scope": "One predeclared, fresh frozen Task06 native Agent turn on isolated Qwen3.8-27B-oQ5e-mtp; private model screen, no installed-profile or public-release change",
+  "run": "e06q5native27a",
+  "configuration": "Existing OpenCode/KRYN harness, 24576 configured context, 4096 output, 1536 thinking budget, browser MCP omitted from the coding stage, 27 GiB oMLX process guard, host warning/swap guard, AC power",
+  "outcome": {
+    "native": "FAIL: the Agent timed out after 366.689 seconds and 12 tool calls (one shell, eleven reads), no completed terminal answer, no compaction, and no source edit. Audited local routing covered the native generations; the last generation ended in error after the owned timeout intervention.",
+    "frozen_grade": "PARTIAL: original backend automatic tests passed 2/2 on unchanged seed source, while independent manual acceptance was absent.",
+    "independent_chrome": "FAIL on unchanged source: stored markup remained inert, but the exact literal stored string was absent because visible text contained JSON-escaped double quotes. The stricter visible-controls and later UI checks were not reached.",
+    "resources": "One host memory-warning sample at otherwise normal pressure; zero observed swap growth; sampled peak model-server physical footprint 26,802,503,352 bytes. Any warning fails the declared green-resource gate even without sustained-abort.",
+    "restoration": "The wrapper terminated only its temporary Q5 server, restarted the owner Qwen3.5-9B-6bit 64K/16 GiB runtime, passed guarded protocol smoke, and then deep doctor verified model/browser files, local routing, connected browser/search MCP and normal idle pressure."
+  },
+  "private_raw_evidence": {
+    "location": "Ignored evals/runs/e06q5native27a; candidate and evaluator shared the owner macOS account, so this is not a protected holdout",
+    "predeclared_trial_sha256": "10c0e7d6410ac5ae8a48339bcf3e374343f9d012b93181ba9cbf0d5c859b551b",
+    "native_driver_sha256": "75656e6810b14f5bf8423d3ac831f91933aca00f409f13fc080ca6928e199713",
+    "browser_report_sha256": "b310e3a56bb93d6d5a89616669a68c0f9b2d27ea02a8e0a9f4f9010a273326c4",
+    "unchanged_app_js_sha256": "b2684c86ddcd8a3a40bb7a7e0dfe7434942e60a0cc7c7fdc5938c492e17a7042",
+    "operator_summary_sha256": "b4485a9698b3238a40ef859e68494fa604abfa75b6fb4f0ed81faa5493734e50"
+  },
+  "decision": "Reject Q5 as the current daily champion: this sole native trial did not edit or finish and failed the declared green-resource gate. Keep the owner 9B/64K private rollback baseline and public release pause. Do not repeat the same broad Task06 prompt on this model; the next coding/UI attempt needs a different bounded workflow and protected independent review."
+}
