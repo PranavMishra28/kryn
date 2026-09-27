@@ -93,6 +93,8 @@ class SetupChecks(unittest.TestCase):
                        memory_gib=32, model_parent="challenger/models")
         install_root = self.root / "Library/Application Support/LocalAI"
         cfg = setup.render(install_root, self.root / "node", profile)
+        self.assertEqual(next(item for item in cfg["plugins"] if isinstance(item, dict))["options"]["nodeBinary"],
+                         str(self.root / "node"))
         setup.write_same(install_root / "xdg/config/opencode/opencode.json", setup.encode(cfg))
         setup.write_same(install_root / "install-profile.json", setup.encode(profile))
         marker = install_root / "challenger/models/Qwen3.8-27B-oQ5e-mtp/.localai-download.json"

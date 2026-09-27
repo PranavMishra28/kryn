@@ -102,6 +102,21 @@ function expectedEditHash(snapshot, input) {
   return sha(source.slice(0, at) + newText + source.slice(at + oldText.length));
 }
 
+function javascriptSyntaxFailure(snapshot, nodeBinary) {
+  if (!snapshot || !nodeBinary || !/\.(?:c|m)?js$/i.test(snapshot.file)) return null;
+  try {
+    // --check parses the edited file without executing project code.
+    execFileSync(nodeBinary, ['--check', snapshot.file], {
+      timeout: 5000, maxBuffer: 8192, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8',
+    });
+    return null;
+  } catch (error) {
+    if (typeof error.status !== 'number') return 'KRYN could not run the local JavaScript syntax check.';
+    return 'KRYN JavaScript syntax check failed after this edit (node --check):\n' +
+      String(error.stderr || error.message).slice(0, 2000);
+  }
+}
+
 export function validatedOptions(options) {
   if (!options || typeof options.stateDir !== 'string' || !path.isAbsolute(options.stateDir))
     throw new Error('KRYN requires an absolute owned stateDir');
@@ -109,6 +124,9 @@ export function validatedOptions(options) {
     throw new Error('KRYN requires a bounded profile ID');
   if (typeof options.modelID !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/.test(options.modelID))
     throw new Error('KRYN requires an exact local model ID');
+  if (options.nodeBinary !== undefined && (typeof options.nodeBinary !== 'string' ||
+      !path.isAbsolute(options.nodeBinary)))
+    throw new Error('KRYN requires an absolute local Node binary for syntax checks');
   const champion = options.champion;
   if (!champion || typeof champion.instructions !== 'string' || champion.instructions.length > 1500 ||
       !HASH.test(champion.revision) || sha(champion.instructions) !== champion.revision)
@@ -124,7 +142,8 @@ export function validatedOptions(options) {
     throw new Error('KRYN model endpoint must be an explicit loopback port at /v1');
   return Object.freeze({ stateDir: path.resolve(options.stateDir), profileId: options.profileId,
     modelID: options.modelID, baseURL: base.href, origin: base.origin, observe: options.observe !== false,
-    workflowScope, champion: Object.freeze({ ...champion }) });
+    workflowScope, nodeBinary: options.nodeBinary ?? null,
+    champion: Object.freeze({ ...champion }) });
 }
 
 function ownedDirectory(directory, create = false) {
@@ -728,6 +747,15 @@ export default {
         if (current && current.file === beforeEdit.file &&
             beforeEdit.expectedHash && current.hash === beforeEdit.expectedHash)
           item.recentReads.set(current.file, current.hash);
+      }
+      if (event.status === 'completed' && ['edit', 'write'].includes(event.tool) && event.result) {
+        const current = projectSnapshot(ctx.location.directory, event.input?.path);
+        const failure = javascriptSyntaxFailure(current, options.nodeBinary);
+        if (failure) event.result.content = [
+          ...(Array.isArray(event.result.content) ? event.result.content :
+            typeof event.result.content === 'string' ? [{ type: 'text', text: event.result.content }] : []),
+          { type: 'text', text: failure },
+        ];
       }
       if (event.tool === 'read' && event.id) {
         const beforeRead = item.pendingReads.get(event.id);

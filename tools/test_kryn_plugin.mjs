@@ -481,6 +481,53 @@ test('an existing project file must be read in the current turn before native ed
   } finally { await cleanup(); f.remove(); }
 });
 
+test('native JavaScript writes report parser failures immediately without executing code', async () => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const file = path.join(f.root, 'app.js');
+  const sideEffect = path.join(f.root, 'unexpected');
+  const run = (id, content) => {
+    const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id,
+      id: 'call_' + id, tool: 'write', input: { path: 'app.js', content } };
+    f.call('tool.execute.before', event);
+    fs.writeFileSync(file, content);
+    const after = { ...event, status: 'completed', result: {
+      content: [{ type: 'text', text: 'Wrote app.js' }] } };
+    f.call('tool.execute.after', after);
+    return after.result.content.map(part => part.text).join('\n');
+  };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.match(run('broken', 'const = ;\n'), /JavaScript syntax check failed/);
+    assert.match(run('fixed', `require('node:fs').writeFileSync(${JSON.stringify(sideEffect)}, 'bad');\n`), /Wrote app.js/);
+    assert.equal(fs.existsSync(sideEffect), false, 'syntax validation must not run project code');
+    assert.doesNotMatch(run('fixed2', 'const valid = 1;\n'), /syntax check failed/);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('native JavaScript edits expose a syntax regression in the edit result', async () => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const file = path.join(f.root, 'app.js');
+  fs.writeFileSync(file, 'const count = 1;\n');
+  const base = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_1' };
+  const read = { ...base, id: 'read_1', tool: 'read', input: { path: 'app.js' } };
+  const edit = { ...base, id: 'edit_1', tool: 'edit', input: { path: 'app.js',
+    oldString: 'const count = 1;\n', newString: 'const = 1;\n' } };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('tool.execute.before', read);
+    f.call('tool.execute.after', { ...read, status: 'completed', result: { content: [] } });
+    f.call('tool.execute.before', edit);
+    fs.writeFileSync(file, 'const = 1;\n');
+    const after = { ...edit, status: 'completed', result: {
+      content: [{ type: 'text', text: 'Edited app.js' }] } };
+    f.call('tool.execute.after', after);
+    assert.match(after.result.content.at(-1).text, /JavaScript syntax check failed/);
+    assert.match(after.result.content.at(-1).text, /app\.js/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('owned edit fingerprints cannot be refreshed through overlapping edits', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'app.js'); fs.writeFileSync(file, 'let count = 0;\n');
