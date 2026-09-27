@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-27",
+  "scope": "Bounded owner-account daily-control smokes on installed guarded 9B/64K; not release or long-workflow qualification",
+  "terminal": {
+    "observed": "A real TUI launch displayed Ask permissions and 2/2 connected tools; Shift+Tab changed Agent to Plan to Ask; Ctrl+T displayed Fast, then returned to Default; idle Ctrl+C exited cleanly. An interactive-permissions launch separately displayed Saved/Auto. These are operator-observed PTY controls, not an automated GUI roundtrip.",
+    "gui": "The --web launch opened a local Chrome sign-in window, but Chrome focus changed during login and no authenticated cross-interface/session control result was obtained. Do not count GUI switching or permission roundtrip as passed. The temporary owned server was stopped cleanly."
+  },
+  "native_browse_smokes": {
+    "run": "e07search27a",
+    "search": "PARTIAL/FAIL against the predeclared search-plus-fetch gate: a fresh native Browse turn completed in 40.344 seconds. The first search call omitted required objective and failed schema validation; the corrected search succeeded, and the agent read its saved output. It answered Python 3.12 and an official docs URL, consistent with docs.python.org, but never called the required web fetch tool or opened that official page. No mutation/execute call occurred.",
+    "browser": "PASS for the narrow declared tool smoke: a fresh Browse turn completed in 21.054 seconds, called browser_browser_navigate and browser_browser_snapshot on the disposable loopback app, and accurately reported TaskboardLite and visible t1 from the real snapshot. The one console error was the fixture's favicon.ico 404. This does not prove forms, responsiveness, GUI login, or broader browser autonomy.",
+    "resources": "Search: 20 samples, all normal pressure/AC, zero observed swap growth. Browser: 10 samples, all normal pressure/AC, zero observed swap growth. Exact local routing and owned-session settlement passed for both.",
+    "private_raw_evidence": {
+      "location": "Ignored evals/runs/e07search27a; same owner account, not a protected holdout",
+      "search_plan_sha256": "92eed35d0acbf652cdae4720b249e8085e71964a546b2896b859846316ef1b0c",
+      "search_driver_sha256": "3a2b22981a01c8a45ab7997618a22255a77299985d9b36c0192a8e5b4ad2c05b",
+      "browser_plan_sha256": "b26e96f8b91d9b9b0025280978c096e28331c11db2c82fd7b05fc6c258c7a271",
+      "browser_driver_sha256": "7a27d129154c40fd5b015155b9e4c38356ba5887dd36a089f76fe9ca08c4f028"
+    }
+  },
+  "decision": "Keep terminal controls and narrow browser navigation as observed working mechanisms. Treat source-opening research behavior and terminal/GUI cross-interface switching as unqualified. Do not change profile, release, or model based on these short smokes."
+}
