@@ -1,0 +1,41 @@
+{
+  "scope": "Private installed Qwen 9B/64K/16GiB guarded candidate; no public release or profile promotion",
+  "installed_source_revision": "0ae67e8c05d783897699cd4c40f2c01f1febad94",
+  "product_fix_main_pr": "https://github.com/PranavMishra28/kryn/pull/108",
+  "native_syntax_probe": {
+    "raw_run": "evals/runs/js-feedback-probe27a (ignored private evidence)",
+    "result": "PASS: one real native Agent write of an intentionally invalid .js file returned the bounded node --check SyntaxError in the same tool result; the native turn completed",
+    "resources": "Nine guarded samples, normal pressure, zero swap growth, Battery Power",
+    "limit": "This proves tool-result feedback reached the model, not that it improved application quality."
+  },
+  "frozen_task06": {
+    "raw_run": "evals/runs/e06syntax27a (ignored private evidence)",
+    "grade": "PASS: automatic backend/preservation checks and all six independently reviewed manual browser checks",
+    "plan": "Read-only native Plan completed in 51.808 seconds with normal pressure and zero swap growth",
+    "agent": "Default-effort native Agent completed in 320.147 seconds; changed only web/app.js, with 52 tool calls. Node syntax, existing tests and diff check passed. Guard samples observed normal pressure, zero swap growth and both AC/Battery Power.",
+    "independent_browser": "Unchanged Playwright Chrome checker passed at 390x844 and 1280x800; real 503 marker preserved inputs, a delayed automatic retry did not occur, one manual retry persisted exactly one row; reload, accessible invalid feedback, inert literal stored markup, console and network passed. Screenshots were visually inspected by the operator. The expected 503 resource message was the only console error; no page exceptions or failed requests.",
+    "compactions": "Two actual native saved-session compactions completed in 23.28 and 44.44 seconds, each using a fresh native server process and guarded resource samples.",
+    "restart_status": "Saved read-only Ask completed after each compaction in fresh processes. Both recovered original user criteria and identified web/app.js as changed. The first correctly separated evaluator-only checks from its own observations; the second incorrectly said the Filter control works, although loadEntries ignores its filter argument.",
+    "fresh_local_reviewer": "FAILED quality: a fresh Default-effort native Reviewer completed after reading source, but asserted false critical findings that textContent is an XSS risk, /^\\d+$/ accepts 123abc, !data.id accepts an empty string, nested label lacks association, and UTF-8 BOM is not handled by the backend. It also tried read-only-prohibited execute calls three times. Do not treat this report as an accepted review.",
+    "operator_source_review": "PASS for frozen Task06 form behavior, supported by independent Chrome/API checks and source inspection. Separate observed quality defect: the visible Filter button calls loadEntries(filterInput.value), but loadEntries never uses filterText; filtering was outside Task06 acceptance. The local Reviewer did not identify this defect.",
+    "limits": "This is one approximately 13.5-minute staged coding/UI run across recorded Plan, Agent, browser, compaction, Ask and Reviewer stages, not a 45–60 minute active endurance result or causal comparison of Default versus Fast or syntax feedback. The successful Agent run had no syntax diagnostic, so the native probe alone establishes the new hook's behavior."
+  },
+  "owner_activation": {
+    "private_wheel_source": "0ae67e8c05d783897699cd4c40f2c01f1febad94",
+    "rollback": "PASS: with zero active requests, rollback restored the preceding owned package/config and retained the 64K setting; offline self-check passed",
+    "reinstall": "PASS: exact private wheel reactivated; guarded kryn bench protocol smoke passed after oMLX restart and kryn doctor --deep passed with 64K, normal pressure, zero active requests, verified model/browser dependency files and connected MCP servers",
+    "limit": "This is an owner update/rollback/reinstall trial, not a clean second-account inference install."
+  },
+  "gate_status": {
+    "frozen_task06_application": "PASS",
+    "two_compactions_and_restarts": "PASS for native mechanism and original-criteria recall; status accuracy remains partial",
+    "independent_operator_review": "PASS for Task06 acceptance; exposed Filter quality defect noted",
+    "native_reviewer_quality": "FAIL",
+    "context_tier_selection": "UNQUALIFIED beyond earlier single-shot screens",
+    "protected_second_account_inference": "UNQUALIFIED",
+    "owner_private_rollback_reinstall": "PASS",
+    "clean_second_account_install_inference": "UNQUALIFIED",
+    "active_45_to_60_minute_endurance": "UNRUN",
+    "public_release": "PAUSED"
+  }
+}
