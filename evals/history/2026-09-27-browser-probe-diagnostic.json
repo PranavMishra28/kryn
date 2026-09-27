@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "run": "e06obs27b",
+  "source_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+  "change": "The supplemental stored-markup Chrome check records element/script safety separately from exact literal-text rendering.",
+  "independent_browser_result": {
+    "scope": "06:--stored-html+--visible-controls",
+    "status": "FAIL",
+    "passed": "Stored markup created no image element and did not execute the injected script.",
+    "failed": "Rendered text did not include the exact stored markup string.",
+    "visible_controls": "NOT_TESTED because the browser check stopped at the earlier literal-text failure"
+  },
+  "native_ask_screen": {
+    "stage": "browser-diagnostic-fresh",
+    "completed": true,
+    "wall_seconds": 147.198,
+    "read_only_tool_denials": 9,
+    "resource_result": "Pressure level remained 1 and swap used bytes remained 407046717 in 72 samples.",
+    "semantic_result": "FAIL",
+    "findings": [
+      "The answer preserved base PASS versus supplemental FAIL but omitted grade automatic 2/2 and six unrun manual checks.",
+      "It misread the exact stored project-markup assertion as a request to add literal li markup to the UI text.",
+      "It proposed a source change without validating that it would pass the exact check."
+    ]
+  },
+  "qualification": "The independent diagnostic is more precise; model action selection and Ask tool discipline remain failed. This is not an autonomous coding/UI pass or a public release gate."
+}

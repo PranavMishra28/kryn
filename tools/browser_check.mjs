@@ -109,17 +109,21 @@ async function main() {
     const screenshot = async name => { await page.screenshot({ path: path.join(output, name), fullPage: true }); report.screenshots.push(name); };
     await page.goto(url.href, { waitUntil: 'networkidle' });
     if (values['stored-html']) {
-      await check('stored entry text is rendered literally without executable HTML', async () => {
-        const markup = '<img src=x onerror="window.__krynStoredHtml=1">';
-        const row = { id: `${prefix}-markup`, project: markup, minutes: 1, date: '2026-09-10' };
+      const markup = '<img src=x onerror="window.__krynStoredHtml=1">';
+      const row = { id: `${prefix}-markup`, project: markup, minutes: 1, date: '2026-09-10' };
+      await check('stored markup probe does not create an HTML element or execute script', async () => {
         const response = await context.request.post(new URL('/api/entries', url).href, { data: row, maxRedirects: 0 });
         assert.equal(response.status(), 201, 'Security probe row must be accepted by the existing API');
         await page.reload({ waitUntil: 'networkidle' });
         await page.waitForFunction(id => document.querySelector('#entries')?.textContent.includes(id), row.id);
         const list = page.locator('#entries');
-        assert((await list.innerText()).includes(markup), 'Stored markup must appear as literal text');
         assert.equal(await list.locator('img').count(), 0, 'Stored markup created an HTML element');
         assert.equal(await page.evaluate(() => window.__krynStoredHtml === 1), false, 'Stored markup executed JavaScript');
+        return { id: row.id, createdElement: false, executedScript: false };
+      });
+      await check('stored entry text includes the exact literal markup', async () => {
+        assert((await page.locator('#entries').innerText()).includes(markup),
+          'Markup probe was inert, but rendered text does not include the exact stored string');
         await screenshot('stored-html.png');
         return { id: row.id, renderedAsText: true };
       });
