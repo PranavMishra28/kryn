@@ -1,0 +1,30 @@
+{
+  "status": "FAIL for autonomous Task12 and long-workflow qualification",
+  "fixture": "Fresh frozen Task12 e12code64a, private ignored workspace and raw transcripts in /private/tmp/kryn-64k-pipeline/evals/runs/e12code64a. Existing OpenCode/oMLX, guarded private 64K owner profile. No product install or release from this trial.",
+  "stages": [
+    {"name": "plan", "wall_seconds": 58.497, "model_completed": true, "native_compaction_completed": true, "driver_sha256": "c787c0521aad9e8dc01f5522ee9989c4824d9f7e86609b6769fb2f86d34f6af5"},
+    {"name": "backend", "wall_seconds": 366.659, "model_completed": false, "native_compaction_completed": false, "driver_sha256": "c424a40ae93715e219228ee99874ff5069a6620c3959614fcda330f246559cdc"},
+    {"name": "handoff-probe", "wall_seconds": 83.678, "model_completed": true, "native_compaction_completed": true, "driver_sha256": "0b5a6e3caf8de9ccb1dabf858409bbf0ad3208823768dce3cfcf167c2d55db29"},
+    {"name": "backend-edge", "wall_seconds": 203.173, "model_completed": true, "native_compaction_completed": true, "driver_sha256": "b3015c8e242fe320bebfd80548f5af7f7843667a96faac2f3dd4a1a2cd6f303a"},
+    {"name": "ui", "wall_seconds": 116.464, "model_completed": true, "native_compaction_completed": true, "driver_sha256": "58cfa78e3da5a2ad304661cd1fd8dc914b1635b6899b2944ffa1aa9a32591ec6"},
+    {"name": "ui-repair", "wall_seconds": 121.206, "model_completed": true, "native_compaction_completed": true, "driver_sha256": "dbbd153945915cbe7c32fb60fe14c645b0bbb6c9f39098d7a0473b7388f3e290"},
+    {"name": "fresh-review", "wall_seconds": 121.576, "model_completed": true, "native_compaction_completed": false, "driver_sha256": "98a86f20a1ae9c37fcaac4b94a1cfc64c112f490986f986128e0a9618f5c9eec"}
+  ],
+  "observations": {
+    "planning": "Read-only Plan inspected the fixture and produced a useful acceptance checklist without implementation edits. Its first checkpoint accurately marked unobserved work unknown.",
+    "backend": "The first Build read server/store/parser before editing, but timed out. Its generated test deleted data/entries.csv and reused one database; the operator preserved the failed test in private evidence, restored the seed from fixture Git and removed the broken test. The frozen grader then passed 2/2 backend checks. An operator-started baseline server had initially occupied the agent's chosen port, making its first 404/501 test receipt an evaluator setup error, not proof the edited source lacked routes.",
+    "handoff": "After restart, Ask recalled routes but invented failure causes and an unverified database reset; the next native checkpoint put agent choices under Decisions and listed already implemented routes as active work. Semantic continuity failed despite completed native compactions.",
+    "backend_edge": "An independent isolated HTTP probe found GET /api/entries?project= returned all rows. One model repair still did so and reported it as correct. After two unsuccessful model attempts, the operator made the one-line filter correction. The same independent probe then passed 6/6 and frozen automatic checks passed 2/2; this is assisted artifact success, not autonomous agent success.",
+    "browser_first": "Independent 390px Chrome Save timed out waiting for POST; only initial GETs appeared. Candidate code used nonexistent JSON.fromObject and classified every new nonempty ID as an edit.",
+    "browser_second": "After one model UI repair, independent 390px Chrome Save again timed out waiting for POST; network observed PATCH /api/entries/<new-id> returning 400. Later browser flows were not reached. Candidate UI also interpolated user-controlled row data into innerHTML and parsed import's JSON count as plain text.",
+    "review": "Fresh read-only Reviewer found real innerHTML injection and import response mismatch, but falsely claimed JSONDecodeError bypasses ValueError and SQLite with-block batch inserts commit partial rows. It misidentified the edit failure. Reviewer accuracy failed; the frozen Task12 manual review gate is not a pass.",
+    "resource": "Seven native stages totaled 1071.253 prompt-active wall seconds (17.85 minutes), all on AC power. All 520 sampled resource rows showed normal host pressure level 1 and zero observed swap growth. No resource guard abort occurred. This is below the 45-60 minute green endurance requirement and says nothing about a reliably useful 96K/128K tier."
+  },
+  "browser_report_sha256": {
+    "first": "5b919a3eeac9002542bcb4cde7e9a85f4663a58e9be952623fef241c2895e6f1",
+    "second": "503c47ed2d82bff06aaa0c4622a7f489576f7f3333439ee100c94cb8b01295a3"
+  },
+  "separate_safe_fix": "Observed Agent shell used lsof | xargs kill -9 on disposable port 62138. PR #44 blocks the xargs signal form, passed make check and CI, and merged to public main cc86f5f. The installed private 64K candidate was not changed.",
+  "packaging": "Public main cc86f5f passed make package-smoke in an isolated temporary environment. Non-owner macOS clean install/update/rollback remains untested without access to a separate standard account; prior owner rollback/reinstall evidence is unchanged.",
+  "next_blocker": "Change implementation/evaluation approach rather than add a third UI prompt: use a fresh untouched fixture with executable feedback at each vertical slice, qualify truthful compaction/restart and reviewer output, and only then run the 45-60 minute green active endurance and non-owner install/rollback gates. Keep private guarded 64K and public 49K profiles; no release, tag, version bump or frontier-equivalence claim."
+}
