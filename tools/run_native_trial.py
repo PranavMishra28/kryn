@@ -281,6 +281,11 @@ def isolate_trial_config(config, target, managed):
     if len(products) != 1:
         raise RuntimeError("Expected exactly one requested KRYN product plugin")
     source = Path(products[0]["package"]).resolve()
+    plugin_files = sorted(source.iterdir())
+    if not {"server.js", "package.json"}.issubset(p.name for p in plugin_files) or any(
+        p.is_symlink() or not p.is_file() for p in plugin_files
+    ):
+        raise RuntimeError("Trial requires a flat regular-file product plugin package")
     fresh = not target.exists()
     target.mkdir(parents=True, mode=0o700, exist_ok=True)
     config_root, product = target / "config", target / "product"
@@ -290,7 +295,7 @@ def isolate_trial_config(config, target, managed):
     hashes = {"config": {}, "product": {}}
     for origin, destination, names, key in (
         (managed, config_root, ("AGENTS.md", "cli.json"), "config"),
-        (source, product, ("server.js", "tui.tsx", "permission_display.mjs", "package.json"), "product"),
+        (source, product, tuple(p.name for p in plugin_files), "product"),
     ):
         for name in names:
             if name == "cli.json" and not (origin / name).exists():
@@ -716,11 +721,12 @@ def self_check():
         original.mkdir()
         for name in ("AGENTS.md", "cli.json", "opencode.json"):
             (managed / name).write_text(name)
-        for name in ("server.js", "tui.tsx", "permission_display.mjs", "package.json"):
+        for name in ("server.js", "tui.tsx", "permission_display.mjs", "package.json", "context_capsule.mjs"):
             (original / name).write_text(name)
         config = {"plugins": [{"package": str(original), "options": {"profileId": "test"}}]}
         isolated, product, hashes = isolate_trial_config(config, root / "frozen", managed)
         assert hashes_match(isolated, hashes["config"]) and hashes_match(product, hashes["product"])
+        assert "context_capsule.mjs" in hashes["product"]
         assert not (isolated / "opencode.json").exists()
         assert config["plugins"][0]["package"] == str(product)
         resumed = {"plugins": [{"package": str(original), "options": {"profileId": "test"}}]}
@@ -734,6 +740,15 @@ def self_check():
         failed["state"] = {"status": "failed", "error": "Duplicate plugin ID: kryn.product"}
         assert not plugin_active({"data": [entry, failed]}, "kryn.product", product)
         assert not plugin_active({"data": [failed]}, "kryn.product", product)
+        resumed["plugins"][0]["package"] = str(original)
+        (original / "linked.mjs").symlink_to("server.js")
+        try:
+            isolate_trial_config(resumed, root / "linked", managed)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("linked plugin module accepted")
+        (original / "linked.mjs").unlink()
         (product / "server.js").chmod(0o600)
         (product / "server.js").write_text("changed")
         assert not hashes_match(product, hashes["product"])

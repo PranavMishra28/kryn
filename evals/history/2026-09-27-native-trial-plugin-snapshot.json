@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "scope": "Native evaluation-driver repair and one guarded same-account Task06 Ask handoff; no installed product, model, profile or release change",
+  "failure": "Fresh e06obs27a structured handoff stopped before inference. The trial driver copied server.js but omitted its installed relative import context_capsule.mjs. OpenCode marked the product plugin failed, and the driver correctly refused to send the prompt. This is infrastructure failure, not a model timeout.",
+  "fix": "Snapshot every flat regular file in the managed product plugin package, hash each one and reject linked or nested files. The offline self-check includes the context_capsule.mjs dependency. Reused snapshots still reject changed package bytes.",
+  "fresh_trial": {
+    "run": "e06obs27b",
+    "source_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+    "artifact_origin": "Previously reviewed UI source copied into a fresh disposable fixture; no autonomous coding success claimed",
+    "evaluator_outcomes": "Frozen automatic backend 2/2, grade PARTIAL because six manual review.json criteria remained NOT_TESTED; base Chrome 5/5 PASS; supplemental stored-HTML/visible-controls FAIL on literal-text rendering, all bound to the same source hash and exact scopes.",
+    "native_ask": "Installed guarded private 64K plugin loaded and the fresh Ask turn completed in 111.431 seconds with 16 tool calls and zero swap growth. It retained base PASS and strict FAIL and did not revive the passed 503 action. It made four tool errors: one nonexistent src path and three denied execute attempts in read-only Ask.",
+    "semantic_errors": "Initial Ask falsely explained grade PARTIAL as server shutdown rather than unrun manual review; called textContent/JSON.stringify 'executable markup', although textContent is safe and the actual strict failure was lack of literal stored text. It proposed a plausible rendering edit from a false security diagnosis.",
+    "compaction_restart": "Two native compactions completed in the saved session, followed by two completed same-session Ask restarts under new native servers. First compaction's operator poller falsely timed out because it assumed oldest-first API message order; session export recovered a completed compaction message and later idle marker. That poller did not retain its resource samples, so the first compaction lacks resource qualification. Second compaction's corrected poller finished with pressure level 1 and zero swap growth. Both Ask restarts completed in 27.525 and 26.887 seconds, each with three tool calls, zero tool errors, normal sampled pressure and zero swap growth.",
+    "checkpoint_semantics": "Checkpoint 1 invented active source modification in a read-only session. Restart 1 correctly said no edit occurred and classified the six manual grade criteria as unrun, but repeated the false executable-markup cause. Checkpoint 2 fixed the active-work claim and retained base PASS/strict FAIL, yet described all grade checks as NOT_TESTED despite automatic 2/2 passing and promoted the proposed rendering change into a required fix. Restart 2 retained base PASS/strict FAIL/no edit but still called safe textContent output executable and omitted the automatic 2/2 result. Historical stub failure came from a separate run and was not supplied to this saved session.",
+    "raw_evidence": "Ignored private evals/runs/e06obs27a/evidence/structured-handoff-initial and evals/runs/e06obs27b/evidence/structured-handoff-initial; not committed"
+  },
+  "gates": {
+    "native_trial_plugin_load": "PASS after repair in one fresh guarded run",
+    "structured_outcome_action_selection": "PARTIAL: current check selected, causal attribution and Ask tool discipline failed",
+    "native_compaction_and_restart_mechanics": "PASS: two completed compactions and two completed same-session restarts; first compaction resource trace absent due operator poller bug",
+    "semantic_compaction_restart": "FAIL: invented active work, false causal/security claim and incomplete automatic/manual grade distinction persisted",
+    "protected_evaluator_account": "PENDING macOS administrator authorization",
+    "autonomous_coding_useful_tier_endurance_release": "OPEN/UNQUALIFIED"
+  },
+  "verification": "Native-trial self-check and final make check passed, including 174 setup Python tests, 21 tool Python tests, 49 Node tests and 18 frozen fixture selftests. Candidate package smoke passed without publishing or installing a new owner build.",
+  "next": "Keep the exact observation record external to model prose. Do not promote model causal claims or proposed edits as verified state; grade next actions against source and exact current check scope. Establish the protected account boundary before claiming independent holdout evidence, then repeat on a fresh autonomous coding/UI task."
+}
