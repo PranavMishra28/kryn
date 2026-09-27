@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-27",
+  "scope": "One fresh frozen Task06 coding/UI fixture under the installed private guarded 64K owner package; staged model-owned edits with independent evaluator feedback",
+  "run": "e06slice64l",
+  "installed_private_source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e06slice64l",
+  "implementation": "The model changed only web/app.js. The first bounded Build completed and compacted, then independent checks exposed a nonfunctional visible Filter. One repair assumed unsupported server-side query filtering. After two failed attempts, the evaluator supplied the actual API contract; a smaller client-side repair passed. Separate source/browser probes then caught Save and Import violating the active filter; the saved Agent repaired each. The last model source SHA256 was b25529f713ddc962fed2ea2434f6c3719f07077e23d8051e5f2a23adbb9d5ce7.",
+  "independent_acceptance": {
+    "frozen_grade": "PASS after evaluator review; the result is assisted and does not establish unassisted first-attempt quality",
+    "automatic": "2/2, unchanged original test and seed data",
+    "browser": "7/7 independent checks: stored HTML literal text, labelled invalid input, real first-save 503 with one manual retry and exactly one row, save/reload at 390x844 and 1280x800, visible Filter/Import, seed preservation, console/network inspection",
+    "filter_save": "Independent alpha-filter/beta-save probe PASS: beta row stays hidden",
+    "filter_import": "Independent alpha-filter/beta-import probe PASS: beta row stays hidden; pre-repair failure retained",
+    "source_review": "Independent evaluator inspected the final model diff and exact production handler; no remaining Task06 blocker found",
+    "app_restart": "Evaluator server stopped and restarted against the same disposable DB; 34 persisted rows were served after restart, including 25 browser-check rows",
+    "native": "Five model-owned Build stages and two read-only Ask handoffs each completed with one native compaction"
+  },
+  "checker_fix": "The opt-in visible Filter check initially prescribed one exact empty-state sentence. PR #56 changed it to observe the filtered row disappear, require nonempty visible feedback, and reject remaining row IDs; the revised checker still rejected a known auto-import fixture and passed the final page. Frozen default scoring was unchanged.",
+  "semantic_handoff": {
+    "status": "FAIL",
+    "neutral_restart": "Ask read TASK.md and current source, but called a syntax check independently verified after its read-only shell attempt was denied. It correctly treated browser acceptance as unverified because external reports were not yet accessible in the project.",
+    "artifact_retrieval": "The evaluator copied the actual browser report, traces/screenshots, two filter probes and source review into project artifacts/evaluator. A second saved-session Ask read them and correctly attributed the browser 7/7 result to the evaluator.",
+    "remaining_false_or_lost_state": "The next stored checkpoint still collapsed the objective to the last Import repair, omitted the earlier failed-check lineage and staged assistance, and named a browser report path that does not exist. The first handoff also invented a pytest requirement even though the original unittest checks passed. External artifact retrieval improved the answer but did not make the checkpoint semantically complete."
+  },
+  "resources": "Seven guarded native stages totaled 676.059 seconds of prompt-active time. Every stage sampled normal pressure level 1 with zero swap growth; no memory abort. This is not a 45–60 minute green active-work qualification.",
+  "gates": {
+    "assisted_frozen_coding_ui": "PASS",
+    "independent_browser_and_source": "PASS",
+    "native_compaction_and_app_restart_mechanics": "PASS",
+    "semantic_checkpoint_restart": "FAIL",
+    "unassisted_daily_quality": "UNQUALIFIED",
+    "useful_49k_64k_96k_128k_tier": "UNQUALIFIED",
+    "non_owner_clean_install": "UNQUALIFIED",
+    "green_45_60_minute_endurance": "FAIL",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Keep the assisted artifact pass separate from the failed handoff. Make current task/evaluator evidence durable and discoverable after compaction/restart without adding another prompt rule, then repeat a fresh held-out task. Continue clean install and green active endurance before proposing any public release."
+}
