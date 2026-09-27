@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-27",
+  "run": "e06freshserver64a",
+  "scope": "Fresh frozen Task06 Agent trial on the installed current-main private 64K owner build; evaluator-owned loopback server was live before the first prompt",
+  "installed_source_revision": "c6b6ce22219139fc9ef39214f238f8d957660f34",
+  "workflow_change": "The evaluator supplied http://127.0.0.1:8779 with a disposable database from the start. This removed the prior nonpersistent-server and connection-refused loop without changing the frozen Task06 acceptance criteria.",
+  "native_agent": {
+    "outcome": "TIMEOUT at 367.958 seconds; no completed Agent turn or compaction",
+    "changes": "Only web/app.js changed (114 generated lines); node --check passed",
+    "browser_activity": "The Agent used browser tools against the live server. It twice touched workspace/data/.fail-next itself, which was not the evaluator-owned database marker; the server observed successful POSTs, not a controlled 503 during the Agent turn.",
+    "frozen_grade": "PARTIAL: original backend 2/2 passed; six manual browser checks remained NOT_TESTED by the frozen grader"
+  },
+  "independent_chrome": {
+    "functional": "FAIL: invalid-minutes accessibility passed, then an evaluator-injected first POST returned 503 followed by automatic POST 201 before manual retry; all four form fields cleared. The single deliberate-retry criterion failed.",
+    "stored_html": "FAIL: generated renderEntries interpolated stored row fields into innerHTML. A stored project value containing an img onerror became one #entries img element and set window.__krynStoredHtml=1 in real Chrome. The optional checker timed out waiting for the row ID as text because the generated renderer used the ID only as an HTML attribute; a separate direct Chrome inspection confirmed element creation and script execution.",
+    "report_locations": [
+      "evals/runs/e06freshserver64a/evidence/independent-browser/browser-report.json",
+      "evals/runs/e06freshserver64a/evidence/independent-browser-html/browser-report.json"
+    ]
+  },
+  "resources": "Guard sampled AC power, normal memory pressure and zero swap growth; owned native session settled idle. Both evaluator-owned servers were stopped.",
+  "gates": {
+    "persistent_server_availability": "PASS as evaluator setup only",
+    "autonomous_task06_completion": "FAIL",
+    "real_503_manual_retry": "FAIL",
+    "safe_stored_text_rendering": "FAIL",
+    "semantic_compaction_restart": "NOT_TESTED: Agent did not complete its first turn",
+    "protected_account": "UNQUALIFIED: macOS still showed only the owner GUI session",
+    "public_release": "PAUSED"
+  },
+  "next_approach": "Do not add another prompt rule or repeat this 9B Task06 session. The persistent server removed one confound, but automatic retry, unsafe rendering and timeout remained. Treat this local Agent/UI profile as unqualified; use a materially different model or staged workflow with the same independent browser and source acceptance before promoting a daily-use profile."
+}
