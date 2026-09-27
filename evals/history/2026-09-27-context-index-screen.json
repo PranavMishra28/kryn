@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-27",
+  "scope": "Private source-bound evaluator evidence-index screen on a fresh frozen Task06 fixture; no public profile or release change",
+  "run": "e06idx64n",
+  "private_candidate_source": "cbca95390eb29b75d2e6c6e7b7fa0619260da2a4",
+  "restored_installed_source": "cff0f1b5234f684151659b0e6a0aebd0d20a4a5b",
+  "raw_evidence_private": "/private/tmp/kryn-64k-pipeline/evals/runs/e06idx64n/evidence",
+  "change": "The private context capsule checks later missing checkpoint paths and reads a bounded root TASK_EVIDENCE.json index after compaction. It compares the index's source SHA256 to current bytes, checks referenced report existence inside the project, and labels all claims untrusted project data. This is a retrieval experiment, not a new public feature.",
+  "offline": "Focused context tests 17/17, full make check and clean package smoke passed. Owner installation of the private 64K candidate succeeded with guard intact.",
+  "fresh_trial": [
+    "Initial read-only Ask completed and compacted in 38.367 seconds; it correctly identified the one-line web/app.js stub and retained original Task06 acceptance criteria.",
+    "An independent browser run against the live fixture failed the stored-HTML literal-rendering check. The evaluator copied the actual failed report under Git-ignored artifacts/evaluator, then wrote root TASK_EVIDENCE.json bound to the unchanged web/app.js SHA256. The evaluator server was stopped and restarted against the same disposable DB.",
+    "Neutral saved-session Ask completed and compacted in 39.837 seconds, correctly said the form was not implemented, but did not cite the indexed browser failure. Source inspection alone could explain its answer, so retrieval benefit was not established.",
+    "A focused saved-session Ask completed and compacted in 51.753 seconds. It read TASK_EVIDENCE.json and accurately stated the failed browser check and next coding action. It did not read the actual ignored report and falsely claimed direct access to that in-project report was restricted. The resulting checkpoint retained the failure claim but not verified report contents."
+  ],
+  "resources": "All native turns completed with normal sampled pressure and zero swap growth. No memory abort or swap-growth rescue explains the semantic gap.",
+  "disposition": "REJECT for daily installation and public promotion. The prior private guarded 64K package was restored through exact rollback; kryn bench and doctor passed with healthy idle local routing. The candidate branch remains private for audit.",
+  "gates": {
+    "source_bound_index_mechanism": "OFFLINE PASS",
+    "fresh_restart_task_state": "PARTIAL: incomplete form correctly identified",
+    "independent_report_attribution": "FAIL: actual report unread and access falsely denied",
+    "semantic_checkpoint_restart": "FAIL",
+    "clean_non_owner_install": "UNQUALIFIED",
+    "green_45_60_minute_endurance": "UNQUALIFIED",
+    "public_release": "PAUSED"
+  },
+  "next_blocker": "Keep actual independent checker output as authority and change the evidence-delivery workflow, rather than adding another Ask prompt rule or treating a path index as verification. A fresh held-out coding/UI run must demonstrate accurate report attribution through compaction and restart before release gates advance."
+}
