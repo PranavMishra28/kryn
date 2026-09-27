@@ -1,0 +1,32 @@
+{
+  "scope": "Private candidate only; no public release, version, tag, or model-profile change",
+  "change": "Retain bounded excerpts of admitted native user messages in private state; reintroduce them after compaction and restart with current tracked Git/file evidence and a checkpoint fingerprint mismatch warning.",
+  "mechanism_checks": {
+    "plugin_tests": "45/45 passed, including unadmitted prompt exclusion, two compactions and restart, bounded omissions, and changed-file stale detection",
+    "native_trials": [
+      {
+        "raw_evidence": "evals/runs/anchor-native27a/report.json (ignored private data)",
+        "compactions": 2,
+        "active_user_messages_after_each": 0,
+        "restart_recovered_original_id_and_manual_retry": true
+      },
+      {
+        "raw_evidence": "evals/runs/anchor-native27b/report.json (ignored private data)",
+        "compactions": 2,
+        "active_user_messages_after_each": 0,
+        "restart_recovered_original_id_and_manual_retry": true,
+        "restart_identified_changed_tracked_file": true,
+        "resource_samples": 17,
+        "ac_power": true,
+        "host_memory_warning": false,
+        "swap_growth_bytes": 0
+      }
+    ]
+  },
+  "limits": [
+    "The native checkpoint in this short trial already retained the original ID; these observations do not establish an uplift over baseline.",
+    "Request excerpts are limited to 12 entries and 30 KB; omitted middle turns are disclosed, and preexisting sessions have no retroactive anchors.",
+    "Git observations cover tracked files in the launched project and do not prove browser flows, tests, or semantic correctness.",
+    "Frozen long coding/UI task, repeated context-tier comparison, protected-account inference, and final active endurance remain unqualified."
+  ]
+}

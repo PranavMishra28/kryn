@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
 import { permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -11,7 +12,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture(extra = {}) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-plugin-')));
   fs.chmodSync(root, 0o700);
-  const hooks = new Map(), pending = [], wake = [], continuations = [], interruptions = [];
+  const hooks = new Map(), pending = [], wake = [], continuations = [], interruptions = [], nativeMessages = [];
   let stopped = false, serial = 0;
   const location = { directory: root, project: { canonical: root } };
   const options = { stateDir: root, profileId: 'test-profile', modelID: 'test-Q4', workflowScope: 'disposable_json_cli',
@@ -28,9 +29,10 @@ function fixture(extra = {}) {
     } } };
   ctx.session.get = async ({ sessionID }) => ({ id: sessionID, location, agent: 'build',
     model: { providerID: 'local', id: 'qwen' }, outcome: 'succeeded', time: {} });
+  ctx.session.context = async () => nativeMessages;
   ctx.session.synthetic = async value => { continuations.push(value); };
   ctx.session.interrupt = async value => { interruptions.push(value); return { interrupted: true }; };
-  return { root, ctx, hooks,
+  return { root, ctx, hooks, nativeMessages,
     continuations, interruptions,
     call: (name, data) => hooks.get(name)(data),
     emit: async (type, data = {}, loc = location) => {
@@ -944,6 +946,92 @@ test('session champion survives restart; tool schema pruning and native checkpoi
   } finally { await cleanup(); f.remove(); }
 });
 
+test('exact user requests survive two checkpoints and restart without entering metadata reports', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    const requests = ['Build a form with a manual retry after 503.',
+      'Keep the submitted text on 503; never retry automatically.',
+      'Show a visible status at a narrow viewport.',
+      'Use textContent for stored project names.',
+      'Verify a real 503, retry, reload, and stored markup in a browser.'];
+    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Unadmitted phantom request.' } });
+    await f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    assert.deepEqual(f.read('anchors'), [], 'prompt hook alone cannot create user provenance');
+    for (let i = 0; i < requests.length; i++) {
+      f.nativeMessages.push({ id: 'msg_' + i, type: 'user', text: requests[i],
+        time: { created: 1000 + i } });
+      await f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    }
+    let event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.compaction', event);
+    const firstAnchor = event.system.find(part => part.text.startsWith('User-authored request excerpts')).text;
+    assert.match(firstAnchor, /Build a form with a manual retry/);
+    assert.match(firstAnchor, /Verify a real 503/);
+    assert.match(firstAnchor, /Keep the submitted text/);
+    await f.emit('session.compaction.ended');
+    f.nativeMessages.splice(0, 3); // Native active context lost older user turns.
+    event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.compaction', event);
+    assert.match(event.system.find(part => part.text.startsWith('User-authored request excerpts')).text, /Use textContent/);
+    await f.emit('session.compaction.ended');
+    await cleanup();
+    cleanup = await plugin.setup(f.ctx);
+    const resumed = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.context', resumed);
+    const anchor = resumed.system.find(part => part.text.startsWith('User-authored request excerpts')).text;
+    assert.match(anchor, /Build a form with a manual retry/);
+    assert.match(anchor, /never retry automatically/);
+    assert.match(anchor, /Verify a real 503/);
+    assert.doesNotMatch(anchor, /user decided|check passed/i);
+    const file = fs.readdirSync(path.join(f.root, 'learning', 'anchors'))[0];
+    const stored = path.join(f.root, 'learning', 'anchors', file);
+    assert.equal(fs.statSync(stored).mode & 0o077, 0);
+    assert.ok(fs.statSync(stored).size < 32768);
+    assert.equal(JSON.stringify([...f.read('trackers'), ...f.read('events')]).includes(requests[0]), false);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('a saved checkpoint is flagged stale when current Git file bytes change across restart', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 1;\n');
+    git('add', 'app.js');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
+    f.nativeMessages.push({ id: 'msg_1', type: 'user', text: 'Keep value at 1 until tests pass.',
+      time: { created: 1 } });
+    await f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    await f.emit('session.compaction.ended');
+    let context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.context', context);
+    assert.match(context.system.at(-1).text, /Current repository observation/);
+    assert.doesNotMatch(context.system.at(-1).text, /state is stale/);
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 2;\n');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.context', context);
+    assert.match(context.system.at(-1).text, /Checkpoint Git\/file state is stale/);
+    assert.ok(!JSON.stringify(f.read('trackers')).includes('export const value'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('bounded user continuity discloses omitted middle turns and safely stores escaped text', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    for (let i = 0; i < 15; i++) f.nativeMessages.push({ id: 'msg_' + i, type: 'user',
+      text: i === 14 ? 'latest ' + '\u0001'.repeat(2500) : 'request-' + i,
+      time: { created: i } });
+    const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.compaction', event);
+    const anchor = event.system.find(part => part.text.startsWith('User-authored request excerpts')).text;
+    assert.match(anchor, /request-0/);
+    assert.match(anchor, /latest/);
+    assert.match(anchor, /middle user request\(s\) omitted/);
+    assert.ok(fs.statSync(path.join(f.root, 'learning', 'anchors', fs.readdirSync(path.join(f.root, 'learning', 'anchors'))[0])).size < 32768);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('Browse includes saved-output reading in its bounded browser/research tools across request hooks', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
@@ -1062,8 +1150,8 @@ test('bounded pin admission preserves old sessions and tracker retention preserv
     f.call('session.context', { sessionID: 'saved', agent: 'build', system: [], tools: {} });
     const pins = path.join(f.root, 'learning', 'pins');
     for (let i = 0; i < 499; i++) fs.writeFileSync(path.join(pins, i.toString(16).padStart(64, '0') + '.json'), '{}', { mode: 0o600 });
-    assert.throws(() => f.call('session.context', { sessionID: 'new', agent: 'build', system: [], tools: {} }), /500 saved session pins/);
-    assert.doesNotThrow(() => f.call('session.context', { sessionID: 'saved', agent: 'build', system: [], tools: {} }));
+    await assert.rejects(f.call('session.context', { sessionID: 'new', agent: 'build', system: [], tools: {} }), /500 saved session pins/);
+    await assert.doesNotReject(f.call('session.context', { sessionID: 'saved', agent: 'build', system: [], tools: {} }));
     assert.equal(fs.readdirSync(pins).length, 500);
     const trackers = path.join(f.root, 'learning', 'trackers');
     for (let i = 0; i < 501; i++) fs.writeFileSync(path.join(trackers, i.toString(16).padStart(64, '0') + '.json'), JSON.stringify({ owner: 'kryn.product' }), { mode: 0o600 });
@@ -1076,7 +1164,7 @@ test('bounded pin admission preserves old sessions and tracker retention preserv
   } finally { await cleanup(); f.remove(); }
 });
 
-test('Browse handoff retains current user criteria through compaction without persisting prompt text', async () => {
+test('Browse handoff retains current user criteria without putting prompt text in metadata reports', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     const request = 'Private acceptance: valid login shows Welcome; invalid login shows an error.';
