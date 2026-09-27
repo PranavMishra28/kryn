@@ -105,9 +105,10 @@ function expectedEditHash(snapshot, input) {
 function javascriptSyntaxFailure(snapshot, nodeBinary) {
   if (!snapshot || !nodeBinary || !/\.(?:c|m)?js$/i.test(snapshot.file)) return null;
   try {
-    // --check parses the edited file without executing project code.
+    // --check parses the edited file; inherited NODE_OPTIONS could preload and execute code.
     execFileSync(nodeBinary, ['--check', snapshot.file], {
       timeout: 5000, maxBuffer: 8192, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8',
+      env: { ...process.env, NODE_OPTIONS: '' },
     });
     return null;
   } catch (error) {
