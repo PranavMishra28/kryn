@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-27",
+  "run": "e06repair27c",
+  "purpose": "One guarded local Agent repair of a seeded Task06 UI, followed by independent frozen and supplemental checks plus a separate read-only Reviewer. This is not a fresh end-to-end coding run or account-isolated scoring.",
+  "source_before_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+  "source_after_sha256": "7f33ba4e46824f3bcc393d7cfc6d79a534867c0b735f7f9d7f548d00063aba5b",
+  "agent": {
+    "driver_completed": true,
+    "wall_seconds": 204.639,
+    "edits": "Two edits to web/app.js; final rendering was CSV-style escaped text inside a ul element.",
+    "verified_itself": "Only the two existing Python unit tests; both passed. It also attempted a JavaScript-like snippet in a Python command, which failed with SyntaxError.",
+    "tool_errors": "Two glob calls omitted the required pattern argument.",
+    "final_claim": "Said the literal-markup repair was complete and asserted browser behavior it had not checked.",
+    "resource_result": "Pressure level remained 1 and swap used bytes remained 407046717 in 99 samples."
+  },
+  "independent_post_edit_checks": {
+    "grade": "PARTIAL; automatic 2/2 passed; six manual checks NOT_TESTED",
+    "browser_base": "PASS 5/5, including real injected 503, input preservation, one manual retry row, and 390/1280 save/reload",
+    "browser_stored_markup": "FAIL exact literal text; the injected image element was absent and its script did not run",
+    "browser_visible_controls": "FAIL: clicking Import produced no expected API response within 10 seconds; source has no Filter or Import handlers"
+  },
+  "reviewer": {
+    "driver_completed": true,
+    "wall_seconds": 67.224,
+    "valid_findings": "Dead visible Filter/Import controls and failed literal-text display.",
+    "false_findings": "Claimed 503 clears input or needs a retry button, despite the independent real-503/single-manual-retry PASS; claimed export lacks a backend endpoint although server.py has /api/export.",
+    "result": "FAIL: independent review contained material unsupported conclusions."
+  },
+  "visual_evidence": {
+    "path": "evals/history/2026-09-27-agent-repair-390.png",
+    "sha256": "d0c594338519e529b54f05d81a72f0c73c11c998c5b1893e911207db1fab7aca",
+    "finding": "At 390px, raw CSV text fills the entries area and the Import button overlaps the Export CSV link. This screenshot does not establish the controls' behavior."
+  },
+  "gates": {
+    "frozen_backend_and_base_browser": "PASS for this post-edit source",
+    "full_coding_ui": "FAIL",
+    "agent_claim_accuracy": "FAIL",
+    "independent_review_accuracy": "FAIL",
+    "protected_evaluator_account": "UNQUALIFIED",
+    "compaction_restart_in_this_run": "NOT_TESTED",
+    "sustained_green_endurance": "NOT_TESTED"
+  }
+}
