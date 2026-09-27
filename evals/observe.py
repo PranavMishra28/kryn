@@ -215,17 +215,24 @@ def compact_status(run_id):
                           manual_review_record_present=item["manual_review_record_present"])
         current[key] = detail
     active_records = {item["record"] for item in full["latest_current"].values() if item is not None}
+    def older_same_scope(item):
+        latest = full["latest_current"].get(item["kind"] + ":" + item["scope"])
+        return bool(latest and latest["record"] != item["record"] and
+                    latest["source_sha256"] == item["source_sha256"])
     failed = [dict(kind=h["kind"], scope=h["scope"], status=h["status"], current_source=h["current_source"],
                    failures=bounded_failures(h), evidence_id=evidence_id(h))
-              for h in full["history"] if h["failures"] and h["report_intact"] and h["record"] not in active_records]
+              for h in full["history"] if h["failures"] and h["report_intact"] and
+              h["record"] not in active_records and not older_same_scope(h)]
     infrastructure = [dict(kind=h["kind"], failures=h["failures"], evidence_id=evidence_id(h))
                       for h in full["history"] if h["status"] == "ERROR" and not h["report_intact"]]
     return {"run": run_id, "current_source_sha256": full["current_source_sha256"],
             "current": current, "historical_failures": failed[-6:],
             "older_failures_omitted": max(0, len(failed) - 6), "total_observations": len(full["history"]),
+            "older_same_source_scope_failures_omitted": sum(bool(h["failures"] and h["report_intact"] and older_same_scope(h))
+                                                            for h in full["history"]),
             "damaged_reports": sum(not h["report_intact"] for h in full["history"]),
             "infrastructure_errors": infrastructure[-3:],
-            "note": "Use source-matched outcomes by exact check scope for next actions; a weaker pass does not settle a stricter failure. Source matching does not prove unchanged runtime/data. Same-account records do not isolate the grader from candidate shell access."}
+            "note": "Use the latest intact source-matched observation by exact scope for next actions; a weaker pass does not settle a stricter failure. Older same-source/scope failure details remain in full history, not this prompt; changed checker coverage is not inferred. Source matching does not prove unchanged runtime/data. Same-account records do not isolate the grader from candidate shell access."}
 
 
 def main():

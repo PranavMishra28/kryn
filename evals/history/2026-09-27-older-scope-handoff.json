@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-27",
+  "run": "e06obs27b",
+  "source_sha256": "9b695f340854c67ad3c0b6dc675f70d6e40f21bb53f32d82e55cfa06b810336c",
+  "change": "The bounded status omits older failure details for the same source and exact scope when a later intact observation exists. It reports their count; full raw history still retains them. Changed checker coverage is not inferred.",
+  "live_status": {
+    "current_stored_markup": "FAIL exact literal display; independent probe safety PASS",
+    "older_same_source_scope_failures_omitted": 1,
+    "grade": "PARTIAL; automatic 2/2 passed; six manual checks NOT_TESTED"
+  },
+  "private_screen": {
+    "stage": "superseded-filter-steps10",
+    "trial_only_ask_step_limit": 10,
+    "installed_product_changed": false,
+    "completed": true,
+    "wall_seconds": 57.349,
+    "resource_result": "Pressure level remained 1 and swap used bytes remained 407046717 in 28 samples.",
+    "tool_errors": "One read of a missing artifacts path; no denied write or execute call.",
+    "semantic_result": "FAIL",
+    "findings": [
+      "The answer retained the current strict failure and grade automatic 2/2 but mixed the grade count into the base-browser row.",
+      "It still misread the stored project markup as a requirement to render HTML table/list structure and did not demonstrate a passing repair.",
+      "The private step ceiling was not installed or proposed for release; two screens are insufficient to establish a useful Ask cap."
+    ]
+  },
+  "qualification": "Better status hygiene, but semantic continuity, coding/UI completion, evaluator account isolation, context-tier selection, and endurance remain open or failed."
+}
