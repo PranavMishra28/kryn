@@ -29,11 +29,11 @@ export default {
       </box>
     ) });
     const removeCommand = context.ui.slot({ append: 'app', render: () => {
-      context.keymap.layer(() => ({ mode: 'global', commands: [{
+      context.keymap.layer(() => ({ mode: 'global', priority: 100, commands: [{
         id: 'kryn.permissions', title: 'KRYN: permission settings', group: 'KRYN',
         palette: true, slash: { name: 'permissions' }, run: open,
       }, {
-        id: 'kryn.share', title: 'KRYN: export this session locally', group: 'KRYN',
+        id: 'session.share', title: 'KRYN: export this session locally', group: 'KRYN',
         palette: true, slash: { name: 'share' }, run: () => {
           context.ui.toast.show({ message: 'OpenCode V2 has no public share link. Opening a local session export; review it before sending.',
             variant: 'info', duration: 6000 });
