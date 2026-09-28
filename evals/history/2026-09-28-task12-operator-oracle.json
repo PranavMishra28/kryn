@@ -1,0 +1,20 @@
+{
+  "kind": "diagnostic operator oracle, not a KRYN agent qualification",
+  "date": "2026-09-28",
+  "source_run": "evals/runs/green-20260928-task12-main",
+  "source_web_app_sha256": "baa8ff80cf1b5803b01f271dd04b664fb78cdfd37643983f743fd1f23294de56",
+  "method": "Copied the failed model-produced workspace to a separate temporary directory; preserved the original frozen run. Applied only browser-client edits, started its existing Python server against fresh seeded SQLite files, and ran tools/browser_check.mjs --task 12 twice with fresh database files and independent browser contexts.",
+  "first_oracle": {
+    "changes": "Stopped clearing the selected file on change; sent raw CSV to the existing server parser; reloaded entries after import; used the existing GET /api/export link instead of rebuilding CSV from filtered client state.",
+    "report_sha256": "59192135ce1f6377adee8602c05833e582ec79de929640c1cc99aef32d371826",
+    "result": "8 checks passed; edit then timed out without PATCH. The code assigned to form.id.value, which did not populate the required ID input, and changed the stable Save button label to Update."
+  },
+  "second_oracle": {
+    "additional_changes": "Set the ID through form.elements.namedItem('id') and kept the Save label stable.",
+    "web_app_sha256": "bbdb69e5c72d6ee615457e12e09f3aba9687b8cd8ef059252b69de962519dabb",
+    "report_sha256": "c6a1159a0f4160c7a34a5153b408109d42fd7728ac92e93da0b693e59a7fbe86",
+    "result": "PASS: 10/10 independent browser checks, including import and atomic rejection, persistent edit, exact filter, full export round-trip, seed preservation, stored-text safety, manual 503 retry, and 390/1280 responsive interactions; no unhandled page errors. Operator-only repair, not autonomous agent success.",
+    "uncovered_defect": "The model added visible Delete buttons but no DELETE server endpoint. The frozen ten checks do not exercise Delete; source and screenshot review still find a broken control. A browser-check pass alone cannot close product acceptance."
+  },
+  "implication": "The frozen browser checker is capable of reaching and passing its documented Task12 path. The model's failed run was caused by client code, not evaluator misconfiguration. A new autonomous model-produced run and independent source/visible-control review are still required; no release gate is promoted."
+}

@@ -8,10 +8,17 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from session_report import report
+from session_report import is_check, report
 
 
 class ReportTests(unittest.TestCase):
+    def test_cd_prefixed_checks_match_context_ledger_without_admitting_compound_shell(self):
+        self.assertTrue(is_check('cd /tmp/project && python3 -B -m pytest -q'))
+        self.assertTrue(is_check('cd ./web && npm test'))
+        for command in ('cd /tmp/project && npm test || true', 'cd project && npm test',
+                        'cd /tmp/project; npm test', 'cd /tmp/project && npm test\ntrue'):
+            self.assertFalse(is_check(command))
+
     def test_native_outcome_history_survives_later_success_without_leaking_unknown_values(self):
         with tempfile.TemporaryDirectory() as folder:
             db = Path(folder) / 'native.db'
@@ -42,6 +49,7 @@ class ReportTests(unittest.TestCase):
                 ('python3 -B test_existing.py', 'completed', {'exit': 0}),
                 ('node --check web/app.js', 'completed', {'exit': 0}),
                 ('node browser_check.mjs --task 06', 'completed', {'exit': 1}),
+                (f'cd {project} && python3 -B -m pytest -q', 'completed', {'exit': 1}),
                 ('node --check', 'completed', {'exit': 0}),
                 ('python3 -B not_test.py', 'completed', {'exit': 0}),
                 ('python3 -B test_existing.py | head', 'completed', {'exit': 0}),
@@ -71,9 +79,9 @@ class ReportTests(unittest.TestCase):
                 c.execute('INSERT INTO session_message VALUES (?,?,?,?)', ('ses_checks', 2, 'compaction',
                           '{"status":"completed","summary":"All verification passed."}'))
             result = report(db, project)
-            self.assertEqual(result['counts']['check_commands'], 16)
+            self.assertEqual(result['counts']['check_commands'], 17)
             self.assertEqual(result['counts']['check_exit_zero'], 4)
-            self.assertEqual(result['counts']['check_exit_nonzero'], 2)
+            self.assertEqual(result['counts']['check_exit_nonzero'], 3)
             self.assertEqual(result['counts']['check_exit_unknown'], 10)
             self.assertEqual(sum(result['counts'][key] for key in
                                  ('check_exit_zero', 'check_exit_nonzero', 'check_exit_unknown')),

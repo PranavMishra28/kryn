@@ -26,7 +26,13 @@ browser_browser_find browser_browser_run_code_unsafe'''.split())
 
 def is_check(command):
     """Match the plugin's conservative simple-command contract, never shell prose."""
-    if not isinstance(command, str) or len(command) > 4096 or re.search(r'[;&|`$\n\r<>]', command):
+    if not isinstance(command, str) or len(command) > 4096:
+        return False
+    simple = command.strip()
+    prefix = re.match(r'^cd\s+(?:/[-A-Za-z0-9_./]+|\.[-A-Za-z0-9_./]*)\s*&&\s*', simple)
+    if prefix:
+        simple = simple[prefix.end():]
+    if re.search(r'[;&|`$\n\r<>]', simple):
         return False
     return bool(re.match(
         r'^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*(?:-m\s+(?:unittest|pytest)(?:\s|$)'
@@ -34,7 +40,7 @@ def is_check(command):
         r'|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)'
         r'|node\s+(?:--test(?:\s|$)|--check\s+[^\s]+(?:\s|$)'
         r'|[^\s]*(?:test|browser_)[^\s]*\.m?js(?:\s|$))'
-        r'|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))', command.strip()))
+        r'|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))', simple))
 
 
 def summarize(connection, session_id):
