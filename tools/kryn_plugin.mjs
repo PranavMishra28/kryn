@@ -9,6 +9,7 @@ const HASH = /^[a-f0-9]{64}$/;
 const MAX_SESSION_PINS = 500;
 const MAX_OBSERVED_CHECKS = 64;
 const MAX_USER_ANCHORS = 12;
+const MAX_TOOL_OUTPUTS = 32;
 const READ_TOOLS = new Set(['read', 'glob', 'grep', 'webfetch', 'question',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const READ_ROLES = new Set(['ask', 'reviewer', 'explore', 'audit']);
@@ -149,6 +150,9 @@ export function validatedOptions(options) {
   if (options.nodeBinary !== undefined && (typeof options.nodeBinary !== 'string' ||
       !path.isAbsolute(options.nodeBinary)))
     throw new Error('KRYN requires an absolute local Node binary for syntax checks');
+  if (options.toolOutputDir !== undefined && (typeof options.toolOutputDir !== 'string' ||
+      !path.isAbsolute(options.toolOutputDir)))
+    throw new Error('KRYN requires an absolute native tool-output directory');
   const champion = options.champion;
   if (!champion || typeof champion.instructions !== 'string' || champion.instructions.length > 1500 ||
       !HASH.test(champion.revision) || sha(champion.instructions) !== champion.revision)
@@ -165,7 +169,21 @@ export function validatedOptions(options) {
   return Object.freeze({ stateDir: path.resolve(options.stateDir), profileId: options.profileId,
     modelID: options.modelID, baseURL: base.href, origin: base.origin, observe: options.observe !== false,
     workflowScope, nodeBinary: options.nodeBinary ?? null,
+    toolOutputDir: options.toolOutputDir ? path.resolve(options.toolOutputDir) : null,
     champion: Object.freeze({ ...champion }) });
+}
+
+function nativeToolOutput(directory, given) {
+  if (!directory || typeof given !== 'string' || !/^tool_[A-Za-z0-9]+$/.test(path.basename(given)) ||
+      path.dirname(given) !== directory) return null;
+  try {
+    const folder = fs.lstatSync(directory), file = fs.lstatSync(given);
+    if (!folder.isDirectory() || folder.isSymbolicLink() || folder.uid !== process.getuid() ||
+        (folder.mode & 0o022) || fs.realpathSync(directory) !== directory ||
+        !file.isFile() || file.isSymbolicLink() || file.uid !== process.getuid() ||
+        file.nlink !== 1 || file.size > 2 * 1024 * 1024 || fs.realpathSync(given) !== given) return null;
+    return given;
+  } catch { return null; }
 }
 
 function ownedDirectory(directory, create = false) {
@@ -427,7 +445,7 @@ export default {
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
         verification: verificationLedger(), previousTracker: null, shellRepeat: null, checkpointRepo: null,
-        anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
+        toolOutputs: [], anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
         recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map() };
       const previous = path.join(folders.trackers, key + '.json');
@@ -441,6 +459,14 @@ export default {
         item.checkpointRepo = item.previousTracker.checkpoint_repo_sha256 ?? null;
         if (item.checkpointRepo !== null && !HASH.test(item.checkpointRepo))
           throw new Error('KRYN saved checkpoint fingerprint changed');
+        const outputs = item.previousTracker.tool_output_paths ?? [];
+        if (!Array.isArray(outputs) || outputs.length > MAX_TOOL_OUTPUTS ||
+            new Set(outputs).size !== outputs.length ||
+            outputs.some(output => typeof output !== 'string' ||
+              path.dirname(output) !== options.toolOutputDir ||
+              !/^tool_[A-Za-z0-9]+$/.test(path.basename(output))))
+          throw new Error('KRYN saved tool-output references changed');
+        item.toolOutputs = outputs;
         staleChecks(item); // A restarted process cannot attest that project files stayed unchanged.
       }
       else if (options.observe && existingPin) item.verification.complete = false; // Old/pruned history is not an empty proof ledger.
@@ -462,6 +488,7 @@ export default {
         task_id: item.turn?.task_id ?? item.previousTracker?.task_id ?? null, champion_revision: item.pin.revision,
         native_session_id: item.native_session_id, native_checkpoint_event: item.checkpoint,
         checkpoint_repo_sha256: item.checkpointRepo,
+        tool_output_paths: item.toolOutputs,
         state, counts: item.turn ? Object.fromEntries(Object.entries(item.turn).filter(([key]) => key !== 'started' && key !== 'task_id')) : item.previousTracker?.counts ?? {},
         verification: item.verification,
         updated_at: new Date().toISOString(),
@@ -692,6 +719,9 @@ export default {
         throw new Error('KRYN has not qualified local model WebSocket transport');
     });
     await ctx.permission.hook('evaluate', event => {
+      if (event.action === 'external_directory' && event.resources?.length === 1 &&
+          sessions.get(event.sessionID)?.toolOutputs.includes(event.resources[0]) &&
+          nativeToolOutput(options.toolOutputDir, event.resources[0])) event.effect = 'allow';
       if (event.agent === 'reviewer' && event.action === 'question') {
         event.effect = 'deny'; event.message = 'Reviewer must return findings without requesting user input.';
       }
@@ -809,6 +839,13 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      if (event.tool === 'subagent' && event.status === 'completed') {
+        const output = nativeToolOutput(options.toolOutputDir, event.result?.metadata?.outputPath);
+        if (output) {
+          item.toolOutputs = [...item.toolOutputs.filter(file => file !== output), output].slice(-MAX_TOOL_OUTPUTS);
+          tracker(item);
+        }
+      }
       if (event.tool === 'edit' && event.id) {
         const beforeEdit = item.pendingEdits.get(event.id);
         item.pendingEdits.delete(event.id);

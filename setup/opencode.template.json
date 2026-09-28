@@ -618,6 +618,7 @@
       "package": "__KRYN_PLUGIN__",
       "options": {
         "stateDir": "__KRYN_STATE__",
+        "toolOutputDir": "__ROOT__/xdg/data/opencode/tool-output",
         "nodeBinary": "__NODE__",
         "profileId": "__PROFILE_ID__",
         "modelID": "Qwen3.5-9B-6bit",
