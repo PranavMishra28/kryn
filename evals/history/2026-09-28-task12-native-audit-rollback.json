@@ -17,13 +17,13 @@
     "diagnostics": ["evals/runs/green-20260928-audit-output37aa", "evals/runs/green-20260928-hook-product"],
     "observed_order": "KRYN execute.after receives the complete child result before OpenCode truncates it. OpenCode later emits session.tool.success with metadata.outputPath and saves the full text.",
     "rejected_candidates": ["081f84e", "37aa508", "351b8cd"],
-    "installed_351_trial": "evals/runs/green-20260928-native-handoff351/evidence/audit-handoff2: native Audit delegated a fresh Reviewer; the exact saved tool-output path was recorded in KRYN's private tracker, yet the parent read and glob both failed with Permission denied: external_directory. A hook-level allow did not override native permission evaluation.",
+    "installed_351_trial": "evals/runs/green-20260928-native-handoff351/evidence/audit-handoff2: native Audit delegated a fresh Reviewer; the exact saved tool-output path was recorded in KRYN's private tracker, yet the parent read and glob both failed with Permission denied: external_directory. This disposable trial sets an explicit external-directory deny, which the hook-level allow did not override; ordinary daily Ask behavior was not qualified.",
     "decision": "Removed the ineffective saved-path grant and its configuration, tracker field and tests. Do not count the native child report as readable across truncation/restart. The parent honestly reported the denied read."
   },
   "retained_fix": {
     "source": "75bbce8fdc725cc8af2de2f8c55e88e310fbfcba",
     "change": "Audit accepts the native tool's empty optional sessionID as a fresh child and removes that field before delegation; nonempty or null reuse remains denied.",
-    "evidence": "Targeted regression and 191 Python plus 69 Node tests passed; frozen suite and clean wheel package smoke passed. The 351 native Audit trial showed a fresh Reviewer completed with this retained fix."
+    "evidence": "Targeted regression and 191 Python plus 69 Node tests passed; frozen suite and clean wheel package smoke passed. On installed 75bbce8, evals/runs/green-20260928-audit75/evidence/audit-child completed in 37.86 seconds with a fresh native Reviewer and no guard intervention. This narrow delegation check does not qualify review accuracy or truncated-report reading."
   },
   "owner_private_install": {
     "source": "75bbce8fdc725cc8af2de2f8c55e88e310fbfcba",
