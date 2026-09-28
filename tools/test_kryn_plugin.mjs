@@ -1043,7 +1043,7 @@ test('a completed native child grants only its exact owned output file across re
     f.call('permission.evaluate', request); assert.equal(request.effect, 'deny');
     f.call('tool.execute.after', { sessionID: 'ses_1', messageID: 'msg_1', id: 'call_1',
       agent: 'audit', tool: 'subagent', status: 'completed', input: { agent: 'reviewer' },
-      result: { metadata: { outputPath: output } } });
+      result: { metadata: { metadata: { outputPath: output }, content: [{ type: 'text', text: 'truncated' }] } } });
     request = permission('ses_1', output);
     f.call('permission.evaluate', request); assert.equal(request.effect, 'allow');
     for (const [id, file] of [['ses_1', unrelated], ['ses_other', output]]) {

@@ -840,7 +840,8 @@ export default {
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
       if (event.tool === 'subagent' && event.status === 'completed') {
-        const output = nativeToolOutput(options.toolOutputDir, event.result?.metadata?.outputPath);
+        const output = nativeToolOutput(options.toolOutputDir,
+          event.result?.metadata?.metadata?.outputPath ?? event.result?.metadata?.outputPath);
         if (output) {
           item.toolOutputs = [...item.toolOutputs.filter(file => file !== output), output].slice(-MAX_TOOL_OUTPUTS);
           tracker(item);
