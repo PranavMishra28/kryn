@@ -11,7 +11,7 @@
     "merged_source_ci": "PR #118 and PR #119 offline-and-package checks passed",
     "private_source": "make check and make package-smoke passed: 177 setup, 21 tool and 57 Node tests, native driver self-check, frozen verify and selftest, 48-file clean wheel",
     "activation": "PASS: receipt source 94cf9bc, guarded 65536/16 GiB idle runtime, deep doctor verified pinned model and browser files, browser/search MCP connected, local protocol smoke passed",
-    "native_picker": "PASS: installed native inventory exposed local/qwen and eight current opencode catalog models; only agent, plan and ask were visible primary roles; saved build/audit remained hidden",
+    "native_picker": "PASS: installed native inventory exposed local/qwen and eight current opencode catalog models; actual /agents TTY picker listed only agent, plan and ask; saved build/audit remained hidden",
     "terminal": "PASS: actual TTY launch showed KRYN glyph and three progress stages before OpenCode; permission footer had no locked label",
     "permission_roundtrip": "PASS: /permissions switched saved autoaccept to prompt and footer Auto to Ask without restart, then restored saved autoaccept and footer Auto",
     "interactive_other_model": "PASS: native /models selected LongCat 2.5 Preview Free; exported disposable session had assistant text OK and succeeded outcome",
