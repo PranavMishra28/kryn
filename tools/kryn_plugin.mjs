@@ -725,6 +725,14 @@ export default {
         throw new Error('KRYN Browse tool is outside the qualified surface');
       if (event.tool === 'shell' && masksCheckFailure(event.input?.command))
         throw new Error('KRYN refuses a check command whose fallback or output pipeline hides failure. Run the check by itself, then inspect its exit status.');
+      // Native background jobs are persistent only when no timeout is supplied.
+      // The model repeatedly gave dev servers a short foreground-style timeout,
+      // then mistook the resulting shutdown for an application failure.
+      if (event.tool === 'shell' && event.input?.background === true &&
+          Object.hasOwn(event.input, 'timeout')) {
+        event.input = { ...event.input };
+        delete event.input.timeout;
+      }
       // A discovered PID may belong to an operator-owned fixture.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
           directProcessSignal(event.input.command))
