@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-27",
+  "scope": "Read-only release discovery and isolated OpenCode 2.0.10 TUI with a synthetic release response; no owner install, runtime/model change, inference, tag or release publication",
+  "base_revision": "84eb07fffc095dd39545b862936d3d471b8a1e8e",
+  "source_sha256": {
+    "src/kryn/updates.py": "2e1ea303422b4bd7ac1cea908fa3dc8db64bbb5996951e0dc9d9751633ceed3a",
+    "tools/update_notice.mjs": "92ed25b80055d17441aff8e00e39254faaf8b22bf3ffe51f95e3a5c44819ed1f",
+    "tools/kryn_tui.tsx": "cef6cb7f02bf0ea5e6ef963123c578917099f79944d9f94f0676a0775c29b21a"
+  },
+  "offline_checks": {
+    "release_discovery": "PASS: newer numeric version, same-version private commit, older release, draft/unpublished/main, missing assets, failed SHA256, dirty/mismatched manifest, unsafe wheel, network failure, sanitized notes, CLI read-only path",
+    "notification": "PASS: startup/idle, busy children, result arriving mid-turn, repeated checks, persistent Later, manual command only, failure cooldown, cleanup cancellation, actual subprocess arguments",
+    "older_client_inspection": "PASS: a receipt-verified client without update_notice.mjs remains inspectable"
+  },
+  "live_public_release": {
+    "simulated_installed_version_0_1_10": "current; no wheel fetched",
+    "simulated_installed_version_0_1_9": "available after existing updater SHA256 and payload-manifest verification",
+    "tag": "v0.1.10",
+    "source_revision": "e9c90ff6fe41cae6ef17f7fecdd2e2adf2f54246",
+    "wheel_sha256": "8d41f4cdf64b15546a5ded3d1a26d65cbf28194246a3afbbc65802466135059f",
+    "installed": false
+  },
+  "native_tui": {
+    "client": "2.0.10",
+    "state": "isolated XDG config/data/state/cache and disposable project; CLI-only plugin",
+    "release": "Synthetic v0.1.11 response; not a published build",
+    "startup_toast": "PASS; one restrained notice, no automatic modal",
+    "command": "PASS; /update has one KRYN entry after shadowing opencode.update with the supported priority-100 keymap layer",
+    "dialog": "PASS; exact version and full commit, short summary, Update instructions and Later",
+    "manual_action": "PASS; exact kryn update v0.1.11 shown with exit/resume/rollback instructions; no command executed",
+    "later": "PASS; returns to prompt",
+    "initial_rejected_registration": "kryn.update left native Update OpenCode as a competing slash action; corrected to opencode.update before final verification"
+  },
+  "remaining_gates": [
+    "Owner-installed end-to-end notification through the packaged launcher",
+    "Actual future published release activation and rollback after explicit exit",
+    "Existing coding/UI, semantic continuity, clean KRYN-scoped install, useful context-tier and active endurance gates"
+  ],
+  "release_state": "Public releases paused; learning worker unchanged and paused",
+  "owner_installation_observation": {
+    "read_only": true,
+    "active_source_revision": "094fd9b9459315780f90b7c6038d7044ab63db44",
+    "active_and_deployment_interpreter": "same stable retained private-candidate interpreter",
+    "deep_doctor": "Reported passing by owner/main chat after moving the candidate; not repeated in this slice",
+    "modified": false
+  }
+}

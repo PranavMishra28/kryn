@@ -28,11 +28,16 @@ def product_plugin_files(project):
     """The same plugin bytes for source packaging and deployed-client validation."""
     project = Path(project)
     if (project / "plugin/server.js").is_file():
+        # Source inspection also reads receipt-verified clients from before notices.
+        names = ("package.json", "permission_display.mjs", "server.js", "tui.tsx")
+        if (project / "plugin/update_notice.mjs").is_file():
+            names += ("update_notice.mjs",)
         return {name: (project / "plugin" / name).read_bytes()
-                for name in ("package.json", "permission_display.mjs", "server.js", "tui.tsx")}
+                for name in names}
     return {"server.js": (project / "tools/kryn_plugin.mjs").read_bytes(),
             "tui.tsx": (project / "tools/kryn_tui.tsx").read_bytes(),
             "permission_display.mjs": (project / "tools/permission_display.mjs").read_bytes(),
+            "update_notice.mjs": (project / "tools/update_notice.mjs").read_bytes(),
             "package.json": b'{"private":true,"type":"module","exports":{".":"./server.js","./tui":"./tui.tsx"}}\n'}
 
 

@@ -473,6 +473,25 @@ class KrynChecks(unittest.TestCase):
                         self.assertRaisesRegex(RuntimeError, 'Unexpected installed release contents'):
                     localai.verify_release(current=True)
 
+            # Adding a notice module must not break source inspection of older clients.
+            (legacy_directory / 'plugin/update_notice.mjs').unlink()
+            legacy_files.pop('plugin/update_notice.mjs')
+            old_id = hashlib.sha256(json.dumps(legacy_files, sort_keys=True).encode()).hexdigest()[:16]
+            old_directory = root / 'client' / old_id
+            legacy_directory.rename(old_directory)
+            plugin_files = localai.product_plugin_files(old_directory)
+            plugin_id = hashlib.sha256(b''.join(plugin_files[name] for name in sorted(plugin_files))).hexdigest()[:16]
+            plugin_directory = root / 'plugins' / plugin_id
+            plugin_directory.mkdir()
+            for name, data in plugin_files.items(): (plugin_directory / name).write_bytes(data)
+            old_manifest = {**legacy_manifest, 'release': old_id, 'directory': str(old_directory),
+                            'files': legacy_files, 'plugin_directory': str(plugin_directory)}
+            (root / 'client/deployment.json').write_text(json.dumps(old_manifest))
+            with patch.object(localai, 'ROOT', root):
+                self.assertEqual(localai.verify_release(current=False), old_manifest)
+                self.assertEqual(next(p for p in localai.expected_config(old_directory)['plugins']
+                                      if isinstance(p, dict))['package'], str(plugin_directory))
+
     def test_source_inspection_uses_the_verified_installed_release_profile(self):
         with tempfile.TemporaryDirectory() as directory:
             installed = Path(directory)

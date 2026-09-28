@@ -35,8 +35,12 @@ def main():
             uninstall()
             return
         if args and args[0] == "update":
+            if args == ["update", "--check"]:
+                from .updates import check_update
+                print(json.dumps(check_update(verify_payload())))
+                return
             if len(args) != 2 or not args[1].startswith("v"):
-                raise RuntimeError("Usage: kryn update vX.Y.Z")
+                raise RuntimeError("Usage: kryn update vX.Y.Z | kryn update --check")
             verify_payload()
             subprocess.run([sys.executable, "-E", "-B", str(payload() / "install-kryn.py"),
                             "--tag", args[1]], check=True)

@@ -3,10 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createSignal } from 'solid-js';
 import { permissionLabel } from './permission_display.mjs';
+import { setupUpdates } from './update_notice.mjs';
 
 export default {
   id: 'kryn.controls',
   setup(context) {
+    const updates = setupUpdates(context);
     const launch = process.env.KRYN_PERMISSION_MODE;
     const file = path.join(process.env.XDG_CONFIG_HOME ?? '', 'opencode', 'cli.json');
     const read = () => {
@@ -33,6 +35,10 @@ export default {
         id: 'kryn.permissions', title: 'KRYN: permission settings', group: 'KRYN',
         palette: true, slash: { name: 'permissions' }, run: open,
       }, {
+        // Shadow the native updater as well as its slash alias: OpenCode stays pinned.
+        id: 'opencode.update', title: 'KRYN: check for a verified update', group: 'KRYN',
+        palette: true, slash: { name: 'update' }, run: updates.open,
+      }, {
         id: 'session.share', title: 'KRYN: export this session locally', group: 'KRYN',
         palette: true, slash: { name: 'share' }, run: () => {
           context.ui.toast.show({ message: 'OpenCode V2 has no public share link. Opening a local session export; review it before sending.',
@@ -42,6 +48,6 @@ export default {
       }] }));
       return null;
     } });
-    return () => { clearInterval(timer); removeSlot(); removeCommand(); };
+    return () => { updates.dispose(); clearInterval(timer); removeSlot(); removeCommand(); };
   },
 };
