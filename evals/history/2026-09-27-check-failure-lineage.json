@@ -1,0 +1,12 @@
+{
+  "scope": "Bounded native check history across recheck, compaction and client restart; public release paused",
+  "problem": "The observed-check ledger keyed a command and workdir to one record, so a later zero exit replaced its earlier failed result. A restarted handoff could omit that failed-then-rechecked lineage.",
+  "change": "Retain one previous failed receipt per check key, including native message ID, time, exit code and allowlisted diagnostic. Keep raw command arguments and output outside the private tracker. A later pass or stale state displays the earlier failure separately from current unresolved checks and from application acceptance.",
+  "validation": {
+    "plugin_regression": "PASS: same check fails, then exits zero, compacts, restarts and exposes the prior failed message and later stale observation; legacy tracker loading also passes",
+    "offline_suite": "PASS: make check",
+    "clean_package_smoke": "PASS: source cb6fbf532cef04d8a847631633f24e56b7c79157, same version 0.1.10"
+  },
+  "limits": "No native model trial or installed-owner candidate was run for this change. This preserves a bounded provenance receipt; it does not make model status answers accurate, prove Task12 browser acceptance, qualify a higher context tier, or close endurance and second-account inference gates.",
+  "public_release": "PAUSED"
+}

@@ -173,6 +173,9 @@ test('observed checks survive compaction and restart without promoting prose or 
     run('npm test', { exit: 0 });
     assert.equal(checks().checks.length, 1, 'only the identical command and directory resolves its debt');
     assert.equal(checks().checks[0].state, 'passed');
+    assert.deepEqual(checks().checks[0].previous_failure, {
+      message_id: 'msg_1', observed_at: checks().checks[0].previous_failure.observed_at,
+      exit_code: 1, diagnostic: 'nonzero exit' });
     f.call('session.compaction', context());
     assert.equal(checks().checks[0].state, 'passed', 'compaction does not erase execution evidence');
     f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'edit', input: { path: 'app.js' } });
@@ -185,6 +188,8 @@ test('observed checks survive compaction and restart without promoting prose or 
     assert.ok(event.system.some(item => item.text.includes('Stale alone is not unresolved debt or a rerun demand')));
     assert.ok(event.system.some(item => item.text.includes('Historical stale check references') &&
       item.text.includes('previously passed; current result unknown') && item.text.includes('at msg_')));
+    assert.ok(event.system.some(item => item.text.includes('Earlier failed checks with later exit observations') &&
+      item.text.includes('failed at msg_1') && item.text.includes('later stale at msg_3')));
     run('npm test', { exit: 0 });
     f.call('session.prompt', { sessionID: 'ses_1' });
     assert.equal(checks().checks[0].state, 'stale');
@@ -215,6 +220,26 @@ test('failed checks retain bounded classifications across restart without raw ou
   } finally { await cleanup(); f.remove(); }
 });
 
+test('restart guidance includes a recently rechecked older command within its four receipts', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const commands = ['npm test', 'npm test -- second', 'npm test -- third',
+      'npm test -- fourth', 'npm test -- fifth'];
+    let serial = 0;
+    for (const command of commands) {
+      shellRun(f, command, 'FAIL: first attempt', ++serial, {}, true, 1);
+      shellRun(f, command, 'ok', ++serial);
+    }
+    await new Promise(resolve => setTimeout(resolve, 5));
+    shellRun(f, commands[0], 'ok', ++serial);
+    const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', event);
+    const text = event.system.map(part => part.text).join('\n');
+    assert.match(text, /Earlier failed checks with later exit observations/);
+    assert.match(text, /later passed at msg_11/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('legacy observed-check records load with unknown diagnostic detail', async () => {
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   try {
@@ -225,7 +250,7 @@ test('legacy observed-check records load with unknown diagnostic detail', async 
     const file = path.join(folder, fs.readdirSync(folder)[0]);
     const saved = JSON.parse(fs.readFileSync(file));
     const check = saved.verification.checks[0];
-    delete check.runner; delete check.exit_code; delete check.diagnostic;
+    delete check.runner; delete check.exit_code; delete check.diagnostic; delete check.previous_failure;
     fs.writeFileSync(file, JSON.stringify(saved), { mode: 0o600 });
     cleanup = await plugin.setup(f.ctx);
     const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
