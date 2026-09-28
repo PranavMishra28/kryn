@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-28",
+  "scope": "Owner private 96K memory-limit incident and guarded synthetic probes; no public release or sustained coding qualification",
+  "incident": {
+    "observed": "The native session reported a prefill projection of 17.35 GB above the 16 GB profile's 15.2 GB hard watermark, then a later request aborted at 15.7 GB process usage.",
+    "session_report": "Native report: 90,017 maximum recorded prompt tokens, four completed compactions, two failed executions and 86 tool errors. This is a long, failed coding session, not an accepted application.",
+    "separate_project_failure": "The interrupted project retained an app_csv.py SyntaxError; no project repair or application acceptance is claimed."
+  },
+  "configuration_trial": {
+    "model": "Qwen3.5-9B-6bit",
+    "context_tokens": 98304,
+    "host_ram_gib": 48,
+    "model_memory_ceiling_gib_selected": 22,
+    "host_guard": "Abort on critical host pressure, two sustained warning samples, or more than 512 MiB swap growth; 2-second resource samples in these probes"
+  },
+  "guarded_probes": [
+    {
+      "temporary_ceiling_gib": 20,
+      "input_tokens": 90000,
+      "actual_input_tokens": 90000,
+      "cached_tokens": 0,
+      "synthetic_retrieval": "PASS",
+      "wall_seconds": 150.218896,
+      "max_sampled_process_footprint_bytes": 18966044256,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0,
+      "power": "Battery Power",
+      "private_raw_metrics": "~/Library/Application Support/LocalAI/runs/context-20260928T153642Z-02a3ac9f/metrics.json"
+    },
+    {
+      "temporary_ceiling_gib": 22,
+      "input_tokens": 94000,
+      "actual_input_tokens": 94000,
+      "cached_tokens": 0,
+      "synthetic_retrieval": "PASS",
+      "wall_seconds": 158.798289,
+      "max_sampled_process_footprint_bytes": 16546225496,
+      "pressure_levels": [1],
+      "swap_peak_growth_bytes": 0,
+      "power": "Battery Power",
+      "private_raw_metrics": "~/Library/Application Support/LocalAI/runs/context-20260928T154005Z-a1b843de/metrics.json"
+    }
+  ],
+  "decision": "Raise the private 96K oMLX ceiling from 16 to 22 GiB, retain the separate host-pressure and swap guard, and keep the previous private build for rollback. Process footprint varies with cache state; neither probe proves near-limit safety for sustained coding, compaction quality, or application correctness."
+}
