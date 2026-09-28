@@ -38,8 +38,7 @@ SERVER_CONTEXT = 49152
 MEMORY_GIB = 16
 OMLX = Path.home() / "Applications/oMLX.app/Contents/MacOS/omlx-cli"
 CONTROL = Path.home() / "Library/Application Support/oMLX/control.sock"
-POLICY = [{"action": "provider.use", "resource": "*", "effect": "deny"},
-          {"action": "provider.use", "resource": "local", "effect": "allow"}]
+POLICY = []
 CONTROLS = """KRYN controls (no model or server needed for this help)
 
 In your shell:
@@ -57,6 +56,8 @@ In your shell:
 Inside the terminal interface:
   /agents   or Ctrl+X then A   Choose Ask, Plan or Agent
   /effort   or Ctrl+T          Switch Default (thinking on) / Fast (thinking off)
+  /models                     Choose a native OpenCode model for this session
+  /connect                    Connect an optional OpenCode provider
   /settings                   Display, reasoning visibility and permission settings
   /permissions                Open settings from the visible permission indicator
   /web      (also /pair)       Show the local GUI address and temporary credentials
@@ -76,6 +77,8 @@ in the browser and use Cmd+Tab to switch. Finish or interrupt the current turn
 before submitting from the other interface; unsent drafts are not synchronized.
 The pairing password is temporary and local: do not share the link or QR code.
 GUI permissions are separate; terminal --auto is not a global GUI permission mode.
+Local Qwen stays the default. Other providers require your own explicit
+connection and selection, and may send task data or charge fees.
 
 Default launches use the saved native permission setting, initially prompts.
 Switch it in /settings > Permissions without restarting. --permissions ask
@@ -98,6 +101,14 @@ def local_reference(ref, *, legacy=False):
     return (isinstance(ref, dict) and ref.get("providerID") == "local"
             and ref.get("id", ref.get("model")) == "qwen"
             and ref.get("variant") in variants | {None})
+
+
+def selected_reference(ref):
+    """Accept a native session's selected model without treating it as a local route."""
+    if not isinstance(ref, dict):
+        return False
+    provider, model = ref.get("providerID"), ref.get("id", ref.get("model"))
+    return all(isinstance(value, str) and 0 < len(value) <= 256 for value in (provider, model))
 
 
 def expected_config(project=None):
@@ -131,7 +142,8 @@ def reference_variant(ref):
 
 
 def same_reference(left, right):
-    return local_reference(left) and local_reference(right) and reference_variant(left) == reference_variant(right)
+    return ((left is None and right is None) or
+            local_reference(left) and local_reference(right) and reference_variant(left) == reference_variant(right))
 
 
 def validate_defaults(config, expected):
@@ -178,7 +190,7 @@ def validate_owned_config(config, project=None):
     validate_defaults(config, expected_profile)
     rules = [p for p in config.get("experimental", {}).get("policies", [])
              if p.get("action") == "provider.use"]
-    require(rules == POLICY, "Owned global config needs deny-all/allow-local provider policy")
+    require(rules == POLICY, "Owned config must leave native provider choice available")
     plugins = config.get("plugins", [])
     require(plugins == expected_profile["plugins"],
             "Owned plugin policy changed; review before launch")
@@ -187,8 +199,6 @@ def validate_owned_config(config, project=None):
     for section in ("agents", "commands"):
         require(set(config.get(section, {})) == set(expected_profile[section]),
                 f"Owned {section} catalog differs from this release")
-        for name, item in config.get(section, {}).items():
-            require(local_reference(item.get("model")), f"Owned {section}/{name} must pin local/qwen")
         for name, item in expected_profile[section].items():
             require(same_reference(config.get(section, {}).get(name, {}).get("model"), item.get("model")),
                     f"Expected release model reference for {section}/{name}")
@@ -416,19 +426,17 @@ def records(response):
 def validate_inventory(inventory):
     expected_profile = expected_config()
     providers, models = records(inventory["providers"]), records(inventory["models"])
-    require(len(providers) == 1 and providers[0].get("id") == "local",
-            "Effective provider inventory is not exclusively local")
-    require(len(models) == 1 and models[0].get("providerID") == "local"
-            and models[0].get("id") == "qwen", "Effective model inventory is not exclusively local/qwen")
-    validate_route(providers[0], models[0])
-    for agent in records(inventory["agents"]):
-        require(agent.get("model") is None or local_reference(agent["model"]),
-                f"Agent {agent.get('id')} selects a nonlocal/unexpected model")
+    local_providers = [item for item in providers if item.get("id") == "local"]
+    local_models = [item for item in models if item.get("providerID") == "local"]
+    require(len(local_providers) == 1 and len(local_models) == 1 and local_models[0].get("id") == "qwen",
+            "Managed local model is missing or ambiguous")
+    validate_route(local_providers[0], local_models[0])
     agents = {item.get("id"): item for item in records(inventory["agents"])}
     for name, item in expected_profile["agents"].items():
         ref = agents.get(name, {}).get("model")
-        require(same_reference(ref, item["model"]),
-                f"Effective agent {name} differs from this release's default model reference")
+        if item.get("model") is not None:
+            require(same_reference(ref, item["model"]),
+                    f"Effective agent {name} differs from this release's default model reference")
     # The command API exposes names/descriptions, not model refs; fold authored config instead.
     commands = {}
     defaults = {}
@@ -455,12 +463,10 @@ def validate_inventory(inventory):
             for name, item in info.get("commands", {}).items():
                 commands[name] = item  # Native command registration replaces the whole definition.
     validate_defaults(defaults, expected_profile)
-    for name, item in commands.items():
-        require(item.get("model") is None or local_reference(item["model"]),
-                f"Command {name} selects a nonlocal/unexpected model")
     for name, item in expected_profile["commands"].items():
-        require(same_reference(commands.get(name, {}).get("model"), item.get("model")),
-                f"Effective command {name} differs from this release's model reference")
+        if item.get("model") is not None:
+            require(same_reference(commands.get(name, {}).get("model"), item["model"]),
+                    f"Effective command {name} differs from this release's model reference")
         require(all(commands[name].get(key) == item.get(key) for key in ("agent", "subagent")),
                 f"Effective command {name} differs from this release's routing")
 
@@ -544,7 +550,7 @@ def interrupt_owned_sessions(server):
         require(re.fullmatch(r"ses_[A-Za-z0-9]+", sid), "Unexpected active session identifier")
         info = request("GET", "/api/session/" + sid).get("data", {})
         require(info.get("id") == sid and Path(info.get("location", {}).get("directory", "")).resolve() == server.directory
-                and local_reference(info.get("model"), legacy=True), "Refusing to interrupt an unrelated native session")
+                and selected_reference(info.get("model")), "Refusing to interrupt an unrelated native session")
         response = request("POST", "/api/session/" + sid + "/interrupt", {})
         require(type(response.get("interrupted")) is bool, "Native session interruption was not acknowledged")
 
@@ -722,7 +728,7 @@ def self_check():
         elif change == "variant":
             model["variants"][0]["settings"]["baseURL"] = "https://example.invalid/v1"
         elif change == "policy":
-            altered["experimental"]["policies"].reverse()
+            altered["experimental"]["policies"].append({"action": "provider.use", "resource": "*", "effect": "deny"})
         elif change == "reference":
             altered["agents"]["plan"]["model"] = "openai/remote"
         elif change == "global_skills":
@@ -741,18 +747,14 @@ def self_check():
     model = provider.pop("models")["qwen"]
     example = {"providers": {"data": [{"id": "local", **provider}]},
                "models": {"data": [{"id": "qwen", "providerID": "local", **model}]},
-               "agents": {"data": [{"id": name, "model": item["model"]}
+               "agents": {"data": [{"id": name, "model": item.get("model")}
                                     for name, item in config["agents"].items()]},
                "config": [{"type": "document", "info": config}]}
     validate_inventory(example)
     example["providers"]["data"].append({"id": "cloud"})
-    try:
-        validate_inventory(example)
-    except RuntimeError:
-        pass
-    else:
-        raise AssertionError("Failed to reject extra effective provider")
-    print("Offline self-check passed: local routing, variants, provider policy and model references.")
+    example["models"]["data"].append({"providerID": "cloud", "id": "optional"})
+    validate_inventory(example)
+    print("Offline self-check passed: managed local routing, optional providers and model references.")
 
 
 def run(args, outcome):
@@ -855,7 +857,7 @@ def run(args, outcome):
                 if isinstance(getattr(args, "session", None), str):
                     selected = server.request("GET", "/api/session/" + args.session).get("data", {})
                     require(selected.get("id") == args.session and selected.get("location", {}).get("directory") == str(project)
-                            and local_reference(selected.get("model"), legacy=True), "Resume session must belong to this local project")
+                            and selected_reference(selected.get("model")), "Resume session must belong to this project")
                     executable.extend(["--session", args.session])
             outcome["failure_code"] = "resource"
             invoked = True

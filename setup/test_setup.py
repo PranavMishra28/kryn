@@ -260,11 +260,13 @@ class SetupChecks(unittest.TestCase):
         document["model"] = reference(document["model"])
         for section in ("agents", "commands"):
             for item in document[section].values():
-                item["model"] = reference(item["model"])
+                if "model" in item:
+                    item["model"] = reference(item["model"])
         provider = copy.deepcopy(config["providers"]["local"])
         model = provider.pop("models")["qwen"]
         model.update(id="qwen", providerID="local", enabled=True, status="active", cost=[], time={"released": 0})
-        agents = [{"id": name, "model": {"id": "qwen", "providerID": "local", "variant": reference(item["model"])["variant"]}}
+        agents = [{"id": name, "model": {"id": "qwen", "providerID": "local", "variant": reference(item["model"])["variant"]}
+                   if "model" in item else None}
                   for name, item in config["agents"].items()]
         inventory = {"providers": {"data": [{"id": "local", **provider}]}, "models": {"data": [model]},
                      "agents": {"data": agents}, "config": [{"type": "document", "info": {"compaction": {"buffer": 1}}},
@@ -284,8 +286,7 @@ class SetupChecks(unittest.TestCase):
             (("config", 2, "info", "tool_output", "max_bytes"), 51200),
             (("config", 2, "info", "tool_output", "max_lines"), 2000),
             (("config", 2, "info", "default_agent"), "plan"),
-            (("config", 2, "info", "model", "variant"), "low"),
-            (("config", 2, "info", "commands", "review", "model", "variant"), "fast"),
+            (("config", 2, "info", "model", "variant"), "fast"),
             (("config", 2, "info", "commands", "audit", "agent"), "build"),
             (("config", 2, "info", "commands", "audit", "subagent"), False),
         ]
@@ -297,6 +298,10 @@ class SetupChecks(unittest.TestCase):
             target[keys[-1]] = value
             with self.subTest(path=keys), self.assertRaises(RuntimeError):
                 localai.validate_inventory(changed)
+        optional = copy.deepcopy(inventory)
+        optional["providers"]["data"].append({"id": "fixture"})
+        optional["models"]["data"].append({"providerID": "fixture", "id": "other"})
+        localai.validate_inventory(optional)
         expected = config["compaction"]
         for partial in ({"buffer": expected["buffer"]}, {"keep": {"tokens": expected["keep"]["tokens"]}},
                         {"auto": expected["auto"]}, {"keep": {}}):
@@ -1143,7 +1148,7 @@ class SetupChecks(unittest.TestCase):
             return result
         json.loads((setup.HERE / 'opencode.template.json').read_text(), object_pairs_hook=unique)
 
-    def test_config_uses_only_explicit_local_models_and_correct_budgets(self):
+    def test_config_keeps_managed_local_default_and_allows_native_model_choice(self):
         root = self.root / 'A space and "quote"'
         cfg = setup.render(root, self.root / "node")
         model = cfg["providers"]["local"]["models"]["qwen"]
@@ -1161,8 +1166,8 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg['agents']['agent']['mode'], 'primary')
         self.assertNotIn('system', cfg['agents']['agent'])  # Native provider prompt remains in effect.
         self.assertEqual(cfg['agents']['ask']['mode'], 'primary')
-        self.assertEqual(cfg['agents']['ask']['model'], 'local/qwen#fast')
-        self.assertEqual(cfg['agents']['plan']['model'], 'local/qwen')
+        self.assertNotIn('model', cfg['agents']['ask'])
+        self.assertNotIn('model', cfg['agents']['plan'])
         self.assertIn({'action': 'edit', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
         self.assertIn({'action': 'shell', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
         self.assertEqual(cfg['agents']['browse']['mode'], 'subagent')
@@ -1198,8 +1203,12 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg["agents"]["audit"]["permissions"], cfg["agents"]["reviewer"]["permissions"] + [
             {"action": "subagent", "resource": "reviewer", "effect": "allow"}])
         self.assertEqual(cfg["providers"]["local"]["settings"]["baseURL"], "http://127.0.0.1:8000/v1")
-        self.assertTrue(all(a["model"] in {"local/qwen", "local/qwen#fast"} for a in cfg["agents"].values()))
-        self.assertTrue(all(c["model"] in {"local/qwen", "local/qwen#fast"} for c in cfg["commands"].values()))
+        self.assertEqual(cfg['model'], 'local/qwen')
+        self.assertTrue(all('model' not in cfg['agents'][name] for name in ('agent', 'ask', 'plan', 'explore', 'general', 'reviewer', 'browse')))
+        self.assertTrue(all('model' not in command for command in cfg['commands'].values()))
+        self.assertNotIn('-opencode.models.dev', cfg['plugins'])
+        self.assertNotIn('-opencode.provider.*', cfg['plugins'])
+        self.assertEqual(cfg['experimental']['policies'], [])
         self.assertFalse(cfg["mcp"]["servers"]["search"]["oauth"])
         self.assertNotIn("agent_run", cfg["mcp"]["servers"]["search"]["url"])
         self.assertIn(str(root / "browser/node_modules/@playwright/mcp/cli.js"), cfg["mcp"]["servers"]["browser"]["command"])

@@ -251,12 +251,13 @@ class KrynChecks(unittest.TestCase):
                 localai.improvement._outcome({**outcome, 'command': 'run', 'status': 'incomplete',
                                              'wall_seconds': 1, field: value})
 
-    def test_explicit_resume_requires_matching_session_project_and_local_model(self):
+    def test_explicit_resume_accepts_native_model_choice_in_owned_project(self):
         project = str(Path.cwd().resolve())
         valid = {'id': 'ses_owned', 'location': {'directory': project},
                  'model': {'providerID': 'local', 'id': 'qwen'}}
-        for change in ({}, {'id': 'ses_other'}, {'location': {'directory': '/other'}},
-                       {'location': {}}, {'model': {'providerID': 'remote', 'id': 'qwen'}}):
+        for change in ({}, {'model': {'providerID': 'remote', 'id': 'other'}},
+                       {'id': 'ses_other'}, {'location': {'directory': '/other'}},
+                       {'location': {}}, {'model': {}}):
             server = Mock(env={}, url='http://127.0.0.1:12345')
             server.request.return_value = {'data': {**valid, **change}}
             owner = Mock(__enter__=Mock(return_value=server), __exit__=Mock(return_value=False))
@@ -269,7 +270,7 @@ class KrynChecks(unittest.TestCase):
                  patch.object(localai, 'mcp_status', return_value={}), \
                  patch.object(localai, 'guarded_run', return_value=0) as launch, \
                  patch.object(localai, 'await_runtime_idle'):
-                if change:
+                if change and change != {'model': {'providerID': 'remote', 'id': 'other'}}:
                     with self.assertRaisesRegex(RuntimeError, 'Resume session'):
                         localai.run(args, {})
                     launch.assert_not_called()

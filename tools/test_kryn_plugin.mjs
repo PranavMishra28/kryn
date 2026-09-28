@@ -777,12 +777,23 @@ test('strict loopback/model guards apply independently of request kind and hot-r
       f.call('session.model.request', { model, kind, baseURL: options.baseURL });
       assert.throws(() => f.call('session.model.request', { model, kind, baseURL: 'https://example.com/v1' }));
     }
-    assert.throws(() => assertLocal({ model: { providerID: 'cloud', id: 'qwen' }, baseURL: options.baseURL }, options));
+    const optional = { providerID: 'fixture', id: 'other' };
+    assert.equal(assertLocal({ model: optional, baseURL: 'https://example.invalid/v1' }, options), false);
+    f.call('session.model.request', { model: optional, kind: 'primary', baseURL: 'https://example.invalid/v1' });
+    const external = new Request('https://example.invalid/v1/chat/completions',
+      { method: 'POST', body: JSON.stringify({ model: 'other' }) });
+    const selected = { model: optional, request: external };
+    await f.call('session.http.request', selected);
+    assert.equal(selected.request, external, 'native provider request remains untouched');
+    assert.throws(() => assertLocal({ model: { providerID: 'local', id: 'other' }, baseURL: options.baseURL }, options));
+    assert.throws(() => assertLocal({ model: null, baseURL: options.baseURL }, options));
     await f.call('session.http.request', { model, request: new Request(options.baseURL + '/chat/completions',
       { method: 'POST', body: JSON.stringify({ model: 'test-Q4' }) }) });
     await assert.rejects(() => f.call('session.http.request', { model, request: new Request(options.baseURL + '/chat/completions',
       { method: 'POST', body: JSON.stringify({ model: 'wrong' }) }) }));
     assert.throws(() => f.call('session.experimental.ws.handshake', {}));
+    assert.throws(() => f.call('session.experimental.ws.handshake', { model }));
+    f.call('session.experimental.ws.handshake', { model: optional });
     for (const url of ['http://localhost:8000/v1', 'http://127.0.0.1/v1', 'http://127.0.0.1:8000/v1?secret=x', 'http://user@127.0.0.1:8000/v1'])
       assert.throws(() => validatedOptions({ ...f.ctx.options, inferenceBaseURL: url }));
     assert.equal(validatedOptions({ ...f.ctx.options, inferenceBaseURL: 'http://127.0.0.1:23456/v1' }).origin, 'http://127.0.0.1:23456');

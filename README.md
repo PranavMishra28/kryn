@@ -1,6 +1,6 @@
 # KRYN
 
-A local coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX, with coding, planning, review, browser and search tools in one installation.
+A coding workspace for Apple Silicon. KRYN connects OpenCode's terminal interface to Qwen running through oMLX by default, with coding, planning, review, browser and search tools in one installation. Other OpenCode providers are optional and selected by you.
 
 [Release v0.1.10](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.10) · [Security](SECURITY.md) · [MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
@@ -39,16 +39,20 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 | **Plan** | Inspect code and produce an actionable plan; only native OpenCode plan files may be written. |
 | **Agent** | Edit code, run approved commands and use browser tools to verify rendered results; thinking on by default. |
 
-Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the visible primary choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. Browser and review work remain available through child agents and `/review` or `/audit`, without adding picker modes. Old saved Build/Audit sessions retain their native IDs; choose Agent for new coding work.
+Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the visible primary choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. The local Qwen default uses bounded thinking; choose Fast when you want it. Browser and review work remain available through child agents and `/review` or `/audit`, without adding picker modes. Old saved Build/Audit sessions retain their native IDs; choose Agent for new coding work.
 
 | Choice in OpenCode | Actual model behavior | Use |
 |---|---|---|
 | **Default** | Thinking on, capped at 3,072 thinking tokens | Normal coding, debugging and review. |
 | **Fast** | Thinking off | Simple edits, quick questions and browser interaction. |
 
-There are only **two choices**. OpenCode always supplies a `Default` entry for the base model; KRYN makes that entry mean bounded thinking and adds only `Fast`. Medium/High/XHigh were our artificial budget presets, not distinct Qwen capabilities or measured quality levels, so they have been removed. There is no duplicate `Think` entry.
+For local Qwen there are only **two choices**. OpenCode supplies `Default` for the base model; KRYN makes that entry mean bounded thinking and adds only `Fast`. Medium/High/XHigh were artificial Qwen budget presets, not distinct model capabilities or measured quality levels, so they have been removed. Other providers expose their own native variants, if any.
 
 Qwen exposes `enable_thinking`; oMLX additionally supports a thinking-token cap. Thinking and the answer share the 8,192-token output limit. The cap keeps reasoning from consuming the whole response; it is not a guarantee of intelligence or runtime. “Show reasoning” in `/settings` changes visibility only, not whether the model thinks. Saved conversations remain available; removed effort selections fall back to Default in the native picker. Check the selection before continuing an older session.
+
+### Models and providers
+
+Qwen remains the installed local default. Inside KRYN, use **`/models`** to select another model for the current session. Use **`/connect`** to add an OpenCode provider; connected models then appear in the native picker. KRYN keeps its managed Qwen endpoint and resource guard exact while allowing those native choices. [OpenCode's provider guide](https://opencode.ai/v2/docs/providers) describes each provider's connection steps; availability and reasoning variants depend on that provider. KRYN does not supply credentials or a free quota. External providers can receive your prompts and project data and may charge you; local Qwen remains available without one. Custom project provider definitions are not yet admitted by KRYN's managed configuration overlay.
 
 Edits normally proceed without a separate approval; shell and browser actions can ask. Agent can use the connected browser directly or delegate Browse; browser actions retain the normal Ask/Auto permission setting, and unsafe browser code remains denied. For a trusted project, explicitly opt into native automatic approvals for one launch:
 
@@ -72,6 +76,8 @@ Type these commands **inside KRYN**, then press Enter:
 |---|---|
 | `/agents` | Switch between Ask, Plan and Agent without starting a different conversation. |
 | `/effort` | Switch Default (thinking) / Fast (no thinking), independently of the agent role. |
+| `/models` | Choose a model for this session through OpenCode's native picker. |
+| `/connect` | Connect an optional provider through OpenCode. |
 | `/settings` | Display controls, reasoning visibility and permissions (see launch modes above). |
 | `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |
@@ -87,7 +93,7 @@ After exiting, run `kryn stop` in Terminal if you also want to stop the idle mod
 
 ### Switch between terminal and GUI
 
-Both interfaces use the **same local OpenCode server, model, tools and saved sessions**. No separate desktop application or paid service is required.
+Both interfaces use the **same OpenCode server, selected model, tools and saved sessions**. No separate desktop application or paid service is required for local Qwen.
 
 1. From your project folder, run `kryn --web` (or `kryn --gui`). Add `--continue` to resume. The browser opens alongside the terminal.
 2. In the terminal, enter **`/web`**. Click the masked password to reveal it. In the browser’s sign-in dialog, use username **`opencode`** and that temporary password. Do not save it; it changes each launch.
@@ -197,7 +203,7 @@ KRYN warns after three consecutive foreground shell calls return the same comman
 
 Each file write is limited to 12,000 UTF-8 bytes; larger components should use smaller files or edits. If a top-level Agent or saved legacy Build response still hits the output limit, KRYN asks OpenCode to continue from saved state, at most twice per user prompt. Incomplete tool-call text is never executed as code. Continued work retains normal permission checks.
 
-Inference runs locally without a paid inference API. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
+The default Qwen inference runs locally without a paid inference API. Optional providers use their own pricing and data policies. Search queries and browser traffic use external services with their own availability and quotas; electricity, storage and hardware still have costs. See [Security](SECURITY.md) for data and permission boundaries.
 
 Version 0.1.10 is the first public-installation prerelease. It adds Agent and Ask primary modes, a guarded startup header, and compatibility with the tested Chrome 154 line. The [v0.1.10 qualification](evals/history/2026-09-25-v010/qualification.json) records anonymous public-asset verification, install/update/rollback/uninstall/reactivation and missing-launcher repair on the owner's existing stack, one installed Agent coding task passing its independent grader, deep dependency checks, and guarded inference. Two ten-minute UI Agent trials timed out; one generated page passed an independent browser outcome check afterward, but the Agent did not complete the task. The [earlier v0.1.9 qualification](evals/history/2026-09-22-production/qualification.json) records broader mechanism checks and failed application acceptance. These results do not prove clean non-owner installation, sustained engineering quality or frontier parity.
 

@@ -345,14 +345,17 @@ function shellIdentity(event, directory) {
 }
 const callHash = id => typeof id === 'string' && id.length > 0 && id.length <= 160 ? sha(id) : null;
 export function assertLocal(event, options, wire = false) {
-  if (event.model?.providerID !== 'local' || event.model?.id !== 'qwen')
-    throw new Error('KRYN blocked a nonlocal model role');
+  if (typeof event.model?.providerID !== 'string' || typeof event.model?.id !== 'string')
+    throw new Error('KRYN blocked an unknown model role');
+  if (event.model.providerID !== 'local') return false;
+  if (event.model.id !== 'qwen') throw new Error('KRYN blocked a changed local model role');
   const raw = wire ? event.request.url : event.baseURL;
   let url;
   try { url = new URL(raw); } catch { throw new Error('KRYN blocked an invalid model destination'); }
   if (url.origin !== options.origin || url.username || url.password || url.search || url.hash ||
       (wire ? url.pathname !== '/v1/chat/completions' : url.pathname !== '/v1'))
     throw new Error('KRYN blocked a changed model destination');
+  return true;
 }
 
 export default {
@@ -632,9 +635,10 @@ export default {
       const item = start(event.sessionID, 'retry-' + Date.now());
       item.turn.retries = count(item.turn.retries + 1); tracker(item);
     });
-    await ctx.session.hook('model.request', event => { assertHealthy(); assertLocal(event, options); });
+    await ctx.session.hook('model.request', event => { if (assertLocal(event, options)) assertHealthy(); });
     await ctx.session.hook('http.request', async event => {
-      assertHealthy(); assertLocal(event, options, true);
+      if (!assertLocal(event, options, true)) return;
+      assertHealthy();
       if (event.request.method !== 'POST') throw new Error('KRYN blocked unexpected model HTTP method');
       const body = await event.request.clone().json();
       if (body.model !== options.modelID) throw new Error('KRYN blocked a changed runtime model ID');
@@ -653,7 +657,10 @@ export default {
         event.request = new Request(event.request, { headers, body: JSON.stringify(body) });
       }
     });
-    await ctx.session.hook('experimental.ws.handshake', () => { throw new Error('KRYN has not qualified model WebSocket transport'); });
+    await ctx.session.hook('experimental.ws.handshake', event => {
+      if (!event.model || event.model.providerID === 'local')
+        throw new Error('KRYN has not qualified local model WebSocket transport');
+    });
     await ctx.permission.hook('evaluate', event => {
       if (event.agent === 'reviewer' && event.action === 'question') {
         event.effect = 'deny'; event.message = 'Reviewer must return findings without requesting user input.';
