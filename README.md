@@ -82,6 +82,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
+| `/share` | Open OpenCode's local session export. V2 cannot create a public share link; inspect the export before sending it. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
 | `/review` or `/audit` | Run a bounded read-only Reviewer child; your current mode stays selected. |
 | `/research your topic` | Research a topic with search and source links. |
