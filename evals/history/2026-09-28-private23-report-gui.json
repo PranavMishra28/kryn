@@ -1,0 +1,35 @@
+{
+  "kind": "private owner activation and GUI control receipt",
+  "date": "2026-09-28",
+  "source": "23b9876ac395d2be6a57776134678ae066799ea6",
+  "release_status": "No public release, tag or version bump; published v0.1.10 unchanged.",
+  "wheel_sha256": "fb808293fa4e86aa4689f638f5e7f48b64fbaac90de63fdb17dabba95793dc7f",
+  "wheel_payload_files": 24,
+  "source_checks": "PASS: 191 Python tests, 69 Node tests, native trial self-check, frozen suite verify/selftest, documentation links and clean-wheel package smoke.",
+  "owner_activation": {
+    "installed_source": "23b9876ac395d2be6a57776134678ae066799ea6",
+    "rollback": "PASS: restored prior private f74b389 source and observed its old reporter count; reinstalled 23b9876 and restored the new count.",
+    "guarded_protocol": "PASS after reactivation; one locally routed smoke, not application-quality evidence.",
+    "deep_doctor": "PASS after reactivation: exact pinned model and browser files, native local routing, browser/search connected, 96K context, 22 GiB runtime ceiling, idle, normal pressure, zero observed swap.",
+    "no_user_reinstall": true
+  },
+  "saved_session_report": {
+    "session": "ses_f1668a5b5ffezLnl9mpw4ROZYt",
+    "prior_installed_report_check_commands": 0,
+    "new_installed_report_check_commands": 6,
+    "new_check_exit_zero": 4,
+    "new_check_exit_nonzero": 2,
+    "acceptance_verified": false,
+    "scope": "Read-only metadata classification of the saved failed Task12 session. It does not establish application acceptance or cause."
+  },
+  "gui_permission_roundtrip": {
+    "scope": "Authenticated headless Chrome against a real OpenCode web frontend launched by the source NativeServer adapter with installed configuration in an owned disposable project; no model prompt or coding session. This does not cover the installed kryn --web launcher or terminal/GUI session handoff.",
+    "sequence": "Prompted/false initially; clicked Auto-accept true; true after page reload; clicked false; false after another reload.",
+    "page_errors": 0,
+    "result": "PASS for this narrow control roundtrip; original prompted GUI setting restored.",
+    "private_evidence": "evals/runs/private23-gui/evidence/permission-roundtrip.json and settings.png (ignored local artifacts)",
+    "settings_screenshot_sha256": "ea795a450ccd36de89cda05d3d273f90bc3e87432f1a185bf8454fdd2a136427"
+  },
+  "open_gates": ["autonomous coding/UI completion and accurate source review", "truthful two-compaction and restart handoff", "matched 49K/64K/96K/128K useful-tier comparison", "successful 45-60 minute active endurance", "installed launcher terminal/GUI handoff", "KRYN-owned isolated clean install and recovery"],
+  "decision": "Keep the guarded 96K private build installed for owner use. Do not call it production-qualified, gold-master or frontier-equivalent and do not publish a release."
+}
