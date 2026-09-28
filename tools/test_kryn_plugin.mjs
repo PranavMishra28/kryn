@@ -48,6 +48,21 @@ function fixture(extra = {}) {
 }
 const model = { providerID: 'local', id: 'qwen' };
 
+test('background shell keeps the native job alive past model-supplied timeouts', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const background = { sessionID: 'ses_1', agent: 'agent', tool: 'shell', id: 'call_1',
+      input: { command: 'npm run dev', background: true, timeout: 15000 } };
+    f.call('tool.execute.before', background);
+    assert.equal(background.input.background, true);
+    assert.equal(Object.hasOwn(background.input, 'timeout'), false);
+    const foreground = { sessionID: 'ses_1', agent: 'agent', tool: 'shell', id: 'call_2',
+      input: { command: 'npm test', timeout: 15000 } };
+    f.call('tool.execute.before', foreground);
+    assert.equal(foreground.input.timeout, 15000);
+  } finally { cleanup(); f.remove(); }
+});
+
 function shellRun(f, command, text, serial, extra = {}, auto = true, exit = 0) {
   const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + serial, id: 'call_' + serial,
     tool: 'shell', input: { command, ...extra } };
