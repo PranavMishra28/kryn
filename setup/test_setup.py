@@ -1218,7 +1218,10 @@ class SetupChecks(unittest.TestCase):
         self.assertTrue(cfg["commands"]["review"]["subagent"])
         self.assertEqual(cfg["agents"]["audit"]["mode"], "primary")
         self.assertEqual(cfg["agents"]["audit"]["permissions"], cfg["agents"]["reviewer"]["permissions"] + [
-            {"action": "subagent", "resource": "reviewer", "effect": "allow"}])
+            {"action": "subagent", "resource": "reviewer", "effect": "allow"},
+            {"action": "read", "resource": output + "/tool_*", "effect": "allow"},
+            {"action": "external_directory", "resource": "*", "effect": "deny"},
+            {"action": "external_directory", "resource": output + "/*", "effect": "allow"}])
         self.assertEqual(cfg["providers"]["local"]["settings"]["baseURL"], "http://127.0.0.1:8000/v1")
         self.assertEqual(cfg['model'], 'local/qwen')
         self.assertTrue(all('model' not in cfg['agents'][name] for name in ('agent', 'ask', 'plan', 'explore', 'general', 'reviewer', 'browse')))
