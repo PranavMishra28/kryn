@@ -9,10 +9,10 @@
     "frozen_automatic": "2/2 passed on final source; original test and seed hashes preserved"
   },
   "ui_and_continuity": {
-    "ui_agent": "FAIL: timed out after 367.917 seconds with no browser-tool call. Source rendered stored text inert and exact, but Save sent new JSON to POST /api/import instead of POST /api/entries.",
+    "ui_agent": "FAIL: timed out after 367.917 seconds. Late browser tools navigated, resized to 390x1024, took snapshots, filled the form and clicked the form element rather than Save; they did not verify a Save request, 503 recovery or a 1280px view. Source rendered stored text inert and exact, but Save sent new JSON to POST /api/import instead of POST /api/entries.",
     "independent_browser": "FAIL: stored markup and invalid-minutes checks passed; controlled first Save generated POST /api/import 503, so the checker timed out waiting for POST /api/entries and did not reach manual retry, responsive Save, upload/edit/filter/export or visual acceptance.",
     "compaction": "PASS mechanics: one native compaction message persisted in the saved UI session export before interruption.",
-    "restart_handoff": "FAIL semantics: a fresh-process read-only Ask completed in 41.055 seconds with zero read/browser tool calls, reduced original Task12 to the latest UI slice, and falsely claimed a 390px browser check and form interaction that the native trace lacks."
+    "restart_handoff": "FAIL semantics: a fresh-process read-only Ask completed in 41.055 seconds with zero new read/browser calls, reduced original Task12 to the latest UI slice, declared the limited 390px inspection a passed check, and treated a click on the form element as submission/503 value-retention evidence although no such request was captured."
   },
   "formal_grade": "FAIL after independent review: automatic 2/2 passed, Plan, browser, 503, handoff and representative-duration manual gates failed; fresh Reviewer untested. The first review manifest used invalid evidence-relative paths and was corrected before final grading; both versions remain in private evidence.",
   "resources": "Five Build stages totaled 999.523 seconds prompt-active; two timed out. All six guarded stages, including Ask, sampled normal pressure and zero swap growth, but all ran on battery. An operator offline check overlapped the first Build, so latency comparisons are confounded. This is not 45–60 minutes of green active work or an AC-powered tier benchmark.",
