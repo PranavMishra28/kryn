@@ -34,6 +34,17 @@ class PackageTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    def test_in_session_expected_digest_stops_changed_release_before_install(self):
+        with patch.object(sys, 'argv', ['install-kryn.py', '--tag', 'v0.1.11',
+                                        '--expected-wheel-sha256', 'a' * 64]), \
+             patch.object(Path, 'home', return_value=self.root), \
+             patch.object(bootstrap, 'safe', side_effect=lambda value: Path(value)), \
+             patch.object(bootstrap.platform, 'system', return_value='Darwin'), \
+             patch.object(bootstrap.platform, 'machine', return_value='arm64'), \
+             patch.object(bootstrap, 'public_release', return_value=(self.root / 'wheel', 'b' * 64)):
+            with self.assertRaisesRegex(RuntimeError, 'changed since the in-session offer'):
+                bootstrap.main()
+
     def owned_installation(self):
         """Receipt-valid disposable installation; no dependencies or services."""
         root, home = self.root, self.root / "home"

@@ -39,11 +39,13 @@ def main():
                 from .updates import check_update
                 print(json.dumps(check_update(verify_payload())))
                 return
-            if len(args) != 2 or not args[1].startswith("v"):
+            expected = len(args) == 4 and args[2] == "--expected-wheel-sha256" and \
+                isinstance(args[3], str) and len(args[3]) == 64 and all(c in "0123456789abcdef" for c in args[3])
+            if (len(args) != 2 and not expected) or not args[1].startswith("v"):
                 raise RuntimeError("Usage: kryn update vX.Y.Z | kryn update --check")
             verify_payload()
             subprocess.run([sys.executable, "-E", "-B", str(payload() / "install-kryn.py"),
-                            "--tag", args[1]], check=True)
+                            "--tag", args[1], *(["--expected-wheel-sha256", args[3]] if expected else [])], check=True)
             return
         root = root_path()
         deployment = safe_json(root / "client/deployment.json")

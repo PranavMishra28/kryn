@@ -129,5 +129,12 @@ class UpdateChecks(unittest.TestCase):
             run.assert_not_called()
             self.assertEqual(json.loads(output.call_args.args[0]), {'status': 'current'})
 
+    def test_cli_forwards_exact_offered_wheel_digest_to_installer(self):
+        digest = 'a' * 64
+        with patch.object(sys, 'argv', ['kryn', 'update', 'v0.1.11', '--expected-wheel-sha256', digest]), \
+             patch.object(cli, 'verify_payload'), patch.object(cli.subprocess, 'run') as run:
+            cli.main()
+            self.assertEqual(run.call_args.args[0][-4:], ['--tag', 'v0.1.11', '--expected-wheel-sha256', digest])
+
 
 if __name__ == '__main__': unittest.main()

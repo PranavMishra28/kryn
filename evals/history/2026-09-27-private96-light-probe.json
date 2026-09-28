@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-27",
+  "scope": "Owner private same-version 96K candidate, guarded synthetic retrieval only; no coding/UI, endurance or public release qualification",
+  "source_revision": "a47dc50e67ca44fca9add0c3bd8b69e279e4936d",
+  "configuration": {
+    "context_tokens": 98304,
+    "output_tokens": 8192,
+    "model_memory_ceiling_gib": 16,
+    "model": "Qwen3.5-9B-6bit",
+    "power": "AC"
+  },
+  "installation": {
+    "private_clean_wheel": "PASS",
+    "guarded_protocol_smoke": "PASS",
+    "deep_doctor": "PASS: model/browser hashes, local routing, browser/search connections and 98304-token runtime metadata"
+  },
+  "above_64k_probe": {
+    "input_tokens": 73728,
+    "first_attempt": "FAIL: 256 requested output tokens ended in finish_reason=length; input count exact, pressure normal, zero swap growth",
+    "second_attempt": "PASS: exact 73728 prompt tokens, correct three-value retrieval, finish_reason=stop, 780 completion tokens, observed cold cache=0",
+    "second_wall_seconds": 315.53966,
+    "second_prefill_seconds": 292.74,
+    "second_pressure_levels": [1],
+    "second_swap_peak_growth_bytes": 0,
+    "second_max_sampled_runtime_footprint_bytes": 15383747760,
+    "second_telemetry_complete": true,
+    "private_raw_metrics": "~/Library/Application Support/LocalAI/runs/context-20260928T054120Z-eeb65439/metrics.json"
+  },
+  "cleanup": "Three inactive candidate scratch/model directories with no active configuration references or open files were removed; live Qwen weights and rollback lineage were retained.",
+  "decision": "Keep 96K as an owner-requested guarded private experiment with immediate 64K rollback. Above-64K admission and one synthetic retrieval pass; cold latency is substantial. Matched coding quality, warm correctness, sustained memory behavior and full UI/restart gates remain unqualified. No public release or frontier-equivalence claim."
+}

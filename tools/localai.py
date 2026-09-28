@@ -702,7 +702,8 @@ def apply_update_after_exit(request, project, args):
             (offer.get("tag"), offer.get("sha256")) == (request["tag"], request["sha256"]),
             "Update changed or cannot be verified; installation unchanged. Run kryn --continue.")
     print("KRYN: installing verified " + request["tag"] + " after saving the session…", flush=True)
-    subprocess.run([sys.executable, "-I", "-B", "-m", "kryn", "update", request["tag"]], check=True)
+    subprocess.run([sys.executable, "-I", "-B", "-m", "kryn", "update", request["tag"],
+                    "--expected-wheel-sha256", request["sha256"]], check=True)
     launcher = ROOT / "kryn"
     require(launcher.is_file() and not launcher.is_symlink(),
             "Update installed; launcher unavailable. Run kryn --continue manually.")
@@ -930,7 +931,8 @@ def run(args, outcome):
                 else:
                     raise error
     if pending_update is not None:
-        apply_update_after_exit(pending_update, project, args)
+        # main() must release its foreground lease and record the exit first.
+        args.pending_update = (pending_update, project)
     return code
 
 
@@ -1019,6 +1021,9 @@ def main(argv=None):
             print("kryn: outcome recording failed (" + type(error).__name__ + "); no private task content was recorded", file=sys.stderr)
             if original is None:
                 raise RuntimeError("KRYN outcome was not recorded; inspect the owned state directory") from error
+        if command == "run" and original is None and getattr(args, "pending_update", None):
+            request, project = args.pending_update
+            apply_update_after_exit(request, project, args)
         if command == "run" and original is None:
             try:
                 learning.start_after_exit(ROOT / "state/improvement", with_verified_skill(owned_config()))

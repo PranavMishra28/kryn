@@ -1,5 +1,5 @@
 """Offline launcher checks. All processes, runtime calls and telemetry are mocked."""
-from contextlib import nullcontext, redirect_stdout, redirect_stderr
+from contextlib import contextmanager, nullcontext, redirect_stdout, redirect_stderr
 import io
 import copy
 import argparse
@@ -648,7 +648,30 @@ class KrynChecks(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, 'reexec'):
                     localai.apply_update_after_exit(request, Path(directory), args)
                 install.assert_called_once()
+                self.assertEqual(install.call_args.args[0][-2:], ['--expected-wheel-sha256', request['sha256']])
                 reexec.assert_called_once_with(str(launcher), [str(launcher), '--continue'])
+
+    def test_in_session_update_waits_for_foreground_release_and_outcome(self):
+        active, recorded = [False], [False]
+        @contextmanager
+        def foreground(*_):
+            active[0] = True
+            try: yield
+            finally: active[0] = False
+        def run(args, outcome):
+            self.assertTrue(active[0])
+            args.pending_update = ({'tag': 'v0.1.11', 'sha256': 'a' * 64}, Path.cwd())
+            return 0
+        def record(*_): recorded[0] = True
+        def apply(*_):
+            self.assertFalse(active[0])
+            self.assertTrue(recorded[0])
+        with patch.object(localai.learning, 'foreground', side_effect=foreground), \
+             patch.object(localai, 'run', side_effect=run), \
+             patch.object(localai.improvement, 'record_outcome', side_effect=record), \
+             patch.object(localai, 'apply_update_after_exit', side_effect=apply) as update:
+            self.assertEqual(localai.main(['.']), 0)
+        update.assert_called_once()
 
 
 if __name__ == '__main__': unittest.main()

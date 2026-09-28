@@ -87,7 +87,8 @@ export function setupUpdates(context, { check = (signal) => packageCheck(process
       if (requestPath) {
         fs.writeFileSync(requestPath, JSON.stringify({ tag: selected.tag, sha256: selected.sha256 }),
           { flag: 'wx', mode: 0o600 });
-        context.keymap.dispatch('app.exit');
+        try { context.keymap.dispatch('app.exit'); }
+        catch (error) { fs.unlinkSync(requestPath); throw error; }
       } else {
         await context.ui.dialog.alert({ title: 'Update KRYN after exit', message:
           `Finish work and exit KRYN, then run in Terminal:\n\nkryn update ${selected.tag}\n\nResume from your project with kryn --continue. Saved sessions remain; kryn rollback restores the previous retained installation.` });

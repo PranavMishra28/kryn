@@ -86,9 +86,12 @@ def public_release(tag, work):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--expected-wheel-sha256")
     args = parser.parse_args()
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", args.tag):
         raise RuntimeError("Use an exact release tag")
+    if args.expected_wheel_sha256 is not None and not re.fullmatch(r"[a-f0-9]{64}", args.expected_wheel_sha256):
+        raise RuntimeError("Invalid expected wheel digest")
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         raise RuntimeError("This installer supports native Apple Silicon macOS")
     os.umask(0o077)
@@ -97,6 +100,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix=".kryn-release-", dir=root) as work:
         work = Path(work)
         wheel, expected = public_release(args.tag, work)
+        if args.expected_wheel_sha256 is not None and expected != args.expected_wheel_sha256:
+            raise RuntimeError("Release wheel changed since the in-session offer")
         # Reject path traversal, links, and non-package data before pip touches the wheel.
         with zipfile.ZipFile(wheel) as bundle:
             names = bundle.namelist()
