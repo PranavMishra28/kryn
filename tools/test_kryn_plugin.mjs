@@ -958,6 +958,22 @@ test('read-only guards reject every unlisted mutation route without autoapproval
   } finally { await cleanup(); f.remove(); }
 });
 
+test('native child failure releases only its own foreground slot', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const prompt = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
+    f.call('session.context', prompt);
+    assert.ok(prompt.system.some(item => item.text.includes('Explore, Browse and Reviewer are agent names, not tool names')));
+    const child = id => ({ agent: 'build', tool: 'subagent', sessionID: 'ses_1', id,
+      input: { agent: 'explore', prompt: 'Inspect the project.' } });
+    f.call('tool.execute.before', child('child_1'));
+    await f.emit('session.tool.failed', { id: 'unrelated' });
+    assert.throws(() => f.call('tool.execute.before', child('child_2')), /one foreground child/);
+    await f.emit('session.tool.failed', { id: 'child_1' });
+    assert.doesNotThrow(() => f.call('tool.execute.before', child('child_3')));
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('Audit parent stays read-only after one fresh foreground Reviewer and ordinary Build remains available', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
