@@ -63,6 +63,7 @@ Inside the terminal interface:
   /web      (also /pair)       Show the local GUI address and temporary credentials
   /sessions                   Open a saved session
   /status                     Inspect native tool and service status
+  /share                      Open a local session export (no public link in OpenCode V2)
   /deliver your task          Build a small milestone and verify it in Agent
   /research your topic        Search primary sources with citations
   /audit                      Request a fresh read-only review
