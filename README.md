@@ -52,7 +52,7 @@ Qwen exposes `enable_thinking`; oMLX additionally supports a thinking-token cap.
 
 ### Models and providers
 
-Qwen remains the installed local default. Inside KRYN, use **`/models`** to select another model for the current session. Use **`/connect`** to add an OpenCode provider; connected models then appear in the native picker. KRYN keeps its managed Qwen endpoint and resource guard exact while allowing those native choices. [OpenCode's provider guide](https://opencode.ai/v2/docs/providers) describes each provider's connection steps; availability and reasoning variants depend on that provider. KRYN does not supply credentials or a free quota. External providers can receive your prompts and project data and may charge you; local Qwen remains available without one. Custom project provider definitions are not yet admitted by KRYN's managed configuration overlay.
+Qwen remains the installed local default. Inside KRYN, use **`/models`** to select another model for the current session. OpenCode may list public free models without a login; use **`/connect`** for providers that require an account or key. KRYN keeps its managed Qwen endpoint and resource guard exact while allowing those native choices. [OpenCode's provider guide](https://opencode.ai/v2/docs/providers) describes each provider's connection steps; availability, limits and reasoning variants depend on that provider. KRYN does not supply credentials or a free quota. External providers can receive your prompts and project data and may charge you; local Qwen remains available without one. Custom project provider definitions are not yet admitted by KRYN's managed configuration overlay.
 
 Edits normally proceed without a separate approval; shell and browser actions can ask. Agent can use the connected browser directly or delegate Browse; browser actions retain the normal Ask/Auto permission setting, and unsafe browser code remains denied. For a trusted project, explicitly opt into native automatic approvals for one launch:
 
@@ -77,7 +77,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/agents` | Switch between Ask, Plan and Agent without starting a different conversation. |
 | `/effort` | Switch Default (thinking) / Fast (no thinking), independently of the agent role. |
 | `/models` | Choose a model for this session through OpenCode's native picker. |
-| `/connect` | Connect an optional provider through OpenCode. |
+| `/connect` | Connect a provider that requires an account or key through OpenCode. |
 | `/settings` | Display controls, reasoning visibility and permissions (see launch modes above). |
 | `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |

@@ -77,8 +77,8 @@ in the browser and use Cmd+Tab to switch. Finish or interrupt the current turn
 before submitting from the other interface; unsent drafts are not synchronized.
 The pairing password is temporary and local: do not share the link or QR code.
 GUI permissions are separate; terminal --auto is not a global GUI permission mode.
-Local Qwen stays the default. Other providers require your own explicit
-connection and selection, and may send task data or charge fees.
+Local Qwen stays the default. Select other models in /models; some providers
+require /connect. They may send task data or charge fees.
 
 Default launches use the saved native permission setting, initially prompts.
 Switch it in /settings > Permissions without restarting. --permissions ask
