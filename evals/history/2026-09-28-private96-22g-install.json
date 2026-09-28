@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-28",
+  "scope": "Private same-version 96K/22 GiB owner activation and rollback; no public release or coding/UI qualification",
+  "installed_source_revision": "f08d45cd87b4452a592c5f7df3295ebeda7cb7d8",
+  "wheel_sha256": "459296f9d7bbed118ac8612c668eafb76aa210ad5b28facd21d4051b082a4c63",
+  "checks": {
+    "source_check": "PASS: make check, including 190 setup, 21 tools and 67 JavaScript tests, native-trial self-check and frozen suite verification",
+    "package_smoke": "PASS: curated private candidate wheel and isolated package check; final installed wheel built from clean f08d45c source",
+    "initial_activation": "PASS: installer deployed the exact private wheel; guarded protocol smoke passed; deep doctor verified model/browser files and connected browser/search",
+    "rollback": "PASS: kryn rollback restored the previous 96K/16 GiB profile; guarded protocol smoke passed and runtime metadata showed a 16 GiB ceiling",
+    "reinstallation": "PASS: exact private wheel reinstalled; guarded protocol smoke passed; deep doctor verified 98,304-token context, 22 GiB ceiling, normal host pressure, model/browser integrity and connected browser/search"
+  },
+  "private_protocol_metrics": {
+    "new_before_rollback": "~/Library/Application Support/LocalAI/runs/protocol-20260928T154609Z-920274cb/metrics.json",
+    "old_after_rollback": "~/Library/Application Support/LocalAI/runs/protocol-20260928T154653Z-a7832b02/metrics.json",
+    "new_after_reinstallation": "~/Library/Application Support/LocalAI/runs/protocol-20260928T154744Z-ff0bb02a/metrics.json"
+  },
+  "decision": "Keep the guarded 22 GiB private installation for owner use. The near-full-context synthetic probes were direct runtime tests; they were not a sustained installed OpenCode coding session. Full coding/UI, compaction/restart quality, useful-tier comparison, endurance and isolated clean-install gates remain open. Public releases and version bumps remain paused."
+}
