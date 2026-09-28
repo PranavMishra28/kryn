@@ -97,6 +97,11 @@ class KrynChecks(unittest.TestCase):
         self.assertEqual(output.getvalue().splitlines()[1], 'KRYN')
         self.assertLessEqual(len(output.getvalue().splitlines()[2]), 20)
         self.assertNotIn('\x1b', output.getvalue())
+        output = Terminal()
+        with patch.object(localai.sys, 'stdout', output):
+            localai.show_loading('Checking installation')
+        self.assertIn('◇ K R Y N', output.getvalue())
+        self.assertIn('Checking installation', output.getvalue())
 
     def test_web_uses_clean_loopback_url_inside_the_existing_resource_guard(self):
         with patch.object(localai.subprocess, 'run', return_value=Mock(returncode=0)) as opened:
@@ -288,9 +293,9 @@ class KrynChecks(unittest.TestCase):
         with patch.object(localai, 'resources', side_effect=OSError('unavailable')):
             self.assertEqual(localai.memory_status()['pressure'], 'unknown')
 
-    def test_permission_modes_keep_default_prompts_and_unlock_only_on_opt_in(self):
+    def test_permission_modes_default_to_native_editable_setting(self):
         project = str(Path.cwd().resolve())
-        modes = [([], False, False), (['--auto'], True, False),
+        modes = [([], False, True), (['--auto'], True, False),
                  (['--permissions', 'ask'], False, False),
                  (['--permissions', 'auto'], True, False),
                  (['--permissions', 'interactive'], False, True)]
@@ -325,7 +330,7 @@ class KrynChecks(unittest.TestCase):
             self.assertEqual(localai.main(['controls']), 0)
         run.assert_not_called()
         self.assertIn('/web', output.getvalue())
-        self.assertIn('--permissions interactive', output.getvalue())
+        self.assertIn('editable native permission setting', output.getvalue())
 
     def test_session_ownership_before_interrupt(self):
         server = Mock(directory=Path('/owned/project'))
