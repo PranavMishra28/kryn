@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-27",
+  "scope": "One real reading-list app session, resumed in the installed private guarded 64K client; diagnostic evidence, not a frozen coding/UI acceptance pass",
+  "native_session": "ses_f19de27e8ffeuAPJST6oSpNrFQ",
+  "original_turn": {
+    "model_variant": "fast",
+    "assistant_steps": 197,
+    "completed_compactions": 1,
+    "background_dev_server_failures": "The agent supplied 15-30 second timeouts to eleven native background shell jobs. The server stopped before reload checks, and the agent incorrectly blamed per-tab localStorage.",
+    "application_faults_independently_reproduced": [
+      "Initial empty state overwrote stored books after reload",
+      "Edit form state shape prevented saving",
+      "No All filter or filtered-empty state"
+    ]
+  },
+  "resumed_turn": {
+    "model_variant": "default",
+    "first_resumed_tools_read_current_source": true,
+    "second_native_compaction": true,
+    "native_background_shell_survived_supplied_30000ms_timeout": true,
+    "node_environment_failure": "Shell chose x64 Node 25 while the installed browser tools and initial native dependencies used ARM Node 22. The agent reinstalled dependencies after Vite failed to load an ARM binding.",
+    "source_app_edits_by_resumed_agent": 0,
+    "reporting_error": "The agent claimed live same-origin tab sync from an All (1) count. The old tab showed Reading (1) after the new tab showed Want to Read (1); it did not contain the newly added book."
+  },
+  "independent_checks_after_app_repair": {
+    "arm_node_build_and_lint": "PASS",
+    "add_edit_move_search_filter_delete_reload_and_mobile": "PASS in independent browser checks",
+    "new_same_origin_tab_reads_saved_book": "PASS",
+    "other_already_open_tab_updates_without_reload": "FAIL; no storage-event listener is implemented or required by the original CRUD/localStorage task",
+    "other_tab_reflects_delete_after_reload": "PASS"
+  },
+  "fixes": {
+    "background_job_timeout": "Merged PR #121; native background shell drops model-supplied timeout while foreground timeouts remain",
+    "node_architecture": "Merged PR #124; native shell PATH prefers KRYN's configured ARM Node",
+    "test_app_source": "Repaired locally in the generated reading-list project; not a KRYN package change"
+  },
+  "session_report_after_resume": {
+    "assistant_messages": 246,
+    "completed_compactions": 2,
+    "completed_browser_calls": 175,
+    "tool_errors": 17,
+    "native_outcome": "succeeded",
+    "prior_interrupted_turn": "A separate slash-command audit accidentally submitted /share as a user prompt and interrupted it; not an app edit"
+  },
+  "gates": {
+    "native_background_job_survival": "PASS",
+    "native_client_restart_and_two_compactions": "MECHANISM PASS; semantic accuracy failed on the live-tab claim",
+    "complete_autonomous_coding_ui_and_independent_review": "FAIL; app repairs were made externally and the resumed agent overclaimed a browser check",
+    "96k_128k_reliably_useful_context": "UNQUALIFIED; 128K near-limit host-pressure screen failed",
+    "public_release": "PAUSED"
+  }
+}
