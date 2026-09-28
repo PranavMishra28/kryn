@@ -235,6 +235,24 @@ test('failed checks retain bounded classifications across restart without raw ou
   } finally { await cleanup(); f.remove(); }
 });
 
+test('a leading cd keeps a failed check in the restart ledger', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    const command = `cd ${f.root} && python -m pytest test_existing.py -v`;
+    assert.equal(isCheck(command), true);
+    assert.equal(isCheck(`${command} && echo done`), false);
+    shellRun(f, command, 'No module named pytest', 1, {}, true, 1);
+    const check = f.read('trackers')[0].verification.checks[0];
+    assert.deepEqual([check.state, check.runner, check.exit_code, check.diagnostic],
+      ['failed', 'pytest', 1, 'pytest unavailable']);
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', event);
+    assert.match(event.system.map(part => part.text).join('\n'),
+      /runner=pytest exit=1 output-hint=pytest unavailable/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('restart guidance includes a recently rechecked older command within its four receipts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {

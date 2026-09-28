@@ -280,9 +280,17 @@ export function pruneTrackers(directory, now = Date.now()) {
 }
 
 // Only simple test commands count. Exit zero remains evidence of a command, not task correctness.
+function checkCommand(raw) {
+  const command = raw.trim();
+  const prefix = /^cd\s+(\/[-A-Za-z0-9_./]+|\.[-A-Za-z0-9_./]*)\s*&&\s*/.exec(command);
+  return { command: prefix ? command.slice(prefix[0].length) : command,
+    directory: prefix?.[1] ?? null };
+}
 export function isCheck(command) {
-  if (typeof command !== 'string' || command.length > 4096 || /[;&|`$\n\r<>]/.test(command)) return false;
-  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*(?:-m\s+(?:unittest|pytest)(?:\s|$)|(?:\.\/)?(?:[A-Za-z0-9_-]+\/)*test_[A-Za-z0-9_-]+\.py(?:\s|$))|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|--check\s+[^\s]+(?:\s|$)|[^\s]*(?:test|browser_)[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(command.trim());
+  if (typeof command !== 'string' || command.length > 4096) return false;
+  const simple = checkCommand(command).command;
+  if (/[;&|`$\n\r<>]/.test(simple)) return false;
+  return /^(?:python(?:3(?:\.\d+)?)?\s+(?:-[BEI]+\s+)*(?:-m\s+(?:unittest|pytest)(?:\s|$)|(?:\.\/)?(?:[A-Za-z0-9_-]+\/)*test_[A-Za-z0-9_-]+\.py(?:\s|$))|pytest(?:\s|$)|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|build|lint|typecheck)(?:\s|$)|node\s+(?:--test(?:\s|$)|--check\s+[^\s]+(?:\s|$)|[^\s]*(?:test|browser_)[^\s]*\.m?js(?:\s|$))|go\s+test(?:\s|$)|cargo\s+test(?:\s|$))/.test(simple);
 }
 // Refuse only plain check commands whose shell fallback would hide the check's exit.
 export function masksCheckFailure(command) {
@@ -348,8 +356,9 @@ function verificationLedger(saved) {
 }
 function checkIdentity(event, directory) {
   if (event.tool !== 'shell' || !isCheck(event.input?.command)) return null;
-  const command = event.input.command.trim();
+  const parsed = checkCommand(event.input.command), command = parsed.command;
   let workdir = path.resolve(directory, typeof event.input.workdir === 'string' ? event.input.workdir : directory);
+  if (parsed.directory) workdir = path.resolve(workdir, parsed.directory);
   try { workdir = fs.realpathSync(workdir); } catch { /* A failed directory remains a distinct unverified check. */ }
   const kind = /^node\s+--check\s+/.test(command) ? 'lint' :
     /^(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(build|lint|typecheck)(?:\s|$)/.exec(command)?.[1] ?? 'test';
