@@ -1,0 +1,16 @@
+{
+  "kind": "private owner activation receipt",
+  "date": "2026-09-28",
+  "installed_source": "a9034ae7b2dc77222f070751faf1df734f001a1b",
+  "wheel_sha256": "088213f5030b2fd8b934f8818c7e229bc0f64d2b668598221abf6fbd73f3b6ec",
+  "profile": "96K local Qwen3.5-9B-6bit, guarded 22 GiB oMLX ceiling",
+  "checks": {
+    "repository": "PASS: make check, including native plugin regressions, trial-driver self-check and frozen fixture validation",
+    "package": "PASS: clean curated wheel and isolated package smoke",
+    "activation": "PASS: exact wheel installed through transactional private installer; active.json source matches installed_source",
+    "deep_doctor": "PASS: pinned model and browser files verified; local routing passed; oMLX healthy at 98,304 max_model_len and 22 GiB ceiling; browser and search connected; host pressure normal, swap 0",
+    "normal_launch": "PASS: KRYN banner, local model, editable permissions and 2/2 tools connected in disposable project; no user prompt sent"
+  },
+  "earlier_source_recovery": "The prior 00179057 private candidate passed direct 512-token protocol smoke, rollback to f08d45c and reinstallation. A 64-token probe truncated think/tool outputs by design and failed; it was rerun with the normal 512-token budget. Rollback was not repeated for this a9034ae source.",
+  "limits": "No generation or browser task was run after the a9034ae install. The frozen Task06 run on installed 00179057 failed independent coding/UI acceptance despite clean local routing and resources; its feedback repair was incomplete and failed responsive layout. No sustained 45-60 minute active work, compaction/restart qualification or isolated clean install. Public release, tag and version bump remain paused."
+}
