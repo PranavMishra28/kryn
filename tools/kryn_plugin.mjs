@@ -28,7 +28,7 @@ const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
-const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, use browser tools directly or delegate Browse with the actual local URL and explicit acceptance criteria; fix observed failures. Use native background shell support for dev servers rather than appending &. Stop owned background sessions through native lifecycle; direct process signals are blocked. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
+const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. For UI work, use browser tools directly or delegate Browse with the actual local URL and explicit acceptance criteria; fix observed failures. Use native background shell support for dev servers. If a port is occupied, choose a free port and update the browser URL; model-facing cancellation of native shell jobs is unavailable, so do not guess a PID. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
 const PROCESS_SIGNAL = /^\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:(?:\/(?:usr\/)?bin\/)?xargs(?:\s+-[^\s;&|]+)*\s+)?(?:\/(?:usr\/)?bin\/)?(?:killall|pkill|kill)(?=\s|[;&|]|$)/;
 function directProcessSignal(command) {
   // A PID discovered by shell is not proof that the agent owns that process.
@@ -64,6 +64,27 @@ function directProcessSignal(command) {
     escaped = false;
   }
   return PROCESS_SIGNAL.test(segment);
+}
+function ownedBackgroundCommand(command) {
+  // A trailing unquoted operator can use native job ownership. Reject other
+  // control syntax instead of attempting to understand arbitrary shell code.
+  if (typeof command !== 'string' || /[\r\n;|`$(){}#]/.test(command)) return null;
+  const match = /^(.*\S)[ \t]+&[ \t]*$/.exec(command);
+  if (!match) return null;
+  let quote = null, escaped = false;
+  for (let i = 0; i < match[1].length; i++) {
+    const char = match[1][i];
+    if (escaped) { escaped = false; continue; }
+    if (char === '\\' && quote !== "'") { escaped = true; continue; }
+    if (quote) { if (char === quote) quote = null; continue; }
+    if (char === "'" || char === '"') { quote = char; continue; }
+    if (char === '&') {
+      if (match[1][i + 1] === '&') { i++; continue; }
+      if (match[1][i - 1] === '>') continue; // e.g. 2>&1
+      return null;
+    }
+  }
+  return quote || escaped ? null : match[1];
 }
 const PLAN_GUIDANCE = 'Plan mode: inspect the project and produce an actionable plan with acceptance checks. Do not edit project files or run shell commands. Native plan-file writes are allowed only in the OpenCode plan directory. To implement, switch to Agent.';
 const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Agent for repairs.";
@@ -696,6 +717,18 @@ export default {
         if (editSource && [...item.pendingEdits.values()].some(other => other.file === editSource.file))
           throw new Error('KRYN requires native edits to the same file to finish one at a time.');
       }
+      // Turn a recognized terminal background operator into an owned native
+      // job before repeat/check tracking classifies this shell call. Native
+      // jobs are persistent only when no foreground timeout is supplied.
+      if (event.tool === 'shell' && typeof event.input?.command === 'string') {
+        const command = ownedBackgroundCommand(event.input.command);
+        if (command) event.input = { ...event.input, command, background: true };
+      }
+      if (event.tool === 'shell' && event.input?.background === true &&
+          Object.hasOwn(event.input, 'timeout')) {
+        event.input = { ...event.input };
+        delete event.input.timeout;
+      }
       const identity = shellIdentity(event, ctx.location.directory);
       if (!identity) item.shellRepeat = null;
       else {
@@ -725,25 +758,10 @@ export default {
         throw new Error('KRYN Browse tool is outside the qualified surface');
       if (event.tool === 'shell' && masksCheckFailure(event.input?.command))
         throw new Error('KRYN refuses a check command whose fallback or output pipeline hides failure. Run the check by itself, then inspect its exit status.');
-      // Native background jobs are persistent only when no timeout is supplied.
-      // The model repeatedly gave dev servers a short foreground-style timeout,
-      // then mistook the resulting shutdown for an application failure.
-      // Translate only a plain trailing & (optionally after cd) into the native
-      // owned job. Keep shell metacharacters and quoted commands out of this path.
-      if (event.tool === 'shell' && typeof event.input?.command === 'string') {
-        const command = event.input.command;
-        const plain = /^(?:[\t ]*cd[\t ]+[A-Za-z0-9_./:-]+[\t ]*&&[\t ]*)?[A-Za-z0-9_./:@=-]+(?:[\t ]+[A-Za-z0-9_./:@=-]+)*[\t ]*&[\t ]*$/.test(command);
-        if (plain) event.input = { ...event.input, command: command.replace(/[\t ]*&[\t ]*$/, ''), background: true };
-      }
-      if (event.tool === 'shell' && event.input?.background === true &&
-          Object.hasOwn(event.input, 'timeout')) {
-        event.input = { ...event.input };
-        delete event.input.timeout;
-      }
       // A discovered PID may belong to an operator-owned fixture.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
           directProcessSignal(event.input.command))
-        throw new Error('KRYN refuses direct process signals from Agent shell: PID ownership is unverified. Use the native owned background-session lifecycle or stop the process from your own terminal.');
+        throw new Error('KRYN refuses direct process signals from Agent shell: PID ownership is unverified. Do not retry a PID signal; use a free port and matching browser URL, or ask the operator to stop the old server.');
       // Complex shell syntax needs an explicit native background call.
       if (event.tool === 'shell' &&
           typeof event.input?.command === 'string' &&

@@ -633,7 +633,11 @@ test('plain detached servers become native owned background jobs', async () => {
     }
     assert.deepEqual(call({ command: 'cd /tmp/project && npm run dev -- --port 5173 &', timeout: 5000 }),
       { command: 'cd /tmp/project && npm run dev -- --port 5173', background: true });
-    for (const command of ["echo 'a' &", 'echo a; echo b &', 'echo a | cat &', 'echo a\\ &',
+    const redirected = 'cd /tmp/project && python -m app.server --db "/tmp/data file.db" 2>&1 &';
+    assert.deepEqual(call({ command: redirected, timeout: 5000 }),
+      { command: redirected.slice(0, -2), background: true });
+    assert.deepEqual(call({ command: "echo 'a' &" }), { command: "echo 'a'", background: true });
+    for (const command of ['echo a; echo b &', 'echo a | cat &', 'echo a\\ &', 'echo a # &',
                            'echo a\ncat &', 'echo a\n# &', 'echo \\&', 'echo "a"&'])
       assert.throws(() => call({ command }), /background:true/);
     for (const command of ['npm run dev', 'echo "&"', "echo '&'",
@@ -651,6 +655,7 @@ test('direct process signals are refused before native shell execution', async (
   const call = command => f.call('tool.execute.before', {
     sessionID: 'ses_1', agent: 'build', tool: 'shell', input: { command } });
   try {
+    assert.throws(() => call('pkill -f server.py'), /use a free port and matching browser URL/);
     for (const command of ['killall python 2>/dev/null; sleep 1', 'command sudo -n pkill -f python',
                            '/usr/bin/killall Python', 'sudo pkill -f server.py',
                            'sudo -n pkill -f server.py', 'sudo -u root -n /usr/bin/killall Python',

@@ -1,0 +1,34 @@
+{
+  "kind": "private installed coding/UI diagnostic",
+  "date": "2026-09-28",
+  "installed_source": "00179057ef19413c54f0c193acb2d6347a31478e",
+  "task": "frozen Task06 browser form",
+  "model": "local Qwen3.5-9B-6bit, 96K, default reasoning",
+  "trial": {
+    "elapsed_seconds": 391.641,
+    "native_completion": true,
+    "local_routing_audited": true,
+    "resource_guard_clean": true,
+    "swap_peak_growth_bytes": 0,
+    "maximum_sampled_runtime_footprint_bytes": 13348691744,
+    "automatic_backend_tests": "2/2 passed; original seed tests/data preserved",
+    "independent_browser": "FAIL: injected first POST returned 503, then the UI sent a second POST and created the row before any manual retry",
+    "other_manual_checks": "Invalid minutes feedback passed; full reload, responsive screenshots and complete console/network checks were not reached",
+    "tool_errors": "Two browser screenshot calls timed out; saved screenshots do not establish acceptance",
+    "model_claim": "Final answer described the automatic retry as successful and claimed completion; this was not accepted"
+  },
+  "feedback_repair": {
+    "elapsed_seconds": 308.482,
+    "native_completion": false,
+    "reason": "300-second bound expired",
+    "local_routing_audited": true,
+    "resource_guard_clean": true,
+    "swap_peak_growth_bytes": 0,
+    "maximum_sampled_runtime_footprint_bytes": 14574723232,
+    "independent_browser": "First 503 retained input and one manual retry created one row; next check failed on horizontal overflow at 390px",
+    "tool_errors": "Three shell calls were blocked for direct PID signals or complex trailing background syntax; two local webfetch calls failed",
+    "qualification": "Failed: the feedback repair was incomplete and responsive acceptance failed"
+  },
+  "driver_fix": "The native trial driver had assumed OpenCode listed only local/qwen. The pinned client also lists its built-in free catalog; the driver now accepts only local plus that built-in provider, requires the single local qwen role and separately audits every trial generation for local routing.",
+  "decision": "Keep the coding/UI and truthful-completion gate failed. The simple native background adapter prevented some blocked launches but not a quoted/redirection form; a narrow follow-up expands that adapter. Stop model-prompt retries after this failed one-shot and timed-out repair. Preserve the frozen criteria and use independent checks on the next approach. No public release claim."
+}

@@ -21,6 +21,8 @@ The [latest owner activation receipt](evals/history/2026-09-28-private96-22g-ins
 
 The next blocker is bounded coding/UI completion with truthful evidence and restart continuity. Useful-tier, endurance and isolated clean-install gates follow. No gold-master, frontier-equivalence or statistical harness-uplift claim is supported.
 
+The installed private 96K build also failed a fresh [frozen Task06 coding/UI trial](evals/history/2026-09-28-private96-task06-feedback.json): backend tests passed, but an independent browser check caught an automatic POST after the injected 503, before manual retry. A feedback repair corrected that flow, then timed out and failed the 390px overflow check. Both turns kept local routing, normal memory pressure and zero observed swap growth. The trial driver now admits OpenCode's built-in free catalog while still requiring local Qwen inference; KRYN's background-shell adapter handles the observed quoted/redirection launch. These mechanism changes need installed use and do not pass the coding/UI gate.
+
 ## Update awareness
 
 Current source checks for newer published KRYN tags through the existing checksum-verifying release downloader. The idle-time dialog and `/update` show the exact release version, wheel-manifest source commit and short release-note excerpt. Same-version private builds and unbuilt main commits are never advertised as updates. Checksum verification uses GitHub distribution, not independent signing or application-quality qualification.
