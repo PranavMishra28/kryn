@@ -1007,6 +1007,21 @@ class SetupChecks(unittest.TestCase):
         self.assertNotIn('npm_config_cache', env)
         self.assertEqual(json.loads(env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
 
+    def test_shell_prefers_managed_native_node_over_ambient_node(self):
+        managed = self.root / 'managed-node'
+        ambient = self.root / 'ambient-node'
+        managed.mkdir()
+        ambient.mkdir()
+        (managed / 'node').write_text('#!/bin/sh\necho managed\n')
+        (ambient / 'node').write_text('#!/bin/sh\necho ambient\n')
+        (managed / 'node').chmod(0o700)
+        (ambient / 'node').chmod(0o700)
+        cfg = {'mcp': {'servers': {'browser': {'command': [str(managed / 'node')]}}}}
+        with patch.dict(os.environ, {'PATH': str(ambient) + ':/usr/bin:/bin'}):
+            env = native_client.environment(cfg)
+        result = subprocess.run(['/bin/zsh', '-c', 'node'], env=env, capture_output=True, text=True, check=True)
+        self.assertEqual(result.stdout.strip(), 'managed')
+
     def test_native_write_boundary_prefix_and_owned_roots(self):
         private, env = self.native_boundary_fixture()
         prefix, metadata = native_client._sandbox_prefix(self.root, private, self.root / "evidence", env)
