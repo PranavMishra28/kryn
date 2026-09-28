@@ -15,7 +15,7 @@
     "source": "7fb80b17e86f44b333c7c109bb96c0d1bbdf1c25",
     "wheel_sha256": "9c43166c4deac67662f30b2eef5e1a70a735ad831ca1f8516b648b8f781c9a7b",
     "source_checks": "PASS: 191 Python tests, 69 Node tests, native trial self-check, frozen suite verify/selftest and candidate package smoke before clean source build.",
-    "owner_install": "PASS: private clean wheel installed; guarded local protocol smoke and deep doctor passed. Model/browser integrity, both tool connections, 96K context, 22 GiB ceiling, normal pressure, zero observed swap and idle runtime. Prior rollback from 95f590a to 23b9876 and reactivation of 95f590a passed; this replacement itself has not yet had an independent rollback cycle.",
+    "owner_install": "PASS: private clean wheel installed, then rolled back from 7fb80b1 to 95f590a and reinstalled 7fb80b1. Guarded local protocol smoke passed after reinstallation (metrics: runs/protocol-20260928T214502Z-f2c595bd/metrics.json); deep doctor passed. Active launcher points to private-7fb80b1. Model/browser integrity, both tool connections, 96K context, 22 GiB ceiling, normal pressure, zero observed swap and idle runtime.",
     "saved_report": "Observed 8 checks, 3 nonzero exits and the deterministic prior-failure warning on the original two-compaction Task02 session; acceptance_verified remains false."
   },
   "open_gates": ["autonomous coding/UI and source acceptance", "truthful compaction/restart handoff", "matched useful 49K/64K/96K/128K tiers", "successful active endurance", "installed terminal/GUI handoff", "KRYN-owned isolated clean install/recovery"],
