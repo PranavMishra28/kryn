@@ -692,6 +692,9 @@ export default {
         throw new Error('KRYN has not qualified local model WebSocket transport');
     });
     await ctx.permission.hook('evaluate', event => {
+      if (event.action === 'external_directory' && event.effect === 'deny' && event.source?.type === 'tool')
+        event.message = 'KRYN denied a path outside this project. Current project root: ' +
+          ctx.location.directory + '. Check saved checkpoint paths against this root before retrying.';
       if (event.agent === 'reviewer' && event.action === 'question') {
         event.effect = 'deny'; event.message = 'Reviewer must return findings without requesting user input.';
       }

@@ -88,6 +88,7 @@ class ReportTests(unittest.TestCase):
                              result['counts']['check_commands'])
             self.assertFalse(result['acceptance_verified'])
             self.assertNotIn('All required tests passed', json.dumps(result))
+            self.assertIn('later successful exits do not erase', ' '.join(result['findings']))
 
     def test_native_usage_separates_cache_reasoning_compaction_and_missing_data(self):
         with tempfile.TemporaryDirectory() as folder:

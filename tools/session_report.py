@@ -149,6 +149,8 @@ def summarize(connection, session_id):
         findings.append('Repeated reads across compaction; inspect for a review loop.')
     if not counts['completed_browser_calls']:
         findings.append('No completed browser tool calls. UI success is not established by this trace.')
+    if counts['check_exit_nonzero']:
+        findings.append('Observed check commands exited nonzero; later successful exits do not erase those attempts. Inspect the native transcript for their sequence.')
     if counts['tool_errors']:
         findings.append('Tool errors occurred; inspect the native transcript before classifying their cause.')
     if any(outcomes[state] for state in ('failed', 'interrupted', 'cancelled')):
