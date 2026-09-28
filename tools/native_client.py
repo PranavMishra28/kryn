@@ -292,8 +292,14 @@ def environment(config=None):
                "TMPDIR", "TMP", "TEMP", "TERM", "TERM_PROGRAM", "TERM_PROGRAM_VERSION",
                "COLORTERM", "NO_COLOR", "FORCE_COLOR", "TZ", "__CF_USER_TEXT_ENCODING",
                "SSL_CERT_FILE", "SSL_CERT_DIR", "NODE_EXTRA_CA_CERTS"}
+    effective = config if config is not None else owned_config()
     env = {key: value for key, value in os.environ.items()
            if key in allowed or key.startswith("LC_")}
+    browser = effective.get("mcp", {}).get("servers", {}).get("browser", {})
+    command = browser.get("command") if isinstance(browser, dict) else None
+    if isinstance(command, list) and command and isinstance(command[0], str) and Path(command[0]).is_absolute():
+        # Shell jobs must use the same native Node as the installed browser tools.
+        env["PATH"] = str(Path(command[0]).parent) + os.pathsep + env.get("PATH", "")
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     for key, name in (("XDG_CONFIG_HOME", "config"), ("XDG_DATA_HOME", "data"),
                       ("XDG_CACHE_HOME", "cache"), ("XDG_STATE_HOME", "state")):
@@ -302,7 +308,7 @@ def environment(config=None):
     env["NPM_CONFIG_CACHE"] = str(ROOT / "xdg/cache/npm")
     env["NO_PROXY"] = env["no_proxy"] = "127.0.0.1,localhost,::1"
     env["OPENCODE_CLI_CONFIG_CONTENT"] = '{"session":{"permissions":"prompt"}}'
-    env["OPENCODE_CONFIG_CONTENT"] = json.dumps(config if config is not None else owned_config())
+    env["OPENCODE_CONFIG_CONTENT"] = json.dumps(effective)
     return env
 
 
