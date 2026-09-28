@@ -1098,9 +1098,17 @@ def main():
         server.env["OPENCODE_CONFIG_DIR"] = str(config_root)
         with server:
             providers, models = server.inventory()
-            if [p["id"] for p in providers["data"]] != ["local"] or [m["id"] for m in models["data"]] != ["qwen"]:
-                raise RuntimeError("Unexpected provider/model inventory")
             (folder / "inventory.json").write_text(json.dumps({"providers": providers, "models": models}, indent=2))
+            provider_ids = [p["id"] for p in providers["data"]]
+            model_providers = [m["providerID"] for m in models["data"]]
+            local_models = [m["id"] for m in models["data"] if m["providerID"] == "local"]
+            # Pinned OpenCode exposes its built-in free catalog even when the
+            # isolated trial config defines only local/qwen. The wire audit
+            # below still requires every trial generation to use local/qwen.
+            if (sorted(provider_ids) not in (["local"], ["local", "opencode"]) or
+                    local_models != ["qwen"] or any(p not in provider_ids for p in model_providers)):
+                raise RuntimeError("Unexpected provider/model inventory: " +
+                                   repr((provider_ids, local_models, model_providers)))
             for domain in ("config", "plugin", "agent", "command", "skill"):
                 value = server.request("GET", "/api/" + domain)
                 (folder / (domain + "-inventory.json")).write_text(json.dumps(value, indent=2))
