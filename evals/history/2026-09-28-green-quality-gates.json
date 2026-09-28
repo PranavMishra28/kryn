@@ -1,0 +1,55 @@
+{
+  "kind": "private installed KRYN quality-gate receipt",
+  "date": "2026-09-28",
+  "release_status": "Public releases, tags and version bumps remain paused; v0.1.10 is unchanged.",
+  "source_commits": {
+    "child_failure_and_delegation": "2bc96cc",
+    "retired_probe_and_wheel_curation": "a35988a",
+    "check_ledger_cd_prefix": "6555369",
+    "multiline_background_guard": "f74b389cd6c41d5d1d3d214d47144638f8335e61"
+  },
+  "owner_private_install": {
+    "source": "f74b389cd6c41d5d1d3d214d47144638f8335e61",
+    "wheel_sha256": "e28132c377d7cad2660e0e1963eb9cc9c460241422275642df2ec545c2dc2b6c",
+    "context_tokens": 98304,
+    "omlx_ceiling_gib": 22,
+    "rollback": "PASS: restored a35988a from 6555369 and verified package identity; reinstalled f74b389 afterward",
+    "guarded_smoke": "PASS: installed local protocol smoke after cold runtime restart",
+    "deep_doctor": "PASS: local routing, model/browser integrity, browser/search connections; normal host pressure and zero swap",
+    "terminal_launch": "PASS: KRYN loading/banner, OpenCode ready, 2/2 tools connected, editable permissions; no prompt sent",
+    "limits": "Private same-version build on the owner Mac, not an isolated clean install or public update qualification."
+  },
+  "verification": "make check: 190 Python tests, 69 Node tests, native trial self-check and frozen suite verify/selftest passed; clean curated wheel and package smoke passed. The multiline shell regression is a unit check, not yet a model-produced installed UI pass.",
+  "trials": {
+    "task02": {
+      "run": "green-20260928-task02-children",
+      "source": "a35988a",
+      "agent_seconds": 300.037,
+      "automatic": "PASS 2/2; original test and CSV preserved",
+      "native_children": "Fresh Explore and Reviewer both completed; one foreground child at a time; all 31 recorded generations locally routed",
+      "compaction_restart": "Two local native compactions completed with a fresh turn between them and saved-session resumes from new server processes. An immediate second compaction without a new turn failed as compaction.unavailable and remains recorded.",
+      "semantic_continuity": "FAIL: post-compaction Ask answer omitted the earlier failed pytest-unavailable attempt and overstated historical verification."
+    },
+    "task06": {
+      "run": "green-20260928-task06-main",
+      "source": "a9034ae",
+      "agent_seconds": 696.398,
+      "automatic": "PASS 2/2",
+      "browser": "FAIL: after injected 503 the page automatically sent a second POST 201 before manual retry; later browser checks untested."
+    },
+    "task12": {
+      "run": "green-20260928-task12-main",
+      "source": "6555369; f74b389 was not mixed into the frozen saved-session trial",
+      "active_stage_seconds": {"plan": 61.312, "build": 908.4, "audit": 304.767, "assisted_handoff": 609.196},
+      "automatic": "PASS 2/2; existing test and seed CSV preserved",
+      "independent_browser": "FAIL before and after assisted repair: save, stored-text safety, accessible invalid input, manual 503 retry, both responsive viewports, duplicate rejection, persistent edit and exact filter passed; file selection was immediately cleared, so Import sent no POST; the client also calls unsupported DOMParser.getRows; Export omitted filtered-out seed row t2. Later frozen browser checks remained unrun.",
+      "native_review": "Fresh read-only Reviewer child completed but misdiagnosed upload as possible evaluator misconfiguration; parent repeated the unsupported claim.",
+      "compaction_restart": "Native local compaction completed, then same saved session resumed in a fresh process after a harmless tracked-file change. The checkpoint falsely called import/export complete and 503 blocked; the resumed model read current files but did not repair the proven UI failures. A separate new root-session final verification was not run.",
+      "outcome": "FAIL: Build and assisted handoff hit their time caps; Audit completed but its conclusions were inaccurate."
+    }
+  },
+  "resource_scope": "All sampled trial stages retained local wire routing, normal host pressure, AC power and zero observed swap growth. Largest sampled oMLX footprint was 15.94 GB in Task06; these runs did not exercise a full 96K prompt or qualify 128K.",
+  "concurrency": "Native independent read tools overlapped in Task02. Native Explore/Reviewer delegation works; model generations remain serialized by the current one-request oMLX scheduler and foreground-child guard. Parallel local model requests were not qualified under the 22 GiB ceiling.",
+  "open_gates": ["accurate long-workflow compaction/restart handoff", "one-shot coding/UI acceptance with independent browser and source review", "matched 49K/64K/96K/128K useful-tier comparison", "45-60 minute successful active endurance", "KRYN-owned isolated clean install and recovery", "public release candidate qualification"],
+  "decision": "Keep the guarded private 96K installation usable for owner testing. Do not call it gold-master, production-qualified or frontier-equivalent and do not publish a release."
+}
