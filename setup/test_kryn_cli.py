@@ -2,6 +2,7 @@
 from contextlib import nullcontext, redirect_stdout, redirect_stderr
 import io
 import copy
+import argparse
 import hashlib
 import json
 import os
@@ -532,7 +533,7 @@ class KrynChecks(unittest.TestCase):
                          ('global',['scheduler','max_concurrent_requests'],2), ('global',['memory','prefill_memory_guard'],False),
                          ('global',['memory','memory_guard_custom_ceiling_gb'],32), ('global',['cache','ssd_cache_max_size'],'16GB'),
                          ('global',['cache','hot_cache_max_size'],'1GB')]
-        for key, value in [('max_context_window',65536),('max_tokens',16384),('mtp_enabled',True),
+        for key, value in [('max_context_window',131072),('max_tokens',16384),('mtp_enabled',True),
                            ('mtp_num_draft_tokens',4),('vlm_mtp_enabled',True),('dflash_enabled',True),
                            ('specprefill_enabled',True),('turboquant_kv_enabled',True),('qwen35_ane_prefill_enabled',True)]:
             modifications.append(('model',['models',localai.MODEL_ID,key],value))
@@ -616,6 +617,38 @@ class KrynChecks(unittest.TestCase):
             with patch.object(localai, 'verify_release'), patch.object(localai.learning, 'control') as controls, self.assertRaises(RuntimeError):
                 localai.main(['improve', *tail])
             controls.assert_not_called()
+
+    def test_in_session_update_handoff_requires_exact_verified_offer(self):
+        request = {'tag': 'v0.1.11', 'sha256': 'a' * 64}
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / 'request.json'
+            target.write_text(json.dumps(request))
+            target.chmod(0o600)
+            self.assertEqual(localai.read_update_request(target), request)
+            target.write_text(json.dumps({**request, 'tag': 'v0.1.11; echo unsafe'}))
+            with self.assertRaisesRegex(RuntimeError, 'Invalid in-session'):
+                localai.read_update_request(target)
+            target.write_text(json.dumps(request))
+            launcher = Path(directory) / 'kryn'
+            launcher.write_text('#!/bin/sh\n')
+            args = argparse.Namespace(web=False, auto=False, permissions='interactive', json_cli=False)
+            with patch.object(localai, 'ROOT', Path(directory)), \
+                 patch.object(localai.subprocess, 'check_output', return_value=json.dumps({
+                     'status': 'available', 'tag': request['tag'], 'sha256': 'b' * 64})), \
+                 patch.object(localai.subprocess, 'run') as install:
+                with self.assertRaisesRegex(RuntimeError, 'Update changed'):
+                    localai.apply_update_after_exit(request, Path(directory), args)
+                install.assert_not_called()
+            with patch.object(localai, 'ROOT', Path(directory)), \
+                 patch.object(localai.subprocess, 'check_output', return_value=json.dumps({
+                     'status': 'available', **request})), \
+                 patch.object(localai.subprocess, 'run') as install, \
+                 patch.object(localai.os, 'chdir'), \
+                 patch.object(localai.os, 'execv', side_effect=RuntimeError('reexec')) as reexec:
+                with self.assertRaisesRegex(RuntimeError, 'reexec'):
+                    localai.apply_update_after_exit(request, Path(directory), args)
+                install.assert_called_once()
+                reexec.assert_called_once_with(str(launcher), [str(launcher), '--continue'])
 
 
 if __name__ == '__main__': unittest.main()

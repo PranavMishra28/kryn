@@ -80,7 +80,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
-| `/update` | Check published KRYN releases; review the exact version/commit and choose Update instructions or Later. |
+| `/update` | Check published KRYN releases; review the exact version/commit and choose Update and restart or Later. |
 | `/share` | Open OpenCode's local session export. V2 cannot create a public share link; inspect the export before sending it. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
 | `/review` or `/audit` | Run a bounded read-only Reviewer child; your current mode stays selected. |
@@ -110,11 +110,11 @@ In the GUI, hover over the prompt area to reveal the **Default** effort button b
 
 ## Maintenance and troubleshooting
 
-The packaged terminal checks public KRYN releases at startup and while idle, at most once every six hours. A newly verified release gets one toast per version and wheel hash across restarts. `/update` opens **Update instructions / Later**, showing the exact version, source commit and a short release-note excerpt. Later dismisses the offer; use `/update` whenever you want to review it again. No dialog opens automatically, and active sessions (including children) defer the check or notice. Repeated manual checks share in-flight work and a 30-second cooldown.
+The packaged terminal checks public KRYN releases on every fresh launch and then at most once every six hours while running. A newly verified release gets one **Update and restart / Later** dialog per version and wheel hash across restarts. `/update` opens the same dialog on demand. Later dismisses the automatic offer; active sessions (including children) defer it until idle. Repeated manual checks share in-flight work and a 30-second cooldown.
 
 Discovery reads the 20 most recent published GitHub releases, including prereleases, and considers only an exact numerically newer KRYN tag. It downloads checksums and the wheel into temporary storage, reuses the verified updater's HTTPS/hash checks, validates the clean manifest and payload, then discards the download. Same-version private candidates, older tags and main commits are not updates. Network, rate-limit or integrity failures stay quiet until you explicitly check; `unavailable` does not mean up to date. These checks send no project content or credentials. Artifact integrity is not independent signing, host compatibility or application-quality qualification.
 
-Update instructions give `kryn update vX.Y.Z` for Terminal after you finish work and exit KRYN. There is no one-click activation or mid-turn replacement. The existing transactional updater and `kryn rollback` retain recovery and native saved sessions; OpenCode is only changed through a reviewed KRYN package's pinned setup. Source-only launches without the installed package report update checking unavailable.
+Accepting an offer saves the exact verified tag and wheel hash in a private launcher handoff, exits the native client, rechecks the same release, then runs the existing transactional updater and reopens the project with `--continue`. If verification or installation fails, the saved session remains; run `kryn --continue` after addressing the error. There is no mid-turn replacement. `kryn rollback` retains the previous installation, and OpenCode changes only through a reviewed KRYN package's pinned setup. Without an installed launcher, `/update` gives manual instructions.
 
 Run these commands in **Terminal**, outside the KRYN interface:
 
@@ -153,9 +153,9 @@ The report shows both the latest native outcome and counts of earlier execution 
 
 ## Configuration and release scope
 
-The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The public profile uses a **49,152-token context**, **8,192-token output limit**, **16 GiB model memory ceiling** and one active generation. The owner's installed same-version **64K** profile is a private guarded experiment, not the published default or a qualified quality improvement. Exact public model hashes and tool settings are in [the accepted profile](../setup/accepted-profile.json) and [the client template](../setup/opencode.template.json).
+The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The published profile uses a **49,152-token context**, **8,192-token output limit**, **16 GiB model memory ceiling** and one active generation. Current source sets **96K** for a guarded private candidate; useful long-workflow quality and sustained resource safety remain unqualified. Exact model hashes and tool settings are in [the accepted profile](../setup/accepted-profile.json) and [the client template](../setup/opencode.template.json).
 
-Automatic compaction reserves room for output: the 49,152-token window leaves roughly 40,960 tokens for active context before native estimation triggers a summary. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
+Automatic compaction reserves room for output: the published 49,152-token window leaves roughly 40,960 tokens for active context; the private 96K setting leaves roughly 90,112. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
 
 npm uses KRYN’s managed writable cache, so ordinary dependency installation does not require modifying `~/.npm` or running `sudo`. Agent, including saved legacy Build sessions, can delegate rendered UI checks to one foreground Browse child. KRYN attaches up to 6,000 characters of the current user request to that handoff so functional acceptance criteria are not lost in a visual-only summary. This text stays in memory outside the native conversation and survives compaction during the running client; it does not recover older criteria after a restart. Agent is also instructed to finish a runnable slice and validate required services. These instructions improve the workflow but are not an enforced correctness gate.
 

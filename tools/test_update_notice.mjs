@@ -10,9 +10,10 @@ const available = { status: 'available', tag: 'v0.1.11', source_revision: 'b'.re
 
 function fixture(t, options = {}) {
   const state = options.state ?? { checked: 0, notified: '' };
-  const notices = [], confirms = [], alerts = [];
-  let time = 100000000, busy = options.busy ?? false, checks = 0, confirm = false;
+  const notices = [], confirms = [], alerts = [], dispatched = [];
+  let time = 100000000, busy = options.busy ?? false, checks = 0, confirm = options.confirm ?? false;
   const context = {
+    keymap: { dispatch: value => dispatched.push(value) },
     storage: { store: () => [state, async fn => fn(state)] },
     data: { session: { list: () => [{ id: 'session' }, { id: 'child' }], status: id => busy && id === 'child' ? 'running' : 'idle' } },
     ui: { toast: { show: value => notices.push(value) }, dialog: {
@@ -22,9 +23,9 @@ function fixture(t, options = {}) {
   };
   const updates = setupUpdates(context, { now: () => time, ...(options.native ? {} : {
     check: async signal => { checks++; return options.check ? options.check(signal) : available; },
-  }) });
+  }), requestPath: options.requestPath });
   t.after(() => updates.dispose());
-  return { state, notices, confirms, alerts, updates, get checks() { return checks; },
+  return { state, notices, confirms, alerts, dispatched, updates, get checks() { return checks; },
     busy(value) { busy = value; }, advance(value) { time += value; }, confirm(value) { confirm = value; } };
 }
 
@@ -32,17 +33,17 @@ test('startup and idle checks are throttled, including across restarts', async t
   const f = fixture(t);
   await f.updates.poll();
   assert.equal(f.checks, 1);
-  assert.equal(f.notices.length, 1);
-  assert.match(f.notices[0].message, /v0.1.11 prerelease/);
+  assert.equal(f.confirms.length, 1);
+  assert.match(f.confirms[0].message, /v0.1.11/);
   await f.updates.poll();
   f.advance(CHECK_INTERVAL);
   await f.updates.poll();
   assert.equal(f.checks, 2);
-  assert.equal(f.notices.length, 1);
+  assert.equal(f.confirms.length, 1);
   f.updates.dispose();
   const restarted = fixture(t, { state: f.state });
   await restarted.updates.poll();
-  assert.equal(restarted.notices.length, 0);
+  assert.equal(restarted.confirms.length, 0);
 });
 
 test('busy child defers startup and results arriving during work wait for idle', async t => {
@@ -56,22 +57,22 @@ test('busy child defers startup and results arriving during work wait for idle',
   f.busy(true);
   resolve(available);
   await polling;
-  assert.equal(f.notices.length, 0);
+  assert.equal(f.confirms.length, 0);
   assert.equal(f.state.notified, '');
   f.busy(false);
   await f.updates.poll();
-  assert.equal(f.notices.length, 1);
+  assert.equal(f.confirms.length, 1);
 });
 
 test('a release published during the session appears at a later idle check', async t => {
   let latest = { status: 'current' };
   const f = fixture(t, { check: () => latest });
   await f.updates.poll();
-  assert.equal(f.notices.length, 0);
+  assert.equal(f.confirms.length, 0);
   f.advance(CHECK_INTERVAL);
   latest = available;
   await f.updates.poll();
-  assert.equal(f.notices.length, 1);
+  assert.equal(f.confirms.length, 1);
 });
 
 test('Later is persistent, and Update instructions only shows the exact manual command', async t => {
@@ -83,12 +84,25 @@ test('Later is persistent, and Update instructions only shows the exact manual c
   assert.equal(f.alerts.length, 0);
   f.advance(CHECK_INTERVAL);
   await f.updates.poll();
-  assert.equal(f.notices.length, 1);
+  assert.equal(f.confirms.length, 2);
   f.confirm(true);
   await f.updates.open();
   assert.match(f.alerts[0].message, /kryn update v0\.1\.11/);
   assert.match(f.alerts[0].message, /exit KRYN/);
   assert.match(f.alerts[0].message, /kryn rollback/);
+});
+
+test('accepted update requests exit the client and leave activation to the launcher', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-update-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const requestPath = path.join(directory, 'request.json');
+  const f = fixture(t, { requestPath, confirm: true });
+  await f.updates.poll();
+  assert.deepEqual(f.confirms[0].label, { confirm: 'Update and restart', cancel: 'Later' });
+  assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')),
+    { tag: available.tag, sha256: available.sha256 });
+  assert.equal(fs.statSync(requestPath).mode & 0o777, 0o600);
+  assert.deepEqual(f.dispatched, ['app.exit']);
 });
 
 test('network failure and invalid responses stay quiet and cannot claim current', async t => {
@@ -97,7 +111,7 @@ test('network failure and invalid responses stay quiet and cannot claim current'
   await f.updates.open();
   await f.updates.open();
   assert.equal(f.checks, 1);
-  assert.equal(f.notices.length, 0);
+  assert.equal(f.confirms.length, 0);
   assert.match(f.alerts[0].message, /Could not verify/);
   assert.equal(f.confirms.length, 0);
   for (const invalid of [{ status: 'current' }, { ...available, tag: 'main' },
@@ -122,7 +136,7 @@ test('dispose aborts a pending check and suppresses late UI', async t => {
   assert.equal(signal.aborted, true);
   resolve(available);
   await polling;
-  assert.equal(f.notices.length, 0);
+  assert.equal(f.confirms.length, 0);
 });
 
 test('real subprocess boundary invokes only isolated package discovery, with spaces preserved', async t => {
@@ -140,5 +154,5 @@ test('real subprocess boundary invokes only isolated package discovery, with spa
   const f = fixture(t, { native: true });
   await f.updates.poll();
   assert.deepEqual(fs.readFileSync(record, 'utf8').trim().split('\n'), ['-I', '-B', '-m', 'kryn', 'update', '--check']);
-  assert.equal(f.notices.length, 1);
+  assert.equal(f.confirms.length, 1);
 });

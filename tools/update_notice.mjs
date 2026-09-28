@@ -1,5 +1,6 @@
-// Read-only KRYN release awareness using the pinned OpenCode V2 plugin context.
+// Verified KRYN release prompt; activation is owned by the launcher after exit.
 import { execFile } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
@@ -21,12 +22,12 @@ export function verifiedNotice(value) {
 }
 
 export function setupUpdates(context, { check = (signal) => packageCheck(process.env.KRYN_UPDATE_PYTHON, signal),
-    now = Date.now } = {}) {
+    now = Date.now, requestPath = process.env.KRYN_UPDATE_REQUEST } = {}) {
   const [state, save] = context.storage.store('kryn-release-notice', {
     initial: { checked: 0, notified: '' },
   });
   const controller = new AbortController();
-  let result, inFlight, disposed = false, dialogOpen = false, lastAttempt = 0, notified = '';
+  let result, inFlight, polling, disposed = false, dialogOpen = false, lastAttempt = 0, notified = '';
   const idle = () => context.data.session.list().every(session => context.data.session.status(session.id) === 'idle');
   const identity = () => `${result.tag}:${result.sha256}`;
   const toast = message => context.ui.toast.show({ title: 'KRYN update', message, variant: 'info', duration: 10000 });
@@ -34,7 +35,8 @@ export function setupUpdates(context, { check = (signal) => packageCheck(process
 
   async function refresh(force = false) {
     if (inFlight) return inFlight;
-    if (!force && recent(state.checked)) return;
+    // Recheck on a fresh launch: a persisted timestamp has no verified result in memory.
+    if (!force && result && recent(state.checked)) return;
     // Repeated palette invocations share a check, including a short failure cooldown.
     if (lastAttempt && now() - lastAttempt < 30000) return;
     lastAttempt = now();
@@ -47,23 +49,27 @@ export function setupUpdates(context, { check = (signal) => packageCheck(process
   }
 
   async function poll() {
-    if (disposed || !idle()) return;
-    try {
-      await refresh();
-      // Work may have started while HTTPS verification was in progress.
-      if (disposed || !idle() || !verifiedNotice(result) || state.notified === identity() || notified === identity()) return;
-      notified = identity();
-      toast(`${result.tag}${result.prerelease ? ' prerelease' : ''} · ${result.source_revision.slice(0,12)} available. Use /update to review, or leave it for later.`);
-      await save(draft => { draft.notified = notified; });
-    } catch { /* Storage/network failure must never block coding or repeat prompts. */ }
+    if (polling) return polling;
+    polling = (async () => {
+      try {
+        if (disposed || !idle()) return;
+        await refresh();
+        // Work may have started while HTTPS verification was in progress.
+        if (disposed || !idle() || !verifiedNotice(result) || state.notified === identity() || notified === identity()) return;
+        notified = identity();
+        await save(draft => { draft.notified = notified; });
+        await open(false);
+      } catch { /* Storage/network failure must never block coding or repeat prompts. */ }
+    })();
+    try { await polling; } finally { polling = undefined; }
   }
 
-  async function open() {
+  async function open(force = true) {
     if (disposed || dialogOpen) return;
     if (!idle()) { toast('Finish the active turn before checking KRYN updates.'); return; }
     dialogOpen = true;
     try {
-      await refresh(true);
+      await refresh(force);
       if (disposed || !idle()) return;
       if (!verifiedNotice(result)) {
         await context.ui.dialog.alert({ title: 'KRYN updates', message: result?.status === 'current'
@@ -74,11 +80,18 @@ export function setupUpdates(context, { check = (signal) => packageCheck(process
       await save(draft => { draft.notified = identity(); });
       const selected = result;
       const details = `${selected.tag}${selected.prerelease ? ' (prerelease)' : ''}\nSource: ${selected.source_revision}\n\n${selected.summary}\n\nRelease checksums verified.`;
-      const instructions = await context.ui.dialog.confirm({ title: 'KRYN update available', message: details,
-        label: { confirm: 'Update instructions', cancel: 'Later' } });
-      if (!instructions || disposed) return;
-      await context.ui.dialog.alert({ title: 'Update KRYN after exit', message:
-        `Finish work and exit KRYN, then run in Terminal:\n\nkryn update ${selected.tag}\n\nResume from your project with kryn --continue. Saved sessions remain; kryn rollback restores the previous retained installation.` });
+      const accepted = await context.ui.dialog.confirm({ title: 'KRYN update available', message: details,
+        label: { confirm: requestPath ? 'Update and restart' : 'Update instructions', cancel: 'Later' } });
+      if (!accepted || disposed) return;
+      if (!idle()) { toast('Finish the active turn, then use /update.'); return; }
+      if (requestPath) {
+        fs.writeFileSync(requestPath, JSON.stringify({ tag: selected.tag, sha256: selected.sha256 }),
+          { flag: 'wx', mode: 0o600 });
+        context.keymap.dispatch('app.exit');
+      } else {
+        await context.ui.dialog.alert({ title: 'Update KRYN after exit', message:
+          `Finish work and exit KRYN, then run in Terminal:\n\nkryn update ${selected.tag}\n\nResume from your project with kryn --continue. Saved sessions remain; kryn rollback restores the previous retained installation.` });
+      }
     } catch {
       if (!disposed) toast('KRYN update check unavailable. Try /update later.');
     } finally { dialogOpen = false; }

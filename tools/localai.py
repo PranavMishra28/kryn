@@ -34,7 +34,7 @@ LEGACY_VARIANTS = {"medium", "high", "xhigh", "think"}
 REVISION = '76fe4065e622cf34990d3c13ef80ec8531c9a0f7'
 REPOSITORY = 'mlx-community/Qwen3.5-9B-6bit'
 MODEL_PARENT = 'candidates/qwen35-9b/models'
-SERVER_CONTEXT = 49152
+SERVER_CONTEXT = 98304
 MEMORY_GIB = 16
 OMLX = Path.home() / "Applications/oMLX.app/Contents/MacOS/omlx-cli"
 CONTROL = Path.home() / "Library/Application Support/oMLX/control.sock"
@@ -678,6 +678,43 @@ def guarded_run(server, command, project, outcome, timeout=None, *, web=False, s
                 raise RuntimeError("Owned client/session cleanup could not be fully verified") from errors[0]
 
 
+def read_update_request(path):
+    if not path.exists():
+        return None
+    info = path.lstat()
+    require(stat.S_ISREG(info.st_mode) and info.st_uid == os.geteuid() and
+            info.st_nlink == 1 and info.st_mode & 0o077 == 0 and info.st_size <= 256,
+            "Unsafe in-session update request")
+    request = json.loads(path.read_text())
+    require(isinstance(request, dict) and set(request) == {"tag", "sha256"} and
+            isinstance(request["tag"], str) and re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", request["tag"]) and
+            isinstance(request["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", request["sha256"]),
+            "Invalid in-session update request")
+    return request
+
+
+def apply_update_after_exit(request, project, args):
+    """Reverify the offer after the native client closes, then activate and resume."""
+    output = subprocess.check_output([sys.executable, "-I", "-B", "-m", "kryn", "update", "--check"],
+                                     text=True, timeout=120)
+    offer = json.loads(output)
+    require(offer.get("status") == "available" and
+            (offer.get("tag"), offer.get("sha256")) == (request["tag"], request["sha256"]),
+            "Update changed or cannot be verified; installation unchanged. Run kryn --continue.")
+    print("KRYN: installing verified " + request["tag"] + " after saving the session…", flush=True)
+    subprocess.run([sys.executable, "-I", "-B", "-m", "kryn", "update", request["tag"]], check=True)
+    launcher = ROOT / "kryn"
+    require(launcher.is_file() and not launcher.is_symlink(),
+            "Update installed; launcher unavailable. Run kryn --continue manually.")
+    resume = [str(launcher), "--continue"]
+    if getattr(args, "web", False): resume.append("--web")
+    if getattr(args, "auto", False): resume.append("--auto")
+    elif args.permissions in {"ask", "auto"}: resume.extend(["--permissions", args.permissions])
+    if args.json_cli: resume.append("--json-cli")
+    os.chdir(project)
+    os.execv(str(launcher), resume)
+
+
 def await_runtime_idle():
     deadline, quiet = time.monotonic() + 30, 0
     while time.monotonic() < deadline:
@@ -818,12 +855,15 @@ def run(args, outcome):
         require(all(type(health.get(k)) is int and health[k] == 0 for k in ("active_requests", "waiting_requests")),
                 "Local runtime is busy; wait for its existing work before launching KRYN")
     invoked = False
+    pending_update = None
     try:
         with ExitStack() as stack:
             if command in {"doctor", "bench"}:
                 project = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-check-", dir="/private/tmp")))
             else:
                 show_loading("Opening OpenCode and tools")
+                update_dir = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-update-", dir=ROOT / "state")))
+                update_request = update_dir / "request.json"
             server = stack.enter_context(NativeServer(project, config=config))
             outcome["failure_code"] = "config"
             inventory(server, config)
@@ -850,8 +890,9 @@ def run(args, outcome):
                 if permissions in (None, "interactive") and not getattr(args, "auto", False):
                     server.env.pop("OPENCODE_CLI_CONFIG_CONTENT", None)
                 server.env["KRYN_PERMISSION_MODE"] = ("auto" if getattr(args, "auto", False) is True else permissions or "interactive")
-                # The TUI may only query this package; it never activates an update.
+                # The TUI can request a handoff; only this launcher activates after exit.
                 server.env["KRYN_UPDATE_PYTHON"] = sys.executable
+                server.env["KRYN_UPDATE_REQUEST"] = str(update_request)
                 if getattr(args, "auto", False) is True or permissions == "auto":
                     executable.append("--auto")
                 if getattr(args, "continue_session", False) is True:
@@ -870,7 +911,8 @@ def run(args, outcome):
             code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None,
                                web=getattr(args, "web", False) is True, startup=startup)
             outcome["failure_code"] = "none" if code == 0 else "verification" if command == "bench" else "unknown"
-            return code
+            if code == 0 and command not in {"doctor", "bench"}:
+                pending_update = read_update_request(update_request)
     finally:
         if invoked:
             original = sys.exc_info()[1]
@@ -887,6 +929,9 @@ def run(args, outcome):
                     print("kryn: resource cleanup could not be verified; inspect kryn status before retrying.", file=sys.stderr)
                 else:
                     raise error
+    if pending_update is not None:
+        apply_update_after_exit(pending_update, project, args)
+    return code
 
 
 def main(argv=None):

@@ -2,7 +2,7 @@
 
 A coding workspace for Apple Silicon: OpenCode's terminal and browser interfaces, a local Qwen model through oMLX, and coding, planning, review, browser and search tools. Other OpenCode providers are optional and selected by you.
 
-**Public releases are paused.** The available [v0.1.10 prerelease](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.10) is from `e9c90ff`; current source includes later fixes. Owner smoke and rollback checks pass narrowly, but full coding/UI completion and truthful compaction/restart remain failed. Clean KRYN-scoped installation, useful context-tier selection and sustained active work remain unqualified. See [current status and gates](plan.md), including the latest reading-list evidence. No production-quality, autonomous improvement or frontier-parity claim follows from the results.
+**Public releases are paused.** The available [v0.1.10 prerelease](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.10) is from `e9c90ff`; current source includes later fixes and a private 96K candidate. Owner smoke and rollback checks pass narrowly, but full coding/UI completion and truthful compaction/restart remain failed. Clean KRYN-scoped installation, useful context-tier selection and sustained active work remain unqualified. See [current status and gates](plan.md). No production-quality, autonomous improvement or frontier-parity claim follows from the results.
 
 | Start here | Contents |
 |---|---|
@@ -67,7 +67,7 @@ Requirements:
 
 ## Updates and recovery
 
-Current packaged source checks for a newer checksum-verified KRYN release at startup and while idle, with one notice per release and no automatic dialogs. `/update` shows its exact version/commit and short change summary, then offers **Update instructions / Later**. `kryn update --check` is the read-only Terminal equivalent. Checks are throttled; network failures, same-version private builds and older releases produce no update offer. This behavior is not yet in the published v0.1.10 artifact.
+Current packaged source checks for a newer checksum-verified KRYN release at startup and while idle. It offers **Update and restart / Later** once per release, or on demand through `/update`. Acceptance closes the client, verifies the same release hash again, uses the existing transactional installer, then resumes the project. Active turns defer the dialog; no update replaces a running generation. `kryn update --check` is the read-only Terminal equivalent. Network failures, same-version private builds and older releases produce no offer. This behavior is not yet in the published v0.1.10 artifact.
 
 Run `kryn update vX.Y.Z` in Terminal for an exact newer published KRYN tag. The updater verifies release checksums and package contents before transactional activation; `kryn rollback` restores the retained previous installation. Finish work and exit KRYN before updating. Do not install an unverified main commit or independently update the pinned OpenCode binary. Current same-version private candidates are not a public update channel.
 
@@ -75,7 +75,7 @@ Run `kryn update vX.Y.Z` in Terminal for an exact newer published KRYN tag. The 
 
 ## Current profile and learning limits
 
-The public profile pins OpenCode **2.0.10**, oMLX **0.6.4**, Qwen3.5-9B-6bit, **49,152** context tokens, **8,192** output tokens, a **16 GiB** model memory ceiling and one active generation. Owner 64K is a private guarded experiment. Exact settings remain in the [accepted profile](setup/accepted-profile.json) and [client template](setup/opencode.template.json).
+The published v0.1.10 profile pins OpenCode **2.0.10**, oMLX **0.6.4**, Qwen3.5-9B-6bit, **49,152** context tokens, **8,192** output tokens, a **16 GiB** model memory ceiling and one active generation. Current source sets **96K** as a private guarded experiment. This larger setting is not a proven quality improvement. Exact settings remain in the [accepted profile](setup/accepted-profile.json) and [client template](setup/opencode.template.json).
 
 Per-run incident capture retains bounded private failure metadata and check receipts for diagnosis. It does not repair code or qualify a change. The optional disposable-task learning worker remains paused; cross-project automatic promotion has no established benefit and still needs independent reproduction, protected holdouts, matched repeated trials and monitored rollback. See [current learning gates](plan.md#incident-capture-and-promotion).
 
