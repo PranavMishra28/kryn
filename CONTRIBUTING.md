@@ -18,7 +18,7 @@ From the repository root:
 
 `make check` is offline and safe for CI. Live evaluations require an installed KRYN and an independently reviewed run; follow [evals/README.md](evals/README.md) and keep private transcripts out of Git. Do not refresh `evals/frozen.sha256.json` to make a candidate pass. Historical failures belong in `evals/history/`.
 
-Use [current gates](plan.md) for decisions and the [archived ledger](docs/archive/2026-09-27-ledger.md) for historical receipts. The optional [External Requests runbook](docs/external-requests.md) is separate from the installed package.
+Use [current gates](plan.md) for decisions and the [historical evidence index](docs/history.md) for primary receipts and immutable earlier narratives. The optional [External Requests runbook](docs/external-requests.md) is separate from the installed package.
 
 `observe.py` records what its check process saw; it does not make a model-produced artifact autonomous or replace operator review. Its compact output uses opaque evidence IDs instead of private grader paths. A source match does not prove the server, database, or browser state is unchanged. Runs under the same macOS account are **not** an evaluator security boundary because candidate shell tools may read that account's files. Use an explicitly KRYN-owned isolated environment for independent holdout evidence; do not use an unrelated project's account. Until then, label same-account checks as diagnostics rather than protected holdout results.
 

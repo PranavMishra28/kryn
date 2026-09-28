@@ -6,7 +6,7 @@
 
 The latest owner activation receipt was inspected read-only during this cleanup: private source `094fd9b9459315780f90b7c6038d7044ab63db44`, with package and deployment using the same stable retained interpreter. The owner/main chat reported deep doctor passing after that move; this slice did not repeat inference, reinstall or change that installation. Earlier installed qualification receipts below retain their original source scope.
 
-[Use/install](README.md) · [Detailed controls](docs/usage.md) · [Develop/check](CONTRIBUTING.md) · [Evaluation contracts](evals/README.md) · [Archived ledger](docs/archive/2026-09-27-ledger.md)
+[Use/install](README.md) · [Detailed controls](docs/usage.md) · [Develop/check](CONTRIBUTING.md) · [Evaluation contracts](evals/README.md) · [Historical evidence](docs/history.md)
 
 ## Active gates
 
@@ -42,6 +42,6 @@ Capture does not itself learn, repair or promote a change. The optional worker r
 
 The small worker suite does not qualify those broader gates. This cleanup does not enable or widen it.
 
-## Evidence archive
+## Historical evidence
 
-The [full historical ledger](docs/archive/2026-09-27-ledger.md) and [former README trial narrative](docs/archive/2026-09-27-readme-evidence.md) preserve earlier observations and links, including failures and superseded next actions. All original receipts in `evals/history/` and frozen evaluation fixtures remain in place. The active decisions above supersede historical advice, especially references to the unrelated account.
+The [historical evidence index](docs/history.md) links the exact former ledger and README in immutable Git history. Duplicated obsolete narrative is absent from the current tree; every original receipt in `evals/history/` and every frozen fixture remains in place. The active decisions above supersede historical advice, especially references to the unrelated account.
