@@ -298,7 +298,8 @@ function verificationLedger(saved) {
   for (const check of saved.checks) {
     const keys = check && Object.keys(check).sort().join(',');
     if (!check || !['call_id_sha256,generation,key,kind,message_id,observed_at,state',
-                   'call_id_sha256,diagnostic,exit_code,generation,key,kind,message_id,observed_at,runner,state'].includes(keys) ||
+                   'call_id_sha256,diagnostic,exit_code,generation,key,kind,message_id,observed_at,runner,state',
+                   'call_id_sha256,diagnostic,exit_code,generation,key,kind,message_id,observed_at,previous_failure,runner,state'].includes(keys) ||
         typeof check.key !== 'string' || !HASH.test(check.key) || !['test', 'build', 'lint', 'typecheck'].includes(check.kind) ||
         !['pending', 'failed', 'passed', 'stale'].includes(check.state) ||
         !Number.isSafeInteger(check.generation) || check.generation < 0 || check.generation > saved.generation ||
@@ -308,6 +309,15 @@ function verificationLedger(saved) {
       throw new Error('KRYN saved verification ledger changed');
     if (keys === 'call_id_sha256,generation,key,kind,message_id,observed_at,state')
       Object.assign(check, { runner: 'unknown', exit_code: null, diagnostic: null });
+    if (check.previous_failure === undefined) check.previous_failure = null;
+    const prior = check.previous_failure;
+    if (prior !== null && (!prior || Object.keys(prior).sort().join(',') !==
+        'diagnostic,exit_code,message_id,observed_at' ||
+        !Number.isSafeInteger(prior.observed_at) || prior.observed_at < 0 ||
+        !(prior.message_id === null || typeof prior.message_id === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(prior.message_id)) ||
+        !(prior.exit_code === null || Number.isSafeInteger(prior.exit_code) && prior.exit_code >= 0 && prior.exit_code <= 65535) ||
+        !CHECK_DIAGNOSTICS.has(prior.diagnostic)))
+      throw new Error('KRYN saved prior check failure changed');
     if (!CHECK_RUNNERS.has(check.runner) ||
         !(check.exit_code === null || Number.isSafeInteger(check.exit_code) && check.exit_code >= 0 && check.exit_code <= 65535) ||
         !(check.diagnostic === null || CHECK_DIAGNOSTICS.has(check.diagnostic)))
@@ -438,11 +448,16 @@ export default {
       if (!check) {
         if (ledger.checks.length === MAX_OBSERVED_CHECKS) { ledger.complete = false; tracker(item); return; }
         check = { ...identity, state: 'pending', generation: ledger.generation, observed_at: Date.now(),
-          exit_code: null, diagnostic: null };
+          exit_code: null, diagnostic: null, previous_failure: null };
         ledger.checks.push(check);
       }
-      if (before) Object.assign(check, identity, { state: 'pending', generation: ledger.generation,
-        exit_code: null, diagnostic: null });
+      if (before) {
+        if (check.state === 'failed') check.previous_failure = {
+          message_id: check.message_id, observed_at: check.observed_at,
+          exit_code: check.exit_code, diagnostic: check.diagnostic ?? 'nonzero exit' };
+        Object.assign(check, identity, { state: 'pending', generation: ledger.generation,
+          exit_code: null, diagnostic: null });
+      }
       else if (check.call_id_sha256 !== identity.call_id_sha256) {
         // An older concurrent completion must not settle a newer invocation.
         ledger.complete = false; tracker(item); return;
@@ -577,6 +592,13 @@ export default {
           stale.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
             (check.message_id ? ' at ' + check.message_id : '')).join('; ') +
           (stale.length > 4 ? '; ' + (stale.length - 4) + ' older records retained in the private tracker.' : '.') });
+        const rechecked = ledger.checks.filter(check => check.previous_failure && !['failed', 'pending'].includes(check.state));
+        if (rechecked.length) event.system.push({ type: 'text', text: 'Earlier failed checks with later exit observations (not application acceptance): ' +
+          rechecked.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
+            ' failed at ' + (check.previous_failure.message_id ?? 'unknown message') +
+            ' (' + check.previous_failure.diagnostic + ')' +
+            ', later ' + check.state + ' at ' + (check.message_id ?? 'unknown message')).join('; ') +
+          (rechecked.length > 4 ? '; ' + (rechecked.length - 4) + ' older records retained in the private tracker.' : '.') });
       }
       if (event.agent === 'reviewer') {
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nAfter 48 tool attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
