@@ -1,0 +1,23 @@
+{
+  "scope": "Fresh frozen Task12 e12slice28a on the owner private 9B/64K/16GiB profile; same-account diagnostic, public release paused",
+  "raw_run": "evals/runs/e12slice28a (ignored; candidate workspace and evaluator evidence kept separate, without an OS account boundary)",
+  "workflow": "Five saved-session Fast Build slices, followed by a fresh-process read-only Ask after one native compaction. The first Build skipped the frozen Plan stage. An evaluator-owned persistent server removed candidate server-lifecycle ambiguity for the UI slice.",
+  "backend": {
+    "import": "First Build completed in 174.019 seconds. Six independent HTTP cases passed: within-upload and existing-ID atomic duplicate rejection, invalid second row, Unicode/comma import, injected 503 without writes, and one manual retry.",
+    "patch": "Initial 131.711-second Build completed but failed three encoded-ID edits. One focused 79.153-second repair completed; independent HTTP then passed plain, space, literal-percent and slash IDs, mismatched body ID, and unknown ID.",
+    "export": "The model changed the export route but timed out after 246.723 seconds of shell checks. Independent HTTP CSV parsing passed fields, original seed preservation, imported Unicode/comma row and edited comma/Unicode row. The timeout remains a bounded Agent-completion failure.",
+    "frozen_automatic": "2/2 passed on final source; original test and seed hashes preserved"
+  },
+  "ui_and_continuity": {
+    "ui_agent": "FAIL: timed out after 367.917 seconds. Late browser tools navigated, resized to 390x1024, took snapshots, filled the form and clicked the form element rather than Save; they did not verify a Save request, 503 recovery or a 1280px view. Source rendered stored text inert and exact, but Save sent new JSON to POST /api/import instead of POST /api/entries.",
+    "independent_browser": "FAIL: stored markup and invalid-minutes checks passed; controlled first Save generated POST /api/import 503, so the checker timed out waiting for POST /api/entries and did not reach manual retry, responsive Save, upload/edit/filter/export or visual acceptance.",
+    "compaction": "PASS mechanics: one native compaction message persisted in the saved UI session export before interruption.",
+    "restart_handoff": "FAIL semantics: a fresh-process read-only Ask completed in 41.055 seconds with zero new read/browser calls, reduced original Task12 to the latest UI slice, declared the limited 390px inspection a passed check, and treated a click on the form element as submission/503 value-retention evidence although no such request was captured."
+  },
+  "formal_grade": "FAIL after independent review: automatic 2/2 passed, Plan, browser, 503, handoff and representative-duration manual gates failed; fresh Reviewer untested. The first review manifest used invalid evidence-relative paths and was corrected before final grading; both versions remain in private evidence.",
+  "resources": "Five Build stages totaled 999.523 seconds prompt-active; two timed out. All six guarded stages, including Ask, sampled normal pressure and zero swap growth, but all ran on battery. An operator offline check overlapped the first Build, so latency comparisons are confounded. This is not 45–60 minutes of green active work or an AC-powered tier benchmark.",
+  "context_observation": "The export stage's last native step reported 40960 cached input tokens; after one UI-stage native compaction, a later step reported 20480. The UI still timed out and used the wrong Save endpoint. This does not show that a larger context tier would repair the quality failure.",
+  "decision": "Stop this 9B saved-session UI prompt workflow after repeated completion and endpoint failures. Preserve its model artifact and external grade; do not operator-edit it into a pass. Keep 64K private and guarded, and require a materially different model or workflow plus protected evaluation before retrying full qualification.",
+  "remaining_gates": ["truthful full Task12 coding/UI and independent review", "semantic multi-compaction restart", "representative 49K–128K useful-tier selection", "protected-account clean inference", "45–60 minutes green active endurance"],
+  "public_release": "PAUSED"
+}

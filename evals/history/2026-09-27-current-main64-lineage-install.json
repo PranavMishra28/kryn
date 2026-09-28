@@ -1,0 +1,16 @@
+{
+  "scope": "Owner-only private candidate from merged main; no public release, tag or version change",
+  "main_base_revision": "736bd791868a4b18336e43aaddda75bf417e4de8",
+  "private_candidate_revision": "c58abd8c65a20e4b6972b5028626724270c56531",
+  "private_delta": "Only the existing 49K context fields were set to 65536 and their test expectations updated; the 16GiB runtime guard and rollback remained.",
+  "wheel_sha256": "c260c3cf1119df5159e66e0234d505f92b2c9f934fc568a2478895e93bc95cb4",
+  "checks": {
+    "offline_suite": "PASS after one hard-coded invalid-context test value was corrected for the private 64K profile; 177 setup, 21 tools and 57 Node tests, native driver self-check, frozen verify and selftest",
+    "package_smoke": "PASS: same-version 0.1.10 wheel, 48 curated payload files, clean source c58abd8",
+    "activation": "PASS: active receipt changed to c58abd8, deep doctor verified model/browser files and healthy idle 65536/16GiB runtime, guarded protocol smoke passed",
+    "rollback": "PASS: exact prior private source 6a556cb32413ce0ed46c769df698b5d540910873 restored; rollback stopped oMLX, then the restored package relaunched it and passed guarded protocol smoke",
+    "reinstallation": "PASS: c58abd8 reactivated, deep doctor verified local routing, browser/search MCP, model/browser integrity, normal pressure and idle 65536/16GiB runtime; guarded protocol smoke passed"
+  },
+  "limits": "Owner package activation/rollback and short inference smoke do not qualify a clean non-owner GUI inference, autonomous Task12, semantic handoff, higher-context useful tier, AC-powered sustained endurance or a public release. The Mac was on battery during the concurrent Task12 diagnostic.",
+  "public_release": "PAUSED"
+}
