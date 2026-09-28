@@ -1,0 +1,38 @@
+{
+  "kind": "private KRYN quality and native-handoff gate receipt",
+  "date": "2026-09-28",
+  "release_status": "Public releases, tags and version bumps remain paused; v0.1.10 is unchanged.",
+  "fresh_task12": {
+    "run": "evals/runs/green-20260928-task12-private7fb",
+    "source": "7fb80b1",
+    "plan_seconds": 79.5,
+    "build_seconds": 1052.6,
+    "automatic": "PASS 2/2; frozen grade PARTIAL",
+    "independent_browser_first": "FAIL: stored markup became a real img element and requested /x; web/app.js interpolated stored fields into innerHTML.",
+    "assisted_agent_audit": "FAIL: this stage was launched as general Agent, not native Audit. It edited the project during requested review. After the edit the markup was inert, but independent browser check still failed exact stored-text rendering because it was escaped before textContent. Import also remained incompatible with the raw-CSV API contract; later browser assertions were not reached.",
+    "native_reviewer": "Two fresh read-only Reviewer probes completed but produced false or unsafe findings; higher thinking budget did not improve this screen. A true native Audit delegated Reviewer but could not read the truncated saved report.",
+    "decision": "Coding/UI acceptance and independent review accuracy FAIL; this is not a successful sustained workflow. Preserve raw runs outside the prompt."
+  },
+  "native_output_handoff": {
+    "diagnostics": ["evals/runs/green-20260928-audit-output37aa", "evals/runs/green-20260928-hook-product"],
+    "observed_order": "KRYN execute.after receives the complete child result before OpenCode truncates it. OpenCode later emits session.tool.success with metadata.outputPath and saves the full text.",
+    "rejected_candidates": ["081f84e", "37aa508", "351b8cd"],
+    "installed_351_trial": "evals/runs/green-20260928-native-handoff351/evidence/audit-handoff2: native Audit delegated a fresh Reviewer; the exact saved tool-output path was recorded in KRYN's private tracker, yet the parent read and glob both failed with Permission denied: external_directory. A hook-level allow did not override native permission evaluation.",
+    "decision": "Removed the ineffective saved-path grant and its configuration, tracker field and tests. Do not count the native child report as readable across truncation/restart. The parent honestly reported the denied read."
+  },
+  "retained_fix": {
+    "source": "75bbce8fdc725cc8af2de2f8c55e88e310fbfcba",
+    "change": "Audit accepts the native tool's empty optional sessionID as a fresh child and removes that field before delegation; nonempty or null reuse remains denied.",
+    "evidence": "Targeted regression and 191 Python plus 69 Node tests passed; frozen suite and clean wheel package smoke passed. The 351 native Audit trial showed a fresh Reviewer completed with this retained fix."
+  },
+  "owner_private_install": {
+    "source": "75bbce8fdc725cc8af2de2f8c55e88e310fbfcba",
+    "wheel_sha256": "91596d84c59ce9aba3121fd1aee3f8a6866f281b8fad82fa26702a2a5927b255",
+    "doctor": "PASS: model/browser integrity, local routing, connected browser/search, 96K/22 GiB profile, normal pressure and zero swap at check time.",
+    "guarded_protocol_smoke": "PASS: /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260928T231947Z-23f89b8b/metrics.json",
+    "rollback": "Prior private-7fb80b1 and private-37aa508 builds remain available; this turn did not run an installed rollback from 75bbce8.",
+    "scope": "Owner-machine private same-version activation, not isolated clean installation or public release qualification."
+  },
+  "open_gates": ["complete autonomous coding/UI and independent source/browser acceptance", "truthful two-compaction and restart continuity on that task", "readable truncated native child report", "matched useful 49K/64K/96K/128K comparison", "45-60 minute successful active endurance", "installed terminal/GUI handoff", "KRYN-owned isolated clean install and recovery"],
+  "decision": "Keep 96K guarded and experimental; KRYN is not production-qualified, gold-master or frontier-equivalent. No public release."
+}
