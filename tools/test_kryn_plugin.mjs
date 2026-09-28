@@ -220,6 +220,26 @@ test('failed checks retain bounded classifications across restart without raw ou
   } finally { await cleanup(); f.remove(); }
 });
 
+test('restart guidance includes a recently rechecked older command within its four receipts', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const commands = ['npm test', 'npm test -- second', 'npm test -- third',
+      'npm test -- fourth', 'npm test -- fifth'];
+    let serial = 0;
+    for (const command of commands) {
+      shellRun(f, command, 'FAIL: first attempt', ++serial, {}, true, 1);
+      shellRun(f, command, 'ok', ++serial);
+    }
+    await new Promise(resolve => setTimeout(resolve, 5));
+    shellRun(f, commands[0], 'ok', ++serial);
+    const event = { sessionID: 'ses_1', agent: 'ask', system: [], tools: {} };
+    f.call('session.context', event);
+    const text = event.system.map(part => part.text).join('\n');
+    assert.match(text, /Earlier failed checks with later exit observations/);
+    assert.match(text, /later passed at msg_11/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('legacy observed-check records load with unknown diagnostic detail', async () => {
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   try {

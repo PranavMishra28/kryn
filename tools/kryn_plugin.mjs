@@ -592,7 +592,8 @@ export default {
           stale.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
             (check.message_id ? ' at ' + check.message_id : '')).join('; ') +
           (stale.length > 4 ? '; ' + (stale.length - 4) + ' older records retained in the private tracker.' : '.') });
-        const rechecked = ledger.checks.filter(check => check.previous_failure && !['failed', 'pending'].includes(check.state));
+        const rechecked = ledger.checks.filter(check => check.previous_failure && !['failed', 'pending'].includes(check.state))
+          .sort((a, b) => a.observed_at - b.observed_at);
         if (rechecked.length) event.system.push({ type: 'text', text: 'Earlier failed checks with later exit observations (not application acceptance): ' +
           rechecked.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
             ' failed at ' + (check.previous_failure.message_id ?? 'unknown message') +
