@@ -1,6 +1,19 @@
-# KRYN execution ledger — 2026-09-25
+# KRYN execution ledger — current status 2026-09-27
 
-This is the single requirement/evidence ledger for the current product goal. `Implemented` means code exists; `mechanism checked` means a narrow test ran; `qualified` requires representative installed use. Recheck evidence after a relevant edit or merge. Baseline for this pass: `main` at `3122fd3`, installed release v0.1.9. The current public prerelease is v0.1.10 from `e9c90ff`. The target Mac is an M4 Max, 48 GB, macOS 26.6.2, with 47 GiB free at the initial audit. Sustained trials must record the actual power state.
+`Implemented` means code exists; `mechanism checked` means a narrow test ran; `qualified` requires representative installed use. Recheck evidence after a relevant edit or merge. Public releases, tags and version bumps remain paused. The public prerelease is v0.1.10 from `e9c90ff`; the owner currently has a private same-version 64K candidate. The target Mac is an M4 Max, 48 GB, macOS 26.6.2. Sustained trials must record the actual power state.
+
+| Active gate | Current evidence | Decision / next check |
+|---|---|---|
+| Owner installation and narrow operation | The private 64K/16 GiB candidate passed exact-source rollback/reinstall, guarded inference and deep doctor after the merged check-lineage fix. [Receipt](evals/history/2026-09-27-current-main64-lineage-install.json). | Working for owner smoke use; 64K remains experimental and guarded. No owner reinstall is required for documentation-only changes. |
+| Full coding/UI and restart continuity | Fresh [Task12](evals/history/2026-09-27-task12-sliced-backend-ui-failure.json) reached automatic 2/2 and independent backend passes, but **failed** the browser Save contract, timed out twice and produced an inaccurate post-compaction handoff. | **Failed.** Change the model/workflow approach before another full qualification attempt; require independent browser and source review plus truthful repeated compaction/restart. |
+| Useful context tier and endurance | 64K is the private owner profile. 96K has a guarded synthetic cache screen; 128K encountered the host warning. No matched coding/UI quality comparison or 45–60-minute green active run has passed. | **Unqualified.** Keep the 64K guard and rollback; compare feasible tiers on representative work before promotion. |
+| Clean installation and independent holdout | A prior second-account run used `eonfolk-ci`, which the owner identified as belonging to a different project. [Scope correction](evals/history/2026-09-27-unrelated-account-scope-correction.json). | **Unqualified for KRYN.** Do not use that account again. A future clean-install/holdout check needs an explicitly KRYN-owned isolated environment; do not count the unrelated account's observations as gate evidence. |
+
+The next blocker is reliable bounded coding/UI completion with accurate compaction/restart and independent checks. Continue through useful-tier, endurance and a KRYN-scoped clean install only after that gate improves. Do not claim gold-master or frontier equivalence or propose a public release from the current results.
+
+## Historical trial log
+
+The table below was the 25 September baseline (`main` at `3122fd3`, installed v0.1.9, 47 GiB free at that audit). Later dated entries preserve what was observed then; the active gate table above supersedes their next-action wording, especially references to the unrelated second account.
 
 | Requirement | Current implementation / evidence | Remaining acceptance gate | Status |
 |---|---|---|---|

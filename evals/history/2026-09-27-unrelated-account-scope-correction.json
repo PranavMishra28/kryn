@@ -1,0 +1,10 @@
+{
+  "date": "2026-09-27",
+  "scope": "Correction to KRYN clean-install and independent-holdout evidence",
+  "superseded_record": "2026-09-27-nonowner-install-rollback.json",
+  "owner_correction": "eonfolk-ci belongs to a different project and is not a KRYN test account",
+  "disposition": "Preserve the earlier command and file-integrity observations as historical diagnostics, but do not count them toward KRYN clean-install, second-user inference or independent-holdout release gates. Do not use or request login to that account for KRYN again.",
+  "kryn_clean_install_gate": "UNQUALIFIED",
+  "kryn_independent_holdout_gate": "UNQUALIFIED",
+  "next_check": "Use an explicitly KRYN-owned isolated environment for any future clean-install or independent-holdout test; keep the public release paused."
+}
