@@ -18,7 +18,18 @@
     "observed_order": "KRYN execute.after receives the complete child result before OpenCode truncates it. OpenCode later emits session.tool.success with metadata.outputPath and saves the full text.",
     "rejected_candidates": ["081f84e", "37aa508", "351b8cd"],
     "installed_351_trial": "evals/runs/green-20260928-native-handoff351/evidence/audit-handoff2: native Audit delegated a fresh Reviewer; the exact saved tool-output path was recorded in KRYN's private tracker, yet the parent read and glob both failed with Permission denied: external_directory. This disposable trial sets an explicit external-directory deny, which the hook-level allow did not override; ordinary daily Ask behavior was not qualified.",
-    "decision": "Removed the ineffective saved-path grant and its configuration, tracker field and tests. Do not count the native child report as readable across truncation/restart. The parent honestly reported the denied read."
+    "decision": "Removed the ineffective saved-path grant and its configuration, tracker field and tests. The parent honestly reported the denied read; later config-only evidence is recorded separately below."
+  },
+  "native_output_config_fix": {
+    "source": "ff69aa9b6aa1207225275f05a1548b6d80e712d1",
+    "change": "Native Audit uses the same OpenCode read and external-directory allowance for managed tool-output files as the existing Browse role, with other external directories denied. No new agent framework or custom file reader was added.",
+    "diagnostic": "A daily-like disposable config, with the evaluator-only blanket external-directory deny omitted, completed a native child and read its saved truncated output. The evaluator's ordinary deny intentionally prevents this workflow and cannot qualify daily permissions.",
+    "installed_trial": "evals/runs/green-20260928-audit-installedff/evidence/child-read: on installed ff69aa9, a fresh Reviewer completed, its result was forced to truncate at 256 bytes, and Audit read the exact saved output file. Driver completed in 47.248 seconds with no resource intervention.",
+    "negative_control": "evals/runs/green-20260928-audit-installedff/evidence/outside-deny: Audit read of a disposable file outside the project and managed tool-output directory was denied as external_directory; driver completed in 16.625 seconds.",
+    "restart_trial": "evals/runs/green-20260928-audit-installedff/evidence/restart-read: the saved native Audit session resumed under a new OpenCode server process and read its prior child report in 36.232 seconds. It searched the managed output directory before choosing the exact file, so this does not prove direct checkpoint recall or bounded discovery.",
+    "normal_threshold_trial": "evals/runs/green-20260928-audit-normalff/evidence/audit-child: an operator-copied failed Task12 source was audited under the installed 4096-byte threshold; a fresh Reviewer report truncated, Audit read the saved file and completed in 148.618 seconds. This is read-only mechanism evidence, not a model-produced coding/UI pass. The Reviewer falsely stated that textContent parses HTML and recommended innerHTML; Audit repeated the false recommendation.",
+    "resources": "All three guarded handoff trials sampled normal pressure and unchanged 3,019,898-byte swap; the Mac was on battery. No resource intervention occurred.",
+    "limits": "Repeated compaction of the child handoff was not exercised. Reviewer's factual accuracy failed. The allowance covers the managed tool-output directory, which the pre-existing Browse role could already read; a resumed model searched that directory instead of retrieving the exact prior path from a checkpoint."
   },
   "retained_fix": {
     "source": "75bbce8fdc725cc8af2de2f8c55e88e310fbfcba",
@@ -26,13 +37,13 @@
     "evidence": "Targeted regression and 191 Python plus 69 Node tests passed; frozen suite and clean wheel package smoke passed. On installed 75bbce8, evals/runs/green-20260928-audit75/evidence/audit-child completed in 37.86 seconds with a fresh native Reviewer and no guard intervention. This narrow delegation check does not qualify review accuracy or truncated-report reading."
   },
   "owner_private_install": {
-    "source": "75bbce8fdc725cc8af2de2f8c55e88e310fbfcba",
-    "wheel_sha256": "91596d84c59ce9aba3121fd1aee3f8a6866f281b8fad82fa26702a2a5927b255",
-    "doctor": "PASS: model/browser integrity, local routing, connected browser/search, 96K/22 GiB profile, normal pressure and zero swap at check time.",
-    "guarded_protocol_smoke": "PASS: /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260928T231947Z-23f89b8b/metrics.json",
-    "rollback": "Prior private-7fb80b1 and private-37aa508 builds remain available; this turn did not run an installed rollback from 75bbce8.",
+    "source": "ff69aa9b6aa1207225275f05a1548b6d80e712d1",
+    "wheel_sha256": "b3439c95df166531da77c1aba717aa6ca451e50f7f3952aa99a4f5b67ec6c855",
+    "doctor": "PASS: model/browser integrity, local routing, connected browser/search, 96K/22 GiB profile and normal pressure. Existing swap used was 3,019,898 bytes at the latest check; do not call this zero swap.",
+    "guarded_protocol_smoke": "PASS: /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260928T233026Z-a38059a2/metrics.json",
+    "rollback": "Prior private-75bbce8 and private-7fb80b1 builds remain available; this turn did not run an installed rollback from ff69aa9.",
     "scope": "Owner-machine private same-version activation, not isolated clean installation or public release qualification."
   },
-  "open_gates": ["complete autonomous coding/UI and independent source/browser acceptance", "truthful two-compaction and restart continuity on that task", "readable truncated native child report", "matched useful 49K/64K/96K/128K comparison", "45-60 minute successful active endurance", "installed terminal/GUI handoff", "KRYN-owned isolated clean install and recovery"],
+  "open_gates": ["complete autonomous coding/UI and independent source/browser acceptance", "accurate independent model review", "truthful two-compaction and restart continuity on that task", "bounded child-output discovery across repeated compaction", "matched useful 49K/64K/96K/128K comparison", "45-60 minute successful active endurance", "installed terminal/GUI handoff", "KRYN-owned isolated clean install and recovery"],
   "decision": "Keep 96K guarded and experimental; KRYN is not production-qualified, gold-master or frontier-equivalent. No public release."
 }
