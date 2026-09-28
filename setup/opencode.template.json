@@ -343,7 +343,7 @@
       ]
     },
     "reviewer": {
-      "mode": "all",
+      "mode": "subagent",
       "description": "Read-only review for correctness and regressions",
       "model": "local/qwen",
       "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
@@ -394,7 +394,7 @@
       "model": "local/qwen#fast"
     },
     "browse": {
-      "mode": "all",
+      "mode": "subagent",
       "model": "local/qwen#fast",
       "permissions": [
         {
@@ -536,6 +536,7 @@
       "description": "Inspect and test rendered interfaces in the isolated browser; report observed flows, console errors and screenshots"
     },
     "audit": {
+      "hidden": true,
       "mode": "primary",
       "description": "Read-only audit with one fresh Reviewer",
       "model": "local/qwen",
@@ -599,7 +600,7 @@
     "review": {
       "agent": "reviewer",
       "model": "local/qwen",
-      "subagent": false,
+      "subagent": true,
       "template": "Review current changes for correctness, regressions and missing tests. Report actionable findings with file and line references. Do not edit files. $ARGUMENTS"
     },
     "deliver": {
@@ -615,10 +616,10 @@
       "template": "Return a concise handoff with objective, acceptance checks, completed work, actual check commands/results, unresolved failures, disproven approaches, and the next action. Reconcile with current Git and files. Use the native checkpoint; do not overwrite user-owned task files. $ARGUMENTS"
     },
     "audit": {
-      "agent": "audit",
+      "agent": "reviewer",
       "model": "local/qwen",
-      "subagent": false,
-      "template": "Audit $ARGUMENTS without modifying files. Inspect relevant files and available diff/check evidence. Launch exactly one new reviewer subagent with background:false, no sessionID and no model override. Supply acceptance criteria, changed paths, available raw diff and actual check results; identify missing evidence. Wait for its result, then report actionable findings with file and line references. Do not fix findings. Remain in Audit mode until the user explicitly switches agents."
+      "subagent": true,
+      "template": "Audit $ARGUMENTS without modifying files. Inspect relevant files, diff and available check evidence. Report actionable findings with file and line references, and say what was not checked. Do not fix findings or claim checks ran unless their results are available."
     }
   },
   "plugins": [

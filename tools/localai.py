@@ -43,7 +43,7 @@ POLICY = [{"action": "provider.use", "resource": "*", "effect": "deny"},
 CONTROLS = """KRYN controls (no model or server needed for this help)
 
 In your shell:
-  kryn                         Start with permission prompts
+  kryn                         Start with editable native permission setting
   kryn --auto                  Auto-approve non-denied requests for this launch
   kryn --permissions interactive
                                Let /settings toggle permissions; saved by OpenCode
@@ -55,7 +55,7 @@ In your shell:
   kryn improve failures       List error-triggered regression incidents
 
 Inside the terminal interface:
-  /agents   or Ctrl+X then A   Choose Ask, Plan or Agent (legacy roles remain)
+  /agents   or Ctrl+X then A   Choose Ask, Plan or Agent
   /effort   or Ctrl+T          Switch Default (thinking on) / Fast (thinking off)
   /settings                   Display, reasoning visibility and permission settings
   /permissions                Open settings from the visible permission indicator
@@ -77,11 +77,11 @@ before submitting from the other interface; unsent drafts are not synchronized.
 The pairing password is temporary and local: do not share the link or QR code.
 GUI permissions are separate; terminal --auto is not a global GUI permission mode.
 
-Default launches pin prompts. --auto pins autoaccept. To switch permissions
-without restarting, use --permissions interactive, then /settings > Permissions.
-That explicit mode honors saved native preferences, including saved autoaccept.
-Launch without it to restore prompts. Autoaccept includes shell/browser/network
-requests, not just edits; explicit denials and resource guards remain in effect.
+Default launches use the saved native permission setting, initially prompts.
+Switch it in /settings > Permissions without restarting. --permissions ask
+pins prompts and --auto pins autoaccept for one launch. Autoaccept includes
+shell/browser/network requests, not just edits; explicit denials and resource
+guards remain in effect.
 """
 
 
@@ -589,6 +589,12 @@ def show_startup(status):
     print("\nKRYN\n" + line, flush=True)
 
 
+def show_loading(stage):
+    """Show progress before OpenCode enters its full-screen terminal UI."""
+    if sys.stdout.isatty():
+        print("◇ K R Y N  ·  " + stage, flush=True)
+
+
 def guarded_run(server, command, project, outcome, timeout=None, *, web=False, startup=None):
     """Monitor the native client; OpenCode still owns every agent/tool decision."""
     guard = ResourceGuard(512 * 1024**2, 2)
@@ -787,6 +793,7 @@ def run(args, outcome):
     require(project.is_dir(), f"Project directory does not exist: {project}")
     if command not in {"doctor", "bench"}:
         require(project != Path.home().resolve(), "Enter a project directory first, then run kryn.")
+        show_loading("Checking installation")
     outcome["failure_code"] = "config"
     config = with_verified_skill(prerequisites(), json_cli=args.json_cli)
     dependencies = dependency_report(config)
@@ -804,6 +811,7 @@ def run(args, outcome):
         except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
             health = {"healthy": False, "error": str(error)}
     else:
+        show_loading("Connecting local model")
         health = ensure_runtime()
         require(all(type(health.get(k)) is int and health[k] == 0 for k in ("active_requests", "waiting_requests")),
                 "Local runtime is busy; wait for its existing work before launching KRYN")
@@ -812,6 +820,8 @@ def run(args, outcome):
         with ExitStack() as stack:
             if command in {"doctor", "bench"}:
                 project = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-check-", dir="/private/tmp")))
+            else:
+                show_loading("Opening OpenCode and tools")
             server = stack.enter_context(NativeServer(project, config=config))
             outcome["failure_code"] = "config"
             inventory(server, config)
@@ -834,11 +844,10 @@ def run(args, outcome):
                     print("Local coding is available; unavailable tools: " + ", ".join(unavailable)
                           + ". Run kryn doctor for details.", file=sys.stderr, flush=True)
                 executable = [str(BINARY), "--server", server.url, str(project)]
-                # Native /settings writes cli.json, but an environment overlay wins
-                # over every edit. Unlock it only with an explicit per-launch opt-in.
-                if permissions == "interactive":
+                # Native /settings writes cli.json; only explicit launch modes pin it.
+                if permissions in (None, "interactive") and not getattr(args, "auto", False):
                     server.env.pop("OPENCODE_CLI_CONFIG_CONTENT", None)
-                server.env["KRYN_PERMISSION_MODE"] = ("auto" if getattr(args, "auto", False) is True else permissions or "ask")
+                server.env["KRYN_PERMISSION_MODE"] = ("auto" if getattr(args, "auto", False) is True else permissions or "interactive")
                 if getattr(args, "auto", False) is True or permissions == "auto":
                     executable.append("--auto")
                 if getattr(args, "continue_session", False) is True:
@@ -852,7 +861,7 @@ def run(args, outcome):
             invoked = True
             startup = None
             if command not in {"doctor", "bench"}:
-                mode = "Auto" if getattr(args, "auto", False) or permissions == "auto" else "Saved" if permissions == "interactive" else "Ask"
+                mode = "Auto" if getattr(args, "auto", False) or permissions == "auto" else "Ask" if permissions == "ask" else "Editable"
                 startup = f"oMLX connected · OpenCode ready · {len(mcp) - len(unavailable)}/{len(mcp)} tools connected · Permissions {mode}"
             code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None,
                                web=getattr(args, "web", False) is True, startup=startup)
@@ -918,7 +927,7 @@ def main(argv=None):
     parser.add_argument("--web", "--gui", action="store_true", help="open the local graphical companion; keep the terminal running and use /web for its login credentials")
     permissions = parser.add_mutually_exclusive_group()
     permissions.add_argument("--auto", action="store_true", help="alias for --permissions auto; includes browser/network actions, not just edits")
-    permissions.add_argument("--permissions", choices=("ask", "auto", "interactive"), help="ask (default) pins prompts; auto pins autoaccept; interactive lets /settings change and save native permissions")
+    permissions.add_argument("--permissions", choices=("ask", "auto", "interactive"), help="ask pins prompts; auto pins autoaccept; interactive (default) lets /settings change and save native permissions")
     resume = parser.add_mutually_exclusive_group()
     resume.add_argument("--continue", dest="continue_session", action="store_true", help="open the latest saved session in this project")
     resume.add_argument("--session", help="open a saved session ID belonging to this project")

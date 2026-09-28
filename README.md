@@ -21,7 +21,7 @@ mkdir -p "$HOME/Developer/my-app"
 cd "$HOME/Developer/my-app" && kryn
 ```
 
-KRYN starts its local model server automatically, prints a short readiness line after runtime, tool, and memory preflight checks, then opens the OpenCode terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. New sessions start in **Agent** mode. For example:
+KRYN shows a small `◇ K R Y N` startup display while it checks the installation, connects the local model, and opens OpenCode. It then prints a readiness line and opens the full-screen terminal interface. A tool count of less than the total means one or more integrations did not connect; run `kryn doctor` for details. The line does not mean the model weights are loaded or a task has passed. Type your request and press **Enter**. New sessions start in **Agent** mode. For example:
 
 ```text
 Inspect this project, explain how to run it, and implement a small todo app with tests. Run the tests and report the results.
@@ -39,7 +39,7 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 | **Plan** | Inspect code and produce an actionable plan; only native OpenCode plan files may be written. |
 | **Agent** | Edit code, run approved commands and use browser tools to verify rendered results; thinking on by default. |
 
-Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the new everyday choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. Browse, Reviewer and Audit remain selectable for existing read-only sessions and specialist use. OpenCode remembers choices per agent/model, so check the displayed selection when resuming. Old Build sessions remain available; the native picker may select equivalent Agent when resuming them. A future migration must resolve this before the picker can contain only three primary roles.
+Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the visible primary choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Ask starts in Fast; Plan and Agent start with bounded thinking. Browser and review work remain available through child agents and `/review` or `/audit`, without adding picker modes. Old saved Build/Audit sessions retain their native IDs; choose Agent for new coding work.
 
 | Choice in OpenCode | Actual model behavior | Use |
 |---|---|---|
@@ -58,19 +58,13 @@ cd "/absolute/path/to/your/project" && kryn --auto
 kryn --continue --auto
 ```
 
-`--auto` accepts **all native permission requests that are not explicitly denied**, including browser, network and external-file requests. It is broader than “accept edits.” Explicit denials and the ordinary shell write boundary remain; native file tools and browser/MCP are outside that shell boundary. A launch without a permission option returns to prompts. See [Security](SECURITY.md).
+`--auto` accepts **all native permission requests that are not explicitly denied**, including browser, network and external-file requests. It is broader than “accept edits.” Explicit denials and the ordinary shell write boundary remain; native file tools and browser/MCP are outside that shell boundary. A launch without a permission option uses your saved native setting, initially prompts. See [Security](SECURITY.md).
 
-To change approvals **while KRYN is running**, start with:
-
-```sh
-kryn --permissions interactive
-```
-
-Then open **`/settings` → Permissions** and use **←/→** or **Enter** to switch between `prompt` and `auto accept`. This mode honors OpenCode’s saved setting, including any saved `autoaccept`, and saves later changes. Ordinary `kryn` pins prompts; `kryn --auto` (also `--permissions auto`) pins autoaccept for that launch. Those pinned modes intentionally override the settings menu. Reasoning visibility, appearance and other display settings remain available through `/settings` in every mode.
+To change approvals **while KRYN is running**, open **`/settings` → Permissions** and use **←/→** or **Enter** to switch between `prompt` and `auto accept`. Ordinary `kryn` honors and saves this native setting. `kryn --auto` (also `--permissions auto`) pins autoaccept for that launch; `kryn --permissions ask` pins prompts. Those explicit launch overrides show `(locked)` and take precedence until the next launch. Reasoning visibility, appearance and other display settings remain available through `/settings` in every mode.
 
 Run **`kryn controls`** in your shell for a quick reference without starting the model or logging in.
 
-The terminal prompt footer now shows **Permissions: Ask/Auto**. `(locked)` means the launch option pins that mode. Click it or use `/permissions` to open native settings. To change the mode there, launch with `kryn --permissions interactive`. The indicator reads the native setting, including JSONC comments, and does not implement a second approval system. In the browser GUI, **Cmd+Shift+P** opens the native command palette; search for **Auto-accept permissions** to find its toggle.
+The terminal prompt footer shows **Permissions: Ask/Auto**. Click it or use `/permissions` to open native settings and change it. `(locked)` appears only with an explicit `--auto` or `--permissions ask/auto` launch override. The indicator reads the native setting, including JSONC comments, and does not implement a second approval system. In the browser GUI, **Cmd+Shift+P** opens the native command palette; search for **Auto-accept permissions** to find its toggle.
 
 Type these commands **inside KRYN**, then press Enter:
 
@@ -83,7 +77,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
-| `/audit` | Run a bounded read-only review through the Audit role. Switch to Agent before fixing findings. |
+| `/review` or `/audit` | Run a bounded read-only Reviewer child; your current mode stays selected. |
 | `/research your topic` | Research a topic with search and source links. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
 | `/sessions` | Choose a saved session to resume. Relaunch from the same project first. |
@@ -95,7 +89,7 @@ After exiting, run `kryn stop` in Terminal if you also want to stop the idle mod
 
 Both interfaces use the **same local OpenCode server, model, tools and saved sessions**. No separate desktop application or paid service is required.
 
-1. From your project folder, run `kryn --web` (or `kryn --gui`). Add `--continue` to resume, and `--permissions interactive` if you want the terminal permission toggle. The browser opens alongside the terminal.
+1. From your project folder, run `kryn --web` (or `kryn --gui`). Add `--continue` to resume. The browser opens alongside the terminal.
 2. In the terminal, enter **`/web`**. Click the masked password to reveal it. In the browser’s sign-in dialog, use username **`opencode`** and that temporary password. Do not save it; it changes each launch.
 3. Select the same project and saved session in the GUI. Use **Cmd+Tab** to switch between browser and terminal. The GUI provides the conversation, effort picker, context usage, files and review controls; the terminal retains its native command palette and mode picker.
 4. Keep the terminal running. Finish or interrupt a turn before submitting from the other interface. Unsent drafts are separate. `/exit` shuts down the owned server, disconnects the GUI and cancels remaining owned work; saved sessions remain available to `kryn --continue`.

@@ -245,7 +245,7 @@ class SetupChecks(unittest.TestCase):
             changed["tool_output"] = output
             with self.subTest(tool_output=output), self.assertRaises(RuntimeError):
                 localai.validate_owned_config(changed)
-        for key, value in (("agent", "build"), ("subagent", True)):
+        for key, value in (("agent", "build"), ("subagent", False)):
             changed = copy.deepcopy(config)
             changed["commands"]["audit"][key] = value
             with self.subTest(audit_route=key), self.assertRaises(RuntimeError):
@@ -287,7 +287,7 @@ class SetupChecks(unittest.TestCase):
             (("config", 2, "info", "model", "variant"), "low"),
             (("config", 2, "info", "commands", "review", "model", "variant"), "fast"),
             (("config", 2, "info", "commands", "audit", "agent"), "build"),
-            (("config", 2, "info", "commands", "audit", "subagent"), True),
+            (("config", 2, "info", "commands", "audit", "subagent"), False),
         ]
         for keys, value in mutations:
             changed = copy.deepcopy(inventory)
@@ -1165,9 +1165,9 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg['agents']['plan']['model'], 'local/qwen')
         self.assertIn({'action': 'edit', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
         self.assertIn({'action': 'shell', 'resource': '*', 'effect': 'deny'}, cfg['agents']['ask']['permissions'])
-        self.assertEqual(cfg['agents']['browse']['mode'], 'all')
-        self.assertEqual(cfg['agents']['reviewer']['mode'], 'all')
-        self.assertFalse(cfg['agents']['audit'].get('hidden', False))
+        self.assertEqual(cfg['agents']['browse']['mode'], 'subagent')
+        self.assertEqual(cfg['agents']['reviewer']['mode'], 'subagent')
+        self.assertTrue(cfg['agents']['audit']['hidden'])
         self.assertFalse(cfg['agents']['browse'].get('hidden', False))
         self.assertFalse(cfg['agents']['reviewer'].get('hidden', False))
         self.assertNotIn('system', cfg['agents']['build'])  # Retain the native tool-aware prompt.
@@ -1191,8 +1191,9 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(cfg['commands']['handoff']['agent'], 'agent')
         self.assertEqual(cfg["compaction"]["buffer"], 4096)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})
-        self.assertEqual(cfg["commands"]["audit"]["agent"], "audit")
-        self.assertFalse(cfg["commands"]["audit"]["subagent"])
+        self.assertEqual(cfg["commands"]["audit"]["agent"], "reviewer")
+        self.assertTrue(cfg["commands"]["audit"]["subagent"])
+        self.assertTrue(cfg["commands"]["review"]["subagent"])
         self.assertEqual(cfg["agents"]["audit"]["mode"], "primary")
         self.assertEqual(cfg["agents"]["audit"]["permissions"], cfg["agents"]["reviewer"]["permissions"] + [
             {"action": "subagent", "resource": "reviewer", "effect": "allow"}])
