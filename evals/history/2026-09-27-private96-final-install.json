@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-27",
+  "scope": "Owner private same-version 96K build; no public release, tag or version bump",
+  "source_revision": "9069d35aa1b40ceb978977ad40c78239245950a6",
+  "wheel_sha256": "7659ace3374bbdbfded75c4e7e12dc59ff51ef5d6fb0b7aa1bc16edd014f5398",
+  "package": "clean 49-file wheel; package smoke PASS",
+  "owner_install": {
+    "new_retained_interpreter": "~/Library/Application Support/LocalAI/private-96k-final-venv/bin/python",
+    "runtime_max_model_len": 98304,
+    "model_memory_ceiling_gib": 16,
+    "guarded_protocol_smoke": "PASS after initial install and again after rollback/reinstall",
+    "deep_doctor": "PASS after initial install and again after rollback/reinstall; model/browser hashes and browser/search connections checked",
+    "native_tui": "PASS: opened a disposable project; /update presented one KRYN command and a no-newer-release dialog; exited normally",
+    "rollback": "PASS: exact rollback restored source 094fd9b9459315780f90b7c6038d7044ab63db44 and 65536 context; reinstall restored this source and 98304 context",
+    "power": "AC",
+    "pressure_after_reinstall": "normal"
+  },
+  "cleanup": "Removed the superseded first 96K trial wheel, venv and client directory after confirming neither active deployment nor one-step rollback references them. The live Qwen weights and 64K rollback interpreter remain.",
+  "remaining": [
+    "A real newer published release is unavailable, so accepted in-session update activation/restart has only isolated tests; manual /update current-status UI passed",
+    "The 73728-token synthetic pass is not matched coding/UI quality, warm-cache correctness or sustained endurance",
+    "Frozen long coding/UI, truthful multi-compaction/restart review, protected clean install and public release gates remain open"
+  ]
+}
