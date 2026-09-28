@@ -617,14 +617,27 @@ test('outside bytes written between native edit and after-hook cannot become own
   } finally { await cleanup(); f.remove(); }
 });
 
-test('plain detached servers require native background ownership without rewriting shell syntax', async () => {
+test('plain detached servers become native owned background jobs', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
-  const call = input => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'build', tool: 'shell', input });
+  const call = input => {
+    const event = { sessionID: 'ses_1', agent: 'build', tool: 'shell', input };
+    f.call('tool.execute.before', event);
+    return event.input;
+  };
   try {
-    for (const background of [undefined, false, true])
-      assert.throws(() => call({ command: 'npm run dev &', background }), /background:true/);
-    for (const command of ['npm run dev', 'echo "&"', "echo '&'", 'echo \\&', 'echo ok # &',
-                           'echo a && echo b', 'echo a & wait', 'echo a\n# &']) {
+    for (const background of [undefined, false, true]) {
+      const result = call({ command: 'npm run dev &', background, timeout: 15000 });
+      assert.equal(result.command, 'npm run dev');
+      assert.equal(result.background, true);
+      assert.equal(Object.hasOwn(result, 'timeout'), false);
+    }
+    assert.deepEqual(call({ command: 'cd /tmp/project && npm run dev -- --port 5173 &', timeout: 5000 }),
+      { command: 'cd /tmp/project && npm run dev -- --port 5173', background: true });
+    for (const command of ["echo 'a' &", 'echo a; echo b &', 'echo a | cat &', 'echo a\\ &',
+                           'echo a\ncat &', 'echo a\n# &'])
+      assert.throws(() => call({ command }), /background:true/);
+    for (const command of ['npm run dev', 'echo "&"', "echo '&'", 'echo \\&',
+                           'echo a && echo b', 'echo a & wait']) {
       const input = { command, ...(command === 'npm run dev' ? { background: true } : {}) };
       const before = structuredClone(input);
       assert.doesNotThrow(() => call(input));

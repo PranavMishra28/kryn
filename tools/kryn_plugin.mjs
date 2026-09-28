@@ -728,6 +728,13 @@ export default {
       // Native background jobs are persistent only when no timeout is supplied.
       // The model repeatedly gave dev servers a short foreground-style timeout,
       // then mistook the resulting shutdown for an application failure.
+      // Translate only a plain trailing & (optionally after cd) into the native
+      // owned job. Keep shell metacharacters and quoted commands out of this path.
+      if (event.tool === 'shell' && typeof event.input?.command === 'string') {
+        const command = event.input.command;
+        const plain = /^(?:[\t ]*cd[\t ]+[A-Za-z0-9_./:-]+[\t ]*&&[\t ]*)?[A-Za-z0-9_./:@=-]+(?:[\t ]+[A-Za-z0-9_./:@=-]+)*[\t ]*&[\t ]*$/.test(command);
+        if (plain) event.input = { ...event.input, command: command.replace(/[\t ]*&[\t ]*$/, ''), background: true };
+      }
       if (event.tool === 'shell' && event.input?.background === true &&
           Object.hasOwn(event.input, 'timeout')) {
         event.input = { ...event.input };
@@ -737,11 +744,10 @@ export default {
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
           directProcessSignal(event.input.command))
         throw new Error('KRYN refuses direct process signals from Agent shell: PID ownership is unverified. Use the native owned background-session lifecycle or stop the process from your own terminal.');
-      // Recognize only a plain terminal background operator. Do not rewrite or
-      // pretend to parse quoted, escaped, commented or multiline shell syntax.
+      // Complex shell syntax needs an explicit native background call.
       if (event.tool === 'shell' &&
           typeof event.input?.command === 'string' &&
-          !/['"`\\#\r\n]/.test(event.input.command) && /[ \t]&[ \t]*$/.test(event.input.command))
+          /[ \t]&[ \t]*$/.test(event.input.command))
         throw new Error('Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls.');
       if (event.tool === 'write' && typeof event.input?.content === 'string' &&
           Buffer.byteLength(event.input.content, 'utf8') > 12000)
