@@ -1,0 +1,14 @@
+{
+  "kind": "private installed KRYN terminal and GUI handoff receipt",
+  "date": "2026-09-28",
+  "source": "ff69aa9b6aa1207225275f05a1548b6d80e712d1",
+  "scope": "Owner Mac, disposable Task01 workspace; public releases, tags and version bumps remain paused.",
+  "launcher": "PASS: installed kryn --web displayed KRYN startup, connected oMLX/OpenCode and 2/2 tools, and showed editable permissions. The owned OpenCode server listened only on 127.0.0.1. No user project was used.",
+  "authentication": "PASS: unauthenticated GET / returned 401; Basic-authenticated GET / and /api/session returned 200. The temporary password was read only inside a local probe and not printed or saved in this receipt.",
+  "browser": "PASS: an authenticated headless Chrome visit rendered OpenCode (HTTP 200, 3015 body characters, 70 buttons, zero page errors). Its screenshot is retained only in ignored raw evidence at evals/runs/green-20260928-audit-installedff/evidence/launcher-gui.png.",
+  "terminal_to_gui": "PASS: a disposable prompt submitted in the installed terminal created a project session; the authenticated GUI listed that session, opened its route, and displayed the exact prompt with zero page errors.",
+  "gui_to_terminal": "PASS: after clean shutdown, installed kryn --continue reopened the same project. A follow-up prompt updated the same native session ID and preserved its title. The second launcher also exited cleanly.",
+  "cleanup": "PASS: both owned OpenCode server listeners and terminal clients stopped; local model runtime remained healthy, idle and under normal host pressure. Saved disposable sessions remain in native history and the raw trial evidence remains on disk.",
+  "limits": "This confirms owner-machine session navigation and a rendered GUI, not a full coding/UI project, clean non-owner install, authenticated permission-toggle roundtrip on this exact build, or long endurance. The GUI dashboard visibly includes disposable evaluation sessions; that clutter has not been removed because their raw history remains part of the failed-gate evidence.",
+  "decision": "Installed terminal/GUI handoff passes narrowly. Production qualification and public release remain blocked by application quality, truthful long-workflow continuity, useful context-tier comparison, endurance and isolated installation."
+}
