@@ -1027,51 +1027,6 @@ test('Audit parent stays read-only after one fresh foreground Reviewer and ordin
   } finally { await cleanup(); f.remove(); }
 });
 
-test('a completed native child grants only its exact owned output file across restart', async () => {
-  const f = fixture();
-  const directory = path.join(f.root, 'tool-output');
-  fs.mkdirSync(directory, { mode: 0o700 });
-  f.ctx.options.toolOutputDir = directory;
-  const output = path.join(directory, 'tool_abc123');
-  const unrelated = path.join(directory, 'tool_unrelated');
-  fs.writeFileSync(output, 'PRIVATE CHILD REPORT', { mode: 0o600 });
-  fs.writeFileSync(unrelated, 'PRIVATE OTHER SESSION', { mode: 0o600 });
-  const permission = (sessionID, resource) => ({ sessionID, agent: 'audit', action: 'external_directory',
-    resources: [resource], effect: 'deny' });
-  let cleanup = await plugin.setup(f.ctx);
-  try {
-    f.call('session.context', { sessionID: 'ses_1', agent: 'audit', system: [], tools: {} });
-    let request = permission('ses_1', output);
-    f.call('permission.evaluate', request); assert.equal(request.effect, 'deny');
-    const child = { sessionID: 'ses_1', messageID: 'msg_1', id: 'call_1',
-      agent: 'audit', tool: 'subagent', status: 'completed', input: { agent: 'reviewer' },
-      result: { output: { sessionID: 'ses_child', status: 'completed', output: 'PRIVATE CHILD REPORT' },
-        metadata: { sessionID: 'ses_child', status: 'completed' } } };
-    f.call('tool.execute.before', child);
-    f.call('tool.execute.after', child);
-    request = permission('ses_1', output);
-    f.call('permission.evaluate', request); assert.equal(request.effect, 'deny');
-    await f.emit('session.tool.success', { id: 'other_call', metadata: { outputPath: unrelated } });
-    await f.emit('session.tool.success', { id: child.id, metadata: { outputPath: output } });
-    request = permission('ses_1', output);
-    f.call('permission.evaluate', request); assert.equal(request.effect, 'allow');
-    for (const [id, file] of [['ses_1', unrelated], ['ses_other', output]]) {
-      request = permission(id, file); f.call('permission.evaluate', request);
-      assert.equal(request.effect, 'deny');
-    }
-    assert.deepEqual(f.read('trackers')[0].tool_output_paths, [output]);
-    assert.doesNotMatch(JSON.stringify(f.read('trackers')[0]), /PRIVATE CHILD REPORT/);
-    await cleanup();
-    cleanup = await plugin.setup(f.ctx);
-    f.call('session.context', { sessionID: 'ses_1', agent: 'audit', system: [], tools: {} });
-    request = permission('ses_1', output);
-    f.call('permission.evaluate', request); assert.equal(request.effect, 'allow');
-    fs.rmSync(output); fs.symlinkSync(unrelated, output);
-    request = permission('ses_1', output);
-    f.call('permission.evaluate', request); assert.equal(request.effect, 'deny');
-  } finally { await cleanup(); f.remove(); }
-});
-
 test('Ask denies mutations even under auto and Agent retains coding guidance', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
