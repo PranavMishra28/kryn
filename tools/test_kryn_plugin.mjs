@@ -656,7 +656,8 @@ test('plain detached servers become native owned background jobs', async () => {
       { command: redirected.slice(0, -2), background: true });
     assert.deepEqual(call({ command: "echo 'a' &" }), { command: "echo 'a'", background: true });
     for (const command of ['echo a; echo b &', 'echo a | cat &', 'echo a\\ &', 'echo a # &',
-                           'echo a\ncat &', 'echo a\n# &', 'echo \\&', 'echo "a"&'])
+                           'echo a\ncat &', 'echo a\n# &', 'echo \\&', 'echo "a"&',
+                           'python -m app.server &\nsleep 2\ncurl http://127.0.0.1:8765'])
       assert.throws(() => call({ command }), /background:true/);
     for (const command of ['npm run dev', 'echo "&"', "echo '&'",
                            'echo a && echo b', 'echo a & wait']) {

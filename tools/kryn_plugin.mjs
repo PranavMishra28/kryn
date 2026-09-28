@@ -774,7 +774,7 @@ export default {
       // Complex shell syntax needs an explicit native background call.
       if (event.tool === 'shell' &&
           typeof event.input?.command === 'string' &&
-          /&[ \t]*$/.test(event.input.command))
+          /&[ \t]*(?:\r?\n|$)/.test(event.input.command))
         throw new Error('Start persistent servers in a separate shell call with background:true and remove the trailing &. Keep setup and check commands in foreground calls.');
       if (event.tool === 'write' && typeof event.input?.content === 'string' &&
           Buffer.byteLength(event.input.content, 'utf8') > 12000)
