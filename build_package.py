@@ -14,23 +14,16 @@ FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
     "setup/model-sha256.json", "setup/opencode.template.json", "setup/browser-package-lock.json",
     "tools/localai.py", "tools/native_client.py", "tools/context_probe.py", "tools/protocol_probe.py",
     "tools/improvement.py", "tools/learning.py", "tools/native-shell",
-    "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/update_notice.mjs", "tools/session_report.py", "tools/run_native_trial.py", "tools/browser_check.mjs",
-    "tools/inference-audit/server.js", "tools/inference-audit/package.json",
-    "evals/README.md", "evals/bench.py", "evals/checks.py", "evals/tasks.json", "evals/frozen.sha256.json"]
+    "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/update_notice.mjs", "tools/session_report.py",
+    "tools/inference-audit/server.js", "tools/inference-audit/package.json"]
 
 
 def source_files(root):
-    frozen = json.loads((root / "evals/frozen.sha256.json").read_text())
-    fixtures = ["evals/" + name for name in frozen if name.startswith(("fixture/", "references/"))]
-    paths = FILES + fixtures
-    for name in fixtures:
-        if hashlib.sha256((root / name).read_bytes()).hexdigest() != frozen[name.removeprefix("evals/")]:
-            raise RuntimeError("Frozen evaluation payload changed: " + name)
-    for relative in paths:
+    for relative in FILES:
         file = root / relative
         if not file.is_file() or file.is_symlink() or file.stat().st_size > 5 * 1024**2:
             raise RuntimeError("Unshippable payload file: " + relative)
-    return sorted(set(paths))
+    return sorted(set(FILES))
 
 
 def stage(root, destination, revision, dirty=False):

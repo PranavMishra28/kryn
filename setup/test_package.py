@@ -3,7 +3,6 @@ import hashlib
 from contextlib import nullcontext, redirect_stdout
 import importlib.util
 import io
-import io
 import json
 import os
 from pathlib import Path
@@ -80,10 +79,13 @@ class PackageTests(unittest.TestCase):
     def test_curated_stage_is_self_contained_and_corruption_is_detected(self):
         manifest = builder.stage(SOURCE, self.root, "a" * 40)
         base = self.root / "src/kryn/payload"
-        self.assertGreater(len(installer.verify_payload(base, manifest)["files"]), 30)
+        self.assertEqual(set(installer.verify_payload(base, manifest)["files"]), set(builder.FILES))
         self.assertTrue((base / "tools/learning.py").is_file())
         self.assertTrue((base / "tools/kryn_plugin.mjs").is_file())
         self.assertTrue((base / "setup/accepted-profile.json").is_file())
+        self.assertFalse((base / "evals").exists())
+        self.assertFalse((base / "tools/run_native_trial.py").exists())
+        self.assertFalse((base / "tools/browser_check.mjs").exists())
         self.assertFalse(any("runs/" in name or name.endswith(".safetensors") or "test_kryn" in name for name in manifest["files"]))
         (base / "setup/opencode.template.json").write_text("{}")
         with self.assertRaisesRegex(RuntimeError, "integrity"):
