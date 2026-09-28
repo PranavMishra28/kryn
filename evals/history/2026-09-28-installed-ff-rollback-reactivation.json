@@ -1,0 +1,12 @@
+{
+  "kind": "private owner-machine rollback and reactivation receipt",
+  "date": "2026-09-28",
+  "scope": "Same macOS account and retained packages; public releases, tags and version bumps remain paused.",
+  "before": "Installed package check and packages/active.json identified ff69aa9b6aa1207225275f05a1548b6d80e712d1. No owned OpenCode client was running and the model had zero active or waiting requests.",
+  "rollback": "PASS: kryn rollback exited successfully, stopped the owned oMLX runtime and restored the prior source 75bbce8fdc725cc8af2de2f8c55e88e310fbfcba. The restored kryn --package-check matched that source.",
+  "reactivation": "PASS: the retained private-ff69aa9 wheel's interpreter ran kryn install successfully. packages/active.json and kryn --package-check again identified ff69aa9b6aa1207225275f05a1548b6d80e712d1; the new activation transaction was committed.",
+  "post_reactivation_inference": "PASS: kryn bench restarted the owned runtime and completed the guarded protocol smoke at /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260928T234554Z-5a291e71/metrics.json. Both fast and think streaming, tool-first and tool-replay cases passed. Memory pressure was normal; swap stayed at 2.88 MiB across this short probe.",
+  "post_reactivation_doctor": "PASS: kryn doctor --deep verified the pinned model and browser files, native local routing, connected browser/search MCP, a healthy idle 98,304-token/22 GiB runtime and normal host pressure. It observed 3,019,898 bytes of existing swap.",
+  "limits": "This qualifies rollback/reactivation from this exact private owner build only. It does not qualify a clean isolated install, restore a saved coding task after update, long context, UI correctness, sustained memory safety or public release.",
+  "decision": "Private owner recovery passes narrowly. Keep ff69aa9 active and 96K experimental; production qualification remains blocked by the other gates."
+}
