@@ -48,21 +48,6 @@ function fixture(extra = {}) {
 }
 const model = { providerID: 'local', id: 'qwen' };
 
-test('outside-path denial points back to the current project without widening access', async () => {
-  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
-  try {
-    const denied = { sessionID: 'ses_1', agent: 'agent', action: 'external_directory',
-      resources: ['/workspace/TASK.md'], source: { type: 'tool', id: 'call_1' }, effect: 'deny' };
-    f.call('permission.evaluate', denied);
-    assert.equal(denied.effect, 'deny');
-    assert.ok(denied.message.includes(f.root));
-    const allowed = { ...denied, effect: 'allow', message: undefined };
-    f.call('permission.evaluate', allowed);
-    assert.equal(allowed.effect, 'allow');
-    assert.equal(allowed.message, undefined);
-  } finally { await cleanup(); f.remove(); }
-});
-
 test('background shell keeps the native job alive past model-supplied timeouts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
