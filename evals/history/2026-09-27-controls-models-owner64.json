@@ -1,0 +1,24 @@
+{
+  "scope": "Owner-only installed control and model-choice verification; no public release, tag or version bump",
+  "main_revisions": {
+    "simple_controls": "45a880bb93482bb38bf7d533b1fc9e616c3ec10c",
+    "native_model_choice": "e82e80668dac6ce60c2d2f4b54b53ba699a5d64d"
+  },
+  "private_owner_source": "94cf9bc3ee1574d21b0f32020b9abdbb6fc13970",
+  "private_delta": "Only the owner context configuration and matching test expectations change 49152 to 65536; the 16 GiB guard and rollback remain.",
+  "wheel_sha256": "dd0291e3c8872463fdb0a9e768aea0d17581dd8297bccfaf0ca4737beeafb967",
+  "checks": {
+    "merged_source_ci": "PR #118 and PR #119 offline-and-package checks passed",
+    "private_source": "make check and make package-smoke passed: 177 setup, 21 tool and 57 Node tests, native driver self-check, frozen verify and selftest, 48-file clean wheel",
+    "activation": "PASS: receipt source 94cf9bc, guarded 65536/16 GiB idle runtime, deep doctor verified pinned model and browser files, browser/search MCP connected, local protocol smoke passed",
+    "native_picker": "PASS: installed native inventory exposed local/qwen and eight current opencode catalog models; actual /agents TTY picker listed only agent, plan and ask; saved build/audit remained hidden",
+    "terminal": "PASS: actual TTY launch showed KRYN glyph and three progress stages before OpenCode; permission footer had no locked label",
+    "permission_roundtrip": "PASS: /permissions switched saved autoaccept to prompt and footer Auto to Ask without restart, then restored saved autoaccept and footer Auto",
+    "interactive_other_model": "PASS: native /models selected LongCat 2.5 Preview Free; exported disposable session had assistant text OK and succeeded outcome",
+    "free_automation": "FAIL: direct opencode run with MiMo-V2.6-Flash Free returned provider rejection: free tier can only be used from within OpenCode",
+    "rollback": "PASS: exact previous private source c58abd8 restored; its guarded local protocol smoke passed",
+    "reinstallation": "PASS: source 94cf9bc restored; deep doctor and guarded local protocol smoke passed after reinstall"
+  },
+  "limits": "GUI permission roundtrip, paid provider credentials/inference, custom project provider definitions, non-owner clean install with GUI oMLX inference, full Task12 coding/UI and semantic handoff, useful 49K-128K tier comparison, and 45-60 minutes of green active work remain failed or unqualified. Free catalog availability can change.",
+  "public_release": "PAUSED"
+}
