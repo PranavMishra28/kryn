@@ -1010,8 +1010,10 @@ test('Audit parent stays read-only after one fresh foreground Reviewer and ordin
     }
     const permission = { agent: 'audit', action: 'subagent', resources: ['reviewer'], effect: 'allow' };
     f.call('permission.evaluate', permission); assert.equal(permission.effect, 'allow');
-    f.call('tool.execute.before', call);
-    f.call('tool.execute.after', { ...call, status: 'completed' });
+    const fresh = { ...call, input: { ...call.input, sessionID: '' } };
+    f.call('tool.execute.before', fresh);
+    assert.equal(Object.hasOwn(fresh.input, 'sessionID'), false);
+    f.call('tool.execute.after', { ...fresh, status: 'completed' });
     assert.throws(() => f.call('tool.execute.before', { ...call, id: 'second_child' }));
     for (const tool of ['edit', 'write', 'patch', 'shell', 'execute', 'browser_browser_click', 'unknown_mutation']) {
       assert.throws(() => f.call('tool.execute.before', { sessionID: 'ses_1', agent: 'audit', tool }));
@@ -1041,9 +1043,16 @@ test('a completed native child grants only its exact owned output file across re
     f.call('session.context', { sessionID: 'ses_1', agent: 'audit', system: [], tools: {} });
     let request = permission('ses_1', output);
     f.call('permission.evaluate', request); assert.equal(request.effect, 'deny');
-    f.call('tool.execute.after', { sessionID: 'ses_1', messageID: 'msg_1', id: 'call_1',
+    const child = { sessionID: 'ses_1', messageID: 'msg_1', id: 'call_1',
       agent: 'audit', tool: 'subagent', status: 'completed', input: { agent: 'reviewer' },
-      result: { metadata: { metadata: { outputPath: output }, content: [{ type: 'text', text: 'truncated' }] } } });
+      result: { output: { sessionID: 'ses_child', status: 'completed', output: 'PRIVATE CHILD REPORT' },
+        metadata: { sessionID: 'ses_child', status: 'completed' } } };
+    f.call('tool.execute.before', child);
+    f.call('tool.execute.after', child);
+    request = permission('ses_1', output);
+    f.call('permission.evaluate', request); assert.equal(request.effect, 'deny');
+    await f.emit('session.tool.success', { id: 'other_call', metadata: { outputPath: unrelated } });
+    await f.emit('session.tool.success', { id: child.id, metadata: { outputPath: output } });
     request = permission('ses_1', output);
     f.call('permission.evaluate', request); assert.equal(request.effect, 'allow');
     for (const [id, file] of [['ses_1', unrelated], ['ses_other', output]]) {
