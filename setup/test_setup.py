@@ -282,12 +282,14 @@ class SetupChecks(unittest.TestCase):
             (("models", "data", 0, "variants", 0, "body", "temperature"), 0.99),
             (("models", "data", 0, "settings", "baseURL"), "https://example.invalid/v1"),
             (("agents", "data", 0, "model", "variant"), "low"),
+            (("agents", "data", 1, "model"), {"providerID": "local", "id": "qwen"}),
             (("config", 2, "info", "compaction", "buffer"), 1),
             (("config", 2, "info", "tool_output", "max_bytes"), 51200),
             (("config", 2, "info", "tool_output", "max_lines"), 2000),
             (("config", 2, "info", "default_agent"), "plan"),
             (("config", 2, "info", "model", "variant"), "fast"),
             (("config", 2, "info", "commands", "audit", "agent"), "build"),
+            (("config", 2, "info", "commands", "review", "model"), "local/qwen"),
             (("config", 2, "info", "commands", "audit", "subagent"), False),
         ]
         for keys, value in mutations:

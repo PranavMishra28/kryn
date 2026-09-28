@@ -434,9 +434,8 @@ def validate_inventory(inventory):
     agents = {item.get("id"): item for item in records(inventory["agents"])}
     for name, item in expected_profile["agents"].items():
         ref = agents.get(name, {}).get("model")
-        if item.get("model") is not None:
-            require(same_reference(ref, item["model"]),
-                    f"Effective agent {name} differs from this release's default model reference")
+        require(same_reference(ref, item.get("model")),
+                f"Effective agent {name} differs from this release's default model reference")
     # The command API exposes names/descriptions, not model refs; fold authored config instead.
     commands = {}
     defaults = {}
@@ -464,9 +463,8 @@ def validate_inventory(inventory):
                 commands[name] = item  # Native command registration replaces the whole definition.
     validate_defaults(defaults, expected_profile)
     for name, item in expected_profile["commands"].items():
-        if item.get("model") is not None:
-            require(same_reference(commands.get(name, {}).get("model"), item["model"]),
-                    f"Effective command {name} differs from this release's model reference")
+        require(same_reference(commands.get(name, {}).get("model"), item.get("model")),
+                f"Effective command {name} differs from this release's model reference")
         require(all(commands[name].get(key) == item.get(key) for key in ("agent", "subagent")),
                 f"Effective command {name} differs from this release's routing")
 
