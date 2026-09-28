@@ -209,7 +209,6 @@
     "agent": {
       "mode": "primary",
       "description": "Implement and verify changes in the current project",
-      "model": "local/qwen",
       "permissions": [
         { "action": "subagent", "resource": "explore", "effect": "allow" },
         { "action": "subagent", "resource": "general", "effect": "allow" },
@@ -222,7 +221,6 @@
     "ask": {
       "mode": "primary",
       "description": "Investigate and answer without changing project files",
-      "model": "local/qwen#fast",
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "deny" },
         { "action": "shell", "resource": "*", "effect": "deny" },
@@ -233,7 +231,6 @@
       ]
     },
     "plan": {
-      "model": "local/qwen",
       "permissions": [
         {
           "action": "browser_*",
@@ -273,7 +270,6 @@
       ]
     },
     "explore": {
-      "model": "local/qwen",
       "permissions": [
         {
           "action": "browser_*",
@@ -318,7 +314,6 @@
       ]
     },
     "general": {
-      "model": "local/qwen",
       "permissions": [
         {
           "action": "browser_*",
@@ -345,7 +340,6 @@
     "reviewer": {
       "mode": "subagent",
       "description": "Read-only review for correctness and regressions",
-      "model": "local/qwen",
       "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
       "permissions": [
         {
@@ -395,7 +389,6 @@
     },
     "browse": {
       "mode": "subagent",
-      "model": "local/qwen#fast",
       "permissions": [
         {
           "action": "browser_*",
@@ -593,38 +586,31 @@
   "commands": {
     "research": {
       "agent": "plan",
-      "model": "local/qwen",
       "subagent": false,
       "template": "Research $ARGUMENTS using keyless search and webfetch. Open primary sources, compare evidence and dates, cite URLs, and identify uncertainty. If search is rate limited, stop and explain; do not authenticate a paid provider."
     },
     "review": {
       "agent": "reviewer",
-      "model": "local/qwen",
       "subagent": true,
       "template": "Review current changes for correctness, regressions and missing tests. Report actionable findings with file and line references. Do not edit files. $ARGUMENTS"
     },
     "deliver": {
       "agent": "agent",
-      "model": "local/qwen",
       "subagent": false,
       "template": "Deliver $ARGUMENTS. First state the smallest useful milestone and observable acceptance criteria. Inspect relevant code and tests, implement that milestone, run suitable checks, and inspect the real output or browser UI when relevant. Preserve user changes. After two repair cycles without new evidence, summarize the blocker and next hypothesis instead of repeating the same attempt. Use one foreground child at a time. Report actual results and unresolved risks; never weaken tests just to pass. This is a workflow instruction, not an enforced execution budget."
     },
     "handoff": {
       "agent": "agent",
-      "model": "local/qwen",
       "subagent": false,
       "template": "Return a concise handoff with objective, acceptance checks, completed work, actual check commands/results, unresolved failures, disproven approaches, and the next action. Reconcile with current Git and files. Use the native checkpoint; do not overwrite user-owned task files. $ARGUMENTS"
     },
     "audit": {
       "agent": "reviewer",
-      "model": "local/qwen",
       "subagent": true,
       "template": "Audit $ARGUMENTS without modifying files. Inspect relevant files, diff and available check evidence. Report actionable findings with file and line references, and say what was not checked. Do not fix findings or claim checks ran unless their results are available."
     }
   },
   "plugins": [
-    "-opencode.models.dev",
-    "-opencode.provider.*",
     "opencode.config.policy",
     "-opencode.config.compatibility",
     "-opencode.browser",
@@ -645,18 +631,7 @@
     }
   ],
   "experimental": {
-    "policies": [
-      {
-        "action": "provider.use",
-        "resource": "*",
-        "effect": "deny"
-      },
-      {
-        "action": "provider.use",
-        "resource": "local",
-        "effect": "allow"
-      }
-    ]
+    "policies": []
   },
   "skills": [
     ".agents/skills",
