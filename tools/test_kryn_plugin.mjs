@@ -634,9 +634,9 @@ test('plain detached servers become native owned background jobs', async () => {
     assert.deepEqual(call({ command: 'cd /tmp/project && npm run dev -- --port 5173 &', timeout: 5000 }),
       { command: 'cd /tmp/project && npm run dev -- --port 5173', background: true });
     for (const command of ["echo 'a' &", 'echo a; echo b &', 'echo a | cat &', 'echo a\\ &',
-                           'echo a\ncat &', 'echo a\n# &'])
+                           'echo a\ncat &', 'echo a\n# &', 'echo \\&', 'echo "a"&'])
       assert.throws(() => call({ command }), /background:true/);
-    for (const command of ['npm run dev', 'echo "&"', "echo '&'", 'echo \\&',
+    for (const command of ['npm run dev', 'echo "&"', "echo '&'",
                            'echo a && echo b', 'echo a & wait']) {
       const input = { command, ...(command === 'npm run dev' ? { background: true } : {}) };
       const before = structuredClone(input);
