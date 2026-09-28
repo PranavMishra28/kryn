@@ -1,0 +1,23 @@
+{
+  "kind": "installed candidate rejection and private replacement",
+  "date": "2026-09-28",
+  "release_status": "No public release, tag or version bump; published v0.1.10 unchanged.",
+  "rejected_candidate": {
+    "source": "95f590af8db9db5436cc9178570b4984eac5e1a4",
+    "trial": "green-20260928-path-hint95",
+    "prompt": "Read /workspace/TASK.md and report its objective; no edits or commands.",
+    "result": "Native Ask turn completed locally in 21.396 seconds under normal pressure with zero swap growth. Its first read was denied with the generic native 'Permission denied: external_directory' message; the proposed permission-hook message containing the exact root did not reach the model. The model independently recovered by reading the real project TASK.md and answered accurately. This does not establish benefit from the hook.",
+    "driver_sha256": "3601f9ec3e5bd933cc78511104b3f01f24dc2e78bd421f83144976772d6d36a5",
+    "export_sha256": "1b7812f9551414f0bde6c91085b2d9b57947d9f616ec31a801e41a845b3022e8",
+    "decision": "Removed the ineffective permission-hook change and its unit test. Kept the independent report's prior-failure finding, which is visible on the saved failed Task02 session."
+  },
+  "installed_replacement": {
+    "source": "7fb80b17e86f44b333c7c109bb96c0d1bbdf1c25",
+    "wheel_sha256": "9c43166c4deac67662f30b2eef5e1a70a735ad831ca1f8516b648b8f781c9a7b",
+    "source_checks": "PASS: 191 Python tests, 69 Node tests, native trial self-check, frozen suite verify/selftest and candidate package smoke before clean source build.",
+    "owner_install": "PASS: private clean wheel installed; guarded local protocol smoke and deep doctor passed. Model/browser integrity, both tool connections, 96K context, 22 GiB ceiling, normal pressure, zero observed swap and idle runtime. Prior rollback from 95f590a to 23b9876 and reactivation of 95f590a passed; this replacement itself has not yet had an independent rollback cycle.",
+    "saved_report": "Observed 8 checks, 3 nonzero exits and the deterministic prior-failure warning on the original two-compaction Task02 session; acceptance_verified remains false."
+  },
+  "open_gates": ["autonomous coding/UI and source acceptance", "truthful compaction/restart handoff", "matched useful 49K/64K/96K/128K tiers", "successful active endurance", "installed terminal/GUI handoff", "KRYN-owned isolated clean install/recovery"],
+  "decision": "Keep this guarded private build usable; do not call KRYN production-qualified, gold-master or frontier-equivalent, and do not publish a release."
+}
