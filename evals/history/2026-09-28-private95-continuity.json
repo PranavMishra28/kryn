@@ -1,0 +1,37 @@
+{
+  "kind": "private Task02 compaction/restart failure and owner activation receipt",
+  "date": "2026-09-28",
+  "release_status": "Public releases, tags and version bumps remain paused; published v0.1.10 unchanged.",
+  "fresh_trial": {
+    "run": "green-20260928-task02-private23",
+    "installed_source_during_trial": "23b9876ac395d2be6a57776134678ae066799ea6",
+    "agent": "PASS native completion in 354.021 seconds; two fresh foreground children completed; all recorded generations locally routed; frozen grader 2/2 PASS, original test and seed CSV preserved.",
+    "observed_check_history": "The native root actually ran python -m pytest with exit 1 (pytest unavailable), then unittest with exit 0; a new test_fix.py first exited 1, then 0. Later continuations added another nonzero check. The installed report counted 8 checks, 5 zero exits, 3 nonzero exits, 2 completed compactions and 16 tool errors across the saved hierarchy; acceptance_verified remained false.",
+    "compaction_1": "PASS native local compaction; its model-written summary omitted failed checks and invented /workspace paths although the project root was a different absolute path.",
+    "restart_ask": "FAIL: saved-session Ask continuation attempted a denied execute tool, outside reads and a dismissed question, then ended without a valid terminal answer. The permissions held.",
+    "restart_agent": "Native Agent continuation completed but falsely said all tests passed and omitted earlier failed checks. It repeatedly used /workspace from the checkpoint, causing outside-path errors and an irrelevant file: browser navigation.",
+    "compaction_2": "PASS native local compaction after a new turn; its checkpoint retained the wrong /workspace path and omitted failed checks.",
+    "restart_agent_2": "Native Agent continuation completed without tools, but copied the inaccurate checkpoint, said failed attempts were none and all tests passed on the first run, and included a malformed source diff.",
+    "independent_acceptance": "FAIL: despite the frozen Task02 grader's 2/2 PASS, the model's report.py accepts compact 20260901 and week-date 2026-W36-2 as start boundaries. The explicit task requires canonical ISO dates; both should raise ValueError. This supplemental source/API check was run by the operator after the model turns, not by the model.",
+    "resources": "All sampled stages showed normal host pressure, zero swap growth and local routing where inference occurred; largest sampled runtime footprint was 12.79 GB. This is not a 45-60 minute successful active-endurance or near-full-96K test.",
+    "evidence": {
+      "agent_driver_sha256": "60bea6391223416d2880401fa5179d2549052eed1ba16bb500aaabfeb5a39331",
+      "compaction1_report_sha256": "31a749e1fe88d2cea2c038162829fee37a3a32016d30fa750904b3f945102236",
+      "ask_driver_sha256": "97668050dbdb5b8a7ecb04cf230b502a63f48503a9d7e2d7e9d526f49fa20b4a",
+      "agent_resume_driver_sha256": "07f8768b5729423ef594fff7843e244724d32bfc9d6179272ca8f1ec3c6d0eac",
+      "compaction2_report_sha256": "5d9c639beb2cf7b92f70aca781009351a0c2b6fc8b55d22fd1b07690c9e4bdbd",
+      "agent_resume2_driver_sha256": "af3a10e0832ea85bd5575433d62cd8939cf87d5bb8da7fd45bd9cd3577a3fca0",
+      "model_source_sha256": "5a4ddc27094a79264cd2135a665da96f46c9316b07a78f44cb8b5dd48a0d6d70"
+    }
+  },
+  "safe_product_fixes": {
+    "source": "95f590af8db9db5436cc9178570b4984eac5e1a4",
+    "changes": "A denied external_directory tool request now receives the exact current project root without granting access. The independent kryn report adds a deterministic finding whenever any observed check exited nonzero; later passes cannot erase it. No further prompt rule or agent framework was added.",
+    "source_checks": "PASS: 191 Python tests, 70 Node tests, native trial self-check, frozen suite verify/selftest, documentation links and candidate wheel package smoke.",
+    "owner_install": "PASS: clean wheel installed privately, rolled back to 23b9876, then reinstalled 95f590a; guarded local protocol smoke passed after reactivation. Deployed plugin bytes matched source SHA256 afa42455f25f722654b6bd5fdc803ffb3869dcac8f69d4ae5856dc2a559a3479.",
+    "deep_doctor_after_reactivation": "PASS: model and browser integrity, local routing, browser/search connected, 96K context, 22 GiB model ceiling, idle runtime, normal pressure and zero observed swap.",
+    "wheel_sha256": "17d8cc417f5837196b2c10fbeccd8228197b9461106209e99470783940fdd1e3",
+    "limit": "The new path error is unit checked and installed, but not yet proven to make the 9B model recover in a full native task. The report warning is installed and observed on the saved failed session; it does not correct the model's answer."
+  },
+  "decision": "Coding/UI acceptance and semantic compaction/restart remain FAILED. Keep private guarded 96K for owner testing; do not claim production readiness, gold-master or frontier equivalence and do not publish a release."
+}
