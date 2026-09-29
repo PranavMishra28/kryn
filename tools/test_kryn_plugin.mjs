@@ -1155,7 +1155,7 @@ test('exact user requests survive two checkpoints and restart without entering m
   } finally { await cleanup(); f.remove(); }
 });
 
-test('a saved checkpoint is flagged stale when current Git file bytes change across restart', async () => {
+test('a saved checkpoint shows bounded current diff and flags changed bytes across restart', async () => {
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
   try {
@@ -1166,17 +1166,30 @@ test('a saved checkpoint is flagged stale when current Git file bytes change acr
     f.nativeMessages.push({ id: 'msg_1', type: 'user', text: 'Keep value at 1 until tests pass.',
       time: { created: 1 } });
     await f.call('session.context', { sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 2;\n');
     await f.emit('session.compaction.ended');
     let context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
     await f.call('session.context', context);
     assert.match(context.system.at(-1).text, /Current repository observation/);
     assert.doesNotMatch(context.system.at(-1).text, /state is stale/);
-    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 2;\n');
+    assert.match(context.system.find(part => part.text.startsWith('Current Git diff excerpt')).text, /\+export const value = 2/);
+    context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.context', context);
+    assert.equal(context.system.some(part => part.text.startsWith('Current Git diff excerpt')), false);
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 3;\n');
     await cleanup(); cleanup = await plugin.setup(f.ctx);
     context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
     await f.call('session.context', context);
     assert.match(context.system.at(-1).text, /Checkpoint Git\/file state is stale/);
+    assert.match(context.system.find(part => part.text.startsWith('Current Git diff excerpt')).text, /\+export const value = 3/);
     assert.ok(!JSON.stringify(f.read('trackers')).includes('export const value'));
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'x'.repeat(8000) + '\n');
+    await f.emit('session.compaction.ended');
+    context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.context', context);
+    const bounded = context.system.find(part => part.text.startsWith('Current Git diff excerpt')).text;
+    assert.equal(JSON.parse(bounded.slice(bounded.indexOf('{'))).truncated, true);
+    assert.ok(Buffer.byteLength(bounded, 'utf8') < 6400);
   } finally { await cleanup(); f.remove(); }
 });
 
