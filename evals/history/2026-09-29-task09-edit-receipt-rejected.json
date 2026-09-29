@@ -1,0 +1,39 @@
+{
+  "kind": "paired native Task09 compaction candidate rejection",
+  "date": "2026-09-29",
+  "setup": "Two fresh frozen Task09 fixtures, the owner-installed Qwen3.5-9B-6bit at configured 96K/8192 and 22 GiB process guard, ten separately released identical row prompts per arm, independent checkpoint after every turn, native compactions after turns 5 and 8, fresh OpenCode server process for every turn and compaction. Default reasoning variant; no paid inference.",
+  "baseline": {
+    "run": "evals/runs/owner-task09-baseline-20260929",
+    "product_plugin_sha256": "444bc130bedbb59898054aeb28f81368a7a550c37c1e90815ec8d5589fdd169a",
+    "turns_and_checkpoints": "10/10 completed and passed; final frozen grade PARTIAL because manual criteria were not certified",
+    "active_turn_wall_seconds": 375.0,
+    "tool_calls": { "shell": 43 },
+    "native_compactions": [
+      { "after_turn": 5, "message_id": "msg_0ec230071001pwuNHRJcFPmYG4", "independent_checkpoint": "e05 present; six CSV lines; 15 minutes", "false_summary": "Completed through e04, called e05 pending and instructed a second append" },
+      { "after_turn": 8, "message_id": "msg_0ec256f47001GtXzZB7ZYtkruU", "independent_checkpoint": "e08 present; nine CSV lines; 36 minutes", "false_summary": "Completed through e07, called e08 pending and instructed a second append" }
+    ],
+    "maximum_observed_process_footprint_bytes": 12605054440,
+    "host_pressure": "normal",
+    "swap_growth_bytes": 0
+  },
+  "candidate": {
+    "run": "evals/runs/owner-task09-editreceipt-20260929",
+    "product_plugin_sha256": "aada5d2214b421375e7456986771a297a0947dd683bba3ae0deb0bc93787ce30",
+    "rejected_patch_sha256": "f4928ffb462626da070b6c6e36f7b6f61c8a053b909ae1efa86cd498570c318d",
+    "mechanism": "Up to four metadata-only exact native edit receipts with user-anchor, path, edit-call and post-edit hashes; current-file match status exposed only to native compaction, never normal Agent context. Existing read-before-edit guard unchanged.",
+    "turns_and_checkpoints": "10/10 completed and passed; final frozen grade PARTIAL because manual criteria were not certified",
+    "active_turn_wall_seconds": 387.4,
+    "tool_calls": { "read": 13, "glob": 1, "edit": 11, "shell": 15 },
+    "tool_errors": 1,
+    "read_before_edit": "Turn 3 attempted an edit before the current-turn read; the existing KRYN guard denied it. The agent then read and successfully edited. The denied attempt was not attributed to the compaction receipt, which was not yet visible to the Agent.",
+    "native_compactions": [
+      { "after_turn": 5, "message_id": "msg_0ec29e756001W0Q5YpF1Y3UaNS", "independent_checkpoint": "e05 present; six CSV lines; 15 minutes", "summary": "Correctly listed e05 complete" },
+      { "after_turn": 8, "message_id": "msg_0ec2c5e59001yMWY5TRHFWE1ha", "independent_checkpoint": "e08 present; nine CSV lines; 36 minutes", "false_summary": "Completed through e07; Next Move instructed append e08" }
+    ],
+    "maximum_observed_process_footprint_bytes": 12811165112,
+    "host_pressure": "normal",
+    "swap_growth_bytes": 0
+  },
+  "comparison_limit": "The baseline chose shell appends while the candidate chose native edits before either compaction. That is model variation under the same prompts and default settings, so the one accurate candidate summary at turn 5 cannot be causally credited to the receipt. The repeated-compaction failure at turn 8 is directly observed in the candidate despite the receipt.",
+  "decision": "Reject and restore the unmodified product plugin. The candidate was never installed, committed or published. Keep raw run files and the rejected patch in ignored local evidence; this receipt preserves the failure signal in the repository. The owner installation remains v0.2.0/9B and the continuity gate remains failed."
+}
