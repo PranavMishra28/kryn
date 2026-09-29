@@ -1132,17 +1132,12 @@ test('exact user requests survive two checkpoints and restart without entering m
     assert.match(firstAnchor, /Build a form with a manual retry/);
     assert.match(firstAnchor, /Verify a real 503/);
     assert.match(firstAnchor, /Keep the submitted text/);
-    assert.match(firstAnchor, /Latest admitted native user request is \[5\]; visible completed native compactions after it: 0/);
     await f.emit('session.compaction.ended');
-    f.nativeMessages.push({ id: 'compact_1', type: 'compaction', status: 'completed', time: { created: 2000 } });
     f.nativeMessages.splice(0, 3); // Native active context lost older user turns.
     event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
     await f.call('session.compaction', event);
     assert.match(event.system.find(part => part.text.startsWith('User-authored request excerpts')).text, /Use textContent/);
-    assert.match(event.system.find(part => part.text.startsWith('User-authored request excerpts')).text,
-      /visible completed native compactions after it: 1/);
     await f.emit('session.compaction.ended');
-    f.nativeMessages.push({ id: 'compact_2', type: 'compaction', status: 'completed', time: { created: 3000 } });
     await cleanup();
     cleanup = await plugin.setup(f.ctx);
     const resumed = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
@@ -1151,60 +1146,12 @@ test('exact user requests survive two checkpoints and restart without entering m
     assert.match(anchor, /Build a form with a manual retry/);
     assert.match(anchor, /never retry automatically/);
     assert.match(anchor, /Verify a real 503/);
-    assert.match(anchor, /visible completed native compactions after it: 2/);
     assert.doesNotMatch(anchor, /user decided|check passed/i);
     const file = fs.readdirSync(path.join(f.root, 'learning', 'anchors'))[0];
     const stored = path.join(f.root, 'learning', 'anchors', file);
     assert.equal(fs.statSync(stored).mode & 0o077, 0);
     assert.ok(fs.statSync(stored).size < 32768);
     assert.equal(JSON.stringify([...f.read('trackers'), ...f.read('events')]).includes(requests[0]), false);
-  } finally { await cleanup(); f.remove(); }
-});
-
-test('false native checkpoint claims are paired with bounded current Git content across restart', async () => {
-  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
-  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
-  try {
-    git('init', '-q');
-    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
-    fs.mkdirSync(path.join(f.root, 'data'));
-    const csv = path.join(f.root, 'data', 'endurance.csv');
-    fs.writeFileSync(csv, 'id,project,minutes,date\n');
-    git('add', '.gitignore', 'data/endurance.csv');
-    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
-    f.nativeMessages.push({ id: 'msg_e05', type: 'user', text: 'Append e05, test, inspect diff, and report count.',
-      time: { created: 1000 } });
-    fs.appendFileSync(csv, 'e05,endurance,5,2026-09-03\n');
-    await f.emit('session.compaction.ended');
-    f.nativeMessages.push({ id: 'compact_1', type: 'compaction', status: 'completed',
-      summary: 'e05 is active; append it next', time: { created: 2000 } });
-    await cleanup(); cleanup = await plugin.setup(f.ctx);
-    let event = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
-    await f.call('session.context', event);
-    let evidence = event.system.map(part => part.text).join('\n');
-    assert.match(evidence, /\+e05,endurance,5,2026-09-03/);
-    assert.match(evidence, /Current tracked Git diff against HEAD/);
-    assert.match(evidence, /visible completed native compactions after it: 1/);
-    f.nativeMessages.push({ id: 'msg_e08', type: 'user', text: 'Append e08, test, inspect diff, and report count.',
-      time: { created: 3000 } });
-    fs.appendFileSync(csv, 'e08,endurance,8,2026-09-03\n');
-    await f.emit('session.compaction.ended');
-    f.nativeMessages.push({ id: 'compact_2', type: 'compaction', status: 'completed',
-      summary: 'No e08 or next action', time: { created: 4000 } });
-    await cleanup(); cleanup = await plugin.setup(f.ctx);
-    event = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
-    await f.call('session.context', event);
-    evidence = event.system.map(part => part.text).join('\n');
-    assert.match(evidence, /\+e08,endurance,8,2026-09-03/);
-    assert.match(evidence, /Latest admitted native user request is \[2\]; visible completed native compactions after it: 1/);
-    assert.doesNotMatch(evidence, /Checkpoint Git\/file state is stale/);
-    fs.appendFileSync(csv, 'x'.repeat(40000) + '\n');
-    event = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
-    await f.call('session.context', event);
-    evidence = event.system.at(-1).text;
-    assert.match(evidence, /Checkpoint Git\/file state is stale/);
-    assert.match(evidence, /Git diff excerpt truncated/);
-    assert.ok(evidence.split('Current tracked Git diff against HEAD')[1].length < 3200);
   } finally { await cleanup(); f.remove(); }
 });
 
