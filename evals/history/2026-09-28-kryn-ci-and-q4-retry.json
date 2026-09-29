@@ -1,0 +1,31 @@
+{
+  "kind": "KRYN-owned account preflight, private owner activation and guarded 27B retry",
+  "date": "2026-09-28",
+  "release": "PAUSED; no tag or version bump",
+  "owner_private_build": {
+    "source": "cd1b4d975e240f38a7098c7ff58c20439a615d81",
+    "wheel_sha256": "6f15ba6b66e67ff80ee6910bb0a11924b0fd4fcd3cbeb11c86b2755afcddae35",
+    "activation": "Clean private wheel install passed --package-check; rollback to 183cf63 passed; cd1b4d9 reinstallation passed --package-check.",
+    "smoke_before_27b": "/Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T031306Z-1e4dc16b/metrics.json",
+    "smoke_after_27b": "/Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T033652Z-2379dfa5/metrics.json",
+    "deep_doctor_after_27b": "PASS: healthy local 98,304-token runtime, 22 GiB ceiling, normal host pressure and connected browser/search MCP. This is a protocol/configuration check, not accepted coding/UI work."
+  },
+  "isolated_account": {
+    "name": "kryn-ci (KRYN-Test in Users & Groups)",
+    "state": "KRYN-owned standard account UID 506 and /Users/kryn-ci home created. macOS still reports no AuthenticationAuthority and who shows only the owner GUI session. Account password and first GUI login require user credential entry in System Settings.",
+    "private_wheel": "Installed inside /Users/kryn-ci/.local/kryn-private-venv; package check passed.",
+    "first_install": "Dependency downloads and first 9B model shard succeeded, but hf download for the second shard returned 'Current directory does not exist' because the test account inherited a protected evaluator working directory. This is an operator launch error, not a demonstrated installer defect. Retrying from /Users/kryn-ci requires renewed macOS administrator authorization.",
+    "gate": "FAIL/incomplete: isolated install, rollback, GUI oMLX inference and protected holdout were not completed. No clean-install qualification claimed."
+  },
+  "27b_retry": {
+    "raw_run": "evals/runs/model-q4-task12-screen-quiet",
+    "conditions": "Owner 9B server stopped; Mac on AC; host memory-pressure free percentage 71% before the temporary Qwen3.8-27B Q4 probe; one local request with the same Task12 failed UI source and no checker/reference answer.",
+    "result": "FAIL: no HTTP response or model answer. Host pressure warning triggered the external guard during model load; peak sampled temporary process physical footprint 12,867,233,416 bytes across nine resource samples. Sampled swap remained 670,438,522 bytes. The temporary server stopped and owner oMLX settings hash was unchanged.",
+    "decision": "A higher oMLX process memory ceiling cannot resolve this host-pressure abort. Do not promote 27B as a daily model on this evidence; keep the downloaded Q4/Q5 artifacts experimental."
+  },
+  "remaining": [
+    "Complete KRYN-Test password and GUI login with user credential entry, then retry isolated install from its home and run inference/rollback/holdout.",
+    "Pass a frozen model-produced coding/UI task with independent browser/source checks and truthful repeated compaction/restart.",
+    "Establish a useful 49K–128K context comparison and 45–60 minute successful active endurance before any public release proposal."
+  ]
+}
