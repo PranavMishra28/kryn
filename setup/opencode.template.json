@@ -391,6 +391,16 @@
       "mode": "subagent",
       "permissions": [
         {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "shell",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
           "action": "browser_*",
           "resource": "*",
           "effect": "deny"
@@ -479,21 +489,6 @@
           "action": "browser_browser_close",
           "resource": "*",
           "effect": "ask"
-        },
-        {
-          "action": "subagent",
-          "resource": "explore",
-          "effect": "allow"
-        },
-        {
-          "action": "subagent",
-          "resource": "general",
-          "effect": "allow"
-        },
-        {
-          "action": "subagent",
-          "resource": "reviewer",
-          "effect": "allow"
         },
         {
           "action": "question",

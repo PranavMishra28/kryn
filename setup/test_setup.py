@@ -1201,6 +1201,12 @@ class SetupChecks(unittest.TestCase):
             {'action': 'external_directory', 'resource': '*', 'effect': 'deny'},
             {'action': 'external_directory', 'resource': output + '/*', 'effect': 'allow'},
         ])
+        self.assertIn({'action': 'subagent', 'resource': '*', 'effect': 'deny'}, cfg['permissions'])
+        self.assertFalse(any(rule['action'] == 'subagent' and rule['effect'] == 'allow'
+                             for rule in cfg['agents']['browse']['permissions']))
+        for action in ('shell', 'edit'):
+            self.assertIn({'action': action, 'resource': '*', 'effect': 'deny'},
+                          cfg['agents']['browse']['permissions'])
         self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
                       cfg['agents']['build']['permissions'])
         self.assertEqual(cfg['agents']['agent']['permissions'], cfg['agents']['build']['permissions'])
