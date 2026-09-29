@@ -952,11 +952,12 @@ def main(argv=None):
         raise RuntimeError("GitHub login is no longer required; this command is retired")
     if argv and argv[0] == "improve":
         verify_release()
-        require(len(argv) <= 2, "Usage: kryn improve [failures|status|pause|resume|disable|enable]")
-        action = argv[1] if len(argv) == 2 else "status"
+        require(len(argv) <= 2 or argv == ["improve", "failures", "--all"],
+                "Usage: kryn improve [failures [--all]|status|pause|resume|disable|enable]")
+        action = argv[1] if len(argv) > 1 else "status"
         require(action in {"failures", "status", "pause", "resume", "disable", "enable"},
                 "Use failures, status, pause, resume, disable or enable; legacy manual promotion is not a product gate")
-        result = (learning.failures(ROOT / "state/improvement") if action == "failures" else
+        result = (learning.failures(ROOT / "state/improvement", limit=None if len(argv) == 3 else 20) if action == "failures" else
                   learning.status(ROOT / "state/improvement") if action == "status"
                   else learning.control(ROOT / "state/improvement", action))
         print(json.dumps(result, indent=2))

@@ -101,7 +101,9 @@ def events(directory):
 
 
 def meaningful(item):
-    return bool(item["tool_errors"] or item["check_failures"] or item["compactions"] >= 2 or (item["corrections"] or 0))
+    # A routine shutdown can emit an incomplete, zero-tool event without an incident.
+    return bool(item["state"] == "failed" or (item["state"] == "incomplete" and item["tool_calls"])
+                or item["tool_errors"] or item["check_failures"] or (item["corrections"] or 0))
 
 
 def _champion(directory):
@@ -136,17 +138,21 @@ def status(directory):
             "pipeline_implemented": True, "benefit_proven": False}
 
 
-def failures(directory):
+def failures(directory, *, limit=20):
     """Error-triggered local backlog, not a schedule or a successful-learning claim."""
     folder = state._directory(root(directory) / "incidents")
     items = []
-    for path in sorted(folder.glob('*.json'))[-POLICY['metadata_records']:]:
+    for path in folder.glob('*.json'):
         value = state._load(path)
-        if value.get('owner') != 'kryn.product' or value.get('task_id') != path.stem:
+        if (value.get('owner') != 'kryn.product' or value.get('task_id') != path.stem
+                or not isinstance(value.get('updated_at'), str)):
             raise RuntimeError('Unexpected failure record')
         items.append({key: value[key] for key in ('task_id', 'native_session_id', 'triggers', 'status', 'updated_at')})
+    items.sort(key=lambda item: (item['updated_at'], item['task_id']), reverse=True)
+    shown = items if limit is None else items[:limit]
     return {'trigger': 'native execution failures, interruptions, failed checks and exhausted reviews',
-            'scheduled': False, 'count': len(items), 'incidents': items,
+            'scheduled': False, 'count': len(items), 'shown': len(shown),
+            'truncated': len(shown) < len(items), 'incidents': shown,
             'note': 'Inspect the linked private native trace, reproduce the error, and validate a candidate '
                     'against that regression and unaffected tasks before adopting it. Capturing a failure is not learning proof.'}
 

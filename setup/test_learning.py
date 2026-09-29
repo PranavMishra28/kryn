@@ -53,6 +53,30 @@ class LearningTests(unittest.TestCase):
         for extra in ({'prompt': 'secret'}, {'task_id': '/private/name'}, {'tool_calls': -1}):
             with self.assertRaises(ValueError): learning.valid_event(self.event(**extra))
         self.assertFalse(learning.meaningful(self.event(tool_errors=0, check_failures=0)))
+        self.assertTrue(learning.meaningful(self.event(state='failed', tool_errors=0, check_failures=0, tool_calls=0)))
+        self.assertFalse(learning.meaningful(self.event(state='incomplete', tool_errors=0, check_failures=0, tool_calls=0)))
+        self.assertTrue(learning.meaningful(self.event(state='incomplete', tool_errors=0, check_failures=0, tool_calls=1)))
+        self.assertFalse(learning.meaningful(self.event(compactions=2, tool_errors=0, check_failures=0)))
+
+    def test_failures_show_latest_incidents_without_discarding_history(self):
+        folder = learning.state._directory(learning.root(self.state) / 'incidents')
+        for index in range(25):
+            task_id = f'{24 - index:064x}'
+            learning.state._write_new(folder / (task_id + '.json'), {
+                'owner': 'kryn.product', 'task_id': task_id, 'native_session_id': 'ses_test',
+                'triggers': ['execution_failed'], 'status': 'needs_regression',
+                'updated_at': f'2026-09-28T00:00:{index:02d}.000Z'})
+        recent = learning.failures(self.state)
+        self.assertEqual((recent['count'], recent['shown'], recent['truncated']), (25, 20, True))
+        self.assertEqual(recent['incidents'][0]['task_id'], f'{0:064x}')
+        self.assertEqual(recent['incidents'][-1]['task_id'], f'{19:064x}')
+        complete = learning.failures(self.state, limit=None)
+        self.assertEqual((complete['count'], complete['shown'], complete['truncated']), (25, 25, False))
+        self.assertEqual(complete['incidents'][-1]['task_id'], f'{24:064x}')
+        (folder / ('f' * 64 + '.json')).write_text(json.dumps({'owner': 'elsewhere', 'task_id': 'f' * 64,
+                                                               'updated_at': '2026-09-28T00:01:00.000Z'}))
+        with self.assertRaisesRegex(RuntimeError, 'Unexpected failure record'):
+            learning.failures(self.state)
 
     def test_proposal_is_generated_data_with_exact_instruction_hash(self):
         candidate = self.candidate()
@@ -297,7 +321,8 @@ class LearningTests(unittest.TestCase):
     def test_exit_prunes_nonactionable_events_without_starting_worker(self):
         folder=learning.state._directory(learning.root(self.state)/'events')
         for index in range(503):
-            item=self.event(task_id=f'{index:064x}',tool_errors=0,check_failures=0)
+            item=self.event(task_id=f'{index:064x}',state='incomplete',tool_calls=0,
+                            tool_errors=0,check_failures=0)
             learning.state._write_new(folder/(item['task_id']+'.json'),item)
         with patch.object(learning.subprocess,'Popen') as launch:
             self.assertIsNone(learning.start_after_exit(self.state,{}))

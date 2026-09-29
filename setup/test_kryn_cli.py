@@ -613,6 +613,11 @@ class KrynChecks(unittest.TestCase):
             else:
                 controls.assert_called_once_with(localai.ROOT/'state/improvement', tail[0])
             record.assert_not_called()
+        for tail, limit in ((['failures'], 20), (['failures', '--all'], None)):
+            with patch.object(localai, 'verify_release'), \
+                 patch.object(localai.learning, 'failures', return_value={}) as failures, redirect_stdout(io.StringIO()):
+                self.assertEqual(localai.main(['improve', *tail]), 0)
+            failures.assert_called_once_with(localai.ROOT/'state/improvement', limit=limit)
         for tail in (['--state','/elsewhere','status'], ['--state=/elsewhere','status'], ['--sta','/elsewhere','status'], ['--s=/elsewhere','status'], ['promote','unqualified']):
             with patch.object(localai, 'verify_release'), patch.object(localai.learning, 'control') as controls, self.assertRaises(RuntimeError):
                 localai.main(['improve', *tail])
