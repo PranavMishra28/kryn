@@ -1,0 +1,13 @@
+{
+  "kind": "reverted context-diff candidate receipt",
+  "date": "2026-09-28",
+  "candidate_source": "e3cb3deb9278dbd640701d2ac50f263e995ccfc4",
+  "run": "evals/runs/green-20260929-diff-continuity",
+  "hypothesis": "One bounded current Git diff excerpt after compaction/restart might counter inaccurate model-written summaries without another prompt rule.",
+  "mechanism": "PASS: source test showed a bounded excerpt with current changed bytes, one-time injection after compaction and fresh injection after restart; no source text entered the private tracker. Full source suite and private package smoke passed.",
+  "installed_trial": "One native Task09 session completed e01, native local compaction and e02 under a fresh OpenCode server process. The compaction summary happened to describe e01 accurately. Both turns completed; the final CSV contained exactly e01 and e02, and native test/diff calls succeeded. No sequential frozen checkpoint was recorded after e01, so this is a mechanism diagnostic, not a frozen Task09 grade or long-workflow qualification.",
+  "failure_signal": "The resumed model first attempted an edit without reading the current file. KRYN's existing read-before-edit guard denied it; the model then read the CSV and completed e02. The earlier ten-turn baseline had read current files before edits, but histories differ, so this single trial cannot prove the diff injection caused the denial. It shows no reliable quality gain and a plausible regression path.",
+  "resources": "All sampled host-pressure levels were normal, existing swap remained 3,019,898 bytes, and no resource intervention occurred. The second turn observed both AC and battery power.",
+  "rollback": "PASS: kryn rollback restored private source 183cf631271dd4dbe09ce3560ec0f40086becbbb; guarded protocol smoke passed at /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T012724Z-a3af2022/metrics.json and deep doctor passed. Candidate code was reverted on main by 5bd6c07.",
+  "decision": "Reject this prompt injection as an unproven improvement. Keep the earlier guarded 96K owner build; semantic continuity and coding/UI acceptance remain failed. Continue with a different approach rather than adding prompt rules. Public release stays paused."
+}
