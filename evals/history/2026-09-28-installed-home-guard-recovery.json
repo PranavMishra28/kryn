@@ -1,0 +1,13 @@
+{
+  "kind": "private owner activation and recovery receipt for HOME preflight guard",
+  "date": "2026-09-28",
+  "source_revision": "183cf631271dd4dbe09ce3560ec0f40086becbbb",
+  "public_release": "paused; no tag or version bump",
+  "package": "PASS: clean curated wheel manifest identified 183cf631271dd4dbe09ce3560ec0f40086becbbb; package smoke and installed --package-check passed.",
+  "home_override": "PASS: installed candidate invoked with a temporary alternate HOME refused immediately at platform preflight with the intended control-socket error. No app or model setup was started in that temporary HOME.",
+  "owner_activation": "PASS: installed on the normal logged-in account; pinned app codesign and offline client routing self-check passed. First guarded protocol smoke and deep doctor passed with 98,304 context, 22 GiB ceiling, normal memory pressure and connected browser/search MCP.",
+  "rollback_reactivation": "PASS: kryn rollback restored retained ff69aa9b6aa1207225275f05a1548b6d80e712d1, confirmed by --package-check. Reinstalling the retained private-183cf63 wheel restored 183cf631271dd4dbe09ce3560ec0f40086becbbb. Guarded protocol smoke passed at /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T005241Z-ebdceac4/metrics.json; deep doctor again passed with normal pressure and 3,019,898 bytes existing swap.",
+  "source_checks": "make check passed 192 Python tests, 69 JavaScript tests, native-trial self-check, frozen-suite verify and 18-case bench selftest. Candidate package smoke passed before commit; clean exact-source wheel was subsequently built and installed.",
+  "limits": "This qualifies the narrow owner install/preflight/recovery mechanism. It does not qualify isolated inference, representative coding/UI completion, truthful compaction summaries, useful 96K long-context quality, sustained endurance, protected holdout or a public release.",
+  "decision": "Keep 183cf63 installed privately for owner testing. Public release and production claim remain blocked by the recorded failed gates."
+}
