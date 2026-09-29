@@ -7,7 +7,7 @@
     "source": "2ebdc40",
     "fixture": "Fresh disposable copy of the failed ff69 Task12 UI source; only web/app.js could be edited; native Agent with local Qwen3.5-9B-6bit, installed guarded 96K profile and browser/search tools ready.",
     "outcome": "FAIL: the driver timed out after 368.169 seconds and 35 tool calls. The model edited only web/app.js, but tried the browser before a server was live, then started the server in a foreground shell that timed out. No resource guard abort occurred.",
-    "independent_checks": "Backend unittest 2/2, node --check and git diff --check passed. Independent Task12 browser check passed literal inert stored markup, invalid input, real POST 503/manual retry, and 390/1280 reload checks, then failed the duplicate new-ID POST/conflict check. The model used a set of loaded IDs to choose PATCH instead of explicit Edit state; the Edit handler also still depends on an unset dataset.row. Later browser assertions were not reached.",
+    "independent_checks": "Backend unittest 2/2, node --check and git diff --check passed. Independent Task12 browser check passed literal inert stored markup, invalid input, real POST 503/manual retry, and 390/1280 reload checks, then failed the duplicate new-ID POST/conflict check. The model used a set of loaded IDs to choose PATCH instead of explicit Edit state. An earlier browser Edit click produced a page error before the final renderEntries edit; the final Edit path and later browser assertions were not reached by the independent check and remain unverified.",
     "decision": "Not a coding/UI pass. Do not turn the six early browser passes into full acceptance. After repeated 9B repairs, change approach rather than adding prompt rules."
   },
   "k2_private_screen": {

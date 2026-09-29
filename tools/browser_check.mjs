@@ -57,7 +57,8 @@ if (values.help) {
 
 async function main() {
   const task = values.task ?? ['06', '08', '12'].find(id => values[`task${id}`]);
-  const report = { task, kind: 'independent browser outcome verification', pass: false, checks: [],
+  const report = { task, checkerRevision: task === '12' ? 2 : 1,
+    kind: 'independent browser outcome verification', pass: false, checks: [],
     screenshots: [], pageErrors: [], console: [], network: [], failedRequests: [], manualRetryStarted: null,
     limitations: ['Not evidence of model MCP use, model vision, review, compaction, or long-running work.'] };
   let browser, context, page, output, marker, markerOwned = false, created = false;
@@ -144,6 +145,21 @@ async function main() {
         assert(rendered.includes(markup), literalMarkupFailure(rendered, markup));
         await screenshot('stored-html.png');
         return { id: row.id, renderedAsText: true };
+      });
+    }
+    if (task === '12') {
+      await check('Edit preserves literal entity-like project text', async () => {
+        const row = { id: `${prefix}-entity`, project: `R&D &quot; O'Neil`, minutes: 3, date: '2026-09-10' };
+        const response = await context.request.post(new URL('/api/entries', url).href, { data: row, maxRedirects: 0 });
+        assert.equal(response.status(), 201);
+        await page.reload({ waitUntil: 'networkidle' });
+        const item = page.locator('#entries > *').filter({ hasText: row.id });
+        assert.equal(await item.count(), 1);
+        await item.getByRole('button', { name: /^Edit$/i }).click();
+        assert.equal(await form.locator('[name="project"]').inputValue(), row.project,
+          'Edit changed or lost entity-like project text');
+        await page.reload({ waitUntil: 'networkidle' });
+        return { id: row.id, literalRoundTrip: true };
       });
     }
     if (task !== '08') {

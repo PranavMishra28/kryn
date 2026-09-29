@@ -1,0 +1,49 @@
+{
+  "kind": "private Task12 source-review regression and bounded 9B repair sequence",
+  "date": "2026-09-28",
+  "release_status": "Public release, tag and version bump remain paused; the installed owner model and 96K guard are unchanged.",
+  "scope": "Disposable Task12 follow-ups after a failed original autonomous run. They are operator-scoped single-failure tasks, not a fresh end-to-end model-produced Task12 or protected holdout.",
+  "explicit_edit_state": {
+    "run": "evals/runs/owner-task12-duplicate-mode-20260928",
+    "native_agent": "Local 9B completed in 118.746 seconds and six tool calls. It replaced loaded-ID POST/PATCH selection with explicit state set by Edit and cleared after success; only web/app.js changed.",
+    "checks": "node --check, backend unittest 2/2, git diff --check and the then-current independent Task12 browser check passed. A separate real-browser Edit probe populated exact fields and sent PATCH 200 with no page error.",
+    "limit": "Source review found the data-row JSON attribute could be changed by HTML entity decoding. The prior full-browser pass did not exercise that case and is superseded by the tightened check."
+  },
+  "independent_checker_regression": {
+    "change": "Task12 browser acceptance now creates a project whose literal text contains an HTML entity spelling and an apostrophe, clicks Edit, and requires exact form text and no page exception. It reloads before later flows. Other tasks are unaffected.",
+    "red": "The explicit-edit 9B artifact fails with JSON.parse page exception and blank form on R&D &quot; O'Neil. The later raw-JSON 9B artifact fails the same check.",
+    "green_control": "An operator-built disposable DOM/textContent renderer with a closure over each row passes all 11 tightened Task12 browser checks, including Unicode CSV import, Edit, filter and CSV export. The final checker revision-2 red/green replay is under each run's browser-rev2 directory: the model artifact fails after three checks with a page exception, and the oracle passes 11/11 with no page exception. This proves the checker is satisfiable, not that a model built the oracle.",
+    "raw_runs": ["evals/runs/owner-task12-duplicate-mode-20260928", "evals/runs/owner-task12-entity-oracle-20260928"]
+  },
+  "model_entity_attempt_1": {
+    "run": "evals/runs/owner-task12-entity-edit-20260928",
+    "native_agent": "Local 9B completed in 87.429 seconds and seven tool calls. It replaced raw JSON attribute data with btoa(JSON.stringify(row)) and decoded on Edit.",
+    "independent_browser": "FAIL: entity-like text now edited correctly, and earlier create/503/duplicate/upload checks passed, but the post-import Edit locator was absent. btoa cannot encode the imported Unicode project text; renderEntries caught the error and did not render that list.",
+    "resources": "43 samples, normal host pressure and zero swap growth; no guard abort."
+  },
+  "model_entity_attempt_2": {
+    "run": "evals/runs/owner-task12-unicode-edit-20260928",
+    "native_agent": "Local 9B completed in 49.521 seconds and four tool calls, but replaced base64 with raw JSON in the HTML attribute despite the exact Unicode/entity failure feedback.",
+    "independent_browser": "FAIL: JSON.parse page exception returned on the entity-like project row, before later checks.",
+    "resources": "24 samples, normal host pressure and zero swap growth; no guard abort."
+  },
+  "fast_variant_screen": {
+    "run": "evals/runs/owner-task12-unicode-fast-20260928",
+    "comparison": "Same btoa source and exact Unicode-Edit prompt as model_entity_attempt_2, but using the existing Fast variant instead of Default. One paired run does not establish a general variant advantage.",
+    "native_agent": "Fast 9B completed in 84.944 seconds and six tool calls. It kept escaped visible text and used numeric row indices plus a currentRows lookup for Edit, avoiding user JSON in HTML attributes and Latin-1 base64.",
+    "independent_checks": "Task12 browser checker revision 2 passed all 11 checks with no page errors or failed network requests; node --check, backend unittest 2/2 and git diff --check passed. This is a model-produced assisted repair after operator feedback, not a fresh autonomous Task12 build.",
+    "resources": "Guarded local trial completed without pressure warning or swap-growth abort."
+  },
+  "fresh_review": {
+    "run": "evals/runs/owner-task12-unicode-fast-20260928/evidence/fresh-review",
+    "result": "A fresh native read-only Reviewer completed in 129.95 seconds and 22 tool calls without editing. It reported no actionable code issue, but falsely claimed no Git diff existed despite web/app.js being modified against a baseline commit, and overclaimed that all TASK.md requirements were complete. Reviewer accuracy gate FAIL; external browser evidence, not the reviewer's claim, supports the narrow UI result."
+  },
+  "continuity_attempt": {
+    "run": "evals/runs/owner-task12-unicode-fast-20260928",
+    "before_compaction": "The resumed Fast Agent read the current app.js and Git diff, then falsely said the next action was none despite an explicit pending request for two compactions, restart, final change and re-verification.",
+    "native_compaction": "compact1 completed with an audited local compaction request, normal sampled pressure and zero swap growth. Its saved summary focused on the Unicode fix, omitted the explicit remaining workflow and said the next move was none.",
+    "restart": "A new OpenCode server process resumed the same native session, read the file and diff, and again said no work remained. KRYN's bounded user-request anchor contained the omitted instruction; the model did not follow it. A second compaction was not promoted as a pass after the first semantic failure. Earlier Task09 separately exercised two compactions and also wrote false summaries.",
+    "decision": "Semantic multi-compaction/restart gate FAIL, even though the simple UI artifact passed browser acceptance."
+  },
+  "decision": "Keep the revision-2 browser regression and red/green oracle. The Fast variant produced one accepted assisted UI repair, but no default change is supported by a single pair. Original autonomous Task12, accurate fresh review, semantic continuity, useful context tier, sustained endurance and product-release gates remain failed. Keep installed 9B/96K guarded and releases paused."
+}
