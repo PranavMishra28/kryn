@@ -1,0 +1,43 @@
+{
+  "kind": "guarded local model screen and frozen coding/UI failure receipt",
+  "date": "2026-09-29",
+  "model": {
+    "source": "https://huggingface.co/leonsarmiento/Qwen3.8-27B-3bit-mlx",
+    "revision": "5fc234d9e6080b8388a11286380e801b7c9f535c",
+    "artifact": "/Users/pranav/Library/Application Support/LocalAI/experimental/models/Qwen3.8-27B-3bit-mlx",
+    "model_shard_sha256": [
+      "bf2fa4c6c41876acab1977b17f62c4fe445a76f4e06d6e0e4107544b394fbccd",
+      "f30b8cd3280fcc91fdcd52f6909bb07c1307be63abc55f5f8f5b71be0565c473",
+      "e9218b7cdb33ff8c9d823bba4ef7ce7920ee5c276b1f4b8f2270824f54a432bc"
+    ],
+    "chat_template_sha256": "4c6ecbbd1f04d27985ea02cdbf15dfb9b8c1de9e32c56721fa2828307fa07e91"
+  },
+  "protocol_screen": {
+    "result": "PASS for cold/warm arithmetic and one low-thinking tool call/replay only",
+    "evidence": "evals/runs/model-3bit-protocol-20260929/result.json",
+    "cold_first_content_seconds": 5.94,
+    "warm_first_content_seconds": 0.42,
+    "tool_call": "add(a=23,b=19), replay answer 42",
+    "peak_sampled_process_footprint_bytes": 16505530904,
+    "host_pressure": "normal",
+    "swap_growth_bytes": 0
+  },
+  "coding_ui_trial": {
+    "run": "evals/runs/model3bit-task12-fast-20260929",
+    "driver": "evals/runs/model3bit-task12-fast-20260929/evidence/candidate-3bit-fast32k/driver.json",
+    "independent_grade": "evals/runs/model3bit-task12-fast-20260929/grade.json",
+    "profile": "oMLX 0.6.4, OpenCode 2.0.10, Fast/no thinking, 32768 configured context, 8192 output, 22 GiB process ceiling, one generation, paged SSD cache disabled for this isolated screen",
+    "duration_seconds": 1508.187,
+    "outcome": "FAIL: operator timeout; no completed Agent turn. The independent frozen backend check received 404 where invalid POST /api/import must return 400. Browser, Reviewer, native compaction, restart and final report were not reached.",
+    "native_tool_calls": { "read": 18, "shell": 1, "write": 1, "edit": 2 },
+    "observed_positive": "The agent read the fixture before editing and wrote a plan covering the Task12 criteria in its private scratch directory.",
+    "observed_defect": "Its first edit added a ROLLBACK on a new SQLite connection after the original with-connection block already exited on IntegrityError. A separate standard-library reproduction raised OperationalError: cannot rollback - no transaction is active; the original connection had already rolled back the partial insert.",
+    "peak_sampled_process_footprint_bytes": 20782672504,
+    "host_pressure": "normal in all 727 sampled observations",
+    "swap_peak_growth_bytes": 0,
+    "resource_abort": false,
+    "caveat": "This run used the isolated no-SSD-cache server; its latency is not a matched measurement of the owner-installed 9B profile. The failure does not prove that every 27B quantization or setting is unusable. It does not qualify a 32K useful context tier or coding/UI quality."
+  },
+  "recovery": "The isolated 27B oMLX process was stopped. The owner 9B oMLX app was restarted; kryn doctor reported a healthy Qwen3.5-9B-6bit runtime, configured 98304-token context, 22 GiB ceiling, idle requests and 2/2 connected MCP tools. Owner sessions and v0.2.0 rollback remain available.",
+  "decision": "Do not promote this 27B artifact to the daily default or claim a quality win. Keep it experimental; continue with the guarded 9B baseline and test the compaction mechanism independently. Public releases remain paused."
+}
