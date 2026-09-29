@@ -1,0 +1,14 @@
+{
+  "kind": "private Task12 candidate Reviewer Git-evidence trial",
+  "date": "2026-09-28",
+  "scope": "A source plugin candidate was snapshotted into a disposable native OpenCode Reviewer trial on the same assisted Task12 artifact. The owner installation was not changed; public release, tag and version bump remain paused.",
+  "change": "Fresh read-only Reviewer context now includes current tracked Git status and a bounded diff excerpt against HEAD before native compaction. The fixture trial driver can snapshot a checkout's product plugin without installing it.",
+  "mechanism": "A unit test initialized a Git repo, changed a tracked JavaScript file, and verified the fresh Reviewer context contained status and both diff sides while shell remained unavailable. Full source checks passed.",
+  "native_trial": {
+    "run": "evals/runs/owner-task12-unicode-fast-20260928/evidence/candidate-reviewer-git",
+    "route": "Candidate product plugin and audit plugin were active before and after. Audited local-model generation coverage was verified.",
+    "resources": "141.293 seconds, guarded preflight passed, normal pressure and no guard intervention or swap-growth abort.",
+    "result": "The Reviewer referred to the actual Git diff and did not repeat the earlier false claim that no diff existed. Its final answer nevertheless invented a quote hazard in numeric data-row attributes, treated duplicate-ID server feedback as absent despite the response error path, and proposed an unsupported empty-filter restriction. It also inconsistently labeled externally passed browser flows as needing tests. Independent review accuracy FAIL."
+  },
+  "decision": "Keep the narrow Git-evidence access improvement; do not treat the model's findings as verified code issues. The original autonomous Task12, accurate independent review, semantic compaction/restart, useful context-tier and endurance gates remain failed. No production or release promotion."
+}

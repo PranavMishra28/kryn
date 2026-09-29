@@ -18,7 +18,7 @@ import threading
 import time
 from urllib.parse import quote
 
-from native_client import BINARY, MODEL_ID, ROOT, NativeServer, owned_config
+from native_client import BINARY, MODEL_ID, PROJECT, ROOT, NativeServer, owned_config, product_plugin_files
 from protocol_probe import memory_snapshot, request as protocol_request
 from context_probe import ResourceGuard, resources, summarize_resources
 
@@ -983,6 +983,8 @@ def main():
     ap.add_argument("--ready-tools", action="store_true", help="wait up to 30s for connected MCP servers and a stable tool catalog before prompting")
     ap.add_argument("--expected-tools", type=Path, help="require exact equality with baseline tool-catalog.json; implies --ready-tools")
     ap.add_argument("--guard-resources", action="store_true", help="require green/idle preflight; cancel only owned sessions on sustained pressure, missing telemetry or >512 MiB swap growth")
+    ap.add_argument("--candidate-product-source", action="store_true",
+                    help="snapshot this checkout's product plugin into the disposable trial; do not change the owner installation")
     ap.add_argument("--replacement-model-id", help="probe-only sole local model; requires context, output and guard flags")
     ap.add_argument("--replacement-context", type=int)
     ap.add_argument("--replacement-output", type=int)
@@ -1034,9 +1036,19 @@ def main():
     except ValueError as error:
         ap.error(str(error))
     folder.mkdir(parents=True, exist_ok=False)
+    if args.candidate_product_source:
+        candidate = folder / "candidate-product"
+        candidate.mkdir(mode=0o700)
+        for name, data in product_plugin_files(PROJECT).items():
+            (candidate / name).write_bytes(data)
+        products = [p for p in config["plugins"] if isinstance(p, dict) and "profileId" in p.get("options", {})]
+        if len(products) != 1:
+            raise RuntimeError("Expected one KRYN product plugin for candidate trial")
+        products[0]["package"] = str(candidate)
     # Outside the workspace and shell's writable evidence/log directory.
     config_root, product_plugin, input_hashes = isolate_trial_config(
-        config, run / "trial-inputs" / "frozen", ROOT / "xdg/config/opencode")
+        config, (folder / "candidate-inputs" if args.candidate_product_source else run / "trial-inputs" / "frozen"),
+        ROOT / "xdg/config/opencode")
     # These eval-only permissions remove interactive waiting in the disposable repo.
     # Ordinary daily launches retain ask. They are not an OS filesystem sandbox.
     config["permissions"] += [
@@ -1059,6 +1071,7 @@ def main():
     prompt = (args.prompt or workspace / "TASK.md").read_text()
     (folder / "prompt.txt").write_text(prompt)
     report = {"agent": args.agent, "variant": args.variant, "expected_model_id": model_id,
+              "candidate_product_source": args.candidate_product_source,
               "replacement_context": args.replacement_context,
               "replacement_output": args.replacement_output,
               "replacement_guard_gib": args.replacement_guard_gib,

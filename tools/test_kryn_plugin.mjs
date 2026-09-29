@@ -1180,6 +1180,26 @@ test('a saved checkpoint is flagged stale when current Git file bytes change acr
   } finally { await cleanup(); f.remove(); }
 });
 
+test('a fresh Reviewer sees the current tracked diff before any compaction', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 1;\n');
+    git('add', 'app.js');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 2;\n');
+    const review = { sessionID: 'ses_1', agent: 'reviewer', system: [], tools: { read: {}, shell: {} } };
+    await f.call('session.context', review);
+    assert.deepEqual(Object.keys(review.tools), ['read']);
+    const evidence = review.system.find(part => part.text.startsWith('Current Git snapshot for review'))?.text;
+    assert.match(evidence, /"status":" M app\.js\\n"/);
+    assert.match(evidence, /-export const value = 1;/);
+    assert.match(evidence, /\+export const value = 2;/);
+    assert.equal(f.read('anchors').length, 0);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('bounded user continuity discloses omitted middle turns and safely stores escaped text', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
