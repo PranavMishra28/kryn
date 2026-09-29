@@ -8,7 +8,7 @@
     "activation": "Clean private wheel install passed --package-check; rollback to 183cf63 passed; cd1b4d9 reinstallation passed --package-check.",
     "smoke_before_27b": "/Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T031306Z-1e4dc16b/metrics.json",
     "smoke_after_27b": "/Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T033652Z-2379dfa5/metrics.json",
-    "deep_doctor_after_27b": "PASS: healthy local 98,304-token runtime, 22 GiB ceiling, normal host pressure and connected browser/search MCP. This is a protocol/configuration check, not accepted coding/UI work."
+    "deep_doctor_after_27b": "PASS: healthy local 98,304-token runtime, 22 GiB ceiling, normal host pressure and connected browser/search MCP. Subsequent owner status reported about 4.6 GB used swap versus 0.67 GB during the brief 27B request; no zero-resource-impact claim. This is a protocol/configuration check, not accepted coding/UI work."
   },
   "isolated_account": {
     "name": "kryn-ci (KRYN-Test in Users & Groups)",
@@ -20,7 +20,7 @@
   "27b_retry": {
     "raw_run": "evals/runs/model-q4-task12-screen-quiet",
     "conditions": "Owner 9B server stopped; Mac on AC; host memory-pressure free percentage 71% before the temporary Qwen3.8-27B Q4 probe; one local request with the same Task12 failed UI source and no checker/reference answer.",
-    "result": "FAIL: no HTTP response or model answer. Host pressure warning triggered the external guard during model load; peak sampled temporary process physical footprint 12,867,233,416 bytes across nine resource samples. Sampled swap remained 670,438,522 bytes. The temporary server stopped and owner oMLX settings hash was unchanged.",
+    "result": "FAIL: no HTTP response or model answer. Host pressure warning triggered the external guard during model load; peak sampled temporary process physical footprint 12,867,233,416 bytes across nine resource samples. The nine request samples showed unchanged 670,438,522 bytes of swap, but later owner status showed about 4.6 GB used swap after restoration. The temporary server stopped and owner oMLX settings hash was unchanged.",
     "decision": "A higher oMLX process memory ceiling cannot resolve this host-pressure abort. Do not promote 27B as a daily model on this evidence; keep the downloaded Q4/Q5 artifacts experimental."
   },
   "remaining": [
