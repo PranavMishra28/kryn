@@ -1,0 +1,10 @@
+{
+  "kind": "guarded 27B Q4 Task12 replacement-model resource failure",
+  "date": "2026-09-28",
+  "scope": "One direct source-bound Task12 UI repair request to the already downloaded Qwen3.8-27B-oQ4e-mtp as the sole temporary local model. Owner 9B was stopped; no profile or public release changed. Raw request and resource logs are ignored under evals/runs/model-q4-task12-screen/.",
+  "setup": "oMLX 0.6.4 CLI served the local Q4 artifact on loopback port 8001 with 19.5 GB model guard, one request, cache disabled and a temporary HOME/HF_HOME/base path. The prompt included the failed web/app.js, original Task12 request and observed first-save failure; no evaluator browser checker or reference answer was exposed.",
+  "result": "FAIL resource gate: the request returned no HTTP response or model answer. A 0.5-second-sampled external guard canceled on a host memory warning. Across ten request samples, pressure levels were 1 and 2, peak sampled temporary process physical footprint was 15,779,770,128 bytes, power was AC and no swap growth was sampled during that brief request. The temporary server was stopped without applying any patch or running a browser checker.",
+  "post_attempt": "The normal owner 9B runtime was restarted; guarded protocol smoke passed at /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T013217Z-6327d24a/metrics.json and deep doctor passed with 98,304 context, 22 GiB ceiling, normal pressure and connected browser/search MCP. Owner oMLX settings SHA256 was unchanged. Host swap subsequently read about 695 MiB used versus about 2.88 MiB before the screen, so this is functional restoration, not zero-resource-impact qualification.",
+  "limits": "No 27B answer, code patch or browser outcome exists. This cannot rank model quality or imply a 27B agent profile is feasible under the current load. The prior isolated Q4/Q5 quality screens also failed their exact browser checks; no further retry of this model is justified under the present memory pressure.",
+  "decision": "Keep the guarded 9B owner profile and public release pause. Do not promote a larger local model or claim production coding/UI quality."
+}
