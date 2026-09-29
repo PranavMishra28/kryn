@@ -1,0 +1,19 @@
+{
+  "kind": "fresh installed ff69aa9 staged Task12 failure receipt",
+  "date": "2026-09-28",
+  "run": "evals/runs/green-20260928-task12-ff-staged",
+  "installed_source": "ff69aa9b6aa1207225275f05a1548b6d80e712d1",
+  "scope": "One frozen Task12 workspace, one saved native session across Plan, backend Build, UI Build and an assisted browser-feedback repair. No public release or version change.",
+  "stages": {
+    "plan": "Completed in 116.464 seconds with local route coverage, no resource intervention and no workspace edits. It read project files but attempted unavailable execute five times, so it did not establish a test baseline.",
+    "backend": "Timed out at 608.232 seconds. It edited the server and wrote a new test script; native execution did not finish. The frozen backend grader passed its original 2/2 checks on saved files, which does not qualify the task.",
+    "ui": "Timed out at 608.733 seconds after editing web files. No completed browser tool calls were recorded.",
+    "feedback_repair": "Timed out at 308.594 seconds after receiving the exact independent first-save failure. It edited its own test_ui_workflow.py and changed a test server port, but left web/app.js's new-entry POST/PATCH decision unchanged. This is an assisted diagnostic, not autonomous completion."
+  },
+  "independent_browser": "FAIL twice on fresh disposable databases and browser profiles. Stored markup remained inert and rendered literally; invalid minutes produced accessible feedback. On the first normal new-entry save, the client sent PATCH /api/entries/{id} and received 400, while the frozen contract expected POST /api/entries and the injected 503. Upload/edit/filter/export checks were not reached. Both reports are under the run's evidence/independent-browser directory.",
+  "source_finding": "The client chose POST only when the entered ID equalled the literal string 'new'; the checker used a normal distinct ID. Its edit handler also attempted JSON.parse(li.dataset.row) without setting data-row on rendered elements; this downstream defect was found by source review, not a completed browser assertion.",
+  "grade": "FAIL after independent manual attestation. Original backend automatic checks passed 2/2, but browser behavior and 503 recovery failed; fresh read-only review, compaction and new-session handoff were not exercised on this failed application.",
+  "report": "The installed kryn report counted 10 simple check commands, five nonzero exits, 11 tool errors and no completed browser calls. Maximum recorded prompt was 59,022 tokens, below configured 96K; cumulative provider-reported input is not a single context window.",
+  "resources": "Across the guarded backend and UI slices, all sampled pressure levels were normal and swap remained 3,019,898 bytes. Both slices ran on AC power with no resource abort. Their time caps, code defects and incomplete model turns fail quality and endurance despite this narrow resource result.",
+  "decision": "Changing from a single long Build to bounded backend/UI slices and then exact external feedback did not produce a complete accepted application. Stop adding prompt rules or retrying this defect blindly; use an independently checked workflow or a materially better model before another promotion attempt. Keep 96K private and experimental; production and public release gates remain open."
+}
