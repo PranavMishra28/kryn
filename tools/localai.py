@@ -863,7 +863,7 @@ def run(args, outcome):
                 project = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-check-", dir="/private/tmp")))
             else:
                 show_loading("Opening OpenCode and tools")
-                update_dir = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-update-", dir=ROOT / "state")))
+                update_dir = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="kryn-update-", dir="/private/tmp")))
                 update_request = update_dir / "request.json"
             server = stack.enter_context(NativeServer(project, config=config))
             outcome["failure_code"] = "config"
