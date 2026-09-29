@@ -1,0 +1,16 @@
+{
+  "kind": "installed ff69aa9 frozen Task09 sequential-work and compaction receipt",
+  "date": "2026-09-28",
+  "run": "evals/runs/green-20260928-task09-ff-endurance",
+  "installed_source": "ff69aa9b6aa1207225275f05a1548b6d80e712d1",
+  "scope": "One saved native Agent session, ten separately released frozen CSV turns, two manual native compactions and fresh OpenCode server processes. The candidate saw only its workspace, not evaluator checkpoints or reference answers.",
+  "frozen_grade": "PASS: all ten independent intermediate checkpoints, final ordered rows and original-file preservation passed; independent manual review found complete file/shell/test/diff tool results in all ten turns. Turn 1's unavailable pytest and shell exit 127 remain visible before successful test_existing.py; later turns did not erase those failures.",
+  "completion": "All ten turns finished with native stop outcomes and zero interventions. Final answers reported the correct count and minutes for each turn. Turn wall times in seconds: 57.487, 34.887, 46.746, 45.405, 56.325, 47.573, 54.691, 66.207, 58.316, 65.779; sum 533.416 seconds, excluding operator gaps and compaction.",
+  "compaction_1": "PASS mechanism: after checkpoint 5, one native local compaction completed. FAIL semantic summary: it described completed e05 as still active and gave an instruction to append e05 again. The actual external checkpoint had already passed with e05 present.",
+  "restart_1": "PASS file behavior: the next turn ran under a new OpenCode server process, read the current CSV, appended only e06 and passed checkpoint 6 without duplicating e05.",
+  "compaction_2": "PASS mechanism: after checkpoint 8 and new turns, a second native local compaction completed. FAIL semantic summary: it omitted completed e08 and claimed there was no next action.",
+  "restart_2": "PASS file behavior: the next turn ran under another new server process, read the current CSV, appended only e09 and passed checkpoint 9. Checkpoint 10 also passed.",
+  "resources": "Across 280 samples from turns and compactions, host pressure stayed normal, existing swap stayed at 3,019,898 bytes, power was AC and the maximum sampled oMLX physical footprint was 12,554,018,064 bytes. No guard abort occurred.",
+  "context_scope": "The largest provider-reported single prompt was 18,046 tokens during compaction, far below the configured 96K. Cumulative usage does not establish a 96K useful tier. The ten-turn task was simple CSV editing, not a coding/UI project or 45–60 minutes of successful active endurance.",
+  "decision": "Task09's narrow frozen sequence gate passes, but the truthful checkpoint and sustained endurance gates remain failed or unqualified. The current-file read prevented corruption in this simple task despite two false summaries; do not generalize that recovery to complex coding/UI work or call KRYN production-qualified."
+}
