@@ -1,0 +1,23 @@
+{
+  "kind": "same-owner private checkpoint candidate activation and rollback",
+  "date": "2026-09-29",
+  "source_revision": "d6ec6faea1a55583ffe5c75dfa1b81d8bff55b92",
+  "version": "0.2.0 private candidate; no public release or tag",
+  "wheel_sha256": "b7256f4ac1deff1a9fa30dbfdb6fc8754a0f259a02858f7f214834d261138afd",
+  "durable_wheel_and_python": "~/Library/Application Support/LocalAI/private-builds/d6ec6fa-20260929/ (the active Python is under this directory, not /private/tmp)",
+  "package": "Clean source build, manifest check, isolated package smoke and installed payload check passed. Main Checks CI for this revision succeeded: https://github.com/PranavMishra28/kryn/actions/runs/36544684891",
+  "first_activation": "Same-owner transactional install succeeded. Installed source revision matched the wheel. Deep doctor rehashed every pinned model and browser dependency file and passed. Native terminal launch displayed KRYN loading, OpenCode ready, Qwen3.5-9B-6bit and 2/2 MCP tools. A real Agent turn replied READY; the settled TUI rendered Acceptance unverified (/report), and /report opened the session evidence dialog.",
+  "gui_and_share_scope": "kryn --web launched its terminal and OpenCode server with 2/2 tools ready. The /share command appeared in the native palette and dispatched the local export flow, but an exported file or full GUI permission click-through was not independently checked in this candidate pass; earlier public-preview evidence has narrower GUI and /share checks.",
+  "rollback": "kryn rollback restored the previous public v0.2.0 source 32c9e2d433bd232133900bfdd1496f70abbcccf2 and intentionally stopped the owned oMLX runtime. Doctor immediately after rollback failed only because that runtime was stopped, as expected; a launch is needed before a runtime-health check.",
+  "reactivation": "The same SHA-verified private wheel was installed from durable user data, not a temporary venv. A fresh kryn launch restarted the owned oMLX app and opened OpenCode with 2/2 tools. Final kryn doctor --deep passed with 98,304 configured context, 22 GiB process ceiling, normal host pressure, zero active/waiting requests, browser/search connected and full model/browser hashes verified. kryn update --check returned current for public 0.2.0. No user project/session files were removed.",
+  "installed_final": {
+    "source_revision": "d6ec6faea1a55583ffe5c75dfa1b81d8bff55b92",
+    "python": "~/Library/Application Support/LocalAI/private-builds/d6ec6fa-20260929/venv/bin/python",
+    "model": "Qwen3.5-9B-6bit",
+    "context_configured_tokens": 98304,
+    "maximum_output_tokens": 8192,
+    "omlx_process_guard_gib": 22,
+    "rollback_source_revision": "32c9e2d433bd232133900bfdd1496f70abbcccf2"
+  },
+  "decision": "Keep this private candidate installed for supervised coding. Owner installation and rollback are checked; autonomous coding/UI, accurate review, complete semantic continuity, useful-tier comparison and 45-60-minute active endurance remain failed or unqualified. No public release."
+}
