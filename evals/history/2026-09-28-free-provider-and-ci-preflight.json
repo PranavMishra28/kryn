@@ -1,0 +1,21 @@
+{
+  "kind": "free-provider, CI and isolated-install preflight receipt",
+  "date": "2026-09-28",
+  "scope": "Disposable owner-machine connectivity and repository checks; no private project prompt, paid provider, release, tag or version bump",
+  "free_provider": {
+    "catalog": "Pinned OpenCode 2.0.10 exposed seven free-named OpenCode Zen models in a disposable native inventory.",
+    "trial": "A tools-denied disposable Ask session selected longcat-2.5-preview-free and requested only 'Reply exactly OK'. Native /api/session/:id/prompt and an actual PTY OpenCode TUI with --prompt both reached a saved assistant error: provider.auth, HTTP 403, free tier can only be used from within OpenCode. The earlier manually selected interactive free-model turn remains a narrow historical pass; it does not establish automation or availability now.",
+    "decision": "No paid provider is authorized. Do not route user projects or frozen automated evaluation to this unreliable free tier."
+  },
+  "ci": {
+    "failure": "Prior main Checks runs failed eight offline tests because the update-handoff TemporaryDirectory parent ROOT/state did not exist on clean GitHub runners.",
+    "fix": "b03847c uses a fresh owner-only directory under /private/tmp, matching the existing doctor temporary-file pattern; handoff still validates the exact request and rechecks the release before activation.",
+    "verification": "Local make check passed 192 Python and 69 JavaScript tests plus native trial self-check and frozen fixture checks; make package-smoke passed for clean b03847c. GitHub Checks run 36515412992 succeeded."
+  },
+  "disk_and_isolation": {
+    "audit": "Current source 183cf63 and its immediate rollback both reference Qwen3.5-9B-6bit under candidates/qwen35-9b/models. No process had the older Q6 model open. Its owner, path, marker revision and absence of symlinks were checked before removal.",
+    "cleanup": "Removed only dormant models/Qwen3.8-27B-oQ6e-mtp (Jundot revision f7ec1f012451c7a76e775e2fdefdd5f0a51f11f7); retained 27B Q4/Q5 and active 9B. Free disk rose from 44.59 to 66.7 GiB. Owner kryn doctor --deep passed afterward, with healthy 96K/22 GiB local runtime, normal pressure and both MCP services connected.",
+    "gate": "A separate KRYN-owned GUI login, fresh inference, rollback and protected holdout remain unqualified."
+  },
+  "release": "PAUSED"
+}
