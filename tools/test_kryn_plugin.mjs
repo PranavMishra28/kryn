@@ -1356,6 +1356,37 @@ test('a fresh Reviewer sees the current tracked diff before any compaction', asy
   } finally { await cleanup(); f.remove(); }
 });
 
+test('Reviewer handoff withholds missing citations and labels existing locations as unverified', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'const one = 1;\nconst two = 2;\n');
+    let serial = 0;
+    const review = report => {
+      const event = { sessionID: 'ses_1', agent: 'agent', tool: 'subagent', id: 'review_' + (++serial),
+        input: { agent: 'reviewer', prompt: 'Check the file.' } };
+      f.call('tool.execute.before', event);
+      const after = { ...event, status: 'completed', result: { content: [{ type: 'text',
+        text: '<subagent sessionID="ses_child" state="completed">\n' + report }] } };
+      f.call('tool.execute.after', after);
+      return after.result.content.map(part => part.text).join('\n');
+    };
+    for (const report of ['Bug in missing.ts:1', 'Bug in app.js:9', 'Bug in ../other.js:1',
+      'The application is broken.']) {
+      const output = review(report);
+      assert.match(output, /withheld/);
+      assert.doesNotMatch(output, /The application is broken|Bug in/);
+      assert.match(output, /ses_child/);
+    }
+    const valid = review('Possible bug at app.js:2. All tests passed.');
+    assert.match(valid, /checked 1 source citation location/);
+    assert.match(valid, /not proof of a defect or of test\/browser acceptance/);
+    assert.match(valid, /Possible bug at app.js:2/);
+    const clear = review('No actionable findings. Tests were not run.');
+    assert.match(clear, /withheld/);
+    assert.doesNotMatch(clear, /No actionable findings/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('bounded user continuity discloses omitted middle turns and safely stores escaped text', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {

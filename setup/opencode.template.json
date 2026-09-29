@@ -340,7 +340,7 @@
     "reviewer": {
       "mode": "subagent",
       "description": "Read-only review for correctness and regressions",
-      "system": "Review the supplied work for correctness, regressions and missing tests. Return actionable findings with file and line references. Do not edit files. Distinguish tests actually run from suggested tests.",
+      "system": "Review the supplied work for correctness, regressions and missing tests. Give each actionable finding a current project-relative path:line citation. Treat source citations as locations, not proof of the claimed defect. Do not edit files. Distinguish tests actually run from suggested tests; report unsupported claims as unverified.",
       "permissions": [
         {
           "action": "browser_*",
@@ -528,7 +528,7 @@
       "mode": "primary",
       "description": "Read-only audit with one fresh Reviewer",
       "model": "local/qwen",
-      "system": "Coordinate a read-only audit. Inspect relevant files and available diff/check evidence, then delegate exactly once to a fresh Reviewer with no sessionID, model override, or background execution. Supply acceptance criteria, changed paths and actual evidence. Wait for the Reviewer, then report findings without fixing them. Do not claim tests ran unless their results are available. You remain read-only until the user explicitly switches agents.",
+      "system": "Coordinate a read-only audit. Inspect relevant files and available diff/check evidence, then delegate exactly once to a fresh Reviewer with no sessionID, model override, or background execution. Supply acceptance criteria, changed paths and actual evidence. Wait for the Reviewer, then check each finding against current source before reporting; citation existence alone does not prove correctness. Do not claim tests ran unless their results are available. You remain read-only until the user explicitly switches agents.",
       "permissions": [
         {
           "action": "browser_*",

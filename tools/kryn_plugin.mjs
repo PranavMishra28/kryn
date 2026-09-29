@@ -349,6 +349,32 @@ function reviewDiffEvidence(directory) {
   } catch { return null; }
 }
 
+function reviewerHandoff(result, directory) {
+  const report = Array.isArray(result?.content) ? result.content.filter(part => part?.type === 'text')
+    .map(part => part.text).filter(text => typeof text === 'string').join('\n') : '';
+  const child = /<subagent sessionID="(ses_[A-Za-z0-9]+)"/.exec(report)?.[1];
+  const reference = child ? ' Native child session: ' + child + '.' : '';
+  if (!report || Buffer.byteLength(report, 'utf8') > 20000)
+    return { ok: false, text: 'KRYN withheld a missing or oversized Reviewer handoff. Inspect the saved child session before reporting findings.' + reference };
+  const citations = [...report.matchAll(/(?:^|[\s`(])((?:\.\/)?[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*\.[A-Za-z0-9_-]+):([1-9]\d*)(?:-([1-9]\d*))?/gm)];
+  const invalid = [];
+  if (citations.length > 32) invalid.push('more than 32 citations');
+  else if (!citations.length) invalid.push('no project-relative path:line citations');
+  for (const [, name, first, last] of citations.slice(0, 32)) {
+    try {
+      const snapshot = projectSnapshot(directory, name);
+      const source = snapshot && fs.readFileSync(snapshot.file, 'utf8');
+      const lines = source ? source.split(/\r?\n/).length - Number(source.endsWith('\n')) : 0;
+      if (!snapshot || Number(first) > lines || Number(last ?? first) > lines ||
+          Number(last ?? first) < Number(first)) invalid.push(name + ':' + first + (last ? '-' + last : ''));
+    } catch { invalid.push(name + ':' + first); }
+  }
+  if (invalid.length) return { ok: false, text: 'KRYN withheld this Reviewer handoff because source citations could not be checked: ' +
+    invalid.slice(0, 8).join(', ') + '. Recheck current files before reporting findings.' + reference };
+  return { ok: true, text: 'KRYN checked ' + citations.length +
+    ' source citation location(s) at handoff. Location is not proof of a defect or of test/browser acceptance; verify each claim independently.' };
+}
+
 export function pruneTrackers(directory, now = Date.now()) {
   const records = [];
   for (const name of fs.readdirSync(directory)) {
@@ -907,6 +933,13 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      if (event.tool === 'subagent' && event.input?.agent === 'reviewer' &&
+          event.status === 'completed' && event.result) {
+        const check = reviewerHandoff(event.result, ctx.location.directory);
+        event.result.content = check.ok ? [{ type: 'text', text: check.text },
+          ...(Array.isArray(event.result.content) ? event.result.content : [])] :
+          [{ type: 'text', text: check.text }];
+      }
       let verifiedEdit = null;
       if (event.tool === 'edit' && event.id) {
         const beforeEdit = item.pendingEdits.get(event.id);
