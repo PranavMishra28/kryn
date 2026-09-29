@@ -8,10 +8,52 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from session_report import is_check, report
+from session_report import brief, is_check, report
 
 
 class ReportTests(unittest.TestCase):
+    def test_brief_completion_distinguishes_task_claims_from_native_evidence(self):
+        with tempfile.TemporaryDirectory() as folder:
+            db = Path(folder) / 'native.db'
+            project = str(Path(folder).resolve())
+            with closing(sqlite3.connect(db)) as c, c:
+                c.executescript('CREATE TABLE session_v2 (id TEXT, parent_id TEXT, directory TEXT, idle_outcome TEXT, time_created INTEGER, time_updated INTEGER);'
+                                'CREATE TABLE session_message (session_id TEXT, seq INTEGER, type TEXT, data TEXT);')
+                c.executemany('INSERT INTO session_v2 VALUES (?,?,?,?,?,?)', [
+                    ('ses_task12', None, project, 'succeeded', 1, 2),
+                    ('ses_checked', None, project, 'succeeded', 3, 5),
+                    ('ses_reviewer', 'ses_checked', project, 'succeeded', 4, 5),
+                ])
+                failed_style = [{'type': 'text', 'text': 'Everything is production-ready; all tests passed.'},
+                                {'type': 'tool', 'name': 'shell', 'state': {'status': 'completed',
+                                 'input': {'command': 'python -m pytest -q 2>&1'},
+                                 'metadata': {'exit': 1}}},
+                                {'type': 'tool', 'name': 'shell', 'state': {'status': 'completed',
+                                 'input': {'command': 'python test_existing.py && python test_new.py'},
+                                 'metadata': {'exit': 0}}},
+                                {'type': 'tool', 'name': 'browser_browser_click', 'state': {'status': 'completed'}}]
+                checked = [{'type': 'tool', 'name': 'shell', 'state': {'status': 'completed',
+                            'input': {'command': 'python3 -m unittest'}, 'metadata': {'exit': 0}}},
+                           {'type': 'tool', 'name': 'browser_browser_click', 'state': {'status': 'completed'}}]
+                c.execute('INSERT INTO session_message VALUES (?,?,?,?)',
+                          ('ses_task12', 1, 'assistant', json.dumps({'content': failed_style})))
+                c.execute('INSERT INTO session_message VALUES (?,?,?,?)',
+                          ('ses_checked', 1, 'assistant', json.dumps({'content': checked})))
+                c.execute('INSERT INTO session_message VALUES (?,?,?,?)',
+                          ('ses_checked', 2, 'compaction', json.dumps({'status': 'completed'})))
+            weak = brief(report(db, project, 'ses_task12'))
+            self.assertIn('execution succeeded', weak)
+            self.assertIn('Task acceptance: unverified', weak)
+            self.assertIn('0 passed, 0 failed', weak)
+            self.assertIn('Browser tool calls: 1; child sessions: 0; compactions: 0', weak)
+            self.assertIn('Shell commands with nonzero exit: 1', weak)
+            self.assertIn('compound shell commands do not count', weak)
+            self.assertNotIn('production-ready', weak)
+            stronger = brief(report(db, project, 'ses_checked'))
+            self.assertIn('1 passed, 0 failed', stronger)
+            self.assertIn('Browser tool calls: 1; child sessions: 1; compactions: 1', stronger)
+            self.assertIn('Task acceptance: unverified', stronger)
+
     def test_cd_prefixed_checks_match_context_ledger_without_admitting_compound_shell(self):
         self.assertTrue(is_check('cd /tmp/project && python3 -B -m pytest -q'))
         self.assertTrue(is_check('cd ./web && npm test'))

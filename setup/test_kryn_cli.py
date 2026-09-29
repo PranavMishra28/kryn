@@ -14,6 +14,7 @@ import unittest
 from unittest.mock import Mock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import localai
+import session_report
 import deploy_client
 import setup
 
@@ -45,6 +46,19 @@ class KrynChecks(unittest.TestCase):
         self.enterContext(patch.object(localai.learning, 'start_after_exit'))
         self.enterContext(patch.object(localai, 'owned_config', return_value={}))
         self.enterContext(patch.object(localai.improvement, 'record_outcome'))
+
+    def test_report_brief_cli_keeps_native_success_distinct_from_acceptance(self):
+        evidence = {'session_id': 'ses_checked', 'native_outcome': 'succeeded',
+                    'session_count': 1, 'counts': {'check_exit_zero': 1},
+                    'execution_outcomes': {},
+                    'partial': False, 'acceptance_verified': False}
+        output = io.StringIO()
+        with patch.object(session_report, 'report', return_value=evidence) as collect, redirect_stdout(output):
+            self.assertEqual(localai.main(['report', '--brief', '--session', 'ses_checked']), 0)
+        collect.assert_called_once_with(localai.ROOT / 'xdg/data/opencode/opencode.db', Path.cwd(), 'ses_checked')
+        self.assertIn('Task acceptance: unverified', output.getvalue())
+        self.assertIn('1 passed, 0 failed', output.getvalue())
+        self.assertNotIn('"schema"', output.getvalue())
 
     def test_chrome_compatibility_lines_are_explicit(self):
         for version in ('153.0.7499.170', '154.0.8037.58'):

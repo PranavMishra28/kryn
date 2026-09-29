@@ -50,7 +50,8 @@ In your shell:
   kryn --session SESSION_ID    Resume a specific session in this project
   kryn --web                   Open the graphical companion; keep the terminal open
   kryn doctor                 Check runtime, browser and search connections
-  kryn report                 Inspect this project's latest native run and children
+  kryn report --brief         Short evidence summary for the latest project session
+  kryn report                 Full native run diagnostics (add --session SESSION_ID)
   kryn improve failures       List error-triggered regression incidents
 
 Inside the terminal interface:
@@ -63,6 +64,7 @@ Inside the terminal interface:
   /web      (also /pair)       Show the local GUI address and temporary credentials
   /sessions                   Open a saved session
   /status                     Inspect native tool and service status
+  /report                     Inspect the latest project session's evidence
   /share                      Open a local session export (no public link in OpenCode V2)
   /deliver your task          Build a small milestone and verify it in Agent
   /research your topic        Search primary sources with citations
@@ -942,11 +944,16 @@ def main(argv=None):
         print(CONTROLS)
         return 0
     if argv and argv[0] == "report":
-        from session_report import report
-        require(len(argv) == 1 or len(argv) == 3 and argv[1] == "--session",
-                "Usage: kryn report [--session SESSION_ID], from your project folder")
-        print(json.dumps(report(ROOT / "xdg/data/opencode/opencode.db", Path.cwd(),
-                                argv[2] if len(argv) == 3 else None), indent=2))
+        from session_report import brief, report
+        tail = argv[1:]
+        short = "--brief" in tail
+        if short:
+            tail.remove("--brief")
+        require(not tail or len(tail) == 2 and tail[0] == "--session",
+                "Usage: kryn report [--brief] [--session SESSION_ID], from your project folder")
+        result = report(ROOT / "xdg/data/opencode/opencode.db", Path.cwd(),
+                        tail[1] if tail else None)
+        print(brief(result) if short else json.dumps(result, indent=2))
         return 0
     if argv in (["login"], ["logout"]):
         raise RuntimeError("GitHub login is no longer required; this command is retired")

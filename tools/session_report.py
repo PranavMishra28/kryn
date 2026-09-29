@@ -205,6 +205,35 @@ def report(database, project, session_id=None):
         return summarize(connection, row[0])
 
 
+def brief(result):
+    """Human-readable native observations; never promote execution to acceptance."""
+    counts = result['counts']
+    checks = (counts.get('check_exit_zero', 0), counts.get('check_exit_nonzero', 0),
+              counts.get('check_exit_unknown', 0))
+    children = result['session_count'] - 1
+    browser = counts.get('completed_browser_calls', 0)
+    lines = [f"Project session {result['session_id']}: execution {result['native_outcome']}.",
+             'Task acceptance: unverified. Model-written completion claims are not evidence.',
+             f'Observed simple checks: {checks[0]} passed, {checks[1]} failed, {checks[2]} unsettled. '
+             f"Browser tool calls: {browser}; "
+             f"child sessions: {children}; compactions: {counts.get('completed_compactions', 0)}."]
+    prior = sum(result['execution_outcomes'].get(state, 0) for state in ('failed', 'interrupted', 'cancelled'))
+    if prior:
+        lines.append(f'Unsuccessful execution records: {prior}; later success does not erase them.')
+    if counts.get('shell_nonzero_exits', 0):
+        lines.append(f"Shell commands with nonzero exit: {counts['shell_nonzero_exits']} (including non-check commands).")
+    if checks[1]:
+        lines.append('A check exited nonzero; inspect the native transcript and current code.')
+    elif not checks[0]:
+        lines.append('No completed simple check is recorded; compound shell commands do not count.')
+    if not browser:
+        lines.append('No completed browser tool call is recorded.')
+    if result['partial']:
+        lines.append('Report bounds reached; counts are partial.')
+    lines.append('UI acceptance, review accuracy and remaining requirements need independent verification.')
+    return '\n'.join(lines)
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
