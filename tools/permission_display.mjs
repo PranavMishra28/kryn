@@ -12,3 +12,9 @@ export function permissionLabel(launch, source = '{}') {
     return mode === 'autoaccept' ? 'Auto' : mode === 'prompt' ? 'Ask' : 'Unknown';
   } catch { return 'Unknown'; }
 }
+
+// Native execution success is not independent application acceptance.
+export function completionLabel(session, status = 'idle') {
+  return status === 'idle' && session?.outcome === 'succeeded' && !session.parentID &&
+    ['agent', 'build'].includes(session.agent) ? 'Acceptance unverified' : null;
+}

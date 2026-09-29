@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { createSignal } from 'solid-js';
-import { permissionLabel } from './permission_display.mjs';
+import { completionLabel, permissionLabel } from './permission_display.mjs';
 import { setupUpdates } from './update_notice.mjs';
 
 const exec = promisify(execFile);
@@ -29,14 +29,15 @@ export default {
         variant: 'info', duration: 6000 });
       context.keymap.dispatch('opencode.settings');
     };
-    const showReport = async () => {
+    const showReport = async (sessionID) => {
       const python = process.env.KRYN_UPDATE_PYTHON;
       if (!python || !path.isAbsolute(python)) {
         context.ui.toast.show({ message: 'Installed KRYN reporter unavailable.', variant: 'info', duration: 6000 });
         return;
       }
       try {
-        const { stdout } = await exec(python, ['-I', '-B', '-m', 'kryn', 'report', '--brief'],
+        const { stdout } = await exec(python, ['-I', '-B', '-m', 'kryn', 'report', '--brief',
+          ...(sessionID ? ['--session', sessionID] : [])],
           { timeout: 5000, maxBuffer: 8192, windowsHide: true });
         await context.ui.dialog.alert({ title: 'KRYN session evidence', message: stdout.trim() });
       } catch {
@@ -44,18 +45,25 @@ export default {
           variant: 'info', duration: 6000 });
       }
     };
-    const removeSlot = context.ui.slot({ append: 'prompt.footer.status', render: () => (
-      <box onMouseUp={open} flexShrink={0}>
-        <text fg={context.theme.text.muted}> · Permissions: {mode()}</text>
-      </box>
-    ) });
+    const removeSlot = context.ui.slot({ append: 'prompt.footer.status', render: input => {
+      const completion = () => input.sessionID && completionLabel(
+        context.data.session.get(input.sessionID), context.data.session.status(input.sessionID));
+      return <>
+        <box onMouseUp={open} flexShrink={0}>
+          <text fg={context.theme.text.muted}> · Permissions: {mode()}</text>
+        </box>
+        {completion() && <box onMouseUp={() => showReport(input.sessionID)} flexShrink={0}>
+          <text fg={context.theme.text.feedback.warning.base}> · {completion()} (/report)</text>
+        </box>}
+      </>;
+    } });
     const removeCommand = context.ui.slot({ append: 'app', render: () => {
       context.keymap.layer(() => ({ mode: 'global', priority: 100, commands: [{
         id: 'kryn.permissions', title: 'KRYN: permission settings', group: 'KRYN',
         palette: true, slash: { name: 'permissions' }, run: open,
       }, {
         id: 'kryn.report', title: 'KRYN: latest project session evidence', group: 'KRYN',
-        palette: true, slash: { name: 'report' }, run: showReport,
+        palette: true, slash: { name: 'report' }, run: () => showReport(),
       }, {
         // Shadow the native updater as well as its slash alias: OpenCode stays pinned.
         id: 'opencode.update', title: 'KRYN: check for a verified update', group: 'KRYN',

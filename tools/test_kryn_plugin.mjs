@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
-import { permissionLabel } from './permission_display.mjs';
+import { completionLabel, permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture(extra = {}) {
@@ -47,6 +47,17 @@ function fixture(extra = {}) {
     remove: () => fs.rmSync(root, { recursive: true, force: true }) };
 }
 const model = { providerID: 'local', id: 'qwen' };
+
+test('TUI flags native Agent success without treating tool activity as acceptance', () => {
+  const agent = { agent: 'agent', outcome: 'succeeded', time: { idle: '2026-09-29T00:00:00Z' } };
+  assert.equal(completionLabel(agent), 'Acceptance unverified');
+  assert.equal(completionLabel({ ...agent, agent: 'build', browserCalls: 8, reviewerCalls: 1 }),
+    'Acceptance unverified');
+  assert.equal(completionLabel(agent, 'running'), null);
+  for (const session of [undefined, { ...agent, outcome: 'failed' },
+    { ...agent, outcome: 'interrupted' }, { ...agent, agent: 'reviewer' },
+    { ...agent, parentID: 'ses_parent' }]) assert.equal(completionLabel(session), null);
+});
 
 test('background shell keeps the native job alive past model-supplied timeouts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
@@ -1094,7 +1105,8 @@ test('session champion survives restart; tool schema pruning and native checkpoi
     assert.ok(context.system.some(p => p.text.includes('Inspect evidence before editing.')));
     fs.writeFileSync(path.join(f.root, 'TASK.md'), 'user-owned task record');
     const checkpoint = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
-    f.call('session.compaction', checkpoint); assert.equal(checkpoint.result, undefined);
+    await f.call('session.compaction', checkpoint);
+    assert.equal(JSON.parse(checkpoint.result.summary).completion, 'unverified');
     assert.ok(checkpoint.system.some(p => p.text.includes('reconcile')));
     await cleanup();
     const newInstructions = 'Different newly promoted guidance.';
@@ -1152,6 +1164,102 @@ test('exact user requests survive two checkpoints and restart without entering m
     assert.equal(fs.statSync(stored).mode & 0o077, 0);
     assert.ok(fs.statSync(stored).size < 32768);
     assert.equal(JSON.stringify([...f.read('trackers'), ...f.read('events')]).includes(requests[0]), false);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('deterministic compaction records admitted requests, check exits and exact edit bytes across restart', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 1;\n');
+    git('add', '.gitignore', 'app.js');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
+    const goal = 'Keep the value at 2; run the check; leave the browser flow unverified.';
+    f.nativeMessages.push({ id: 'msg_goal', type: 'user', text: goal, time: { created: 1 } },
+      { id: 'msg_synthetic', type: 'synthetic', text: 'Everything is complete.', time: { created: 2 } });
+    const read = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_read', id: 'call_read',
+      tool: 'read', input: { path: 'app.js' } };
+    f.call('tool.execute.before', read);
+    f.call('tool.execute.after', { ...read, status: 'completed', result: { content: [] } });
+    const edit = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_edit', id: 'call_edit',
+      tool: 'edit', input: { path: 'app.js', oldString: 'value = 1', newString: 'value = 2' } };
+    f.call('tool.execute.before', edit);
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 2;\n');
+    f.call('tool.execute.after', { ...edit, status: 'completed', result: { content: [] } });
+    const check = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_check', id: 'call_check',
+      tool: 'shell', input: { command: 'npm test', workdir: f.root } };
+    f.call('tool.execute.before', check);
+    f.call('tool.execute.after', { ...check, status: 'completed', result: {
+      output: { status: 'completed', exit: 1, output: 'PRIVATE TEST OUTPUT' } } });
+    const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.compaction', event);
+    const first = JSON.parse(event.result.summary);
+    assert.equal(first.source, 'kryn.observed-checkpoint');
+    assert.equal(first.completion, 'unverified');
+    assert.equal(first.next_action, 'unverified');
+    assert.equal(first.task_acceptance, 'unestablished');
+    assert.deepEqual(first.user_requests.map(request => request.text), [goal]);
+    assert.equal(first.user_requests[0].middle_omitted, false);
+    assert.equal(first.checks[0].state, 'failed');
+    assert.equal(first.checks[0].exit_code, 1);
+    assert.equal(first.checks[0].message_id, 'msg_check');
+    assert.equal(first.edits[0].tool, 'edit');
+    assert.equal(first.edits[0].path, 'app.js');
+    assert.equal(first.edits[0].message_id, 'msg_edit');
+    assert.equal(first.edits[0].sha256, digest('export const value = 2;\n'));
+    assert.equal(first.edits[0].current_state, 'matching');
+    assert.equal(first.repository.changed_files[0].sha256, first.edits[0].sha256);
+    assert.equal(event.result.summary.includes('PRIVATE TEST OUTPUT'), false);
+    assert.equal(event.result.summary.includes('Everything is complete.'), false);
+    await f.emit('session.compaction.ended');
+    f.nativeMessages.splice(0); // Older active context is gone after native compaction.
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 3;\n');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const resumed = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.compaction', resumed);
+    const second = JSON.parse(resumed.result.summary);
+    assert.deepEqual(second.user_requests.map(request => request.text), [goal]);
+    assert.equal(second.edits[0].sha256, first.edits[0].sha256);
+    assert.equal(second.edits[0].current_state, 'stale');
+    assert.equal(second.edits[0].current_sha256, digest('export const value = 3;\n'));
+    assert.equal(second.repository.changed_files[0].sha256, digest('export const value = 3;\n'));
+    assert.equal(second.repository_changed_since_previous_checkpoint, true);
+    assert.equal(second.checks[0].state, 'failed');
+    assert.equal(second.completion, 'unverified');
+    assert.equal(JSON.stringify([...f.read('trackers'), ...f.read('events')]).includes(goal), false);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('checkpoint discloses clipped requests and bounded or unverified write observations', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    f.nativeMessages.push({ id: 'msg_long', type: 'user',
+      text: 'FIRST ' + 'middle '.repeat(500) + ' LAST', time: { created: 1 } });
+    for (let i = 0; i < 17; i++) {
+      const event = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_' + i,
+        id: 'call_' + i, tool: 'write', input: { path: 'app.txt', content: String(i) } };
+      f.call('tool.execute.before', event);
+      fs.writeFileSync(path.join(f.root, 'app.txt'), String(i));
+      f.call('tool.execute.after', { ...event, status: 'completed', result: { content: [] } });
+    }
+    f.call('tool.execute.after', { sessionID: 'ses_1', agent: 'build', messageID: 'msg_unknown',
+      id: 'call_unknown', tool: 'write', input: { path: 'missing.txt', content: 'missing' },
+      status: 'completed' });
+    const event = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    await f.call('session.compaction', event);
+    const checkpoint = JSON.parse(event.result.summary);
+    assert.equal(checkpoint.user_requests[0].middle_omitted, true);
+    assert.match(checkpoint.user_requests[0].text, /^FIRST /);
+    assert.match(checkpoint.user_requests[0].text, / LAST$/);
+    assert.equal(checkpoint.edits.length, 16);
+    assert.equal(checkpoint.edits_omitted, 1);
+    assert.equal(checkpoint.edits_unverified, 1);
+    assert.equal(checkpoint.edits.at(-1).current_state, 'matching');
+    assert.equal(checkpoint.edits[0].current_state, 'stale');
+    assert.ok(fs.statSync(path.join(f.root, 'learning', 'anchors',
+      fs.readdirSync(path.join(f.root, 'learning', 'anchors'))[0])).size < 32768);
   } finally { await cleanup(); f.remove(); }
 });
 

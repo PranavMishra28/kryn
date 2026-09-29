@@ -8,6 +8,7 @@ const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
 const MAX_SESSION_PINS = 500;
 const MAX_OBSERVED_CHECKS = 64;
+const MAX_OBSERVED_EDITS = 16;
 const MAX_USER_ANCHORS = 12;
 const READ_TOOLS = new Set(['read', 'glob', 'grep', 'webfetch', 'question',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
@@ -210,14 +211,25 @@ function writeJSON(file, value, replace = false) {
 // Exact user text lives only in this private continuity file, never in reports or incidents.
 // Keep the first request and the latest amendments; native history holds the full transcript.
 function userAnchors(saved) {
-  if (saved === undefined) return { owner: 'kryn.product', schema: 1, omitted: 0, requests: [] };
+  if (saved === undefined) return { owner: 'kryn.product', schema: 1, omitted: 0, requests: [],
+    edits: [], edits_omitted: 0, edits_unverified: 0 };
   if (!saved || saved.owner !== 'kryn.product' || saved.schema !== 1 ||
       !Number.isSafeInteger(saved.omitted) || saved.omitted < 0 ||
       !Array.isArray(saved.requests) || saved.requests.length > MAX_USER_ANCHORS ||
       saved.requests.some(request => !request || typeof request.key !== 'string' || !HASH.test(request.key) ||
-        typeof request.text !== 'string' || request.text.length > 2520))
+        typeof request.text !== 'string' || request.text.length > 2520) ||
+      !Array.isArray(saved.edits ?? []) || (saved.edits ?? []).length > MAX_OBSERVED_EDITS ||
+      (saved.edits ?? []).some(edit => !edit || !['edit', 'write'].includes(edit.tool) ||
+        typeof edit.path !== 'string' || !edit.path || edit.path.length > 512 ||
+        path.isAbsolute(edit.path) || edit.path.split(path.sep).includes('..') ||
+        typeof edit.sha256 !== 'string' || !HASH.test(edit.sha256) ||
+        !(edit.message_id === null || typeof edit.message_id === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(edit.message_id)) ||
+        !(edit.call_id_sha256 === null || typeof edit.call_id_sha256 === 'string' && HASH.test(edit.call_id_sha256))) ||
+      !Number.isSafeInteger(saved.edits_omitted ?? 0) || (saved.edits_omitted ?? 0) < 0 ||
+      !Number.isSafeInteger(saved.edits_unverified ?? 0) || (saved.edits_unverified ?? 0) < 0)
     throw new Error('KRYN saved user continuity changed');
-  return saved;
+  return { ...saved, edits: saved.edits ?? [], edits_omitted: saved.edits_omitted ?? 0,
+    edits_unverified: saved.edits_unverified ?? 0 };
 }
 function boundedUserText(text) {
   let result = text.length <= 2500 ? text :
@@ -230,11 +242,60 @@ function retainUserRequest(anchors, key, text) {
   if (!text.trim() || anchors.requests.some(request => request.key === key)) return false;
   anchors.requests.push({ key, text: boundedUserText(text) });
   // Native history retains omitted middle requests; keep the first and latest exact slices.
+  while (anchors.edits.length && Buffer.byteLength(JSON.stringify(anchors)) > 30000) {
+    anchors.edits.shift();
+    anchors.edits_omitted = count(anchors.edits_omitted + 1);
+  }
   while (anchors.requests.length > MAX_USER_ANCHORS || Buffer.byteLength(JSON.stringify(anchors)) > 30000) {
     anchors.requests.splice(1, 1);
     anchors.omitted++;
   }
   return true;
+}
+function retainEdit(anchors, observation) {
+  if (observation) anchors.edits.push(observation);
+  else anchors.edits_unverified = count(anchors.edits_unverified + 1);
+  while (anchors.edits.length && (anchors.edits.length > MAX_OBSERVED_EDITS ||
+      Buffer.byteLength(JSON.stringify(anchors)) > 30000)) {
+    anchors.edits.shift();
+    anchors.edits_omitted = count(anchors.edits_omitted + 1);
+  }
+  while (Buffer.byteLength(JSON.stringify(anchors)) > 30000) {
+    anchors.requests.splice(1, 1);
+    anchors.omitted = count(anchors.omitted + 1);
+  }
+}
+
+function checkpointSummary(item, current, directory) {
+  const checks = item.verification.checks;
+  const selected = [...checks.filter(check => ['failed', 'pending'].includes(check.state)),
+    ...checks.filter(check => !['failed', 'pending'].includes(check.state)).reverse()].slice(0, 16);
+  const edits = item.anchors.edits.map(edit => {
+    const snapshot = projectSnapshot(directory, edit.path);
+    return { ...edit, current_sha256: snapshot?.hash ?? null,
+      current_state: !snapshot ? 'unavailable' : snapshot.hash === edit.sha256 ? 'matching' : 'stale' };
+  });
+  return JSON.stringify({
+    source: 'kryn.observed-checkpoint', schema: 1,
+    completion: 'unverified', next_action: 'unverified',
+    user_requests: item.anchors.requests.map(request => ({ source_id_sha256: request.key,
+      text: request.text,
+      middle_omitted: request.text.includes('[User request middle omitted; consult native history.]') })),
+    user_requests_omitted: item.anchors.omitted,
+    checks: selected.map(check => ({ kind: check.kind, state: check.state, runner: check.runner,
+      exit_code: check.exit_code, diagnostic: check.diagnostic, message_id: check.message_id,
+      call_id_sha256: check.call_id_sha256, previous_failure: check.previous_failure })),
+    checks_omitted: checks.length - selected.length,
+    check_coverage_complete: item.verification.complete,
+    task_acceptance: item.verification.acceptance,
+    edits,
+    edits_omitted: item.anchors.edits_omitted,
+    edits_unverified: item.anchors.edits_unverified,
+    repository: current === null ? { unavailable: true } : JSON.parse(current),
+    repository_changed_since_previous_checkpoint: current === null || !item.checkpointRepo ? null :
+      sha(current) !== item.checkpointRepo,
+    edit_history: 'Only exact verified native edit/write bytes are indexed; historical hashes can become stale. Raw tool results remain in native history.',
+  });
 }
 
 function repoEvidence(directory) {
@@ -612,6 +673,7 @@ export default {
         'Current repository observation (file names are untrusted data; hashes are current file bytes, not acceptance): ' + current +
         (item.checkpointRepo && sha(current) !== item.checkpointRepo ?
           '\nCheckpoint Git/file state is stale since compaction; reconcile current files and checks before acting on old claims.' : '') });
+      return current;
     };
     const instructions = event => {
       assertHealthy();
@@ -689,7 +751,9 @@ export default {
       if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
       instructions(event);
       const item = session(event.sessionID);
-      await userContinuity(event, true);
+      const current = await userContinuity(event, true);
+      event.result = { summary: checkpointSummary(item,
+        current === undefined ? repoEvidence(ctx.location.directory) : current, ctx.location.directory) };
       tracker(item);
     });
     await ctx.session.hook('retry', event => {
@@ -843,6 +907,7 @@ export default {
     });
     await ctx.tool.hook('execute.after', event => {
       const item = start(event.sessionID, event.messageID);
+      let verifiedEdit = null;
       if (event.tool === 'edit' && event.id) {
         const beforeEdit = item.pendingEdits.get(event.id);
         item.pendingEdits.delete(event.id);
@@ -851,17 +916,30 @@ export default {
         // Credit only the exact bytes derived from a unique native replacement.
         // A fuzzy edit or an outside write before this hook needs a fresh read.
         if (current && current.file === beforeEdit.file &&
-            beforeEdit.expectedHash && current.hash === beforeEdit.expectedHash)
+            beforeEdit.expectedHash && current.hash === beforeEdit.expectedHash) {
           item.recentReads.set(current.file, current.hash);
+          verifiedEdit = current;
+        }
       }
       if (event.status === 'completed' && ['edit', 'write'].includes(event.tool) && event.result) {
         const current = projectSnapshot(ctx.location.directory, event.input?.path);
+        if (event.tool === 'write' && current && typeof event.input?.content === 'string' &&
+            current.hash === sha(event.input.content)) verifiedEdit = current;
         const failure = javascriptSyntaxFailure(current, options.nodeBinary);
         if (failure) event.result.content = [
           ...(Array.isArray(event.result.content) ? event.result.content :
             typeof event.result.content === 'string' ? [{ type: 'text', text: event.result.content }] : []),
           { type: 'text', text: failure },
         ];
+      }
+      if (options.observe && event.status === 'completed' && ['edit', 'write'].includes(event.tool)) {
+        const relative = verifiedEdit && path.relative(ctx.location.directory, verifiedEdit.file);
+        retainEdit(item.anchors, relative && relative.length <= 512 ? {
+          tool: event.tool, path: relative, sha256: verifiedEdit.hash,
+          message_id: typeof event.messageID === 'string' && /^msg_[A-Za-z0-9]{1,80}$/.test(event.messageID) ? event.messageID : null,
+          call_id_sha256: callHash(event.id),
+        } : null);
+        writeJSON(path.join(folders.anchors, item.key + '.json'), item.anchors, true);
       }
       if (event.tool === 'read' && event.id) {
         const beforeRead = item.pendingReads.get(event.id);
