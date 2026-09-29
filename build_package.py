@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Build a wheel from a curated stage, never from ignored personal state."""
 import argparse
+import ast
 import hashlib
 import json
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import tomllib
 import zipfile
 
 FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
@@ -26,7 +28,19 @@ def source_files(root):
     return sorted(set(FILES))
 
 
+def package_version(root):
+    version = tomllib.loads((root / "pyproject.toml").read_text())["project"]["version"]
+    module = ast.parse((root / "src/kryn/__init__.py").read_text())
+    declared = next((ast.literal_eval(node.value) for node in module.body
+                     if isinstance(node, ast.Assign) and any(
+                         isinstance(target, ast.Name) and target.id == "__version__" for target in node.targets)), None)
+    if declared != version:
+        raise RuntimeError("KRYN runtime version differs from pyproject.toml")
+    return version
+
+
 def stage(root, destination, revision, dirty=False):
+    version = package_version(root)
     for file in (root / "src/kryn").glob("*.py"):
         target = destination / "src/kryn" / file.name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -38,7 +52,7 @@ def stage(root, destination, revision, dirty=False):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(root / name, target)
         files[name] = hashlib.sha256(target.read_bytes()).hexdigest()
-    manifest = {"schema": 1, "version": "0.1.10", "source_revision": revision, "source_dirty": dirty, "files": files}
+    manifest = {"schema": 1, "version": version, "source_revision": revision, "source_dirty": dirty, "files": files}
     (destination / "src/kryn/manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
     return manifest
 
@@ -60,7 +74,7 @@ def main():
         work = Path(work)
         manifest = stage(root, work, revision, dirty)
         subprocess.run([args.uv, "build", "--wheel", "--out-dir", output, work], check=True)
-    wheel = output / "kryn-0.1.10-py3-none-any.whl"
+    wheel = output / f"kryn-{manifest['version']}-py3-none-any.whl"
     with zipfile.ZipFile(wheel) as bundle:
         names = bundle.namelist()
         required = {"kryn/payload/" + name for name in manifest["files"]} | {"kryn/manifest.json", "kryn/cli.py", "kryn/installer.py"}

@@ -78,6 +78,7 @@ class PackageTests(unittest.TestCase):
 
     def test_curated_stage_is_self_contained_and_corruption_is_detected(self):
         manifest = builder.stage(SOURCE, self.root, "a" * 40)
+        self.assertEqual(manifest["version"], builder.package_version(SOURCE))
         base = self.root / "src/kryn/payload"
         self.assertEqual(set(installer.verify_payload(base, manifest)["files"]), set(builder.FILES))
         self.assertTrue((base / "tools/learning.py").is_file())
@@ -90,6 +91,19 @@ class PackageTests(unittest.TestCase):
         (base / "setup/opencode.template.json").write_text("{}")
         with self.assertRaisesRegex(RuntimeError, "integrity"):
             installer.verify_payload(base, manifest)
+
+    def test_builder_uses_project_version_and_rejects_runtime_mismatch(self):
+        source = self.root / "source"
+        entry = source / "src/kryn/__init__.py"
+        entry.parent.mkdir(parents=True)
+        (source / "pyproject.toml").write_text('[project]\nversion = "1.2.3"\n')
+        entry.write_text('__version__ = "1.2.3"\n')
+        with patch.object(builder, "FILES", []):
+            manifest = builder.stage(source, self.root / "stage", "a" * 40)
+            self.assertEqual(manifest["version"], "1.2.3")
+            entry.write_text('__version__ = "1.2.4"\n')
+            with self.assertRaisesRegex(RuntimeError, "differs from pyproject.toml"):
+                builder.stage(source, self.root / "mismatch", "a" * 40)
 
     def test_transaction_recovers_failure_and_exact_rollback_preserves_user_changes(self):
         existing, new = self.root / "config.json", self.root / "launcher"
