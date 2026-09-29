@@ -2,7 +2,7 @@
 
 [Install and quick start](../README.md) · [Current qualification and release gates](../plan.md)
 
-These controls describe current source. The published v0.1.10 prerelease predates later changes; see the current status for that distinction.
+These controls describe the v0.2.0 preview source and its 96K local-model profile. See the current status for qualification limits and release state. The earlier v0.1.10 prerelease used a different profile.
 
 ## Start coding
 
@@ -80,6 +80,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/permissions` | Open native settings from the terminal permission indicator. |
 | `/web` | Show the local graphical interface address and temporary login credentials. |
 | `/status` | Inspect native tool and service status. |
+| `/report` | Inspect machine-owned evidence for the latest project session; execution success is not task acceptance. |
 | `/update` | Check published KRYN releases; review the exact version/commit and choose Update and restart or Later. |
 | `/share` | Open OpenCode's local session export. V2 cannot create a public share link; inspect the export before sending it. |
 | `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
@@ -133,7 +134,8 @@ Run these commands in **Terminal**, outside the KRYN interface:
 | `kryn uninstall` | Deactivate owned command launchers; keep models, sessions, caches, settings and packages. |
 | `kryn improve status` | Inspect experimental background improvement. |
 | `kryn improve failures` | Inspect the 20 latest failure-triggered incidents; add `--all` for the full retained list. |
-| `kryn report` | Read-only diagnostics of this project's latest session and its children. Add `--session SESSION_ID` for a specific session. |
+| `kryn report --brief` | Short, read-only evidence summary for this project's latest session. Inside the terminal UI, `/report` opens the same view. |
+| `kryn report` | Full read-only diagnostics of this project's latest session and its children. Add `--session SESSION_ID` for a specific session. |
 | `kryn improve pause` | Pause background improvement. |
 | `kryn stop` | Stop the verified, idle KRYN model server. Finish active work first. |
 
@@ -151,11 +153,13 @@ Application state, sessions, caches and installed packages live under `~/Library
 
 The report shows both the latest native outcome and counts of earlier execution outcomes from the saved session. A later successful read-only turn does not erase an interrupted coding turn. Those counts describe execution history, not application acceptance or the cause of an interruption.
 
+`/report` and `kryn report --brief` show observed simple checks, browser calls, child sessions and compactions for the **latest project session**, including its children. They always label task acceptance unverified: a native execution can succeed while UI behavior, Reviewer findings or requested work remain wrong. If you are viewing an older session, use `kryn report --brief --session SESSION_ID` in Terminal. A compound shell command is not counted as a simple check. Verify your project's actual requirements independently before relying on a completion claim.
+
 ## Configuration and release scope
 
-The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The published profile uses a **49,152-token context**, **8,192-token output limit**, **16 GiB model memory ceiling** and one active generation. The owner installation uses **96K** and a **22 GiB** oMLX ceiling as a guarded private candidate; useful long-workflow quality and sustained resource safety remain unqualified. If it becomes unstable, exit KRYN, run `kryn rollback` in Terminal, then `kryn --continue` from the project. The previous private 96K build is retained for rollback; the earlier 64K rollback remains available separately. Exact model hashes and tool settings are in [the accepted profile](../setup/accepted-profile.json) and [the client template](../setup/opencode.template.json).
+The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The v0.2.0 preview profile configures a **98,304-token context (96K)**, **8,192-token output limit**, **22 GiB oMLX model memory ceiling** and one active generation. These are guarded limits, not proof of useful 96K coding quality or sustained safety. If the installed build becomes unstable, exit KRYN, run `kryn rollback` in Terminal, then `kryn --continue` from the project. The previous installation is retained transactionally. Exact model hashes and tool settings are in [the accepted profile](../setup/accepted-profile.json) and [the client template](../setup/opencode.template.json).
 
-Automatic compaction reserves room for output: the published 49,152-token window leaves roughly 40,960 tokens for active context; the private 96K setting leaves roughly 90,112. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
+Automatic compaction reserves room for output: the preview 96K setting leaves roughly 90,112 tokens for active context. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
 
 npm uses KRYN’s managed writable cache, so ordinary dependency installation does not require modifying `~/.npm` or running `sudo`. Agent, including saved legacy Build sessions, can delegate rendered UI checks to one foreground Browse child. KRYN attaches up to 6,000 characters of the current user request to that handoff so functional acceptance criteria are not lost in a visual-only summary. This text stays in memory outside the native conversation and survives compaction during the running client; it does not recover older criteria after a restart. Agent is also instructed to finish a runnable slice and validate required services. These instructions improve the workflow but are not an enforced correctness gate.
 
