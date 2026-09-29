@@ -1,0 +1,12 @@
+{
+  "kind": "KRYN-owned same-UID isolated HOME install and runtime boundary receipt",
+  "date": "2026-09-28",
+  "scope": "Private ff69aa9 wheel, temporary KRYN-owned HOME under /private/tmp, same macOS UID as owner. This is not an independent GUI account or protected holdout.",
+  "filesystem_install": "PASS: from blank KRYN state, the private wheel installed owned config and launchers, pinned model/runtime/browser files, and passed --package-check. Deep doctor verified files, routing and connected browser/search MCP, but exited nonzero because runtime was stopped.",
+  "filesystem_recovery": "PASS: kryn rollback removed the temporary active installation while retaining model/app; reinstall committed a new activation transaction. The temporary active.json and transaction journals were copied to the ignored run evidence directory before removing only the newly created temporary HOME.",
+  "runtime_isolation": "FAIL: under a HOME override, the oMLX macOS app bound its control socket in the actual account's Application Support directory. The temporary launcher could not find its own control socket, and owner KRYN correctly refused a server listener outside its owned app identity. A same-UID HOME override cannot establish isolated inference.",
+  "owner_recovery": "PASS: the verified temporary server/app processes were stopped. The owner app and server were restarted. Guarded protocol smoke passed at /Users/pranav/Library/Application Support/LocalAI/runs/protocol-20260929T004530Z-edd8c9bc/metrics.json; kryn doctor --deep passed with healthy 98,304-token/22 GiB runtime, normal pressure and connected browser/search MCP.",
+  "source_fix": "The installer preflight now rejects a HOME override before copying model/application assets. This prevents a false clean-isolation claim and expensive setup for this unsupported configuration; it does not make isolated inference pass.",
+  "raw_evidence": "evals/runs/green-20260928-kryn-owned-isolatedff/evidence/ contains retained private active and transaction JSON receipts. The temporary HOME was removed after process identity and shutdown checks.",
+  "decision": "Same-UID filesystem install and rollback pass narrowly; isolated runtime, protected holdout and production clean-install gate remain unqualified. A separate KRYN-owned macOS GUI login is required. Public release remains paused."
+}

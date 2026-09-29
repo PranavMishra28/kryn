@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import pwd
 import re
 import shutil
 import socket
@@ -175,6 +176,8 @@ def platform_check(profile):
         raise RuntimeError("KRYN requires native Apple Silicon macOS with Python 3.13+")
     if int(platform.mac_ver()[0].split(".")[0]) not in (26, 27):
         raise RuntimeError("Upstream supports this runtime on macOS 26/27; KRYN measurements cover the recorded Mac only")
+    if Path.home().resolve() != Path(pwd.getpwuid(os.geteuid()).pw_dir).resolve():
+        raise RuntimeError("KRYN requires the logged-in macOS account home; a HOME override cannot isolate the oMLX app control socket")
     memory = int(subprocess.check_output(["/usr/sbin/sysctl", "-n", "hw.memsize"]))
     if memory < 48 * 1024**3 or profile["memory_gib"] > memory / 1024**3 - 8:
         raise RuntimeError("This profile requires 48 GiB RAM and at least 8 GiB outside the model ceiling")

@@ -30,7 +30,7 @@ The v0.1.10 installer fetches public release assets over HTTPS without a GitHub 
 
 Requirements:
 
-- Native Apple Silicon, macOS 26 or 27, and at least **48 GiB unified memory**. Release validation used an M4 Max with 48 GiB.
+- Native Apple Silicon, macOS 26 or 27, and at least **48 GiB unified memory**. Release validation used an M4 Max with 48 GiB. Run the installer from the logged-in macOS account with its normal `HOME`; a `HOME` override cannot isolate the oMLX app.
 - `python3` and `curl` available in Terminal; Google Chrome installed at `/Applications/Google Chrome.app`.
 - Internet access for installation. Allow space for roughly **8.22 GB of model files**, dependencies, and the installer's **40 GiB free-space reserve**.
 

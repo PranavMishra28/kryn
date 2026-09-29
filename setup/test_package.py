@@ -209,6 +209,17 @@ class PackageTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Apple Silicon"):
                 installer.platform_check({"memory_gib": 8})
 
+    def test_home_override_refused_before_installation_work(self):
+        real_home = self.root / "real-home"
+        with patch.object(installer.platform, "system", return_value="Darwin"), \
+             patch.object(installer.platform, "machine", return_value="arm64"), \
+             patch.object(installer.platform, "mac_ver", return_value=("26.0", "", "")), \
+             patch.object(installer.pwd, "getpwuid", return_value=Mock(pw_dir=str(real_home))), \
+             patch.object(Path, "home", return_value=self.root / "alternate-home"), \
+             patch.object(installer.subprocess, "check_output", side_effect=AssertionError("dependency work started")):
+            with self.assertRaisesRegex(RuntimeError, "HOME override"):
+                installer.platform_check({"memory_gib": 8})
+
     def test_package_manifest_rejects_added_file_and_path_escape(self):
         manifest = builder.stage(SOURCE, self.root, "a" * 40)
         base = self.root / "src/kryn/payload"
