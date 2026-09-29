@@ -1160,8 +1160,10 @@ test('a saved checkpoint is flagged stale when current Git file bytes change acr
   const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
   try {
     git('init', '-q');
+    // The fixture stores plugin state inside the project; production stores it outside.
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
     fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 1;\n');
-    git('add', 'app.js');
+    git('add', '.gitignore', 'app.js');
     git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
     f.nativeMessages.push({ id: 'msg_1', type: 'user', text: 'Keep value at 1 until tests pass.',
       time: { created: 1 } });
@@ -1177,6 +1179,52 @@ test('a saved checkpoint is flagged stale when current Git file bytes change acr
     await f.call('session.context', context);
     assert.match(context.system.at(-1).text, /Checkpoint Git\/file state is stale/);
     assert.ok(!JSON.stringify(f.read('trackers')).includes('export const value'));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('untracked project files affect checkpoints and fresh review without reading ignored or large files', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\nignored.txt\n');
+    git('add', '.gitignore');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
+    fs.writeFileSync(path.join(f.root, 'new.js'), 'export const value = 1;\n');
+    fs.writeFileSync(path.join(f.root, 'large.dat'), Buffer.alloc(1024 * 1024 + 1));
+    fs.writeFileSync(path.join(f.root, 'ignored.txt'), 'private');
+    for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(f.root, 'z' + i + '.txt'), String(i));
+    const review = { sessionID: 'ses_1', agent: 'reviewer', system: [], tools: {} };
+    await f.call('session.context', review);
+    const evidence = review.system.find(part => part.text.startsWith('Current Git snapshot for review'))?.text;
+    assert.match(evidence, /"path":"new\.js","sha256":"[a-f0-9]{64}"/);
+    assert.match(evidence, /"path":"large\.dat","sha256":null,"bytes":1048577,"reason":"too_large"/);
+    assert.match(evidence, /"untracked_files_truncated":true,"untracked_files_unavailable":false/);
+    assert.doesNotMatch(evidence, /ignored\.txt/);
+    await f.emit('session.compaction.ended');
+    fs.writeFileSync(path.join(f.root, 'new.js'), 'export const value = 2;\n');
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    const resumed = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
+    await f.call('session.context', resumed);
+    assert.match(resumed.system.at(-1).text, /Checkpoint Git\/file state is stale/);
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('native synthetic turns are not promoted to user-authored continuity', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    // Pinned OpenCode 2.0.10 stores synthetic inputs with a distinct message type.
+    f.nativeMessages.push({ id: 'msg_user', type: 'user', text: 'Preserve the current file.',
+      time: { created: 1 } });
+    f.nativeMessages.push({ id: 'msg_recovery', type: 'synthetic',
+      text: 'The last response reached the output-token limit and is incomplete.',
+      metadata: { source: 'kryn.output-recovery' }, time: { created: 2 } });
+    const event = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
+    await f.call('session.compaction', event);
+    const anchor = event.system.find(part => part.text.startsWith('User-authored request excerpts'))?.text;
+    assert.match(anchor, /Preserve the current file/);
+    assert.doesNotMatch(anchor, /output-token limit/);
+    assert.equal(f.read('anchors')[0].requests.length, 1);
   } finally { await cleanup(); f.remove(); }
 });
 

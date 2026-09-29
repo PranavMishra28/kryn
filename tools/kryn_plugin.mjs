@@ -247,20 +247,30 @@ function repoEvidence(directory) {
     const head = git('rev-parse', '--verify', 'HEAD').trim();
     const status = git('status', '--short', '--untracked-files=no', '--', '.').slice(0, 2000);
     const changed = git('diff', '--no-ext-diff', '--name-only', '-z', 'HEAD', '--', '.')
-      .split('\0').filter(Boolean).slice(0, 8);
-    const files = [];
+      .split('\0').filter(Boolean).slice(0, 9);
+    let untracked = null;
+    try {
+      // Git excludes ignored files; failure (including too many names) stays explicit.
+      untracked = git('ls-files', '--others', '--exclude-standard', '-z', '--', '.')
+        .split('\0').filter(Boolean).slice(0, 9);
+    } catch { /* The tracked snapshot is still useful. */ }
     const root = fs.realpathSync(directory);
-    for (const name of changed) {
+    const fileEvidence = name => {
       const file = path.resolve(root, name);
-      if (!file.startsWith(root + path.sep)) continue;
+      if (!file.startsWith(root + path.sep)) return { path: name, sha256: null, reason: 'outside_project' };
       try {
-        if (fs.realpathSync(file) !== file) continue;
+        if (fs.realpathSync(file) !== file) return { path: name, sha256: null, reason: 'linked' };
         const info = fs.statSync(file);
-        if (info.isFile() && info.size <= 1024 * 1024)
-          files.push({ path: name, sha256: sha(fs.readFileSync(file)), bytes: info.size });
-      } catch { /* A deleted or inaccessible path remains visible in Git status. */ }
-    }
-    return JSON.stringify({ head, status, changed_files: files, changed_files_truncated: changed.length === 8 });
+        if (!info.isFile()) return { path: name, sha256: null, reason: 'not_regular' };
+        if (info.size > 1024 * 1024) return { path: name, sha256: null, bytes: info.size, reason: 'too_large' };
+        return { path: name, sha256: sha(fs.readFileSync(file)), bytes: info.size };
+      } catch { return { path: name, sha256: null, reason: 'unavailable' }; }
+    };
+    return JSON.stringify({ head, status,
+      changed_files: changed.slice(0, 8).map(fileEvidence), changed_files_truncated: changed.length > 8,
+      untracked_files: untracked?.slice(0, 8).map(fileEvidence) ?? [],
+      untracked_files_truncated: untracked === null ? null : untracked.length > 8,
+      untracked_files_unavailable: untracked === null });
   } catch { return null; }
 }
 
