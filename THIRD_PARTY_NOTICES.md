@@ -1,6 +1,6 @@
 # Third-party components
 
-KRYN's wheel contains KRYN source, configuration, lockfiles and evaluation material. It does not bundle third-party model weights, applications, runtime binaries, Node dependency trees or Chrome profiles. The installer downloads verified upstream artifacts and preserves their supplied licenses. Their terms remain separate from KRYN's [MIT license](LICENSE).
+KRYN's wheel contains KRYN source, configuration, lockfiles and license notices. Evaluation fixtures and private run evidence stay outside the wheel. It does not bundle third-party model weights, applications, runtime binaries, Node dependency trees or Chrome profiles. The installer downloads verified upstream artifacts and preserves their supplied licenses. Their terms remain separate from KRYN's [MIT license](LICENSE).
 
 | Component | License and provenance |
 |---|---|
