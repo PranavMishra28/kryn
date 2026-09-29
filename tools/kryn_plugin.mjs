@@ -940,6 +940,20 @@ export default {
           ...(Array.isArray(event.result.content) ? event.result.content : [])] :
           [{ type: 'text', text: check.text }];
       }
+      if (event.tool === 'shell' && event.status === 'completed' &&
+          event.result?.output?.exit === 0 &&
+          typeof event.input?.command === 'string') {
+        const content = Array.isArray(event.result.content) ? event.result.content :
+          typeof event.result.content === 'string' ? [{ type: 'text', text: event.result.content }] : [];
+        const output = content.filter(part => part?.type === 'text').map(part => part.text).join('\n');
+        const notices = [];
+        if (/\bgit(?:\s+-C\s+\S+)?\s+clone\b/.test(event.input.command))
+          notices.push('KRYN: cloning does not move this session. Git checkpoints and reports remain scoped to the launch directory; open a new KRYN session from the cloned repository root for later work.');
+        if (/\bgit(?:\s+-C\s+\S+)?\s+push\b/.test(event.input.command) &&
+            /https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/pull\/new\/[^\s]+/.test(output))
+          notices.push('KRYN: /pull/new/ is only a PR creation link. Git push did not create a PR. Verify a numbered /pull/123 URL before reporting a PR as opened.');
+        if (notices.length) event.result.content = [...content, ...notices.map(text => ({ type: 'text', text }))];
+      }
       let verifiedEdit = null;
       if (event.tool === 'edit' && event.id) {
         const beforeEdit = item.pendingEdits.get(event.id);

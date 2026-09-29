@@ -21,7 +21,8 @@ browser_browser_press_key browser_browser_select_option browser_browser_wait_for
 browser_browser_take_screenshot browser_browser_console_messages
 browser_browser_network_requests browser_browser_resize browser_browser_tabs
 browser_browser_handle_dialog browser_browser_file_upload browser_browser_close
-browser_browser_find browser_browser_run_code_unsafe'''.split())
+browser_browser_find browser_browser_evaluate browser_browser_mouse_move_xy
+browser_browser_mouse_wheel browser_browser_run_code_unsafe'''.split())
 
 
 def is_check(command):
@@ -214,9 +215,19 @@ def brief(result):
     browser = counts.get('completed_browser_calls', 0)
     lines = [f"Project session {result['session_id']}: execution {result['native_outcome']}.",
              'Task acceptance: unverified. Model-written completion claims are not evidence.',
+             f"Native tool calls: {sum(result.get('tools', {}).values())}; tool errors: {counts.get('tool_errors', 0)}. "
+             f"Assistant records: {counts.get('assistant_messages', 0)}.",
              f'Observed simple checks: {checks[0]} passed, {checks[1]} failed, {checks[2]} unsettled. '
              f"Browser tool calls: {browser}; "
              f"child sessions: {children}; compactions: {counts.get('completed_compactions', 0)}."]
+    usage = result.get('token_usage', {}).get('assistant', {})
+    if usage.get('records_with_usage'):
+        lines.append('Provider-reported request sums: '
+                     f"{usage['uncached_input_tokens']} uncached input, "
+                     f"{usage['cache_read_tokens']} cache-read input, "
+                     f"{usage['output_tokens']} output tokens; "
+                     f"largest recorded prompt {usage['max_recorded_prompt_tokens']}. "
+                     'These are cumulative request counts, not unique conversation length.')
     prior = sum(result['execution_outcomes'].get(state, 0) for state in ('failed', 'interrupted', 'cancelled'))
     if prior:
         lines.append(f'Unsuccessful execution records: {prior}; later success does not erase them.')

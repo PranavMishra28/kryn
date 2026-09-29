@@ -25,7 +25,7 @@ KRYN shows a small `◇ K R Y N` startup display while it checks the installatio
 Inspect this project, explain how to run it, and implement a small todo app with tests. Run the tests and report the results.
 ```
 
-Review permission prompts before approving commands. The first response after the model has unloaded takes longer because the weights must load again. Launch from your project folder, rather than your home directory or the KRYN source checkout.
+Review permission prompts before approving commands. The first response after the model has unloaded takes longer because the weights must load again. Launch from your project folder, rather than your home directory or the KRYN source checkout. If the repository is nested inside another folder, launch from the repository root; session reports and Git checkpoints are scoped to the launch directory.
 
 ### Modes and everyday controls
 
@@ -153,7 +153,7 @@ Application state, sessions, caches and installed packages live under `~/Library
 
 The report shows both the latest native outcome and counts of earlier execution outcomes from the saved session. A later successful read-only turn does not erase an interrupted coding turn. Those counts describe execution history, not application acceptance or the cause of an interruption.
 
-`/report` and `kryn report --brief` show observed simple checks, browser calls, child sessions and compactions for the **latest project session**, including its children. They always label task acceptance unverified: a native execution can succeed while UI behavior, Reviewer findings or requested work remain wrong. If you are viewing an older session, use `kryn report --brief --session SESSION_ID` in Terminal. A compound shell command is not counted as a simple check. Verify your project's actual requirements independently before relying on a completion claim.
+`/report` and `kryn report --brief` show native tool calls, errors, provider token sums, observed simple checks, browser calls, child sessions and compactions for the **latest project session**, including its children. Use these counts for session-health questions instead of estimating from visible scrollback. They always label task acceptance unverified: a native execution can succeed while UI behavior, Reviewer findings or requested work remain wrong. If you are viewing an older session, use `kryn report --brief --session SESSION_ID` in Terminal. A compound shell command is not counted as a simple check. Verify your project's actual requirements independently before relying on a completion claim.
 
 ## Configuration and release scope
 
@@ -191,4 +191,4 @@ The engineering loop is **failure → reproducible regression → candidate chan
 
 Reviewer runs now end their tool phase after 48 attempts or two compactions, then must return findings and explicitly unreviewed scope. If the model still emits unavailable tool calls for two more steps, KRYN interrupts that Reviewer and records an incomplete review. This limit applies to Reviewer, not Build; large reviews should use focused follow-ups. It bounds the observed repeated-reading loop without increasing the memory or context limits.
 
-Incident capture is automatic; implementing and accepting a new harness fix still requires evidence and engineering review. The older local instruction-optimization experiment remains restricted to disposable JSON tasks. Fresh installations and the validated installation start paused; `kryn improve resume` explicitly opts into that experiment. Failure incident capture does not require it. It has not established an improvement in application-building quality. KRYN does not automatically rewrite its runtime, permissions, test answers or model weights after an error, and frontier parity has not been demonstrated.
+Incident capture is automatic; implementing and accepting a new harness fix still requires evidence and engineering review. A false completion with no failing native check, such as calling a PR-creation link an opened PR, cannot be identified as a quality failure from exit codes alone; verify task-specific acceptance rather than changing the harness after every session. The older local instruction-optimization experiment remains restricted to disposable JSON tasks. Fresh installations and the validated installation start paused; `kryn improve resume` explicitly opts into that experiment. Failure incident capture does not require it. It has not established an improvement in application-building quality. KRYN does not automatically rewrite its runtime, permissions, test answers or model weights after an error, and frontier parity has not been demonstrated.

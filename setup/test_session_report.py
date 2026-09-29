@@ -34,7 +34,9 @@ class ReportTests(unittest.TestCase):
                                 {'type': 'tool', 'name': 'browser_browser_click', 'state': {'status': 'completed'}}]
                 checked = [{'type': 'tool', 'name': 'shell', 'state': {'status': 'completed',
                             'input': {'command': 'python3 -m unittest'}, 'metadata': {'exit': 0}}},
-                           {'type': 'tool', 'name': 'browser_browser_click', 'state': {'status': 'completed'}}]
+                           *[{'type': 'tool', 'name': name, 'state': {'status': 'completed'}}
+                             for name in ('browser_browser_click', 'browser_browser_evaluate',
+                                          'browser_browser_mouse_move_xy', 'browser_browser_mouse_wheel')]]
                 c.execute('INSERT INTO session_message VALUES (?,?,?,?)',
                           ('ses_task12', 1, 'assistant', json.dumps({'content': failed_style})))
                 c.execute('INSERT INTO session_message VALUES (?,?,?,?)',
@@ -51,7 +53,8 @@ class ReportTests(unittest.TestCase):
             self.assertNotIn('production-ready', weak)
             stronger = brief(report(db, project, 'ses_checked'))
             self.assertIn('1 passed, 0 failed', stronger)
-            self.assertIn('Browser tool calls: 1; child sessions: 1; compactions: 1', stronger)
+            self.assertIn('Browser tool calls: 4; child sessions: 1; compactions: 1', stronger)
+            self.assertIn('Native tool calls: 5; tool errors: 0', stronger)
             self.assertIn('Task acceptance: unverified', stronger)
 
     def test_cd_prefixed_checks_match_context_ledger_without_admitting_compound_shell(self):
@@ -158,6 +161,7 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(usage['records_without_usable_usage'], 3)
             self.assertEqual(result['token_usage']['compaction']['prompt_tokens'], 1050)
             self.assertEqual(result['counts']['output_tokens'], 40)
+            self.assertIn('200 uncached input, 1800 cache-read input, 40 output tokens', brief(result))
             self.assertFalse(result['acceptance_verified'])
 
     def test_child_loops_failed_checks_and_privacy(self):

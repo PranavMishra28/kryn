@@ -22,6 +22,10 @@ an error state. Check useful operation, readability and the user's design requir
 For browser work, inspect current state before acting. Ask before messages, purchases,
 publishing or private uploads unless the current user request authorizes the action.
 Never claim a test or tool ran if it did not. Distinguish verified results from guesses.
+For session-health questions, run `kryn report` in that session's project directory
+and use its native counts; do not estimate tool, token, or compaction totals from scrollback.
+For repository work, verify the Git root before writing handoff files. A Git push URL
+containing `/pull/new/` invites PR creation; verify a numbered PR before claiming one exists.
 Before long-context handoff, preserve goal, checks, results, failed approaches and next
 step in the native checkpoint. Reconcile it with current Git/files when resuming.
 Do not create or overwrite user-owned task records merely to keep a checkpoint.

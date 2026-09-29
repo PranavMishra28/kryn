@@ -92,6 +92,26 @@ function shellRun(f, command, text, serial, extra = {}, auto = true, exit = 0) {
   return { executed, permission, after, event };
 }
 
+test('shell feedback distinguishes a clone boundary and PR creation link from completed work', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const pushed = shellRun(f, 'git push -u origin feature',
+      'remote: Create a pull request by visiting https://github.com/example/repo/pull/new/feature', 1);
+    assert.match(pushed.after.result.content.at(-1).text, /only a PR creation link/);
+    assert.match(pushed.after.result.content.at(-1).text, /numbered \/pull\/123/);
+    const created = shellRun(f, 'gh pr create', 'https://github.com/example/repo/pull/123', 2);
+    assert.doesNotMatch(created.after.result.content.at(-1).text, /only a PR creation link/);
+    const reference = shellRun(f, 'echo example',
+      'https://github.com/example/repo/pull/new/feature', 3);
+    assert.doesNotMatch(reference.after.result.content.at(-1).text, /only a PR creation link/);
+    const cloned = shellRun(f, 'git clone https://github.com/example/repo.git', 'Cloning into repo...', 4);
+    assert.match(cloned.after.result.content.at(-1).text, /cloning does not move this session/);
+    assert.match(cloned.after.result.content.at(-1).text, /repository root/);
+    const failed = shellRun(f, 'git clone https://github.com/example/missing.git', 'fatal: repository not found', 5, {}, true, 128);
+    assert.doesNotMatch(failed.after.result.content.at(-1).text, /cloning does not move this session/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('unchanged shell loop warns at three, native deny survives auto, and repeated denial interrupts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {

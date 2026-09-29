@@ -1,0 +1,55 @@
+{
+  "kind": "owner mixed-project session health and handoff audit",
+  "date": "2026-09-29",
+  "native_session_id": "ses_f122770e2ffen2U8zypcx7hPOn",
+  "source": "Read-only native OpenCode 2.0.10 session database and KRYN session reporter; this receipt contains counts and outcomes, not prompts, commands, source or tool output.",
+  "whole_saved_session": {
+    "wall_seconds_including_user_idle": 24250.094,
+    "assistant_records": 728,
+    "native_tool_calls": 705,
+    "tool_errors": 30,
+    "browser_calls_completed": 269,
+    "shell_calls": 333,
+    "completed_compactions": 5,
+    "simple_check_exits": { "zero": 1, "nonzero": 3 },
+    "native_execution_outcomes": { "succeeded": 25, "interrupted": 1 },
+    "provider_request_sums": {
+      "uncached_input_tokens": 2871744,
+      "cache_read_tokens": 37183488,
+      "output_tokens": 107918,
+      "max_recorded_prompt_tokens": 90253
+    },
+    "token_scope": "Sums across requests, not unique conversation tokens or proof of acceptance."
+  },
+  "kryn_repository_phase": {
+    "wall_seconds_including_user_idle": 5024.699,
+    "initial_pr_turn": { "wall_seconds": 539.1, "assistant_records": 36, "tool_calls": 35, "native_compactions": 1 },
+    "review_and_handoff_turn": { "wall_seconds": 644.6, "assistant_records": 27, "tool_calls": 26, "user_steering_during_turn": 1 },
+    "assistant_records": 63,
+    "tool_calls": 61,
+    "tool_breakdown": { "browser": 13, "shell": 22, "read": 11, "write": 9, "edit": 6 },
+    "native_compactions": 1,
+    "read_before_edit_denials": 3,
+    "observed_test_commands": 0,
+    "reviewer_subagent_calls": 0,
+    "actual_pull_request_creation_calls": 0,
+    "git_push_calls": 2,
+    "observed_result": "The branch was pushed; the model labeled a /pull/new/ creation page as a PR. Four summary/handoff files were written in the parent folder, outside the cloned Git repository; three were later linked at the wrong repo paths. The current user request survived compaction, but prior unrelated project requests and check debts dominated its checkpoint. The model chose broad plan.md gates instead of the session-health problem the user had just raised."
+  },
+  "last_link_only_turn": {
+    "wall_seconds": 154.578,
+    "tool_calls": 0,
+    "uncached_input_tokens": 71812,
+    "cache_read_tokens": 10240,
+    "output_tokens": 771,
+    "prior_step_cache_read_tokens": 79872,
+    "cache_drop_cause": "Unproven; the high fresh-prefill count explains why the short answer took 2m34s, but does not establish a model or runtime defect."
+  },
+  "changes_from_audit": [
+    "Recognize the three observed browser tool names in content-free session reporting and expose actual tool/token counts in the brief report.",
+    "Show a native tool-result notice when git push yields only a GitHub PR creation URL or git clone leaves the session rooted in a parent directory.",
+    "Tell the agent to use the native report for health metrics and verify the Git root and numbered PR before claiming completion."
+  ],
+  "self_improvement_scope": "The existing event-driven incident hook records native failures, interrupted work, failed recognized checks and bounded review failures. It does not grade a successful-looking final answer or automatically create a regression for this false PR claim. The optional skill experiment remains paused and limited to disposable JSON tasks; this audit supplies a human-reviewed regression, not evidence for automatic promotion.",
+  "decision": "Mechanism checks can verify reporting and notices. No model rerun has established better task interpretation, reviewer accuracy, coding/UI completion, semantic continuity or endurance; existing gates remain open."
+}
