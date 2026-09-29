@@ -9,6 +9,8 @@ check: docs-check
 	$(PYTHON) -B tools/run_native_trial.py --self-check
 	$(PYTHON) -B evals/bench.py verify
 	$(PYTHON) -B evals/bench.py selftest
+	$(PYTHON) -B evals/fresh_review_queue/suite.py verify
+	$(PYTHON) -B evals/fresh_review_queue/suite.py selftest
 
 docs-check:
 	$(PYTHON) -B tools/check_docs.py
