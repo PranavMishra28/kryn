@@ -1,0 +1,14 @@
+{
+  "kind": "same-owner private session-diagnostics activation",
+  "date": "2026-09-29",
+  "source_revision": "b3239ebb1b7128241c0e9c51276552a36b89ebb0",
+  "version": "0.2.0 private build; no public release or tag",
+  "wheel_sha256": "7c79016608c7f2f91b968deb73d56f0f38a1b8a0f675f69feaf22491c0fb10ce",
+  "active_python": "~/Library/Application Support/LocalAI/private-builds/b3239eb-20260929/venv/bin/python",
+  "source_checks": "Full make check passed before commit; focused 59 Node plugin tests, six Python report tests, docs links and diff check passed after the final guard change. A clean-tree make package-smoke passed at b3239eb.",
+  "activation": "A durable, clean-source wheel passed its isolated package check and same-owner transactional install. The active receipt names b3239eb. No model settings changed and the existing saved sessions were retained.",
+  "installed_checks": "kryn doctor --deep passed: every pinned model and browser dependency file verified, Qwen3.5-9B-6bit healthy at configured 98,304 context and 22 GiB ceiling, host pressure normal, zero active/waiting requests, browser/search connected. From the original parent project directory, kryn report --brief --session ses_f122770e2ffen2U8zypcx7hPOn reported 705 native calls, 30 tool errors, 269 completed browser calls, five compactions and the cumulative provider token sums matching the read-only audit. A fresh disposable TUI launch displayed KRYN loading, OpenCode ready, 2/2 tools connected and editable permissions, then exited cleanly without a model turn.",
+  "self_improvement": "kryn improve status reported enabled=true, paused=true, activation_scope=disposable_json_cli and benefit_proven=false. Failure incidents remain automatic; the skill experiment remains paused.",
+  "limits": "The installed smoke did not run a model-produced coding/UI task, the new Git tool-result notices against a real push, a future public update, or rollback/reactivation for this exact build. It does not close the autonomous coding/UI, accurate-review, full semantic-continuity, useful-tier or endurance gates.",
+  "decision": "Keep b3239eb as the owner private build for the next supervised session. No public release, tag or version bump."
+}
