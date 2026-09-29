@@ -1,0 +1,29 @@
+{
+  "kind": "private owner Task12 repair and alternate-model screen",
+  "date": "2026-09-28",
+  "release_status": "No public release, tag, version bump, owner model change, or context-tier promotion.",
+  "nine_b_native_repair": {
+    "run": "evals/runs/owner-task12-fresh-repair-20260928",
+    "source": "2ebdc40",
+    "fixture": "Fresh disposable copy of the failed ff69 Task12 UI source; only web/app.js could be edited; native Agent with local Qwen3.5-9B-6bit, installed guarded 96K profile and browser/search tools ready.",
+    "outcome": "FAIL: the driver timed out after 368.169 seconds and 35 tool calls. The model edited only web/app.js, but tried the browser before a server was live, then started the server in a foreground shell that timed out. No resource guard abort occurred.",
+    "independent_checks": "Backend unittest 2/2, node --check and git diff --check passed. Independent Task12 browser check passed literal inert stored markup, invalid input, real POST 503/manual retry, and 390/1280 reload checks, then failed the duplicate new-ID POST/conflict check. The model used a set of loaded IDs to choose PATCH instead of explicit Edit state; the Edit handler also still depends on an unset dataset.row. Later browser assertions were not reached.",
+    "decision": "Not a coding/UI pass. Do not turn the six early browser passes into full acceptance. After repeated 9B repairs, change approach rather than adding prompt rules."
+  },
+  "k2_private_screen": {
+    "raw_run": "evals/runs/k2-horizon-task12-screen-20260928",
+    "model": "mlx-community/K2-Horizon-7B-oQ6e at 2cca82ec88e24bd5fc264e4bcd29922182c8f62f; two weight files matched publisher SHA256 values",
+    "runtime": "Publisher oMLX 0.7.0rc1 private app image, GitHub release SHA256 82c1ea4d882153bb2da5cd2793e950620b2d2eb81b2e90695272e878be79b83a, isolated HOME and port 8001; owner 0.6.4/9B port 8000 untouched",
+    "configuration": "14 GiB process ceiling, host warning abort, at most 256 MiB swap growth, high reasoning, temperature 1.0, top_p 0.95, 8192 output-token cap. This is below the model publisher's >=32768 output-token recommendation and is a KRYN-fit screen, not a fair publisher-benchmark reproduction.",
+    "smoke": "A user-only local request returned OK. oMLX logged an internal chat-template capability-probe error but still returned HTTP 200. A first larger request was operator-interrupted before completion; it is not a model-quality outcome.",
+    "task12_result": "HTTP 200, stop, 1387 prompt tokens, 3614 completion tokens, 64.92 server-reported seconds. The returned unified diff was corrupt (git apply --check failed at line 22). Source inspection found DOM-element join into innerHTML, which would render [object HTMLLIElement], and continued ID-sentinel POST/PATCH selection rather than explicit edit state. No product/browser acceptance attempt was made on that unapplicable diff.",
+    "resources": "119 samples, normal host pressure, zero swap growth, sampled process footprint peak 10,654,047,072 bytes on battery. These short samples do not establish long-context or sustained reliability.",
+    "decision": "Reject K2 as a default or alternate installed model on current evidence. A publisher benchmark and nominal 512K context do not establish KRYN coding/UI quality."
+  },
+  "open_gates": [
+    "fresh model-produced coding/UI task with complete independent browser and source acceptance",
+    "truthful multi-compaction and fresh-session restart on that task",
+    "matched useful context-tier comparison and sustained successful active work",
+    "clean owner install and rollback on the eventual candidate"
+  ]
+}
