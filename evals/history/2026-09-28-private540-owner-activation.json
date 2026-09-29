@@ -1,0 +1,13 @@
+{
+  "kind": "owner private candidate activation and narrow smoke",
+  "date": "2026-09-28",
+  "source_revision": "540cade2aa28785506cb5e4204f3bf7778000fc5",
+  "public_release": false,
+  "installed_version": "0.1.10",
+  "candidate_wheel_sha256": "a68aa4baedc52f95c855109658d8853d06e4761f6bd1dae93f2010f40524a000",
+  "local_checks": "make check passed: 193 Python tests, 72 Node tests, native trial self-check, frozen-suite verify and 18 eval selftests. make package-smoke passed from a clean tree. GitHub main Checks run 36527897243 passed.",
+  "activation": "Private same-version wheel passed --package-check and transactional owner install. The launcher then pointed at private-540cade-venv. Deep doctor verified every pinned model file and browser dependency, local routing, and both browser/search MCP connections. Optional improvement remained paused and reported benefit_proven=false. The incident command returned the latest 20 of 442 retained records with an explicit truncation marker.",
+  "native_smoke": "The installed product plugin, not a checkout snapshot, served a guarded Fast Ask turn in evals/runs/owner-private540-no-tools-20260928/evidence/installed-smoke. It returned exactly READY in 12.969 seconds. Driver exit 0; native generation, local routing, no-tools constraint and all nine acceptance checks passed. Seven resource samples had normal pressure, AC power, complete telemetry and zero swap growth. This is a no-tools inference smoke, not coding/UI acceptance or endurance.",
+  "recovery": "kryn rollback restored the previous private-cd1b launcher; activating the new wheel again succeeded. A fresh TUI launch started the owned oMLX server, reported OpenCode ready and 2/2 tools connected, and exited after Ctrl-C. Final doctor found a healthy idle 96K Qwen3.5-9B-6bit runtime, normal pressure, 0 active/waiting requests, and browser/search connected.",
+  "failed_or_unqualified_gates": "The independent fresh Task12 frozen grade remains FAIL; the stronger browser check, fresh Reviewer, truthful repeated compaction/restart, representative useful-context comparison, and successful 45-60-minute active endurance remain unqualified or failed. No public tag or release was created. The worker remains paused and scoped to disposable JSON CLI trials; no autonomous application-building gain is proven."
+}
