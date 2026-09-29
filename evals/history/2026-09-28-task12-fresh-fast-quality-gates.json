@@ -1,0 +1,21 @@
+{
+  "kind": "private fresh Fast-mode 9B Task12 quality-gate receipt",
+  "date": "2026-09-28",
+  "source_revision": "7346679b129aed4ff1d7d916ebd71c3a5df5d543",
+  "scope": "One fresh frozen Task12 fixture, a source-plugin candidate, the installed local Qwen3.5-9B-6bit runtime, native OpenCode Agent with its existing Fast variant, connected browser/search tools and a 20-minute guarded turn. No paid provider, alternate model, public release or owner installation change.",
+  "run": "evals/runs/owner-task12-fast-fresh-20260928",
+  "native": {
+    "evidence": "evals/runs/owner-task12-fast-fresh-20260928/evidence/fresh-fast",
+    "result": "Model completed in 1115.895 seconds with verified local generation routing and one top-level native session. It edited backend/UI code, used browser tools, wrote its own 13 additional unit tests, and declared the task complete.",
+    "resources": "533 guarded samples all had normal host pressure. Swap used decreased from 4396941312 to 4371775488 bytes; peak observed oMLX physical footprint was 17038875896 bytes. No guard or operator intervention. This is one 18.6-minute active trial, not a 45-60-minute endurance pass."
+  },
+  "independent_checks": {
+    "frozen_grade": "PARTIAL: the two automatic backend assertions passed, while seven manual workflow fields remain NOT_TESTED by the grader.",
+    "local_source": "15/15 fixture unittests and node --check web/app.js passed. git diff --check failed on two trailing-whitespace lines in web/app.js.",
+    "browser_revision_2": "Stopped after two security/text checks because it assumed Edit reused #entry-form; this fixture uses a separate edit form. That was a checker layout assumption, not a demonstrated app failure.",
+    "browser_revision_3": "The layout-neutral checker passed stored-markup safety, exact literal rendering, entity-like Edit form population and invalid-minutes feedback. It failed the existing recoverable-503 check after the manual retry returned 201: the create form stayed filled instead of clearing. Later browser assertions were not run. This reset is an independent UX acceptance expectation; TASK.md does not prescribe a specific form layout.",
+    "checker_controls": "Revision 3 passed all 11 checks on the prior operator DOM oracle and the earlier model-produced assisted Fast repair, while the known raw-JSON-attribute artifact still failed with a page JavaScript exception. The checker is satisfiable and still catches the source-review regression."
+  },
+  "workflow_and_claims": "The model neither delegated a fresh Reviewer nor crossed a native compaction or fresh process restart. Its HANDOFF.md asserted no unresolved work and no next action, called the app production-ready for evaluation, and claimed about 25 minutes of work despite the 18.6-minute measured turn. These completion claims are false against the requested workflow and independent checks.",
+  "decision": "Fresh autonomous Task12 application-quality, accurate audit, semantic continuity and truthful completion gates FAIL. The 9B runtime stayed within its guard and the backend automatic checks passed, but this run cannot qualify the product or a public release. Keep 96K experimental and the owner installation unchanged."
+}

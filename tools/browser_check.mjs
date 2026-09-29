@@ -57,7 +57,7 @@ if (values.help) {
 
 async function main() {
   const task = values.task ?? ['06', '08', '12'].find(id => values[`task${id}`]);
-  const report = { task, checkerRevision: task === '12' ? 2 : 1,
+  const report = { task, checkerRevision: task === '12' ? 3 : 1,
     kind: 'independent browser outcome verification', pass: false, checks: [],
     screenshots: [], pageErrors: [], console: [], network: [], failedRequests: [], manualRetryStarted: null,
     limitations: ['Not evidence of model MCP use, model vision, review, compaction, or long-running work.'] };
@@ -117,6 +117,20 @@ async function main() {
       for (const key of fields.filter(key => !edit || key !== 'id')) await form.locator(`[name="${key}"]`).fill(String(row[key]));
     };
     const formValues = () => form.evaluate(el => Object.fromEntries(new FormData(el)));
+    const populatedEditForm = async row => {
+      await page.waitForFunction(expected => [...document.forms].some(candidate =>
+        candidate.getClientRects().length &&
+        candidate.querySelector('[name="id"]')?.value === expected.id &&
+        candidate.querySelector('[name="project"]')?.value === expected.project), row);
+      for (const candidate of await page.locator('form').all()) {
+        if (await candidate.isVisible() &&
+            await candidate.locator('[name="id"]').count() &&
+            await candidate.locator('[name="project"]').count() &&
+            await candidate.locator('[name="id"]').inputValue() === row.id &&
+            await candidate.locator('[name="project"]').inputValue() === row.project) return candidate;
+      }
+      throw new Error('Edit did not populate a visible form with the exact row');
+    };
     const submit = async (method, status) => {
       const [response] = await Promise.all([page.waitForResponse(response => new URL(response.url()).pathname.startsWith('/api/entries')
         && response.request().method() === method), save.click()]);
@@ -156,7 +170,8 @@ async function main() {
         const item = page.locator('#entries > *').filter({ hasText: row.id });
         assert.equal(await item.count(), 1);
         await item.getByRole('button', { name: /^Edit$/i }).click();
-        assert.equal(await form.locator('[name="project"]').inputValue(), row.project,
+        const editForm = await populatedEditForm(row);
+        assert.equal(await editForm.locator('[name="project"]').inputValue(), row.project,
           'Edit changed or lost entity-like project text');
         await page.reload({ waitUntil: 'networkidle' });
         return { id: row.id, literalRoundTrip: true };
@@ -299,7 +314,15 @@ async function main() {
       });
       await check('persistent browser edit, exact filter and downloaded CSV round-trip', async () => {
         await page.locator('#entries > *').filter({ hasText: imported[0].id }).getByRole('button', { name: /^Edit$/i }).click();
-        const edited = { ...imported[0], minutes: 41 }; await fill(edited, true); await submit('PATCH', 200); await cleared();
+        const editForm = await populatedEditForm(imported[0]);
+        const edited = { ...imported[0], minutes: 41 };
+        for (const key of fields.filter(key => key !== 'id'))
+          await editForm.locator(`[name="${key}"]`).fill(String(edited[key]));
+        const [patch] = await Promise.all([page.waitForResponse(response =>
+          new URL(response.url()).pathname.startsWith('/api/entries/') && response.request().method() === 'PATCH'),
+          editForm.getByRole('button', { name: /^(Save|Update)$/i }).click()]);
+        assert.equal(patch.status(), 200);
+        if (await editForm.getAttribute('id') === 'entry-form') await cleared();
         await page.reload({ waitUntil: 'networkidle' }); assert.deepEqual((await apiRows()).find(row => row.id === edited.id), edited);
         await page.getByLabel('Filter project', { exact: true }).fill(edited.project);
         await page.getByRole('button', { name: /^Filter$/i }).click();
