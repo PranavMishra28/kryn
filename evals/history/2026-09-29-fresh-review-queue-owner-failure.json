@@ -1,0 +1,52 @@
+{
+  "kind": "fresh installed 9B coding/UI and independent review failure",
+  "date": "2026-09-29",
+  "setup": "Frozen review-queue task released to the owner-installed v0.2.0 OpenCode 2.0.10/oMLX 0.6.4 Qwen3.5-9B-6bit Default Agent at configured 96K context, 8192 output and 22 GiB process ceiling. One disposable Git workspace; no operator hints after launch; local browser/search ready; guarded AC-power run. The initial symlink workspace preflight was refused before any prompt, then moved to a canonical directory before this trial.",
+  "run": "evals/fresh_review_queue/runs/owner-fresh-review-20260929",
+  "native_session_id": "ses_f13ce6285ffevmXu97eWEOhQIt",
+  "driver": {
+    "stage": "owner-9b-default-fresh2",
+    "wall_seconds": 1551.673,
+    "tool_calls": 159,
+    "maximum_observed_single_prompt_tokens": 84688,
+    "maximum_process_physical_footprint_bytes": 18178448680,
+    "host_pressure": "normal in all 741 samples",
+    "swap_growth_bytes": 0,
+    "guard_abort": false,
+    "raw_driver_sha256": "3a61e33350a25bdd384f7cd48e265fef071436aa9b312cc845358ba77fbf665f",
+    "raw_events_sha256": "15b821e372cef16f9fe5ffdb84591c59b8bf4a2a808f7117eeb17dde8cf5c067"
+  },
+  "independent_grade": {
+    "status": "FAIL",
+    "source_preservation_and_original_tests": "PASS",
+    "new_review_browser": "PASS at 390x844 and 1280x800, including 503/manual retry, filters, reload, inert stored markup, console and network",
+    "original_entries_api_shape": "FAIL: /api/entries exposes a new reviewed field",
+    "task12_browser_regression": "FAIL: original Edit button is absent",
+    "additional_direct_api_probe": "GET /api/export returned 400 because a fifth reviewed field reached a four-column CSV writer; PATCH /api/entries/t1 closed the connection after a missing :reviewed SQLite binding",
+    "plan_before_edits": "PASS: PLAN.md write event preceded first native edit",
+    "fresh_readonly_review": "FAIL: no subagent call; AUDIT.md was written by the primary Agent",
+    "truthful_final_report": "FAIL: Agent stated all criteria met and backward compatibility despite the regressions",
+    "two_native_compactions": "FAIL: zero native compaction messages",
+    "real_process_restart": "FAIL: no resumed process in this task",
+    "active_endurance": "FAIL: 25.9 minutes, below the 45-minute lower bound"
+  },
+  "separate_readonly_reviewer": {
+    "stage": "owner-9b-reviewer-fresh",
+    "wall_seconds": 76.457,
+    "read_only_tool_calls": 11,
+    "caught": "PATCH update requires reviewed input absent from the original validated row; duplicate UI status was also noted",
+    "false_material_findings": [
+      "Recommended adding reviewed to the required original four-column CSV format rather than identifying the actual export 400",
+      "Called SQLite integer storage versus Python boolean a type bug despite correct JSON boolean conversion",
+      "Claimed the 503 browser state loses filter/action when the independent browser oracle passed that exact flow"
+    ],
+    "missed_material_findings": [
+      "Changed original /api/entries response shape",
+      "Missing original Edit control",
+      "Actual CSV export 400"
+    ],
+    "raw_driver_sha256": "80c74f03216c258b97eeefa6b0770cb2eb226735cc8ddfbdd66c08eac0692164",
+    "raw_events_sha256": "b1e933604a0e6b0d2a2546fcca82d386460f00496cc9b928904a89243b1eedcf"
+  },
+  "decision": "Fresh autonomous coding/UI, accurate review, truthful completion, continuity and long active endurance remain failed. The new review flow working alone cannot qualify the product. Keep v0.2.0 a supervised preview; preserve the exact local trial and oracle evidence."
+}

@@ -1,0 +1,51 @@
+{
+  "kind": "private deterministic checkpoint and visible acceptance-status candidate",
+  "date": "2026-09-29",
+  "mechanism": "The pinned OpenCode 2.0.10 session.compaction hook receives a bounded deterministic summary from KRYN instead of a model-written summary. It contains exact admitted user request excerpts with omission markers, observed check exits and provenance, verified native edit/write post-byte hashes, and current Git/file hashes with staleness markers. Completion and next action are explicitly unverified. A separate TUI footer shows Acceptance unverified for settled top-level Agent sessions and opens the existing session-specific report.",
+  "source_sha256": {
+    "tools/kryn_plugin.mjs": "a1ea05d63a816bb26bc6ee3028bec3ed6344318fec006f3d23f29d7816a81ec7",
+    "tools/kryn_tui.tsx": "37e89f502ac0766c329a3633fe95a898040fc56c24e71270aba472946c324f50"
+  },
+  "offline_checks": "57/57 KRYN plugin tests, 196/196 setup tests, complete make check, and private candidate package smoke passed. Focused fixture covers two compactions, process restart, changed-file staleness, bounded omissions, synthetic exclusion and verified edit bytes. These are mechanism checks, not installed UI/coding acceptance.",
+  "native_task09": {
+    "run": "evals/runs/owner-task09-deterministic-20260929",
+    "model": "owner-installed Qwen3.5-9B-6bit, Default reasoning, 96K configured context, 22 GiB process guard",
+    "ten_separately_released_turns_and_independent_checkpoints": "10/10 PASS",
+    "final_frozen_grade": "PASS after independent tool and row review",
+    "active_turn_wall_seconds": 384.441,
+    "maximum_observed_single_prompt_tokens": 16712,
+    "maximum_observed_process_footprint_bytes": 12562374144,
+    "host_pressure": "normal",
+    "swap_growth_bytes": 0,
+    "first_compaction": {
+      "after_turn": 5,
+      "message_id": "msg_0ec4d36b4001pazp3pMnYVOW5Y",
+      "duration_seconds": 0.24,
+      "model_wire_requests": 0,
+      "exact_user_requests_retained": 5,
+      "summary_completion": "unverified",
+      "summary_next_action": "unverified"
+    },
+    "second_compaction": {
+      "after_turn": 8,
+      "message_id": "msg_0ec4eeabb001GSUWCLtnAz1IVq",
+      "duration_seconds": 0.22,
+      "model_wire_requests": 0,
+      "exact_user_requests_retained": 8,
+      "prior_check_state": "stale",
+      "repository_changed_since_first_compaction": true,
+      "summary_completion": "unverified",
+      "summary_next_action": "unverified"
+    },
+    "later_native_processes": "Turn 6 after first and turns 9-10 after second compaction completed against the same native session; a new OpenCode server process was launched for every turn and compaction.",
+    "grade_sha256": "5bf7556ab30c8359ca040b30ca92fe1a3a8d685d6ce5ccfb206f481c4c1aa2f5"
+  },
+  "comparison": "The earlier paired installed baseline falsely called e05 and e08 pending after independent checkpoints showed both were already present. This candidate eliminated those false claims from its two checkpoint summaries and retained correct native continuations. The test does not establish causality for all task behavior or general coding/UI quality; every turn explicitly supplied the next row.",
+  "limits": [
+    "OpenCode also preserves a separate recent conversation segment that may contain false assistant prose; the hook controls only summary.",
+    "A bounded checkpoint cannot retain all historical details; omission markers point to native raw history.",
+    "Native TUI rendering/click and installed activation are not covered by this receipt.",
+    "Task09 used at most 16.7K in one prompt and does not qualify the useful 96K context tier or 45-60-minute coding/UI endurance."
+  ],
+  "decision": "Retain as a private candidate for packaging and owner activation/rollback checks. No new public release or production claim."
+}
