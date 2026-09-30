@@ -603,11 +603,11 @@ def show_loading(stage):
         print("◇ K R Y N  ·  " + stage, flush=True)
 
 
-def guarded_run(server, command, project, outcome, timeout=None, *, web=False, startup=None):
+def guarded_run(server, command, project, outcome, timeout=None, *, web=False, startup=None, warning_samples=2):
     """Monitor the native client; OpenCode still owns every agent/tool decision."""
-    # macOS warning pressure alone can persist while swap is flat. Keep it in
-    # outcome telemetry; critical pressure, swap growth and identity still stop.
-    guard = ResourceGuard(512 * 1024**2, None)
+    # Interactive calls record warning pressure without a warning-only stop;
+    # bench retains the strict cutoff. Critical pressure, swap and identity stop.
+    guard = ResourceGuard(512 * 1024**2, warning_samples)
     guard.pid = runtime_identity()
     child = None
     def sample():
@@ -914,7 +914,8 @@ def run(args, outcome):
                 mode = "Auto" if getattr(args, "auto", False) or permissions == "auto" else "Ask" if permissions == "ask" else "Editable"
                 startup = f"oMLX connected · OpenCode ready · {len(mcp) - len(unavailable)}/{len(mcp)} tools connected · Permissions {mode}"
             code = guarded_run(server, executable, project, outcome, timeout=1500 if command == "bench" else None,
-                               web=getattr(args, "web", False) is True, startup=startup)
+                               web=getattr(args, "web", False) is True, startup=startup,
+                               warning_samples=2 if command == "bench" else None)
             outcome["failure_code"] = "none" if code == 0 else "verification" if command == "bench" else "unknown"
             if code == 0 and command not in {"doctor", "bench"}:
                 pending_update = read_update_request(update_request)

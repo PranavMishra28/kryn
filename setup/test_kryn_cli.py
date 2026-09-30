@@ -68,6 +68,7 @@ class KrynChecks(unittest.TestCase):
 
     def guarded(self, samples, child, outcome=None, **options):
         outcome = {} if outcome is None else outcome
+        options.setdefault('warning_samples', None)
         server = Mock(env={}, directory=Path('/owned/project'), url='http://127.0.0.1:12345')
         with patch.object(localai, 'resources', side_effect=samples) as readings, \
              patch.object(localai, 'runtime_identity', return_value=42), \
@@ -157,6 +158,12 @@ class KrynChecks(unittest.TestCase):
         self.assertEqual(outcome['swap_growth_bytes'], 0)
         self.assertNotIn('failure_code', outcome)
         self.assertEqual(child.signals, [])
+
+    def test_strict_probe_still_stops_after_two_warnings(self):
+        child = Child([subprocess.TimeoutExpired('native', 2)] * 2 + [0])
+        with self.assertRaisesRegex(localai.ResourceStop, 'sustained host memory warning'):
+            self.guarded([sample()] * 3 + [sample(2)] * 2, child, warning_samples=2)
+        self.assertEqual(child.signals, [localai.signal.SIGINT])
 
     def test_warning_escalation_still_cancels_owned_child(self):
         for escalation in (sample(4), sample(2, swap=100+512*1024**2+1)):
