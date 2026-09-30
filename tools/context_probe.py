@@ -128,7 +128,7 @@ def telemetry_ready(sample):
 
 
 class ResourceGuard:
-    """Declared request-local cancellation gates; a brief warning still fails grading."""
+    """Request-local gates. None records warnings without warning-only cancellation."""
     def __init__(self, max_swap_growth, warning_samples, baseline_swap=None):
         self.max_swap_growth, self.warning_samples = max_swap_growth, warning_samples
         self.baseline_swap, self.pid, self.warnings = baseline_swap, None, 0
@@ -153,7 +153,7 @@ class ResourceGuard:
                 self.reason = "critical host memory pressure"
             elif swap - self.baseline_swap > self.max_swap_growth:
                 self.reason = "whole-probe swap growth exceeded the declared budget"
-            elif self.warnings >= self.warning_samples:
+            elif self.warning_samples is not None and self.warnings >= self.warning_samples:
                 self.reason = "sustained host memory warning"
         return self.reason
 

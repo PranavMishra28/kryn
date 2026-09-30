@@ -68,6 +68,7 @@ class KrynChecks(unittest.TestCase):
 
     def guarded(self, samples, child, outcome=None, **options):
         outcome = {} if outcome is None else outcome
+        options.setdefault('warning_samples', None)
         server = Mock(env={}, directory=Path('/owned/project'), url='http://127.0.0.1:12345')
         with patch.object(localai, 'resources', side_effect=samples) as readings, \
              patch.object(localai, 'runtime_identity', return_value=42), \
@@ -98,6 +99,12 @@ class KrynChecks(unittest.TestCase):
                 localai.guarded_run(Mock(), ['native'], Path('/owned'), {}, startup='ready')
             popen.assert_not_called()
             banner.assert_not_called()
+
+    def test_daily_warning_preflight_can_start_without_swap_growth(self):
+        code, outcome, _, _, popen, _ = self.guarded([sample(2)] * 4, Child([0]))
+        self.assertEqual(code, 0)
+        self.assertEqual(outcome['swap_growth_bytes'], 0)
+        popen.assert_called_once()
 
     def test_startup_header_only_in_interactive_terminals(self):
         class Terminal(io.StringIO):
@@ -137,7 +144,7 @@ class KrynChecks(unittest.TestCase):
         interrupt.assert_called_once()
 
     def test_each_guard_gate_cancels_owned_child(self):
-        cases = ([sample(2), sample(2)], [sample(4)], [{}], [sample(None)], [sample(pid=99)],
+        cases = ([sample(4)], [{}], [sample(None)], [sample(pid=99)],
                  [sample(swap=100+512*1024**2+1)])
         for after in cases:
             child = Child([subprocess.TimeoutExpired('native', 2)] * len(after) + [0])
@@ -149,13 +156,32 @@ class KrynChecks(unittest.TestCase):
             self.assertEqual(child.signals, [localai.signal.SIGINT])
             self.assertEqual(child.poll(), 0)
 
-    def test_single_warning_resets(self):
-        child = Child([subprocess.TimeoutExpired('native', 2), 0])
-        code, outcome, *_ = self.guarded([sample()] * 3 + [sample(2), sample()], child)
+    def test_stable_warning_does_not_interrupt_daily_work(self):
+        child = Child([subprocess.TimeoutExpired('native', 2)] * 4 + [0])
+        code, outcome, *_ = self.guarded([sample()] * 3 + [sample(2)] * 5, child)
         self.assertEqual(code, 0)
-        self.assertEqual(outcome['pressure_warning_samples'], 1)
+        self.assertEqual(outcome['pressure_warning_samples'], 5)
+        self.assertEqual(outcome['swap_growth_bytes'], 0)
+        self.assertNotIn('failure_code', outcome)
+        self.assertEqual(child.signals, [])
 
-    def test_exact_swap_budget_allowed_and_warning_count_resets(self):
+    def test_strict_probe_still_stops_after_two_warnings(self):
+        child = Child([subprocess.TimeoutExpired('native', 2)] * 2 + [0])
+        with self.assertRaisesRegex(localai.ResourceStop, 'sustained host memory warning'):
+            self.guarded([sample()] * 3 + [sample(2)] * 2, child, warning_samples=2)
+        self.assertEqual(child.signals, [localai.signal.SIGINT])
+
+    def test_warning_escalation_still_cancels_owned_child(self):
+        for escalation in (sample(4), sample(2, swap=100+512*1024**2+1)):
+            child = Child([subprocess.TimeoutExpired('native', 2)] * 3 + [0])
+            outcome = {}
+            with self.subTest(escalation=escalation), self.assertRaises(localai.ResourceStop):
+                self.guarded([sample()] * 3 + [sample(2)] * 2 + [escalation], child, outcome)
+            self.assertEqual(outcome['failure_code'], 'resource')
+            self.assertEqual(outcome['interventions'], 1)
+            self.assertEqual(child.signals, [localai.signal.SIGINT])
+
+    def test_exact_swap_budget_allowed_with_warnings(self):
         after = [sample(2), sample(), sample(2), sample(swap=100+512*1024**2)]
         child = Child([subprocess.TimeoutExpired('native', 2)] * 3 + [0])
         code, outcome, *_ = self.guarded([sample()] * 3 + after, child)
