@@ -1,0 +1,14 @@
+{
+  "kind": "same-owner private quality-loop guard activation",
+  "date": "2026-09-29",
+  "source_revision": "394d019af6f275f75ee76358d3f0add3a4a2117d",
+  "version": "0.2.0 private build; no public release, tag or version bump",
+  "wheel_sha256": "2f789e880268d4f255b9ff606371fccea4e5d53df55170d4c10618bc28259a92",
+  "active_python": "~/Library/Application Support/LocalAI/private-builds/394d019-20260929/venv/bin/python",
+  "source_checks": "make check passed: 196 Python tests, 78 JavaScript tests, native-trial self-check, frozen suite verification and browser-oracle self-check. Clean-source make package-smoke and GitHub Checks run 36649017439 passed.",
+  "activation": "Durable wheel passed isolated package validation and same-owner transactional installation. Active package receipt names source 394d019. Existing saved sessions and the 9B/96K/22 GiB profile were retained.",
+  "installed_checks": "kryn doctor --deep passed full model and browser file hashing, local routing, connected browser/search and normal host pressure. A guarded installed no-tools native Agent turn returned exactly READY in 13.108 seconds with verified local routing, no tool calls, no swap growth and no pressure warnings.",
+  "smoke_driver_sha256": "2a5525568d2faa1878137d6419ef1951c83cb1484c21e369cd05bd144ea0672b",
+  "limits": "No rollback/reactivation was run for this exact build. The smoke did not exercise the new denial loop through a live model, coding/UI acceptance, Reviewer accuracy, native compaction or sustained active work. Those product gates remain failed.",
+  "decision": "Keep this private build installed for supervised use. The user does not need to reinstall. Keep public releases paused."
+}
