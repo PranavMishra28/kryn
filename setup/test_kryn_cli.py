@@ -100,6 +100,12 @@ class KrynChecks(unittest.TestCase):
             popen.assert_not_called()
             banner.assert_not_called()
 
+    def test_daily_warning_preflight_can_start_without_swap_growth(self):
+        code, outcome, _, _, popen, _ = self.guarded([sample(2)] * 4, Child([0]))
+        self.assertEqual(code, 0)
+        self.assertEqual(outcome['swap_growth_bytes'], 0)
+        popen.assert_called_once()
+
     def test_startup_header_only_in_interactive_terminals(self):
         class Terminal(io.StringIO):
             def isatty(self): return True

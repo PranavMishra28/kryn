@@ -636,7 +636,8 @@ def guarded_run(server, command, project, outcome, timeout=None, *, web=False, s
         return value
     try:
         for index in range(3):
-            if sample().get("pressure_level") != 1:
+            allowed = {1, 2} if warning_samples is None else {1}
+            if sample().get("pressure_level") not in allowed:
                 raise ResourceStop("Resource preflight needs three consecutive green samples; no generation started."
                                    " Let memory pressure settle, then run kryn --continue.")
             if index < 2:
