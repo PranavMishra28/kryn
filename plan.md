@@ -1,4 +1,6 @@
-# KRYN current status — 29 September 2026
+# KRYN current status — 30 September 2026
+
+The current source removes the redundant `/deliver` and `/research` commands. Plan keeps read-only source research with the selected model and effort; Agent accepts implementation requests directly. `/call TASK` routes one bounded General child, limited to 16 model steps with no child delegation. The owned-config validator checks that bound and the command template. [The comparison protocol](docs/evaluation.md) separates model, context, harness and provider changes without altering the frozen suite. Source checks and candidate package smoke pass; installed command behavior and any model-quality gain remain to be measured. Public releases and version bumps remain paused.
 
 The [fresh installed 9B review-queue trial](evals/history/2026-09-29-fresh-review-queue-owner-failure.json) ran 25.9 minutes with normal host pressure, no swap growth and an 84.7K-token maximum observed prompt. Its new review UI passed the independent narrow browser flow, but the original entries API, CSV export, PATCH and Edit behavior regressed. The Agent claimed full backward compatibility anyway; a separate read-only Reviewer missed material regressions and invented findings. **Fresh autonomous coding/UI, accurate review, truthful completion, and active endurance still fail.**
 

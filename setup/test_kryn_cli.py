@@ -542,8 +542,8 @@ class KrynChecks(unittest.TestCase):
             template['agents'].pop('agent')
             template['agents'].pop('ask')
             template['agents']['build'].pop('hidden')
-            for name in ('deliver', 'handoff'):
-                template['commands'][name]['agent'] = 'build'
+            template['commands'].pop('call')
+            template['commands']['handoff']['agent'] = 'build'
             (installed / 'setup/opencode.template.json').write_text(json.dumps(template))
             (installed / 'setup/install-profile.json').write_bytes((localai.PROJECT / 'setup/accepted-profile.json').read_bytes())
             with patch.object(localai, 'product_plugin_files', return_value={'server.js': b'legacy'}):

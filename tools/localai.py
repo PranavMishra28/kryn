@@ -66,8 +66,7 @@ Inside the terminal interface:
   /status                     Inspect native tool and service status
   /report                     Inspect the latest project session's evidence
   /share                      Open a local session export (no public link in OpenCode V2)
-  /deliver your task          Build a small milestone and verify it in Agent
-  /research your topic        Search primary sources with citations
+  /call TASK                  Run one bounded General child (16 model steps)
   /audit                      Request a fresh read-only review
   /handoff                    Summarize work, checks and next steps
   Ctrl+P                      Search the full native command palette
@@ -207,10 +206,10 @@ def validate_owned_config(config, project=None):
                     f"Expected release model reference for {section}/{name}")
             if section == "agents":
                 require(all(config[section][name].get(key) == item.get(key)
-                            for key in ("mode", "hidden", "permissions", "system")),
+                            for key in ("mode", "hidden", "permissions", "system", "steps")),
                         f"Expected release permissions and visibility for {section}/{name}")
             if section == "commands":
-                require(all(config[section][name].get(key) == item.get(key) for key in ("agent", "subagent")),
+                require(all(config[section][name].get(key) == item.get(key) for key in ("agent", "subagent", "template")),
                         f"Expected release command routing for {name}")
 
 
@@ -469,7 +468,7 @@ def validate_inventory(inventory):
     for name, item in expected_profile["commands"].items():
         require(same_reference(commands.get(name, {}).get("model"), item.get("model")),
                 f"Effective command {name} differs from this release's model reference")
-        require(all(commands[name].get(key) == item.get(key) for key in ("agent", "subagent")),
+        require(all(commands[name].get(key) == item.get(key) for key in ("agent", "subagent", "template")),
                 f"Effective command {name} differs from this release's routing")
 
 

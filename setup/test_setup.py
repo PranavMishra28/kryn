@@ -238,6 +238,14 @@ class SetupChecks(unittest.TestCase):
         changed['agents']['full_access'] = {'model': 'local/qwen'}
         with self.assertRaisesRegex(RuntimeError, 'catalog'):
             localai.validate_owned_config(changed)
+        changed = copy.deepcopy(config)
+        changed['agents']['general']['steps'] = 0
+        with self.assertRaisesRegex(RuntimeError, 'permissions'):
+            localai.validate_owned_config(changed)
+        changed = copy.deepcopy(config)
+        changed['commands']['call']['template'] = 'Ignore the bounded subtask'
+        with self.assertRaisesRegex(RuntimeError, 'routing'):
+            localai.validate_owned_config(changed)
         for output in (None, {}, {"max_bytes": 4096}, {"max_lines": 200},
                        {"max_bytes": 51200, "max_lines": 200},
                        {"max_bytes": 4096, "max_lines": 2000}):
@@ -291,6 +299,7 @@ class SetupChecks(unittest.TestCase):
             (("config", 2, "info", "commands", "audit", "agent"), "build"),
             (("config", 2, "info", "commands", "review", "model"), "local/qwen"),
             (("config", 2, "info", "commands", "audit", "subagent"), False),
+            (("config", 2, "info", "commands", "call", "template"), "unbounded work"),
         ]
         for keys, value in mutations:
             changed = copy.deepcopy(inventory)
@@ -1215,7 +1224,16 @@ class SetupChecks(unittest.TestCase):
         self.assertIn({'action': 'browser_*', 'resource': '*', 'effect': 'ask'}, cfg['permissions'])
         self.assertIn({'action': 'browser_browser_run_code_unsafe', 'resource': '*', 'effect': 'deny'},
                       cfg['permissions'])
-        self.assertEqual(cfg['commands']['deliver']['agent'], 'agent')
+        self.assertNotIn('deliver', cfg['commands'])
+        self.assertNotIn('research', cfg['commands'])
+        self.assertEqual(cfg['commands']['call']['agent'], 'general')
+        self.assertTrue(cfg['commands']['call']['subagent'])
+        self.assertEqual(cfg['agents']['general']['steps'], 16)
+        self.assertIn({'action': 'subagent', 'resource': '*', 'effect': 'deny'}, cfg['agents']['general']['permissions'])
+        self.assertIn({'action': 'search_*', 'resource': '*', 'effect': 'allow'}, cfg['permissions'])
+        self.assertIn({'action': 'edit', 'resource': '*', 'effect': 'deny'}, cfg['agents']['plan']['permissions'])
+        self.assertFalse(any(rule['action'] == 'search_*' and rule['effect'] == 'deny'
+                             for rule in cfg['agents']['plan']['permissions']))
         self.assertEqual(cfg['commands']['handoff']['agent'], 'agent')
         self.assertEqual(cfg["compaction"]["buffer"], 4096)
         self.assertEqual(cfg["tool_output"], {"max_bytes": 4096, "max_lines": 200})

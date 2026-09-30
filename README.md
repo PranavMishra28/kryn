@@ -9,7 +9,7 @@ A coding workspace for Apple Silicon: OpenCode's terminal and browser interfaces
 | [Use KRYN](docs/usage.md) | Modes, permissions, models, terminal/GUI, sessions, diagnostics and recovery |
 | [Current status](plan.md) | Active gates, exact evidence and next checks |
 | [Develop KRYN](CONTRIBUTING.md) · [Repository map](AGENTS.md) | Owning layers, focused checks and package smoke |
-| [Evaluation contracts](evals/README.md) · [External Requests](docs/external-requests.md) | Frozen checks and independent acceptance requirements |
+| [Evaluation contracts](evals/README.md) · [Comparison protocol](docs/evaluation.md) | Frozen checks, model decisions and independent acceptance requirements |
 | [Security](SECURITY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [Changelog](CHANGELOG.md) | Trust boundaries, distribution and changes |
 
 ## Quick start
@@ -20,7 +20,7 @@ From your project folder in Terminal:
 cd "/absolute/path/to/your/project" && kryn
 ```
 
-Type a request and press Enter. New sessions use **Agent**; **Ctrl+X**, then **A** chooses Ask, Plan or Agent. **Ctrl+T** cycles Default (bounded thinking) and Fast for local Qwen. **Ctrl+P** opens the command palette. Agent can delegate a foreground Explore, Browse or Reviewer child; local generations run one at a time to protect memory. Use `/models` for native provider selection, `/settings` for permissions and display, `/report` for observed session evidence, `/sessions` to resume, and `/exit` to leave. `kryn controls` shows an offline reference.
+Type a request and press Enter. New sessions use **Agent**; **Ctrl+X**, then **A** chooses Ask, Plan or Agent. Plan handles research with the selected model and effort. **Ctrl+T** cycles Default (bounded thinking) and Fast for local Qwen. **Ctrl+P** opens the command palette. Agent can delegate Explore, Browse or Reviewer work; `/call TASK` runs one bounded General child. Local generations run one at a time to protect memory. Use `/models` for native provider selection, `/settings` for permissions and display, `/report` for observed session evidence, `/sessions` to resume, and `/exit` to leave. `kryn controls` shows an offline reference.
 
 Review permission prompts and generated changes. Explicit `kryn --auto` accepts all native requests not denied, including browser/network actions; see [permission scope](docs/usage.md#models-and-providers). `kryn --web` opens the companion GUI; `/web` displays its temporary credentials. `kryn --continue` resumes from the same project. Saved sessions remain on disk; compaction summaries can be inaccurate.
 

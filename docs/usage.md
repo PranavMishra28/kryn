@@ -34,10 +34,10 @@ Press **Ctrl+X**, release it, then press **A** to choose an agent. Use the arrow
 | Mode | Use it for |
 |---|---|
 | **Ask** | Inspect and answer using read and search tools, without edits or commands. |
-| **Plan** | Inspect code and produce an actionable plan; only native OpenCode plan files may be written. |
+| **Plan** | Inspect code, research current sources and produce an actionable plan; only native OpenCode plan files may be written. |
 | **Agent** | Edit code, run approved commands and use browser tools to verify rendered results; thinking on by default. |
 
-Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the visible primary choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. The local Qwen default uses bounded thinking; choose Fast when you want it. Browser and review work remain available through child agents and `/review` or `/audit`, without adding picker modes. Old saved Build/Audit sessions retain their native IDs; choose Agent for new coding work.
+Agent roles and reasoning effort are separate. **Ask/Plan/Agent** are the visible primary choices; **Ctrl+T** cycles effort, and **`/effort`** opens the variant picker. Plan uses the selected model and effort; choose Default for local Qwen's bounded thinking when researching or planning. Agent accepts a task directly and works toward its acceptance checks. Browser and review work remain available through child agents and `/review` or `/audit`, without adding picker modes. Old saved Build/Audit sessions retain their native IDs; choose Agent for new coding work.
 
 | Choice in OpenCode | Actual model behavior | Use |
 |---|---|---|
@@ -83,9 +83,8 @@ Type these commands **inside KRYN**, then press Enter:
 | `/report` | Inspect machine-owned evidence for the latest project session; execution success is not task acceptance. |
 | `/update` | Check published KRYN releases; review the exact version/commit and choose Update and restart or Later. |
 | `/share` | Open OpenCode's local session export. V2 cannot create a public share link; inspect the export before sending it. |
-| `/deliver your task` | Request a small runnable milestone with explicit acceptance checks. |
+| `/call TASK` | From Agent, run one bounded General child for a specific coding or investigation subtask. The child has at most 16 model steps and cannot delegate again; it returns its result to the parent. Local inference remains serialized. |
 | `/review` or `/audit` | Run a bounded read-only Reviewer child; your current mode stays selected. |
-| `/research your topic` | Research a topic with search and source links. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
 | `/sessions` | Choose a saved session to resume. Relaunch from the same project first. |
 | `/exit` | Close the terminal interface and return to your shell. |

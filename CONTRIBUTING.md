@@ -17,6 +17,7 @@ From the repository root:
 | `kryn doctor` | Inspect an installed copy on a supported Mac. `kryn doctor --deep` also hashes model and browser files. |
 
 `make check` is offline and safe for CI. Live evaluations require an installed KRYN and an independently reviewed run; follow [evals/README.md](evals/README.md) and keep private transcripts out of Git. Do not refresh `evals/frozen.sha256.json` to make a candidate pass. Historical failures belong in `evals/history/`.
+For matched model, context, provider or harness comparisons, use the [evaluation protocol](docs/evaluation.md) and change one factor at a time.
 The evaluation runner, browser checker and frozen fixtures live in this source repository; they are not installed with the user wheel.
 
 Use [current gates](plan.md) for decisions and the [historical evidence index](docs/history.md) for primary receipts and immutable earlier narratives. The optional [External Requests runbook](docs/external-requests.md) is separate from the installed package.
