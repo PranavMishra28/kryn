@@ -137,7 +137,7 @@ class KrynChecks(unittest.TestCase):
         interrupt.assert_called_once()
 
     def test_each_guard_gate_cancels_owned_child(self):
-        cases = ([sample(2), sample(2)], [sample(4)], [{}], [sample(None)], [sample(pid=99)],
+        cases = ([sample(4)], [{}], [sample(None)], [sample(pid=99)],
                  [sample(swap=100+512*1024**2+1)])
         for after in cases:
             child = Child([subprocess.TimeoutExpired('native', 2)] * len(after) + [0])
@@ -149,13 +149,26 @@ class KrynChecks(unittest.TestCase):
             self.assertEqual(child.signals, [localai.signal.SIGINT])
             self.assertEqual(child.poll(), 0)
 
-    def test_single_warning_resets(self):
-        child = Child([subprocess.TimeoutExpired('native', 2), 0])
-        code, outcome, *_ = self.guarded([sample()] * 3 + [sample(2), sample()], child)
+    def test_stable_warning_does_not_interrupt_daily_work(self):
+        child = Child([subprocess.TimeoutExpired('native', 2)] * 4 + [0])
+        code, outcome, *_ = self.guarded([sample()] * 3 + [sample(2)] * 5, child)
         self.assertEqual(code, 0)
-        self.assertEqual(outcome['pressure_warning_samples'], 1)
+        self.assertEqual(outcome['pressure_warning_samples'], 5)
+        self.assertEqual(outcome['swap_growth_bytes'], 0)
+        self.assertNotIn('failure_code', outcome)
+        self.assertEqual(child.signals, [])
 
-    def test_exact_swap_budget_allowed_and_warning_count_resets(self):
+    def test_warning_escalation_still_cancels_owned_child(self):
+        for escalation in (sample(4), sample(2, swap=100+512*1024**2+1)):
+            child = Child([subprocess.TimeoutExpired('native', 2)] * 3 + [0])
+            outcome = {}
+            with self.subTest(escalation=escalation), self.assertRaises(localai.ResourceStop):
+                self.guarded([sample()] * 3 + [sample(2)] * 2 + [escalation], child, outcome)
+            self.assertEqual(outcome['failure_code'], 'resource')
+            self.assertEqual(outcome['interventions'], 1)
+            self.assertEqual(child.signals, [localai.signal.SIGINT])
+
+    def test_exact_swap_budget_allowed_with_warnings(self):
         after = [sample(2), sample(), sample(2), sample(swap=100+512*1024**2)]
         child = Child([subprocess.TimeoutExpired('native', 2)] * 3 + [0])
         code, outcome, *_ = self.guarded([sample()] * 3 + after, child)

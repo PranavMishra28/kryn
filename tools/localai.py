@@ -605,7 +605,9 @@ def show_loading(stage):
 
 def guarded_run(server, command, project, outcome, timeout=None, *, web=False, startup=None):
     """Monitor the native client; OpenCode still owns every agent/tool decision."""
-    guard = ResourceGuard(512 * 1024**2, 2)
+    # macOS warning pressure alone can persist while swap is flat. Keep it in
+    # outcome telemetry; critical pressure, swap growth and identity still stop.
+    guard = ResourceGuard(512 * 1024**2, None)
     guard.pid = runtime_identity()
     child = None
     def sample():
