@@ -537,7 +537,7 @@ export default {
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
-        verification: verificationLedger(), previousTracker: null, shellRepeat: null, checkpointRepo: null,
+        verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
         recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map() };
@@ -631,6 +631,7 @@ export default {
         const triggers = [state === 'failed' ? 'execution_failed' : null,
           state === 'incomplete' && (interrupted || t.tool_calls) ? 'execution_incomplete' : null,
           t.tool_errors ? 'tool_error' : null, t.check_failures ? 'check_failed' : null,
+          item.maskedCheckDenials >= 3 ? 'masked_check_denial_loop' : null,
           item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null]
           .filter(Boolean);
         if (triggers.length) {
@@ -667,6 +668,7 @@ export default {
       item.pendingReads.clear();
       item.pendingEdits.clear();
       item.shellRepeat = null;
+      item.maskedCheckDenials = 0;
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
       const text = event.prompt?.text;
@@ -886,8 +888,11 @@ export default {
         throw new Error('KRYN managed read-only role cannot execute this tool');
       if (event.agent === 'browse' && event.tool.startsWith('browser_') && !BROWSER_SET.has(event.tool))
         throw new Error('KRYN Browse tool is outside the qualified surface');
-      if (event.tool === 'shell' && masksCheckFailure(event.input?.command))
-        throw new Error('KRYN refuses a check command whose fallback or output pipeline hides failure. Run the check by itself, then inspect its exit status.');
+      if (event.tool === 'shell' && masksCheckFailure(event.input?.command)) {
+        item.maskedCheckDenials = Math.min(3, item.maskedCheckDenials + 1);
+        throw new Error('KRYN refuses a check command whose fallback or output pipeline hides failure. Run the check by itself, then inspect its exit status.' +
+          (item.maskedCheckDenials === 3 ? ' Repeated blocked checks will end this Agent turn.' : ''));
+      }
       // A discovered PID may belong to an operator-owned fixture.
       if (event.tool === 'shell' && typeof event.input?.command === 'string' &&
           directProcessSignal(event.input.command))
@@ -1033,7 +1038,8 @@ export default {
         t.tool_errors = count(t.tool_errors + 1);
       if (event.tool === 'shell' && event.status === 'completed' && isCheck(event.input?.command)) {
         const output = event.result?.output;
-        if (typeof output?.exit === 'number' && output.status !== 'running') {
+        if (Number.isInteger(output?.exit) && output.status !== 'running') {
+          item.maskedCheckDenials = 0;
           if (output.exit === 0 && !output.timeout) t.check_passes = count(t.check_passes + 1);
           else t.check_failures = count(t.check_failures + 1);
         }
@@ -1064,6 +1070,15 @@ export default {
         }
         if (event.type === 'session.step.ended') {
           const item = start(id, event.id);
+          if (item.maskedCheckDenials >= 3 && !item.stopped) {
+            const epoch = item.promptEpoch;
+            const info = await ctx.session.get({ sessionID: id });
+            if (!controller.signal.aborted && epoch === item.promptEpoch &&
+                info.id === id && AGENT_ROLES.has(info.agent) && sameLocation(info.location)) {
+              item.stopped = true;
+              await ctx.session.interrupt({ sessionID: id });
+            }
+          }
           const repeat = item.shellRepeat;
           if (repeat?.blocked >= 2 && !item.stopped) {
             const epoch = item.promptEpoch;

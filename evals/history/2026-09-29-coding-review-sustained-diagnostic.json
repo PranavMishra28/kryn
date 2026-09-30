@@ -1,0 +1,54 @@
+{
+  "kind": "private coding, Reviewer and sustained-workflow diagnostic",
+  "date": "2026-09-29",
+  "baseline": "The frozen fresh review-queue task failed original API, CSV, PATCH and Edit compatibility despite a narrow new-review UI pass; see 2026-09-29-fresh-review-queue-owner-failure.json. The first regressions were introduced before context was full, so this is not evidence of a 96K overflow.",
+  "reviewer_trials": {
+    "default": {
+      "session": "ses_f1085c55cffexAM4kFRhwPczF6",
+      "wall_seconds": 143.812,
+      "tool_calls": 9,
+      "result": "Read task, implementation summary, production source and model-written tests. Found a real duplicate status label but missed the four material original-behavior regressions; also invented or overstated findings and concluded no regressions detected.",
+      "driver_sha256": "0f9e589ba6c7412725ad2b5c036d1d9ef8425c683e6262501cd2e4742c848460"
+    },
+    "higher_thinking_budget": {
+      "session": "ses_f10836583ffelTDOxVWLc1qtA0",
+      "budget_tokens": 6144,
+      "wall_seconds": 167.609,
+      "tool_calls": 18,
+      "result": "Read more source and reports but still missed all four material regressions and returned unrelated or incorrect findings. Increasing reasoning budget did not improve this case.",
+      "driver_sha256": "96d205ced9f381e2243b300b442ddc07cc1d2649163a1c9e411ab8b2fe73dceb"
+    }
+  },
+  "browser_trial": {
+    "session": "ses_f107fed79ffeSYRYaPD0TYcjLV",
+    "wall_seconds": 249.635,
+    "tool_calls": 48,
+    "result": "Detected missing Edit and export HTTP 400, but incorrectly passed exact entries API shape and inferred import success from visible controls without uploading a file. Browser-agent reports are observations, not independent acceptance.",
+    "driver_sha256": "b404a3fb55935b9834e7d2242299af7bdd18d27bdffaf0c87b1322f8f3f85cdc"
+  },
+  "test_first_trial": {
+    "wall_seconds": 451.349,
+    "status": "INCOMPLETE; operator stopped repeated different check commands whose fallback or pipeline hid failures",
+    "result": "The model-written preservation test failed the untouched baseline because its server readiness loop did not wait and its CSV assertion mishandled CRLF. Correcting those test-only bugs in a disposable copy made all three tests pass on baseline and fail on the known bad app. The model-generated test did not qualify unassisted.",
+    "driver_sha256": "d13a77c26c8dcb76b9ae9084758b39c8cf270dfaab33d9c86e92116752135a5a"
+  },
+  "staged_repair": {
+    "session": "ses_f106c0573ffeiQVnl7ri9Qo7Ox",
+    "setup": "Operator-supplied disposable three-case HTTP contract test, proven green on original fixture and red on failed artifact; candidate KRYN plugin; guarded local 9B; no browser tool in this scoped first stage.",
+    "wall_seconds": 313.795,
+    "native_completed": true,
+    "tool_calls": 44,
+    "independent_result": "Three contract, two original and twelve model-written review tests passed. Frozen API oracle passed 17 checks. Both browser oracles failed: review 503 had no new accessible status, and original Edit was absent. An additional independent review-then-PATCH probe showed PATCH reset review state to pending.",
+    "driver_sha256": "e92a2a7703da02ad848e6b2d0e56bde0deceaa000c92a254ef8b07ef798008fa"
+  },
+  "resumed_ui_repair": {
+    "setup": "New native server process resumed the same saved session with a fourth operator-supplied contract test for review state across PATCH, browser tools and candidate KRYN plugin.",
+    "wall_seconds": 419.078,
+    "status": "INCOMPLETE; operator stopped after repeated unsuccessful persistent-server launch attempts; no native browser acceptance or compaction occurred",
+    "independent_final": "Four contract, two original and twelve review tests passed; frozen API oracle passed 17 checks; review browser passed initial pending filter then failed accessible 503 feedback; Task12 browser passed nine preceding checks including Edit, both viewports, import and retry, then failed because two buttons had the exact accessible name Filter.",
+    "independent_report": "Private raw evidence: /private/tmp/kryn-contract-repair-candidate-20260929/evidence/independent-final/summary.json",
+    "driver_sha256": "4ca71db552e75b0046515feb4c73cacde6ddbe474e0948f1cdb8a4b4269deea0"
+  },
+  "product_fix": "KRYN now stops an Agent turn after three masked-check denials in one prompt, resets the counter after a completed standalone check or new prompt, and records the policy-loop trigger in a private incident. This bounds the observed waste without changing the model or Reviewer claims. A focused regression, 196 Python tests, 78 JavaScript tests, frozen-suite self-checks and candidate package smoke passed.",
+  "decision": "Autonomous coding/UI, Reviewer accuracy, and successful sustained-workflow gates remain FAIL. The provided-tests repair is assisted evidence only; the resumed turn did not finish, and there were no two native compactions or 45–60-minute successful active run. Keep releases and version bumps paused; do not infer frontier-equivalent quality."
+}

@@ -518,6 +518,36 @@ test('plain test output cannot hide a failed exit', async () => {
   } finally { await cleanup(); f.remove(); }
 });
 
+test('different masked checks stop one Agent turn unless a plain check runs', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  let serial = 0;
+  const blocked = command => f.call('tool.execute.before', {
+    sessionID: 'ses_1', agent: 'build', tool: 'shell', id: 'call_' + (++serial), input: { command } });
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.throws(() => blocked('python -m unittest | head'), /hides failure/);
+    assert.throws(() => blocked('python3 -m unittest || true'), /hides failure/);
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 0);
+    shellRun(f, 'python3 -m unittest test_existing', 'FAILED', ++serial, {}, true, 1);
+    for (const command of ['python -m unittest | tail', 'python3 -m unittest || echo failed'])
+      assert.throws(() => blocked(command), /hides failure/);
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 0, 'a completed standalone check resets the denial count');
+    assert.throws(() => blocked('pytest -q | head'), /end this Agent turn/);
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.deepEqual(f.interruptions, [{ sessionID: 'ses_1' }]);
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 1);
+    await f.emit('session.execution.interrupted');
+    assert.ok(f.read('incidents').some(x => x.triggers.includes('masked_check_denial_loop')));
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.throws(() => blocked('npm test || true'), /hides failure/);
+    await f.emit('session.step.ended', { finish: 'tool-calls' });
+    assert.equal(f.interruptions.length, 1, 'a new user turn resets the denial count');
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('an existing project file must be read in the current turn before native edit', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'data', 'endurance.csv');
