@@ -606,7 +606,7 @@
     "call": {
       "agent": "general",
       "subagent": true,
-      "description": "Run one bounded child task and return its checked result",
+      "description": "Run a coding-capable child, even from Ask or Plan",
       "template": "Complete only this subtask in the current project: $ARGUMENTS. Inspect relevant files first, make the smallest needed change, and run an appropriate check. Do not start another child, publish, release, or push. Return changed paths, exact check commands and results, and anything unfinished."
     },
     "review": {

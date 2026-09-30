@@ -1,5 +1,11 @@
 # KRYN evaluation and model decisions
 
+## Native stack decision
+
+OpenCode is the only agent harness: it owns sessions, Ask/Plan/Agent, model and effort selection, permission decisions, tools, background child sessions, [skills](https://opencode.ai/v2/docs/skills), [MCP servers](https://opencode.ai/v2/docs/mcp-servers), and [compaction](https://opencode.ai/v2/docs/compaction). The local provider sends OpenAI-compatible requests to oMLX, which owns model loading, inference, cache, and its process-memory guard. KRYN adds only the owned launch/install boundary, resource checks, bounded continuity and incident evidence. The configured `/call` and Reviewer/Browse children use [OpenCode's native agent and command mechanisms](https://opencode.ai/v2/docs/agents); they do not make one local model generate in parallel. Project skills and external providers remain OpenCode features, subject to the selected model, credentials, permissions and service availability.
+
+For a model or runtime upgrade, first prove that the same native tools work and the model finishes useful tasks under the Mac's host guard. Publisher benchmarks compare other quantizations, contexts and harnesses; they are candidate-selection hints, not KRYN acceptance. Do not add a second orchestrator, extra prompt rules, or speculative MCP servers to compensate for a failing model trial. Preserve the current daily profile until a challenger clears the gates below.
+
 The installed 9B/96K profile is the daily baseline, not a qualified frontier baseline. A model publisher's coding score, a configured context number, or a completed agent turn cannot establish KRYN task quality. Keep the [frozen TaskboardLite suite](../evals/README.md) and its SHA256 manifest unchanged; the [fresh review-queue task](../evals/fresh_review_queue/README.md) checks API preservation, browser behavior and long-workflow evidence outside the candidate workspace.
 
 ## Run a comparable trial

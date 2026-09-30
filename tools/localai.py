@@ -66,7 +66,7 @@ Inside the terminal interface:
   /status                     Inspect native tool and service status
   /report                     Inspect the latest project session's evidence
   /share                      Open a local session export (no public link in OpenCode V2)
-  /call TASK                  Run one bounded General child (16 model steps)
+  /call TASK                  Explicit coding child (16 steps; can edit from Ask/Plan)
   /audit                      Request a fresh read-only review
   /handoff                    Summarize work, checks and next steps
   Ctrl+P                      Search the full native command palette

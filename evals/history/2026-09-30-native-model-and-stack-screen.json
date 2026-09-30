@@ -1,0 +1,40 @@
+{
+  "kind": "private local-model and native OpenCode integration screen",
+  "date": "2026-09-30",
+  "release_status": "No public release, tag, version bump, or daily-model promotion.",
+  "stack_decision": "OpenCode 2.0.10 remains the sole agent harness; oMLX 0.6.4 remains the owned local inference service. KRYN keeps the thin launch, resource, continuity, and evidence boundary. The upstream OpenCode model/agent/command/skill/MCP/compaction features do not require a second orchestrator.",
+  "native_checks": {
+    "project_provider": "A disposable project opencode.json model appeared in native provider/model inventory alongside managed local/qwen; the owned inventory validator still passed. Custom-provider inference was not tested.",
+    "project_skill": "A disposable .agents/skills project skill appeared in native /api/skill inventory. Invocation quality was not tested.",
+    "call_from_plan": "A disposable native Plan session invoked /call, spawned a General child, and created a marker file while the parent stayed in Plan. /call is therefore explicitly coding-capable even from Ask or Plan; descriptions and controls now say so.",
+    "free_provider": "Earlier automated native OpenCode free-model probes returned HTTP 403; no paid route or credentials were added. Catalog presence is not usable fallback evidence."
+  },
+  "model_candidates": {
+    "qwen36_35b_oq3e": {
+      "source": "https://huggingface.co/Jundot/Qwen3.6-35B-A3B-oQ3e-mtp",
+      "revision": "9d5312516fc7fa473a28b9c7598d1c28a0f420a1",
+      "artifact": "/Users/pranav/Library/Application Support/LocalAI/experimental/models/Qwen3.6-35B-A3B-oQ3e-mtp",
+      "profile": "Isolated oMLX 0.6.4, 96K context, 8192 output, MTP off, 27 GiB process ceiling, guarded host-pressure stop.",
+      "protocol": "Cold 256-output smoke truncated thinking; a 2048-output retry passed stream and tool-call protocol. Repeated ALPHA/BRAVO/ALPHA answers were correct, but cache-hit telemetry was zero for that tiny probe.",
+      "task02": "evals/runs/model-screen-35b-20260930: native Agent finished in 80.764 s, 16 tool calls, no intervention; frozen code grade PASS; peak sampled lifetime process footprint 19.72 GiB, normal pressure, no swap growth.",
+      "task06_first": "evals/runs/model-screen-35b-ui-20260930: resource guard aborted at 27.401 s after two host-pressure warnings. Another unrelated memory-heavy process was present; this cannot rank UI quality.",
+      "task06_clean_retry": "evals/runs/model-screen-35b-ui-clean-20260930: host pressure remained normal and swap did not grow, but the native question asking about evaluator 503 injection was dismissed by the disposable driver. The turn did not complete. The question incorrectly offered to create the marker itself.",
+      "task06_evaluator_resume": "An operator created the frozen task's marker outside the model session. The resumed native session observed the controlled 503 and false success in its first implementation, but did not repair the promise chain. The CLI exited while the owned server session remained active; settlement failed after 354.433 s. The independent backend grade was PARTIAL because manual UI acceptance was not attested. Peak sampled lifetime process footprint 20.94 GiB, normal pressure, no swap growth.",
+      "decision": "Do not promote: clean host fit was better than the first abort suggested, but autonomous UI completion and settled-session gates failed."
+    },
+    "qwen36_35b_oq2": {
+      "source": "https://huggingface.co/Jundot/Qwen3.6-35B-A3B-oQ2",
+      "revision": "9c0b2f22c12a9f48f0af6aa042f3ad9baae154ed",
+      "artifact": "Screened at /private/tmp/kryn-model-screen-q2-20260930/models/Qwen3.6-35B-A3B-oQ2; weights removed after rejection to recover disk space. Source record and probe logs remain.",
+      "integrity": "Three weight shards and tokenizer were checked against publisher hashes; 13,102,377,044 downloaded bytes.",
+      "profile": "Isolated oMLX 0.6.4, 96K context, 8192 output, MTP off, 27 GiB process ceiling, guarded host-pressure stop.",
+      "protocol": "Two of three repeated smoke probes passed. In the failed probe, the model wrote JSON in prose instead of issuing the required function call; this is an agent-reliability strike, not a transport error.",
+      "task02": "evals/runs/model-screen-q2-20260930: native Agent finished in 70.656 s, 11 tool calls, no intervention; frozen code grade PASS; peak sampled lifetime process footprint 15.70 GiB, normal pressure, no swap growth.",
+      "task06": "evals/runs/model-screen-q2-ui-20260930: backend code grade PARTIAL pending manual checks, but the complete agent task failed. It created the evaluator's .fail-next marker itself three times, then spent a turn at the 8192-output-token cap without converging. The operator stopped it at 523.372 s after 76 tool calls; host pressure remained normal and swap did not grow.",
+      "decision": "Do not promote: a short coding win and lower memory footprint do not offset intermittent tool calling and failed independent UI procedure."
+    }
+  },
+  "baseline_comparison_limit": "The clean 9B Task02 run in evals/runs/model-screen-9b-clean2-20260930 eventually passed the frozen code grader but the operator stopped an unfinished Agent turn at 611.719 s after repeated wrong /workspace reads. It is a diagnostic comparison, not a matched statistically meaningful quality ranking. No 35B candidate passed a sustained coding/UI, multi-compaction, restart, and independent-review workflow.",
+  "upstream_candidates": "Qwen's unquantized 35B-A3B card advertises 35B total/3B active and 262K native context; its published scores do not measure these quantizations or KRYN. oMLX 0.7.0 and newer OpenCode builds exist, but neither was installed or qualified together with this model screen. Do not change runtime and model simultaneously without isolated rollback tests.",
+  "decision": "Keep the guarded Qwen3.5-9B-6bit 96K owner profile. Preserve raw ignored trial evidence and source revisions, keep the public release pause, and prioritize a completed independently checked UI/restart workflow before changing the default."
+}
