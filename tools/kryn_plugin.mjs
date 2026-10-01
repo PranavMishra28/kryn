@@ -336,6 +336,16 @@ function repoEvidence(directory) {
   } catch { return null; }
 }
 
+function repoFingerprint(directory) {
+  const snapshot = repoEvidence(directory);
+  if (snapshot === null) return null;
+  const evidence = JSON.parse(snapshot);
+  const files = [...evidence.changed_files, ...evidence.untracked_files];
+  return evidence.changed_files_truncated || evidence.untracked_files_truncated !== false ||
+    files.some(file => typeof file.sha256 !== 'string' || !HASH.test(file.sha256)) ?
+    null : sha(snapshot);
+}
+
 function reviewDiffEvidence(directory) {
   try {
     const diff = execFileSync('/usr/bin/git',
@@ -537,6 +547,7 @@ export default {
         throw new Error('KRYN saved session pin changed');
       const item = { key, native_session_id: id, pin: Object.freeze(pin), turn: undefined, checkpoint: null,
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
+        uiBrowserFingerprint: null,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
         verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
@@ -630,12 +641,21 @@ export default {
       if (!item?.turn) return;
       if (options.observe) {
         const t = item.turn;
+        const currentBrowserFingerprint = t.ui_edits && (t.browser_calls || t.browse_handoffs) ?
+          repoFingerprint(ctx.location.directory) : null;
         const triggers = [state === 'failed' ? 'execution_failed' : null,
           state === 'incomplete' && (interrupted || t.tool_calls) ? 'execution_incomplete' : null,
           t.tool_errors ? 'tool_error' : null, t.check_failures ? 'check_failed' : null,
           item.maskedCheckDenials >= 3 ? 'masked_check_denial_loop' : null,
           item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null,
-          t.ui_edits && !t.browser_calls && !t.browse_handoffs ? 'ui_browser_unverified' : null]
+          t.ui_edits && !t.browser_calls && !t.browse_handoffs ? 'ui_browser_unverified' : null,
+          t.ui_edits && (t.browser_calls || t.browse_handoffs) &&
+            (!item.uiBrowserFingerprint || !currentBrowserFingerprint) ?
+            'ui_browser_evidence_unavailable' : null,
+          t.ui_edits && (t.browser_calls || t.browse_handoffs) &&
+            item.uiBrowserFingerprint && currentBrowserFingerprint &&
+            item.uiBrowserFingerprint !== currentBrowserFingerprint ?
+            'ui_browser_stale' : null]
           .filter(Boolean);
         if (triggers.length) {
           writeJSON(path.join(folders.incidents, t.task_id + '.json'), {
@@ -668,6 +688,7 @@ export default {
       const item = session(event.sessionID);
       staleChecks(item); tracker(item);
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
+      item.uiBrowserFingerprint = null;
       item.recentReads.clear();
       item.pendingReads.clear();
       item.pendingEdits.clear();
@@ -993,13 +1014,18 @@ export default {
         item.turn.ui_edits = count(item.turn.ui_edits + 1);
         item.turn.browser_calls = 0;
         item.turn.browse_handoffs = 0;
+        item.uiBrowserFingerprint = null;
       }
       if (AGENT_ROLES.has(event.agent) && event.status === 'completed' &&
-          typeof event.tool === 'string' && event.tool.startsWith('browser_'))
+          typeof event.tool === 'string' && event.tool.startsWith('browser_')) {
         item.turn.browser_calls = count(item.turn.browser_calls + 1);
+        item.uiBrowserFingerprint = repoFingerprint(ctx.location.directory);
+      }
       if (AGENT_ROLES.has(event.agent) && event.status === 'completed' &&
-          event.tool === 'subagent' && event.input?.agent === 'browse')
+          event.tool === 'subagent' && event.input?.agent === 'browse') {
         item.turn.browse_handoffs = count(item.turn.browse_handoffs + 1);
+        item.uiBrowserFingerprint = repoFingerprint(ctx.location.directory);
+      }
       if (options.observe && event.status === 'completed' && ['edit', 'write'].includes(event.tool)) {
         const relative = verifiedEdit && path.relative(ctx.location.directory, verifiedEdit.file);
         retainEdit(item.anchors, relative && relative.length <= 512 ? {
