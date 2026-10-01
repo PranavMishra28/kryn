@@ -1,0 +1,59 @@
+{
+  "kind": "Materially different open-weight model screen in the normal occupied daily-use envelope",
+  "date_local": "2026-10-01",
+  "candidate": {
+    "repository": "mlx-community/Ministral-3-14B-Instruct-2512-4bit",
+    "revision": "95b6f345475c8c8c92b7959d02f4ad86d3ba8384",
+    "weights_sha256": {
+      "model-00001-of-00002.safetensors": "b51aeb985da636eadd3744ee1f53542303795447c138c20d18054eecf64f6413",
+      "model-00002-of-00002.safetensors": "a73d514a74619d6896a324b87addc76aca94f20dcf302632de44be2a443c5c94"
+    },
+    "source": "https://huggingface.co/mlx-community/Ministral-3-14B-Instruct-2512-4bit"
+  },
+  "control": "Clean main after the daily-envelope decision; pinned OpenCode 2.0.10; isolated oMLX 0.7.0; 49,152-token backend and Agent context, 8,192 output; full native browser/search and child tools; same 22-GiB process ceiling as the installed 9B; unchanged host-pressure and swap guard. AC power, ordinary user applications left open. No operator repair.",
+  "protocol": {
+    "result": "PASS",
+    "observed": "Correct 323 answer, structured sum_integers(23,19) tool call, and correct 42 after tool-result replay; streamed completions and finish reasons complete.",
+    "sampled_peak_physical_footprint_bytes": 9365462336,
+    "host_warning": false,
+    "swap_growth_bytes": 0
+  },
+  "frozen_task03": {
+    "run": "ministral14-task03-20261001",
+    "native_completed": true,
+    "routing_verified": true,
+    "independent_grade": "PASS: case-sensitive project filtering across report, CLI and HTTP; existing data/tests preserved",
+    "wall_seconds": 422.36,
+    "native_tool_calls": 32,
+    "sampled_peak_physical_footprint_bytes": 18594472264,
+    "host_warning": false,
+    "swap_growth_bytes": 0
+  },
+  "frozen_task06_plus_cancel_edit": {
+    "run": "ministral14-ui-20261001-01",
+    "native_completed": false,
+    "routing_verified": true,
+    "wall_seconds": 625.837,
+    "native_tool_calls": 80,
+    "resource_stop": "Sustained host memory warning under the unchanged guard; owned native sessions settled idle. Sampled swap growth 0; peak sampled listener physical footprint 19,840,213,344 bytes. This is a daily-use resource-fit failure, not a settled autonomous coding-quality verdict.",
+    "post_abort_independent_diagnostic": "Source/API, existing tests, JS syntax and diff hygiene passed; Task06 stored-markup browser check and Cancel Edit browser check failed. The separate Task06 suite grade remained PARTIAL, with browser/manual fields unqualified.",
+    "trace_observations": "Native explore and general child sessions ran. The Agent rewrote TASK.md and removed original task instructions, claimed Cancel Edit had been verified, misread a 503 page as expected behavior, and repeatedly launched a plain static server instead of the project API server. These are observed mistakes in an interrupted run, not a completed-run ranking."
+  },
+  "daily_decision": "Reject this 14B/49K profile as a sustained daily autonomous default in the occupied 48-GiB envelope. Do not repeat the same resource-gated trial. Keep Qwen3.5-9B-6bit installed for supervised coding under its existing guard; no alternate model is promoted.",
+  "architecture_choices": {
+    "different_fitting_open_weight": "The materially different 14B family passed protocol and one coding task but failed sustained occupied-host fit on the harder UI workflow. Previously screened GLM-4.7-Flash 3-bit failed answer/tool protocol; larger 27B/35B candidates also hit resource limits. No tested challenger passes the required combination of native tooling, accepted UI work and host fit.",
+    "stronger_shorter_context": "The 14B profile used 49K instead of the installed 9B's configured 96K; its accepted Task03 result does not offset the guarded UI abort and failed browser diagnostics. The interrupted UI root session's observed step prompts peaked below 19K tokens, so lowering the nominal context cap is not established as a memory cure. No shorter-context stronger profile is promoted.",
+    "optional_external_frontier": "An external frontier provider would require explicit user selection and possibly cost. The user has disallowed paid-provider use, the OpenCode free route previously returned HTTP 403, and no external provider was configured or used in these trials.",
+    "truthful_v1_scope": "The installed 9B plus acceptance-controller and requirement-evidence development experiments each achieved 0/3 independent autonomous UI acceptance. This is a measured ceiling on the tested local workflow, not proof that the model can never succeed. Until repeatable accepted work is demonstrated, KRYN's supported claim is supervised local coding; autonomous/frontier-equivalent claims and public release remain paused."
+  },
+  "downstream_gates": {
+    "fresh_holdout": "NOT_RUN: no repeatable development acceptance",
+    "successful_ui_compaction_restart": "NOT_RUN: no accepted UI task to continue",
+    "sustained_endurance": "NOT_RUN: guarded UI run aborted",
+    "promotion_install_rollback": "NOT_RUN: candidate rejected before promotion",
+    "public_release": "PAUSED"
+  },
+  "private_raw_archive": "~/Library/Application Support/LocalAI/runs/ministral14-screen-20261001",
+  "private_archive_manifest_sha256": "4eb51380eb6912c3a8e2344dc0a64d3ef80864a575d26a033fa8dd8ed9fb3a15",
+  "owner_restore": "Private server stopped and candidate unloaded. The unpromoted 14B weights and isolated SSD cache were removed after archiving pinned source, native traces and the runtime log. Owned 9B oMLX 0.6.4 restarted; kryn bench passed guarded protocol, kryn doctor --deep rehashed every pinned file, runtime healthy and pressure normal; both owner settings hashes unchanged."
+}
