@@ -23,6 +23,6 @@ This project distributes v0.2.0 as a public preview. There is no guaranteed resp
 
 ## Release integrity
 
-Use an exact release tag and verify `SHA256SUMS` before running the downloaded installer, as shown in the [README](README.md#first-installation). The installer verifies the wheel; the package verifies its curated payload and pinned dependencies. These checks trust the authenticated GitHub repository and its release assets. Checksums do not protect against a compromised publisher replacing both an artifact and its checksum. KRYN does not currently provide independent artifact signatures, notarization or hosted build attestations.
+Use an exact release tag and verify the installer's pinned SHA256 before running it, as shown in the [README](README.md#first-installation). The installer downloads `SHA256SUMS`, verifies the wheel, and checks its curated payload and pinned dependencies. These checks trust the authenticated GitHub repository and its release assets. Checksums do not protect against a compromised publisher replacing both an artifact and its checksum. KRYN does not currently provide independent artifact signatures, notarization or hosted build attestations.
 
 Third-party components retain their own security policies and licenses; component identities and provenance are recorded in [Third-party notices](THIRD_PARTY_NOTICES.md).

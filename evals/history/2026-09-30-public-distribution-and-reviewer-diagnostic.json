@@ -1,0 +1,17 @@
+{
+  "kind": "public distribution audit and matched local Reviewer diagnostic",
+  "date_local": "2026-09-30",
+  "repository": "PranavMishra28/kryn changed from PRIVATE to PUBLIC after a Git-history and release-asset audit. This is source visibility, not a new release or a quality qualification.",
+  "audit": {
+    "history": "Gitleaks 8.30.1 scanned Git history. Eleven generic-api-key hits were checked by file/key and were SHA256 hash fields, not identified credentials. Tracked-tree patterns and commit messages were also screened. This is not a guarantee against every kind of private content.",
+    "releases": "Twelve historical prereleases/draft releases were inspected before visibility changed. Downloaded release checksums matched every installer and wheel; wheel paths were checked for traversal. Gitleaks hits in the v0.1.9 qualification asset were SHA256 fields. Existing release assets, tags and descriptions were not rewritten or deleted.",
+    "public_access": "Unauthenticated GitHub repository GET returned HTTP 200. Public v0.2.0 installer, SHA256SUMS and wheel downloaded without GitHub credentials; installer SHA256 b66e4332b4951c4abbe37c59db6865f076117e4ebc8d4588ad6a180929bc55b5 and the wheel/checksum contents matched the published release. Installer --help passed; no second-account GUI install was claimed."
+  },
+  "reviewer_comparison": {
+    "setup": "Same copied known-bad review-queue Git workspace and identical read-only prompt; installed 9B Default baseline versus a candidate plugin exposing a scoped read-only per-file Git diff tool. Both used guarded native OpenCode sessions; raw traces remain under /private/tmp/kryn-review-diff-20261001-{baseline,candidate}/evidence/reviewer.",
+    "baseline": "Native completion in 168.56 seconds, eight read calls. Missed the independent oracle's changed original /api/entries shape, missing Edit control and actual export HTTP 400, while inventing required reviewed CSV/PATCH fields that contradict the original contract.",
+    "candidate": "Native completion in 216.207 seconds, nine read calls and zero calls to the new diff tool. Missed the same material regressions and added false findings, including a selector mismatch while quoting matching selector/ID text. This was not an accuracy gain.",
+    "decision": "Reverted the diff-tool candidate and its test. Do not promote a Reviewer wording/tool change on source-citation count or apparent detail; independent API/browser contract evidence remains authoritative. Reviewer accuracy gate stays failed."
+  },
+  "release_decision": "No new tag, version or release. Autonomous coding/UI, Reviewer accuracy, two-compaction/restart application acceptance and sustained-use gates remain failed."
+}

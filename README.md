@@ -34,21 +34,18 @@ Requirements:
 - `python3` and `curl` available in Terminal; Google Chrome installed at `/Applications/Google Chrome.app`.
 - Internet access for installation. Allow space for roughly **8.22 GB of model files**, dependencies, and the installer's **40 GiB free-space reserve**.
 
-1. Download the tagged release, verify its checksums, and run the installer:
+1. Download the pinned installer and run it. The installer fetches and verifies the release wheel and its checksums:
 
    ```sh
    (
      set -eu
-     kryn_stage="$(mktemp -d "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
-     cd "$kryn_stage"
-     kryn_tag=v0.2.0
-     kryn_base="https://github.com/PranavMishra28/kryn/releases/download/$kryn_tag"
-     for kryn_asset in install-kryn.py "kryn-${kryn_tag#v}-py3-none-any.whl" SHA256SUMS; do
-       curl --fail --location --proto '=https' --proto-redir '=https' \
-         --output "$kryn_asset" "$kryn_base/$kryn_asset"
-     done
-     shasum -a 256 -c SHA256SUMS
-     python3 install-kryn.py --tag "$kryn_tag"
+     kryn_installer="$(mktemp "${TMPDIR:-/tmp}/kryn-install.XXXXXX")"
+     trap 'rm -f "$kryn_installer"' EXIT
+     curl --fail --location --proto '=https' --proto-redir '=https' \
+       --output "$kryn_installer" \
+       https://github.com/PranavMishra28/kryn/releases/download/v0.2.0/install-kryn.py
+     printf '%s  %s\n' b66e4332b4951c4abbe37c59db6865f076117e4ebc8d4588ad6a180929bc55b5 "$kryn_installer" | shasum -a 256 -c -
+     python3 "$kryn_installer" --tag v0.2.0
    )
    ```
 
