@@ -1,0 +1,22 @@
+{
+  "kind": "managed autonomous-acceptance development experiment",
+  "date_utc": "2026-10-01",
+  "base_main": "b5377c9",
+  "hypothesis": "Progressive disclosure of browser tools to primary Agent improves 9B completion while native Browse and independent browser checks remain available",
+  "control": "Three fresh Task06 plus Cancel Edit fixtures, exact B prompt and checks, Qwen3.5-9B-6bit Fast, 96K configured context, same guard and two-repair controller; the sole candidate change removes direct browser tools from primary Agent",
+  "decision": "REJECT the 96K browser-tool ablation as an autonomous quality improvement: 0/3 accepted and two guarded host warnings",
+  "candidate": [
+    {"run": "managed-c-20261001-01", "seconds": 668.229, "native_tool_calls": 55, "controller_accepted": false, "independent_acceptance": false, "intervention": "resource guard: sustained host memory warning during first repair", "note": "Stored row rendering and Cancel Edit failed; shell server-start attempts repeated"},
+    {"run": "managed-c-20261001-02", "seconds": 591.043, "native_tool_calls": 65, "controller_accepted": false, "independent_acceptance": false, "intervention": "none", "note": "Initial Cancel Edit pass was invalidated after UI edits; two repairs left stored markup unsafe and Cancel Edit regressed"},
+    {"run": "managed-c-20261001-03", "seconds": 535.869, "native_tool_calls": 41, "controller_accepted": false, "independent_acceptance": false, "intervention": "resource guard: sustained host memory warning during first repair", "note": "Final browser checks found an unhandled page JavaScript exception and failed Cancel Edit"}
+  ],
+  "wire": "All Agent generations in each run omitted direct browser_* tools and retained native subagent. No run invoked Browse, so Browse model-wire availability was not observed; the plugin regression test verifies its role-specific tool list.",
+  "resource": "C01 and C03 had sustained host warning samples despite reduced tool count; C02 had normal pressure. None had positive swap growth.",
+  "context_followup": "An isolated OpenCode-only 64K pilot stopped on a sustained host warning after 78.435 seconds and 24 tools. The oMLX owner runtime still advertised 96K, so this is not a valid 64K backend-tier comparison. The pilot is inconclusive for 64K quality or resource safety; no owner context setting changed.",
+  "context_followup_private_archive": "~/Library/Application Support/LocalAI/runs/managed-c64-inconclusive-20261001",
+  "context_followup_archive_manifest_sha256": "a8da2809c6e73a29180590530f5422b3ce87c8d3a0227379557f39cf5885c443",
+  "next_hypothesis": "Change-impact verification already rechecks affected UI/API/stateful flows and caught a newly introduced Cancel regression in C02. Preserve that mechanism, then test the pre-screened feasible 35B candidate under the same controller and independent checks.",
+  "raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-lean-tools-96k-20261001",
+  "archive_manifest_sha256": "7392b46ccaa0f323aefc04f79f585cd511baa4ce1535d89dd0e1eeb9acd00409",
+  "gates": {"repeatable_development": "FAIL 0/3", "false_controller_acceptance": "PASS 0/3", "holdout": "NOT_RUN", "compaction_restart": "NOT_RUN", "endurance": "NOT_RUN", "release": "PAUSED"}
+}

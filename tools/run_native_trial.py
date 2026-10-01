@@ -21,6 +21,7 @@ from urllib.parse import quote
 from native_client import BINARY, MODEL_ID, PROJECT, ROOT, NativeServer, owned_config, product_plugin_files
 from protocol_probe import memory_snapshot, request as protocol_request
 from context_probe import ResourceGuard, resources, summarize_resources
+from acceptance_controller import AcceptanceController, CommandCheck, Requirement
 
 
 EXA_TOOLS = {"search_web_fetch_exa", "search_web_search_advanced_exa", "search_web_search_exa"}
@@ -1021,6 +1022,8 @@ def main():
     ap.add_argument("--guard-resources", action="store_true", help="require green/idle preflight; cancel only owned sessions on sustained pressure, missing telemetry or >512 MiB swap growth")
     ap.add_argument("--candidate-product-source", action="store_true",
                     help="snapshot this checkout's product plugin into the disposable trial; do not change the owner installation")
+    ap.add_argument("--managed-acceptance", type=Path,
+                    help="development-only requirement/check JSON outside the Agent workspace; verify and repair in the same session")
     ap.add_argument("--replacement-model-id", help="probe-only sole local model; requires context, output and guard flags")
     ap.add_argument("--replacement-context", type=int)
     ap.add_argument("--replacement-output", type=int)
@@ -1056,6 +1059,28 @@ def main():
     workspace = run / "workspace"
     if not (run / "run.json").is_file() or not (workspace / ".git").is_dir():
         ap.error("Expected a disposable run prepared by evals/bench.py")
+    managed = None
+    if args.managed_acceptance:
+        spec_path = args.managed_acceptance.resolve()
+        if not args.guard_resources or args.session or not spec_path.is_relative_to(run) or \
+                spec_path.is_relative_to(workspace) or args.attachment:
+            ap.error("Managed acceptance requires a fresh guarded run and a check spec outside its workspace")
+        try:
+            raw = spec_path.read_bytes()
+            definition = json.loads(raw)
+            for row in definition["checks"]:
+                watch = row.get("watch", ["*"])
+                if not isinstance(watch, list) or any(not isinstance(item, str) for item in watch):
+                    raise ValueError("Check watch must be a list of path patterns")
+            managed = (hashlib.sha256(raw).hexdigest(),
+                       [Requirement(row["id"], row["source"], tuple(row["checks"]),
+                                    row.get("capability", "general"), row.get("source_file"))
+                        for row in definition["requirements"]],
+                       [CommandCheck(row["id"], tuple(row["argv"]), row.get("timeout", 120),
+                                     tuple(row.get("watch", ["*"])))
+                        for row in definition["checks"]])
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            ap.error("Invalid managed acceptance spec: " + str(error))
     try:
         attachment, image_info = attachment_info(workspace, args.attachment)
     except ValueError as error:
@@ -1067,6 +1092,8 @@ def main():
                            args.replacement_guard_gib)
     if args.without_browser:
         config["mcp"]["servers"].pop("browser")
+    else:
+        config["mcp"]["servers"]["browser"]["command"].append("--headless")
     try:
         apply_budget(config, args.variant, args.thinking_budget)
     except ValueError as error:
@@ -1121,6 +1148,8 @@ def main():
               "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
               "memory_before": memory_snapshot(), "interventions": 0,
               "fixture_only_permissions": True, "completed": False, "model_completed": False}
+    if managed:
+        report["managed_spec_sha256"] = managed[0]
     started = time.monotonic()
     samples, sampling_stop = [], threading.Event()
     def sample_resources():
@@ -1210,6 +1239,14 @@ def main():
                 if not runtime_is_idle(folder, "guard-idle-after-preflight", model_id=model_id,
                                        guard_gib=args.replacement_guard_gib):
                     raise RuntimeError("Expected runtime became busy during resource preflight; no prompt sent")
+            controller = AcceptanceController(
+                server, session["id"], workspace, folder / "managed-acceptance.json",
+                managed[1], managed[2], max_repairs=2, turn_timeout=args.timeout,
+                cancelled=monitor.cancel.is_set) if managed else None
+            admitted_prompt = controller.admission_text(prompt) if controller else prompt
+            if controller:
+                (folder / "admitted-prompt.txt").write_text(admitted_prompt)
+                report["admitted_prompt_sha256"] = hashlib.sha256(admitted_prompt.encode()).hexdigest()
             command = [str(BINARY), "run", "--server", server.url, "--agent", args.agent,
                        "--model", "local/qwen" + ("#fast" if args.variant == "fast" else ""), "--format", "json", "--thinking",
                        "--session", session["id"], "--title", run.name + "-" + args.stage]
@@ -1221,11 +1258,11 @@ def main():
                 child = subprocess.Popen(command, cwd=workspace, env=server.env, stdin=subprocess.PIPE, stdout=out, stderr=err)
                 try:
                     if monitor is not None:
-                        run_guarded_cli(child, prompt.encode(), args.timeout, monitor, server,
+                        run_guarded_cli(child, admitted_prompt.encode(), args.timeout, monitor, server,
                                         session["id"], workspace, folder, report,
                                         model_id=model_id, guard_gib=args.replacement_guard_gib)
                     else:
-                        child.communicate(prompt.encode(), timeout=args.timeout)
+                        child.communicate(admitted_prompt.encode(), timeout=args.timeout)
                 except subprocess.TimeoutExpired:
                     try:
                         server.request("POST", "/api/session/" + session["id"] + "/interrupt", {})
@@ -1244,6 +1281,21 @@ def main():
             cli_completed = child.returncode == 0 and not report.get("timed_out") and not report.get("resource_aborted")
             if monitor is not None:
                 cli_completed &= report.get("owned_settlement", {}).get("idle", False) and report.get("owned_cli_exited", False)
+            if managed and cli_completed:
+                if hashlib.sha256(spec_path.read_bytes()).hexdigest() != managed[0]:
+                    raise RuntimeError("Managed acceptance spec changed after Agent work")
+                native_messages = server.request("GET", "/api/session/" + session["id"] +
+                                                 "/message?limit=100&order=desc")["data"]
+                latest_idle = next((m for m in native_messages if m.get("type") == "idle"), None)
+                if not latest_idle or latest_idle.get("outcome") != "succeeded":
+                    raise RuntimeError("Native first turn has no successful idle record")
+                report["managed_acceptance"] = controller.run(
+                    prompt, initial=("native-cli", latest_idle["id"]), admitted_prompt=admitted_prompt)
+                report["managed_settlement"] = settle_owned_sessions(
+                    server, session["id"], workspace, folder,
+                    interrupt=monitor.cancel.is_set(), cancel=monitor.cancel,
+                    model_id=model_id, guard_gib=args.replacement_guard_gib)
+                cli_completed &= report["managed_settlement"].get("idle", False)
             events = [json.loads(line) for line in (folder / "events.jsonl").read_text().splitlines() if line.strip()]
             event_session_ids = {event["sessionID"] for event in events if event.get("sessionID")}
             audit = [json.loads(line) for line in audit_path.read_text().splitlines() if line.strip()]
@@ -1257,6 +1309,13 @@ def main():
                                      for part in tool_parts if part.get("state", {}).get("status") == "error"]
             exports, report["session_ownership"] = export_owned_sessions(
                 server, required_ids, session["id"], workspace, folder)
+            if managed:
+                native_tools = [part for exported in exports for message in exported["data"]["messages"]
+                                if message.get("type") == "assistant" for part in message.get("content", [])
+                                if part.get("type") == "tool"]
+                report["tool_calls"] = len(native_tools)
+                report["tool_errors"] = [{"tool": part.get("name"), "error": part.get("state", {}).get("error")}
+                                         for part in native_tools if part.get("state", {}).get("status") == "error"]
             report["session_ids"] = sorted(e["data"]["info"]["id"] for e in exports)
             report["native_session_tokens"] = {e["data"]["info"]["id"]: e["data"]["info"].get("tokens") for e in exports}
             report["generation_completion"] = generation_completion(
@@ -1264,6 +1323,8 @@ def main():
             report["model_completed"] = bool(cli_completed and not report["event_errors"]
                                              and report["generation_completion"]["verified"])
             report["completed"] = report["model_completed"] and report["session_ownership"]["verified"]
+            if managed:
+                report["completed"] &= report.get("managed_acceptance", {}).get("accepted", False)
             plugin_after = server.request("GET", "/api/plugin")
             (folder / "plugin-inventory-after.json").write_text(json.dumps(plugin_after, indent=2) + "\n")
             report["audit_plugin_active_after"] = plugin_active(plugin_after, "localai.inference-audit", audit_plugin)

@@ -1,0 +1,18 @@
+{
+  "kind": "pre-screened 35B model cold-load resource probe",
+  "date_utc": "2026-10-01",
+  "base_main": "b5377c9",
+  "candidate": "Qwen3.6-35B-A3B-oQ3e-mtp, local three-bit artifact, isolated oMLX 0.7.0, 49,152-token runtime and OpenCode context, 8,192-token output, 27 GiB process guard",
+  "control": "Same Task06 plus Cancel Edit prompt, A/B acceptance controller, full native tool catalog and external checks; owner 9B runtime stopped before the private server bound port 8000",
+  "result": "RESOURCE_ABORT before substantive coding. The guarded native attempt stopped after 13.31 seconds and zero tool calls while the model cold-loaded. Host pressure reached warning for two consecutive samples and swap grew 3,333,035,131 bytes from the first sample. No coding-quality conclusion is valid.",
+  "runtime_observation": "The private server advertised only the target 35B model at 49,152 tokens. Sampled process footprint rose from about 0.12 GiB to 16.51 GiB. Other desktop applications remained open; do not infer the model would fail on an unloaded host.",
+  "safety_and_restore": "The private oMLX process was signaled and exited, port 8000 closed, and the verified owned oMLX 0.6.4/Qwen3.5-9B-6bit server was restarted. Both owner settings SHA256 values matched their pretrial snapshot; kryn status was healthy and idle and kryn doctor passed with browser/search connected. No owner model or release changed.",
+  "owner_settings_sha256": {
+    "/Users/pranav/.omlx/settings.json": "3e402063a2a10449bb0d6f943b87fec139b9343097142fb510735aa509a7aeed",
+    "/Users/pranav/.omlx/model_settings.json": "7a63025164981f3b0ed8ea4b3a58f5b16dfea1c0c834aaa66ce7001353fe38a8"
+  },
+  "raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-e35-load-abort-20261001",
+  "archive_manifest_sha256": "739a3fb46e4603d7fb788c2e7f6883139f9383afc21ac545bb06a9dc5571f5d8",
+  "next": "Retry fresh guarded coding trials only if host memory headroom is freed. A cold-load abort does not satisfy the model ladder's quality comparison.",
+  "release": "PAUSED"
+}

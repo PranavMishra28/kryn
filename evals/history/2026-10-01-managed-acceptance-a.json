@@ -1,0 +1,22 @@
+{
+  "kind": "managed autonomous-acceptance development experiment",
+  "date_utc": "2026-10-01",
+  "base_main": "b5377c9",
+  "hypothesis": "A bounded controller can prevent false acceptance and turn independent check failures into successful same-session repair on the 9B",
+  "control": "Three fresh Task06 plus Cancel Edit fixtures, Qwen3.5-9B-6bit Fast, 96K configured context, native OpenCode tools, same original user prompt, guarded serial trials, two repair continuations, independent source/API/browser checks outside the Agent workspace",
+  "decision": "REJECT as an autonomous application-quality improvement; retain the fail-closed lifecycle design for the next requirement-evidence experiment",
+  "candidate": [
+    {"run": "managed-a-20261001-01", "native_completed": true, "controller_accepted": false, "independent_acceptance": false, "seconds": 847.236, "native_tool_calls": 75, "note": "Task06 Filter behavior still failed after two repairs"},
+    {"run": "managed-a-20261001-02", "native_completed": true, "controller_accepted": false, "independent_acceptance": false, "seconds": 1052.155, "native_tool_calls": 134, "note": "Stored-text, retry and Cancel Edit flows failed; the final edit omitted existing behavior"},
+    {"run": "managed-a-20261001-03", "native_completed": true, "controller_accepted": false, "independent_acceptance": false, "seconds": 1001.207, "native_tool_calls": 140, "note": "Stored-text and Cancel Edit failed; source revision did not change between the last two verification rounds"}
+  ],
+  "baseline_context": [
+    {"run": "managed-baseline-20261001-02", "native_completed": true, "independent_acceptance": false, "seconds": 180.917, "native_tool_calls": 24},
+    {"run": "managed-baseline-20261001-03", "native_completed": false, "independent_acceptance": false, "seconds": 1106.947, "intervention": "external process signal; invalid as a clean completion", "observed": "More than 170 repeated browser close/navigate calls"}
+  ],
+  "resource": "All five sampled runs had normal host pressure and zero peak swap growth; the cause was not an observed memory guard stop",
+  "next_hypothesis": "B: admit the already visible repository task contract, track each requirement/check separately and invalidate only relevant passed evidence",
+  "raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-acceptance-20261001",
+  "archive_manifest_sha256": "f99b54b16cdecfa17d69001077b077ef78c306bee1309a0ae62e1cd5c59dbca8",
+  "gates": {"repeatable_development": "FAIL 0/3", "false_controller_acceptance": "PASS 0/3", "holdout": "NOT_RUN", "compaction_restart": "NOT_RUN", "endurance": "NOT_RUN", "release": "PAUSED"}
+}
