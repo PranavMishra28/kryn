@@ -16,7 +16,13 @@
       "observation": "After creating the missing disposable plugin-state directory, the same guarded-shell startup canary still failed before inference. Further isolated retries were stopped."
     }
   ],
-  "interpretation": "These are execution-environment blockers, not successful KRYN product trials or evidence of model quality. The isolated redirect is not the owner installation and cannot qualify it. The canary's root cause in this nested sandbox was not established; its failure was not bypassed.",
+  "nested_sandbox_probe": {
+    "command": "/usr/bin/sandbox-exec -p '(version 1)(allow default)' /bin/echo nested-sandbox-canary",
+    "exit_code": 71,
+    "stderr": "sandbox-exec: sandbox_apply: Operation not permitted",
+    "meaning": "The Codex task environment cannot apply even this diagnostic macOS sandbox profile. KRYN's guarded native shell requires sandbox-exec, so this task environment cannot exercise it without changing the execution environment."
+  },
+  "interpretation": "These are execution-environment blockers, not successful KRYN product trials or evidence of model quality. The isolated redirect is not the owner installation and cannot qualify it. The direct OS probe explains why a guarded-shell trial cannot pass inside this task sandbox; the product guard and canary were not bypassed.",
   "guard_changed": false,
   "model_inference_started": false,
   "qualifying_v1_gates_passed": [],
