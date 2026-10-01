@@ -84,6 +84,7 @@ class PackageTests(unittest.TestCase):
         self.assertTrue((base / "tools/learning.py").is_file())
         self.assertTrue((base / "tools/kryn_plugin.mjs").is_file())
         self.assertTrue((base / "setup/accepted-profile.json").is_file())
+        self.assertIn("huggingface-hub==1.32.0", (base / "setup/hf-download-constraints.txt").read_text())
         self.assertFalse((base / "evals").exists())
         self.assertFalse((base / "tools/run_native_trial.py").exists())
         self.assertFalse((base / "tools/browser_check.mjs").exists())

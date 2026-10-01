@@ -1,0 +1,18 @@
+{
+  "kind": "model-download transitive version constraint candidate",
+  "date_utc": "2026-10-01",
+  "change": "The existing huggingface-hub==1.32.0 tool invocation now passes a packaged 15-package exact-version constraint set and chooses Python 3.13 in an isolated uv tool environment. Model revision and file SHA256 verification remain unchanged.",
+  "validation": {
+    "disposable_hf_version": "PASS: uv tool run --isolated --python 3.13 --from huggingface-hub==1.32.0 --constraints setup/hf-download-constraints.txt hf --version returned 1.32.0",
+    "negative_constraint": "PASS: replacing click's pin with click==0.0.0 made uv refuse resolution before execution",
+    "focused_tests": "PASS: missing-only download and curated package tests",
+    "make_check": "PASS: offline Python/Node/native-trial/frozen-eval checks",
+    "private_package_smoke": "PASS: 22 curated payload files, external wheel install and package-check"
+  },
+  "limits": [
+    "uv tool run applies the exact version constraints but does not enforce wheel hashes from a requirements file; repository release checksums still verify KRYN's own payload.",
+    "The full model download was not repeated because the owner model is already present and the trial sandbox cannot write the owner app log; a final-artifact owner installation remains a release gate.",
+    "Optional document-phase dependencies remain separately resolved."
+  ],
+  "release_status": "CANDIDATE_ONLY"
+}
