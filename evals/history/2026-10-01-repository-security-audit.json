@@ -1,0 +1,21 @@
+{
+  "kind": "repository secret scan and GitHub protection readback",
+  "source_revision": "a5e2ce6a8c0c62c78048de8d85f7c140a52be4fe",
+  "scanner": "Gitleaks 8.30.1",
+  "history": {
+    "scope": "git --all, 371 reachable commits",
+    "findings": 11,
+    "classification": "All generic-api-key hits inspected at their source lines were SHA256 digests in model profiles, release manifests, or evidence receipts; no exposed credential was identified."
+  },
+  "current_tracked_tree": {
+    "scope": "git archive HEAD extracted to a temporary directory, then gitleaks dir",
+    "findings": 9,
+    "classification": "All inspected lines were SHA256 digest fields or model filename-to-digest entries."
+  },
+  "private_working_tree": "A wider directory scan included ignored disposable trial state and found one additional local service key in a user-only settings file. It is not tracked or included in a release; its value and path are omitted here.",
+  "github_security_and_analysis": {
+    "secret_scanning": "enabled",
+    "secret_scanning_push_protection": "enabled"
+  },
+  "limits": "Pattern scans cannot prove absence of every credential or private datum. Rescan the final v1 source and history/archive before any release or history reset. This receipt does not authorize deleting old refs."
+}
