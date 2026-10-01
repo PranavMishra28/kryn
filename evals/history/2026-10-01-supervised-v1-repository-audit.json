@@ -1,0 +1,29 @@
+{
+  "kind": "supervised-v1 repository and private candidate audit",
+  "date_utc": "2026-10-01",
+  "source_base": "aef818831a61cab0f122af3e55b64c52baa83dd1",
+  "scope": "Documentation-only release-preparation branch; public version remains 0.2.0. No owner install, live native trial, v1 tag or release is claimed.",
+  "offline_checks": {
+    "make_check": "PASS: 211 Python tests, 82 Node tests, native-trial self-check, frozen TaskboardLite and fresh review-queue verification/self-tests",
+    "candidate_package_smoke": "PASS: dirty-tree candidate wheel installed outside checkout; package-check and version command passed",
+    "candidate_wheel_sha256": "c9b87767d69353b237ba5e37f0eafbcd614f8aa02c403814e2fd232a1fe9357e",
+    "candidate_payload_files": 21,
+    "candidate_source_dirty": true,
+    "limitation": "This candidate was deleted by package-smoke cleanup and is not a final release artifact."
+  },
+  "secret_scan": {
+    "scanner": "gitleaks 8.30.1 with default rules and 100-percent redaction",
+    "working_tree_matches": 9,
+    "history_commits_scanned": 401,
+    "history_matches": 11,
+    "inspection": "Every current and historical match was inspected by path, key and value shape without printing the value. All were 64-character lowercase SHA256 digest fields in model manifests or evidence receipts. No credential was identified.",
+    "limitation": "Pattern scanning and shape inspection cannot prove that no secret exists. Raw scanner reports remain outside the repository."
+  },
+  "live_trial": {
+    "run": "evals/runs/supervised-v1-20261001-01/evidence/turn01",
+    "result": "NO_MODEL_PROMPT",
+    "reason": "The current Codex filesystem sandbox denied OpenCode an owner-state log write under ~/Library/Application Support/LocalAI/xdg/data/opencode/log; the native server exited before readiness. A permission request returned no additional filesystem grant.",
+    "classification": "Task-environment access failure, not a 9B quality result. Raw diagnostic retained only in ignored local run evidence."
+  },
+  "next": "Qualify the final installed artifact's live supervised gates when owner app state is writable in the execution environment; keep public release paused until then."
+}

@@ -1,0 +1,13 @@
+# KRYN architecture
+
+KRYN installs an owned OpenCode workspace on native Apple Silicon. OpenCode owns conversations, Ask/Plan/Agent, permission prompts, provider selection, tools, child sessions and compaction. KRYN does not replace its agent loop. The local default routes to the pinned Qwen3.5-9B-6bit model through the oMLX OpenAI-compatible endpoint on loopback. Other providers are selected explicitly through OpenCode and can send project data off-device or charge fees.
+
+The release wheel contains KRYN's launcher, installer, configuration template, native plugin, diagnostics and pinned artifact identities. It contains no model weights, browser profile or user session. The credential-free installer verifies release checksums, payload hashes and dependency/model pins, then activates launchers and configuration transactionally. A retained previous activation supports rollback. `kryn uninstall` deactivates launchers and retains private data.
+
+The launcher validates its owned files and the runtime identity, checks host pressure and swap, and starts or connects to the pinned oMLX app. The model process has a 22 GiB ceiling; KRYN permits one heavyweight local generation at a time. A guard stop leaves native sessions and completed project edits available for supervised recovery with `kryn --continue`. The configured 96K window is an input limit, not a demonstrated useful reasoning span.
+
+The product plugin stores bounded user-request excerpts, current Git/file hashes, observed check exits and incident metadata in private state, then supplies relevant bounded facts on continuation. Its deterministic compaction checkpoint marks completion and next action unverified and flags stale file/check evidence after changes or restart. Full native history remains on disk. These mechanisms aid a human-led workflow; they cannot establish that generated code or a Reviewer finding is correct. The development Acceptance Controller runs independently supplied checks against disposable workspaces and refuses unsupported success claims. It is not an installed general-purpose judge for arbitrary user projects.
+
+Browser and search are OpenCode MCP integrations. They can contact external sites even while inference stays local. `kryn --web` opens OpenCode's loopback GUI with temporary credentials; the terminal remains the resource supervisor. Permission choices in `/settings` or `--permissions` govern native approvals, but KRYN is not an operating-system sandbox for untrusted projects.
+
+The [supervised v1 qualification](v1-qualification.md) owns the release gate. The [autonomous evaluation protocol](evaluation.md) remains a research track; its failed runs and frozen inputs stay indexed in [historical evidence](history.md).
