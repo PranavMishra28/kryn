@@ -19,6 +19,10 @@
     "inspection": "Every current and historical match was inspected by path, key and value shape without printing the value. All were 64-character lowercase SHA256 digest fields in model manifests or evidence receipts. No credential was identified.",
     "limitation": "Pattern scanning and shape inspection cannot prove that no secret exists. Raw scanner reports remain outside the repository."
   },
+  "dependency_review": {
+    "browser_lock": "npm audit --omit=dev on a temporary package containing the pinned @playwright/mcp 0.0.82 lock returned zero advisories across the production dependency tree on 1 October 2026.",
+    "release_lock_gap": "Optional Python document packages are direct-version-pinned but their transitive resolution is saved only after installation; the huggingface-hub model-download tool is direct-version-pinned with a dynamic transitive resolution. Resolve or explicitly scope these before v1 release."
+  },
   "live_trial": {
     "run": "evals/runs/supervised-v1-20261001-01/evidence/turn01",
     "result": "NO_MODEL_PROMPT",
