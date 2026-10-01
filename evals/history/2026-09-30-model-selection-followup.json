@@ -1,0 +1,56 @@
+{
+  "kind": "private model-selection follow-up and evaluator correction",
+  "date_local": "2026-09-30",
+  "machine": "M4 Max MacBook Pro, 48 GiB unified memory, occupied desktop; trials were guarded and serial",
+  "scope": "One screening pass per new model and one or two runs of the previously strongest 35B candidate. This is not an exhaustive model search, a protected holdout, or a statistically stable quality estimate.",
+  "harness": "OpenCode 2.0.10 native sessions and KRYN fixture suite 2026-09-19.2; candidates used isolated oMLX 0.7.0 with a 27 GiB process guard and one active generation",
+  "daily_profile_decision": "Retain the installed Qwen3.5-9B-6bit / oMLX 0.6.4 profile. It has owner installation, guarded inference and rollback evidence, but it has not passed the autonomous coding/UI or review gates. No replacement is qualified.",
+  "strongest_screened_alternative": "Qwen3.6-35B-A3B-oQ3e-mtp: faster than 9B on matched Task03 and stable at 49K during two Task12 builds, but repeatedly fails independent Task12 browser acceptance and falsely declares completion. Keep experimental; do not present its nominal context or Task03 speed as frontier-equivalent quality.",
+  "trials": [
+    {
+      "model": "NexVeridian/GLM-4.7-Flash-3bit",
+      "revision": "dcd394b7580ada8a62c07717e58a3252d9ac2b3b",
+      "verified_weight_bytes": 13110303327,
+      "condition": "isolated oMLX 0.7.0, 27 GiB guard, normal host pressure, no swap growth",
+      "result": "REJECT: bounded thinking returned no final answer or tool call; nonthinking and greedy probes produced repetitive malformed numerals rather than the requested answer/tool. No coding trial followed a failed protocol screen.",
+      "raw": ["/private/tmp/kryn-model-search-20260930/glm47q3-protocol", "/private/tmp/kryn-model-search-20260930/glm47q3-fast-protocol", "/private/tmp/kryn-model-search-20260930/glm47q3-greedy"]
+    },
+    {
+      "model": "Jundot/Qwen3.6-35B-A3B-oQ2",
+      "revision": "9c0b2f22c12a9f48f0af6aa042f3ad9baae154ed",
+      "verified_weight_bytes": 13079169733,
+      "condition": "isolated oMLX 0.7.0, 64K, 27 GiB guard, normal pressure and no measured swap growth",
+      "protocol": "PASS for streamed fast/think answer, function call and replay",
+      "task03": "PASS, Fast Agent, 127.117 seconds, zero interventions; frozen source-bound grade",
+      "task06": "REJECT: model directly created the evaluator's fail-next marker twice instead of requesting controlled injection. Interrupted at 97.194 seconds. Automatic backend checks passed but independent mobile browser check failed horizontal overflow; this is not an autonomous Task06 pass.",
+      "raw": ["evals/runs/model-search-q36q2-07-protocol", "evals/runs/model-search-q36q2-07-fast-task03-20260930", "evals/runs/model-search-q36q2-07-fast-task06-20260930"]
+    },
+    {
+      "model": "Jundot/Qwen3.6-35B-A3B-oQ3e-mtp",
+      "condition": "isolated oMLX 0.7.0, 49,152-token context, 8,192-token output, 27 GiB guard",
+      "fast_task12": "Plan 74.931 s and Build 635.492 s; native model turn settled, zero operator interventions, two real deterministic compactions, normal pressure and no swap growth. Independent browser failed exact literal stored-markup rendering; model nevertheless claimed all acceptance criteria met. Driver's old HTTP-only routing verdict was a false negative for deterministic compaction.",
+      "normal_task12": "Plan 71.201 s and Build 368.747 s; driver completed and route verified, zero operator interventions, one real deterministic compaction, normal pressure and no swap growth. Plan sampled AC and battery; Build was on battery, so its latency is not a matched speed comparison. Independent automatic source checks passed 2/2; browser again failed exact literal stored-markup rendering because web/app.js uses JSON.stringify(row) as visible text. The model claimed complete without browser, fresh review, restart or full acceptance.",
+      "raw": ["evals/runs/model-search-q36q3-07-fast49-task12-20260930", "evals/runs/model-search-q36q3-07-normal49-task12-20260930"]
+    }
+  ],
+  "evaluator_fix": {
+    "file": "tools/run_native_trial.py",
+    "problem": "The route checker required an HTTP inference triplet for every compaction, although KRYN's marked deterministic checkpoint compactions have no model-wire request.",
+    "rule": "Accept a completed, bounded, correctly marked deterministic checkpoint with no HTTP/wire attempt; all ordinary assistant and model-generated compaction rows still require routed HTTP coverage.",
+    "self_check": "PASS with positive checkpoint, malformed marker and stray-HTTP negative cases",
+    "offline_replay": "The saved Fast49 Task12 trace changes from routing_verified=false to true: 115 model HTTP generations plus two deterministic checkpoints, zero uncovered HTTP requests and zero rejected audit events. Original raw driver and failed browser receipt remain unchanged.",
+    "raw_replay": "evals/runs/model-search-q36q3-07-fast49-task12-20260930/evidence/build/route-replay-after-fix.json"
+  },
+  "owner_restoration": "After stopping the private oMLX 0.7.0 server, kryn bench passed guarded protocol smoke; kryn doctor reported healthy Qwen3.5-9B-6bit on oMLX 0.6.4, 96K configured context, normal pressure, and connected browser/search. Both owner oMLX settings files exactly matched the before-trial SHA256 and size. The disposable 4 GiB private SSD cache was removed; source-bound failed trial receipts were kept.",
+  "owner_settings_sha256": {
+    "/Users/pranav/.omlx/settings.json": "3e402063a2a10449bb0d6f943b87fec139b9343097142fb510735aa509a7aeed",
+    "/Users/pranav/.omlx/model_settings.json": "7a63025164981f3b0ed8ea4b3a58f5b16dfea1c0c834aaa66ce7001353fe38a8"
+  },
+  "repository_checks": "make check passed: 199 Python and 78 Node tests, native-trial self-check, frozen fixture verification/selftest and review-queue oracle selftest. make package-smoke BUILD_FLAGS=--candidate passed on the dirty source; a clean-source package smoke remains for the committed tree.",
+  "failed_or_open_gates": [
+    "No candidate passed a fresh Task12 autonomous browser flow, accurate completion report, fresh review, two compactions and restart together.",
+    "Qwen3.6 64K has only synthetic context/cold-warm evidence; 64K normal Task12 hit host warning and swap, while repeated 80K and 92K probes were not reliable. The owner 9B has a 96K setting, not proven useful 96K task quality.",
+    "The public fixture is a development regression set. A protected, independently checked holdout and paired repetitions remain required before model promotion.",
+    "No new model/runtime owner install and rollback were attempted because the candidate failed the earlier application-quality gate. Public release, tag and version bump remain paused."
+  ]
+}

@@ -455,13 +455,35 @@ def route_coverage(audit, exports, started_ms, finished_ms):
                       and lower <= millis(r) <= upper]
             requests = [i for i, r in scoped if r.get("event") == "http.request" and r.get("ok") is True
                         and i not in used_requests]
-            covered = bool(requests) and any(r.get("event") == "wire.options" for _, r in scoped) and any(
+            wire_covered = bool(requests) and any(r.get("event") == "wire.options" for _, r in scoped) and any(
                 r.get("event") == "http.response" and r.get("status") == 200 for _, r in scoped)
-            if covered:
+            # KRYN's compaction hook can return a deterministic checkpoint
+            # without making an inference request. Require its exact marker
+            # and absence of any model-wire attempt; ordinary compactions
+            # still require the full HTTP triplet above.
+            checkpoint = False
+            summary = message.get("summary")
+            if (kind == "compaction" and message.get("status") == "completed"
+                    and isinstance(summary, str) and len(summary) <= 65536
+                    and sum(r.get("event") == "model.request" for _, r in scoped) <= 1
+                    and all(r.get("ok") is True for _, r in scoped if r.get("event") == "model.request")
+                    and not any(r.get("event") in {"http.request", "wire.options", "http.response"}
+                                for _, r in scoped)):
+                try:
+                    parsed = json.loads(summary)
+                    checkpoint = (isinstance(parsed, dict) and parsed.get("source") == "kryn.observed-checkpoint"
+                                  and parsed.get("schema") == 1 and parsed.get("completion") == "unverified"
+                                  and parsed.get("next_action") == "unverified"
+                                  and isinstance(parsed.get("user_requests"), list))
+                except ValueError:
+                    pass
+            covered = wire_covered or checkpoint
+            if wire_covered:
                 used_requests.update(requests)
             rows.append({"session_id": sid, "message_id": message.get("id"), "kind": kind,
                          "created_ms": created, "completed_ms": completed, "coverage_window_ms": [lower, upper],
-                         "covered": covered})
+                         "covered": covered,
+                         "coverage": "model_http" if wire_covered else "deterministic_checkpoint" if checkpoint else "missing"})
             if kind == "primary":
                 previous_completion = upper
     last_completion = max([finished_ms] + [r["completed_ms"] or r["coverage_window_ms"][1] for r in rows])
@@ -813,6 +835,20 @@ def self_check():
     compacted = copy.deepcopy(exported)
     compacted[0]["data"]["messages"].append({"id": "compact", "type": "compaction", "status": "completed", "time": {"created": 2100}})
     assert not route_coverage(trace, compacted, 900, 2500)["verified"]
+    checkpoint = copy.deepcopy(compacted)
+    checkpoint[0]["data"]["messages"][-1]["summary"] = json.dumps({
+        "source": "kryn.observed-checkpoint", "schema": 1, "completion": "unverified",
+        "next_action": "unverified", "user_requests": []})
+    assert route_coverage(trace, checkpoint, 900, 2500)["verified"]
+    prepared = audit_row("model.request", 2200, sessionID="test", kind="compaction", ok=True)
+    assert route_coverage(trace[:-1] + [prepared, trace[-1]], checkpoint, 900, 2500)["verified"]
+    checkpoint[0]["data"]["messages"][-1]["summary"] = '{"source":"untrusted"}'
+    assert not route_coverage(trace, checkpoint, 900, 2500)["verified"]
+    checkpoint[0]["data"]["messages"][-1]["summary"] = json.dumps({
+        "source": "kryn.observed-checkpoint", "schema": 1, "completion": "unverified",
+        "next_action": "unverified", "user_requests": []})
+    stray = audit_row("http.request", 2200, sessionID="test", kind="compaction", ok=True)
+    assert not route_coverage(trace[:-1] + [stray, trace[-1]], checkpoint, 900, 2500)["verified"]
     compact_trace = [audit_row(event, stamp, sessionID="test", kind="compaction", **details) for event, stamp, details in (
         ("http.request", 2200, {"ok": True}), ("wire.options", 2201, {}), ("http.response", 2202, {"status": 200}))]
     assert route_coverage(trace[:-1] + compact_trace + trace[-1:], compacted, 900, 2500)["verified"]
