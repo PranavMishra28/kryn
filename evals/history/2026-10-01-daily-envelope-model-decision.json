@@ -1,0 +1,14 @@
+{
+  "kind": "Daily-use memory-envelope decision after 35B guarded trials",
+  "date_local": "2026-10-01",
+  "host": "48-GiB Apple Silicon Mac with ordinary user applications open",
+  "guard": "Unchanged host-pressure and swap abort policy; no process-guard relaxation",
+  "evidence": [
+    "2026-10-01-e35-load-abort.json: 35B three-bit resource-gated on four starts before useful coding",
+    "2026-10-01-e35-q2-resource.json: 35B two-bit loaded, then sustained host warnings interrupted two fresh coding/browser repetitions before settled autonomous completion. Post-abort independent diagnostics passed source/API, existing tests, JS syntax and diff hygiene, while Task06 and Cancel Edit browser checks failed in both runs"
+  ],
+  "decision": "Neither 35B quantization is suitable as the normal daily-use profile in this occupied host envelope. This is a resource-fit decision, not a settled coding-quality ranking. Do not repeat the same guarded trials or wait for unrelated applications to close. A single clean-host retry, if offered later, is diagnostic only and does not change the daily-use requirement.",
+  "installed_default": "Qwen3.5-9B-6bit remains installed under the existing 22-GiB process ceiling and 96K configured context; autonomous coding/UI acceptance remains failed.",
+  "disk_cleanup": "The unpromoted two-bit 35B weights were removed after checking pinned source metadata, shard sizes, the private raw archive manifest SHA256 f0d7541949acebd0870e0e0054ff3dced3625087129326f594e6ddc7f93c0740, and no open file handles. The three-bit artifact remains available for the optional clean-host diagnostic. No evidence files or owner model weights were deleted.",
+  "next": "Screen one materially different open-weight model within the occupied host envelope, using native protocol and independent coding/browser checks before any promotion. If it does not pass repeatable acceptance, retain supervised local coding scope; hold autonomous, holdout, continuity, endurance and public-release claims."
+}
