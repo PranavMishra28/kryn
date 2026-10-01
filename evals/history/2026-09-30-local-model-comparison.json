@@ -1,0 +1,58 @@
+{
+  "kind": "private local model and quantization comparison",
+  "date_local": "2026-09-30",
+  "machine": "MacBook Pro, M4 Max, 48 GiB unified memory; other desktop applications remained open",
+  "harness": "OpenCode 2.0.10 with KRYN native client, frozen eval suite 2026-09-19.2",
+  "candidate_runtime": "oMLX 0.7.0, isolated app and settings; 27 GiB process guard; one concurrent request",
+  "installed_owner_unchanged": "KRYN 0.2.0, oMLX 0.6.4, Qwen3.5-9B-6bit, 96K configured context",
+  "owner_restoration": "After isolated trials, kryn bench passed guarded protocol smoke; kryn doctor reported healthy owner runtime, normal host pressure, and connected browser/search MCP. Both owner oMLX settings files retained their recorded SHA256 hashes.",
+  "decision": {
+    "strongest_screened_candidate": "Qwen3.6-35B-A3B-oQ3e-mtp on oMLX 0.7.0, OpenCode Agent Fast",
+    "basis": "Both normal and Fast Task03 native runs settled and passed the independent frozen grade in about 2 minutes; the staged Task06 coding/UI run settled after evaluator input and passed the independent browser checker. It was substantially faster than the owner 9B and the 27B candidates on matched Task03.",
+    "promotion": "No owner-model switch, public release, tag, or version bump. This is the best candidate in the tested pool, not a production-qualified replacement: Task12 independent UI failed and long-context/restart gates remain open."
+  },
+  "matched_task03": [
+    {"model": "Qwen3.5-9B-6bit", "runtime": "oMLX 0.6.4", "variant": "owner", "run": "model-search-9b-task03-20260930", "native_completed": true, "independent_grade": "PASS", "active_seconds": 583.409, "tool_calls": 39, "host_warning": false, "swap_growth_bytes": 0},
+    {"model": "Qwen3.6-35B-A3B-oQ3e-mtp", "runtime": "oMLX 0.7.0", "variant": "normal", "run": "model-search-q36q3-07-task03-20260930", "native_completed": true, "independent_grade": "PASS", "active_seconds": 113.527, "tool_calls": 20, "host_warning": false, "swap_growth_bytes": 0},
+    {"model": "Qwen3.6-35B-A3B-oQ3e-mtp", "runtime": "oMLX 0.7.0", "variant": "fast", "run": "model-search-q36q3-07-fast-task03-20260930", "native_completed": true, "independent_grade": "PASS", "active_seconds": 102.064, "tool_calls": 25, "host_warning": false, "swap_growth_bytes": 0},
+    {"model": "Qwen3.8-27B-oQ4e-mtp", "runtime": "oMLX 0.7.0", "variant": "fast", "run": "model-search-q38q4-07-fast-task03-20260930", "native_completed": true, "independent_grade": "PASS", "active_seconds": 274.342, "tool_calls": 21, "host_warning": false, "swap_growth_bytes": 0},
+    {"model": "Qwen3.8-27B-3bit-mlx", "runtime": "oMLX 0.7.0", "variant": "fast", "run": "model-search-q38q3-07-fast-task03-20260930", "native_completed": false, "independent_grade": "FAIL", "active_seconds": 908.585, "tool_calls": 48, "failure": "15-minute active timeout; GET /api/summary?project=beta returned count 0 instead of 1", "host_warning": false, "swap_growth_bytes": 0}
+  ],
+  "other_quality_gates": {
+    "qwen36_q3_fast_task06": "Staged native Agent settled after evaluator replied to its question and injected the specified 503. Independent backend and browser checks passed. First stage asked for evaluator input too early; the implementation was functional but visually utilitarian. Run: model-search-q36q3-07-fast-task06-20260930.",
+    "qwen36_q3_fast_task12": "Native plan and build did not produce an independently accepted UI. A focused repair still failed the frozen edit-row browser check; one repair stage also observed host warning. Run: model-search-q36q3-07-fast-task12-20260930.",
+    "qwen38_q4_fast_task06": "Independent browser checker passed the produced code, but the native Agent was aborted by sustained host memory warning before completing. Run: model-search-q38q4-07-fast-task06-20260930.",
+    "qwen36_q2": "Historical Task02 passed, but tool-call smoke was intermittent and Task06 did not converge. See 2026-09-30-native-model-and-stack-screen.json."
+  },
+  "qwen36_q4_screen": {
+    "source": "Jundot/Qwen3.6-35B-A3B-oQ4e-mtp@14c285372cbdb1777adea5bb49087ced0bffc0b5",
+    "verified_weight_bytes": 21612801291,
+    "protocol_run": "model-search-q36q4-07-protocol/protocol-20261001T023240Z-f58c28c2",
+    "tool_first_and_replay": "PASS",
+    "think_stream": "FAIL: 512-token cap consumed by reasoning, no final content",
+    "short_screen_swap_growth_mib": 782.37,
+    "result": "Rejected for this occupied 48 GiB Mac. No coding or long-context load was attempted after the memory failure; private weights and cache were removed after hash verification."
+  },
+  "qwen36_q3_fast_context": {
+    "49k": "Semantic facts recovered, normal pressure and zero swap growth; answer wrapped JSON in a Markdown fence, so strict format failed.",
+    "64k": "Two cold requests recovered semantic facts with normal pressure and zero swap growth. An 8 GiB private SSD cache gave a 70.5 s cold answer, 1.06 s exact repeat, 81.1 s changed-facts request, and 1.34 s restored-prefix repeat with 65,529 cached tokens. Final restored response was Markdown-fenced, so strict JSON remained intermittent.",
+    "80k": "One cold request returned the facts with normal pressure; the repeated cold request hit sustained host warning and was cancelled. Not reliable.",
+    "92k": "Request cancelled during prefill after sustained host warning. Not reliable.",
+    "raw_run_prefix": "model-search-q36q3-07-fast-context/context-20261001T",
+    "scope": "Synthetic retrieval and prefix-cache evidence only; no sustained native Agent at 64K passed."
+  },
+  "sources": [
+    "https://huggingface.co/Qwen/Qwen3.6-35B-A3B",
+    "https://huggingface.co/Jundot/Qwen3.6-35B-A3B-oQ3e-mtp",
+    "https://huggingface.co/Jundot/Qwen3.6-35B-A3B-oQ4e-mtp",
+    "https://huggingface.co/Jundot/Qwen3.8-27B-oQ4e-mtp",
+    "https://huggingface.co/leonsarmiento/Qwen3.8-27B-3bit-mlx",
+    "https://github.com/jundot/omlx/releases/tag/v0.7.0"
+  ],
+  "remaining_gates": [
+    "Repeat the winning configuration on sustained coding/UI work with multiple compactions and a restart.",
+    "Pass independent Task12 UI/edit acceptance without an operator patch.",
+    "Qualify the 64K candidate in native work and strict answer format; 80K and 96K failed host-pressure repeatability under this load.",
+    "Clean install and rollback of any eventual runtime/model change before owner promotion or public release."
+  ]
+}
