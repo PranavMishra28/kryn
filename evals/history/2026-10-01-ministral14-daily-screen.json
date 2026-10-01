@@ -54,6 +54,6 @@
     "public_release": "PAUSED"
   },
   "private_raw_archive": "~/Library/Application Support/LocalAI/runs/ministral14-screen-20261001",
-  "private_archive_manifest_sha256": "cf6f825ea322e95bad3ae7210566e0c56e285e5dbb568bf65d0c6d1cfd9b2c03",
+  "private_archive_manifest_sha256": "4eb51380eb6912c3a8e2344dc0a64d3ef80864a575d26a033fa8dd8ed9fb3a15",
   "owner_restore": "Private server stopped and candidate unloaded. The unpromoted 14B weights were removed after archiving pinned source and raw traces. Owned 9B oMLX 0.6.4 restarted; kryn bench passed guarded protocol, kryn doctor --deep rehashed every pinned file, runtime healthy and pressure normal; both owner settings hashes unchanged."
 }
