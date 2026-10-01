@@ -15,11 +15,15 @@
   "archive_manifest_sha256": "739a3fb46e4603d7fb788c2e7f6883139f9383afc21ac545bb06a9dc5571f5d8",
   "fresh_retries": [
     {"run": "managed-e35-20261001-02", "seconds": 16.942, "native_tool_calls": 0, "result": "Guard stopped a second cold load after two host-warning samples; swap grew 481,233,470 bytes. No coding-quality verdict."},
-    {"run": "managed-e35-20261001-03", "seconds": 7.148, "native_tool_calls": 0, "result": "Warm-cache preflight was not green; the driver sent no prompt. No coding-quality verdict."}
+    {"run": "managed-e35-20261001-03", "seconds": 7.148, "native_tool_calls": 0, "result": "Warm-cache preflight was not green; the driver sent no prompt. No coding-quality verdict."},
+    {"run": "managed-e35-20261001-04", "seconds": 15.566, "native_tool_calls": 0, "result": "After host swap had fallen to about 7.7 GB and a green guarded preflight, the cold model load again triggered sustained host memory warning. Sampled swap delta was zero. No coding-quality verdict."}
   ],
   "retry_raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-e35-retries-20261001",
   "retry_archive_manifest_sha256": "18bb227e185ad10543313cdf478cc0ea6981195e31d0fd16ae334e42900fe11b",
+  "fourth_retry_raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-e35-retry4-20261001",
+  "fourth_retry_archive_manifest_sha256": "a41b0b2b31e8662919aef4a27116b37a70dc014d24334af5b28898a47c70d802",
+  "fourth_retry_restore": "The private oMLX 0.7.0 server stopped, the installed owner Qwen3.5-9B-6bit/oMLX 0.6.4 server restarted, both owner settings hashes matched the pretrial snapshot, and kryn doctor passed. Cursor, Chrome and a VM remained open; no installed model or profile changed.",
   "retry_restore": "The private server exited, the owner Qwen3.5-9B-6bit/oMLX 0.6.4 server restarted, both owner settings hashes still matched, and kryn doctor passed. No installed profile changed.",
-  "next": "Retry fresh guarded coding trials only after host memory headroom is freed. Three resource-gated starts do not satisfy the model ladder's quality comparison.",
+  "next": "Retry fresh guarded coding trials only after host memory headroom is freed. Four resource-gated starts do not satisfy the model ladder's quality comparison.",
   "release": "PAUSED"
 }
