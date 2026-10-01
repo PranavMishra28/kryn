@@ -1,0 +1,23 @@
+{
+  "kind": "exact local shell workspace-alias control and 64K diagnostic",
+  "date_utc": "2026-10-01",
+  "base_main": "2d4cb92d1ac1d6d463362ab781c2158e4d7549ef",
+  "observed_failure": "On an actual-backend 64K Qwen3.5-9B-6bit managed UI run, the Agent issued 202 exact leading 'cd /workspace &&' shell commands. The nonexistent /workspace path caused 200 external_directory denials, 207 total tool errors, no controller checks, and an operator interruption after 969.285 seconds. Guard pressure stayed normal and swap fell; this was not a clean 64K quality verdict.",
+  "fix_scope": "In an Agent shell call with no explicit workdir, rewrite only a leading 'cd /workspace && ' prefix when /workspace does not exist. Native shell then starts in its existing project directory. Other paths, nonleading commands, explicit workdir calls and existing /workspace directories are unchanged. No agent loop, permission policy change or prompt rule was added.",
+  "controlled_native_probe": {
+    "conditions": "Two fresh disposable Task02 workspaces, identical prompt SHA256 cfc5966c863656d5b756702ea896a0546b607b0a46bff6499277dfb382d0eb9f, identical native tool-catalog SHA256 d412993103d9d3e775f44c8d77f4d048a56286e534fd8a3b19950768bd5d2c29, installed 9B/96K/22-GiB owner runtime, Fast Agent, same guard and zero operator interventions. The sole product-source variable was the plugin fix.",
+    "control_main": "The Agent called exactly 'cd /workspace && pwd'. Native shell returned Permission denied: external_directory. Driver completed in 14.866 seconds, with normal pressure and zero swap delta.",
+    "candidate": "The Agent called exactly 'cd /workspace && pwd'. Native shell completed with exit 0 and printed the actual disposable project directory. Driver completed in 29.086 seconds, with normal pressure and zero swap delta.",
+    "limit": "This proves the exact shell alias behavior, not autonomous application quality or a general directory permission policy."
+  },
+  "full_ui_followup": "A separate fresh 9B/64K candidate-plugin run lasted 1503.505 seconds with normal sampled pressure, falling swap, and one real native compaction. It did not issue the exact /workspace alias, so its different tool trajectory is not causal evidence for the alias fix. The controller refused acceptance: initial source/API, existing tests and JavaScript syntax passed; diff hygiene, Task06 browser stored-markup handling and Cancel Edit data integrity failed. The same-session repair was interrupted before a second verifier round. The independent final checker passed source/API, existing tests, syntax and diff hygiene but failed both browser flows. No 64K tier or autonomous task-quality gain is promoted.",
+  "raw_private_archives": {
+    "full_64k_runs": "~/Library/Application Support/LocalAI/runs/managed-9b64-alias-20261001",
+    "full_64k_manifest_sha256": "7fa57ed18a67d9fecfc55134a8f271be070e27a400159de6b6a5d3f198ec6819",
+    "exact_probe_runs": "~/Library/Application Support/LocalAI/runs/alias-probe-20261001",
+    "exact_probe_manifest_sha256": "93d201e23d47a600aeaf20a828f14186d73f018549b36608f8ba1c99c9f6f810"
+  },
+  "owner_restore": "The isolated 64K runtime was stopped. The installed Qwen3.5-9B-6bit/oMLX 0.6.4/96K/22-GiB owner server restarted, both owner settings hashes matched pretrial, and kryn doctor passed with browser/search connected. The exact probes used the owner runtime and left it healthy and idle.",
+  "qualification": "Narrow alias mechanism passed controlled native probe; autonomous coding/UI, useful 64K context, holdout, compaction/restart continuation and endurance remain unqualified or failed.",
+  "release": "PAUSED"
+}

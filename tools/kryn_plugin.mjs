@@ -88,6 +88,16 @@ function ownedBackgroundCommand(command) {
   }
   return quote || escaped ? null : match[1];
 }
+function projectAliasCommand(command) {
+  // Some local models assume a container-style /workspace. Map only an exact
+  // leading cd when that path does not exist; native shell already starts in
+  // the current project. Leave every other path and command untouched.
+  const prefix = /^[ \t]*cd[ \t]+\/workspace[ \t]*&&[ \t]*(?=\S)/;
+  if (!prefix.test(command)) return null;
+  try { fs.lstatSync('/workspace'); return null; }
+  catch (error) { if (error?.code !== 'ENOENT') return null; }
+  return command.replace(prefix, '');
+}
 const PLAN_GUIDANCE = 'Plan mode: inspect the project and produce an actionable plan with acceptance checks. Do not edit project files or run shell commands. Native plan-file writes are allowed only in the OpenCode plan directory. To implement, switch to Agent.';
 const BROWSER_GUIDANCE = "Use the configured browser tools to inspect the requested page, exercise the supplied acceptance criteria, and report observations and failures. Include an error state and a narrow viewport for UI work. A page loading is not proof that login, persistence or other flows work. You cannot edit code or run shell commands. Return concrete reproduction steps to Agent for repairs.";
 const REVIEW_GUIDANCE = 'Review a bounded scope. Read source rather than dependencies or minified build output. Use focused ranges and searches; do not reread every file after compaction. A TEST_REPORT or prior assistant claim is not execution evidence. Tests that copy implementation logic do not validate the application. Report unsupported browser/test claims explicitly. You cannot execute commands; state checks as unrun instead of attempting execute or shell. Return actionable findings and unreviewed scope promptly.';
@@ -878,6 +888,10 @@ export default {
       // job before repeat/check tracking classifies this shell call. Native
       // jobs are persistent only when no foreground timeout is supplied.
       if (event.tool === 'shell' && typeof event.input?.command === 'string') {
+        if (AGENT_ROLES.has(event.agent) && !Object.hasOwn(event.input, 'workdir')) {
+          const command = projectAliasCommand(event.input.command);
+          if (command) event.input = { ...event.input, command };
+        }
         const command = ownedBackgroundCommand(event.input.command);
         if (command) event.input = { ...event.input, command, background: true };
       }
