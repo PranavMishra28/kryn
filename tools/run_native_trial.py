@@ -29,9 +29,9 @@ EXA_TOOLS = {"search_web_fetch_exa", "search_web_search_advanced_exa", "search_w
 
 class NativeResourceGuard:
     """Resource sampling only; the main thread owns all native HTTP/control calls."""
-    def __init__(self, folder, samples):
+    def __init__(self, folder, samples, warning_samples=2):
         self.samples = samples
-        self.guard = ResourceGuard(512 * 1024**2, 2)
+        self.guard = ResourceGuard(512 * 1024**2, warning_samples)
         self.cancel, self.stop = threading.Event(), threading.Event()
         self.log = (folder / "resources.jsonl").open("x")
         self.watcher = None
@@ -58,8 +58,10 @@ class NativeResourceGuard:
     def start(self):
         for index in range(3):
             self.sample()
-            if self.cancel.is_set() or self.samples[-1].get("pressure_level") != 1:
-                self.guard.reason = self.guard.reason or "resource preflight was not green; no prompt sent"
+            allowed = {1, 2} if self.guard.warning_samples is None else {1}
+            if self.cancel.is_set() or self.samples[-1].get("pressure_level") not in allowed:
+                self.guard.reason = self.guard.reason or ("resource preflight was not green; no prompt sent"
+                    if self.guard.warning_samples is not None else "resource preflight refused pressure; no prompt sent")
                 self.cancel.set()
                 raise RuntimeError(self.guard.reason)
             if index < 2:
@@ -694,6 +696,16 @@ def guard_self_check():
             monitor.close()
         assert not monitor.watcher.is_alive() and monitor.log.closed
         assert summarize_resources(monitor.samples)["warning_or_critical_observed"]
+        (folder / "daily").mkdir()
+        daily = NativeResourceGuard(folder / "daily", [], warning_samples=None)
+        with patch(__name__ + ".resources", return_value={**green, "pressure_level": 2}), patch.object(time, "sleep", lambda _: None):
+            daily.start()
+            daily.sample()
+            assert daily.preflight_passed and not daily.cancel.is_set()
+            with patch(__name__ + ".resources", return_value={**green, "pressure_level": 4}):
+                daily.sample()
+                assert daily.cancel.is_set() and daily.guard.reason == "critical host memory pressure"
+            daily.close()
         class Server:
             def __init__(self, foreign=False, busy=False, paginated=False, cyclic=False):
                 self.paths, self.foreign, self.busy = [], foreign, busy
@@ -1019,7 +1031,9 @@ def main():
     ap.add_argument("--without-browser", action="store_true", help="omit browser MCP in a disposable code stage; run browser acceptance separately")
     ap.add_argument("--ready-tools", action="store_true", help="wait up to 30s for connected MCP servers and a stable tool catalog before prompting")
     ap.add_argument("--expected-tools", type=Path, help="require exact equality with baseline tool-catalog.json; implies --ready-tools")
-    ap.add_argument("--guard-resources", action="store_true", help="require green/idle preflight; cancel only owned sessions on sustained pressure, missing telemetry or >512 MiB swap growth")
+    guards = ap.add_mutually_exclusive_group()
+    guards.add_argument("--guard-resources", action="store_true", help="strict research guard: require green preflight and stop on sustained warning")
+    guards.add_argument("--daily-use-guard", action="store_true", help="match the interactive KRYN guard: allow warning pressure, stop on critical pressure, missing telemetry or >512 MiB swap growth")
     ap.add_argument("--candidate-product-source", action="store_true",
                     help="snapshot this checkout's product plugin into the disposable trial; do not change the owner installation")
     ap.add_argument("--managed-acceptance", type=Path,
@@ -1171,13 +1185,14 @@ def main():
                 if sampling_stop.wait(5):
                     break
     sampler = threading.Thread(target=sample_resources, daemon=True)
-    monitor = NativeResourceGuard(folder, samples) if args.guard_resources else None
+    monitor = NativeResourceGuard(folder, samples, None if args.daily_use_guard else 2) if (args.guard_resources or args.daily_use_guard) else None
     if monitor is None:
         sampler.start()
     else:
-        report["resource_guard"] = {"green_samples_before_prompt": 3, "sample_interval_seconds": 2,
-            "warning_samples_to_abort": 2, "max_swap_growth_bytes": 512 * 1024**2,
-            "any_warning_fails_acceptance": True, "missing_telemetry_aborts": True}
+        report["resource_guard"] = {"allowed_preflight_pressure": [1, 2] if args.daily_use_guard else [1],
+            "sample_interval_seconds": 2, "warning_samples_to_abort": None if args.daily_use_guard else 2,
+            "max_swap_growth_bytes": 512 * 1024**2,
+            "any_warning_fails_acceptance": not args.daily_use_guard, "missing_telemetry_aborts": True}
         report.update(operator_interventions=0, automatic_interventions=0)
     exports, server = [], None
     try:
@@ -1404,7 +1419,7 @@ def main():
         report["resources"] = summarize_resources(samples)
         if monitor is not None:
             summary = report["resources"]
-            clean = (summary["telemetry_complete"] and not summary["warning_or_critical_observed"]
+            clean = (summary["telemetry_complete"] and (args.daily_use_guard or not summary["warning_or_critical_observed"])
                      and summary["swap_peak_growth_bytes"] <= 512 * 1024**2
                      and not monitor.guard.reason and not report.get("resource_cleanup_error"))
             report.setdefault("acceptance_checks", {}).update(resource_guard_clean=clean,
