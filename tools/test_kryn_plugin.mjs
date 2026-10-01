@@ -813,6 +813,26 @@ test('plain detached servers become native owned background jobs', async () => {
   } finally { await cleanup(); f.remove(); }
 });
 
+test('missing container workspace alias resolves only at the start of an Agent shell call', async () => {
+  if (fs.existsSync('/workspace')) return;
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const call = input => {
+    const event = { sessionID: 'ses_1', agent: 'agent', tool: 'shell', input };
+    f.call('tool.execute.before', event);
+    return event.input;
+  };
+  try {
+    assert.deepEqual(call({ command: 'cd /workspace && python -m unittest test_existing' }),
+      { command: 'python -m unittest test_existing' });
+    assert.deepEqual(call({ command: 'cd /workspace && python -m app.server', background: true }),
+      { command: 'python -m app.server', background: true });
+    for (const command of ['echo hi && cd /workspace', 'cd /workspace-other && pwd'])
+      assert.equal(call({ command }).command, command);
+    assert.equal(call({ command: 'cd /workspace && pwd', workdir: f.root }).command,
+      'cd /workspace && pwd');
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('direct process signals are refused before native shell execution', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const call = command => f.call('tool.execute.before', {
