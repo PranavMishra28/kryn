@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Synthetic context/cache checks, not sustained agent qualification.
 
-Uses oMLX 0.6.4 /v1/messages/count_tokens, then verifies actual prompt_tokens.
+Uses oMLX /v1/messages/count_tokens, then verifies actual prompt_tokens.
 Never changes settings, clears caches, reads credentials, or follows cloud URLs.
 Run --self-check offline. Other modes make real local inference requests.
 """
@@ -343,7 +343,7 @@ def perform(args, folder, report):
         n = (r.get("json") or {}).get("input_tokens")
         if r.get("http_status") != 200 or r.get("transport_error") or type(n) is not int or n <= 0:
             raise RuntimeError("No trustworthy token-count API response; exact-size testing unavailable")
-        return n
+        return n + args.count_offset
 
     def send(label, messages, target, expected, oversize=False):
         nonlocal baseline_swap
@@ -352,7 +352,7 @@ def perform(args, folder, report):
             raise RuntimeError("Measured input exceeds text admission or the declared conservative planning budget")
         if not idle(label + "-before"):
             raise RuntimeError("Runtime is not idle on the expected model; no generation sent")
-        payload = protocol.body(args.model, "xhigh", messages, 1 if oversize else args.max_tokens)
+        payload = protocol.body(args.model, args.variant, messages, 1 if oversize else args.max_tokens)
         dispatch = {"stage": label, "attempted": False}
         report.setdefault("dispatches", []).append(dispatch)
         settled = False
@@ -424,7 +424,7 @@ def perform(args, folder, report):
         messages, units, preflight_tokens, seen = calibrate(target, count, lambda n: prompt(n, nonce))
         report["calibrations"].append({"target_tokens": target, "units": units,
             "counted_tokens": preflight_tokens, "api_samples": seen,
-            "count_endpoint": COUNT_PATH, "template": "single user message; Qwen default/xhigh thinking"})
+            "count_endpoint": COUNT_PATH, "template": "single user message; Qwen " + args.variant})
         if args.mode == "oversize":
             send("oversize", messages, target, FACTS["A"], oversize=True)
             break
@@ -510,6 +510,7 @@ def self_check():
     assert guard.check({**green, "listener_processes": [{"pid": 2, "rss_bytes": 100}]})
     args = SimpleNamespace(base_url="http://127.0.0.1", model="test", mode="cache", timeout=1,
         max_tokens=128, input_tokens=[512], server_context_limit=4096, planning_budget=4096,
+        variant="think", count_offset=0,
         sample_interval=.01, warning_samples=2, max_swap_growth_mib=512, min_cache_fraction=.5)
     sent, busy, bad_repeat, bad_telemetry, fault = [], False, False, False, None
     def fake_request(_base, _folder, _label, path, payload=None, **_kwargs):
@@ -584,6 +585,9 @@ def main():
     p.add_argument("--self-check", action="store_true")
     p.add_argument("--base-url", default="http://127.0.0.1:8000")
     p.add_argument("--model")
+    p.add_argument("--variant", choices=("fast", "think"), default="think")
+    p.add_argument("--count-offset", type=int, default=0,
+                   help="observed generation minus count-endpoint tokens; verify against actual usage")
     p.add_argument("--nonce", help="optional fixed fixture ID for exact request replay across configurations")
     p.add_argument("--runs-dir", type=Path)
     p.add_argument("--mode", choices=("cache", "context", "oversize"), default="cache")
@@ -627,6 +631,8 @@ def main():
             raise ValueError("invalid telemetry interval, cache threshold or swap budget")
         if not 1 <= args.warning_samples <= 10:
             raise ValueError("warning-samples must be 1..10")
+        if not -8 <= args.count_offset <= 8:
+            raise ValueError("count offset must be within -8..8")
     except ValueError as e:
         p.error(str(e))
     args.runs_dir.mkdir(parents=True, exist_ok=True)
@@ -634,8 +640,10 @@ def main():
     nonce = args.nonce or run_id
     folder = args.runs_dir / ("context-" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + run_id[:8])
     folder.mkdir()
-    report = {"schema_version": 2, "probe_revision": 4, "run_nonce": nonce,
+    report = {"schema_version": 2, "probe_revision": 5, "run_nonce": nonce,
         "model": args.model, "base_url": args.base_url, "mode": args.mode,
+        "variant": args.variant,
+        "count_offset": args.count_offset,
         "server_context_limit_asserted_by_operator": args.server_context_limit,
         "requested_output_max_tokens": 1 if args.mode == "oversize" else args.max_tokens,
         "planning_budget_tokens": args.planning_budget, "min_cache_fraction": args.min_cache_fraction,
