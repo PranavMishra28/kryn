@@ -12,7 +12,7 @@ KRYN's wheel contains KRYN source, configuration, lockfiles and license notices.
 | Google Chrome | Separately installed proprietary browser; not redistributed. [Chrome terms](https://www.google.com/chrome/terms/). |
 | Node.js | Separately provisioned runtime; compatible 22.x releases or pinned 22.23.1 fallback. [Upstream license and bundled notices](https://github.com/nodejs/node/blob/v22.23.1/LICENSE). |
 | CPython | uv-managed runtime; [Python license](https://docs.python.org/3/license.html) and bundled dependency notices apply. Runtime bytes are not included in KRYN's wheel. |
-| huggingface-hub 1.32.0 model-download tool | Downloaded temporarily with pinned direct and transitive versions; [Apache-2.0 at the exact tag](https://github.com/huggingface/huggingface_hub/blob/v1.32.0/LICENSE). Its dependencies retain their own licenses and are not bundled in KRYN's wheel. |
+| huggingface-hub 1.32.0 model-download tool | Installed on demand with pinned direct and transitive versions; [Apache-2.0 at the exact tag](https://github.com/huggingface/huggingface_hub/blob/v1.32.0/LICENSE). Its dependencies retain their own licenses and are not bundled in KRYN's wheel. |
 | uv 0.11.16 fallback | Separately downloaded original-publisher artifact; [MIT/Apache-2.0 licensing](https://github.com/astral-sh/uv/tree/0.11.16). |
 | hatchling 1.32.4 | MIT; [upstream](https://github.com/pypa/hatch). Build dependency only, not needed by the installed runtime. |
 
