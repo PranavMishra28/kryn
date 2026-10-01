@@ -21,6 +21,7 @@
   "other_quality_gates": {
     "qwen36_q3_fast_task06": "Staged native Agent settled after evaluator replied to its question and injected the specified 503. Independent backend and browser checks passed. First stage asked for evaluator input too early; the implementation was functional but visually utilitarian. Run: model-search-q36q3-07-fast-task06-20260930.",
     "qwen36_q3_fast_task12": "Native plan and build did not produce an independently accepted UI. A focused repair still failed the frozen edit-row browser check; one repair stage also observed host warning. Run: model-search-q36q3-07-fast-task12-20260930.",
+    "qwen36_q3_normal64_task12": "A later 64K normal-reasoning repeat was aborted in Plan after 15.984 s by the resource guard: host warning, 1,031,610,040 bytes of swap growth, and no implementation edits. The frozen automatic grade failed on the untouched fixture; no model-quality conclusion is possible from this aborted turn. Run: model-search-q36q3-07-normal64-task12-20260930.",
     "qwen38_q4_fast_task06": "Independent browser checker passed the produced code, but the native Agent was aborted by sustained host memory warning before completing. Run: model-search-q38q4-07-fast-task06-20260930.",
     "qwen36_q2": "Historical Task02 passed, but tool-call smoke was intermittent and Task06 did not converge. See 2026-09-30-native-model-and-stack-screen.json."
   },
@@ -52,7 +53,7 @@
   "remaining_gates": [
     "Repeat the winning configuration on sustained coding/UI work with multiple compactions and a restart.",
     "Pass independent Task12 UI/edit acceptance without an operator patch.",
-    "Qualify the 64K candidate in native work and strict answer format; 80K and 96K failed host-pressure repeatability under this load.",
+    "Qualify the 64K candidate in native work under representative occupied-Mac load and strict answer format; a 64K normal Plan was resource-aborted, while 80K and 96K failed host-pressure repeatability.",
     "Clean install and rollback of any eventual runtime/model change before owner promotion or public release."
   ]
 }
