@@ -13,6 +13,13 @@
   },
   "raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-e35-load-abort-20261001",
   "archive_manifest_sha256": "739a3fb46e4603d7fb788c2e7f6883139f9383afc21ac545bb06a9dc5571f5d8",
-  "next": "Retry fresh guarded coding trials only if host memory headroom is freed. A cold-load abort does not satisfy the model ladder's quality comparison.",
+  "fresh_retries": [
+    {"run": "managed-e35-20261001-02", "seconds": 16.942, "native_tool_calls": 0, "result": "Guard stopped a second cold load after two host-warning samples; swap grew 481,233,470 bytes. No coding-quality verdict."},
+    {"run": "managed-e35-20261001-03", "seconds": 7.148, "native_tool_calls": 0, "result": "Warm-cache preflight was not green; the driver sent no prompt. No coding-quality verdict."}
+  ],
+  "retry_raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-e35-retries-20261001",
+  "retry_archive_manifest_sha256": "18bb227e185ad10543313cdf478cc0ea6981195e31d0fd16ae334e42900fe11b",
+  "retry_restore": "The private server exited, the owner Qwen3.5-9B-6bit/oMLX 0.6.4 server restarted, both owner settings hashes still matched, and kryn doctor passed. No installed profile changed.",
+  "next": "Retry fresh guarded coding trials only after host memory headroom is freed. Three resource-gated starts do not satisfy the model ladder's quality comparison.",
   "release": "PAUSED"
 }
