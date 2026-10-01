@@ -35,11 +35,6 @@ DMG_MIRROR_URL = "https://downloads.sourceforge.net/project/omlx.mirror/v0.6.4/o
 DMG_SHA = "53f1506c2385e8920a67198b72d1fe09351c1b3538be9c6bdeb78e5277d06d93"
 CLI_URL = "https://registry.npmjs.org/@opencode/cli-darwin-arm64/-/cli-darwin-arm64-2.0.10.tgz"
 CLI_SHA = "acb2f84e60c47a2437d6316c173250fa0a3f6af6ac9e55dadf7538996f49d84d6f3763222c639e690ce5398438804ef605b92ba763e5fc9531d4924288ada5dd"
-DOC_PACKAGES = ["python-docx==1.2.0", "python-pptx==1.0.2", "openpyxl==3.1.5",
-                "matplotlib==3.11.2", "pypdf==6.19.0", "pypdfium2==5.13.0",
-                "reportlab==5.0.1", "Pillow==12.3.0"]
-
-
 def load_profile(path=None):
     profile = json.loads(Path(path or HERE / "accepted-profile.json").read_text())
     if not isinstance(profile, dict) or set(profile) - {"repository", "revision", "memory_gib", "files", "model_parent"}:
@@ -513,7 +508,7 @@ def main():
     elif args.phase == "documents":
         if not venv.exists():
             run([uv, "venv", "--python", python, venv], env)
-        requirements = ["-r", resolved] if resolved.exists() else DOC_PACKAGES
+        requirements = ["-r", resolved if resolved.exists() else HERE / "document-requirements.txt"]
         run([uv, "pip", "install", "--python", venv / "bin/python", *requirements], env)
         frozen = subprocess.check_output([str(uv), "pip", "freeze", "--python", str(venv / "bin/python")], env=env, text=True)
         write_same(resolved, frozen)

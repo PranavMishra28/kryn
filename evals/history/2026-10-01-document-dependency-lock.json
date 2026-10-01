@@ -1,0 +1,15 @@
+{
+  "kind": "optional document dependency version lock candidate",
+  "date_utc": "2026-10-01",
+  "change": "Fresh optional document installations use 22 exact Python 3.13 Apple Silicon package versions from a curated wheel payload file. Existing owner resolved-requirements.txt takes precedence to preserve previously installed optional environments.",
+  "validation": {
+    "resolution": "uv pip compile resolved all eight direct document packages and their transitive packages to 22 exact versions",
+    "disposable_install": "PASS: uv venv --python 3.13 plus uv pip install -r candidate lock installed all 22 packages under /private/tmp",
+    "imports": "PASS: docx, pptx, openpyxl, matplotlib, pypdf, pypdfium2, reportlab and PIL imported in that disposable environment"
+  },
+  "limits": [
+    "The version list does not enforce distribution hashes and is specific to the supported Apple Silicon Python 3.13 profile.",
+    "The owner's existing optional document environment was not changed; final owner install and rollback remain release gates."
+  ],
+  "release_status": "CANDIDATE_ONLY"
+}
