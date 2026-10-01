@@ -82,6 +82,33 @@ test('a native UI edit without later browser work becomes a bounded regression i
   } finally { await cleanup(); f.remove(); }
 });
 
+test('browser evidence becomes stale when project bytes change after the browser call', async () => {
+  for (const changed of [false, true]) {
+    const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+    try {
+      fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+      execFileSync('/usr/bin/git', ['init', '-q'], { cwd: f.root });
+      execFileSync('/usr/bin/git', ['add', '.gitignore'], { cwd: f.root });
+      execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+        'commit', '-qm', 'seed'], { cwd: f.root });
+      const file = path.join(f.root, 'web', 'app.js');
+      fs.mkdirSync(path.dirname(file));
+      const edit = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_1', id: 'call_1',
+        tool: 'write', input: { path: file, content: 'document.body.textContent = "one";\n' } };
+      f.call('tool.execute.before', edit);
+      fs.writeFileSync(file, edit.input.content);
+      f.call('tool.execute.after', { ...edit, status: 'completed', result: { content: [] } });
+      f.call('tool.execute.after', { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_2',
+        id: 'call_2', tool: 'browser_browser_snapshot', status: 'completed', result: { content: [] } });
+      if (changed) fs.writeFileSync(file, 'document.body.textContent = "two";\n');
+      await f.emit('session.execution.succeeded');
+      assert.equal(f.continuations.length, 0);
+      assert.equal(f.read('incidents').length, changed ? 1 : 0);
+      if (changed) assert.ok(f.read('incidents')[0].triggers.includes('ui_browser_stale'));
+    } finally { await cleanup(); f.remove(); }
+  }
+});
+
 test('UI incident capture skips browser work, Browse handoffs and non-UI edits', async () => {
   for (const browserTool of [null, 'browser_browser_navigate', 'browser_browser_evaluate', 'subagent']) {
     const f = fixture(); const cleanup = await plugin.setup(f.ctx);
