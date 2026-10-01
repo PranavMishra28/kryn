@@ -1,0 +1,46 @@
+{
+  "kind": "private opt-in JavaScript binding diagnostic rejection",
+  "date_utc": "2026-10-01",
+  "decision": "REJECT: independent coding/UI browser acceptance failed; do not install, merge, or release this candidate",
+  "source": {
+    "base_main": "a5e2ce6a8c0c62c78048de8d85f7c140a52be4fe",
+    "uncommitted_product_plugin_sha256": "080dc6ee48675c014f92d7c62f72fefc33ada38b324c7b4b915b633a00befa7d",
+    "failed_app_js_sha256": "5469cb2f75fe5d80dece64174ab462c499eab81dda76cc0b388c7fc02cf7b823",
+    "private_driver_sha256": "7fef2cfa498c8c795edb5b58d844a440719630486e62e372aaf7ca34393ca438",
+    "exact_prompt_sha256": "91d2a2c70ae2d9a02da743068501b2c20e7da43dbf801fac1513bad08d85e996",
+    "private_eslint_tool_sha256": "dafa6b826443dfd3a688e2c7ec933428a169353ca720d7a41837f25ffaec62a1",
+    "private_eslint_lock_sha256": "0c388ff612deacf5b40a86c15c30a8627b9acf40e0f57ced44169549c90088a1"
+  },
+  "private_raw": "~/Library/Application Support/LocalAI/runs/no-undef-candidate-20261001",
+  "private_copy_manifest_sha256": "379b710a473777e9dfd1dcc057df722aed59152ed7cc78d21dd34822266d4e49",
+  "private_archive_manifest_v2_sha256": "4abb050d329d68280b2d3922f14437f77ab3d8bfa35d97993b997acaffc84d97",
+  "trial": {
+    "configuration": "owner OpenCode 2.0.10 / oMLX 0.6.4 / Qwen3.5-9B-6bit, Fast, configured 96K context, 8192 output, 22 GiB process ceiling; same candidate product plugin source reserved for both arms",
+    "workload": "fresh frozen Task06 seed plus exact September 30 Cancel Edit prompt; no operator code repairs",
+    "wall_seconds": 339.762,
+    "native_tool_calls": 33,
+    "native_completed": true,
+    "route_verified": true,
+    "lint_notices": 0,
+    "resource_guard": "PASS for this short run: 162 complete samples, normal pressure only, zero swap growth, no abort; battery 89% to 75%",
+    "frozen_automatic_checks": "PASS for existing two source/API cases; this does not establish browser acceptance",
+    "external_task06_browser": "FAIL: after an injected POST 503, the form performed an unintended GET navigation and accessible failure feedback did not appear; manual retry was not reached",
+    "external_cancel_edit_browser": "FAIL: Edit raised a JSON parse page error and never showed Cancel Edit; initial hidden state was observed, but cancel/data preservation and Save-after-cancel were not reached",
+    "source_findings": [
+      "web/app.js:31 parses rendered row text as JSON, which fails after clicking Edit",
+      "web/app.js:211 registers saveEntry as a submit handler without preventing the default form navigation",
+      "web/app.js:44-46 removes a Cancel Edit button, but the completed client never creates one"
+    ],
+    "baseline_arm": "NOT_RUN: stopped after decisive candidate browser failure; no comparative latency or quality claim",
+    "limits": "The opt-in no-undef check did not fire because these failures use defined names; native completion and green resource samples do not establish useful autonomous coding/UI quality"
+  },
+  "owner_after": "oMLX healthy and idle with the 9B model, normal host pressure; no owned trial process or disposable app listener remained",
+  "evidence": {
+    "native": "run/evidence/lint-candidate2/driver.json",
+    "events": "run/evidence/lint-candidate2/events.jsonl",
+    "resource_samples": "run/evidence/lint-candidate2/resources.jsonl",
+    "task06_browser": "run/evidence/external-acceptance/task06/browser-report.json",
+    "cancel_edit_browser": "run/evidence/external-acceptance/cancel/report.json",
+    "failed_source": "run/workspace/web/app.js"
+  }
+}
