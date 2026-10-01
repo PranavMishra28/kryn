@@ -20,8 +20,6 @@ import sys
 import tarfile
 import tempfile
 import time
-import urllib.request
-import urllib.parse
 from . import __version__
 
 NODE_URL = "https://nodejs.org/dist/v22.23.1/node-v22.23.1-darwin-arm64.tar.gz"
@@ -445,17 +443,7 @@ def install():
         node = selected_node(root, setup, env)
         env["PATH"] = str(node.parent) + os.pathsep + env.get("PATH", "")
         model_dir, model_marker, model_identity = setup.model_destination(root, profile)
-        missing = [n for n in profile["files"] if not (model_dir / n).exists()]
-        if missing:
-            total = 0
-            for name in missing:
-                url = "https://huggingface.co/" + profile["repository"] + "/resolve/" + profile["revision"] + "/" + urllib.parse.quote(name, safe="/")
-                with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=30) as response:
-                    size = response.headers.get("Content-Length")
-                    if not size or not size.isdigit(): raise RuntimeError("Cannot establish download disk budget")
-                    total += int(size)
-            if shutil.disk_usage(root).free < total + 40 * 1024**3:
-                raise RuntimeError("Model download would leave less than 40 GiB disk reserve")
+        setup.check_model_download_space(root, model_dir, profile)
         setup.download_omlx(root / "downloads/oMLX-0.6.4-macos26-27.dmg")
         archive = root / "downloads/opencode-2.0.10.tgz"
         setup.download(setup.CLI_URL, archive, "sha512", setup.CLI_SHA)

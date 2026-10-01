@@ -1300,14 +1300,50 @@ class SetupChecks(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             setup.model_destination(self.root)
 
-    def test_unrelated_files_do_not_reduce_disk_reserve(self):
+    def test_optional_phases_keep_their_disk_reserve(self):
         unrelated = self.root / "browser-output"
         unrelated.write_bytes(b"unrelated")
         with self.assertRaises(RuntimeError):
-            setup.require_space(110 * setup.GIB, "core")
-        setup.require_space(140 * setup.GIB, "core")
-        with self.assertRaises(RuntimeError):
-            setup.require_space(103 * setup.GIB, "documents")
+            setup.require_optional_space(103 * setup.GIB)
+        setup.require_optional_space(104 * setup.GIB)
+
+    def test_model_download_budget_uses_only_missing_pinned_bytes_and_exact_boundary(self):
+        model = self.root / "models"
+        model.mkdir()
+        (model / "cached.safetensors").write_bytes(b"cached")
+        profile = {"repository": "owner/model", "revision": "a" * 40,
+                   "files": {"cached.safetensors": "0" * 64,
+                             "dir/missing model.safetensors": "1" * 64}}
+        response = MagicMock()
+        response.__enter__.return_value.headers = {"Content-Length": str(4 * setup.GIB)}
+        with patch.object(setup.urllib.request, "urlopen", return_value=response) as head, \
+             patch.object(setup.shutil, "disk_usage", return_value=MagicMock(free=44 * setup.GIB)) as disk:
+            setup.check_model_download_space(self.root, model, profile)
+            request = head.call_args.args[0]
+            self.assertEqual(request.get_method(), "HEAD")
+            self.assertEqual(request.full_url, "https://huggingface.co/owner/model/resolve/" +
+                             "a" * 40 + "/dir/missing%20model.safetensors")
+            self.assertEqual(head.call_args.kwargs, {"timeout": 30})
+            disk.assert_called_once_with(self.root)
+            disk.return_value.free -= 1
+            with self.assertRaisesRegex(RuntimeError, "40 GiB disk reserve"):
+                setup.check_model_download_space(self.root, model, profile)
+        self.assertEqual(sorted(p.name for p in model.iterdir()), ["cached.safetensors"])
+        (model / "dir").mkdir()
+        (model / "dir/missing model.safetensors").write_bytes(b"cached")
+        with patch.object(setup.urllib.request, "urlopen", side_effect=AssertionError("network forbidden")), \
+             patch.object(setup.shutil, "disk_usage", side_effect=AssertionError("disk check forbidden")):
+            setup.check_model_download_space(self.root, model, profile)
+
+    def test_missing_model_size_fails_closed(self):
+        response = MagicMock()
+        response.__enter__.return_value.headers = {}
+        with patch.object(setup.urllib.request, "urlopen", return_value=response), \
+             patch.object(setup.shutil, "disk_usage", side_effect=AssertionError("no disk check without size")):
+            with self.assertRaisesRegex(RuntimeError, "Cannot establish download disk budget"):
+                setup.check_model_download_space(self.root, self.root / "models",
+                                                 {"repository": "owner/model", "revision": "a" * 40,
+                                                  "files": {"missing.safetensors": "0" * 64}})
 
     def test_verified_download_is_reused_and_bad_hash_fails_offline(self):
         target = self.root / "download"
@@ -1383,6 +1419,8 @@ class SetupChecks(unittest.TestCase):
     def test_default_preflight_cannot_download_write_or_install(self):
         fake_socket = MagicMock()
         fake_socket.__enter__.return_value.connect_ex.return_value = 1
+        response = MagicMock()
+        response.__enter__.return_value.headers = {"Content-Length": "0"}
         with contextlib.ExitStack() as stack:
             stack.enter_context(patch.object(sys, "argv", ["setup.py"]))
             stack.enter_context(patch.object(Path, "home", return_value=self.root))
@@ -1394,13 +1432,16 @@ class SetupChecks(unittest.TestCase):
             stack.enter_context(patch.object(setup.subprocess, "check_output", side_effect=lambda cmd, **kw: "arm64 22.23.1" if "-p" in cmd else str(48 * setup.GIB).encode()))
             stack.enter_context(patch.object(setup.subprocess, "run", return_value=MagicMock(returncode=1)))
             stack.enter_context(patch.object(setup.socket, "socket", return_value=fake_socket))
-            stack.enter_context(patch.object(setup.shutil, "disk_usage", return_value=MagicMock(free=180 * setup.GIB)))
+            stack.enter_context(patch.object(setup.shutil, "disk_usage", return_value=MagicMock(free=44 * setup.GIB)))
+            head = stack.enter_context(patch.object(setup.urllib.request, "urlopen", return_value=response))
             stack.enter_context(patch.dict(setup.os.environ, {}, clear=True))
             for name in ("download", "write_same", "run", "extract_cli", "npm_install"):
                 stack.enter_context(patch.object(setup, name, side_effect=AssertionError(f"{name} forbidden")))
             output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
             setup.main()
             self.assertIn("READ-ONLY preflight passed", output.getvalue())
+            self.assertTrue(head.called)
+            self.assertTrue(all(call.args[0].get_method() == "HEAD" for call in head.call_args_list))
         self.assertEqual(list(self.root.iterdir()), [])
 
 
