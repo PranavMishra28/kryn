@@ -376,6 +376,9 @@ class SetupChecks(unittest.TestCase):
         directory.mkdir()
         (directory / "model.safetensors").write_bytes(payloads["model.safetensors"])
         def fake_run(command, env):
+            self.assertIn("--isolated", command)
+            self.assertEqual(command[command.index("--python") + 1], "3.13")
+            self.assertEqual(command[command.index("--constraints") + 1], setup.HERE / "hf-download-constraints.txt")
             start = command.index(profile["repository"]) + 1
             filenames = command[start:command.index("--revision")]
             self.assertEqual(len(filenames), 1)  # Multi-file CLI requests take the defective snapshot path.

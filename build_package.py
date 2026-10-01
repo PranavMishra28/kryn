@@ -13,7 +13,7 @@ import zipfile
 
 FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
     "setup/setup.py", "setup/deploy_client.py", "setup/AGENTS.md", "setup/accepted-profile.json",
-    "setup/opencode.template.json", "setup/browser-package-lock.json",
+    "setup/opencode.template.json", "setup/browser-package-lock.json", "setup/hf-download-constraints.txt",
     "tools/localai.py", "tools/native_client.py", "tools/context_probe.py", "tools/protocol_probe.py",
     "tools/improvement.py", "tools/learning.py", "tools/native-shell",
     "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/update_notice.mjs", "tools/session_report.py"]

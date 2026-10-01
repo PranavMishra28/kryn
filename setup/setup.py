@@ -395,7 +395,8 @@ def download_model(uv, model_dir, profile, env):
             missing.append(name)
     for name in missing:
         # One filename selects hf_hub_download; multi-file snapshot_download omitted a pinned dotfile.
-        run([uv, "tool", "run", "--from", "huggingface-hub==1.32.0", "hf", "download",
+        run([uv, "tool", "run", "--isolated", "--python", "3.13", "--from", "huggingface-hub==1.32.0",
+             "--constraints", HERE / "hf-download-constraints.txt", "hf", "download",
              profile["repository"], name, "--revision", profile["revision"], "--local-dir", model_dir], env)
     for name, expected in profile["files"].items():
         if digest(model_dir / name, "sha256") != expected:

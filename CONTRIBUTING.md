@@ -20,6 +20,8 @@ From the repository root:
 The installed 9B/96K profile is frozen for supervised v1. For later matched model, context, provider or harness research, use the [evaluation protocol](docs/evaluation.md) and change one factor at a time. The [supervised v1 contract](docs/v1-qualification.md) owns product-release decisions.
 The evaluation runner, browser checker and frozen fixtures live in this source repository; they are not installed with the user wheel.
 
+The core browser npm tree uses `setup/browser-package-lock.json`. The model-download CLI uses exact versions in `setup/hf-download-constraints.txt`; update that file only with an installer regression and disposable `hf --version` check. These constraints pin versions but do not themselves enforce distribution hashes. Optional document packages resolve separately when that phase is requested.
+
 Use [current gates](plan.md) for decisions and the [historical evidence index](docs/history.md) for primary receipts and immutable earlier narratives. The optional [External Requests runbook](docs/external-requests.md) is separate from the installed package.
 
 `observe.py` records what its check process saw; it does not make a model-produced artifact autonomous or replace operator review. Its compact output uses opaque evidence IDs instead of private grader paths. A source match does not prove the server, database, or browser state is unchanged. Runs under the same macOS account are **not** an evaluator security boundary because candidate shell tools may read that account's files. Use an explicitly KRYN-owned isolated environment for independent holdout evidence; do not use an unrelated project's account. Until then, label same-account checks as diagnostics rather than protected holdout results.
