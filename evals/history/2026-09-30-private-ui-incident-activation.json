@@ -1,0 +1,18 @@
+{
+  "kind": "private owner activation, rollback and recovery receipt",
+  "date_local": "2026-09-30",
+  "source_revision": "0541390fb0b78533494b56ff791ccebbbb93c065",
+  "private_wheel_sha256": "8fe8074a9d4957bc431570ce2b438ff92877c0691b95155f61c6edb8748db04c",
+  "version": "0.2.0 (same-version private build; no public release or tag)",
+  "checks": {
+    "repository": "make check passed (199 Python and 80 Node tests, native-trial self-check, frozen and fresh evaluation verifier/self-tests); clean-tree make package-smoke passed with 24 payload files",
+    "ci": "PASS https://github.com/PranavMishra28/kryn/actions/runs/36812656405 for source revision 0541390",
+    "owner_activation": "Local wheel payload integrity passed; transactional install activated client release 6514502c5207ffc5 without a runtime profile or model change",
+    "rollback": "kryn rollback restored the prior owned source revision 07a108516958d313eb34f43a1c9d0c8368239484 and stopped only the idle owned oMLX runtime",
+    "reactivation": "The same verified private wheel reinstalled client release 6514502c5207ffc5; active source revision again matches 0541390",
+    "runtime_recovery": "kryn bench restarted the owned oMLX app and passed the guarded local protocol smoke; metrics SHA256 1b6b78e1db0fb598fb9439f517d349cc53b45825f7915775083ac3f365ba9a88 under LocalAI/runs/protocol-20261001T035639Z-df7a0aa1/metrics.json",
+    "final_doctor": "kryn doctor --deep passed every pinned model SHA256 and browser dependency integrity check; local routing passed; Qwen3.5-9B-6bit reported 98,304 configured context, 22 GiB model ceiling, zero active/waiting requests, normal host pressure, and connected browser/search MCP"
+  },
+  "final_owner_active_receipt_sha256": "d23f904d1d337bc14e831e5bbe5da2e7d4be957a5c3d4fbaff4a44afa4aa548b",
+  "limits": "This proves owner activation, rollback and a small local protocol smoke for this revision. It does not qualify autonomous coding/UI, Reviewer accuracy, compaction/restart quality, useful 96K context, sustained endurance, external clean-host installation or a public release. The independent UI diagnostic remains failed."
+}
