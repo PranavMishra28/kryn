@@ -3,6 +3,7 @@
 
 Python 3.13+, macOS 26/27 ARM64, at least 48 GiB RAM. Run with --help for phases.
 No sudo, shell startup edits, service launches or automatic removal of existing files.
+Core preflight makes HEAD requests to size missing pinned model files; it writes nothing.
 Core --apply copies only the verified user-space app and deploys the daily client.
 """
 import argparse
@@ -22,6 +23,7 @@ import sys
 import tarfile
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 
 HERE = Path(__file__).resolve().parent
@@ -81,11 +83,28 @@ def model_destination(root, profile=None):
     return destination, marker, identity
 
 
-def require_space(free, phase):
-    # Conservative even on reruns: unrelated files never reduce the reserve.
-    required = (140 if phase == "core" else 104) * GIB
+def require_optional_space(free):
+    required = 104 * GIB
     if free < required:
-        raise RuntimeError(f"Need at least {required // GIB} GiB free for this phase, including the 100 GiB reserve")
+        raise RuntimeError(f"Need at least {required // GIB} GiB free for this optional phase, including the 100 GiB reserve")
+
+
+def check_model_download_space(disk_root, model_dir, profile):
+    """Match the release installer's missing-model budget without writing files."""
+    missing = [name for name in profile["files"] if not (model_dir / name).exists()]
+    if not missing:
+        return
+    total = 0
+    for name in missing:
+        url = ("https://huggingface.co/" + profile["repository"] + "/resolve/" +
+               profile["revision"] + "/" + urllib.parse.quote(name, safe="/"))
+        with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=30) as response:
+            size = response.headers.get("Content-Length")
+            if not size or not size.isdigit():
+                raise RuntimeError("Cannot establish download disk budget")
+            total += int(size)
+    if shutil.disk_usage(disk_root).free < total + 40 * GIB:
+        raise RuntimeError("Model download would leave less than 40 GiB disk reserve")
 
 
 def encode(value):
@@ -421,7 +440,8 @@ def main():
         if part.is_symlink():
             raise RuntimeError(f"Refusing symlink install root: {part}")
     free = shutil.disk_usage(home).free
-    require_space(free, args.phase)
+    if args.phase != "core":
+        require_optional_space(free)
     cfg_path = root / "xdg/config/opencode/opencode.json"
     cfg = render(root, node, profile)
     guidance = (HERE / "AGENTS.md").read_text() + f"\nIf installed, use {root}/artifacts/.venv/bin/python for document/data tasks.\n"
@@ -450,6 +470,7 @@ def main():
                 raise RuntimeError("Port 8000 is occupied; review before configuring a runtime")
         for path, text in files.items():
             check_destination(path, text)
+        check_model_download_space(home, model_dir, profile)
     elif not cfg_path.is_file():
         raise RuntimeError("Complete the core phase before installing an optional module")
     if args.phase == "documents":
