@@ -340,7 +340,9 @@ function repoFingerprint(directory) {
   const snapshot = repoEvidence(directory);
   if (snapshot === null) return null;
   const evidence = JSON.parse(snapshot);
-  return evidence.changed_files_truncated || evidence.untracked_files_truncated !== false ?
+  const files = [...evidence.changed_files, ...evidence.untracked_files];
+  return evidence.changed_files_truncated || evidence.untracked_files_truncated !== false ||
+    files.some(file => typeof file.sha256 !== 'string' || !HASH.test(file.sha256)) ?
     null : sha(snapshot);
 }
 
@@ -647,6 +649,9 @@ export default {
           item.maskedCheckDenials >= 3 ? 'masked_check_denial_loop' : null,
           item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null,
           t.ui_edits && !t.browser_calls && !t.browse_handoffs ? 'ui_browser_unverified' : null,
+          t.ui_edits && (t.browser_calls || t.browse_handoffs) &&
+            (!item.uiBrowserFingerprint || !currentBrowserFingerprint) ?
+            'ui_browser_evidence_unavailable' : null,
           t.ui_edits && (t.browser_calls || t.browse_handoffs) &&
             item.uiBrowserFingerprint && currentBrowserFingerprint &&
             item.uiBrowserFingerprint !== currentBrowserFingerprint ?

@@ -83,7 +83,7 @@ test('a native UI edit without later browser work becomes a bounded regression i
 });
 
 test('browser evidence becomes stale when project bytes change after the browser call', async () => {
-  for (const changed of [false, true]) {
+  for (const scenario of ['unchanged', 'changed', 'unhashable']) {
     const f = fixture(); const cleanup = await plugin.setup(f.ctx);
     try {
       fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
@@ -98,13 +98,16 @@ test('browser evidence becomes stale when project bytes change after the browser
       f.call('tool.execute.before', edit);
       fs.writeFileSync(file, edit.input.content);
       f.call('tool.execute.after', { ...edit, status: 'completed', result: { content: [] } });
+      if (scenario === 'unhashable') fs.writeFileSync(path.join(f.root, 'large.bin'), Buffer.alloc(1024 * 1024 + 1));
       f.call('tool.execute.after', { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_2',
         id: 'call_2', tool: 'browser_browser_snapshot', status: 'completed', result: { content: [] } });
-      if (changed) fs.writeFileSync(file, 'document.body.textContent = "two";\n');
+      if (scenario !== 'unchanged') fs.writeFileSync(file, 'document.body.textContent = "two";\n');
       await f.emit('session.execution.succeeded');
       assert.equal(f.continuations.length, 0);
-      assert.equal(f.read('incidents').length, changed ? 1 : 0);
-      if (changed) assert.ok(f.read('incidents')[0].triggers.includes('ui_browser_stale'));
+      assert.equal(f.read('incidents').length, scenario === 'unchanged' ? 0 : 1,
+        'unavailable file hashes must remain explicitly unverified');
+      if (scenario === 'changed') assert.ok(f.read('incidents')[0].triggers.includes('ui_browser_stale'));
+      if (scenario === 'unhashable') assert.ok(f.read('incidents')[0].triggers.includes('ui_browser_evidence_unavailable'));
     } finally { await cleanup(); f.remove(); }
   }
 });
@@ -113,6 +116,13 @@ test('UI incident capture skips browser work, Browse handoffs and non-UI edits',
   for (const browserTool of [null, 'browser_browser_navigate', 'browser_browser_evaluate', 'subagent']) {
     const f = fixture(); const cleanup = await plugin.setup(f.ctx);
     try {
+      if (browserTool) {
+        fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+        execFileSync('/usr/bin/git', ['init', '-q'], { cwd: f.root });
+        execFileSync('/usr/bin/git', ['add', '.gitignore'], { cwd: f.root });
+        execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+          'commit', '-qm', 'seed'], { cwd: f.root });
+      }
       f.call('session.prompt', { sessionID: 'ses_1' });
       await f.call('session.context', { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} });
       const file = path.join(f.root, browserTool ? 'index.html' : 'server.py');
