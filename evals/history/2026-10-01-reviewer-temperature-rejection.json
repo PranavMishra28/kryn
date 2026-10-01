@@ -1,0 +1,17 @@
+{
+  "kind": "matched native Reviewer sampling candidate rejection",
+  "date": "2026-10-01",
+  "setup": "Same known-bad review-queue Git workspace and read-only prompt as the previous matched Reviewer baseline. Owner-installed OpenCode 2.0.10/oMLX 0.6.4/Qwen3.5-9B-6bit Default, with only a disposable candidate plugin overriding primary Reviewer temperature from 0.6 to 0.2 after model-body overlays. The owner installation was unchanged.",
+  "wire_and_guard": "Native inference audit confirmed temperature 0.2 on all three primary Reviewer requests. The guarded AC-power trial had 120 complete resource samples, all normal pressure, no warning and zero swap growth. Route and owned-session settlement checks passed.",
+  "independent_result": "FAILED: 252.97 seconds, seven read-only tool calls and 8,534 output tokens across generations. The third generation ended with finish=length at the 8,192-token per-request limit; no terminal review verdict was produced. Its saved text repeated two already-resolved claims 36 and 35 times, then generated dozens of repetitive missing-test items. This is not an accurate or complete review of the independent API/browser regressions.",
+  "comparison_limit": "The previous Default baseline completed in 168.56 seconds but missed material regressions and invented findings. Cache state differs, so this single trial does not support a latency comparison. Both fail the accuracy gate; the candidate also fails completion.",
+  "decision": "Reverted the candidate plugin and its focused unit test. Do not promote a lower Reviewer temperature, add another prompt rule, or claim Reviewer accuracy from source citation counts. Use externally executed API/browser contracts as acceptance authority while the local model remains unqualified for autonomous review.",
+  "private_raw_evidence": "/Users/pranav/Library/Application Support/LocalAI/runs/reviewer-temp-20261001/evidence/reviewer-temp02",
+  "raw_sha256": {
+    "driver.json": "b879bae701b5e71f562c9abd96db35061df4027b6cfce2f35d40bbebe2c72ef0",
+    "events.jsonl": "49d24df4c7d442bea0c2912957dd6ff8e1505220270424d994df5db0716176c6",
+    "inference.jsonl": "76e1a9a4616a8cd272ffb03df2d1f01fe06c3bf633d19fdda1a0f6204b936239",
+    "resources.jsonl": "d33653c65e1c5603f6ecbd9f1acb17a176829fffa085b1a8285154974c2a0960"
+  },
+  "public_release": "No new tag, version or release."
+}

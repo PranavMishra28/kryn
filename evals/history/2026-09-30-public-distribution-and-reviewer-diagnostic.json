@@ -8,10 +8,16 @@
     "public_access": "Unauthenticated GitHub repository GET returned HTTP 200. Public v0.2.0 installer, SHA256SUMS and wheel downloaded without GitHub credentials; installer SHA256 b66e4332b4951c4abbe37c59db6865f076117e4ebc8d4588ad6a180929bc55b5 and the wheel/checksum contents matched the published release. Installer --help passed; no second-account GUI install was claimed."
   },
   "reviewer_comparison": {
-    "setup": "Same copied known-bad review-queue Git workspace and identical read-only prompt; installed 9B Default baseline versus a candidate plugin exposing a scoped read-only per-file Git diff tool. Both used guarded native OpenCode sessions; raw traces remain under /private/tmp/kryn-review-diff-20261001-{baseline,candidate}/evidence/reviewer.",
+    "setup": "Same copied known-bad review-queue Git workspace and identical read-only prompt; installed 9B Default baseline versus a candidate plugin exposing a scoped read-only per-file Git diff tool. Both used guarded native OpenCode sessions. Raw traces were copied with verified driver/events hashes to private LocalAI/runs/reviewer-diff-20261001-{baseline,candidate}/evidence/reviewer; the candidate plugin was reverted.",
     "baseline": "Native completion in 168.56 seconds, eight read calls. Missed the independent oracle's changed original /api/entries shape, missing Edit control and actual export HTTP 400, while inventing required reviewed CSV/PATCH fields that contradict the original contract.",
     "candidate": "Native completion in 216.207 seconds, nine read calls and zero calls to the new diff tool. Missed the same material regressions and added false findings, including a selector mismatch while quoting matching selector/ID text. This was not an accuracy gain.",
-    "decision": "Reverted the diff-tool candidate and its test. Do not promote a Reviewer wording/tool change on source-citation count or apparent detail; independent API/browser contract evidence remains authoritative. Reviewer accuracy gate stays failed."
+    "decision": "Reverted the diff-tool candidate and its test. Do not promote a Reviewer wording/tool change on source-citation count or apparent detail; independent API/browser contract evidence remains authoritative. Reviewer accuracy gate stays failed.",
+    "raw_hashes": {
+      "baseline_driver_sha256": "542a3c869f03df5ca0ff49abdc8ea8e4b7a948eed8019f335ba8937507a36141",
+      "baseline_events_sha256": "7e447a125f1e3757216b488c3bc039b0d8da517ba7077710c243dd7afc88f41b",
+      "candidate_driver_sha256": "263b9812c29ad58d11320ced6b7a3e48641407d91c193bdce8cb70411d60f47b",
+      "candidate_events_sha256": "cf90a39fb67cbedbfc0f8ccd44cfa9e33bc32cb58a48b6e3fe5de762c1ef28f0"
+    }
   },
   "release_decision": "No new tag, version or release. Autonomous coding/UI, Reviewer accuracy, two-compaction/restart application acceptance and sustained-use gates remain failed."
 }
