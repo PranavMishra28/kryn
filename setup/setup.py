@@ -27,8 +27,6 @@ import urllib.request
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "tools"))
 from native_client import product_plugin_files
-MODEL = "Qwen3.8-27B-oQ6e-mtp"
-REVISION = "f7ec1f012451c7a76e775e2fdefdd5f0a51f11f7"
 GIB = 1024 ** 3
 DMG_URL = "https://github.com/jundot/omlx/releases/download/v0.6.4/oMLX-0.6.4-macos26-27.dmg"
 DMG_MIRROR_URL = "https://downloads.sourceforge.net/project/omlx.mirror/v0.6.4/oMLX-0.6.4-macos26-27.dmg"
@@ -41,9 +39,7 @@ DOC_PACKAGES = ["python-docx==1.2.0", "python-pptx==1.0.2", "openpyxl==3.1.5",
 
 
 def load_profile(path=None):
-    profile = (json.loads(Path(path).read_text()) if path else {
-        "repository": "Jundot/" + MODEL, "revision": REVISION,
-        "memory_gib": 36, "files": json.loads((HERE / "model-sha256.json").read_text())})
+    profile = json.loads(Path(path or HERE / "accepted-profile.json").read_text())
     if not isinstance(profile, dict) or set(profile) - {"repository", "revision", "memory_gib", "files", "model_parent"}:
         raise RuntimeError("Profile must contain repository, revision, memory_gib, files and optional model_parent")
     profile = {**profile, "model_parent": profile.get("model_parent", "models")}
@@ -396,7 +392,7 @@ def main():
     parser.add_argument("--node", type=Path, default=shutil.which("node"), help="Existing native Node 22.23.1 executable")
     args = parser.parse_args()
     if args.apply and args.profile is None:
-        raise RuntimeError("Choose the accepted profile explicitly with --profile; the built-in example is not acceptance")
+        raise RuntimeError("Choose the accepted profile explicitly with --profile")
     profile = load_profile(args.profile)
     if args.apply:
         os.umask(0o077)

@@ -60,6 +60,7 @@ class SetupChecks(unittest.TestCase):
 
     def test_profile_pin_paths_and_memory(self):
         profile = setup.load_profile()
+        self.assertEqual(profile["repository"], "mlx-community/Qwen3.5-9B-6bit")
         profile.update(repository="gcoli/Qwen3.8-27B-oQ5e-mtp", revision="a" * 40,
                        memory_gib=32, model_parent="challenger/models")
         with tempfile.TemporaryDirectory() as directory:
@@ -1260,8 +1261,9 @@ class SetupChecks(unittest.TestCase):
         self.assertIsInstance(setup.runtime_settings(root)["memory"]["memory_guard_custom_ceiling_gb"], float)
         self.assertEqual(setup.runtime_settings(root)["idle_timeout"], {"idle_timeout_seconds": 300})
         self.assertFalse(setup.runtime_settings(root)["server"]["auto_start_on_launch"])
-        self.assertEqual(setup.model_settings()["models"][setup.MODEL]["max_tokens"], 8192)
-        self.assertTrue(setup.model_settings()["models"][setup.MODEL]["is_default"])
+        daily_model = setup.model_id(setup.load_profile())
+        self.assertEqual(setup.model_settings()["models"][daily_model]["max_tokens"], 8192)
+        self.assertTrue(setup.model_settings()["models"][daily_model]["is_default"])
         self.assertNotIn("__ROOT__", json.dumps(cfg))
 
     def test_reruns_preserve_changed_files_and_reject_symlinks(self):
@@ -1277,7 +1279,8 @@ class SetupChecks(unittest.TestCase):
             setup.write_same(link, "original")
 
     def test_model_guard_preserves_unowned_and_symlinked_destinations(self):
-        destination = self.root / "models" / setup.MODEL
+        profile = setup.load_profile()
+        destination = self.root / profile["model_parent"] / setup.model_id(profile)
         destination.mkdir(parents=True)
         with self.assertRaises(RuntimeError):
             setup.model_destination(self.root)
