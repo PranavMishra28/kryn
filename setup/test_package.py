@@ -87,6 +87,7 @@ class PackageTests(unittest.TestCase):
         self.assertFalse((base / "evals").exists())
         self.assertFalse((base / "tools/run_native_trial.py").exists())
         self.assertFalse((base / "tools/browser_check.mjs").exists())
+        self.assertFalse((base / "tools/inference-audit").exists())
         self.assertFalse(any("runs/" in name or name.endswith(".safetensors") or "test_kryn" in name for name in manifest["files"]))
         (base / "setup/opencode.template.json").write_text("{}")
         with self.assertRaisesRegex(RuntimeError, "integrity"):

@@ -16,8 +16,7 @@ FILES = ["LICENSE", "THIRD_PARTY_NOTICES.md", "install-kryn.py",
     "setup/opencode.template.json", "setup/browser-package-lock.json",
     "tools/localai.py", "tools/native_client.py", "tools/context_probe.py", "tools/protocol_probe.py",
     "tools/improvement.py", "tools/learning.py", "tools/native-shell",
-    "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/update_notice.mjs", "tools/session_report.py",
-    "tools/inference-audit/server.js", "tools/inference-audit/package.json"]
+    "tools/kryn_plugin.mjs", "tools/kryn_tui.tsx", "tools/permission_display.mjs", "tools/update_notice.mjs", "tools/session_report.py"]
 
 
 def source_files(root):
