@@ -1,0 +1,24 @@
+{
+  "kind": "supervised-v1 owner native-start screen, invalid Task09 prompt",
+  "date_utc": "2026-10-01",
+  "private_run_id": "supervised-v1-owner-20261001-01",
+  "stage": "attempt1",
+  "model": "Qwen3.5-9B-6bit via the owned OpenCode/oMLX stack",
+  "observed": {
+    "driver_completed": true,
+    "wall_seconds": 85.762,
+    "model_completed": true,
+    "local_route_verified": true,
+    "resource_guard_preflight_passed": true,
+    "resource_samples": 41,
+    "host_pressure_levels": [1],
+    "swap_growth_bytes": 0,
+    "tool_calls": 16,
+    "tool_errors": 6,
+    "automatic_grade": "FAIL: existing test passed, but no Task09 checkpoint or CSV row was produced"
+  },
+  "setup_error": "The supplied command omitted --prompt, so the model received only the generic ten-turn task description and no evaluator-released row request. Its final response did not claim to have appended a row. The six read-tool path errors were followed by successful in-project shell reads.",
+  "interpretation": "This proves a narrow owner-environment native startup, local routing and guarded 85.8-second turn. It does not test Task09 row execution, coding acceptance, compaction/restart or sustained use. The automatic FAIL is retained but must not be attributed to a coding attempt that was never requested.",
+  "prevention": "The evaluation driver now refuses Task09 without an explicit --prompt before creating an evidence stage. A fresh trial must release the exact turn request and record checkpoints externally.",
+  "release_gate": "OPEN"
+}
