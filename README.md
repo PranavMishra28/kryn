@@ -74,7 +74,7 @@ Run `kryn update vX.Y.Z` in Terminal for an exact newer published KRYN tag. The 
 
 The preview pins OpenCode **2.0.10**, oMLX **0.6.4**, Qwen3.5-9B-6bit, **96K** context tokens, **8,192** output tokens, a **22 GiB** oMLX ceiling and one active generation. This larger setting is guarded but has not been proved to improve coding quality or sustain every desktop workload; if the guard stops work, the session remains available to resume. Exact settings are in the [accepted profile](setup/accepted-profile.json) and [client template](setup/opencode.template.json).
 
-Per-run incident capture retains bounded private failure metadata and check receipts for diagnosis. It does not repair code or qualify a change. The optional disposable-task learning worker remains paused; cross-project automatic promotion has no established benefit and still needs independent reproduction, protected holdouts, matched repeated trials and monitored rollback. See [current learning gates](plan.md#incident-capture-and-promotion).
+Per-run incident capture retains bounded private failure metadata and check receipts for diagnosis. It does not repair code or qualify a change. The optional disposable-task learning worker remains paused; cross-project automatic promotion has no established benefit and still needs independent reproduction, protected holdouts, matched repeated trials and monitored rollback. See [current status](plan.md).
 
 ## License and distribution
 
