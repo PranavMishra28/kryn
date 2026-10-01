@@ -1,0 +1,57 @@
+{
+  "kind": "private Agent-context ablation and final-boundary diagnostic",
+  "date_utc": "2026-10-01",
+  "base_main": "44e87d8f8d59e834341af6aa0df2e816641fe889",
+  "decision": "REJECT: do not merge, install, tag, or release this candidate",
+  "hypothesis": "KRYN's additional Agent system guidance was crowding out task requirements and browser verification",
+  "one_change": "A private source candidate skipped KRYN's extra Agent guidance in the existing context hook; native OpenCode, oMLX, model, permissions, tool catalog, frozen user prompt, and resource guard were unchanged",
+  "candidate_plugin_sha256": "a5d3c867cf7612747ca323a70de7811616f0e60d8ff0c63083a6b7b2200bba0f",
+  "matched_stack": "OpenCode 2.0.10, oMLX 0.6.4, Qwen3.5-9B-6bit Fast, configured 96K context, 8192 output tokens, 22 GiB process ceiling",
+  "control": "Fresh frozen Task06 seed plus the exact Cancel Edit prompt; exact baseline tool catalog, no operator repair; independent graders ran outside the model workspace",
+  "baseline": {
+    "run": "quality-base-20261001b",
+    "native_completed": true,
+    "seconds": 471.527,
+    "task06_browser": "FAIL",
+    "cancel_edit_browser": "FAIL"
+  },
+  "repetitions": [
+    {
+      "run": "quality-trim-context-20261001",
+      "native_completed": true,
+      "seconds": 264.846,
+      "tool_calls": 53,
+      "browser_calls_completed": 19,
+      "task06_browser": "PASS: five frozen checks, including injected 503 and mobile/desktop reload",
+      "cancel_edit_browser": "PASS: visible Edit and Cancel Edit controls, data preservation, and Save after Cancel",
+      "adjacent_visible_controls": "FAIL: restrictive Filter still displayed unrelated rows",
+      "edit_data_integrity": "FAIL: editing a row with id hyphen-probe and project alpha-beta populated the project field with probe; the generated client split rendered text to reconstruct data",
+      "git_diff_check": "FAIL: trailing whitespace",
+      "final_claim": "Claimed all checks passed despite the material data-integrity defect",
+      "resource": "normal sampled pressure, zero swap growth, no operator intervention"
+    },
+    {
+      "run": "quality-trim-context-20261001b",
+      "native_completed": true,
+      "seconds": 402.195,
+      "tool_calls": 82,
+      "browser_calls_completed": 46,
+      "task06_browser": "FAIL: form did not clear after the real 503 and successful manual retry",
+      "cancel_edit_browser": "FAIL: no accessible Edit button to enter the flow",
+      "git_diff_check": "FAIL: trailing whitespace",
+      "final_claim": "Claimed full success and preservation of existing behavior",
+      "resource": "normal sampled pressure, zero swap growth, no operator intervention"
+    }
+  ],
+  "final_boundary_probe": "A synthetic continuation queued on the native final step ran after the first idle and after the CLI returned, so it cannot synchronously veto a false final answer. Rejected; no final-boundary code retained.",
+  "wire_probe": "The exact simple user instruction was present in the local OpenCode request, but both Fast and normal native turns answered a generic greeting. A short direct oMLX request followed it; replay with the full OpenCode/KRYN system context greeted again. This is a diagnostic, not proof of the UI failure's cause.",
+  "raw_private_archive": "~/Library/Application Support/LocalAI/runs/quality-blocker-20261001",
+  "archive_manifest_sha256": "65c4b598dbf6fe71374bee270643da245dc9996d26d78b265d277191c050a218",
+  "gates": {
+    "combined_development_regression": "FAIL: 1/2 frozen Task06+Cancel repetitions passed, and that pass had a material data-integrity defect",
+    "unseen_holdout": "NOT_RUN: candidate rejected before holdout",
+    "two_compactions_and_restart": "NOT_RUN: no successful candidate to extend",
+    "reviewer_accuracy": "FAIL: prior known-bad assessment remains authoritative",
+    "public_release": "PAUSED"
+  }
+}
