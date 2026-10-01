@@ -14,3 +14,5 @@ The autonomous-gate table and final model-screen narrative preceding the supervi
 These pages are historical evidence, not current instructions. Their dated next actions, installed revisions and references to an unrelated account are superseded by current status. Read either locally with `git show 84eb07f:plan.md` or `git show 84eb07f:README.md`.
 
 The navigation cleanup verified that all 93 distinct receipt destinations linked by those originals still exist, and that every original `evals/history` file is unchanged. Duplicated narrative copies were removed from the current tree; no failed receipt or frozen fixture was removed.
+
+On 1 October 2026, the owner retired eleven 0.1.x GitHub prereleases/tags and stale branches after saving release metadata, all release assets, a verified all-refs Git bundle and archived dirty worktrees outside the public repository. The v0.2.0 preview tag, release and installer remain available until a replacement is qualified. The archive is private owner data; current public history and failed evaluation receipts remain in Git.

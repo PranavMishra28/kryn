@@ -11,4 +11,4 @@ This preview is for supervised coding. The latest independent long coding/UI tas
 
 ## Earlier prereleases
 
-The [v0.1.10 release](https://github.com/PranavMishra28/kryn/releases/tag/v0.1.10) and older tags remain available for exact installation, rollback and reproducibility. Historical failures and fixes are indexed in [the evidence history](docs/history.md).
+The 0.1.x prereleases and tags were retired on 1 October 2026 after their assets, release metadata, refs and abandoned worktrees were archived privately. The current v0.2.0 preview remains available until a replacement clears its release gates. Historical failures and fixes remain indexed in [the evidence history](docs/history.md).

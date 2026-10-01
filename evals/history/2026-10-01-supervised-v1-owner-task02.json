@@ -1,0 +1,30 @@
+{
+  "kind": "supervised-v1 owner coding screen with independent rejection",
+  "date_utc": "2026-10-01",
+  "private_run_id": "supervised-v1-owner-coding-20261001-01",
+  "stage": "daily1",
+  "source_revision": "703f6e1839270b27911aad766889df6ceddc2119",
+  "model": "Qwen3.5-9B-6bit via owned OpenCode/oMLX",
+  "native_observed": {
+    "driver_completed": true,
+    "model_completed": true,
+    "wall_seconds": 190.054,
+    "tool_calls": 16,
+    "tool_errors": 0,
+    "resource_samples": 91,
+    "pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "route_verified": true,
+    "owned_session_idle": true
+  },
+  "frozen_grader": "PASS: original and frozen range tests passed; fixtures preserved",
+  "independent_review": {
+    "status": "FAIL",
+    "reason": "Agent replaced the canonical date equality check with date.fromisoformat parsing alone. Python accepts compact 20260901, so summarize([], start='20260901') returned {'count': 0, 'minutes': 0} instead of raising ValueError as TASK.md requires.",
+    "diff_inspected_by_agent": false,
+    "end_exclusive_range_edit": "correct",
+    "interpretation": "Native coding and resource screens passed, but the full coding/edit/test acceptance gate did not. Frozen grader PASS is not independent task acceptance."
+  },
+  "next_step": "Run a supervised correction in the saved native session, independently check canonical date boundaries and inspect the final diff. Record the correction as operator-assisted rather than autonomous first-pass success.",
+  "release_gate": "OPEN"
+}
