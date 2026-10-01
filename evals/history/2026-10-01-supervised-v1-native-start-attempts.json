@@ -1,0 +1,24 @@
+{
+  "kind": "supervised-v1 native-start gate attempt",
+  "date_utc": "2026-10-01",
+  "product_under_test": "OpenCode native client with the frozen Qwen3.5-9B-6bit/oMLX profile and unchanged resource guard",
+  "attempts": [
+    {
+      "private_run_id": "supervised-v1-20261001-01",
+      "observation": "OpenCode exited before inference because the Codex task sandbox denied a write to the owner's OpenCode log under Application Support. No model session was created."
+    },
+    {
+      "private_run_id": "supervised-v1-isolated-20261001-01",
+      "observation": "A disposable test-only redirect of OpenCode state into /private/tmp reached native startup but failed the guarded-shell startup canary before inference."
+    },
+    {
+      "private_run_id": "supervised-v1-isolated-20261001-02",
+      "observation": "After creating the missing disposable plugin-state directory, the same guarded-shell startup canary still failed before inference. Further isolated retries were stopped."
+    }
+  ],
+  "interpretation": "These are execution-environment blockers, not successful KRYN product trials or evidence of model quality. The isolated redirect is not the owner installation and cannot qualify it. The canary's root cause in this nested sandbox was not established; its failure was not bypassed.",
+  "guard_changed": false,
+  "model_inference_started": false,
+  "qualifying_v1_gates_passed": [],
+  "next_proof": "Run the final committed wheel in the normal owner macOS environment with access to its app state, unchanged guard and preserved session; collect coding, browser/search, compaction/restart, long-use and lifecycle receipts."
+}
