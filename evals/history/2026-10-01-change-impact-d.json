@@ -1,0 +1,16 @@
+{
+  "kind": "change-impact verification assessment",
+  "date_utc": "2026-10-01",
+  "base_main": "b5377c9",
+  "question": "Do UI/API/stateful edits invalidate relevant success and failure evidence, or are missed checks causing false acceptance?",
+  "mechanism": "The requirement/check manifest binds checks to affected path patterns. Every first round runs the full declared bundle; later edits rerun affected checks and reuse only unchanged passed checks. Unmatched changed paths invalidate all checks. Source changes during verification mark evidence stale.",
+  "offline_evidence": [
+    "test_ui_edit_rechecks_prior_browser_pass_and_catches_regression: a web/app.js change reruns previously passed stored and Cancel flows; a newly failing Cancel flow blocks acceptance",
+    "test_api_edit_rechecks_stateful_browser_flow: a taskboard_lite/server.py change reruns a previously passed stateful browser flow; its failure blocks acceptance",
+    "make check passed with these tests, native driver self-check, frozen fixture verification and oracle self-tests"
+  ],
+  "native_evidence": "In managed-c-20261001-02, Cancel Edit passed in controller round 0, then a UI edit caused a fresh Cancel browser run in round 1; the new failure prevented acceptance. The final independent checker agreed. The full Task06 and Cancel suite ran on each fresh task, including stored text, 503 retry, Filter/Import and data integrity.",
+  "decision": "Change-impact detection for the declared development bundle is working. No missed verifier explains the failures; adding more task-specific checks or prompt rules would not address the observed 9B repair regressions. Generic automatic check discovery for arbitrary repositories is not qualified.",
+  "quality_gate": "FAILED: no accepted development run; advance to the pre-screened feasible model comparison with the same controller, tools, task and checker",
+  "release": "PAUSED"
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "managed autonomous-acceptance development experiment",
+  "date_utc": "2026-10-01",
+  "base_main": "b5377c9",
+  "hypothesis": "Admitting the repository task contract and tracking requirement-specific evidence with targeted invalidation improves repeatable 9B acceptance",
+  "control": "Three fresh Task06 plus Cancel Edit fixtures, identical admitted prompt and external checks, Qwen3.5-9B-6bit Fast, 96K configured context, native OpenCode tools, serial guarded trials and at most two same-session repairs",
+  "decision": "REJECT as an autonomous application-quality improvement: 0/3 accepted; retain fail-closed requirement/evidence observations for the next controlled tool-surface experiment",
+  "candidate": [
+    {"run": "managed-b-20261001-01", "seconds": 1208.331, "native_tool_calls": 193, "controller_accepted": false, "independent_acceptance": false, "intervention": "first native turn timed out before verification", "note": "Diff hygiene, first-save 503 retry and Cancel Edit failed independently"},
+    {"run": "managed-b-20261001-02", "seconds": 2143.877, "native_tool_calls": 177, "controller_accepted": false, "independent_acceptance": false, "intervention": "resource guard: sustained host memory warning during second repair", "note": "First and second controller rounds rejected stored markup and accessible Edit behavior; final independent checks agreed"},
+    {"run": "managed-b-20261001-03", "seconds": 1127.859, "native_tool_calls": 112, "controller_accepted": false, "independent_acceptance": false, "intervention": "resource guard: sustained host memory warning during first repair", "note": "Final independent check found Filter/Import and Cancel form-reset defects despite improvement in stored text and Edit controls"}
+  ],
+  "resource": "B01 had normal host pressure; B02 and B03 each had exactly two sustained warning samples, with no swap growth. Their guard aborts are real failures of the 96K sustained workflow on this host.",
+  "next_hypothesis": "C: controlled progressive disclosure removes direct browser tools from primary Agent while preserving native Browse and the same independent checks",
+  "raw_private_archive": "~/Library/Application Support/LocalAI/runs/managed-requirement-evidence-20261001",
+  "archive_manifest_sha256": "be50204e7a39a98a5210e6540ed86deda2e66f152f3f31da1c8f31b1f7319e82",
+  "gates": {"repeatable_development": "FAIL 0/3", "false_controller_acceptance": "PASS 0/3", "holdout": "NOT_RUN", "compaction_restart": "NOT_RUN", "endurance": "NOT_RUN", "release": "PAUSED"}
+}
