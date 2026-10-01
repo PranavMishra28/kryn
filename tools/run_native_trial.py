@@ -1059,6 +1059,15 @@ def main():
     workspace = run / "workspace"
     if not (run / "run.json").is_file() or not (workspace / ".git").is_dir():
         ap.error("Expected a disposable run prepared by evals/bench.py")
+    try:
+        metadata = json.loads((run / "run.json").read_text())
+    except (OSError, ValueError):
+        ap.error("Invalid prepared run metadata")
+    if not isinstance(metadata, dict):
+        ap.error("Invalid prepared run metadata")
+    task_id = metadata.get("task")
+    if task_id == "09" and args.prompt is None:
+        ap.error("Task09 requires --prompt with the evaluator-released turn request")
     managed = None
     if args.managed_acceptance:
         spec_path = args.managed_acceptance.resolve()
