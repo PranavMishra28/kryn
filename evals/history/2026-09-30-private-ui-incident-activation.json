@@ -11,8 +11,11 @@
     "rollback": "kryn rollback restored the prior owned source revision 07a108516958d313eb34f43a1c9d0c8368239484 and stopped only the idle owned oMLX runtime",
     "reactivation": "The same verified private wheel reinstalled client release 6514502c5207ffc5; active source revision again matches 0541390",
     "runtime_recovery": "kryn bench restarted the owned oMLX app and passed the guarded local protocol smoke; metrics SHA256 1b6b78e1db0fb598fb9439f517d349cc53b45825f7915775083ac3f365ba9a88 under LocalAI/runs/protocol-20261001T035639Z-df7a0aa1/metrics.json",
-    "final_doctor": "kryn doctor --deep passed every pinned model SHA256 and browser dependency integrity check; local routing passed; Qwen3.5-9B-6bit reported 98,304 configured context, 22 GiB model ceiling, zero active/waiting requests, normal host pressure, and connected browser/search MCP"
+    "final_doctor": "kryn doctor --deep passed every pinned model SHA256 and browser dependency integrity check; local routing passed; Qwen3.5-9B-6bit reported 98,304 configured context, 22 GiB model ceiling, zero active/waiting requests, normal host pressure, and connected browser/search MCP",
+    "durable_staging": "The first private activation pointed at a temporary Python environment. Detected before handoff; the same SHA256-verified wheel was staged under LocalAI/private-candidates/0541390-8fe8074a with a persistent managed Python 3.13.13 interpreter, then activated transactionally. No public release asset, tag or version was changed.",
+    "durable_rollback": "After durable activation, kryn rollback restored the prior owned launchers; the durable candidate then reinstalled successfully. Active receipt, client deployment and shell launcher all point to the persistent candidate interpreter. The temporary build directory was removed.",
+    "post_cleanup_protocol": "PASS after temporary build removal: kryn bench restarted the owned oMLX app and passed guarded local protocol smoke; metrics SHA256 ae8e924c2971d54d99023d047a5caab787a8ead5c1c68d7dc6b0034572f008b4 under LocalAI/runs/protocol-20261001T040225Z-68a1be13/metrics.json. Final kryn doctor --deep passed."
   },
-  "final_owner_active_receipt_sha256": "d23f904d1d337bc14e831e5bbe5da2e7d4be957a5c3d4fbaff4a44afa4aa548b",
+  "final_owner_active_receipt_sha256": "edf21c52dd1fc9478ea7a823b6627c500485492c56591e768f5db0094915d524",
   "limits": "This proves owner activation, rollback and a small local protocol smoke for this revision. It does not qualify autonomous coding/UI, Reviewer accuracy, compaction/restart quality, useful 96K context, sustained endurance, external clean-host installation or a public release. The independent UI diagnostic remains failed."
 }
