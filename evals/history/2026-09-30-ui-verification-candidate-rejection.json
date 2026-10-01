@@ -1,0 +1,29 @@
+{
+  "kind": "guarded owner-9B UI quality diagnostic and candidate rejection",
+  "date_local": "2026-09-30",
+  "daily_profile": "installed OpenCode 2.0.10 / oMLX 0.6.4 / Qwen3.5-9B-6bit, Fast variant, guarded 96K configuration",
+  "scope": "Disposable native OpenCode Agent workspaces; candidate KRYN plugin loaded from source. No owner installation or public release changed. Task06 run A used the frozen prompt; run B used a recorded small Cancel Edit diagnostic prompt and is not a frozen Task06 grade or protected holdout.",
+  "runs": [
+    {
+      "path": "evals/runs/ui-native-verify-20260930-a/evidence/first",
+      "driver_sha256": "15fab6a2c16692d3420bd1eb8e6361edd4d7555c3ffb273e6d80d53f8a5d8373",
+      "outcome": "26.59 seconds, one tool call, no edit. Agent asked for repository/API facts available in the workspace; the headless question was dismissed and native execution aborted. No UI quality inference is possible.",
+      "resources": "13 samples, all normal pressure, zero swap growth"
+    },
+    {
+      "path": "evals/runs/ui-native-verify-20260930-b/evidence/first",
+      "driver_sha256": "3a61215f822ac8b9c5b0cb33b5bfa9e1c697506d2295f8454a69a6df2919fe76",
+      "events_sha256": "bb67f3530be16c14de3054ee52b06c226dbf6cb5ec24d7c5b874b98a26977512",
+      "outcome": "608.054 seconds, 84 tool calls, timed out before a terminal native completion. Agent used browser feedback to repair hidden Cancel Edit controls and attempted to repair a failed Update path, then performed Cancel/Edit/Create actions. It also hallucinated a browse tool, used stale browser references, attempted a blocked PID signal, and rewrote a seven-line app.js into 172 lines for a small feature.",
+      "resources": "291 samples, all normal pressure; swap decreased 33,554,432 bytes; maximum sampled oMLX physical footprint 14,498,028,816 bytes"
+    }
+  ],
+  "independent_review": {
+    "source": "evals/runs/ui-native-verify-20260930-b/workspace/web/app.js",
+    "source_finding": "The changed filter is case-insensitive substring matching instead of the seed UI's exact project match. Both Save and Update inspect response.ok after response.json() has left response out of scope, so a successful API write still takes the error path and leaves the form filled.",
+    "browser_observation": "evals/runs/ui-native-verify-20260930-b/evidence/observations/1790826565365373000-d67572352ed344fba876aea29dc5969d.json",
+    "browser_observation_sha256": "a31fc622cae9d7e8ece65a2b0887a8d39e0b6a0e01e6f4415eb9d9de46e8df20",
+    "result": "FAIL: the independent browser checker observed a controlled POST 503 and one manual POST 201, then timed out waiting for the form to clear. The invalid-minutes accessibility check passed. Later browser criteria were not reached. JavaScript syntax and existing two Python tests passing do not settle this regression."
+  },
+  "decision": "Reject the extra automatic UI model continuation: the live diagnostic already used browser tools, so the continuation did not activate or demonstrate benefit. Keep only a bounded private incident for verified native UI edits that finish without a completed browser call or Browse handoff. This signal is not acceptance and does not detect shell/patch edits or superficial browser checks. Daily model decision and failed autonomous coding/UI, review, continuity, and endurance gates remain unchanged."
+}

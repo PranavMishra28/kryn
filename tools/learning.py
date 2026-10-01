@@ -139,7 +139,7 @@ def status(directory):
 
 
 def failures(directory, *, limit=20):
-    """Error-triggered local backlog, not a schedule or a successful-learning claim."""
+    """Observed regression backlog, not a schedule or a successful-learning claim."""
     folder = state._directory(root(directory) / "incidents")
     items = []
     for path in folder.glob('*.json'):
@@ -150,7 +150,7 @@ def failures(directory, *, limit=20):
         items.append({key: value[key] for key in ('task_id', 'native_session_id', 'triggers', 'status', 'updated_at')})
     items.sort(key=lambda item: (item['updated_at'], item['task_id']), reverse=True)
     shown = items if limit is None else items[:limit]
-    return {'trigger': 'native execution failures, interruptions, failed checks and exhausted reviews',
+    return {'trigger': 'native execution/check failures, interrupted work, exhausted reviews and unverified UI edits',
             'scheduled': False, 'count': len(items), 'shown': len(shown),
             'truncated': len(shown) < len(items), 'incidents': shown,
             'note': 'Inspect the linked private native trace, reproduce the error, and validate a candidate '

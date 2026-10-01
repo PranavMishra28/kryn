@@ -25,6 +25,7 @@ export const BROWSER_TOOLS = [
   'browser_browser_handle_dialog', 'browser_browser_file_upload', 'browser_browser_close',
 ];
 const BROWSER_SET = new Set(BROWSER_TOOLS);
+const UI_SOURCE = /(?:\.(?:html?|css|jsx|tsx|vue|svelte)$|(?:^|\/)web\/.*\.(?:[cm]?js|ts)$)/i;
 const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
   'search_web_search_exa', 'search_web_fetch_exa', 'search_web_search_advanced_exa']);
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
@@ -564,6 +565,7 @@ export default {
       if (item.turn) return item;
       item.turn = { task_id: sha(item.key + '\0' + token), started: Date.now(), tool_calls: 0,
         tool_errors: 0, check_passes: 0, check_failures: 0, compactions: 0, output_tokens: 0,
+        ui_edits: 0, browser_calls: 0, browse_handoffs: 0,
         retries: 0, input_tokens: 0, reasoning_tokens: 0 };
       return item;
     }
@@ -632,7 +634,8 @@ export default {
           state === 'incomplete' && (interrupted || t.tool_calls) ? 'execution_incomplete' : null,
           t.tool_errors ? 'tool_error' : null, t.check_failures ? 'check_failed' : null,
           item.maskedCheckDenials >= 3 ? 'masked_check_denial_loop' : null,
-          item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null]
+          item.reviewCalls >= 48 || item.reviewCompactions >= 2 ? 'review_bound' : null,
+          t.ui_edits && !t.browser_calls && !t.browse_handoffs ? 'ui_browser_unverified' : null]
           .filter(Boolean);
         if (triggers.length) {
           writeJSON(path.join(folders.incidents, t.task_id + '.json'), {
@@ -640,6 +643,7 @@ export default {
             native_session_id: item.native_session_id, profile_id: options.profileId,
             triggers, tool_errors: t.tool_errors, check_failures: t.check_failures,
             compactions: t.compactions, review_tool_attempts: item.reviewCalls,
+            ui_edits: t.ui_edits, browser_calls: t.browser_calls, browse_handoffs: t.browse_handoffs,
             status: 'needs_regression', updated_at: new Date().toISOString(),
           });
           pruneTrackers(folders.incidents);
@@ -984,6 +988,18 @@ export default {
           { type: 'text', text: failure },
         ];
       }
+      if (AGENT_ROLES.has(event.agent) && verifiedEdit &&
+          UI_SOURCE.test(path.relative(ctx.location.directory, verifiedEdit.file))) {
+        item.turn.ui_edits = count(item.turn.ui_edits + 1);
+        item.turn.browser_calls = 0;
+        item.turn.browse_handoffs = 0;
+      }
+      if (AGENT_ROLES.has(event.agent) && event.status === 'completed' &&
+          typeof event.tool === 'string' && event.tool.startsWith('browser_'))
+        item.turn.browser_calls = count(item.turn.browser_calls + 1);
+      if (AGENT_ROLES.has(event.agent) && event.status === 'completed' &&
+          event.tool === 'subagent' && event.input?.agent === 'browse')
+        item.turn.browse_handoffs = count(item.turn.browse_handoffs + 1);
       if (options.observe && event.status === 'completed' && ['edit', 'write'].includes(event.tool)) {
         const relative = verifiedEdit && path.relative(ctx.location.directory, verifiedEdit.file);
         retainEdit(item.anchors, relative && relative.length <= 512 ? {

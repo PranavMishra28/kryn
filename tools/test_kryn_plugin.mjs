@@ -59,6 +59,52 @@ test('TUI flags native Agent success without treating tool activity as acceptanc
     { ...agent, parentID: 'ses_parent' }]) assert.equal(completionLabel(session), null);
 });
 
+test('a native UI edit without later browser work becomes a bounded regression incident', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    await f.call('session.context', { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} });
+    const file = path.join(f.root, 'web', 'app.js');
+    fs.mkdirSync(path.dirname(file));
+    const source = 'document.body.textContent = "ready";\n';
+    f.call('tool.execute.after', { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_0',
+      id: 'call_0', tool: 'browser_browser_navigate', status: 'completed', result: { content: [] } });
+    const edit = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_1', id: 'call_1',
+      tool: 'write', input: { path: file, content: source } };
+    f.call('tool.execute.before', edit);
+    fs.writeFileSync(file, source);
+    f.call('tool.execute.after', { ...edit, status: 'completed', result: { content: [] } });
+    await f.emit('session.execution.succeeded');
+    assert.equal(f.continuations.length, 0, 'incident capture must not start an unsolicited model turn');
+    assert.ok(f.read('incidents')[0].triggers.includes('ui_browser_unverified'));
+    assert.equal(f.read('incidents')[0].ui_edits, 1);
+    assert.equal(f.read('incidents')[0].browser_calls, 0, 'a browser call before the edit is not verification');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('UI incident capture skips browser work, Browse handoffs and non-UI edits', async () => {
+  for (const browserTool of [null, 'browser_browser_navigate', 'browser_browser_evaluate', 'subagent']) {
+    const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+    try {
+      f.call('session.prompt', { sessionID: 'ses_1' });
+      await f.call('session.context', { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} });
+      const file = path.join(f.root, browserTool ? 'index.html' : 'server.py');
+      const source = browserTool ? '<main>ready</main>\n' : 'print("ready")\n';
+      const edit = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_1', id: 'call_1',
+        tool: 'write', input: { path: file, content: source } };
+      f.call('tool.execute.before', edit);
+      fs.writeFileSync(file, source);
+      f.call('tool.execute.after', { ...edit, status: 'completed', result: { content: [] } });
+      if (browserTool) f.call('tool.execute.after', { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_2',
+        id: 'call_2', tool: browserTool, input: browserTool === 'subagent' ? { agent: 'browse' } : {},
+        status: 'completed', result: { content: [] } });
+      await f.emit('session.execution.succeeded');
+      assert.equal(f.continuations.length, 0);
+      assert.equal(f.read('incidents').length, 0);
+    } finally { await cleanup(); f.remove(); }
+  }
+});
+
 test('background shell keeps the native job alive past model-supplied timeouts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
@@ -840,7 +886,7 @@ test('browser and Reviewer tool progress leave system guidance stable while hard
   } finally { await cleanup(); f.remove(); }
 });
 
-test('only actual failures and interrupted work create private regression incidents', async () => {
+test('execution failures, failed checks and interrupted work create private regression incidents', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     await f.emit('session.execution.started');

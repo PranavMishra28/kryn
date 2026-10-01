@@ -52,7 +52,7 @@ In your shell:
   kryn doctor                 Check runtime, browser and search connections
   kryn report --brief         Short evidence summary for the latest project session
   kryn report                 Full native run diagnostics (add --session SESSION_ID)
-  kryn improve failures       List error-triggered regression incidents
+  kryn improve failures       List execution and verification regression incidents
 
 Inside the terminal interface:
   /agents   or Ctrl+X then A   Choose Ask, Plan or Agent
