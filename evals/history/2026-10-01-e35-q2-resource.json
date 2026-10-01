@@ -1,0 +1,47 @@
+{
+  "kind": "Predeclared stronger-model ladder: lower-memory two-bit candidate resource diagnostic",
+  "date_local": "2026-10-01",
+  "baseline": "Clean main 40a9fa5 product source, OpenCode 2.0.10, frozen Task06 + Cancel Edit development data, same managed acceptance controller and full native tool catalog as the three-bit candidate. No holdout.",
+  "candidate": {
+    "repo": "Jundot/Qwen3.6-35B-A3B-oQ2",
+    "revision": "9c0b2f22c12a9f48f0af6aa042f3ad9baae154ed",
+    "weights_sha256": {
+      "model-00001-of-00003.safetensors": "bcafef009d45076079524adb12610d7ec3a1878cc249ffa8b5cb8de8d9289482",
+      "model-00002-of-00003.safetensors": "7c2cbc55189d7b922bf8c6572ceeb45d6073888b4b5277c7cd77846f4dcc6801",
+      "model-00003-of-00003.safetensors": "8bda4135991dfc182073cc7182f7367194f13799fb066aba8cd47f3616824439"
+    },
+    "integrity": "All three pinned weight shards checked against publisher SHA256 after download.",
+    "runtime": "Isolated oMLX 0.7.0, sole model, 49,152 backend/agent context, 8,192 output, Fast Agent, 27 GiB process guard, full browser/search tools."
+  },
+  "policy": {
+    "preflight": "Three green idle samples before each prompt",
+    "abort": "Two host warning samples, missing telemetry, or >512 MiB swap growth; no guard relaxation",
+    "operator_repair": 0
+  },
+  "runs": [
+    {
+      "id": "managed-q2-20261001-01",
+      "stage": "controller-q2-01a",
+      "wall_seconds": 113.374,
+      "native_tool_calls": 38,
+      "routing_verified": true,
+      "guard_result": "Sustained host memory warning after model-loaded coding and browser work; controlled interrupt, owned session idle. Sampled swap growth 0; peak sampled listener physical footprint 16,647,626,024 bytes.",
+      "post_abort_independent_diagnostic": "Source/API, existing tests, JS syntax and diff hygiene passed. Task06 browser 503 retry and Cancel Edit browser failed. Workspace was interrupted before a settled autonomous completion; this is not an acceptance verdict."
+    },
+    {
+      "id": "managed-q2-20261001-02",
+      "stage": "controller-q2-02",
+      "wall_seconds": 23.109,
+      "native_tool_calls": 9,
+      "routing_verified": true,
+      "guard_result": "Warm model again reached sustained host memory warning; controlled interrupt, owned session idle. Sampled swap growth 0; peak sampled listener physical footprint 16,042,761,488 bytes.",
+      "post_abort_independent_diagnostic": "Source/API, existing tests, JS syntax and diff hygiene passed. Task06 stored-markup and Cancel Edit browser flows failed. Workspace was interrupted before a settled autonomous completion; this is not an acceptance verdict."
+    }
+  ],
+  "invocation_correction": "An initial trial invocation mistakenly supplied prompt text instead of the required prompt file path and failed before inference; the same untouched fixture was then used with a new stage controller-q2-01a. The failed invocation is archived, not counted as a model trial.",
+  "third_repetition": "Not attempted while host warnings recurred on both fresh guarded runs. Three settled matched quality repetitions remain unmet.",
+  "private_raw_archive": "~/Library/Application Support/LocalAI/runs/managed-q2-resource-20261001",
+  "private_archive_manifest_sha256": "f0d7541949acebd0870e0e0054ff3dced3625087129326f594e6ddc7f93c0740",
+  "owner_restore": "Private server terminated and unloaded the candidate. Owner settings SHA256 matched the pretrial snapshot; kryn bench passed guarded local protocol; kryn doctor --deep verified every pinned model and browser dependency, healthy 9B/96K/22 GiB runtime, connected browser/search and normal pressure. Disposable SSD cache removed after archiving raw evidence; model weights retained privately for a later green-host retry.",
+  "decision": "No quality ranking or promotion. The same occupied host also resource-gated two-bit inference. Retry only after memory headroom changes; keep daily 9B installed and public releases paused."
+}
