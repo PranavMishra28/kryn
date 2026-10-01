@@ -1,0 +1,69 @@
+{
+  "kind": "autonomous coding/UI and Reviewer qualification diagnostic",
+  "date_utc": "2026-10-01",
+  "decision": "FAIL: keep public releases paused; no autonomous UI or Reviewer claim; do not install or merge the unqualified candidates",
+  "merged_safe_fix": {
+    "pr": "https://github.com/PranavMishra28/kryn/pull/135",
+    "main_merge": "8bb0d1f1a37f9e88af6f605fb156e9c8d3589791",
+    "scope": "Record stale or unavailable browser evidence as private regression incidents; no synthetic model turn or installed-profile change",
+    "plugin_tests": "63/63 passed",
+    "required_ci": "offline-and-package passed"
+  },
+  "trial_control": {
+    "stack": "OpenCode 2.0.10, oMLX 0.6.4, Qwen3.5-9B-6bit Fast, configured 96K context, 8192 output tokens, 22 GiB guard",
+    "workspace": "fresh frozen Task06 seed plus same Cancel Edit request, same native tool catalog, no operator repair",
+    "prompt_sha256": "91d2a2c70ae2d9a02da743068501b2c20e7da43dbf801fac1513bad08d85e996",
+    "baseline_plugin_sha256": "db525adfd2714c0d9d7baa478de32afb739442bc19af70ce84a76f15e19e8e9f",
+    "edit_feedback_plugin_sha256": "21a4eb6e38ba403e810f420d88d9c351d949e9f54045631f3f151d0e4bb01f8a",
+    "task_context_plugin_sha256": "fc717897b9970f3865f186441e4d1405154a6311e44a92c9c0176c638baade5d"
+  },
+  "runs": [
+    {
+      "id": "quality-base-20261001b",
+      "native_completed": true,
+      "seconds": 471.527,
+      "tools": 57,
+      "browser_calls": 26,
+      "frozen_task06": "FAIL: fresh browser could not find Save; app started in Update mode",
+      "cancel_edit": "FAIL: fresh browser could not reach required edit flow",
+      "existing_tests": "PASS",
+      "original_seed": "preserved"
+    },
+    {
+      "id": "quality-candidate-20261001d",
+      "native_completed": true,
+      "seconds": 711.476,
+      "tools": 93,
+      "browser_calls": 63,
+      "frozen_task06": "PASS: five independent source/API/browser checks including real 503 retry, reload and two viewports",
+      "cancel_edit": "FAIL: no visible or keyboard-accessible Edit control; only mouse click on a bare list item enters edit mode",
+      "existing_tests": "PASS",
+      "original_seed": "preserved",
+      "source_caveats": [
+        "unescaped API values flow into innerHTML",
+        "Import handler dereferences an input searched under the clicked button",
+        "git diff --check reports trailing whitespace"
+      ]
+    },
+    {
+      "id": "quality-task-context-20261001g",
+      "native_completed": false,
+      "seconds": 56.552,
+      "tools": 12,
+      "browser_calls": 0,
+      "frozen_task06": "NOT_RUN",
+      "cancel_edit": "NOT_RUN",
+      "failure": "Model called a clarifying-question tool despite the exact request saying no clarification was needed; headless trial dismissed it before edits"
+    }
+  ],
+  "resource_observation": "All three trials sampled normal host pressure and zero swap growth; this is not a 45-60 minute endurance qualification.",
+  "reviewer_known_bad": {
+    "native_completed": true,
+    "seconds": 93.769,
+    "prompt_sha256": "8cec7e4f986656a0708f33724209ec9fd752908c81695340e3e15f742d454c69",
+    "verdict": "FAIL: found unescaped innerHTML and wrong Filter method, missed inaccessible Edit and broken Import, and invented a missing date assignment and other unsupported defects; citations were not reliably current project-relative paths"
+  },
+  "private_raw": "~/Library/Application Support/LocalAI/runs/quality-blocker-20261001",
+  "private_archive_manifest_sha256": "3313fee672d04b71737601ab980209f8036109d2ad0f5dd2302db9c9aad7286c",
+  "evidence_limits": "The Task06 pass is a development-set pass only. No candidate passed the combined Task06 plus Cancel Edit gate; no repeated matched success, unseen holdout, two compactions and restart, or sustained coding/UI run was reached. Reviewer accuracy failed. Do not infer frontier equivalence or full autonomy."
+}
