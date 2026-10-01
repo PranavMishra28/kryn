@@ -7,9 +7,9 @@ A coding workspace for Apple Silicon: OpenCode's terminal and browser interfaces
 | Start here | Contents |
 |---|---|
 | [Use KRYN](docs/usage.md) | Modes, permissions, models, terminal/GUI, sessions, diagnostics and recovery |
-| [Current status](plan.md) | Active gates, exact evidence and next checks |
-| [Develop KRYN](CONTRIBUTING.md) · [Repository map](AGENTS.md) | Owning layers, focused checks and package smoke |
-| [Evaluation contracts](evals/README.md) · [Comparison protocol](docs/evaluation.md) | Frozen checks, model decisions and independent acceptance requirements |
+| [Current status](plan.md) · [Architecture](docs/architecture.md) | Supervised v1 gates, ownership and trust boundaries |
+| [Develop KRYN](CONTRIBUTING.md) · [Release runbook](docs/releasing.md) | Owning layers, focused checks and final-artifact release steps |
+| [Supervised v1 qualification](docs/v1-qualification.md) · [Research evaluations](docs/evaluation.md) | Product release checks and separate autonomous experiments |
 | [Security](SECURITY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [Changelog](CHANGELOG.md) | Trust boundaries, distribution and changes |
 
 ## Quick start
