@@ -13,6 +13,7 @@
   },
   "private_raw": "~/Library/Application Support/LocalAI/runs/no-undef-candidate-20261001",
   "private_copy_manifest_sha256": "379b710a473777e9dfd1dcc057df722aed59152ed7cc78d21dd34822266d4e49",
+  "private_archive_manifest_v2_sha256": "4abb050d329d68280b2d3922f14437f77ab3d8bfa35d97993b997acaffc84d97",
   "trial": {
     "configuration": "owner OpenCode 2.0.10 / oMLX 0.6.4 / Qwen3.5-9B-6bit, Fast, configured 96K context, 8192 output, 22 GiB process ceiling; same candidate product plugin source reserved for both arms",
     "workload": "fresh frozen Task06 seed plus exact September 30 Cancel Edit prompt; no operator code repairs",
