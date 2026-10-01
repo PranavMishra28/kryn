@@ -18,6 +18,14 @@
     "exact_probe_manifest_sha256": "93d201e23d47a600aeaf20a828f14186d73f018549b36608f8ba1c99c9f6f810"
   },
   "owner_restore": "The isolated 64K runtime was stopped. The installed Qwen3.5-9B-6bit/oMLX 0.6.4/96K/22-GiB owner server restarted, both owner settings hashes matched pretrial, and kryn doctor passed with browser/search connected. The exact probes used the owner runtime and left it healthy and idle.",
+  "private_owner_activation": {
+    "merged_main": "797549f9477dcc1a0dc949c992d14bb5a2425947",
+    "clean_wheel_sha256": "1804bdfaf3a219e9c1b93882ab286d02a2ff10fc06876075191157f316cac86a",
+    "transaction": "The clean merged wheel installed through KRYN's package installer. kryn rollback restored prior source 0541390fb0b78533494b56ff791ccebbbb93c065 and the exact prior launcher; reinstalling the same private wheel reactivated 797549f. Both owner oMLX settings files matched their pretrial SHA256, and kryn doctor passed with browser/search connected.",
+    "installed_native_probe": "The installed plugin, without a source override, ran exactly 'cd /workspace && pwd' in the real disposable project directory with shell exit 0. Driver completed in 18.147 seconds, native route verified, normal sampled pressure and zero swap delta.",
+    "raw_private_archive": "~/Library/Application Support/LocalAI/runs/alias-probe-installed-20261001",
+    "archive_manifest_sha256": "bbdc64104faa4758be013d3eb09223e3f5d719ffcccd06a4008c571f6fc1a6f7"
+  },
   "qualification": "Narrow alias mechanism passed controlled native probe; autonomous coding/UI, useful 64K context, holdout, compaction/restart continuation and endurance remain unqualified or failed.",
   "release": "PAUSED"
 }
