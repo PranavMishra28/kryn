@@ -2,7 +2,7 @@
 
 [Install and quick start](../README.md) · [Current qualification and release gates](../plan.md)
 
-These controls describe the current unreleased source/private build and its 96K local-model profile. The public v0.2.0 preview uses the same profile but retains `/research` and `/deliver` in place of `/call`; use Plan and Agent directly for those workflows. See the current status for qualification limits and release state. The earlier v0.1.10 prerelease used a different profile.
+These controls describe the current unreleased source/private build and its 96K local-model profile. The public v0.2.0 preview uses the same profile but retains `/research` and `/deliver` in place of `/call`; use Plan and Agent directly for those workflows. See the current status for qualification limits and release state.
 
 ## Start coding
 

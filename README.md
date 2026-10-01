@@ -64,7 +64,7 @@ Requirements:
 
 ## Updates and recovery
 
-The v0.2.0 client checks for a newer checksum-verified KRYN release at startup and while idle. It offers **Update and restart / Later** once per release, or on demand through `/update`. Acceptance closes the client, verifies the same release hash again, uses the existing transactional installer, then resumes the project. Active turns defer the dialog; no update replaces a running generation. `kryn update --check` is the read-only Terminal equivalent. Network failures, same-version private builds and older releases produce no offer. The older public v0.1.10 client needs a manual version update; its in-session notice was not yet present.
+The v0.2.0 client checks for a newer checksum-verified KRYN release at startup and while idle. It offers **Update and restart / Later** once per release, or on demand through `/update`. Acceptance closes the client, verifies the same release hash again, uses the existing transactional installer, then resumes the project. Active turns defer the dialog; no update replaces a running generation. `kryn update --check` is the read-only Terminal equivalent. Network failures, same-version private builds and older releases produce no offer. Older installed clients without an in-session notice need a manual version update.
 
 Run `kryn update vX.Y.Z` in Terminal for an exact newer published KRYN tag. The updater verifies release checksums and package contents before transactional activation; `kryn rollback` restores the retained previous installation. Finish work and exit KRYN before updating. Do not install an unverified main commit or independently update the pinned OpenCode binary. Current same-version private candidates are not a public update channel.
 
