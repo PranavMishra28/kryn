@@ -1,0 +1,26 @@
+{
+  "kind": "public repository and private candidate preflight",
+  "date_utc": "2026-10-02",
+  "source_base": "e3c30721e4ba136a0ea3fd58fbbabe7a86ff89b3",
+  "release_state": "Only main, the v0.2.0 tag and its preview release remain on GitHub; the older 0.1.x public refs were previously archived and retired. Stale local remote-tracking refs were pruned. The v0.2.0 release note and SECURITY.md were corrected to reflect that history; v0.2.0 remains the working install route.",
+  "source_checks": {
+    "make_check": "PASS: 212 Python tests, 85 Node tests, native-trial self-check, frozen suite verification/self-tests and local documentation links",
+    "candidate_package_smoke": "PASS: 23-file curated wheel installed outside the checkout; package check and version command passed",
+    "candidate_wheel_sha256": "96862d3e34d2480a2748a483d15f762dd6a71506c56ed3effeac09e85a6d6ec8",
+    "candidate_source_dirty": true,
+    "limit": "This temporary candidate is not a clean final v1 artifact and is not a release qualification."
+  },
+  "secret_scan": {
+    "tool": "gitleaks 8.30.1, default rules, history scan with full redaction",
+    "historical_findings": 11,
+    "classification": "Same 11 generic-api-key matches in SHA256-shaped manifest/evidence fields across five historical commits as the previous inspected audit; no newly identified credential. Pattern scanning cannot prove absence of secrets.",
+    "raw_report": "Private, outside Git"
+  },
+  "browser_dependency_audit": {
+    "tool": "npm 11.6.2 audit --omit=dev --package-lock-only against a temporary copy of the pinned browser lock",
+    "production_dependencies": 4,
+    "known_advisories": 0,
+    "limit": "Point-in-time advisory lookup, not a guarantee of future safety."
+  },
+  "decision": "Keep the public version/tag unchanged while Reviewer accuracy, sustained accepted use and final-artifact lifecycle gates remain open."
+}

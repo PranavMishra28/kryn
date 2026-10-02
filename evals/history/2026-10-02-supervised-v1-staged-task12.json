@@ -1,0 +1,33 @@
+{
+  "kind": "staged supervised Task12 coding, UI, continuity and review screen",
+  "date_utc": "2026-10-02",
+  "source_commit": "e3c30721e4ba136a0ea3fd58fbbabe7a86ff89b3",
+  "private_run_id": "supervised-v1-staged-20261002-01",
+  "profile": "OpenCode 2.0.10, oMLX 0.6.4, Qwen3.5-9B-6bit, configured 96K context, unchanged daily-use guard, normally occupied owner Mac; stages crossed battery and AC power",
+  "stage_results": {
+    "plan": "Completed in a separate read-only stage, but suggested unrequested Delete/progress features and asked unnecessary clarification.",
+    "backend": "Initial model output passed frozen HTTP grader 2/2 and its own 10 tests, but removed canonical date validation; an independent source-bound probe failed on a noncanonical date. One saved-session feedback turn restored the validation. The final backend grader, original 2 tests, 8 route tests and canonical-date probe passed; the operator removed a redundant filter refactor.",
+    "browser": "The first independent browser run passed four checks and failed at the 503/manual-retry form-clear step. After one model correction, two fresh-database runs passed the frozen 11/11 browser oracle. A separate native Browser turn made 28 tool calls and observed the injected 503, manual retry, reload, Edit, filter and export; it completed under the guard. One browser-output read was denied as an external path without preventing the browser flow.",
+    "compaction_restart": "Two distinct actual OpenCode compaction events completed in fresh guarded server processes. A harmless external CSS comment changed the project after the first checkpoint. The first continuation detected it and ran current checks but falsely said no next action was needed. After the probe was removed and explicit operator feedback was given, a post-second-compaction fresh-process continuation reran source-bound checks, recalled earlier failures, identified the probe removal and named fresh review plus operator decision as the next action. This is supervised recovery, not first-pass truthful handoff.",
+    "reviewer": "A fresh read-only local-model Reviewer inspected source and tests but missed two material client defects and reported several speculative/nonmaterial findings. An independent browser holdout reproduced both misses: Edit crashed for a project containing a vertical bar, and the form stayed in Update mode after a successful edit. The operator changed only client row rendering and button reset. The holdout then passed 2/2 and the unchanged frozen browser oracle passed 11/11 again. Reviewer accuracy failed."
+  },
+  "native_compaction_message_ids": [
+    "msg_0fb1fd7ab001WHcRV59YqU4LFp",
+    "msg_0fb246cfe001x0YpC6rA56Gj2n"
+  ],
+  "duration": {
+    "all_nine_native_stage_wall_seconds": 2535.129,
+    "accepted_native_stage_wall_seconds": 1090.605,
+    "accepted_native_stage_minutes": 18.177,
+    "required_accepted_active_minutes": "45-60",
+    "operator_edits_and_external_browser_time_counted": false
+  },
+  "resources": "All native stage samples recorded normal pressure; each stage started and ended without swap growth above its baseline. The 9B runtime remained healthy after the trial. The resource guard was not weakened.",
+  "independent_grade": {
+    "automatic": "PASS 2/2; seed data and original test preserved",
+    "manual_pass": ["plan/build separation", "browser upload/edit/filter/export after correction", "503/manual retry after correction", "two native compactions", "saved-session handoff after operator feedback"],
+    "manual_fail": ["fresh Reviewer accuracy", "45-60 minutes accepted active sustained work"],
+    "overall": "FAIL"
+  },
+  "release_decision": "Keep public v1.0.0 paused. This trial demonstrates a useful supervised workflow with real corrections and independent UI checks, but does not qualify autonomous coding, reliable Reviewer authority, or the sustained-use gate. Final-wheel installation, rollback and post-release anonymous download remain unrun."
+}
