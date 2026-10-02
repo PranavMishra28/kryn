@@ -415,7 +415,8 @@ export function pruneTrackers(directory, now = Date.now()) {
 function checkCommand(raw) {
   const command = raw.trim();
   const prefix = /^cd\s+(\/[-A-Za-z0-9_./]+|\.[-A-Za-z0-9_./]*)\s*&&\s*/.exec(command);
-  return { command: prefix ? command.slice(prefix[0].length) : command,
+  const simple = prefix ? command.slice(prefix[0].length) : command;
+  return { command: simple.replace(/\s+2>&1$/, ''),
     directory: prefix?.[1] ?? null };
 }
 export function isCheck(command) {
