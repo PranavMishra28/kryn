@@ -25,6 +25,23 @@
     "end_exclusive_range_edit": "correct",
     "interpretation": "Native coding and resource screens passed, but the full coding/edit/test acceptance gate did not. Frozen grader PASS is not independent task acceptance."
   },
-  "next_step": "Run a supervised correction in the saved native session, independently check canonical date boundaries and inspect the final diff. Record the correction as operator-assisted rather than autonomous first-pass success.",
+  "supervised_correction": {
+    "stage": "correction1",
+    "driver_completed": true,
+    "same_saved_session": true,
+    "fresh_native_server_process": true,
+    "wall_seconds": 109.502,
+    "tool_calls": 5,
+    "tool_errors": 0,
+    "source_read_before_edit": true,
+    "agent_test_and_diff_inspection": true,
+    "frozen_grader": "PASS",
+    "independent_result": "PASS: malformed and compact dates raise ValueError; canonical dates, zero-minute rows, empty ranges and end-exclusive boundaries behave as requested; original tests and fixtures preserved",
+    "pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "power": "Battery Power",
+    "classification": "Supervised candidate coding acceptance after one operator feedback turn, not an autonomous first-pass success or a final-artifact pass"
+  },
+  "next_step": "Exercise browser/search, compaction/restart, sustained use and final-artifact gates. Keep the initial failed turn visible when reporting supervised success.",
   "release_gate": "OPEN"
 }
