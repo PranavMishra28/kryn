@@ -20,4 +20,4 @@ This preview is for supervised coding. The latest independent long coding/UI tas
 
 ## Earlier prereleases
 
-The 0.1.x prereleases and tags were retired on 1 October 2026 after their assets, release metadata, refs and abandoned worktrees were archived privately. v0.2.0 is retained for verified rollback until its replacement installation is confirmed. Historical failures and fixes remain indexed in [the evidence history](docs/history.md).
+The 0.1.x prereleases and tags were retired on 1 October 2026 after their assets, release metadata, refs and abandoned worktrees were archived privately. The v0.2.0 release/tag was retired on 2 October after public v1 installation and after its assets and metadata were privately archived and hash-checked. Historical failures and fixes remain indexed in [the evidence history](docs/history.md).
