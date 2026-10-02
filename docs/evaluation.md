@@ -8,6 +8,8 @@ The installed 9B profile is the settled daily choice. Do not reopen model, quant
 
 The installed 9B/96K profile is the daily baseline, not a qualified frontier baseline. A model publisher's coding score, a configured context number, or a completed agent turn cannot establish KRYN task quality. Keep the [frozen TaskboardLite suite](../evals/README.md) and its SHA256 manifest unchanged; the [fresh review-queue task](../evals/fresh_review_queue/README.md) checks API preservation, browser behavior and long-workflow evidence outside the candidate workspace.
 
+The [research protocol](../research/PROTOCOL.md) and [development pilot](../research/DEVELOPMENT.md) track the separate same-model harness study and its open gates. Those public-fixture results do not change the installed v1.0.0 profile.
+
 “Frontier-equivalent” would require a named frontier agent comparator on the same independently graded tasks and comparable tools, budgets and repetitions. Internal passes alone could support a bounded autonomous-workflow claim, not general parity. No matched frontier comparator is available under the current free/local-only constraint, and KRYN's own required workflow gates still fail; neither claim is qualified.
 
 ## Run a comparable trial

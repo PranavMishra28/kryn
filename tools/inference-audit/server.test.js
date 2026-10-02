@@ -38,7 +38,9 @@ test("array order stays significant at every depth", () => {
 
 test("omitted tools retain defaults; explicit empty tools hash separately", () => {
   assert.deepEqual(wireMetadata({}), { requestModelID: null, numeric: {}, thinking: null, preserveThinking: null,
-    effort: null, tools: [], toolCount: 0, toolsSha256: null, imagePartCount: 0, imageCount: 0, images: [] });
+    effort: null, messageCount: 0, systemMessageFingerprints: [], tools: [], toolCount: 0, toolsSha256: null,
+    workspaceNormalizedToolsSha256: null, toolFingerprints: [],
+    imagePartCount: 0, imageCount: 0, images: [] });
   assert.equal(hash(null), null);
   assert.equal(hash({}), null);
   assert.equal(wireMetadata({ tools: {} }).toolCount, null);
@@ -55,12 +57,39 @@ test("existing sampling and image evidence stays intact; schema text is not logg
   assert.deepEqual(metadata.numeric, { max_tokens: 128, thinking_budget: 0 });
   assert.equal(metadata.thinking, true); assert.equal(metadata.preserveThinking, true);
   assert.equal(metadata.effort, "low"); assert.equal(metadata.toolCount, 1);
+  assert.deepEqual(metadata.toolFingerprints.map(x => x.name), ["lookup"]);
+  assert.match(metadata.toolFingerprints[0].argumentsSha256, /^[a-f0-9]{64}$/);
+  assert.match(metadata.toolFingerprints[0].descriptionSha256, /^[a-f0-9]{64}$/);
+  assert.match(metadata.toolFingerprints[0].workspaceNormalizedDescriptionSha256, /^[a-f0-9]{64}$/);
   assert.equal(metadata.imagePartCount, 2); assert.equal(metadata.imageCount, 1);
   assert.deepEqual(metadata.images, [{ mime: "image/png", bytes: bytes.length,
     sha256: createHash("sha256").update(bytes).digest("hex") }]);
   const logged = JSON.stringify(metadata);
   for (const secret of ["private-description", "private-schema", "private-message", "private.invalid", data])
     assert(!logged.includes(secret));
+});
+
+test("workspace path normalization identifies equivalent tool descriptions", () => {
+  const a = structuredClone(tool), b = structuredClone(tool);
+  a.function.description = "Read /private/tmp/a/workspace/file";
+  b.function.description = "Read /private/tmp/b/workspace/file";
+  const left = wireMetadata({ tools: [a] }, "/private/tmp/a/workspace");
+  const right = wireMetadata({ tools: [b] }, "/private/tmp/b/workspace");
+  assert.notEqual(left.toolsSha256, right.toolsSha256);
+  assert.equal(left.workspaceNormalizedToolsSha256, right.workspaceNormalizedToolsSha256);
+});
+
+test("system prompt fingerprints expose change without logging prompt text", () => {
+  const system = text => ({ messages: [{ role: "system", content: text },
+    { role: "user", content: "private-user-message" }] });
+  const left = wireMetadata(system("Read /private/tmp/a/workspace/file"), "/private/tmp/a/workspace");
+  const right = wireMetadata(system("Read /private/tmp/b/workspace/file"), "/private/tmp/b/workspace");
+  const changed = wireMetadata(system("Different guidance"));
+  assert.equal(left.messageCount, 2);
+  assert.deepEqual(left.systemMessageFingerprints, right.systemMessageFingerprints);
+  assert.notDeepEqual(left.systemMessageFingerprints, changed.systemMessageFingerprints);
+  assert(!JSON.stringify(left).includes("private-user-message"));
+  assert(!JSON.stringify(left).includes("/private/tmp/a/workspace"));
 });
 
 async function auditHook(t, expectedModelID) {

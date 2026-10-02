@@ -16,6 +16,9 @@ The fixture's own `AGENTS.md` is identical in both arms. A tool-catalog or effec
 permission mismatch invalidates the pair; it is not silently counted as a loss or
 win. The main comparison is a *whole policy/state-layer* ablation, not attribution
 to one hook. Subcomponent attribution requires later one-variable ablations.
+Agent descriptions remain matched because OpenCode can embed them in its native
+subagent tool schema; the native arm strips agent system guidance but not the tool
+contract.
 
 The first runner validation uses public TaskboardLite tasks 02 and 03. They were used
 for prior tuning and are **development data only**. Older September comparisons had
@@ -99,3 +102,56 @@ source establishes KRYN's performance.
 No "frontier-adjacent" claim is permitted until all eight gates in the user goal
 pass, including a matched authorized frontier comparator. `NO IMPROVEMENT` is a
 valid research result. The next public release is out of scope for this protocol.
+
+### Development-grader amendment, 2026-10-02
+
+After the first native Task02 trial, the frozen suite reported PASS but the
+pre-existing `evals/supervised_task02.py` probe reported FAIL on a compact date.
+The v1 qualification contract already required this probe because the frozen
+grader misses noncanonical dates. Both research arms therefore require it for
+Task02 acceptance. The first provisional development receipt was replaced before
+publication; the raw trial and both check outputs remain available. This amendment
+does not change holdout tasks, H1 thresholds, or candidate selection rules.
+
+### Tool-contract amendment, 2026-10-02
+
+The first warm Task02 pair had equal tool IDs but unequal full tool-schema hashes.
+It is retained as an unmatched diagnostic and cannot support H1. The next pair
+logs per-tool argument/description hashes and checks the wire schema after
+normalizing only the disposable workspace path. Agent descriptions were restored
+in the control config because they can form part of OpenCode's subagent tool
+contract. The model, permissions, graders and H1 decision threshold are unchanged.
+
+### Task03 development check, 2026-10-02
+
+Before the KRYN Task03 arm finished, an additional independent probe was fixed to
+check the task's explicit names-with-spaces, comma/Unicode and case-sensitive
+requirements across report, CLI and HTTP. The frozen Task03 grader covers only a
+subset of those combinations. The probe passes the reference implementation and
+the completed native arm. Both arms must pass it for development acceptance; this
+does not alter the sealed-holdout plan or H1 threshold.
+
+### Role and path-control amendment, 2026-10-02
+
+The public fixture pilot used the hidden `build` agent to validate instrumentation.
+The primary protected study will use the user-facing `agent` role in both arms,
+frozen before any holdout generation. This prevents an internal-role pilot from
+standing in for the actual product experience. The pair checker now normalizes
+underscores in the random `.localai-tmp-*` directory name when comparing effective
+permissions; a behavioral test confirms that an actual permission change still
+invalidates a pair. The first matched Task03 pair (native PASS, KRYN FAIL) is a
+development observation, not an H1 result. Its KRYN trace shows an unavailable
+`browse` tool call followed by a question for already-specified requirements;
+the unattended question ended the turn before edits. A reverse-order repeat was
+started before any product-policy change.
+
+### Invocation-provenance amendment, 2026-10-02
+
+After the public Task02/03 pilot, receipt review found that the driver had not
+persisted its turn timeout or invocation-time OpenCode binary and model-profile
+hashes. The pilot finished within the later 900-second cap and its observed wire,
+tool, permission, guard and power controls matched, but missing fields cannot be
+reconstructed from the raw driver reports. The comparator therefore reports these
+as unverified and refuses a fully matched designation for those pairs. New trials
+capture them before prompting. The public pilot remains useful for debugging and
+is not used to support H1 or a frontier claim.
