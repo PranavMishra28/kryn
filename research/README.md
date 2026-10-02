@@ -42,10 +42,11 @@ outside its readable and reachable surfaces.
 An actual sandboxed OpenCode call on a public development fixture passed this
 runner preflight; its evidence and limitations are in [DEVELOPMENT.md](DEVELOPMENT.md).
 
-The external benchmark and protected-holdout layers are pending. An installed
-Docker CLI without a running daemon is insufficient for official SWE-bench or
-Harbor grading. Never report a local fixture result as an official benchmark
-score or a proof of frontier-level capability.
+The external benchmark and protected-holdout layers are pending. Docker is
+running on the research host and the one-instance official SWE-bench gold
+preflight passed; representative model subsets and Harbor remain unrun. Never
+report a local fixture result as an official benchmark score or a proof of
+frontier-level capability.
 
 The first pinned official SWE-bench calibration and its gold-oracle preflight
 are recorded in [EXTERNAL.md](EXTERNAL.md). The one-instance calibration is

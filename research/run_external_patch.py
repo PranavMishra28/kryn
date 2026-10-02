@@ -80,6 +80,26 @@ def configuration(workspace, state_dir, arm, relay_url):
     return config, products, dependencies
 
 
+def benchmark_tools(venv):
+    if venv is None:
+        return None, []
+    venv = Path(venv).absolute()
+    if (venv != venv.resolve() or not venv.is_relative_to(Path("/private/tmp")) or
+            not (venv / "pyvenv.cfg").is_file() or not (venv / "bin/python3").is_file() or
+            not (venv / "bin/rg").is_file()):
+        raise ValueError("Benchmark tool venv must be a real disposable /private/tmp Python venv with rg")
+    base = Path(subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
+        "import sys; print(sys.base_prefix)"], text=True, timeout=5).strip()).resolve()
+    linked = subprocess.check_output(["/usr/bin/otool", "-L", str(venv / "bin/rg")],
+                                     text=True, timeout=5)
+    libraries = []
+    for line in linked.splitlines()[1:]:
+        name = line.strip().split(" ", 1)[0]
+        if name.startswith("/") and not name.startswith(("/usr/lib/", "/System/")):
+            libraries.append(Path(name).resolve())
+    return venv / "bin", [venv, base, *libraries]
+
+
 def drive(child, prompt, timeout, cancelled):
     deadline, first = time.monotonic() + timeout, True
     output = errors = b""
@@ -121,15 +141,21 @@ def run(args):
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
             workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1")
+        tool_path, tool_dependencies = benchmark_tools(args.tool_venv)
+        dependencies += tool_dependencies
+        report["benchmark_tool_path"] = str(tool_path) if tool_path else None
+        report["benchmark_tool_dependencies"] = [str(path) for path in tool_dependencies]
         report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
         monitor = NativeResourceGuard(evidence, samples)
         try:
             if not runtime_is_idle(evidence, "runtime-before", model_id=MODEL_ID, guard_gib=22):
                 raise RuntimeError("Expected guarded model runtime is not idle")
             monitor.start()
-            with NativeServer(workspace, config, evidence / "native.log", background={
-                    "dependencies": dependencies, "inference_port": relay.port,
-                    "cancel": monitor.cancel.is_set}) as server:
+            background = {"dependencies": dependencies, "inference_port": relay.port,
+                          "cancel": monitor.cancel.is_set}
+            if tool_path is not None:
+                background["tool_path"] = str(tool_path)
+            with NativeServer(workspace, config, evidence / "native.log", background=background) as server:
                 # /api/info can become ready before asynchronous plugin discovery.
                 for _ in range(75):
                     inventory = server.request("GET", "/api/plugin")
@@ -212,6 +238,7 @@ def main():
     parser.add_argument("--prompt", required=True, type=Path)
     parser.add_argument("--evidence", required=True, type=Path)
     parser.add_argument("--arm", choices=("native", "kryn"), default="kryn")
+    parser.add_argument("--tool-venv", type=Path, help="preflighted disposable benchmark Python/ripgrep venv")
     parser.add_argument("--timeout", type=int, default=900)
     args = parser.parse_args()
     if not 30 <= args.timeout <= 1800:

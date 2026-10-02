@@ -34,6 +34,28 @@ grader errors. Its run ID is `kryn-gold-lite-amd64-20261002`; this is an oracle
 check, **not** model performance. The image occupies about 4.0 GB and was
 retained for the candidate trials. No unrelated Docker data was deleted.
 
+The first KRYN candidate generation failed the unchanged host-memory guard
+after 255.887 s and 33 local inference requests, before any tracked edit. Its
+sampled host pressure reached warning twice; sampled swap growth was zero.
+Power switched between AC and battery during the run, so it cannot form a
+matched performance pair with a later single-power control. The trace also
+showed the isolated candidate had no usable ripgrep for OpenCode's `glob` and
+`grep` tools, and the host's Python 3.14 could not import this old SymPy tree
+(`distutils` was removed). These are calibration-environment faults, not an
+accepted patch or a reason to weaken the resource guard. Earlier startup
+preflights made no inference call and are retained separately.
+
+A fresh disposable research tool venv now supplies Python 3.9.18, mpmath 1.3.0
+and ripgrep 15.1.0 to **both** arms through the whole-process sandbox's
+explicit dependency list. The isolated canary successfully imported SymPy
+1.7.1 and ran ripgrep on the candidate tree. Its Python executable, ripgrep
+binary and mpmath initializer SHA-256 values are respectively
+`7787e81ff11ff35703620e6af5e0cd395bea30e9ed099e318940153004c2580f`,
+`b8836cfabdf1e40f68431cab9b58d7add60c237b858c62a34cd3b2046fbadf8e`,
+and `b241584d2c1fc0304b0a1015ea923749d7b0800411dd406dcab7c82bf25d9fe8`.
+This environment correction is development calibration; any task observed here
+is ineligible for protected holdout selection.
+
 Neither this calibration nor the earlier public TaskboardLite pilot is sealed
 holdout evidence. Full Lite/Verified subsets and Terminal-Bench via Harbor remain
 unrun. The frontier-adjacency gate remains open.

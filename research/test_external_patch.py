@@ -4,10 +4,28 @@ import subprocess
 import tempfile
 import unittest
 
-from run_external_patch import prepare
+from unittest.mock import patch
+
+from run_external_patch import benchmark_tools, prepare
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_benchmark_tool_dependencies_are_explicit(self):
+        self.assertEqual(benchmark_tools(None), (None, []))
+        with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
+            venv = Path(tmp) / "venv"
+            (venv / "bin").mkdir(parents=True)
+            for name in ("pyvenv.cfg", "bin/python3", "bin/rg"):
+                (venv / name).touch()
+            with patch("run_external_patch.subprocess.check_output", side_effect=[
+                "/private/tmp/python-base\n", "/private/tmp/venv/bin/rg:\n"
+                "    /usr/local/opt/pcre2/lib/libpcre2-8.0.dylib (compatibility version 1.0.0)\n"
+                "    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n"]):
+                bin_path, dependencies = benchmark_tools(venv)
+            self.assertEqual(bin_path, venv / "bin")
+            self.assertEqual(dependencies[:2], [venv, Path("/private/tmp/python-base")])
+            self.assertEqual(len(dependencies), 3)
+
     def test_exact_clean_base_and_separate_oracle(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
             root = Path(tmp).resolve()
