@@ -316,9 +316,13 @@ function repoEvidence(directory) {
       env: { PATH: '/usr/bin:/bin', HOME: directory, GIT_CONFIG_NOSYSTEM: '1',
         GIT_CONFIG_GLOBAL: '/dev/null', GIT_OPTIONAL_LOCKS: '0' }, stdio: ['ignore', 'pipe', 'ignore'] });
   try {
-    const head = git('rev-parse', '--verify', 'HEAD').trim();
+    let head = null;
+    try { head = git('rev-parse', '--verify', 'HEAD').trim(); }
+    catch { /* An unborn repository can still have staged and untracked source. */ }
     const status = git('status', '--short', '--untracked-files=no', '--', '.').slice(0, 2000);
-    const changed = git('diff', '--no-ext-diff', '--name-only', '-z', 'HEAD', '--', '.')
+    const changed = (head === null
+      ? git('diff', '--cached', '--no-ext-diff', '--name-only', '-z', '--', '.')
+      : git('diff', '--no-ext-diff', '--name-only', '-z', 'HEAD', '--', '.'))
       .split('\0').filter(Boolean).slice(0, 9);
     let untracked = null;
     try {
@@ -563,7 +567,8 @@ export default {
         verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
-        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map() };
+        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map(),
+        shellSyntax: new Map(), shellSyntaxIncomplete: false };
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
         item.previousTracker = ownedFile(previous);
@@ -1023,6 +1028,39 @@ export default {
             typeof event.result.content === 'string' ? [{ type: 'text', text: event.result.content }] : []),
           { type: 'text', text: failure },
         ];
+      }
+      if (event.status === 'completed' && event.tool === 'shell' && AGENT_ROLES.has(event.agent) &&
+          event.result && event.result.output?.status !== 'running' && options.nodeBinary) {
+        // Shell can write source without invoking the native edit hooks. Inspect only
+        // bounded Git-visible project files; ignored dependencies stay outside scope.
+        const evidence = repoEvidence(ctx.location.directory);
+        const changed = evidence ? JSON.parse(evidence) : null;
+        const incomplete = !changed || changed.changed_files_truncated ||
+          changed.untracked_files_truncated !== false || changed.untracked_files_unavailable;
+        const coverageNotice = incomplete && !item.shellSyntaxIncomplete ?
+          'KRYN could not inspect every changed JavaScript file. Run node --check on the changed files before claiming syntax validation.' : null;
+        item.shellSyntaxIncomplete = incomplete;
+        const failures = changed ? [...changed.changed_files, ...changed.untracked_files]
+            .filter(file => /\.(?:c|m)?js$/i.test(file.path))
+            .map(file => {
+              const current = projectSnapshot(ctx.location.directory, file.path);
+              if (current?.hash !== file.sha256) return null;
+              const cached = item.shellSyntax.get(current.file);
+              if (cached?.hash === current.hash) return cached.failure;
+              const failure = javascriptSyntaxFailure(current, options.nodeBinary);
+              if (item.shellSyntax.size >= 8) item.shellSyntax.delete(item.shellSyntax.keys().next().value);
+              item.shellSyntax.set(current.file, { hash: current.hash, failure });
+              return failure;
+            }).filter(Boolean) : [];
+        if (failures.length || coverageNotice) {
+          const content = event.result.content;
+          event.result.content = [
+            ...(Array.isArray(content) ? content : typeof content === 'string' ? [{ type: 'text', text: content }] : []),
+            ...failures.slice(0, 2).map(text => ({ type: 'text', text })),
+            ...(failures.length > 2 ? [{ type: 'text', text: `KRYN found ${failures.length - 2} more JavaScript syntax failures; run node --check on the changed files.` }] : []),
+            ...(coverageNotice ? [{ type: 'text', text: coverageNotice }] : []),
+          ];
+        }
       }
       if (AGENT_ROLES.has(event.agent) && verifiedEdit &&
           UI_SOURCE.test(path.relative(ctx.location.directory, verifiedEdit.file))) {

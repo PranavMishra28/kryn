@@ -1,0 +1,33 @@
+{
+  "kind": "fresh supervised-v1 Task12 local-model repeat failure and shell syntax-feedback candidate",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-endurance-repeat-20261002-01",
+  "scope": "Fresh frozen Task12 fixture, saved native Plan then Agent/Build session, current KRYN source plugin, installed Qwen3.5-9B-6bit/oMLX, unchanged daily-use guard, no paid provider. Candidate files and raw traces remain private under the ignored run directory.",
+  "baseline": "Frozen automatic HTTP check failed 404 versus required 400 for the unimplemented import route; test_existing.py passed 2/2.",
+  "native": {
+    "plan_wall_seconds": 119.551,
+    "build_wall_seconds": 567.027,
+    "total_wall_seconds": 686.578,
+    "saved_session_id": "ses_f0524f267ffeTA7WQll4FNDiom",
+    "routing_verified": true,
+    "build_pressure_levels": [1],
+    "build_swap_peak_growth_bytes": 0,
+    "power": "Battery Power",
+    "operator_feedback": "The Plan incorrectly said an absent project filter should return all rows. The Build request explicitly restored TASK.md's exact-filter requirement. The model tried several /workspace native edits and writes, which KRYN denied as external paths, then used shell calls in the actual fixture."
+  },
+  "source_sha256": {
+    "web/app.js": "0eaada656f510e83e115c89745a7fc408811805efea34f6d27c828fd0487c9f0",
+    "taskboard_lite/server.py": "23151ea0903d2aa3eb9c5c1957bbc6baefa680e7338bfcf5f99a740f758753f2"
+  },
+  "independent_checks": {
+    "frozen_api_source": "PASS 2/2",
+    "existing_unittest": "PASS 2/2",
+    "node_check": "FAIL: web/app.js line 138 contains await inside a non-async IIFE",
+    "git_diff_check": "FAIL: six trailing-whitespace lines in web/index.html",
+    "browser": "FAIL at page JavaScript exception before any UI acceptance assertion; report SHA256 50db9024654e4110286bc11c257bb3badae5d37080430a2412e719bc54103f3a"
+  },
+  "additional_source_findings": "The generated client sends multipart FormData to a raw-CSV import endpoint and imports on file selection as well as on Import click. The browser oracle stopped at the syntax exception, so these are static findings, not independently observed completed UI flows.",
+  "false_completion": "The model's final summary declared browser controls complete and estimated about 30 minutes of active work, while observed Plan+Build walls were 11.44 minutes and the client did not parse. It also described a server and /workspace database state that were not independent acceptance evidence.",
+  "decision": "Fresh autonomous coding/UI acceptance fails again under a healthy resource guard. Do not retry another prompt-only Task12 variant or promote autonomous quality. Keep the 9B supervised scope and the private artifact; use independent checks and explicit operator correction. A minimal product candidate now adds node --check feedback for Git-visible JavaScript written through shell calls, which previously bypassed native edit feedback. The candidate unit test passes, but native benefit is not yet measured.",
+  "release_gate": "OPEN"
+}
