@@ -99,3 +99,30 @@ manifest. The folder is not part of the public source package.
 
 Neither this calibration nor the earlier public TaskboardLite pilot is sealed
 holdout evidence. The frontier-adjacency gate remains open.
+
+## Frozen cross-repository subset (not yet run)
+
+[The machine-readable roster](subsets/swebench-20261002.json) freezes six new
+instances from six repositories before agent generation: three Lite and three
+Verified. It pins task IDs, dataset revisions and test-file hashes, base
+commits, platform image digests, prompt hashes, a 900-second cap and alternating
+KRYN/native order. The roster SHA-256 at freeze time was
+`d4dda57b2de1a046b56a268da6b176e6050fbce2c6a1478b8b0d3dad57f71737`.
+
+Selection used only `instance_id` and `repo` metadata: take the six most frequent
+repositories across the pinned Lite and Verified test splits after excluding
+`sympy/sympy`, which was already used for calibration. Assign them in frequency
+order alternately to Lite and Verified, then choose the lowest SHA-256 of
+`seed + "\\0" + dataset + "\\0" + instance_id` within each assigned repo,
+using seed `kryn-external-20261002-v1`. The prompt is the roster's exact generic
+prefix followed by that instance's `problem_statement` and one newline;
+`hints_text`, reference `patch` and `test_patch` are excluded. Private prompt
+files were generated and hashed before any selected-task run.
+
+For each instance, the official gold patch must first pass the pinned evaluator
+under its pinned image digest. Each agent gets a fresh base checkout, the same
+preflighted candidate tools, installed model and guard, and one uninterrupted
+bounded attempt. Any image, local dependency, guard or oracle failure is recorded
+against that frozen task, never silently substituted. The six-case subset is
+small and cannot stand in for a full-suite SWE-bench score or the protected
+internal holdout.
