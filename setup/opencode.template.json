@@ -203,6 +203,11 @@
           "action": "execute",
           "resource": "*",
           "effect": "deny"
+        },
+        {
+          "action": "external_directory",
+          "resource": "__ROOT__/browser-output/*",
+          "effect": "allow"
         }
       ]
     },
@@ -215,7 +220,8 @@
         { "action": "subagent", "resource": "reviewer", "effect": "allow" },
         { "action": "subagent", "resource": "browse", "effect": "allow" },
         { "action": "search_*", "resource": "*", "effect": "deny" },
-        { "action": "execute", "resource": "*", "effect": "deny" }
+        { "action": "execute", "resource": "*", "effect": "deny" },
+        { "action": "external_directory", "resource": "__ROOT__/browser-output/*", "effect": "allow" }
       ]
     },
     "ask": {

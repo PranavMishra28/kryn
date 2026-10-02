@@ -1223,6 +1223,11 @@ class SetupChecks(unittest.TestCase):
         self.assertIn({'action': 'subagent', 'resource': 'browse', 'effect': 'allow'},
                       cfg['agents']['build']['permissions'])
         self.assertEqual(cfg['agents']['agent']['permissions'], cfg['agents']['build']['permissions'])
+        browser_output = str(root / 'browser-output') + '/*'
+        self.assertIn({'action': 'external_directory', 'resource': browser_output, 'effect': 'allow'},
+                      cfg['agents']['agent']['permissions'])
+        self.assertNotIn({'action': 'external_directory', 'resource': browser_output, 'effect': 'allow'},
+                         cfg['agents']['browse']['permissions'])
         self.assertNotIn({'action': 'browser_*', 'resource': '*', 'effect': 'deny'},
                          cfg['agents']['agent']['permissions'])
         self.assertIn({'action': 'browser_*', 'resource': '*', 'effect': 'ask'}, cfg['permissions'])
