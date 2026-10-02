@@ -367,6 +367,35 @@ test('a leading cd keeps a failed check in the restart ledger', async () => {
   } finally { await cleanup(); f.remove(); }
 });
 
+test('a simple stderr merge keeps the real check result through compaction and restart', async () => {
+  const f = fixture(); let cleanup = await plugin.setup(f.ctx);
+  try {
+    const command = `cd ${f.root} && python3 -m unittest -v 2>&1`;
+    for (const unsafe of [`${command} || true`, `${command} | head`,
+      `cd ${f.root} && python3 -m unittest -v 2>/dev/null`])
+      assert.equal(isCheck(unsafe), false);
+    assert.equal(isCheck(command), true);
+    assert.equal(isCheck('python3 test_api.py 2>&1'), true);
+    assert.equal(isCheck('node --check web/app.js 2>&1'), true);
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    shellRun(f, command, 'FAIL: assertion', 1, {}, true, 1);
+    const context = { sessionID: 'ses_1', agent: 'build', system: [], tools: {} };
+    f.call('session.compaction', context);
+    assert.deepEqual(f.read('trackers')[0].verification.checks.map(check => [check.state, check.exit_code]),
+      [['failed', 1]]);
+    shellRun(f, `cd ${f.root} && python3 -m unittest -v`, 'ok', 2);
+    let checks = f.read('trackers')[0].verification.checks;
+    assert.equal(checks.length, 1, 'stderr merging must not create a second check identity');
+    assert.equal(checks[0].state, 'passed');
+    assert.equal(checks[0].previous_failure.exit_code, 1);
+    await cleanup(); cleanup = await plugin.setup(f.ctx);
+    f.call('session.context', context);
+    checks = f.read('trackers')[0].verification.checks;
+    assert.equal(checks[0].state, 'stale');
+    assert.equal(checks[0].previous_failure.exit_code, 1);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('restart guidance includes a recently rechecked older command within its four receipts', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
