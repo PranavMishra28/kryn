@@ -48,7 +48,11 @@ frozen six-task Lite/Verified subset are documented in
 [EXTERNAL.md](EXTERNAL.md). Record every subset attempt with
 `research/record_external.py`; it checks task/prompt/base identity and, when an
 official result is supplied, verifies that the submitted patch is exactly the
-one archived by the runner and grader. The compact append-only
+one archived by the runner and grader. New schema-2 receipts also require the
+grader's per-task patch and report beneath the declared run directory, and
+publish only the exception class when a driver fails. Earlier schema-1 rows
+remain immutable; their raw evidence and SHA-256 manifests are retained for
+audit. The compact append-only
 `research/history/external.jsonl` index is public; full prompts and traces stay
 in ignored evidence directories. Never report a subset as a full benchmark
 score or a proof of frontier-level capability.

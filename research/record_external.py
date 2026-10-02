@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import shlex
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,13 +20,24 @@ def sha(path):
 
 def edited_tests(patch):
     paths = []
+    sections = []
     for line in patch.splitlines():
-        if not line.startswith("diff --git "):
-            continue
-        pair = shlex.split(line[len("diff --git "):])
+        if line.startswith("diff --git "):
+            sections.append([line])
+        elif sections:
+            sections[-1].append(line)
+    for section in sections:
+        pair = shlex.split(section[0][len("diff --git "):])
         if len(pair) != 2 or not pair[1].startswith("b/"):
             raise ValueError("Cannot audit patch paths")
         path = PurePosixPath(pair[1][2:])
+        if path.is_absolute() or any(part in {"..", "\\"} for part in path.parts):
+            raise ValueError("Cannot audit patch paths")
+        header = section[1:next((i for i, line in enumerate(section)
+                                  if line.startswith("@@ ")), len(section))]
+        if any(line.startswith("new file mode ") or line == "--- /dev/null"
+               for line in header):
+            continue
         name = path.name.lower()
         if ({"test", "tests", "testing"} & {part.lower() for part in path.parts} or
                 name.startswith("test_") or
@@ -55,9 +67,11 @@ def receipt(evidence, official=None, prediction=None, official_patch=None,
         raise ValueError("Driver patch hash does not match archived patch")
     results = None
     if official is not None:
-        if not official_run_id or "/" in official_run_id:
+        if not official_run_id or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", official_run_id):
             raise ValueError("Official grade needs its evaluator run ID")
         official = Path(official).resolve()
+        if official.name != "results.json" or official.parent.name != official_run_id:
+            raise ValueError("Official result is outside its declared evaluator run")
         results = json.loads(official.read_text())
         if results.get("submitted_ids") != [task_id]:
             raise ValueError("Official grade is for another task")
@@ -69,8 +83,17 @@ def receipt(evidence, official=None, prediction=None, official_patch=None,
                 submitted[0].get("model_patch") != model_patch.read_text()):
             raise ValueError("Submitted prediction differs from archived patch")
         if model_patch.stat().st_size:
-            if official_patch is None or sha(Path(official_patch).resolve()) != sha(model_patch):
+            graded_patch = Path(official_patch).resolve() if official_patch else None
+            if (graded_patch is None or graded_patch.name != "patch.diff" or
+                    graded_patch.parent.name != task_id or
+                    graded_patch.parent.parent.parent != official.parent or
+                    sha(graded_patch) != sha(model_patch)):
                 raise ValueError("Official evaluator patch differs from submitted patch")
+            report_path = graded_patch.parent / "report.json"
+            report = json.loads(report_path.read_text())
+            if (report.get(task_id, {}).get("resolved") is not
+                    (task_id in results.get("resolved_ids", []))):
+                raise ValueError("Official per-task report differs from run result")
         elif task_id not in results.get("empty_patch_ids", []):
             raise ValueError("Empty patch does not match official result")
     elif prediction is not None or official_patch is not None or official_run_id is not None:
@@ -95,8 +118,12 @@ def receipt(evidence, official=None, prediction=None, official_patch=None,
                     clean_resources and not test_edits)
     request_schemas = sorted({row["tool_schema_sha256"] for row in driver.get("requests", [])
                               if row.get("tool_schema_sha256")})
+    error = driver.get("error")
+    error_kind = error.split(":", 1)[0] if isinstance(error, str) else None
+    if error_kind and not re.fullmatch(r"[A-Za-z_]\w*", error_kind):
+        error_kind = "Error"
     return {
-        "schema": 1, "split": "external-subset", "task_id": task_id,
+        "schema": 2, "split": "external-subset", "task_id": task_id,
         "dataset": task["dataset"], "arm": arm, "evidence_id": evidence.name,
         "source_commit": driver.get("source_commit"),
         "driver_sha256": sha(driver_path), "runner_sha256": driver.get("runner_sha256"),
@@ -112,7 +139,7 @@ def receipt(evidence, official=None, prediction=None, official_patch=None,
         "request_count": len(driver.get("requests", [])),
         "driver_completed": driver.get("completed"),
         "intervention": driver.get("intervention"),
-        "error": driver.get("error"),
+        "error": error_kind,
         "official_results_sha256": sha(official) if official else None,
         "official_run_id": official_run_id,
         "prediction_sha256": sha(prediction) if prediction else None,
@@ -127,6 +154,16 @@ def receipt(evidence, official=None, prediction=None, official_patch=None,
 
 
 def append(database, row):
+    if row.get("error") is not None and not re.fullmatch(r"[A-Za-z_]\w*", row["error"]):
+        raise ValueError("Public receipt error must contain only an exception name")
+    for path in row.get("edited_test_paths", []):
+        if not isinstance(path, str):
+            raise ValueError("Public receipt contains an unsafe test path")
+        parsed = PurePosixPath(path)
+        if (parsed.is_absolute() or
+                any(part == ".." for part in parsed.parts) or "\\" in path or
+                any(ord(char) < 32 for char in path)):
+            raise ValueError("Public receipt contains an unsafe test path")
     encoded = json.dumps(row, sort_keys=True, separators=(",", ":"))
     if any(marker in encoded for marker in ("/Users/", "/private/tmp/", "/var/folders/")):
         raise ValueError("Public receipt contains a local absolute path")

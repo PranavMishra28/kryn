@@ -26,9 +26,13 @@ class ExternalRecordTest(unittest.TestCase):
             prediction = root / "prediction.json"
             prediction.write_text(json.dumps([{"instance_id": task["instance_id"],
                                                "model_patch": patch}]))
-            official_patch = root / "official.patch"
+            run = root / "run-1"
+            grade = run / "model" / task["instance_id"]
+            grade.mkdir(parents=True)
+            official_patch = grade / "patch.diff"
             official_patch.write_text(patch)
-            official = root / "results.json"
+            (grade / "report.json").write_text(json.dumps({task["instance_id"]: {"resolved": True}}))
+            official = run / "results.json"
             official.write_text(json.dumps({"submitted_ids": [task["instance_id"]],
                                             "resolved_ids": [task["instance_id"]]}))
             row = record_external.receipt(evidence, official, prediction, official_patch, "run-1")
@@ -36,6 +40,10 @@ class ExternalRecordTest(unittest.TestCase):
             self.assertNotIn(str(root), json.dumps(row))
             self.assertEqual(record_external.edited_tests(
                 "diff --git a/tests/test_api.py b/tests/test_api.py\n"), ["tests/test_api.py"])
+            self.assertEqual(record_external.edited_tests(
+                "diff --git a/tests/test_new.py b/tests/test_new.py\n"
+                "new file mode 100644\n--- /dev/null\n+++ b/tests/test_new.py\n"
+                "@@ -0,0 +1 @@\n+new test\n"), [])
             forbidden = "diff --git a/tests/test_api.py b/tests/test_api.py\n"
             (evidence / "model.patch").write_text(forbidden)
             official_patch.write_text(forbidden)
@@ -51,10 +59,22 @@ class ExternalRecordTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "evaluator patch differs"):
                 record_external.receipt(evidence, official, prediction, official_patch, "run-1")
             official_patch.write_text(patch)
+            with self.assertRaisesRegex(ValueError, "declared evaluator run"):
+                record_external.receipt(evidence, official, prediction, official_patch, "run-2")
+            (grade / "report.json").write_text(json.dumps({task["instance_id"]: {"resolved": False}}))
+            with self.assertRaisesRegex(ValueError, "per-task report"):
+                record_external.receipt(evidence, official, prediction, official_patch, "run-1")
+            (grade / "report.json").write_text(json.dumps({task["instance_id"]: {"resolved": True}}))
             database = root / "history.jsonl"
             record_external.append(database, row)
             with self.assertRaisesRegex(ValueError, "already recorded"):
                 record_external.append(database, row)
+            with self.assertRaisesRegex(ValueError, "exception name"):
+                record_external.append(database, {**row, "error": "failed at /home/person/secret"})
+            with self.assertRaisesRegex(ValueError, "unsafe test path"):
+                record_external.append(database, {**row, "edited_test_paths": ["/tmp/secret"]})
+            with self.assertRaisesRegex(ValueError, "unsafe test path"):
+                record_external.append(database, {**row, "edited_test_paths": ["../secret/test_a.py"]})
             driver["intervention"] = "resource_guard"
             (evidence / "driver.json").write_text(json.dumps(driver))
             self.assertFalse(record_external.receipt(
