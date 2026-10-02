@@ -259,3 +259,32 @@ Across four frozen tasks, strict acceptance is KRYN **0/4** versus native
 OpenCode **1/4**. The observed resource aborts and unresolved patches do not
 support H1. Two selected tasks remain; the subset remains too small for a
 generalization or frontier comparison.
+
+### Task 5: pytest 5495 (Lite)
+
+The pinned gold patch resolved 1/1 in official run
+`gold-pytest-5495-20261002`. Both clean owner-only checkouts imported the
+frozen pytest 4.6.1 source from matched Python 3.9 environments, had the same
+pluggy and other pinned dependencies, and passed the focused
+`test_reprcompare_notin` canary. The candidate tools, prompt, model and guard
+were unchanged. The KRYN-first pair produced:
+
+| Arm | Native turn | Official diagnostic grade | Frozen acceptance | New input tokens |
+| --- | --- | --- | --- | ---: |
+| KRYN | guard stop after 3 requests, 29.084 s | empty patch; unresolved | **fail** | 6,833 |
+| Native OpenCode | guard stop after 27 requests, 211.362 s | partial patch resolved 1/1 | **fail** | 61,570 |
+
+Both turns observed host-memory warning under the unchanged guard and had zero
+sampled swap growth. Native's partial patch passed the official evaluator, but
+the interrupted turn cannot meet the preregistered completion endpoint. The
+official run IDs are `kryn-pytest-5495-20261002` and
+`native-pytest-5495-20261002`; the former reports one empty patch. Raw traces,
+patches, predictions, grader reports and a SHA-256 manifest are retained in
+ignored `evals/runs/external-pytest-5495-20261002/` on this Mac. The early KRYN
+abort also makes this pair a poor estimate of relative solution quality.
+
+Across five frozen tasks, strict acceptance is KRYN **0/5** and native
+OpenCode **1/5**. Even a KRYN-only success on the final selected task could at
+most tie the six-task strict totals; this external subset cannot establish a
+positive v1 harness acceptance difference. The result does not replace the
+larger protected holdout, and no frontier-adjacent claim is supported.
