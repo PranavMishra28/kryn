@@ -805,6 +805,45 @@ test('shell-written JavaScript receives syntax feedback before the Agent claims 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {
+  const run = (f, id) => {
+    const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id,
+      id: 'call_' + id, tool: 'shell', input: { command: 'inspect source' } };
+    f.call('tool.execute.before', event);
+    const after = { ...event, status: 'completed', result: { output: { exit: 0, status: 'completed', output: '' },
+      content: [{ type: 'text', text: 'Command exited with code 0.' }] } };
+    f.call('tool.execute.after', after);
+    return after.result.content.map(part => part.text).join('\n');
+  };
+  const unborn = fixture({ nodeBinary: process.execPath });
+  const unbornCleanup = await plugin.setup(unborn.ctx);
+  try {
+    assert.match(run(unborn, 'no-git'), /could not inspect every changed JavaScript file/);
+    assert.doesNotMatch(run(unborn, 'no-git-again'), /could not inspect every changed JavaScript file/);
+    execFileSync('/usr/bin/git', ['init', '-q'], { cwd: unborn.root });
+    fs.writeFileSync(path.join(unborn.root, 'staged.js'), 'const = ;\n');
+    fs.writeFileSync(path.join(unborn.root, 'untracked.js'), 'const = ;\n');
+    execFileSync('/usr/bin/git', ['add', 'staged.js'], { cwd: unborn.root });
+    const feedback = run(unborn, 'unborn');
+    assert.match(feedback, /staged\.js/);
+    assert.match(feedback, /untracked\.js/);
+    assert.doesNotMatch(feedback, /could not inspect every changed JavaScript file/);
+  } finally { await unbornCleanup(); unborn.remove(); }
+
+  const truncated = fixture({ nodeBinary: process.execPath });
+  const truncatedCleanup = await plugin.setup(truncated.ctx);
+  try {
+    execFileSync('/usr/bin/git', ['init', '-q'], { cwd: truncated.root });
+    for (let n = 0; n < 9; n++) fs.writeFileSync(path.join(truncated.root, `file-${n}.js`), 'const ready = true;\n');
+    execFileSync('/usr/bin/git', ['add', '.'], { cwd: truncated.root });
+    execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+      'commit', '-qm', 'seed'], { cwd: truncated.root });
+    for (let n = 0; n < 9; n++) fs.writeFileSync(path.join(truncated.root, `file-${n}.js`),
+      n === 8 ? 'const = ;\n' : 'const ready = false;\n');
+    assert.match(run(truncated, 'truncated'), /could not inspect every changed JavaScript file/);
+  } finally { await truncatedCleanup(); truncated.remove(); }
+});
+
 test('owned edit fingerprints cannot be refreshed through overlapping edits', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'app.js'); fs.writeFileSync(file, 'let count = 0;\n');
