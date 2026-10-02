@@ -80,3 +80,16 @@ reference because it requires an explicit variant; this preflight used a disposa
 `local/qwen#fast` config and a disposable resumed control. No installed learning
 control or production profile changed. Default-variant support and a full sealed
 candidate/grader run remain unqualified.
+
+### Default-variant learner candidate
+
+The installed `local/qwen` reference failed before dispatch with
+`Learning requires the selected explicit local model variant`. A separate
+two-line candidate accepts that native reference as OpenCode's `default`
+variant while preserving the existing explicit-variant validation. In a
+disposable resumed learner state, its real sandboxed OpenCode turn on the
+public `records` fixture completed and passed the external 3/3 black-box
+checks in 68.437 s, with 12 local inference requests, normal sampled host
+pressure, and zero swap growth. The default-variant path is a functional
+repair, not evidence that autonomous learner promotions improve engineering
+quality; selection, protected validation and rollback remain required.
