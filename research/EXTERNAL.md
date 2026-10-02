@@ -189,3 +189,37 @@ usable pytest command and record its package manifest. After adding pytest
 `tests/test_domain_std.py::test_glossary` check (1/1); this retrospective
 environment check does not change either recorded agent outcome. Prior results
 remain unchanged.
+
+### Task 3: Matplotlib 25498 (Lite)
+
+The pinned gold patch resolved 1/1 in official run
+`gold-matplotlib-25498-20261002`. Both candidate checkouts were reset to the
+frozen base and received the exact frozen prompt. The same pinned Python 3.11
+dependencies and ripgrep were installed for each arm. Building this older
+Matplotlib source on the Mac first failed while linking its bundled FreeType;
+using the installed system FreeType fixed that candidate-tool environment
+before either arm started. The focused `test_colorbar_renorm` canary passed in
+both arms. The system FreeType version differs from the official Docker image,
+so that Mac canary does not validate image-comparison tests; official grading
+remains authoritative.
+
+| Arm | Native turn | Official diagnostic grade | Frozen acceptance | New input tokens |
+| --- | --- | --- | --- | ---: |
+| KRYN | guard stop after 11 requests, 96.941 s | empty patch; unresolved | **fail** | 38,528 |
+| Native OpenCode | guard stop after 12 requests, 107.571 s | empty patch; unresolved | **fail** | 43,943 |
+
+Both saw sustained host-memory warning under the unchanged guard before any
+tracked edit. Sampled swap growth was zero; peak sampled oMLX process physical
+footprint was 13.93 GB for KRYN and 13.14 GB for native. Both ran on AC power.
+The first KRYN grading CLI call omitted the required `model_name_or_path`
+prediction field and produced no result; its run metadata is retained. The
+corrected official runs are `kryn-matplotlib-25498-20261002-corrected` and
+`native-matplotlib-25498-20261002`, each reporting one empty patch and zero
+resolved instances. Raw traces, predictions, official results and a SHA-256
+manifest are retained in ignored `evals/runs/external-matplotlib-25498-20261002/`
+on this Mac. No same-task retry or guard change was made.
+
+Across the first three frozen tasks, strict acceptance is KRYN **0/3** and
+native OpenCode **1/3**. This is an occupied-host limitation and no evidence
+of KRYN uplift. The small subset remains incomplete; even when complete it
+cannot by itself qualify H1 or support a frontier-adjacent claim.
