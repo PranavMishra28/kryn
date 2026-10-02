@@ -1,0 +1,20 @@
+{
+  "kind": "supervised-v1 Task12 continuation, checkpoint and Reviewer accuracy receipt",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-endurance-20261001-01",
+  "model": "Qwen3.5-9B-6bit via owned OpenCode/oMLX",
+  "observed": {
+    "verify1": "After the first native compaction, a fresh server/client resumed the saved session for 176.664 seconds. Eight tool calls read current source/Git and ran git diff --check, python unittest and node syntax checks; all observed exits were 0. The model recognized that EVIDENCE.md describes older client bytes, but did not recall the earlier failed test_api.py exit or explicitly compare checkpoint hashes in its final answer. Route verified; pressure level 1; zero swap growth.",
+    "compaction2": "A second native checkpoint completed without a local-model compaction request. It retained five user requests, marked completion and next action unverified, flagged repository_changed_since_previous_checkpoint, and recorded the prior Python check exit 1 plus stale unittest and Node syntax exits 0. Current changed-file hashes matched the checkpoint. Four samples observed pressure level 1 and zero swap growth.",
+    "review1": "A fresh read-only Reviewer session completed in 155.958 seconds with 11 read/glob calls, verified local route, pressure level 1 and zero swap growth. It correctly flagged EVIDENCE.md as stale and browser acceptance as unverified, but incorrectly called DOM text nodes an XSS path, denied the existing form submit/PATCH mechanism, recommended restoring inline handlers, and invented a failed=5 observed-check ledger. The independent operator rejected those findings.",
+    "frozen_grade": "Task12 automatic API/source checks passed 2/2, but the overall result remained FAIL: native browser/503 recovery failed, Reviewer accuracy failed, and the final saved-session handoff was not tested.",
+    "elapsed": "Plan, Build, Browser, Repair, Verify and Reviewer native stage wall times totalled 2267.732 seconds (37.8 minutes). This is not 45-60 minutes of accepted active work; failed stages and operator correction remain distinct."
+  },
+  "interpretation": "Native checkpoint mechanics now retain the relevant failed and stale checks, but model-authored check recall and Reviewer accuracy are not qualified. No new prompt rule or automatic reviewer authority is inferred from this attempt.",
+  "remaining": [
+    "Independent browser acceptance of the corrected client remains unverified.",
+    "A final saved-session Agent handoff/change/verification has not run after the second compaction.",
+    "Sustained accepted work and the final installed wheel lifecycle remain unqualified."
+  ],
+  "release_gate": "OPEN"
+}
