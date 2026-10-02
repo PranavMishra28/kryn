@@ -1771,15 +1771,18 @@ test('explicit JSON CLI scope reaches future work while resumed scope and guidan
   } finally { await cleanup(); f.remove(); }
 });
 
-test('bounded pin admission preserves old sessions and tracker retention preserves unknown files', async () => {
+test('new sessions remain available after 500 saved pins while old pins and tracker bounds remain intact', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
     f.call('session.context', { sessionID: 'saved', agent: 'build', system: [], tools: {} });
     const pins = path.join(f.root, 'learning', 'pins');
+    const saved = fs.readdirSync(pins)[0];
+    const savedBytes = fs.readFileSync(path.join(pins, saved), 'utf8');
     for (let i = 0; i < 499; i++) fs.writeFileSync(path.join(pins, i.toString(16).padStart(64, '0') + '.json'), '{}', { mode: 0o600 });
-    await assert.rejects(f.call('session.context', { sessionID: 'new', agent: 'build', system: [], tools: {} }), /500 saved session pins/);
+    await assert.doesNotReject(f.call('session.context', { sessionID: 'new', agent: 'build', system: [], tools: {} }));
     await assert.doesNotReject(f.call('session.context', { sessionID: 'saved', agent: 'build', system: [], tools: {} }));
-    assert.equal(fs.readdirSync(pins).length, 500);
+    assert.equal(fs.readdirSync(pins).length, 501);
+    assert.equal(fs.readFileSync(path.join(pins, saved), 'utf8'), savedBytes);
     const trackers = path.join(f.root, 'learning', 'trackers');
     for (let i = 0; i < 501; i++) fs.writeFileSync(path.join(trackers, i.toString(16).padStart(64, '0') + '.json'), JSON.stringify({ owner: 'kryn.product' }), { mode: 0o600 });
     fs.writeFileSync(path.join(trackers, 'user-note.txt'), 'preserve');
