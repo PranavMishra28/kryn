@@ -1,0 +1,31 @@
+{
+  "kind": "supervised-v1 Task12 independent browser acceptance after operator correction",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-endurance-20261001-01",
+  "scope": "The user granted localhost Browser access. The built-in Browser opened a fresh disposable Task12 server; the frozen independent browser oracle then ran twice against separate fresh databases. No product source, model profile, resource guard, installed package, or public release changed.",
+  "source_sha256": {
+    "web/app.js": "da8d56c6dc78e1d196ad8fac4b37b291cc7e59254f54e6019cb07c4f3fb5c6b6",
+    "taskboard_lite/server.py": "9ab26517d05c2f9609ad1f28596b7fcb709580aabfc3bddc6749e032724025d5",
+    "tools/browser_check.mjs": "179768dd7756d504f39ca0a3e9bcba58230b447459dd63b9ca8ee8403ec11de2"
+  },
+  "independent_browser_runs": [
+    {
+      "evidence": "evals/runs/supervised-v1-endurance-20261001-01/evidence/browser-after-grant-1/oracle/browser-report.json",
+      "report_sha256": "0075c4e6d01bf12a98a52451e3efedf3a86212be88b51f9dcf70ed87626d6107",
+      "result": "PASS 11/11"
+    },
+    {
+      "evidence": "evals/runs/supervised-v1-endurance-20261001-01/evidence/browser-after-grant-2/oracle/browser-report.json",
+      "report_sha256": "74986e968b2986d89a63c8c0cf9e256abe22983fe27725ccfcb3a1ab271129c0",
+      "result": "PASS 11/11"
+    }
+  ],
+  "observed": "Both runs passed inert literal stored markup, exact Edit text, accessible invalid-minute feedback, real injected POST 503 with preserved fields and exactly one manual retry, persistence at 390x844 and 1280x800, duplicate-ID rejection, atomic CSV rejection, successful browser upload, persistent edit/exact filter/downloaded CSV round-trip, seed preservation and page/network inspection. Expected 503 and 400 responses appear as browser console resource errors; neither run had an unhandled page exception or failed request.",
+  "attribution": "The passing client includes two explicit operator corrections after the native Agent browser failure. The original Agent browser stage, 503 recovery and fresh local-model Reviewer remain failed as autonomous work. This is a supervised corrected-artifact browser pass, not a fresh autonomous Task12 pass, model vision proof, sustained-use pass or final-wheel qualification.",
+  "remaining": [
+    "Independent local-model Reviewer accuracy failed and cannot be treated as approval authority.",
+    "The accumulated native stages include failures and corrections and do not establish 45-60 minutes of accepted active supervised work.",
+    "All supervised gates must be repeated from the final installed v1 artifact before publication."
+  ],
+  "release_gate": "OPEN"
+}

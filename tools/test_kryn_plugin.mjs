@@ -770,6 +770,41 @@ test('native JavaScript edits expose a syntax regression in the edit result', as
   } finally { await cleanup(); f.remove(); }
 });
 
+test('shell-written JavaScript receives syntax feedback before the Agent claims completion', async () => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const tracked = path.join(f.root, 'web', 'app.js');
+  const untracked = path.join(f.root, 'new.js');
+  fs.mkdirSync(path.dirname(tracked));
+  fs.writeFileSync(tracked, 'const ready = true;\n');
+  execFileSync('/usr/bin/git', ['init', '-q'], { cwd: f.root });
+  execFileSync('/usr/bin/git', ['add', 'web/app.js'], { cwd: f.root });
+  execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+    'commit', '-qm', 'seed'], { cwd: f.root });
+  const run = (id, write) => {
+    const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id,
+      id: 'call_' + id, tool: 'shell', input: { command: 'write source' } };
+    f.call('tool.execute.before', event);
+    write();
+    const after = { ...event, status: 'completed', result: { output: { exit: 0, status: 'completed', output: '' },
+      content: [{ type: 'text', text: 'Command exited with code 0.' }] } };
+    f.call('tool.execute.after', after);
+    return after.result.content.map(part => part.text).join('\n');
+  };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    assert.match(run('broken', () => fs.writeFileSync(tracked, 'const = ;\n')), /JavaScript syntax check failed/);
+    assert.match(run('untracked', () => {
+      fs.writeFileSync(tracked, 'const ready = true;\n');
+      fs.writeFileSync(untracked, 'const = ;\n');
+    }), /new\.js/);
+    assert.doesNotMatch(run('fixed', () => {
+      fs.writeFileSync(tracked, 'const ready = true;\n');
+      fs.writeFileSync(untracked, 'const ready = true;\n');
+    }), /JavaScript syntax check failed/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('owned edit fingerprints cannot be refreshed through overlapping edits', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'app.js'); fs.writeFileSync(file, 'let count = 0;\n');

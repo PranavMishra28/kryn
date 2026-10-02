@@ -563,7 +563,7 @@ export default {
         verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
-        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map() };
+        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map(), shellSyntax: new Map() };
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
         item.previousTracker = ownedFile(previous);
@@ -1023,6 +1023,33 @@ export default {
             typeof event.result.content === 'string' ? [{ type: 'text', text: event.result.content }] : []),
           { type: 'text', text: failure },
         ];
+      }
+      if (event.status === 'completed' && event.tool === 'shell' && AGENT_ROLES.has(event.agent) &&
+          event.result && event.result.output?.status !== 'running' && options.nodeBinary) {
+        // Shell can write source without invoking the native edit hooks. Inspect only
+        // bounded Git-visible project files; ignored dependencies stay outside scope.
+        const evidence = repoEvidence(ctx.location.directory);
+        if (evidence) {
+          const changed = JSON.parse(evidence);
+          const failures = [...changed.changed_files, ...changed.untracked_files]
+            .filter(file => /\.(?:c|m)?js$/i.test(file.path))
+            .map(file => {
+              const current = projectSnapshot(ctx.location.directory, file.path);
+              if (current?.hash !== file.sha256) return null;
+              const cached = item.shellSyntax.get(current.file);
+              if (cached?.hash === current.hash) return cached.failure;
+              const failure = javascriptSyntaxFailure(current, options.nodeBinary);
+              if (item.shellSyntax.size >= 8) item.shellSyntax.delete(item.shellSyntax.keys().next().value);
+              item.shellSyntax.set(current.file, { hash: current.hash, failure });
+              return failure;
+            }).filter(Boolean);
+          if (failures.length) event.result.content = [
+            ...(Array.isArray(event.result.content) ? event.result.content :
+              typeof event.result.content === 'string' ? [{ type: 'text', text: event.result.content }] : []),
+            ...failures.slice(0, 2).map(text => ({ type: 'text', text })),
+            ...(failures.length > 2 ? [{ type: 'text', text: `KRYN found ${failures.length - 2} more JavaScript syntax failures; run node --check on the changed files.` }] : []),
+          ];
+        }
       }
       if (AGENT_ROLES.has(event.agent) && verifiedEdit &&
           UI_SOURCE.test(path.relative(ctx.location.directory, verifiedEdit.file))) {
