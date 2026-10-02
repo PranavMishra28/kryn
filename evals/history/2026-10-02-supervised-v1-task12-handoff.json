@@ -1,0 +1,27 @@
+{
+  "kind": "supervised-v1 Task12 post-compaction handoff receipt",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-endurance-20261001-01",
+  "model": "Qwen3.5-9B-6bit via owned OpenCode/oMLX",
+  "native_handoff": {
+    "saved_session_resumed": true,
+    "fresh_server_client": true,
+    "after_native_compactions": 2,
+    "wall_seconds": 124.987,
+    "tool_calls": 11,
+    "route_verified": true,
+    "pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "observed_current_check_exits": {
+      "git_diff_check": 0,
+      "python_unittest_2": 0,
+      "node_syntax": 0
+    },
+    "historical_failed_check_recalled": true,
+    "semantic_handoff": "FAIL: the model-authored document falsely said verify1 had not run, called browser/server testing unavailable rather than untested, and described an Update button absent from current HTML. Its git diff of the untracked document was empty, so the edit was not inspected. The model reported checkpoint staleness but did not explicitly compare its hash with current bytes. The operator preserved the model version and corrected the disposable document separately."
+  },
+  "browser_after_operator_correction": "NOT_TESTED: Codex browser policy denied localhost access; the disposable server was stopped and no alternate browser path was used.",
+  "frozen_grade": "FAIL: Task12 automatic API/source checks passed 2/2, but browser/503 recovery, Reviewer accuracy and semantic handoff failed; native compaction mechanics passed.",
+  "elapsed": "Seven native stage walls totalled 2392.719 seconds (39.9 minutes), including failed work and corrections. This is not 45-60 minutes of accepted active work.",
+  "release_gate": "OPEN"
+}
