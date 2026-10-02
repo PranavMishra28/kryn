@@ -5,6 +5,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ("AGENTS.md", "CONTRIBUTING.md", "plan.md", "README.md", "SECURITY.md", "evals/README.md",
+        "research/README.md", "research/PROTOCOL.md", "research/DEVELOPMENT.md",
         *(str(p.relative_to(ROOT)) for p in sorted((ROOT / "docs").rglob("*.md"))))
 REQUIRED = ("AGENTS.md", "CONTRIBUTING.md", "plan.md", "README.md", "SECURITY.md", "Makefile")
 errors = []

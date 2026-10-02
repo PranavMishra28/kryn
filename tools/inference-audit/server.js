@@ -9,16 +9,32 @@ function canonicalJson(value) {
   return JSON.stringify(value);
 }
 
+function maskWorkspace(value, workspace) {
+  if (!workspace) return value;
+  if (typeof value === "string") return value.split(workspace).join("<WORKSPACE>");
+  if (Array.isArray(value)) return value.map(item => maskWorkspace(item, workspace));
+  if (value !== null && typeof value === "object")
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, maskWorkspace(item, workspace)]));
+  return value;
+}
+
 // Metadata only: never return message text, data URLs, or remote image URLs.
-export function wireMetadata(body) {
+export function wireMetadata(body, workspace = null) {
   const kwargs = body.chat_template_kwargs ?? {};
+  const messages = Array.isArray(body.messages) ? body.messages : [];
+  const systemMessageFingerprints = messages.filter(message =>
+    ["system", "developer"].includes(message.role)).map(message => {
+    const content = canonicalJson(maskWorkspace(message.content ?? null, workspace));
+    return { role: message.role, bytes: Buffer.byteLength(content),
+      sha256: createHash("sha256").update(content).digest("hex") };
+  });
   const numeric = {};
   for (const key of ["max_tokens", "max_completion_tokens", "temperature", "top_p",
                      "top_k", "min_p", "presence_penalty", "repetition_penalty", "thinking_budget"])
     if (typeof body[key] === "number" && Number.isFinite(body[key])) numeric[key] = body[key];
   const images = [];
   let imagePartCount = 0;
-  for (const message of Array.isArray(body.messages) ? body.messages : []) {
+  for (const message of messages) {
     for (const part of Array.isArray(message.content) ? message.content : []) {
       if (part.type !== "image_url") continue;
       imagePartCount++;
@@ -33,6 +49,7 @@ export function wireMetadata(body) {
     }
   }
   return { requestModelID: typeof body.model === "string" ? body.model : null, numeric,
+    messageCount: messages.length, systemMessageFingerprints,
     thinking: typeof kwargs.enable_thinking === "boolean" ? kwargs.enable_thinking : null,
     preserveThinking: typeof kwargs.preserve_thinking === "boolean" ? kwargs.preserve_thinking : null,
     effort: ["low", "medium", "xhigh"].includes(kwargs.reasoning_effort) ? kwargs.reasoning_effort : null,
@@ -41,6 +58,15 @@ export function wireMetadata(body) {
     // Covers direct wire tools, not a Code Mode catalog embedded in message text.
     toolsSha256: Array.isArray(body.tools)
       ? createHash("sha256").update(canonicalJson(body.tools)).digest("hex") : null,
+    workspaceNormalizedToolsSha256: Array.isArray(body.tools)
+      ? createHash("sha256").update(canonicalJson(maskWorkspace(body.tools, workspace))).digest("hex") : null,
+    toolFingerprints: Array.isArray(body.tools) ? body.tools.map(tool => ({
+      name: tool.function?.name ?? null,
+      argumentsSha256: createHash("sha256").update(canonicalJson(tool.function?.parameters ?? null)).digest("hex"),
+      descriptionSha256: createHash("sha256").update(canonicalJson(tool.function?.description ?? null)).digest("hex"),
+      workspaceNormalizedDescriptionSha256: createHash("sha256").update(canonicalJson(
+        maskWorkspace(tool.function?.description ?? null, workspace))).digest("hex")
+    })) : [],
     imagePartCount, imageCount: images.length, images };
 }
 
@@ -83,7 +109,7 @@ export default {
       await ctx.session.hook("http.request", async e => {
         check("http.request", e, e.request.url, { method: e.request.method });
         const body = await e.request.clone().json();
-        log("wire.options", { ...scope(e), ...wireMetadata(body),
+        log("wire.options", { ...scope(e), ...wireMetadata(body, ctx.location?.directory),
           ...(expectedModelID === undefined ? {} : { expectedModelID }),
           captureOnly: ctx.options.captureOnly === true });
         if (expectedModelID !== undefined && body.model !== expectedModelID) {
