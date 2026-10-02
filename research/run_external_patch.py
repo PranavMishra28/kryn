@@ -42,7 +42,7 @@ def prepare(workspace, prompt_file, evidence, base_commit):
         raise ValueError("Use a clean disposable /private/tmp Git checkout and separate fresh inputs/evidence")
     if git(workspace, "rev-parse", "HEAD") != base_commit or git(workspace, "status", "--porcelain"):
         raise ValueError("External task checkout differs from its declared clean base commit")
-    if not prompt_file.is_file() or not prompt_file.read_text().strip():
+    if not prompt_file.is_file() or not prompt_file.read_bytes().strip():
         raise ValueError("External task prompt is missing")
     evidence.mkdir(mode=0o700)
     state_dir = workspace / ".git/kryn-external-state"
@@ -101,14 +101,14 @@ def drive(child, prompt, timeout, cancelled):
 def run(args):
     workspace, prompt_file, evidence, state_dir = prepare(
         args.workspace, args.prompt, args.evidence, args.base_commit)
-    prompt = prompt_file.read_text()
+    prompt = prompt_file.read_bytes()
     started = time.monotonic()
     profile_path = ROOT / "setup/accepted-profile.json"
     profile = json.loads(profile_path.read_text())
     if profile.get("repository", "").rsplit("/", 1)[-1] != MODEL_ID:
         raise RuntimeError("Installed champion profile does not identify the requested model")
     report = {"schema": 1, "task_id": args.task_id, "arm": args.arm,
-              "base_commit": args.base_commit, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+              "base_commit": args.base_commit, "prompt_sha256": hashlib.sha256(prompt).hexdigest(),
               "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "source_commit": git(ROOT, "rev-parse", "HEAD"),
               "opencode_binary_sha256": hashlib.sha256(BINARY.read_bytes()).hexdigest(),
@@ -128,9 +128,18 @@ def run(args):
             with NativeServer(workspace, config, evidence / "native.log", background={
                     "dependencies": dependencies, "inference_port": relay.port,
                     "cancel": monitor.cancel.is_set}) as server:
-                inventory = server.request("GET", "/api/plugin")
-                active = (plugin_absent(inventory, "kryn.product") if args.arm == "native"
-                          else plugin_active(inventory, "kryn.product", Path(products[0]["package"])))
+                # /api/info can become ready before asynchronous plugin discovery.
+                for _ in range(75):
+                    inventory = server.request("GET", "/api/plugin")
+                    entries = inventory.get("data", [])
+                    policy_ready = any(p.get("id") == "opencode.config.policy" and
+                                       p.get("state", {}).get("status") == "active" for p in entries)
+                    active = policy_ready and (plugin_absent(inventory, "kryn.product") if args.arm == "native"
+                              else plugin_active(inventory, "kryn.product", Path(products[0]["package"])))
+                    if active or any(p.get("state", {}).get("status") in {"failed", "error"} for p in entries):
+                        break
+                    time.sleep(.2)
+                (evidence / "plugin-inventory.json").write_text(json.dumps(inventory, indent=2) + "\n")
                 if not active:
                     raise RuntimeError("Requested OpenCode arm is not active")
                 session = server.request("POST", "/api/session", {
@@ -145,7 +154,7 @@ def run(args):
                                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE)
                 try:
-                    cause, output, errors = drive(child, prompt.encode(), args.timeout, monitor.cancel.is_set)
+                    cause, output, errors = drive(child, prompt, args.timeout, monitor.cancel.is_set)
                     report["intervention"] = cause
                     report["settlement"] = learning.settle_background(
                         server, sid, workspace, relay, interrupt=cause is not None)
