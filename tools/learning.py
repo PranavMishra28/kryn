@@ -492,6 +492,11 @@ class InferenceRelay:
                         self.wfile.write(data); self.wfile.flush()
                 except (OSError, ValueError, http.client.HTTPException):
                     self.close_connection = True
+                except AttributeError:
+                    # Python 3.14 can raise here if cancellation closes the
+                    # HTTPConnection while HTTPResponse is reading a chunk.
+                    if not owner.cancelled.is_set(): raise
+                    self.close_connection = True
                 finally:
                     if conn:
                         owner.connections.discard(conn); conn.close()

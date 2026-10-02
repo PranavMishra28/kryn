@@ -100,7 +100,7 @@ manifest. The folder is not part of the public source package.
 Neither this calibration nor the earlier public TaskboardLite pilot is sealed
 holdout evidence. The frontier-adjacency gate remains open.
 
-## Frozen cross-repository subset (not yet run)
+## Frozen cross-repository subset
 
 [The machine-readable roster](subsets/swebench-20261002.json) freezes six new
 instances from six repositories before agent generation: three Lite and three
@@ -126,3 +126,66 @@ bounded attempt. Any image, local dependency, guard or oracle failure is recorde
 against that frozen task, never silently substituted. The six-case subset is
 small and cannot stand in for a full-suite SWE-bench score or the protected
 internal holdout.
+
+### Task 1: Django 15996 (Lite)
+
+The pinned gold-patch evaluator resolved the instance (1/1), so the task's
+official grading path is functional. Both candidate arms used clean copies of
+the pinned base tree, the exact frozen prompt, Python 3.9 and ripgrep inside
+the same sandbox, and the unchanged guard. Both were interrupted by sustained
+host-memory warning on an occupied Mac, with zero sampled swap growth:
+
+| Arm | Generation | Patch | Official diagnostic grade | Wall time |
+| --- | --- | --- | --- | ---: |
+| KRYN | interrupted after 15 requests | empty | empty patch; unresolved | 157.836 s |
+| Native OpenCode | interrupted after editing | 15 added lines | executed; unresolved 1/1 | 202.006 s |
+
+The native partial patch is *not* a completed task. Under the preregistered
+all-criteria endpoint, both arms score zero. The official run IDs are
+`gold-django-15996-20261002`, `kryn-django-15996-20261002` and
+`native-django-15996-20261002`. All raw receipts, candidate patches, official
+logs and a SHA-256 manifest are retained in ignored
+`evals/runs/external-django-15996-20261002/` on this Mac. This one failed pair
+offers no evidence of same-model harness uplift; the resource failure is itself
+relevant to the daily-use envelope.
+
+### Task 2: Sphinx 7440 (Verified)
+
+The pinned gold patch resolved 1/1 in official run
+`gold-sphinx-7440-20261002`. The first native-arm startup refused to send the
+prompt because the kernel memory-pressure signal was already at warning. It
+made zero model requests and did not alter the clean checkout. This preflight
+failure is retained separately from the frozen one-attempt generation protocol.
+
+Both subsequent arms used clean copies of the same base and prompt. Their
+candidate venv had Sphinx 3.0.1 and ripgrep but lacked pytest, despite a
+successful import canary. Both agents spent tool calls trying to obtain or
+replace the missing test runner. This is a research-environment fault; it is
+not evidence that the installed product lacks pytest for normal projects.
+
+| Arm | Native turn | Official diagnostic grade | Frozen acceptance | New input tokens |
+| --- | --- | --- | --- | ---: |
+| Native OpenCode | completed in 258.866 s; 44 requests | resolved 1/1 | **pass** | 65,084 |
+| KRYN | memory-guard interruption in 368.514 s; 46 requests | partial patch resolved 1/1 | **fail** | 119,940 |
+
+The KRYN partial patch also added 11 lines to an existing test file, violating
+the frozen instruction not to edit existing tests. The official evaluator tests
+functionality, but it does not waive that task constraint or turn an interrupted
+agent into a completed one. Its result is diagnostic only. Both candidate patch
+hashes match the exact patches that the official evaluator applied; run IDs are
+`native-sphinx-7440-20261002` and `kryn-sphinx-7440-20261002`. Native sampled
+normal pressure and zero swap growth; KRYN sampled sustained warning and zero
+swap growth. Both ran on AC power. Native started with the model unloaded and
+KRYN with it loaded, so their wall times and cache costs are not a matched
+performance comparison. The raw receipts and SHA-256 manifest are retained in
+ignored `evals/runs/external-sphinx-7440-20261002/` on this Mac.
+
+Across the first two selected tasks, the strict endpoint is KRYN **0/2** and
+native OpenCode **1/2**. This tiny, partly unmatched subset shows no harness
+uplift; it is neither a full-suite score nor a statistical conclusion. Before
+the remaining Python tasks, the research tool venv preflight will require a
+usable pytest command and record its package manifest. After adding pytest
+8.3.3 to the disposable Sphinx venv, the native patch passed the focused
+`tests/test_domain_std.py::test_glossary` check (1/1); this retrospective
+environment check does not change either recorded agent outcome. Prior results
+remain unchanged.

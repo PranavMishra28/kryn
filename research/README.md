@@ -42,13 +42,16 @@ outside its readable and reachable surfaces.
 An actual sandboxed OpenCode call on a public development fixture passed this
 runner preflight; its evidence and limitations are in [DEVELOPMENT.md](DEVELOPMENT.md).
 
-The external benchmark and protected-holdout layers are pending. Docker is
-running on the research host and the one-instance official SWE-bench gold
-preflight passed; representative model subsets and Harbor remain unrun. Never
-report a local fixture result as an official benchmark score or a proof of
-frontier-level capability.
+The protected-holdout and Harbor layers remain pending. Docker is running on
+the research host. The first pinned official SWE-bench calibration and the
+frozen six-task Lite/Verified subset are documented in
+[EXTERNAL.md](EXTERNAL.md). Record every subset attempt with
+`research/record_external.py`; it checks task/prompt/base identity and, when an
+official result is supplied, verifies that the submitted patch is exactly the
+one archived by the runner and grader. The compact append-only
+`research/history/external.jsonl` index is public; full prompts and traces stay
+in ignored evidence directories. Never report a subset as a full benchmark
+score or a proof of frontier-level capability.
 
-The first pinned official SWE-bench calibration, including a resolved KRYN
-patch and an interrupted native control, is recorded in
-[EXTERNAL.md](EXTERNAL.md). This one public instance is not the representative
-external subset required by the protocol.
+The calibration's single resolved KRYN patch and interrupted native control
+are development observations, not the representative external subset.

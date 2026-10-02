@@ -18,7 +18,7 @@ class ExternalPreflightTest(unittest.TestCase):
         self.assertEqual(cause, "output_budget")
 
     def test_benchmark_tool_dependencies_are_explicit(self):
-        self.assertEqual(benchmark_tools(None), (None, []))
+        self.assertEqual(benchmark_tools(None), (None, [], None))
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
             venv = Path(tmp) / "venv"
             (venv / "bin").mkdir(parents=True)
@@ -27,11 +27,20 @@ class ExternalPreflightTest(unittest.TestCase):
             with patch("run_external_patch.subprocess.check_output", side_effect=[
                 "/private/tmp/python-base\n", "/private/tmp/venv/bin/rg:\n"
                 "    /usr/local/opt/pcre2/lib/libpcre2-8.0.dylib (compatibility version 1.0.0)\n"
-                "    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n"]):
-                bin_path, dependencies = benchmark_tools(venv)
+                "    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n",
+                "[[\"pytest\", \"8.3.3\"]]\n"]), patch(
+                    "run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
+                        [], 0, "pytest 8.3.3\n", "")):
+                bin_path, dependencies, manifest = benchmark_tools(venv)
             self.assertEqual(bin_path, venv / "bin")
             self.assertEqual(dependencies[:2], [venv, Path("/private/tmp/python-base")])
             self.assertEqual(len(dependencies), 3)
+            self.assertEqual(manifest["pytest_version"], "pytest 8.3.3")
+            self.assertEqual(manifest["packages"], [["pytest", "8.3.3"]])
+            with patch("run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
+                    [], 1, "", "No module named pytest")):
+                with self.assertRaisesRegex(RuntimeError, "lacks runnable pytest"):
+                    benchmark_tools(venv)
 
     def test_exact_clean_base_and_separate_oracle(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
