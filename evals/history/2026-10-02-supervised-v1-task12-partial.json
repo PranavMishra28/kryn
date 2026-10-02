@@ -1,0 +1,23 @@
+{
+  "kind": "supervised-v1 Task12 multi-stage candidate attempt, partial receipt",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-endurance-20261001-01",
+  "model": "Qwen3.5-9B-6bit via owned OpenCode/oMLX",
+  "candidate_result": "FAIL",
+  "observed": {
+    "plan": "Native Plan completed in 118.521 seconds without source edits.",
+    "build": "Native Build completed in 808.568 seconds. The frozen API/source grader passed 2/2, but the generated client did not pass independent UI review.",
+    "browser": "Native browser stage ran 452.95 seconds, observed an Update ReferenceError, sent an import before the user clicked Import, and did not recover from the injected 503. The unchanged daily-use guard ended the stage when whole-probe swap growth reached 1561979781 bytes against a 536870912-byte budget.",
+    "compaction1": "Native compaction completed with an unverified completion and next action, retained the user request and source hashes, and used no local-model compaction call. Its check list was empty although the Build turn ran eight recognizable test/syntax commands ending in 2>&1.",
+    "repair1": "A saved-session, code-only 555.071-second repair turn completed with normal pressure and zero swap growth. It removed file-selection auto-import, but the client still interpolated raw JSON into an inline HTML handler, left the referenced helper out of global scope, and lacked the required visible Edit button. The model's completion claim was therefore unsupported.",
+    "operator_correction": "The supervisor preserved the model's exact client source, replaced the inline handler/rendering with DOM text nodes and a form-populating Edit action, and retained input after HTTP failures. Node syntax, two existing unit tests, the frozen two API/source checks, and an independent API-only smoke passed. No independent browser check has accepted the corrected UI.",
+    "check_ledger_fix": "PR #162 merged a narrowly scoped parser fix. Before the fix, none of the eight captured Build check commands entered the checkpoint ledger; replay against the fix recognized all eight. The old checkpoint was not rewritten."
+  },
+  "limits": [
+    "This is not an uninterrupted autonomous UI pass; the browser and 503-recovery gates failed before operator correction.",
+    "API, syntax, and source inspection do not establish visible UI behavior or browser acceptance.",
+    "A second native compaction, fresh continuation review, 45–60 minutes of accepted active work, and final-wheel lifecycle checks remain unqualified."
+  ],
+  "next_gate": "Resume the saved session with the merged check ledger, complete a second native compaction/restart and independent browser acceptance when permitted, then regrade the corrected fixture. Preserve the original failed stage.",
+  "release_gate": "OPEN"
+}
