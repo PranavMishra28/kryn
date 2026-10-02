@@ -223,3 +223,39 @@ Across the first three frozen tasks, strict acceptance is KRYN **0/3** and
 native OpenCode **1/3**. This is an occupied-host limitation and no evidence
 of KRYN uplift. The small subset remains incomplete; even when complete it
 cannot by itself qualify H1 or support a frontier-adjacent claim.
+
+### Task 4: scikit-learn 25747 (Verified)
+
+The pinned gold patch resolved 1/1 in official run
+`gold-scikit-25747-20261002`. The copied source was reset to the frozen base in
+two separate checkouts. A matched Python 3.11 environment built scikit-learn
+1.3.dev0 from each checkout; both imported their own source and passed the
+focused `test_make_union` canary. Its dependency versions differ from the old
+official Linux image, so that local canary is only a tool-environment check.
+The official Docker evaluator graded both resulting patches.
+
+The first native startup correctly refused a world-writable Docker-copied
+checkout before any model request. That preflight failure has its own receipt.
+The two disposable checkouts were made owner-only, then the frozen native-first
+generation pair ran with fresh evidence. Neither arm was retried after a model
+request.
+
+| Arm | Native turn | Official diagnostic grade | Frozen acceptance | New input tokens |
+| --- | --- | --- | --- | ---: |
+| Native OpenCode | guard stop after 20 requests, 144.708 s | partial patch unresolved | **fail** | 45,127 |
+| KRYN | guard stop after 23 requests, 392.033 s | partial patch unresolved | **fail** | 161,396 |
+
+Both saw sustained host-memory warning and zero sampled swap growth. The native
+and KRYN sampled oMLX physical-footprint peaks were 12.66 GB and 13.22 GB,
+respectively. The official runs `native-scikit-25747-20261002` and
+`kryn-scikit-25747-20261002` executed their exact archived partial patches and
+each returned zero resolved instances without grader errors. KRYN's much larger
+new-input count is an observation, not yet an attributed cache or policy effect;
+the arms ran at different times and neither completed. Raw traces, patches,
+predictions, grader reports, the preflight failure and a SHA-256 manifest are
+retained in ignored `evals/runs/external-scikit-25747-20261002/` on this Mac.
+
+Across four frozen tasks, strict acceptance is KRYN **0/4** versus native
+OpenCode **1/4**. The observed resource aborts and unresolved patches do not
+support H1. Two selected tasks remain; the subset remains too small for a
+generalization or frontier comparison.
