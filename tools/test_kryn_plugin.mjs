@@ -1046,6 +1046,36 @@ test('browser and Reviewer tool progress leave system guidance stable while hard
   } finally { await cleanup(); f.remove(); }
 });
 
+test('check guidance stays stable within a turn and refreshes at compaction or a new prompt', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const context = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {} });
+  const checkText = event => event.system.filter(part =>
+    part.text.startsWith('Observed-check ledger snapshot:')).map(part => part.text).join('\n');
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const initial = context(); await f.call('session.context', initial);
+    assert.match(checkText(initial), /failed=0/);
+    const shell = { sessionID: 'ses_1', agent: 'build', messageID: 'msg_check',
+      id: 'call_check', tool: 'shell', input: { command: 'npm test' } };
+    f.call('tool.execute.before', shell);
+    f.call('tool.execute.after', { ...shell, status: 'completed', result: { output: { exit: 1 } } });
+    assert.equal(f.read('trackers')[0].verification.checks[0].state, 'failed');
+    const sameTurn = context(); await f.call('session.generate', sameTurn);
+    assert.equal(checkText(sameTurn), checkText(initial));
+    const compact = context(); await f.call('session.compaction', compact);
+    assert.match(checkText(compact), /failed=1/);
+    const afterCompact = context(); await f.call('session.generate', afterCompact);
+    assert.equal(checkText(afterCompact), checkText(compact));
+    const retry = { ...shell, messageID: 'msg_retry', id: 'call_retry' };
+    f.call('tool.execute.before', retry);
+    f.call('tool.execute.after', { ...retry, status: 'completed', result: { output: { exit: 0 } } });
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const nextPrompt = context(); await f.call('session.generate', nextPrompt);
+    assert.match(checkText(nextPrompt), /failed=0, pending=0, stale=1/);
+    assert.notEqual(checkText(nextPrompt), checkText(compact));
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('execution failures, failed checks and interrupted work create private regression incidents', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
