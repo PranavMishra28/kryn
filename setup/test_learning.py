@@ -1,7 +1,10 @@
 """Offline controls and disposable black-box grader tests; no model/runtime calls."""
 import copy
+from contextlib import redirect_stderr
 from datetime import datetime, timezone
 import hashlib
+import http.client
+import io
 import json
 from pathlib import Path
 import sys
@@ -100,6 +103,42 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(effective['plugins'][0]['options']['inferenceBaseURL'],base)
         self.assertEqual(effective['plugins'][0]['options']['workflowScope'],'disposable_json_cli')
         self.assertEqual(config['providers']['local']['settings']['baseURL'],'http://127.0.0.1:8000/v1')
+
+    def test_relay_cancellation_does_not_log_a_chunk_read_traceback(self):
+        real_connection = http.client.HTTPConnection
+        relay = None
+
+        class Response:
+            status = 200
+            def getheader(self, *_): return 'application/json'
+            def read1(self, _):
+                relay.cancel()
+                raise AttributeError("'NoneType' object has no attribute 'close'")
+
+        class Socket:
+            def settimeout(self, *_): pass
+            def shutdown(self, *_): pass
+
+        class Connection:
+            def __init__(self, *_args, **_kwargs): self.sock = Socket()
+            def connect(self): pass
+            def request(self, *_args): pass
+            def getresponse(self): return Response()
+            def close(self): pass
+
+        errors = io.StringIO()
+        with redirect_stderr(errors), patch.object(learning.http.client, 'HTTPConnection', Connection):
+            with learning.InferenceRelay('test-model', max_tokens=1) as relay:
+                client = real_connection('127.0.0.1', relay.port, timeout=2)
+                client.request('POST', '/v1/chat/completions', json.dumps({
+                    'model': 'test-model', 'max_tokens': 1, 'messages': []}))
+                try: client.getresponse().read()
+                except http.client.RemoteDisconnected: pass  # cancellation may close mid-response
+                client.close()
+                self.assertTrue(relay.cancelled.is_set())
+                self.assertTrue(relay.gate.acquire(timeout=1))
+                relay.gate.release()
+        self.assertNotIn('Traceback', errors.getvalue())
 
     def test_installed_default_model_is_valid_for_disposable_learning(self):
         config={'model':'local/qwen','agents':{'build':{'model':'local/qwen'}},

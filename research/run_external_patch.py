@@ -82,12 +82,16 @@ def configuration(workspace, state_dir, arm, relay_url):
 
 def benchmark_tools(venv):
     if venv is None:
-        return None, []
+        return None, [], None
     venv = Path(venv).absolute()
     if (venv != venv.resolve() or not venv.is_relative_to(Path("/private/tmp")) or
             not (venv / "pyvenv.cfg").is_file() or not (venv / "bin/python3").is_file() or
             not (venv / "bin/rg").is_file()):
         raise ValueError("Benchmark tool venv must be a real disposable /private/tmp Python venv with rg")
+    pytest = subprocess.run([str(venv / "bin/python3"), "-I", "-m", "pytest", "--version"],
+                            capture_output=True, text=True, timeout=10)
+    if pytest.returncode:
+        raise RuntimeError("Benchmark tool venv lacks runnable pytest; no prompt sent")
     base = Path(subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
         "import sys; print(sys.base_prefix)"], text=True, timeout=5).strip()).resolve()
     linked = subprocess.check_output(["/usr/bin/otool", "-L", str(venv / "bin/rg")],
@@ -97,7 +101,15 @@ def benchmark_tools(venv):
         name = line.strip().split(" ", 1)[0]
         if name.startswith("/") and not name.startswith(("/usr/lib/", "/System/")):
             libraries.append(Path(name).resolve())
-    return venv / "bin", [venv, base, *libraries]
+    package_listing = subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
+        "import importlib.metadata as m,json; print(json.dumps(sorted((d.metadata['Name'], d.version) for d in m.distributions())))"],
+        text=True, timeout=10)
+    return venv / "bin", [venv, base, *libraries], {
+        "pytest_version": pytest.stdout.strip(),
+        "python_sha256": hashlib.sha256((venv / "bin/python3").resolve().read_bytes()).hexdigest(),
+        "rg_sha256": hashlib.sha256((venv / "bin/rg").read_bytes()).hexdigest(),
+        "packages": json.loads(package_listing),
+    }
 
 
 def drive(child, prompt, timeout, cancelled):
@@ -143,13 +155,14 @@ def run(args):
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
             workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1")
-        tool_path, tool_dependencies = benchmark_tools(args.tool_venv)
-        dependencies += tool_dependencies
-        report["benchmark_tool_path"] = str(tool_path) if tool_path else None
-        report["benchmark_tool_dependencies"] = [str(path) for path in tool_dependencies]
-        report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
         monitor = NativeResourceGuard(evidence, samples)
         try:
+            tool_path, tool_dependencies, tool_manifest = benchmark_tools(args.tool_venv)
+            dependencies += tool_dependencies
+            report["benchmark_tool_path"] = str(tool_path) if tool_path else None
+            report["benchmark_tool_dependencies"] = [str(path) for path in tool_dependencies]
+            report["benchmark_tool_manifest"] = tool_manifest
+            report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
             if not runtime_is_idle(evidence, "runtime-before", model_id=MODEL_ID, guard_gib=22):
                 raise RuntimeError("Expected guarded model runtime is not idle")
             monitor.start()

@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "frozen_at_utc": "2026-10-02T21:21:54.872270+00:00",
+  "selection_seed": "kryn-external-20261002-v1",
+  "selection": "top six combined-frequency repos excluding calibration repo sympy/sympy; alternate Lite/Verified; lowest SHA256(seed\\0dataset\\0instance_id) per allocated repo",
+  "prompt_prefix": "Fix the issue described below in the current repository. Edit the source, run focused checks, and report what you verified. Do not edit existing tests.\n\n",
+  "prompt_construction": "UTF-8(prefix + exact problem_statement + newline); omit hints_text, patch, test_patch",
+  "evaluator_commit": "02e7a74ffd0b707aab73d203fe87bdc7c76afc8e",
+  "datasets": {
+    "lite": {
+      "revision": "b0dde1093fe417d83b7184254edf8199c1f0dff5",
+      "test_sha256": "438e281d80587aa7be470896ce410557002fde02d2ceee3e099331d308f62dd3"
+    },
+    "verified": {
+      "revision": "78f471bf655a3137b2e8a75af1501690ec009ec3",
+      "test_sha256": "030cfd7f2a704c4c0226e7f104c725a3b41230b1d3517f9c915ad7ea5be3fa25"
+    }
+  },
+  "timeout_seconds": 900,
+  "max_heavy_generations": 1,
+  "guard": "installed strict 22-GiB process ceiling plus two-warning host guard, unchanged",
+  "tasks": [
+    {
+      "order": 1,
+      "dataset": "lite",
+      "repo": "django/django",
+      "instance_id": "django__django-15996",
+      "base_commit": "b30c0081d4d8a31ab7dc7f72a4c7099af606ef29",
+      "image": "swebench/sweb.eval.x86_64.django_1776_django-15996:latest",
+      "image_digest": "sha256:7e6f7cf48c434b640ad0cb96897bfbc722d7b6d39013b12353f5300bf93f74c7",
+      "prompt_sha256": "abcb032bb2d7ce069756e972c6f5adc0d2cf59fdda6326b7d9031dda6225d523",
+      "arm_order": [
+        "kryn",
+        "native"
+      ]
+    },
+    {
+      "order": 2,
+      "dataset": "verified",
+      "repo": "sphinx-doc/sphinx",
+      "instance_id": "sphinx-doc__sphinx-7440",
+      "base_commit": "9bb204dcabe6ba0fc422bf4a45ad0c79c680d90b",
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7440:latest",
+      "image_digest": "sha256:e161d52daf02bf18e12fc1cf7837eabc318aa095fe0b7ddef9113af3cf51ab44",
+      "prompt_sha256": "500f519b80804d645590ead422d91b5f030883384a076cb0c32b90a700de100e",
+      "arm_order": [
+        "native",
+        "kryn"
+      ]
+    },
+    {
+      "order": 3,
+      "dataset": "lite",
+      "repo": "matplotlib/matplotlib",
+      "instance_id": "matplotlib__matplotlib-25498",
+      "base_commit": "78bf53caacbb5ce0dc7aa73f07a74c99f1ed919b",
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25498:latest",
+      "image_digest": "sha256:d1e8c61667340631dcb3d28250a902cc88567c6ae53826af9a3109d7976e05d9",
+      "prompt_sha256": "dbab4a1e1e174c6200ff6915cb455a34f033032c930e2e28403149191cbcc3e2",
+      "arm_order": [
+        "kryn",
+        "native"
+      ]
+    },
+    {
+      "order": 4,
+      "dataset": "verified",
+      "repo": "scikit-learn/scikit-learn",
+      "instance_id": "scikit-learn__scikit-learn-25747",
+      "base_commit": "2c867b8f822eb7a684f0d5c4359e4426e1c9cfe0",
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747:latest",
+      "image_digest": "sha256:83c8ceadfea2c09ee31bb621af694c38a77b839d8a7e5587d69ff121cc81ce69",
+      "prompt_sha256": "bd66651cae25654338fbc0a5d45062ecc82ba25ac3d9dcf07a8bb7988807ec49",
+      "arm_order": [
+        "native",
+        "kryn"
+      ]
+    },
+    {
+      "order": 5,
+      "dataset": "lite",
+      "repo": "pytest-dev/pytest",
+      "instance_id": "pytest-dev__pytest-5495",
+      "base_commit": "1aefb24b37c30fba8fd79a744829ca16e252f340",
+      "image": "swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-5495:latest",
+      "image_digest": "sha256:2a435aad4e26c0ed4f2f846615db06696bf153975dcef2d4f7b9eb83f1ba13b3",
+      "prompt_sha256": "21b91abd70505918b8b4b0128f3917d93e94964b1e874a83aa9c4deccae43316",
+      "arm_order": [
+        "kryn",
+        "native"
+      ]
+    },
+    {
+      "order": 6,
+      "dataset": "verified",
+      "repo": "astropy/astropy",
+      "instance_id": "astropy__astropy-13398",
+      "base_commit": "6500928dc0e57be8f06d1162eacc3ba5e2eff692",
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13398:latest",
+      "image_digest": "sha256:4d7e922ae3b796147f85b37861f6dec5463001a964bd941ed6933109245fe69f",
+      "prompt_sha256": "bd1575c340f04e9aaf0fc743a4cfc4b9184a51646b911d67e6380a8a11460a6d",
+      "arm_order": [
+        "native",
+        "kryn"
+      ]
+    }
+  ]
+}
