@@ -1,0 +1,28 @@
+{
+  "kind": "supervised-v1 owner native browser and search screen",
+  "date_utc": "2026-10-01",
+  "private_run_id": "supervised-v1-browser-search-20261001-01",
+  "stage": "browser-search1",
+  "model": "Qwen3.5-9B-6bit via owned OpenCode/oMLX Browse",
+  "observed": {
+    "driver_completed": true,
+    "model_completed": true,
+    "wall_seconds": 136.541,
+    "tool_calls": 17,
+    "tool_errors": 0,
+    "native_route_verified": true,
+    "browser_and_search_connected_before_prompt": true,
+    "browser_normal_width": "At 1280x800, native browser tools saved v1browser01 with zero minutes; raw status snapshot showed Saved and the row. After navigation reload, a raw snapshot still showed the row.",
+    "browser_narrow_width": "At 390x844, the native browser submitted the same ID; the raw status snapshot showed duplicate id. Network output and the disposable server log recorded the expected POST 400.",
+    "independent_database": "Exactly one v1browser01 row persisted with project alpha, minutes 0 and date 2026-10-01; no duplicate row was inserted.",
+    "search": "Native search_web_search_exa returned the official docs.python.org result and webfetch opened https://docs.python.org/3/.",
+    "resource_samples": 65,
+    "host_pressure_levels": [1, 2],
+    "swap_peak_growth_bytes": 0,
+    "power": "Battery Power",
+    "owned_session_idle": true
+  },
+  "interpretation": "Candidate browser/search acceptance passed for one disposable local page and one official source. Warning-level host pressure was observed and permitted by the unchanged daily-use guard; this is not a warning-free or sustained-use result. The frozen Task01 grader was not used because this was a custom mechanism screen, not repository comprehension.",
+  "limits": "This did not test the final installed wheel, terminal/GUI startup, arbitrary sites, broad search quality or long UI coding. Browser snapshots and the persisted DB establish the scripted success/error paths only.",
+  "release_gate": "OPEN"
+}
