@@ -1,0 +1,164 @@
+{
+  "kind": "supervised v1 active-duration reconciliation",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-staged-20261002-01",
+  "classification": "PRIVATE CANDIDATE PASS FOR ACTIVE-DURATION COMPONENT ONLY; final v1 wheel still requires its own sustained-use qualification",
+  "source": "owner OpenCode 2.0.10 SQLite session_message records; raw contents remain private",
+  "method": "For each saved Task12 session, sum user-message creation through corresponding native idle-event creation. All 13 turns closed normally. Inter-turn idle, shell setup/teardown, and external browser/operator time are excluded; both failed and corrected supervised turns count under docs/v1-qualification.md. No gap greater than 10 seconds occurs between adjacent message records inside a counted turn.",
+  "turns": [
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:00:45.995Z",
+      "start_ms": 1790917245995,
+      "assistant_messages": 6,
+      "tool_calls": 15,
+      "end_ms": 1790917307535,
+      "end_utc": "2026-10-02T05:01:47.535Z",
+      "active_seconds": 61.54
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:02:03.295Z",
+      "start_ms": 1790917323295,
+      "assistant_messages": 26,
+      "tool_calls": 27,
+      "end_ms": 1790917804388,
+      "end_utc": "2026-10-02T05:10:04.388Z",
+      "active_seconds": 481.093
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:10:34.248Z",
+      "start_ms": 1790917834248,
+      "assistant_messages": 12,
+      "tool_calls": 11,
+      "end_ms": 1790918070425,
+      "end_utc": "2026-10-02T05:14:30.425Z",
+      "active_seconds": 236.177
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:15:15.701Z",
+      "start_ms": 1790918115701,
+      "assistant_messages": 13,
+      "tool_calls": 14,
+      "end_ms": 1790918672986,
+      "end_utc": "2026-10-02T05:24:32.986Z",
+      "active_seconds": 557.285
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:25:32.761Z",
+      "start_ms": 1790918732761,
+      "assistant_messages": 13,
+      "tool_calls": 12,
+      "end_ms": 1790919149365,
+      "end_utc": "2026-10-02T05:32:29.365Z",
+      "active_seconds": 416.604
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:33:43.290Z",
+      "start_ms": 1790919223290,
+      "assistant_messages": 29,
+      "tool_calls": 28,
+      "end_ms": 1790919524708,
+      "end_utc": "2026-10-02T05:38:44.708Z",
+      "active_seconds": 301.418
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:39:54.652Z",
+      "start_ms": 1790919594652,
+      "assistant_messages": 9,
+      "tool_calls": 17,
+      "end_ms": 1790919836417,
+      "end_utc": "2026-10-02T05:43:56.417Z",
+      "active_seconds": 241.765
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T05:44:41.691Z",
+      "start_ms": 1790919881691,
+      "assistant_messages": 7,
+      "tool_calls": 11,
+      "end_ms": 1790919988947,
+      "end_utc": "2026-10-02T05:46:28.947Z",
+      "active_seconds": 107.256
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T06:07:25.404Z",
+      "start_ms": 1790921245404,
+      "assistant_messages": 11,
+      "tool_calls": 15,
+      "end_ms": 1790921555203,
+      "end_utc": "2026-10-02T06:12:35.203Z",
+      "active_seconds": 309.799
+    },
+    {
+      "session_id": "ses_f050394e0ffeMvJZyU78buqn16",
+      "session_title": "supervised-v1-staged-20261002-01-plan1",
+      "start_utc": "2026-10-02T06:15:02.717Z",
+      "start_ms": 1790921702717,
+      "assistant_messages": 12,
+      "tool_calls": 14,
+      "end_ms": 1790921975968,
+      "end_utc": "2026-10-02T06:19:35.968Z",
+      "active_seconds": 273.251
+    },
+    {
+      "session_id": "ses_f04d94173ffeWLAIqjUTTvJAoA",
+      "session_title": "supervised-v1-staged-20261002-01-reviewer1",
+      "start_utc": "2026-10-02T05:46:59.869Z",
+      "start_ms": 1790920019869,
+      "assistant_messages": 5,
+      "tool_calls": 14,
+      "end_ms": 1790920087791,
+      "end_utc": "2026-10-02T05:48:07.791Z",
+      "active_seconds": 67.922
+    },
+    {
+      "session_id": "ses_f04c968a5ffepmbi1CX5m8q44O",
+      "session_title": "supervised-v1-staged-20261002-01-reviewer2a",
+      "start_utc": "2026-10-02T06:04:18.429Z",
+      "start_ms": 1790921058429,
+      "assistant_messages": 8,
+      "tool_calls": 19,
+      "end_ms": 1790921213195,
+      "end_utc": "2026-10-02T06:06:53.195Z",
+      "active_seconds": 154.766
+    },
+    {
+      "session_id": "ses_f04b9fca6ffes2RVTKnwKtnQOp",
+      "session_title": "supervised-v1-staged-20261002-01-reviewer3",
+      "start_utc": "2026-10-02T06:21:09.100Z",
+      "start_ms": 1790922069100,
+      "assistant_messages": 6,
+      "tool_calls": 10,
+      "end_ms": 1790922147477,
+      "end_utc": "2026-10-02T06:22:27.477Z",
+      "active_seconds": 78.377
+    }
+  ],
+  "turn_count": 13,
+  "active_seconds": 3287.253,
+  "active_minutes": 54.788,
+  "prior_stage_wall_seconds": 3380.117,
+  "excluded_from_stage_wall_seconds": 92.864,
+  "turn_metadata_sha256": "25b55a893eb0e693cc221c73330f1a0d987613efac2d8d78a665906e4aeb927a",
+  "status": "PASS: 54.788 active minutes is inside the required 45\u201360-minute band. Prior accepted-only interpretation was outside the supervised-v1 contract. The frozen autonomous Task12 overall FAIL is unchanged.",
+  "limits": [
+    "The owner private session database is not committed. The temporary disposable workspace and driver receipts were removed by the host restart; archived public receipts plus retained native session records support this duration reconstruction.",
+    "This candidate duration does not qualify a later final wheel or independent Reviewer authority."
+  ]
+}

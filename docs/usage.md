@@ -2,7 +2,7 @@
 
 [Install and quick start](../README.md) · [Current qualification and release gates](../plan.md)
 
-These controls describe the current unreleased source/private build and its 96K local-model profile. The public v0.2.0 preview uses the same profile but retains `/research` and `/deliver` in place of `/call`; use Plan and Agent directly for those workflows. See the current status for qualification limits and release state.
+These controls describe the v1.0.0 96K local-model profile. See the current status for qualification limits and release state.
 
 ## Start coding
 
@@ -104,7 +104,7 @@ Both interfaces use the **same OpenCode server, selected model, tools and saved 
 
 To open the GUI after an ordinary launch, use `/web` and copy its **plain local address** into your browser. Use an address such as `http://127.0.0.1:PORT/`, without credentials or query parameters. The pinned upstream client’s credential-bearing link can cause a `BrowserAttachments` error; its token-only link can leave assets waiting for authentication. KRYN’s `--web` opens the clean address and uses the browser’s normal sign-in dialog. If a credential-bearing link was already opened, navigate to the plain address, reload the page, and reopen the session.
 
-Final browser checks verified Default/Fast switching and one native automatic approval, but the complete permission-toggle roundtrip remains unqualified because reopening the command palette timed out in the test. The terminal controls were exercised separately.
+The GUI's native Auto-accept switch is under Settings → Preferences. It stores a separate preference from the terminal; check the [qualification status](../plan.md) for the latest installed-build evidence.
 
 The GUI has its own permission preferences. A terminal running with `--auto` can still approve requests for the same session while you use the GUI. Use a normal prompted launch when you want explicit approvals in both interfaces. Select the project KRYN was launched in; to work on another project, exit and relaunch there so the shell write boundary follows it. Treat the pairing password, link and QR code as private.
 
@@ -158,9 +158,9 @@ The report shows both the latest native outcome and counts of earlier execution 
 
 ## Configuration and release scope
 
-The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The v0.2.0 preview profile configures a **98,304-token context (96K)**, **8,192-token output limit**, **22 GiB oMLX model memory ceiling** and one active generation. These are guarded limits, not proof of useful 96K coding quality or sustained safety. If the installed build becomes unstable, exit KRYN, run `kryn rollback` in Terminal, then `kryn --continue` from the project. The previous installation is retained transactionally. Exact model hashes and tool settings are in [the accepted profile](../setup/accepted-profile.json) and [the client template](../setup/opencode.template.json).
+The pinned stack is **OpenCode 2.0.10**, **oMLX 0.6.4**, **Qwen3.5-9B-6bit**, **Playwright MCP 0.0.82** and keyless Exa search. The v1 profile configures a **98,304-token context (96K)**, **8,192-token output limit**, **22 GiB oMLX model memory ceiling** and one active generation. These are guarded limits, not proof of useful 96K coding quality or sustained safety. If the installed build becomes unstable, exit KRYN, run `kryn rollback` in Terminal, then `kryn --continue` from the project. The previous installation is retained transactionally. Exact model hashes and tool settings are in [the accepted profile](../setup/accepted-profile.json) and [the client template](../setup/opencode.template.json).
 
-Automatic compaction reserves room for output: the preview 96K setting leaves roughly 90,112 tokens for active context. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
+Automatic compaction reserves room for output: the 96K setting leaves roughly 90,112 tokens for active context. It retains up to 4,096 tokens of recent user context alongside a structured checkpoint. The complete session history and written files remain on disk; summaries are not lossless, so the agent is instructed to reconcile them with files and check results. Compaction uses a separate 2,048-token fast summary budget.
 
 npm uses KRYN’s managed writable cache, so ordinary dependency installation does not require modifying `~/.npm` or running `sudo`. Agent, including saved legacy Build sessions, can delegate rendered UI checks to one foreground Browse child. KRYN attaches up to 6,000 characters of the current user request to that handoff so functional acceptance criteria are not lost in a visual-only summary. This text stays in memory outside the native conversation and survives compaction during the running client; it does not recover older criteria after a restart. Agent is also instructed to finish a runnable slice and validate required services. These instructions improve the workflow but are not an enforced correctness gate.
 
