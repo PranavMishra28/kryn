@@ -46,3 +46,7 @@ The external benchmark and protected-holdout layers are pending. An installed
 Docker CLI without a running daemon is insufficient for official SWE-bench or
 Harbor grading. Never report a local fixture result as an official benchmark
 score or a proof of frontier-level capability.
+
+The first pinned official SWE-bench calibration and its gold-oracle preflight
+are recorded in [EXTERNAL.md](EXTERNAL.md). The one-instance calibration is
+not the representative external subset required by the protocol.
