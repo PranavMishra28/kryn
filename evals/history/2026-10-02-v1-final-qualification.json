@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "product_scope": "Human-supervised local coding workspace on native Apple Silicon macOS 26/27 with at least 48 GiB unified memory",
+  "source_commit": "4038a77ebea5f421b08b055c9aa768dcf12a890b",
+  "release_tag": "v1.0.0",
+  "wheel_sha256": "3356318cc8335c65e14d88d8c0acd64bbf49ed288f34ab342c83f09caaeb54b1",
+  "installer_sha256": "b66e4332b4951c4abbe37c59db6865f076117e4ebc8d4588ad6a180929bc55b5",
+  "installed_runtime": {
+    "model": "Qwen3.5-9B-6bit",
+    "configured_max_model_len": 98304,
+    "opencode": "2.0.10",
+    "omlx": "0.6.4",
+    "machine": "Apple M4 Max, 48 GiB unified memory",
+    "power": "Coding Task02 sampled both AC and battery; final public-install diagnostics sampled AC. Power was not recorded for every Task12 stage."
+  },
+  "gates": {
+    "coding_edit_test": {
+      "status": "PASS_SUPERVISED",
+      "run_id": "v1-final2-coding-20261002-01",
+      "result": "Agent read before editing; frozen Task02 grader 2/2 and independent noncanonical/exclusive-end checks passed. Imported-code checks ran, and the saved-session follow-up inspected the current diff. No operator code correction was needed."
+    },
+    "browser_search": {
+      "status": "PASS_SUPERVISED",
+      "run_id": "v1-final-sustained-20261002-01",
+      "result": "Native Browse exercised a visible success and duplicate-ID error in the disposable app; Search returned and opened current official OpenCode documentation. Both MCP servers were connected in deep diagnostics. Independent 390x844 and 1280x800 browser views passed without page errors."
+    },
+    "unsupported_claims": {
+      "status": "PASS_REFUSAL_MECHANISM",
+      "run_id": "v1-final-claim-20261002-01",
+      "result": "An intentionally failing check exited 7 in three bounded controller rounds; the controller remained blocked and accepted=false despite model completion. The driver marked the negative test incomplete as expected. This does not establish general autonomous coding success."
+    },
+    "compaction_restart": {
+      "status": "PASS_SUPERVISED",
+      "run_id": "v1-final-sustained-20261002-01",
+      "result": "Three real OpenCode compactions and fresh server/client processes continued one saved project. Checkpoint evidence preserved the goal, failed checks and unverified status; the third checkpoint flagged files changed since the prior checkpoint. Current checks and operator review followed. An earlier handoff made inaccurate source claims and was not treated as acceptance."
+    },
+    "resource_safety": {
+      "status": "PASS_WITH_PHYSICAL_LIMIT",
+      "result": "The unchanged daily-use guard recorded warning pressure [1,2] during one continuation, allowed work, saw zero swap growth and no abort; other final-wheel stages sampled normal pressure. Exact-wheel regressions exercise critical pressure, missing telemetry, swap and listener-change refusal. The saved project resumed after guarded startup and rollback. No unsafe critical pressure was induced on the owner Mac, so a live critical-stop event is not claimed."
+    },
+    "sustained_supervised_use": {
+      "status": "PASS_SUPERVISED_AFTER_CORRECTION",
+      "run_id": "v1-final-sustained-20261002-01",
+      "active_minutes": 48.123,
+      "active_accounting": "2381.817 seconds in disjoint native user-prompt spans plus 505.562 seconds of task-specific interstage operator checks and corrections; unrelated 590.419-second gap, idle, preflight and teardown excluded.",
+      "result": "After two failed Agent UI attempts, the operator corrected the disposable project. Frozen backend 2/2, real-server unit tests 5/5, independent browser 11/11 and encoded-ID/filter holdouts passed. The fresh local Reviewer made inaccurate low-severity findings and was advisory only. One failed regression attempt was operator-interrupted and counted as active failed work."
+    },
+    "terminal_gui_controls": {
+      "status": "PASS_ON_EXISTING_PROJECT",
+      "result": "Exact-wheel terminal splash, Ask/Plan/Agent, Default/Fast, native model picker, persisted Ask/Auto permissions and explicit Ask lock worked. Authenticated GUI rendered; its native permission toggle persisted off/on/off across reload. In an existing project, GUI model picker showed local Qwen plus optional OpenCode models, and effort changed Default/Fast/Default. A saved session pointing to a deleted temporary project returned provider API 500 and an empty picker; opening an extant project restored controls."
+    },
+    "final_artifact_lifecycle": {
+      "status": "PASS_OWNER_PATH",
+      "result": "Clean-main wheel and installer hashes verified. Exact wheel installed, rolled back, reactivated, uninstalled and reactivated with sessions/models retained. Saved OpenCode session reopened after restart. Anonymous HTTPS assets matched the qualified hashes. Public installer activated the owner from its public package store; public rollback and reactivation passed. Fresh public-launcher startup and doctor --deep passed with healthy 96K runtime and zero swap. Separate macOS-account installation was waived by the owner."
+    },
+    "offline_and_supply_chain": {
+      "status": "PASS_WITH_REVIEWED_FINDINGS",
+      "result": "Final source make check passed 212 Python and 85 Node tests, native-trial and frozen-suite self-checks, documentation links and git diff hygiene. Outside-checkout package smoke rebuilt the same wheel hash. Wheel manifest contains 23 curated payload files and no evaluation runs. Pinned browser npm production lock audit reported zero advisories. Redacted Git-history gitleaks scan found 11 generic-api-key matches, all inspected as 64-character hexadecimal artifact hashes in historical manifests/receipts."
+    }
+  },
+  "research_only_failures": [
+    "Autonomous Task12 acceptance did not become repeatable.",
+    "Fresh local Reviewer accuracy is insufficient for acceptance authority.",
+    "Useful reasoning throughout the full configured 96K context is not established.",
+    "No matched frontier-model comparison exists under the local/free-only constraint."
+  ],
+  "raw_evidence": "Ignored evals/runs/v1-final2-coding-20261002-01, evals/runs/v1-final-sustained-20261002-01 and evals/runs/v1-final-claim-20261002-01 are retained on the owner's qualification Mac; user data and raw transcripts are not published."
+}
