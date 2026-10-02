@@ -1,0 +1,22 @@
+{
+  "kind": "guarded native follow-up of the shell-written JavaScript syntax feedback",
+  "date_utc": "2026-10-02",
+  "source_commit": "e3c30721e4ba136a0ea3fd58fbbabe7a86ff89b3",
+  "private_run_id": "supervised-v1-endurance-repeat-20261002-01",
+  "stage": "repair1",
+  "session_continuity": "Resumed the saved local-model Task12 session under the unchanged daily-use guard and candidate product plugin.",
+  "driver_completed": false,
+  "wall_seconds": 93.495,
+  "observed": [
+    "Native tool output surfaced the existing web/app.js parse error to the model after shell calls.",
+    "The model rewrote the client file and a subsequent node --check passed.",
+    "The model repeatedly attempted check commands with failure-masking shell fallbacks; KRYN refused them and ended the turn.",
+    "Independent browser acceptance passed two stored-markup checks, then failed because the entity-like row had no visible Edit button."
+  ],
+  "resource": {
+    "pressure_levels": [1],
+    "swap_peak_growth_bytes": 0,
+    "route_verified": true
+  },
+  "decision": "The syntax-feedback change was active and helped repair parsing, but the coding/UI and sustained-use gates remain failed. Do not count this as accepted endurance, autonomous completion, or final-artifact qualification. Avoid another identical local-model client repair prompt; use independent checks and explicit operator correction for the supervised product."
+}
