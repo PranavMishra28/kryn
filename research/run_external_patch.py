@@ -112,6 +112,8 @@ def drive(child, prompt, timeout, cancelled):
         try:
             output, errors = child.communicate(input=prompt if first else None,
                                                timeout=min(.5, remaining))
+            if len(output) > 2 * 1024**2 or len(errors) > 64 * 1024:
+                return "output_budget", output, errors
             return ("resource_guard" if cancelled() else None), output, errors
         except subprocess.TimeoutExpired as error:
             first = False

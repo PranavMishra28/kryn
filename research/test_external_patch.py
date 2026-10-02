@@ -6,10 +6,17 @@ import unittest
 
 from unittest.mock import patch
 
-from run_external_patch import benchmark_tools, prepare
+from run_external_patch import benchmark_tools, drive, prepare
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_finished_cli_cannot_silently_truncate_events(self):
+        class Child:
+            def communicate(self, **kwargs):
+                return b"x" * (2 * 1024**2 + 1), b""
+        cause, _, _ = drive(Child(), b"task", 30, lambda: False)
+        self.assertEqual(cause, "output_budget")
+
     def test_benchmark_tool_dependencies_are_explicit(self):
         self.assertEqual(benchmark_tools(None), (None, []))
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:

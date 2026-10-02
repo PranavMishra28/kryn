@@ -56,6 +56,46 @@ and `b241584d2c1fc0304b0a1015ea923749d7b0800411dd406dcab7c82bf25d9fe8`.
 This environment correction is development calibration; any task observed here
 is ineligible for protected holdout selection.
 
+## Candidate result
+
+The corrected run used fresh copies of the official task checkout, with the
+same prompt bytes, model profile, OpenCode binary, 900-second bound, sandbox
+and first-wire tool schema in both arms. Their SHA-256 values were, respectively,
+`767b87738cc2de709220547740b66623bec8630f8bd5f5dfe8978bede8462f8b`,
+`05c4645f3b691ae09b239534c026a9da5fa929677e39cff3c0d867fe9e91fe52`,
+`f2dfe9ad5851219a6bd97b2e3cd2081c0964b5f120530f578d3da3aefc5ccc5a`,
+and `1b56b6b37c804f7fd30cd60d131476c6a619cda5269ac2ccf9d2fc8a5d34a81e`.
+The unchanged guard was active throughout. These are one public-task observations:
+
+| Arm | Native outcome | Patch | Official evaluator | Wall time | Resource result |
+| --- | --- | --- | --- | ---: | --- |
+| KRYN | completed | two-line `Printable.__slots__` edit | resolved 1/1; no grader error | 338.446 s | normal sampled pressure, zero swap growth |
+| Native OpenCode | interrupted | empty | empty-patch 1/1; not run by grader | 529.983 s | sustained host-memory warning, zero swap growth |
+
+The official run IDs are `kryn-sympy-r5-20261002` and
+`native-sympy-r5-20261002`. The KRYN candidate patch SHA-256 is
+`9581a6a5474aa324fc05e9e2f065c399c1f6ac2cd0ae7fb7b7554e50b0c1ecb6`.
+KRYN used 33 model requests and native used 34. KRYN made its edit after
+source inspection and finished; native remained in source investigation until
+the guard stopped it. KRYN's first piped pytest command was refused because it
+masked the check exit; its subsequent direct pytest attempt failed because
+the disposable tool venv lacks pytest. It ran smaller Python checks, but only
+the official evaluator establishes acceptance for this external task.
+
+This is **not** a matched timing/uplift result: KRYN's samples include AC and
+battery power, while native's are battery-only; cache warmth also differed.
+One task previously inspected during environment repair cannot establish
+generalization, a confidence interval, or H1. The first KRYN candidate attempt
+also failed the memory guard before its patch, so reporting only the accepted
+retry would hide a real failure. The official evaluator correctly records the
+native empty patch as `empty_patch_instances: 1`, not as a resolved or executed
+test. Full Lite/Verified subsets, Harbor, protected holdout and long-horizon
+gates remain open.
+
+Raw private traces, resource samples, exact prompt/prediction JSON and official
+evaluator logs are retained in the ignored
+`evals/runs/external-sympy-20261002/` directory on this Mac, with a SHA-256
+manifest. The folder is not part of the public source package.
+
 Neither this calibration nor the earlier public TaskboardLite pilot is sealed
-holdout evidence. Full Lite/Verified subsets and Terminal-Bench via Harbor remain
-unrun. The frontier-adjacency gate remains open.
+holdout evidence. The frontier-adjacency gate remains open.
