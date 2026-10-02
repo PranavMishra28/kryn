@@ -62,3 +62,21 @@ boundary; then official, pinned external subsets and one-variable ablations.
 The macOS read-boundary canary passed, but that alone does not qualify a protected
 holdout. The Docker daemon is not running, so official evaluator runs are pending.
 Released v1.0.0 and the owner installation were not changed by this pilot.
+
+## Isolated native-process preflight
+
+One additional **public** `collections` fixture ran through the existing
+`NativeServer(background=...)` path with the OpenCode process and its descendants
+inside the macOS read/network boundary. The trusted parent kept the oracle outside
+that boundary and graded the resulting program afterward: 3/3 checks passed in
+84.965 s, with 12 local inference requests, normal sampled pressure, zero swap
+growth, and verified native settlement. The separate direct/symlink grader-read
+canary also passed, and the owned OpenCode server and CLI had exited afterward.
+This qualifies a real sandboxed runner path, **not** a protected holdout task or
+an H1 result; the fixture is previously visible development data.
+
+The current idle learner initially refused the installed default `local/qwen`
+reference because it requires an explicit variant; this preflight used a disposable
+`local/qwen#fast` config and a disposable resumed control. No installed learning
+control or production profile changed. Default-variant support and a full sealed
+candidate/grader run remain unqualified.

@@ -39,6 +39,8 @@ Seatbelt boundary can read a candidate workspace but cannot read a separate grad
 even through a workspace symlink. This is only a boundary preflight; protected
 holdout qualification also requires a full sandboxed candidate run with the grader
 outside its readable and reachable surfaces.
+An actual sandboxed OpenCode call on a public development fixture passed this
+runner preflight; its evidence and limitations are in [DEVELOPMENT.md](DEVELOPMENT.md).
 
 The external benchmark and protected-holdout layers are pending. An installed
 Docker CLI without a running daemon is insufficient for official SWE-bench or
