@@ -515,8 +515,10 @@ class InferenceRelay:
 
 def configured_reference(config):
     reference = config.get("agents", {}).get("build", {}).get("model", config.get("model"))
+    if reference == "local/qwen":
+        return reference, "default"
     if not isinstance(reference, str) or not reference.startswith("local/qwen#"):
-        raise RuntimeError("Learning requires the selected explicit local model variant")
+        raise RuntimeError("Learning requires the selected local model")
     variant = reference.partition("#")[2]
     choices = {item["id"] for item in config["providers"]["local"]["models"]["qwen"].get("variants", [])}
     if variant not in choices:

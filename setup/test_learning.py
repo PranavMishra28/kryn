@@ -101,6 +101,14 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(effective['plugins'][0]['options']['workflowScope'],'disposable_json_cli')
         self.assertEqual(config['providers']['local']['settings']['baseURL'],'http://127.0.0.1:8000/v1')
 
+    def test_installed_default_model_is_valid_for_disposable_learning(self):
+        config={'model':'local/qwen','agents':{'build':{'model':'local/qwen'}},
+                'providers':{'local':{'models':{'qwen':{'variants':[{'id':'fast'}]}}}}}
+        self.assertEqual(learning.configured_reference(config), ('local/qwen','default'))
+        config['agents']['build']['model']='local/qwen#missing'
+        with self.assertRaisesRegex(RuntimeError,'not in the installed profile'):
+            learning.configured_reference(config)
+
     def test_reflection_uses_frozen_fast_profile_and_trials_preserve_selected_variant(self):
         import context_probe
         workspace=self.base/'run'/'workspace'; workspace.mkdir(parents=True)
