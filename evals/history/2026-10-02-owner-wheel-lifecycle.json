@@ -1,0 +1,20 @@
+{
+  "kind": "clean-main private wheel owner lifecycle screen",
+  "date_utc": "2026-10-02",
+  "source_commit": "f5d7874ee522e41ff8f5b4a048135803c8228dbb",
+  "wheel": "kryn-0.2.0-py3-none-any.whl",
+  "wheel_sha256": "bddb40e4e0d660f95995e02021679a8eb0c4dcf0aa636f06e328b56c997fb4b0",
+  "package": "Built from a clean main tree; 23 curated payload files; wheel and installer passed SHA256SUMS verification. This same-version wheel is a retained private candidate, not a public release.",
+  "owner_sequence": [
+    "Installed from a retained private Python 3.13 environment; package-check reported the exact source commit and active.json matched its payload manifest.",
+    "Rollback stopped only the idle owned oMLX runtime and restored the previous owned source revision 797549f9477dcc1a0dc949c992d14bb5a2425947; the launcher still reported KRYN 0.2.0.",
+    "Reactivation from the same private wheel restored active source revision f5d7874ee522e41ff8f5b4a048135803c8228dbb.",
+    "A fresh terminal launch displayed the KRYN startup glyph, connected oMLX and 2/2 tools, and showed editable permissions. The terminal client exited without an active generation.",
+    "A --web --continue launch reused the same saved session; its loopback GUI server required authentication (unauthenticated HTTP 401). The browser page itself was not independently rendered or interacted with in this screen.",
+    "Uninstall deactivated the owned launcher while retaining model/session data; reinstallation from the same wheel restored the launcher and exact source revision. A subsequent --continue launch again reused the saved session.",
+    "After intentional runtime stop during rollback/uninstall, doctor --deep initially reported the stopped listener; the next normal launch restarted oMLX. Final doctor --deep passed model/browser integrity, local routing, runtime health and browser/search MCP connection. Update --check reported current for the same-version private wheel."
+  ],
+  "final_owner_state": "KRYN 0.2.0 private wheel from f5d7874 is installed, launcher active, 9B runtime healthy, configured context 98,304, memory limit 22 GiB, host pressure normal.",
+  "limits": "This owner screen does not prove a fresh second-user install (waived by the owner), complete GUI interactions, a generated coding turn after reactivation, 45-60 minutes of accepted active work, anonymous installation of unpublished v1 assets, or v1.0.0 qualification.",
+  "private_raw_evidence": "evals/runs/owner-lifecycle-20261002-01/evidence/snapshot.json"
+}

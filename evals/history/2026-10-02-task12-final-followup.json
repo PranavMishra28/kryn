@@ -1,0 +1,31 @@
+{
+  "kind": "guarded Task12 continuation and independent reviewer accuracy follow-up",
+  "date_utc": "2026-10-02",
+  "source_commit": "f5d7874ee522e41ff8f5b4a048135803c8228dbb",
+  "private_run_id": "supervised-v1-staged-20261002-01",
+  "profile": "Installed same-version private wheel from clean main; OpenCode 2.0.10, oMLX 0.6.4, Qwen3.5-9B-6bit, configured 96K context, unchanged daily-use guard",
+  "findings": {
+    "reviewer2": "A fresh read-only Reviewer missed a reproduced HTTP 400 when editing an ID containing a space and misdescribed existing tests. It also raised a filter concern with an incorrect mechanism. Treat the model review as advisory.",
+    "encoded_id": "An independent HTTP probe reproduced POST 201 then PATCH /api/entries/id%20with%20space 400. A saved-session Agent changed client URL encoding and server decoding; its claimed regression used Store directly and never exercised HTTP. The operator replaced that misleading test with an actual HTTP POST/PATCH regression. The real HTTP probe then returned PATCH 200 with the persisted update; 11 Python tests, node --check and the frozen browser oracle passed. A separate browser holdout edited IDs containing spaces and URL punctuation with two PATCH 200 results and no page errors.",
+    "filter": "An independent browser holdout found that an Alpha filter remained visible after editing its row to Beta while the Beta row appeared. A guarded Agent added filter-restore logic and claimed a fix, but the identical holdout failed again. The operator changed the refresh path to reapply the visible filter and removed the unused restore logic. The holdout then passed with the Beta row hidden; the encoded-ID browser holdout and unchanged frozen 11/11 browser oracle passed again.",
+    "reviewer3": "A final fresh read-only Reviewer cited the source but made several false material claims: it said the form was not reset even though form.reset() is present, treated unused CSV precheck rows as the import payload, and described the bounded 503 retry as infinite. It did not qualify as accurate independent review. No further prompt-rule retry was made."
+  },
+  "final_disposable_artifact_checks": {
+    "frozen_backend": "PASS 2/2; preserved seed and original test",
+    "python_unittest": "PASS 11/11, including real HTTP encoded-ID regression",
+    "javascript_syntax": "PASS node --check web/app.js",
+    "frozen_browser": "PASS 11/11 on a fresh database after final operator correction",
+    "independent_holdouts": "PASS: encoded-ID browser 2/2 and filter-after-edit 1/1 on fresh databases",
+    "frozen_task12_overall": "FAIL: fresh Reviewer accuracy and accepted sustained duration remain failed"
+  },
+  "duration": {
+    "native_stage_wall_seconds_cumulative": 3380.117,
+    "native_stage_wall_minutes_cumulative": 56.335,
+    "accepted_native_stage_wall_seconds_cumulative": 1407.538,
+    "accepted_native_stage_wall_minutes_cumulative": 23.459,
+    "required_accepted_active_minutes": "45-60",
+    "note": "The cumulative wall includes failed review and filter-fix stages; it cannot be substituted for accepted active work. Operator edits and external browser-oracle time were excluded from both numbers."
+  },
+  "resources": "All four new native stages observed normal host pressure and zero swap growth above their stage baselines under the unchanged guard, on AC power.",
+  "decision": "Task12's final supervised disposable application works for the measured API/UI flows after operator corrections. The frozen overall grade remains FAIL. Do not claim repeatable autonomous coding, reliable local Reviewer authority, sustained-use qualification, frontier equivalence or public v1.0.0 readiness."
+}
