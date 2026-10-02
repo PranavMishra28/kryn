@@ -6,7 +6,6 @@ import { execFileSync } from 'node:child_process';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
-const MAX_SESSION_PINS = 500;
 const MAX_OBSERVED_CHECKS = 64;
 const MAX_OBSERVED_EDITS = 16;
 const MAX_USER_ANCHORS = 12;
@@ -549,9 +548,6 @@ export default {
       const key = sessionKey(id), file = path.join(folders.pins, key + '.json');
       const existingPin = fs.existsSync(file);
       // Preserve every saved champion identity, including resumed old sessions.
-      // Reaching this bound refuses a new session; it never silently re-pins one.
-      if (!existingPin && fs.readdirSync(folders.pins).filter(name => /^[a-f0-9]{64}\.json$/.test(name)).length >= MAX_SESSION_PINS)
-        throw new Error('KRYN has reached 500 saved session pins; inspect and archive owned session state before creating another session');
       const pin = writeJSON(file, { owner: 'kryn.product', schema: 2, ...options.champion,
         workflowScope: options.workflowScope });
       if (pin.owner !== 'kryn.product' || ![1, 2].includes(pin.schema) || typeof pin.instructions !== 'string' ||

@@ -1,0 +1,18 @@
+{
+  "kind": "owner final-wheel coding startup defect and candidate pin-cap repair",
+  "date_utc": "2026-10-02",
+  "failed_final_wheel": {
+    "source_commit": "997d949757c016bc4b5fab2b498760a1bfd0ad1a",
+    "wheel_sha256": "6b48e3c714c9073dd100202685782267451368f2eb4e7c588785c282dd952031",
+    "run": "v1-final-coding-20261002-01/attempt1",
+    "result": "FAIL before inference: OpenCode prompt HTTP 500, UnexpectedStatus, zero generation and zero tool calls",
+    "cause": "The KRYN product plugin rejected a new session after the owner account reached 500 saved champion pins. Native session storage and the resource guard were healthy; pressure was normal and swap growth zero."
+  },
+  "fix": "Remove the arbitrary 500-pin admission limit. Existing pins still use the same private, owned, validated per-session files; no pin or native session is silently discarded. Native session history already governs larger long-term storage cost.",
+  "candidate_validation": {
+    "regression": "The plugin test created 500 existing pins, admitted a 501st session and verified the older pin bytes remained unchanged.",
+    "guarded_native_run": "v1-pinfix-coding-20261002-01: patched product source, same installed stack and daily-use guard. First Agent turn completed with 16 tools, verified local routing, normal pressure and zero swap growth. The frozen Task02 grader passed but an independent canonical-date probe failed.",
+    "supervised_correction": "One saved-session Agent feedback turn completed with seven tools under the same guard. Frozen Task02 checks and the separate imported-code canonical-date probe passed; the current diff was inspected. This is supervised success after correction, not autonomous first-pass success."
+  },
+  "release_decision": "The 997d949 wheel is invalidated by the reproduced product failure. Merge the minimal fix, rebuild from clean main, reinstall the new exact wheel and repeat affected final-artifact gates before publication."
+}
