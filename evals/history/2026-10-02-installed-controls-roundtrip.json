@@ -1,0 +1,19 @@
+{
+  "kind": "owner-installed private-candidate terminal and GUI control roundtrip",
+  "date_utc": "2026-10-02",
+  "installed_source_commit": "3c0ccb63acad07a4711d9d49e9a4b7b21cffaef5",
+  "installed_version": "0.2.0 private same-version candidate",
+  "project": "disposable empty project, not a user work session",
+  "terminal": {
+    "startup": "◇ K R Y N glyph, owned oMLX startup, OpenCode ready, browser/search 2/2 connected",
+    "ordinary_interactive_launch": "Native /settings Permissions changed Ask → Auto → Ask. The KRYN footer showed Ask, Auto and Ask respectively, without (locked). OpenCode's cli.json persisted prompt, autoaccept and prompt respectively. A fresh ordinary launch displayed Ask from the saved prompt setting.",
+    "locked_overrides": "With saved prompt, kryn --auto displayed Auto (locked). Changing the native saved preference to autoaccept did not change that launch's locked indicator. With saved autoaccept, kryn --permissions ask displayed Ask (locked). The original saved autoaccept preference was restored at the end.",
+    "exit": "Native terminal client exited cleanly without an active model generation."
+  },
+  "gui": {
+    "launch": "kryn --web opened the same owned loopback server; authenticated headless Chrome loaded the OpenCode page with HTTP 200 and no JavaScript page errors.",
+    "permission_roundtrip": "The native Auto-accept permissions switch started off, changed on, remained on after reload, changed off, and remained off after a second reload. No JavaScript page errors were observed.",
+    "boundary": "The loopback password was read only by a local test process and was not printed or saved in this receipt. The GUI preference is separate from the terminal preference."
+  },
+  "scope": "PASS for candidate terminal and GUI controls. This does not qualify the later final 1.0.0 wheel or exercise a generated coding turn."
+}

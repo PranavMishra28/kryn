@@ -2,7 +2,7 @@
 
 A coding workspace for Apple Silicon: OpenCode's terminal and browser interfaces, a local Qwen model through oMLX, and coding, planning, review, browser and search tools. Other OpenCode providers are optional and selected by you.
 
-**v0.2.0 is a public preview for supervised local coding.** It retains the local 9B model, native OpenCode agents and tools, and a guarded 96K context setting. A small owner coding task and launcher/recovery checks passed; the larger independent coding/UI task, accurate autonomous review, truthful compaction summaries and sustained-use gates did not. Review generated changes and run your own checks. See [current status and gates](plan.md). No production-quality, autonomous improvement or frontier-parity claim follows from the results.
+**KRYN 1.0.0 is a local-first, human-supervised coding workspace.** It combines native OpenCode sessions and tools with a guarded local 9B model and a configured 96K context window. Review generated changes and run project checks; KRYN does not claim unattended application engineering, reliable local Reviewer authority, frontier parity or useful reasoning across every configured context token. See [qualification evidence](plan.md).
 
 | Start here | Contents |
 |---|---|
@@ -20,13 +20,13 @@ From your project folder in Terminal:
 cd "/absolute/path/to/your/project" && kryn
 ```
 
-Type a request and press Enter. New sessions use **Agent**; **Ctrl+X**, then **A** chooses Ask, Plan or Agent. Plan handles research with the selected model and effort. **Ctrl+T** cycles Default (bounded thinking) and Fast for local Qwen. **Ctrl+P** opens the command palette. Agent can delegate Explore, Browse or Reviewer work. Local generations run one at a time to protect memory. Use `/models` for native provider selection, `/settings` for permissions and display, `/report` for observed session evidence, `/sessions` to resume, and `/exit` to leave. `kryn controls` shows an offline reference. The unreleased source build also adds `/call TASK` for one bounded General child; the tagged v0.2.0 installer does not provide that command.
+Type a request and press Enter. New sessions use **Agent**; **Ctrl+X**, then **A** chooses Ask, Plan or Agent. Plan handles research with the selected model and effort. **Ctrl+T** cycles Default (bounded thinking) and Fast for local Qwen. **Ctrl+P** opens the command palette. Agent can delegate Explore, Browse or Reviewer work. Local generations run one at a time to protect memory. Use `/models` for native provider selection, `/settings` for permissions and display, `/report` for observed session evidence, `/sessions` to resume, and `/exit` to leave. `kryn controls` shows an offline reference. `/call TASK` runs one bounded coding child without changing the selected parent mode.
 
 Review permission prompts and generated changes. Explicit `kryn --auto` accepts all native requests not denied, including browser/network actions; see [permission scope](docs/usage.md#models-and-providers). `kryn --web` opens the companion GUI; `/web` displays its temporary credentials. `kryn --continue` resumes from the same project. Saved sessions remain on disk; compaction summaries can be inaccurate.
 
 ## First installation
 
-The v0.2.0 preview installer fetches public release assets over HTTPS without a GitHub account.
+The v1.0.0 installer fetches public release assets over HTTPS without a GitHub account.
 
 Requirements:
 
@@ -43,9 +43,9 @@ Requirements:
      trap 'rm -f "$kryn_installer"' EXIT
      curl --fail --location --proto '=https' --proto-redir '=https' \
        --output "$kryn_installer" \
-       https://github.com/PranavMishra28/kryn/releases/download/v0.2.0/install-kryn.py
+       https://github.com/PranavMishra28/kryn/releases/download/v1.0.0/install-kryn.py
      printf '%s  %s\n' b66e4332b4951c4abbe37c59db6865f076117e4ebc8d4588ad6a180929bc55b5 "$kryn_installer" | shasum -a 256 -c -
-     python3 "$kryn_installer" --tag v0.2.0
+     python3 "$kryn_installer" --tag v1.0.0
    )
    ```
 
@@ -60,11 +60,11 @@ Requirements:
    kryn --version
    ```
 
-   Expected version: `KRYN 0.2.0`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
+   Expected version: `KRYN 1.0.0`. If a new Terminal cannot find `kryn`, use `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once.
 
 ## Updates and recovery
 
-The v0.2.0 client checks for a newer checksum-verified KRYN release at startup and while idle. It offers **Update and restart / Later** once per release, or on demand through `/update`. Acceptance closes the client, verifies the same release hash again, uses the existing transactional installer, then resumes the project. Active turns defer the dialog; no update replaces a running generation. `kryn update --check` is the read-only Terminal equivalent. Network failures, same-version private builds and older releases produce no offer. Older installed clients without an in-session notice need a manual version update.
+KRYN checks for a newer checksum-verified release at startup and while idle. It offers **Update and restart / Later** once per release, or on demand through `/update`. Acceptance closes the client, verifies the same release hash again, uses the existing transactional installer, then resumes the project. Active turns defer the dialog; no update replaces a running generation. `kryn update --check` is the read-only Terminal equivalent. Network failures, same-version private builds and older releases produce no offer. Older installed clients without an in-session notice need a manual version update.
 
 Run `kryn update vX.Y.Z` in Terminal for an exact newer published KRYN tag. The updater verifies release checksums and package contents before transactional activation; `kryn rollback` restores the retained previous installation. Finish work and exit KRYN before updating. Do not install an unverified main commit or independently update the pinned OpenCode binary. Current same-version private candidates are not a public update channel.
 
@@ -72,7 +72,7 @@ Run `kryn update vX.Y.Z` in Terminal for an exact newer published KRYN tag. The 
 
 ## Current profile and learning limits
 
-The preview pins OpenCode **2.0.10**, oMLX **0.6.4**, Qwen3.5-9B-6bit, **96K** context tokens, **8,192** output tokens, a **22 GiB** oMLX ceiling and one active generation. This larger setting is guarded but has not been proved to improve coding quality or sustain every desktop workload; if the guard stops work, the session remains available to resume. Exact settings are in the [accepted profile](setup/accepted-profile.json) and [client template](setup/opencode.template.json).
+The v1 profile pins OpenCode **2.0.10**, oMLX **0.6.4**, Qwen3.5-9B-6bit, **96K** context tokens, **8,192** output tokens, a **22 GiB** oMLX ceiling and one active generation. This larger setting is guarded but has not been proved to improve coding quality or sustain every desktop workload; if the guard stops work, the session remains available to resume. Exact settings are in the [accepted profile](setup/accepted-profile.json) and [client template](setup/opencode.template.json).
 
 Per-run incident capture retains bounded private failure metadata and check receipts for diagnosis. It does not repair code or qualify a change. The optional disposable-task learning worker remains paused; cross-project automatic promotion has no established benefit and still needs independent reproduction, protected holdouts, matched repeated trials and monitored rollback. See [current status](plan.md).
 
