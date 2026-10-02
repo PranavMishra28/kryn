@@ -1199,6 +1199,7 @@ def main():
         server = NativeServer(workspace, config, folder / "native-server.log")
         server.env["OPENCODE_CONFIG_DIR"] = str(config_root)
         with server:
+            report["owned_native_server_pid"] = server.process.pid
             providers, models = server.inventory()
             (folder / "inventory.json").write_text(json.dumps({"providers": providers, "models": models}, indent=2))
             provider_ids = [p["id"] for p in providers["data"]]
@@ -1280,6 +1281,7 @@ def main():
             report["prompt_started_unix_ms"] = time.time() * 1000
             with (folder / "events.jsonl").open("wb") as out, (folder / "stderr.log").open("wb") as err:
                 child = subprocess.Popen(command, cwd=workspace, env=server.env, stdin=subprocess.PIPE, stdout=out, stderr=err)
+                report["owned_native_cli_pid"] = child.pid
                 try:
                     if monitor is not None:
                         run_guarded_cli(child, admitted_prompt.encode(), args.timeout, monitor, server,
