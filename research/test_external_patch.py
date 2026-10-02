@@ -24,7 +24,8 @@ class ExternalPreflightTest(unittest.TestCase):
             evidence = root / "evidence"
             got = prepare(workspace, prompt, evidence, base)
             self.assertEqual(got[:3], (workspace, prompt, evidence))
-            self.assertTrue((workspace / ".git/kryn-external-state").is_dir())
+            self.assertTrue(got[3].is_dir())
+            self.assertTrue(got[3].is_relative_to(workspace / ".git"))
             self.assertEqual(evidence.stat().st_mode & 0o777, 0o700)
             with self.assertRaisesRegex(ValueError, "separate fresh"):
                 prepare(workspace, prompt, evidence, base)

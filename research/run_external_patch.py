@@ -45,7 +45,8 @@ def prepare(workspace, prompt_file, evidence, base_commit):
     if not prompt_file.is_file() or not prompt_file.read_bytes().strip():
         raise ValueError("External task prompt is missing")
     evidence.mkdir(mode=0o700)
-    state_dir = workspace / ".git/kryn-external-state"
+    # Keep plugin state fresh across failed startup attempts in the same checkout.
+    state_dir = workspace / (".git/kryn-external-" + hashlib.sha256(str(evidence).encode()).hexdigest()[:16])
     state_dir.mkdir(mode=0o700)
     return workspace, prompt_file, evidence, state_dir
 
