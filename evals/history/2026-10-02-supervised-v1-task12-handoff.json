@@ -10,7 +10,9 @@
     "wall_seconds": 124.987,
     "tool_calls": 11,
     "route_verified": true,
-    "pressure_levels": [1],
+    "pressure_levels": [
+      1
+    ],
     "swap_peak_growth_bytes": 0,
     "observed_current_check_exits": {
       "git_diff_check": 0,
@@ -20,8 +22,29 @@
     "historical_failed_check_recalled": true,
     "semantic_handoff": "FAIL: the model-authored document falsely said verify1 had not run, called browser/server testing unavailable rather than untested, and described an Update button absent from current HTML. Its git diff of the untracked document was empty, so the edit was not inspected. The model reported checkpoint staleness but did not explicitly compare its hash with current bytes. The operator preserved the model version and corrected the disposable document separately."
   },
-  "browser_after_operator_correction": "NOT_TESTED: Codex browser policy denied localhost access; the disposable server was stopped and no alternate browser path was used.",
-  "frozen_grade": "FAIL: Task12 automatic API/source checks passed 2/2, but browser/503 recovery, Reviewer accuracy and semantic handoff failed; native compaction mechanics passed.",
-  "elapsed": "Seven native stage walls totalled 2392.719 seconds (39.9 minutes), including failed work and corrections. This is not 45-60 minutes of accepted active work.",
-  "release_gate": "OPEN"
+  "browser_after_operator_correction": "NOT_TESTED: Codex browser policy denied localhost access again after explicit user authorization; the disposable server was stopped and no alternate browser path was used.",
+  "frozen_grade": "FAIL overall: automatic API/source checks passed 2/2; native compaction and supervised handoff after operator feedback passed, while browser/503 recovery and fresh Reviewer accuracy failed.",
+  "elapsed": "Eight native stage walls totalled 2514.805 seconds (41.9 minutes), including failed work and corrections. This is not 45-60 minutes of accepted active work.",
+  "release_gate": "OPEN",
+  "supervised_followup": {
+    "operator_feedback": "Named the first handoff false claims and corrected its document; separately added the frozen visible-empty-state behavior to the disposable client.",
+    "saved_session_resumed": true,
+    "wall_seconds": 122.086,
+    "tool_calls": 9,
+    "route_verified": true,
+    "pressure_levels": [
+      1
+    ],
+    "swap_peak_growth_bytes": 0,
+    "observed_current_check_exits": {
+      "git_diff_check": 0,
+      "python_unittest_2": 0,
+      "node_syntax": 0
+    },
+    "source_unchanged": true,
+    "historical_failed_check_recalled": true,
+    "stale_client_hash_detected": true,
+    "correct_next_action": "Independent browser acceptance, still unverified.",
+    "result": "PASS supervised handoff after explicit operator feedback; the first false handoff remains recorded and no autonomous first-pass accuracy is claimed."
+  }
 }
