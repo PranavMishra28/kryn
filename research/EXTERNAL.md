@@ -288,3 +288,54 @@ OpenCode **1/5**. Even a KRYN-only success on the final selected task could at
 most tie the six-task strict totals; this external subset cannot establish a
 positive v1 harness acceptance difference. The result does not replace the
 larger protected holdout, and no frontier-adjacent claim is supported.
+
+### Task 6: Astropy 13398 (Verified)
+
+The pinned gold patch resolved 1/1 in official run
+`gold-astropy-13398-20261002`. Both clean candidate checkouts imported their
+own frozen Astropy 5.2.dev source from matched Python 3.9 environments and
+passed the focused `test_shortest_path` canary. The old WCS extension initially
+failed to build with Clang 22's stricter function-pointer diagnostic; applying
+the same compiler warning override to both disposable candidate environments
+made their builds pass before generation. A pre-existing issue-specific test
+also encounters an expired leap-second table on this 2026 host when warnings
+are treated as errors. It passes with the warning filter relaxed, but the
+official Docker evaluator, not that local test, decides resolution.
+
+| Arm | Native turn | Official diagnostic grade | Frozen acceptance | New input tokens |
+| --- | --- | --- | --- | ---: |
+| Native OpenCode | guard stop after 6 requests, 40.127 s | empty patch; unresolved | **fail** | 10,279 |
+| KRYN | guard stop during first request, 12.917 s | empty patch; unresolved | **fail** | 0 |
+
+Both turns observed host-memory warning under the unchanged guard and had zero
+sampled swap growth. Official runs `native-astropy-13398-20261002` and
+`kryn-astropy-13398-20261002` each report an empty patch and zero resolved
+instances. The KRYN request was interrupted before any recorded tokens or tool
+call; this pair does not compare solution quality. Raw traces, predictions,
+official results, build logs and a SHA-256 manifest are retained in ignored
+`evals/runs/external-astropy-13398-20261002/` on this Mac.
+
+### Frozen six-task subset result
+
+`python3 -B research/summarize_external.py` selects one officially graded
+generation receipt per frozen task and arm, excluding startup preflights. Under
+the preregistered strict endpoint, KRYN accepted **0/6** and native OpenCode
+**1/6**. The paired task deltas in roster order are `[0, -1, 0, 0, 0, 0]`:
+KRYN minus native is **-16.7 percentage points**. A task-clustered paired
+bootstrap with 10,000 fixed-seed resamples has a percentile 95% interval of
+**[-50, 0] percentage points**. This small, selected subset gives no evidence
+for the required positive H1 effect.
+
+Eleven of twelve generation turns were stopped by the unchanged host-memory
+guard. The only completed turn was native OpenCode on Sphinx. Generation-turn
+wall time totals, excluding source setup, build, official grading and startup
+preflights, were 1,057.325 s for KRYN and 964.640 s for native; accepted work
+per generation-hour was 0 and 3.732 respectively. Those ratios are descriptive
+for these six short interrupted turns, **not** sustainable throughput. Native's
+interrupted pytest patch also resolved 1/1 in the official evaluator, but it
+failed the frozen completion endpoint. Candidate power state, cache warmth and
+occupied-host pressure varied across turns. The subset is neither a complete
+SWE-bench score nor the 30-task protected holdout, and it cannot qualify
+frontier-adjacent or autonomous-production claims. The next research step is a
+separately preregistered development ablation of the observed prompt/cache
+churn, without changing the released v1.0.0 or weakening its resource guard.

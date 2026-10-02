@@ -56,6 +56,8 @@ audit. The compact append-only
 `research/history/external.jsonl` index is public; full prompts and traces stay
 in ignored evidence directories. Never report a subset as a full benchmark
 score or a proof of frontier-level capability.
+`python3 -B research/summarize_external.py` reproduces the frozen six-task
+strict-acceptance totals and paired bootstrap from the graded compact receipts.
 
 The calibration's single resolved KRYN patch and interrupted native control
 are development observations, not the representative external subset.
