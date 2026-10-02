@@ -44,13 +44,17 @@ must label a snapshot as historical, never as a current pass claim.
 
    Frozen invocation for these public development pairs: user-facing `agent`,
    default local variant, `--timeout 900 --daily-use-guard --ready-tools
-   --without-browser --candidate-product-source`, with TaskboardLite's exact
-   prepared prompt and no `--managed-acceptance` intervention. The browser MCP
-   is omitted in both arms because these two tasks have no UI criterion; the
-   remaining tool catalog must match. V1 runs use the clean `main` product
+   --candidate-product-source`, with TaskboardLite's exact prepared prompt and
+   no `--managed-acceptance` intervention. The full tool catalog must match.
+   V1 runs use the clean `main` product
    plugin, C1 runs use the committed candidate plugin. Planned pair order:
    Task02 V1/C1, Task03 C1/V1, Task02 C1/V1, Task03 V1/C1. Run IDs encode task,
    arm and repetition. Each arm gets a fresh prepared workspace and session.
+
+   The first V1 command included both `--ready-tools` and `--without-browser`.
+   Runner argument validation rejected that combination before starting a native
+   server or model request. It is a recorded invocation preflight, not a trial;
+   the command above was corrected before either arm generated.
 3. If development is promising, freeze **new** validation tasks and oracle hashes
    before reading any C1 result on them. Do not promote C1 until fresh validation
    has no strict-acceptance or accepted-work/hour regression and external/protected
