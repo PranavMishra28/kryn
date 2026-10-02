@@ -25,6 +25,18 @@ def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
 
+def model_provenance(profile, model_id, profile_hash, invocation_hash):
+    """Never label a replacement model with the installed champion's revision."""
+    champion_id = profile.get("repository", "").rsplit("/", 1)[-1]
+    if model_id != champion_id:
+        return {"repository": None, "revision": None, "manifest_sha256": None,
+                "verified": False}
+    return {"repository": profile.get("repository"), "revision": profile.get("revision"),
+            "manifest_sha256": profile_hash,
+            "verified": bool(invocation_hash and invocation_hash == profile_hash
+                             and profile.get("revision"))}
+
+
 def receipt(run, stage):
     run = Path(run).resolve()
     if not run.is_relative_to(ROOT / "evals/runs") or not stage or "/" in stage or stage.startswith("."):
@@ -54,6 +66,8 @@ def receipt(run, stage):
             driver["model_profile_sha256"] != file_hash(profile_path)):
         raise ValueError("Model profile changed since trial invocation")
     profile = json.loads(profile_path.read_text())
+    provenance = model_provenance(profile, driver.get("expected_model_id"),
+                                  file_hash(profile_path), driver.get("model_profile_sha256"))
     guard = driver.get("resource_guard", {})
     supplemental = None
     supplemental_checks = {"02": ROOT / "evals/supervised_task02.py",
@@ -101,8 +115,9 @@ def receipt(run, stage):
             "agent": config.get("agents", {}).get(driver.get("agent"), {}).get("permissions")})),
         "tool_catalog_sha256": file_hash(tools),
         "model_id": driver.get("expected_model_id"),
-        "model_repository": profile.get("repository"), "model_revision": profile.get("revision"),
-        "model_manifest_sha256": file_hash(profile_path),
+        "model_repository": provenance["repository"], "model_revision": provenance["revision"],
+        "model_manifest_sha256": provenance["manifest_sha256"],
+        "model_provenance_verified": provenance["verified"],
         "model_profile_sha256_at_invocation": driver.get("model_profile_sha256"),
         "opencode_version": driver.get("opencode_version", "2.0.10"),
         "opencode_binary_sha256_at_invocation": driver.get("opencode_binary_sha256"),
@@ -126,7 +141,9 @@ def receipt(run, stage):
                         *([] if driver.get("opencode_binary_sha256") else
                           ["OpenCode binary hash was not captured at invocation"]),
                         *([] if driver.get("turn_timeout_seconds") else
-                          ["turn timeout was not captured at invocation"])],
+                          ["turn timeout was not captured at invocation"]),
+                        *([] if provenance["verified"] else
+                          ["model revision provenance is unverified for this trial"])],
     }
 
 

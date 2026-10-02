@@ -38,6 +38,8 @@ def compare(native_run, kryn_run, stage):
     unverified = [key for key in ("runner_sha256_at_invocation", "opencode_binary_sha256_at_invocation",
                                 "model_profile_sha256_at_invocation", "turn_timeout_seconds")
                   if not a.get(key) or not b.get(key)]
+    if not a["model_provenance_verified"] or not b["model_provenance_verified"]:
+        unverified.append("model revision provenance")
     for key in ("runner_sha256_at_invocation", "opencode_binary_sha256_at_invocation",
                 "model_profile_sha256_at_invocation"):
         if a.get(key) and b.get(key) and a[key] != b[key]:
