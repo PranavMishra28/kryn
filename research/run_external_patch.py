@@ -63,6 +63,7 @@ def configuration(workspace, state_dir, arm, relay_url):
     if products:
         products[0]["options"]["stateDir"] = str(state_dir)
         products[0]["options"]["observe"] = True
+        products[0]["options"]["inferenceBaseURL"] = relay_url
         dependencies.append(Path(products[0]["package"]).resolve())
     config["mcp"] = {"servers": {}}
     config["skills"] = []
