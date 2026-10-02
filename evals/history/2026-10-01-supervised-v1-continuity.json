@@ -1,0 +1,33 @@
+{
+  "kind": "supervised-v1 owner native continuity and stale-checkpoint screen",
+  "date_utc": "2026-10-02",
+  "private_run_id": "supervised-v1-owner-coding-20261001-01",
+  "model": "Qwen3.5-9B-6bit via owned OpenCode/oMLX",
+  "observed": {
+    "saved_session_reused": true,
+    "native_compaction_message_ids": ["msg_0fa08d67f00139dw7GGZO2kuWB", "msg_0fa0a53bf001Bkj3U2SbmB51DP"],
+    "compactions_completed": 2,
+    "both_checkpoints_completion_and_next_action": "unverified",
+    "both_checkpoints_retained_original_goal_and_correction": true,
+    "both_checkpoints_retained_failed_pytest_unavailable_exit": 1,
+    "compaction_model_wire_calls": 0,
+    "fresh_server_listeners": ["127.0.0.1:59305", "127.0.0.1:59349", "127.0.0.1:59678", "127.0.0.1:59725"],
+    "continuation1": "After first compaction, a fresh server and CLI reused the saved session. Agent read the current source, ran two existing unittest cases and explicit date checks, inspected Git diff, and made no edit. Eight tool calls; route coverage verified.",
+    "external_change": "After the second compaction, the operator changed one regex in the disposable project from canonical YYYY-MM-DD to a permissive pattern. Source SHA256 changed from 36d7391b12fce3193252f736ef608440ba38e98643f33c8a89e801e35c7f65d5 to 759a2c0274bf299c9868329f4eb61cd0b853de9505a88d460f5a573f30d58421. The independent boundary check failed while the original unit tests still passed.",
+    "continuation2": "A new server and CLI reused the saved session. Agent inspected Git, identified the changed regex as a current defect, observed a boundary failure, and attempted a repair. KRYN denied an edit before a current read; Agent read the file, repaired it, reran checks and inspected diff. Fourteen tool calls; route coverage verified; one expected read-before-edit denial was recovered.",
+    "final_source_sha256": "36d7391b12fce3193252f736ef608440ba38e98643f33c8a89e801e35c7f65d5",
+    "final_independent_boundary_and_unit_exits": [0, 0],
+    "resource_samples": {"compaction1": 4, "continuation1": 44, "compaction2": 4, "continuation2": 89},
+    "host_pressure_levels": {"compaction1": [1], "continuation1": [1, 2], "compaction2": [1], "continuation2": [1]},
+    "swap_peak_growth_bytes_each_stage": 0,
+    "power": "Battery Power",
+    "resource_abort_or_operator_intervention": false
+  },
+  "semantic_limits": [
+    "The checkpoints retained a historical failed pytest-unavailable exit, but the final Agent response omitted it despite being asked for prior failed-check lineage.",
+    "One model-authored boundary command printed FAIL for a bad date but exited 0. The Agent noticed the defect from the text and repaired it, yet its own command was not a trustworthy acceptance signal; the separate independent checker provided the failing and final passing exits.",
+    "Fresh server launches and distinct listener ports were observed, but this screen did not persist OpenCode process IDs."
+  ],
+  "interpretation": "Candidate compaction/restart mechanics, bounded checkpoint retention, stale-file recognition and supervised repair passed. Accurate final historical-check reporting is partial; this is not a final-wheel or sustained-use qualification.",
+  "release_gate": "OPEN"
+}
