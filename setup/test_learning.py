@@ -408,8 +408,10 @@ class LearningTests(unittest.TestCase):
 
     def test_native_background_uses_private_discovery_and_read_only_public_git(self):
         workspace=self.base/'workspace'; workspace.mkdir()
+        tools=workspace/'tools'; tools.mkdir()
         server=native_client.NativeServer(workspace,{},self.base/'native.log',
-                                         background={'dependencies':[],'inference_port':19876})
+                                         background={'dependencies':[tools],'inference_port':19876,
+                                                     'tool_path':str(tools)})
         process=MagicMock(); process.poll.return_value=None
         try:
             with patch.object(native_client.subprocess,'Popen',return_value=process), \
@@ -418,6 +420,7 @@ class LearningTests(unittest.TestCase):
             self.assertEqual(server.env['OPENCODE_TEST_HOME'],server.temporary.name)
             self.assertEqual(server.env['HOME'],server.temporary.name)
             self.assertEqual(server.env['OPENCODE_CONFIG_PROJECT_DISABLE'],'true')
+            self.assertEqual(server.env['PATH'],str(tools)+':/usr/bin:/bin')
             profile=server.background_prefix[-1]
             toolchain=Path('/Library/Developer/CommandLineTools')
             if toolchain.is_dir():self.assertIn('(subpath '+json.dumps(str(toolchain.resolve()))+')',profile)

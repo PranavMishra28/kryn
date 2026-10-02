@@ -354,8 +354,12 @@ class NativeServer:
 
     def _enter_background(self):
         options = self.background
-        if set(options) - {"dependencies", "inference_port", "cancel"} or not {"dependencies", "inference_port"}.issubset(options):
+        if set(options) - {"dependencies", "inference_port", "cancel", "tool_path"} or not {"dependencies", "inference_port"}.issubset(options):
             raise RuntimeError("Unexpected background isolation options")
+        tool_path = Path(options.get("tool_path", Path(sys.executable).parent))
+        if "tool_path" in options and (not tool_path.is_dir() or tool_path != tool_path.resolve() or
+                not any(tool_path.is_relative_to(Path(dep).resolve()) for dep in options["dependencies"])):
+            raise RuntimeError("Background tool path must be inside an explicit readable dependency")
         self.temporary = tempfile.TemporaryDirectory(prefix="kryn-isolated-", dir="/private/tmp", delete=False)
         private = Path(self.temporary.name)
         effective = json.loads(self.env["OPENCODE_CONFIG_CONTENT"])
@@ -368,7 +372,7 @@ class NativeServer:
         # Its explicit home hook keeps discovery inside the disposable boundary.
         self.env["OPENCODE_TEST_HOME"] = str(private)
         self.env["OPENCODE_CONFIG_PROJECT_DISABLE"] = "true"
-        self.env["PATH"] = str(Path(sys.executable).parent) + ":/usr/bin:/bin"
+        self.env["PATH"] = str(tool_path) + ":/usr/bin:/bin"
         for key in ("TMPDIR", "TMP", "TEMP", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"):
             dest = private / key.lower()
             dest.mkdir(mode=0o700)
