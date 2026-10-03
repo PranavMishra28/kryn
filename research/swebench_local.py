@@ -180,10 +180,15 @@ def official_result(grade_root, task, run_id, *, model_patch=None):
 def release_image(info):
     if not info["image_owned"]:
         return {"preexisting_preserved": True, "removed": False}
+    current = image_identity({"image_tag": info["image_tag"]})
+    if current["Id"] != info["image_id"]:
+        raise RuntimeError("Owned SWE-bench image tag changed before cleanup")
     for reference in (info["image_tag"], info["image_digest"]):
         subprocess.run(["docker", "image", "rm", reference],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
     remaining = subprocess.run(["docker", "image", "inspect", info["image_id"]],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                timeout=20).returncode == 0
-    return {"preexisting_preserved": False, "removed": not remaining}
+    if remaining:
+        raise RuntimeError("Owned SWE-bench image remained after cleanup")
+    return {"preexisting_preserved": False, "removed": True}

@@ -65,6 +65,22 @@ class SWEbenchCampaignTests(unittest.TestCase):
             self.assertTrue((prepared / "image-release.json").is_file())
             release.assert_called_once()
 
+    def test_image_cleanup_refuses_repointed_tag_or_retained_image(self):
+        info = {"image_owned": True, "image_tag": "official:tag",
+                "image_digest": "official@sha256:abc", "image_id": "sha256:expected"}
+        with patch.object(swebench_controller.swebench_local, "image_identity",
+                          return_value={"Id": "sha256:different"}), patch.object(
+                              swebench_controller.swebench_local.subprocess, "run") as docker:
+            with self.assertRaisesRegex(RuntimeError, "tag changed"):
+                swebench_controller.swebench_local.release_image(info)
+            docker.assert_not_called()
+        with patch.object(swebench_controller.swebench_local, "image_identity",
+                          return_value={"Id": "sha256:expected"}), patch.object(
+                              swebench_controller.swebench_local.subprocess, "run") as docker:
+            docker.return_value.returncode = 0
+            with self.assertRaisesRegex(RuntimeError, "remained"):
+                swebench_controller.swebench_local.release_image(info)
+
 
 if __name__ == "__main__":
     unittest.main()
