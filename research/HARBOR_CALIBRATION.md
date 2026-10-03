@@ -127,6 +127,24 @@ claim, runtime, tokens, resource samples and any guard stop. A failure or
 guard stop is a result, not a reason to retry. No product change is promoted
 from this one post-hoc diagnostic.
 
+### Environment-only amendment, frozen 2026-10-03T01:47:31Z
+
+The first native trial exited during `apt-get install` with intermittent
+`deb.debian.org` DNS failure. It made **zero** inference requests, never
+started the model guard, and has no grader result. Its 11-file raw evidence
+manifest SHA-256 is
+`3f89fc64a72d527c98ed4b79abde24c9b128ffa40ff8ea998e2e1307e9be7772`.
+This is an adapter-environment failure, retained as a distinct failed trial;
+it is not an unsuccessful model generation. Docker DNS now resolves again.
+To test the already declared native control without hiding this fault, run a
+new `native-harbor-preflight-20261002` **install-only** trial first. If that
+setup passes, run one new `native-harbor-control2-20261002` generation with
+identical task, adapter, model, config, guard and evaluation rules. If the
+preflight or generation setup fails again, stop this Harbor control screen
+and change approach. Do not aggregate either setup trial as an agent success
+or silently replace its evidence. This amendment was committed before any
+native-model generation on this task.
+
 To reproduce the adapter check, install Harbor from the pinned commit in a
 disposable Python 3.12 environment, download
 `terminal-bench-sample@2.0` with `harbor datasets download`, and pin the
