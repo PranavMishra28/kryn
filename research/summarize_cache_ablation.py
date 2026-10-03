@@ -23,8 +23,15 @@ def summarize(rows):
         c1 = by_name[f"cache-c1-{task}-c1-{repeat}"]
         if v1["comparison_arm"] != "v1" or c1["comparison_arm"] != "c1":
             raise ValueError("Arm labels do not match frozen run IDs")
+        if v1["task"] != task or c1["task"] != task:
+            raise ValueError("Task labels do not match frozen run IDs")
         if v1["prompt_sha256"] != c1["prompt_sha256"]:
             raise ValueError("Paired prompts differ")
+    for row in rows:
+        if not row["model_provenance_verified"] or row["wire_primary_requests"] < 1 or \
+                (row["accepted"] and not row["driver_completed"]) or \
+                (row["false_completion"] and row["accepted"]):
+            raise ValueError("Incomplete or contradictory trial evidence")
     for key in CONTROLS:
         if len({json.dumps(row[key], sort_keys=True) for row in rows}) != 1:
             raise ValueError(f"Non-matched control: {key}")
@@ -32,6 +39,9 @@ def summarize(rows):
         if len({row["candidate_bundle_sha256"] for row in rows
                 if row["comparison_arm"] == arm}) != 1:
             raise ValueError(f"{arm} product bundle changed between repeats")
+    if by_name["cache-c1-02-v1-a"]["candidate_bundle_sha256"] == \
+            by_name["cache-c1-02-c1-a"]["candidate_bundle_sha256"]:
+        raise ValueError("Candidate bundle matches the baseline")
     arms = {}
     for arm in ("v1", "c1"):
         selected = [by_name[f"cache-c1-{task}-{arm}-{repeat}"]
