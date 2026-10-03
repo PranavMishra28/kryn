@@ -660,55 +660,6 @@ test('different masked checks stop one Agent turn unless a plain check runs', as
   } finally { await cleanup(); f.remove(); }
 });
 
-test('explicit unchanged-test request protects only prompt-start tracked tests from native edits', async () => {
-  const f = fixture();
-  const existing = path.join(f.root, 'test_existing.py');
-  const source = path.join(f.root, 'report.py');
-  const fresh = path.join(f.root, 'test_new.py');
-  const alias = path.join(f.root, 'test_alias.py');
-  fs.writeFileSync(existing, 'def test_old(): pass\n');
-  fs.writeFileSync(source, 'answer = 1\n');
-  fs.symlinkSync(existing, alias);
-  execFileSync('/usr/bin/git', ['init', '-q'], { cwd: f.root });
-  execFileSync('/usr/bin/git', ['add', 'test_existing.py', 'report.py'], { cwd: f.root });
-  execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
-    'commit', '-qm', 'seed'], { cwd: f.root });
-  const cleanup = await plugin.setup(f.ctx);
-  const call = (tool, file, id) => f.call('tool.execute.before', {
-    sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id, id: 'call_' + id,
-    tool, input: tool === 'write' ? { path: file, content: 'def test_new(): pass\n' } :
-      { path: file, oldString: 'def test_old(): pass\n', newString: 'def test_old(): assert True\n' },
-  });
-  try {
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text:
-      'Keep all existing tests and data unchanged. Add focused tests in new files.' } });
-    assert.throws(() => call('edit', existing, 1), /preserved-file constraint/);
-    assert.throws(() => call('write', existing, 2), /preserved-file constraint/);
-    assert.throws(() => call('write', alias, 8), /preserved-file constraint/);
-    assert.doesNotThrow(() => call('write', fresh, 3));
-    fs.writeFileSync(fresh, 'def test_new(): pass\n');
-    assert.doesNotThrow(() => call('write', fresh, 4), 'new tests stay editable');
-    assert.doesNotThrow(() => call('write', source, 5), 'source files stay editable');
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Update the existing tests.' } });
-    assert.doesNotThrow(() => call('write', existing, 6), 'new user request replaces the lock');
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Do not edit existing tests.' } });
-    assert.throws(() => call('write', existing, 7), /preserved-file constraint/);
-  } finally { await cleanup(); f.remove(); }
-});
-
-test('unchanged-test guard does not claim coverage without a Git baseline', async () => {
-  const f = fixture(); const existing = path.join(f.root, 'test_existing.py');
-  fs.writeFileSync(existing, 'def test_old(): pass\n');
-  const cleanup = await plugin.setup(f.ctx);
-  try {
-    f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Keep existing tests unchanged.' } });
-    assert.doesNotThrow(() => f.call('tool.execute.before', {
-      sessionID: 'ses_1', agent: 'agent', messageID: 'msg_1', id: 'call_1',
-      tool: 'write', input: { path: existing, content: 'def test_old(): assert True\n' },
-    }));
-  } finally { await cleanup(); f.remove(); }
-});
-
 test('an existing project file must be read in the current turn before native edit', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'data', 'endurance.csv');

@@ -120,35 +120,6 @@ function projectSnapshot(directory, given) {
   }
 }
 
-const UNCHANGED_TESTS = /\b(?:keep|leave|preserve)\b[\s\S]{0,80}\bexisting\s+tests\b[\s\S]{0,80}\bunchanged\b|\b(?:do\s+not|don't)\s+(?:edit|alter|change|modify)\b[\s\S]{0,50}\b(?:existing\s+)?tests\b/i;
-function trackedTestsAtPrompt(directory, prompt) {
-  if (typeof prompt !== 'string' || !UNCHANGED_TESTS.test(prompt)) return null;
-  try {
-    const output = execFileSync('/usr/bin/git',
-      ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks', 'ls-files', '-z', '--'],
-      { cwd: directory, timeout: 1500, maxBuffer: 256 * 1024, encoding: 'utf8',
-        env: { PATH: '/usr/bin:/bin', HOME: directory, GIT_CONFIG_NOSYSTEM: '1',
-          GIT_CONFIG_GLOBAL: '/dev/null', GIT_OPTIONAL_LOCKS: '0' }, stdio: ['ignore', 'pipe', 'ignore'] });
-    const files = output.split('\0').filter(Boolean);
-    if (files.length > 5000) return null;
-    return new Set(files.filter(name => {
-      const base = path.basename(name), parts = name.split('/');
-      return /\.(?:py|[cm]?js|tsx?)$/i.test(base) &&
-        (/^test[_-]|[_-]test\.|\.(?:test|spec)\./i.test(base) ||
-          parts.slice(0, -1).some(part => /^(?:tests?|__tests__)$/.test(part)));
-    }));
-  } catch { return null; }
-}
-
-function protectedTestPath(directory, given, tracked) {
-  if (!tracked || typeof given !== 'string' || given.length > 4096) return false;
-  const root = fs.realpathSync(directory);
-  let file = path.resolve(root, given);
-  try { file = fs.realpathSync(file); }
-  catch (error) { if (error.code !== 'ENOENT') return false; }
-  return file.startsWith(root + path.sep) && tracked.has(path.relative(root, file));
-}
-
 function expectedEditHash(snapshot, input) {
   const oldText = input?.oldString, newText = input?.newString;
   if (!snapshot || typeof oldText !== 'string' || !oldText || typeof newText !== 'string' ||
@@ -592,7 +563,7 @@ export default {
         verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
-        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map(), protectedTests: null,
+        recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map(),
         shellSyntax: new Map(), shellSyntaxIncomplete: false };
       const previous = path.join(folders.trackers, key + '.json');
       if (options.observe && fs.existsSync(previous)) {
@@ -740,7 +711,6 @@ export default {
       const text = event.prompt?.text;
       item.userRequest = typeof text === 'string' ? (text.length <= 6000 ? text :
         text.slice(0, 3000) + '\n[Middle omitted; verification scope may be incomplete.]\n' + text.slice(-3000)) : '';
-      item.protectedTests = trackedTestsAtPrompt(ctx.location.directory, text);
     });
     const userContinuity = async (event, force = false) => {
       if (!options.observe) return;
@@ -909,9 +879,6 @@ export default {
         }
       }
       let editSource = null;
-      if (AGENT_ROLES.has(event.agent) && ['edit', 'write'].includes(event.tool) &&
-          protectedTestPath(ctx.location.directory, event.input?.path, item.protectedTests))
-        throw new Error('KRYN preserved-file constraint: the current request requires existing tests unchanged. Create a new test file instead.');
       if (AGENT_ROLES.has(event.agent) && event.tool === 'edit') {
         editSource = projectSnapshot(ctx.location.directory, event.input?.path);
         if (editSource && item.recentReads.get(editSource.file) !== editSource.hash)
