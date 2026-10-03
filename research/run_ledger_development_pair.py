@@ -92,14 +92,25 @@ def warmup(folder):
 
 
 def permissions_digest(items, workspace, private):
-    raw = json.dumps(items, sort_keys=True)
-    raw = raw.replace(workspace, "<WORKSPACE>")
-    pattern = re.escape(private) + r"/kryn-isolated-[a-z0-9]+"
-    raw, count = re.subn(pattern, "<SERVER_PRIVATE>", raw)
+    normalized = []
+    count = 0
+    for item in items:
+        copy = dict(item)
+        resource = copy.get("resource")
+        if isinstance(resource, str):
+            if resource == workspace or resource.startswith(workspace + "/"):
+                resource = "<WORKSPACE>" + resource[len(workspace):]
+            elif resource.startswith(private + "/"):
+                relative = resource[len(private) + 1:]
+                root, slash, suffix = relative.partition("/")
+                if slash and re.fullmatch(r"kryn-isolated-[a-z0-9_]+", root):
+                    resource = "<SERVER_PRIVATE>/" + suffix
+                    count += 1
+            copy["resource"] = resource
+        normalized.append(copy)
     if not count:
         return None
-    raw = re.sub(r"\.localai-tmp-[a-z0-9_]+", "<TMP>", raw)
-    return hashlib.sha256(raw.encode()).hexdigest()
+    return hashlib.sha256(json.dumps(normalized, sort_keys=True).encode()).hexdigest()
 
 
 def permissions(receipt, barrier):
