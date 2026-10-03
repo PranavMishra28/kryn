@@ -55,7 +55,9 @@ Raw logs, model traces, task copies, resource samples, launch receipts and
 independent pair reviews remain in the private local research directory.
 The six compact, machine-readable arm receipts are public in
 `research/history/harbor_subset.jsonl` (SHA-256
-`aab30ba05d88a99523d49dc98f49f9937c86ac381bcf521e52d77cd4db165c0d`).
+`5c2c3b598d38a01c63ad799da3d3c22231c8291d38278a8a54211a7af4bcdae6`).
+Their token fields come from Harbor's agent trajectory and exclude auxiliary
+title requests; they are not full relay-counter totals.
 The frozen environment lock v7 SHA-256 is
 `0502bbcc8df9de226a6a6cf4dff29749e98eda85e8a0b2cddbff26ae5bcf7440`.
 The three independent pair-review receipt hashes are recorded beside those
@@ -69,9 +71,11 @@ a replacement for these one-shot observations.
 
 The runner's 900-second threshold cancels an active agent and rejects a late
 result. Cancellation can take additional time while Harbor cleans up its
-container, so this is **not** a hard whole-process wall limit. The frozen
-subset launcher additionally used a 2700-second outer supervisor and checked
-owned Docker cleanup before the next arm. Reproducers requiring a hard total
-wall bound need an external supervisor and must retain its stop/cleanup
-receipt. Install-only preflight is a separate setup check: it must finish with
-zero model requests and an idle runtime; it is never scored as agent success.
+container, so this is **not** a hard whole-process wall limit. The first KRYN
+arm had only Harbor's configured timeout, which did not survive host sleep as
+an effective wall bound. The five continuation arms used a 2700-second outer
+supervisor and checked owned Docker cleanup before the next arm. Reproducers
+requiring a hard total wall bound need an external supervisor and must retain
+its stop/cleanup receipt. Install-only preflight is a separate setup check:
+it must finish with zero model requests and an idle runtime; it is never
+scored as agent success.
