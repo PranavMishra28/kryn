@@ -342,7 +342,7 @@ defect, not a broad oracle-completeness proof or protected admission. Every
 private manifest still says `protected_status=false`; the combined roster,
 non-Python categories and real paired Agent turns remain open gates.
 
-## Error-recovery draft oracle correction
+## Error-recovery draft oracle corrections
 
 An independent no-model audit of the owner-only `06-verified-restore` draft
 found that its grader accepted a mutation selecting the **oldest** valid
@@ -365,3 +365,21 @@ Its compact [history entry](history/ui_gateway.jsonl) discloses no task prompt
 or oracle. This is a stronger **draft**, not protected admission: no candidate
 model request, real OpenCode boundary, 30-task roster seal or paired grading
 was performed. Its manifest still says `protected_status=false`.
+
+A second audit of the owner-only upload-retry draft found its grader accepted a
+mutation that passed a **negative** retry delay to the injected sleep callback,
+despite the prompt's nonnegative-delay requirement. The original oracle also
+required exact error-message text absent from the task contract. A separate
+replacement tests negative delay and rejection of 302 as a 2xx success, while
+accepting a structurally different implementation with different error text.
+The old-oracle mutant pass has private receipt SHA-256
+`a4734531922e23c26d89b9d31500c14bf23d137555aea76aa32025b2a93736d7`.
+The seed and partial patch fail, reference and alternative pass, and negative-
+delay, redirect-as-success and two-try mutants fail in the new seven-control
+receipt, SHA-256
+`8b62d8013d37964c3800f4e34bf32e1565f5b1b5eefa0716638f576399c80c31`.
+The 16-file owner-only archive index SHA-256 is
+`74e26492df7f7b73271ea7f845032af27d8f6927fc3e4fbfa1ffe9aaf014a6dd`.
+Its [history entry](history/ui_gateway.jsonl) contains no hidden prompt or
+grader. This also remains an unsealed no-model draft with
+`protected_status=false` and no real candidate-volume admission.
