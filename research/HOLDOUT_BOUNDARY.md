@@ -827,8 +827,44 @@ SHA-256 values are `1d5777ed6ceaf26504ac3996fa79298bdc7ea86a712344319af884446ac1
 `5580c9d1956a4054c5b0b817d3005559efa1bd620fdbfed03e5021a13bc02119`,
 `a323ea99b94269561118ba700f383ac6c2b9b624437ec9cfe8ca1b278045956b`,
 and `ad789f33ce0a794fcd6fc52bd8d13be5c5fbf5ac9fdd4ccdc4efc2674fe97f24`.
-Owner-only provisional roster V15 now points to both corrected oracles. Its
+The historical owner-only provisional roster V15 pointed to both v11 oracles. Its
 30-task/120-identity-check audit found zero mismatches; roster and audit
 SHA-256 values are `208d9369dc807acb3bf0efc2426802f1c688bd2e789bcdb06284b6a62c685ea3`
 and `6dc21f396800d2c962badddb06b8dd02fa4127a749f83d8ba355df523b789e52`.
 Neither correction has been exposed to a model, and the roster remains unsealed.
+
+### Bounded contract-matrix correction
+
+Read-only review found additional false acceptances in those provisional v11
+oracles and then in the fallback v13 draft. The failed drafts and their mutant
+receipts remain owner-only. The current interpolation v13 and fallback v14
+oracles use finite contract matrices while preserving the original prompts and
+clean seeds. The interpolation matrix covers local, cross-section, nested and
+shared-dependency references, missing references, cycles and source
+nonmutation. The fallback matrix covers 462 combinations of existing or
+missing keys, five stored/argument values including falsey values, positional
+and keyword defaults, `fallback`, and explicit dual-alias conflicts. Offline
+subprocess checks pass each reference and reject the recorded wrong
+implementations. Separate native APFS/OpenCode preflights pass seed-fail,
+partial-fail, reference-pass and boundary probes; both candidate volumes
+detached. These probes made **zero model requests**.
+
+The interpolation v13 manifest, oracle, preflight and discrimination receipt
+SHA-256 values are `f727ed5d44c19c2894af29f31898bddd34db72d0ddc6fe9652292155988ab5c8`,
+`d330e93229a6f119940ef71ed9843f2dfbda801a00ecdada64610bbbdb849df6`,
+`493c3770f251237fc01fdd8b6b6be3597c5608fc67f954449651df2ab67c0523`
+and `4485c37c2e5afc8933d377a4561a927a364b1f833ea47959632669e308c0b382`.
+The fallback v14 values are `fc8592158ea6b82eb6f410c13737d5ff20f1df43c72422b50aef1e43aea8240c`,
+`5a69fce1f41f7cbd9c0e471ff554666ca59b3aee2387a0b7e31995853d1d04a0`,
+`f11d95666d079569758988bc4aa8ff574f095f03de822b5fd5f661fb5669591f`
+and `c700e48f47a95fefca6500d181a1e5858694f8a3ac5055fd346ce9eff791d80a`.
+
+Owner-only provisional roster V16 points to these drafts. Its 30-task,
+120-check identity audit found zero mismatches; roster and audit SHA-256 values
+are `ae254a0a2aa09237e974896298160167bf27a37440ae9dabda34f1d8f5345a08`
+and `b025a73c44cfdc263db1540bdd656c8a6ddc9647930ab0b4895127adcd330790`.
+The separate bounded review found no material ordinary-contract hole in these
+two matrices. This is **not independent per-task semantic admission**: finite
+matrices do not establish every valid implementation, five roster slots still
+need replacement, the combined roster remains unsealed, and no protected H1
+score or model uplift has been measured.
