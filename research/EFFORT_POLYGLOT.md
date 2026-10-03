@@ -86,3 +86,52 @@ Docker was restarted and its API is healthy. The frozen Fast arm may run once
 as a one-arm diagnostic, but **no outcome of it can make this pair a positive
 or negative Default/Fast screen**. There will be no retry of this Default arm.
 A future mode comparison needs a newly preregistered task and two graded arms.
+
+## Observed outcome and decision
+
+| Arm | Agent / full trial | Local requests | New input / cache-read / output tokens | Official result |
+| --- | ---: | ---: | ---: | --- |
+| Default | 617.383 / 751.772 s | 16 | 39,750 / 167,936 / 21,847 | Ungraded: Docker Desktop quit during the turn; Harbor lost its socket before adding tests. |
+| Fast | 768.824 / 905.049 s | 128 | 147,738 / 2,310,144 / 21,667 | Reward 0.0, with an unfinished OpenCode turn. |
+
+The first **nonempty** wire request in each arm used the same
+`Qwen3.5-9B-6bit` model, 8,192 output-token cap, ten tools and full tool-schema
+SHA-256 `1b2a1690eeb2f4986afcb04c13e6538dd156e399bd2c3f5442d96293d18f675c`.
+Default sent thinking enabled, temperature 0.6, top-p 0.95 and presence penalty
+0; Fast sent thinking disabled, temperature 0.7, top-p 0.8 and presence penalty
+1.5. Default also sent one preceding no-tool, 128-token product probe. The
+model and tool protocol were therefore connected as configured. These are
+bundled mode settings, not an isolated thinking-budget comparison.
+
+The Fast worker made 57 shell and 71 write calls. It ended with **16 identical
+consecutive writes** to `main.py.c`; the same payload appeared 21 times in
+all. It then attempted request 129, which the research-only inference relay
+rejected with HTTP 403 under its fixed 128-request ceiling. This was not a
+provider authentication failure or a KRYN resource-guard stop. Harbor did run
+the verifier on the remaining workspace and returned reward 0.0: the first
+assertion found an extra compiled `cmain` binary beside the required sole
+`main.py.c` source. Because the test stopped there, the final source's Python/C
+behavior is unverified. The worker produced no final completion claim.
+
+Both trials had complete host telemetry, normal or warning pressure, no guard
+stop, and an idle model runtime afterward. Default's peak swap growth was
+35,651,584 bytes; Fast's was zero. Default samples were AC only, whereas Fast
+crossed from AC to battery, independently invalidating a latency comparison.
+The Docker application's Electron log shows `before-quit`/`will-quit` at
+02:28:48Z, and its backend logged a requested, healthy shutdown; the initiator
+is unknown. Those log excerpts were copied into the Default private trial.
+
+**E1 is inconclusive, with no positive mode evidence.** Default has no reward,
+Fast did not finish cleanly, and the power states differ. Do not promote Fast,
+claim accepted work/hour improvement, or spend a same-task retry to turn this
+into a matched pair. The Fast trajectory does expose a general candidate
+mechanism to test separately: detect and interrupt repeated identical file
+writes before they consume a whole turn. That mechanism has not been built,
+validated on fresh tasks, or integrated. The compact machine-readable receipts
+are `history/effort_polyglot.jsonl`; full raw trial manifests remain under
+`/private/tmp/kryn-harbor-effort-polyglot-20261002/` with SHA-256 values
+`f2f5d062a24df44137afc0f3d1cee9ec370867c04bd23d1ac5978783566f3c9a`
+(Default, 19 files) and
+`bf915f92af462c719d47c38a83433c0981e77a82890ebd8f4e1538814b7d27fe`
+(Fast, 20 files). Each private manifest is a sorted JSON array of relative
+paths, byte lengths and SHA-256 file hashes, encoded without whitespace.
