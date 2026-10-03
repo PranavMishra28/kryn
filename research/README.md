@@ -24,6 +24,8 @@ public Task03 pairs using the user-facing Agent role. Native OpenCode accepted
 public Task03 diagnostic that retains KRYN guidance while removing only its
 product plugin. Strict acceptance tied at 1/2 per arm; it cannot establish
 protected uplift.
+[PUBLIC_UI_RESOURCE_PROBE.md](PUBLIC_UI_RESOURCE_PROBE.md) freezes a one-turn
+public Task06 browser/resource diagnostic under the strict research guard.
 [PRESERVED_TESTS.md](PRESERVED_TESTS.md) records the rejected explicit
 preserved-test guard screen: the functional grader passed, but the Agent timed
 out and the candidate guard never fired. Its code was reverted.
