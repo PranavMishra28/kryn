@@ -69,3 +69,14 @@ This proves one public Docker callback path through the real research barrier.
 It does not prove that every private Docker grader can be staged safely, or
 establish any protected model score, autonomous success, or H1 uplift. The
 actual recovery tasks must still pass an admitted, frozen paired study.
+
+To repeat the public canary on this Mac from a **clean** research checkout,
+use a new direct `/private/tmp` output name. The pinned tool environment and
+Docker-shared owner-only grading root from the recorded run were:
+
+```sh
+/opt/homebrew/bin/python3.14 -B research/docker_grader_handoff_canned.py \
+  --output /private/tmp/a-new-public-docker-handoff \
+  --tool-venv /private/tmp/kryn-python-tools-v2-20261003 \
+  --grade-root /Users/pranav/Documents/Codex/kryn-research-private
+```
