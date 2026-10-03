@@ -803,8 +803,10 @@ protected H1** and remain development diagnostics only. Neither produced an H1
 score. Their failed reviews, corrected drafts and receipts remain in the
 owner-only archive.
 
-The owner-only provisional roster now has **seven retired slots** and is
-unsealed. Thirty draft identities passed 120 file/Git checks, which establish
-only that the recorded bytes are present and seeds are clean. Private replacement
-tasks, independent admission, and matched model trials are still required.
-No product change or frontier-capability claim follows from this audit.
+A follow-up scan found 18 of the 30 draft identities in the current public
+tracked tree; public Git and PR history can expose more. Because the combined
+roster was never sealed, the entire old 30-draft roster is now
+**development-only**. It cannot supply a protected H1 denominator. Its 120
+file/Git identity checks establish only recorded bytes and clean seeds.
+A fresh privately authored roster, independent admission, and matched model
+trials are required. No product change or frontier-capability claim follows.
