@@ -17,6 +17,9 @@ after repeated writes before a successful grade.
 [WRITE_LOOP.md](WRITE_LOOP.md) records the preregistered, rejected no-op write
 hook screen. Its official Harbor reward was 0.0, the hook never fired, and the
 candidate code was reverted. The raw and compact failed evidence is retained.
+[H1_PROVENANCE_PILOT.md](H1_PROVENANCE_PILOT.md) records two fully matched
+public Task03 pairs using the user-facing Agent role. Native OpenCode accepted
+2/2 and KRYN 0/2; this validates the corrected runner, not H1 transfer.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 
