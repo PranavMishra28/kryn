@@ -9,6 +9,8 @@ prompt-stability candidate before its implementation.
 failure-only repair-feedback candidate and its resource-guard stop.
 [HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md) freezes a public Terminal-Bench
 sample task, the exact KRYN OpenCode adapter and Harbor's official verifier.
+[REVIEWER_SCREEN.md](REVIEWER_SCREEN.md) preregisters a read-only Reviewer
+mechanism screen on two archived, public Harbor worker failures.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Neither rejected candidate changed the product.
 
