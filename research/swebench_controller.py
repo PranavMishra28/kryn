@@ -1,9 +1,10 @@
-"""SWE-bench phase of the single, local-only KRYN campaign controller.
+"""Resume the preregistered local SWE-bench phase without Codex task turns.
 
-Imported by local_campaign after the Harbor baseline is finished. The official
-evaluator owns grading; this module owns only sequencing, safety and receipts.
+The official evaluator owns grading; this module owns sequencing, safety and
+receipts. Launch only after the Harbor phase has finished and settled.
 """
 
+import argparse
 import fcntl
 import importlib.metadata
 import json
@@ -16,6 +17,7 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from research import swebench_local
 from research.swebench_roster import EVALUATOR
 from research.local_campaign import (atomic, controlled_env, file_sha,
@@ -335,11 +337,31 @@ def run(campaign, work, expected_sha):
                     shutil.rmtree(candidate)
                 atomic(final, row)
                 atomic(campaign / "progress.json", summarize(campaign, manifest))
-            if image is not None:
-                release = swebench_local.release_image(image)
-                atomic(campaign / "prepared" / ident / "image-release.json", release)
+            prepared = campaign / "prepared" / ident / "receipt.json"
+            released = campaign / "prepared" / ident / "image-release.json"
+            if prepared.is_file() and not released.exists():
+                release = swebench_local.release_image(json.loads(prepared.read_text()))
+                atomic(released, release)
+            if released.exists() and (work / ident).exists():
                 shutil.rmtree(work / ident)
         report = summarize(campaign, manifest)
         report["finished"] = report["finished_arms"] == report["planned_arms"]
         atomic(campaign / "final-report.json", report)
         return report
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("campaign", type=Path)
+    parser.add_argument("work", type=Path)
+    parser.add_argument("--expected-sha256", required=True)
+    args = parser.parse_args()
+    report = run(args.campaign.resolve(), args.work.resolve(), args.expected_sha256)
+    print(json.dumps({"finished": report["finished"],
+                      "matched_pairs": report["matched_pairs"],
+                      "kryn_strict": report["kryn_strict"],
+                      "native_strict": report["native_strict"]}))
+
+
+if __name__ == "__main__":
+    main()

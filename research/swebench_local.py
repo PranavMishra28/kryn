@@ -9,7 +9,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from research.local_campaign import atomic, file_sha, sha
+from research.local_campaign import MIN_FREE, atomic, file_sha, sha
 
 DATASET_ROOT = Path("/private/tmp/kryn-swebench-datasets")
 EVALUATOR_PYTHON = Path("/private/tmp/kryn-swebench-venv/bin/python")
@@ -81,6 +81,9 @@ def prepare(manifest, task, campaign, work, *, dataset_root=DATASET_ROOT):
         raise RuntimeError("Partial SWE-bench preparation needs an audit")
     _, prompt = row_for(manifest, task, dataset_root)
     image = pin_image(task)
+    if shutil.disk_usage(campaign).free < MIN_FREE:
+        release_image(image)
+        raise RuntimeError("Official image pull left less than 12 GiB free")
     directory.mkdir(mode=0o700, parents=True)
     prompt_file.write_bytes(prompt)
     prompt_file.chmod(0o600)
@@ -91,16 +94,23 @@ def prepare(manifest, task, campaign, work, *, dataset_root=DATASET_ROOT):
                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                       timeout=15).returncode == 0:
         raise RuntimeError("A previous SWE-bench preparation container remains")
-    subprocess.run(["docker", "create", "--platform", "linux/amd64",
-                    "--name", container, "--label", "kryn.swebench.prep=" + ident,
-                    image["image_digest"], "/bin/true"], check=True,
-                   stdout=subprocess.DEVNULL, timeout=60)
     try:
+        subprocess.run(["docker", "create", "--platform", "linux/amd64",
+                        "--name", container, "--label", "kryn.swebench.prep=" + ident,
+                        image["image_digest"], "/bin/true"], check=True,
+                       stdout=subprocess.DEVNULL, timeout=60)
         subprocess.run(["docker", "cp", container + ":/testbed/.", str(base)],
                        check=True, stdout=subprocess.DEVNULL, timeout=240)
     finally:
-        subprocess.run(["docker", "rm", "-f", container], check=True,
-                       stdout=subprocess.DEVNULL, timeout=60)
+        found = subprocess.run(
+            ["docker", "container", "inspect", "--format",
+             '{{index .Config.Labels "kryn.swebench.prep"}}', container],
+            capture_output=True, text=True, timeout=15)
+        if found.returncode == 0 and found.stdout.strip() != ident:
+            raise RuntimeError("SWE-bench preparation container ownership changed")
+        if found.returncode == 0 and found.stdout.strip() == ident:
+            subprocess.run(["docker", "rm", "-f", container], check=True,
+                           stdout=subprocess.DEVNULL, timeout=60)
     subprocess.run(["git", "-C", str(base), "reset", "--hard", task["base_commit"]],
                    check=True, stdout=subprocess.DEVNULL, timeout=60)
     subprocess.run(["git", "-C", str(base), "clean", "-fdx"],
