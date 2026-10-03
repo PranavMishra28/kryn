@@ -20,7 +20,9 @@ import sys
 import tempfile
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from research import local_only
 import learning
 from native_client import BINARY, MODEL_ID, NativeServer, background_boundary, owned_config, product_plugin_files
 from context_probe import summarize_resources
@@ -598,8 +600,9 @@ def run(args, *, defer_patch=False):
     report["candidate_product_source"] = bool(candidate_product_source)
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
+        relay_url = f"http://127.0.0.1:{relay.port}/v1"
         config, products, dependencies = configuration(
-            workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1",
+            workspace, state_dir, args.arm, relay_url,
             source_file=source_file, candidate_package=candidate_package)
         ui_gateway = getattr(args, "ui_gateway", None)
         monitor = NativeResourceGuard(evidence, samples)
@@ -635,6 +638,7 @@ def run(args, *, defer_patch=False):
                                          adapter=adapter, repo=workspace,
                                          port=ui_gateway["port"], token=ui_gateway["token"])
                 dependencies += [Path(sys.executable).resolve(), Path(sys.base_prefix).resolve(), adapter]
+            report["local_config_sha256"] = local_only.check_config(config, relay_url)
             report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
             background = {"dependencies": dependencies, "inference_port": relay.port,
                           "cancel": monitor.cancel.is_set}
@@ -648,6 +652,10 @@ def run(args, *, defer_patch=False):
                                          background=background)
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                report["local_only"] = local_only.attest(
+                    server.env, server.temporary.name, relay_url)
+                (evidence / "local-only-preflight.json").write_text(
+                    json.dumps(report["local_only"], indent=2) + "\n")
                 if ui_gateway is not None:
                     for _ in range(100):
                         if monitor.cancel.is_set():
@@ -765,6 +773,18 @@ def run(args, *, defer_patch=False):
                     report["browser_settled"] = False
             monitor.close()
             report["requests"] = relay.records
+            local_receipt = report.get("local_only")
+            if local_receipt is not None:
+                try:
+                    local_receipt["runtime_same_after"] = local_only.same_runtime(local_receipt)
+                except (OSError, RuntimeError, ValueError):
+                    local_receipt["runtime_same_after"] = False
+                local_receipt["observed_requests"] = len(relay.records)
+                local_receipt["observed_local_model_only"] = bool(relay.records and all(
+                    item.get("model") == MODEL_ID for item in relay.records))
+                local_receipt["generation_proven"] = bool(
+                    local_receipt["runtime_same_after"] and
+                    local_receipt["observed_local_model_only"])
             report["resources"] = summarize_resources(samples)
             report["wall_seconds"] = round(time.monotonic() - started, 3)
             if source_file is not None:
@@ -780,6 +800,7 @@ def run(args, *, defer_patch=False):
                     for name, digest in report["candidate_plugin_files_sha256"].items())
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete")
+                                       and local_receipt and local_receipt["generation_proven"]
                                        and report["browser_settled"] and report["source_unchanged"]
                                        and report.get("candidate_plugin_unchanged", True))
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")

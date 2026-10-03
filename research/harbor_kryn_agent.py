@@ -16,19 +16,21 @@ from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
 from tools.native_client import product_plugin_files
+from research.local_only import check_environment
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_DIR = "/tmp/kryn-plugin"
 STATE_DIR = "/tmp/kryn-state"
 LOCAL_PORT = 18765
+LOCAL_URL = f"http://127.0.0.1:{LOCAL_PORT}/v1"
 
 
 def container_config(*, native=False):
     """Keep the shipped policy/roles, substituting only container-owned paths."""
     config = json.loads((ROOT / "setup/opencode.template.json").read_text()
                         .replace("__ROOT__", "/tmp/kryn"))
-    base_url = f"http://127.0.0.1:{LOCAL_PORT}/v1"
+    base_url = LOCAL_URL
     config["providers"]["local"]["settings"]["baseURL"] = base_url
     model = config["providers"]["local"]["models"]["qwen"]
     model["settings"]["baseURL"] = base_url
@@ -49,6 +51,31 @@ def container_config(*, native=False):
                    if key in {"mode", "hidden", "model", "permissions", "description"}}
             for name, agent in config["agents"].items()}
     return config
+
+
+def worker_environment(*, native=False):
+    """The complete OpenCode environment; the launch uses ``env -i``."""
+    env = {
+        "HOME": "/tmp/kryn/home",
+        "PATH": "/usr/local/bin:/usr/bin:/bin",
+        "OPENCODE_TEST_HOME": "/tmp/kryn/home",
+        "OPENCODE_CONFIG_CONTENT": json.dumps(container_config(native=native)),
+        "OPENCODE_CLI_CONFIG_CONTENT": '{"session":{"permissions":"auto"}}',
+        "OPENCODE_CONFIG_PROJECT_DISABLE": "true",
+        "NO_PROXY": "host.docker.internal,127.0.0.1,localhost",
+        "XDG_CONFIG_HOME": "/tmp/kryn/xdg/config",
+        "XDG_DATA_HOME": "/tmp/kryn/xdg/data",
+        "XDG_CACHE_HOME": "/tmp/kryn/xdg/cache",
+        "XDG_STATE_HOME": "/tmp/kryn/xdg/state",
+    }
+    check_environment(env, "/tmp/kryn", LOCAL_URL)
+    return env
+
+
+def scrubbed_command(*, native=False):
+    env = worker_environment(native=native)
+    return "/usr/bin/env -i " + " ".join(
+        shlex.quote(key + "=" + value) for key, value in sorted(env.items()))
 
 
 class KrynOpenCode(OpenCode):
@@ -77,8 +104,12 @@ class KrynOpenCode(OpenCode):
                     (source / name).write_bytes(data)
                 await environment.upload_dir(source, PLUGIN_DIR)
         await self.exec_as_agent(environment, f"mkdir -p {STATE_DIR} {self.environment_logs_dir} "
+                                 "/tmp/kryn/home "
                                  "/tmp/kryn/xdg/config /tmp/kryn/xdg/data "
                                  "/tmp/kryn/xdg/cache /tmp/kryn/xdg/state")
+        await self.exec_as_agent(
+            environment, scrubbed_command(native=self.ARM == "native") +
+            " opencode --version | grep -Fx 'opencode v2.0.10'")
 
     @with_prompt_template
     async def run(self, instruction: str, environment: BaseEnvironment,
@@ -100,18 +131,11 @@ class KrynOpenCode(OpenCode):
             "sleep 0.2; done; exit 1")
         output = shlex.quote(str(self.environment_logs_dir / self._OUTPUT_FILENAME))
         model = "local/qwen" + ("#fast" if variant == "fast" else "")
-        command = ("opencode run --standalone --model " + shlex.quote(model) + " --agent agent "
+        scrubbed = scrubbed_command(native=self.ARM == "native")
+        command = (scrubbed + " opencode run --standalone --model " + shlex.quote(model) + " --agent agent "
                    "--format json --auto -- " + shlex.quote(instruction) +
                    f" 2>&1 </dev/null | tee {output}")
-        await self.exec_as_agent(environment, command, env={
-            "OPENCODE_CONFIG_CONTENT": json.dumps(container_config(native=self.ARM == "native")),
-            "OPENCODE_CLI_CONFIG_CONTENT": '{"session":{"permissions":"auto"}}',
-            "NO_PROXY": "host.docker.internal,127.0.0.1,localhost",
-            "XDG_CONFIG_HOME": "/tmp/kryn/xdg/config",
-            "XDG_DATA_HOME": "/tmp/kryn/xdg/data",
-            "XDG_CACHE_HOME": "/tmp/kryn/xdg/cache",
-            "XDG_STATE_HOME": "/tmp/kryn/xdg/state",
-        })
+        await self.exec_as_agent(environment, command)
         if messages := self._error_messages():
             raise RuntimeError("OpenCode error event: " + "; ".join(messages[:3]))
 
