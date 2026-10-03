@@ -55,22 +55,24 @@ def read_before_edit(path, stage):
             continue
         status = state.get("status")
         calls.append({"tool": name, "status": status, "input": arguments})
+        shell = str(arguments.get("command", "")) if name == "shell" else ""
+        mutating = name in {"edit", "write", "patch"} or (name == "shell" and any(
+            marker in shell for marker in
+            ("apply_patch", "sed -i", "write_text(", "tee ", " > ", " >> ")))
+        if mutating:
+            first_edit = len(calls)
+            break
         if name == "read" and status == "completed":
             target = str(arguments.get("path", ""))
             for filename in ("solve.py", "rules.json"):
                 if target.endswith("/" + filename) or target == filename:
                     reads.add(filename)
-        if name == "shell" and status == "completed":
-            shell = str(arguments.get("command", ""))
+        if (name == "shell" and status == "completed" and
+                state.get("metadata", {}).get("metadata", {}).get("exit") == 0):
             if any(word in shell for word in ("cat ", "sed -n", "head ", "rg ")):
                 for filename in ("solve.py", "rules.json"):
                     if filename in shell:
                         reads.add(filename)
-        if name in {"edit", "write", "patch"} or (name == "shell" and any(
-                marker in str(arguments.get("command", "")) for marker in
-                ("apply_patch", "sed -i", "write_text(", "tee ", " > ", " >> "))):
-            first_edit = len(calls)
-            break
     required = {"solve.py", "rules.json"} if stage == 1 else ({"rules.json"} if stage == 3 else {"solve.py"})
     return {"passed": bool(first_edit and required <= reads), "required": sorted(required),
             "read_before_first_edit": sorted(reads), "first_edit_tool_index": first_edit,
@@ -97,6 +99,11 @@ def event_metrics(path):
             for key in ("read", "write"):
                 counters["tokens"]["cache_" + key] += tokens.get("cache", {}).get(key, 0) or 0
     return counters
+
+
+def prompts_retained(history, prompts):
+    stored = [m.get("text") for m in history["messages"] if m.get("type") == "user"]
+    return [stored.count(prompt) == 1 for prompt in prompts]
 
 
 def seed_and_preflight(root):
@@ -214,9 +221,7 @@ def arm(root, which, seed, grader, preflight, tools):
                                 (workspace / "rules.json").read_bytes())
                 final = export(server, sid)
                 (folder / "final-export.json").write_text(json.dumps(final, indent=2) + "\n")
-                stored = json.dumps([m for m in final["messages"] if m.get("type") == "user"],
-                                    ensure_ascii=False)
-                result["stored_prompts"] = [p in stored for p in PROMPTS]
+                result["stored_prompts"] = prompts_retained(final, PROMPTS)
                 result["stored_compactions"] = [m["id"] for m in final["messages"]
                     if m.get("type") == "compaction" and m.get("status") == "completed"]
                 result["server_pid_end"] = server.process.pid

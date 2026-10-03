@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from run_public_staged_model import event_metrics, read_before_edit
+from run_public_staged_model import event_metrics, prompts_retained, read_before_edit
 
 
 class StagedEvidenceTest(unittest.TestCase):
@@ -33,6 +33,23 @@ class StagedEvidenceTest(unittest.TestCase):
         self.assertEqual(metrics["tool_errors"], 1)
         self.assertEqual(metrics["tokens"], {"input": 10, "output": 3,
             "reasoning": 2, "cache_read": 4, "cache_write": 1})
+
+    def test_failed_shell_read_and_shell_write_are_not_read_evidence(self):
+        def shell(command, code):
+            return {"type": "tool", "tool": "shell", "state": {
+                "status": "completed", "input": {"command": command},
+                "metadata": {"metadata": {"exit": code}}}}
+        result, _ = self.check([shell("cat rules.json", 1),
+                                shell("cat > solve.py", 0)], 3)
+        self.assertFalse(result["passed"])
+
+    def test_quoted_prompts_use_native_text_field(self):
+        prompt = 'Return {"value":"ok"}.'
+        history = {"messages": [{"type": "user", "text": prompt},
+                                {"type": "assistant", "text": "done"}]}
+        self.assertEqual(prompts_retained(history, [prompt]), [True])
+        history["messages"].append({"type": "user", "text": prompt})
+        self.assertEqual(prompts_retained(history, [prompt]), [False])
 
 
 if __name__ == "__main__":

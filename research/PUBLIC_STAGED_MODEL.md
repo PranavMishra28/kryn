@@ -75,3 +75,44 @@ This one pair is a calibration, never an estimate of H1 or long-horizon
 reliability. Even two passing arms provide no uplift evidence. Passing allows
 considering a larger qualified staged runner; any failure remains in the
 append-only development history. The v1.0.0 product stays unchanged.
+
+## Observed matched development pair
+
+The first and only guarded model pair ran at frozen research commit `c20e2c1`
+in the preregistered KRYN→native order. Raw receipts are under
+`/private/tmp/kryn-public-staged-live-20261003-c20e2c1`; raw `result.json`
+SHA-256 is `2ee7d3aeaffb37b01758f732a9546f01e55593583c6051afef3b1b9989354ea2`.
+Both arms had the same binary/profile/permissions, 10-tool full wire schema
+`1b56b6b37c804f7fd30cd60d131476c6a619cda5269ac2ccf9d2fc8a5d34a81e`
+on **every** request, and the same initial sampling settings. Both completed
+three turns, two compactions and two server restarts in the same owned session;
+the candidate volumes detached, the guard did not stop either run, observed
+pressure remained normal on AC power, and sampled swap growth was zero.
+
+| Arm | Stage 1 | Stage 2 | Stage 3 | Model requests | Tool calls/errors | Wall time |
+| --- | --- | --- | --- | ---: | ---: | ---: |
+| KRYN | pass | pass | **fail** | 35 | 44 / 6 | 220.7 s |
+| Native OpenCode | pass | pass | pass | 28 | 27 / 1 | 210.5 s |
+
+The KRYN stage-3 source tracked used suffixes only per base slug. On the
+frozen `unique` case `[' A B ', 'a\tb', 'a_b_2', 'A B', 'Z']`, it reused the
+already emitted `a_b_2`; the independent oracle rejected that case. It read
+the changed rule but also made failed file-tool calls through `/workspace` and
+unqualified relative paths, then used shell writes after a read-before-edit
+denial. Its own spot checks did not include a natural-suffix collision. The
+native arm satisfied the frozen cases, but a **post-hoc, non-scored** case
+`['a_b', 'a_b_2', 'a_b']` fails in both arms: each can emit `a_b_2` twice.
+Thus native's frozen pass is not proof of general collision correctness.
+
+The trial runner initially reported both arms failed because it searched a
+JSON-encoded history string for prompts containing quotes; the quotes were
+escaped. Its read-before-edit check also risked treating a nonzero shell exit
+as a successful read. The raw receipts and first correction were kept unchanged.
+The corrected checker reads native user-message `text` fields directly, requires
+zero shell exit before crediting a read, and finds all three exact prompts and
+source reads in each arm. The final `corrected-review-v2.json` SHA-256 is
+`1f57d50c21a70400d8b3c54cc924734057b81669fc8c68b6d08016d381c3ccb8`:
+native accepted, KRYN rejected. This one public pair argues **against** a
+KRYN uplift claim; it neither estimates population performance nor qualifies
+protected tasks. The result remains a development failure to investigate, not
+a reason to edit the product or weaken the guard from one fixture.
