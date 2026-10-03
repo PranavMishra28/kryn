@@ -51,3 +51,60 @@ The failed receipt is retained at
 `09248df70df5e177e9997827d2619057f3455fb743862c7`. This is a grader
 transport defect, not a model result. The correction adds Docker's stdin flag;
 the task, source, cases and reference remain unchanged.
+
+## Frozen controls and first live pair
+
+The corrected offline controls from clean `f8232a3b939009fb94276bf5f934a220c4d987c0`
+passed: the seed failed four of six cases, the reference passed all six, and
+the one-page partial failed four. All Docker workers exited and containers
+were removed. The fixture receipt is
+`/private/tmp/kryn-public-pagination-20261003-02/fixture.json`, SHA-256
+`76ae8751cdf66e50166344f622db884640bb49c520c4b979c350c4298cea41e3`.
+The seed commit was `fc2ad7d009d7c2abb7b3a523f4850b2892370769`, prompt
+SHA-256 `5bbf552855582b4d91187e42a9ab6414c98be4f2c6842b018793d61ce4db0387`,
+reference patch SHA-256
+`6589b1c3977f36b373b9c4a9c0c472c534846178e97208edff19fb4ae04f0a41`,
+and partial patch SHA-256
+`ec46d8122c77136fd38c371d4fe59411d3d94c4b8cc8cd53213ec992a921b902`.
+`make check` passed before generation.
+
+The native-first live pair used the same Qwen3.5-9B-6bit, 8192 output cap,
+sampling values, ten-tool wire schema hash
+`1b56b6b37c804f7fd30cd60d131476c6a619cda5269ac2ccf9d2fc8a5d34a81e`,
+and effective permissions in both arms. AC power, normal sampled pressure,
+zero sampled swap growth, complete telemetry and clean APFS detachment were
+observed. **Neither arm passed strict acceptance.** The frozen raw pair receipt
+is `/private/tmp/kryn-public-pagination-20261003-02/pair.json`, SHA-256
+`de64c7aa614c03d94bc2795173765f0ae06a1847639c4a2d77a585cd1d19f2fe`.
+
+| Arm | Outcome | Evidence |
+| --- | --- | --- |
+| Native | Completed in 119.984 s; independent Docker grader rejected 2/6 cases. | The model's own check exited 0, but `None` data with a next link stopped early and mixed-case `LiNk` was missed. Its final text claimed both behaviors were covered. Nine model requests; session-export totals: 19,898 input, 4,217 output, 45,056 cached-read tokens. |
+| KRYN | Ended after 20.501 s before edit or grading. | Native `read` returned `Permission denied: external_directory`; the Agent then tried an unrelated `raw.githubusercontent.com/simonw/...` URL through `webfetch`, which the noninteractive permission policy rejected. Three model requests; 4,238 input, 308 output, 10,240 cached-read tokens. |
+
+Both arms first tried the native `read` tool on the pinned source and were
+denied by the **OpenCode permission layer**, although the research Seatbelt
+profile allowed the exact file. Native recovered with `shell cat`, but that
+tool reported `truncated: true` and supplied only its tail. KRYN did not use
+the permitted shell route. [OpenCode V2's permissions documentation](https://opencode.ai/v2/docs/permissions)
+confirms that external paths need an `external_directory` rule as well as a
+`read` rule; the current research config denies every external directory.
+This is a source-delivery defect in the experimental adapter, plus a visible
+worker recovery failure, not evidence about frontier capability.
+
+The raw pair incorrectly says `tool_catalogs_equal: false`: the recorder read
+a nonexistent `tools` field from relay requests. Without rerunning the model,
+a read-only audit of both `driver.json` and session exports found one identical
+wire contract across all requests in both arms. The corrected code now uses
+`tool_count` and `tool_schema_sha256` along with model, sampling and thinking
+settings. The separate audit is
+`/private/tmp/kryn-public-pagination-20261003-02/pair-audit.json`, SHA-256
+`92db46fbff5e9b995d536b6eacb3d35c541bf5551cf5c5397f69f4ebe7b53014`.
+Neither raw receipt was rewritten or reclassified as a pass.
+
+**Decision:** retain this pair as a failed public diagnostic. The next
+one-variable candidate is a narrow, read-only OpenCode permission path for
+the already-allowed exact source file; it must pass no-model read, edit-denial,
+and sibling-denial checks before another live task. Reusing this public fixture
+after that change is development work only. Protected H1 and current-source
+category admission remain closed.

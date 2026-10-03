@@ -279,6 +279,12 @@ def source_calls(receipt, source):
     return calls
 
 
+def wire_contracts(requests):
+    fields = ("model", "max_tokens", "numeric", "thinking",
+              "tool_count", "tool_schema_sha256")
+    return [{key: request.get(key) for key in fields} for request in requests]
+
+
 def run_arm(args, fixture_report, source, provenance, arm):
     seed, prompt = args.output / "seed", args.output / "prompt.txt"
     reference, partial = args.output / "reference.patch", args.output / "partial.patch"
@@ -318,6 +324,10 @@ def run_arm(args, fixture_report, source, provenance, arm):
                          "Resource guard" in str(error))
         return {"arm": arm, "receipt": str(receipt), "accepted": False,
                 "guard_stopped": guard_stopped,
+                "wire_contracts": wire_contracts(raw.get("requests", [])),
+                "request_count": len(raw.get("requests", [])),
+                "resources": resources,
+                "source_calls": source_calls(receipt, source),
                 "error": type(error).__name__ + ": " + str(error)}
     agent = result["agent"]
     observed = source_calls(receipt, source)
@@ -329,11 +339,11 @@ def run_arm(args, fixture_report, source, provenance, arm):
                     result["candidate_detached"] and result["capture_detached"] and
                     result["grader_detached"] and agent["resources"]["telemetry_complete"] and
                     not agent["resources"]["warning_or_critical_observed"])
-    tools = [request.get("tools") for request in agent.get("requests", [])]
     return {"arm": arm, "receipt": str(receipt), "accepted": accepted,
             "guard_stopped": False,
             "native_completed": agent["completed"], "source_calls": observed,
-            "source_used": used, "grade": graded, "tool_catalogs": tools,
+            "source_used": used, "grade": graded,
+            "wire_contracts": wire_contracts(agent.get("requests", [])),
             "request_count": len(agent.get("requests", [])),
             "wall_seconds": result["wall_seconds"], "resources": agent["resources"],
             "intervention": agent.get("intervention"),
@@ -368,10 +378,10 @@ def pair(args, source, provenance):
         "source_commit": frozen["source_commit"], "runs": runs}, indent=2) + "\n")
     if not runs[0]["guard_stopped"]:
         runs.append(run_arm(args, frozen, source, provenance, "kryn"))
-    catalogs_equal = (len(runs) == 2 and all(run.get("tool_catalogs") for run in runs) and
-        all(catalog == run["tool_catalogs"][0]
-            for run in runs for catalog in run["tool_catalogs"]) and
-        runs[0]["tool_catalogs"][0] == runs[1]["tool_catalogs"][0])
+    contracts_equal = (len(runs) == 2 and all(run.get("wire_contracts") for run in runs) and
+        all(contract == run["wire_contracts"][0]
+            for run in runs for contract in run["wire_contracts"]) and
+        runs[0]["wire_contracts"][0] == runs[1]["wire_contracts"][0])
     report = {"schema": 1, "kind": "public_official_source_pagination_pair",
               "source_commit": frozen["source_commit"], "script_sha256": sha(Path(__file__)),
               "fixture_sha256": sha(fixture_file), "source_sha256": sha(source),
@@ -379,11 +389,11 @@ def pair(args, source, provenance):
               "protected_status": False, "order": ["native", "kryn"],
               "pair_completed": len(runs) == 2,
               "permissions_equal": permissions_equal,
-              "tool_catalogs_equal": bool(catalogs_equal), "runs": runs}
+              "wire_contract_equal": bool(contracts_equal), "runs": runs}
     (args.output / "pair.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"pair": str(args.output / "pair.json"),
                       "permissions_equal": permissions_equal,
-                      "tool_catalogs_equal": bool(catalogs_equal),
+                      "wire_contract_equal": bool(contracts_equal),
                       "pair_completed": len(runs) == 2,
                       "accepted": {run["arm"]: run["accepted"] for run in runs}}))
     return 0
