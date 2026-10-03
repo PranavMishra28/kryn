@@ -727,3 +727,19 @@ This remains offline task mechanics. Both corrected restart drafts still need
 native staged model turns, two real compactions, two server restarts and an
 independent semantic review. One original restart slot, three long-workflow
 slots, the occupied-host browser path and the paired H1 study remain open.
+
+## Long-workflow draft classification corrected
+
+The three provisional long-workflow slots each delivered one short coding
+prompt, had no stage schedule, and were already labeled
+`INVALID_LONG_SESSION_PROTOCOL` in their private source manifests. They cannot
+measure the preregistered multi-hour, two-compaction, two-restart endpoint.
+Owner-only roster V10 retains their identity records but marks all three
+**retired from protected long-workflow use** and requires replacements. Its
+SHA-256 is
+`17bd47e64de795c4870e7e43d8ba9248c6ded36e4940e94364a2f03664e9a028`;
+the direct-path audit receipt hashes to
+`e7af3a00114bd74d21a1b7da623a259342374ac30c4a0f2d43e7424bae1f0202`.
+The audit rechecked all 30 draft prompt, grader and clean-seed identities with
+zero mismatches and made zero model requests. It does not turn the remaining
+27 slots into admitted protected tasks. The combined roster remains unsealed.
