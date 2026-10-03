@@ -743,3 +743,37 @@ the direct-path audit receipt hashes to
 The audit rechecked all 30 draft prompt, grader and clean-seed identities with
 zero mismatches and made zero model requests. It does not turn the remaining
 27 slots into admitted protected tasks. The combined roster remains unsealed.
+
+## One retired restart draft exposed to a real model
+
+Before model exposure, `11-newsletter-restart` was retired from the provisional
+holdout in owner-only roster V11 (SHA-256
+`e30b9298e9fe05ace5e26401d8f3db98853fa1ecd7bbf7bef018c35c78e1ed18`).
+The frozen one-attempt development plan and runner hash to
+`61407ffd23fd55f344dbd87765b3104050e3979cda010ff46bd33bb60a98637c`
+and `1e67e8fd27d43ab214ae41e61e71da407adf46a1424be22b51fd0909c908d1fb`.
+A zero-model preflight confirmed the broken seed failed and the stage-one
+implementation plus final reference passed their expected stages through APFS
+capture and the pinned networkless Docker grader.
+
+At clean source `1bbf0ff3742d8668205a41081a782266b4da7df4`, one guarded
+KRYN Agent session passed stage one, completed a real native compaction,
+restarted the OpenCode server, and resumed the **same session** with only the
+stage-two prompt newly delivered. The hidden grader remained unreadable to
+the candidate. Stage two failed because the generated URL validation accepted
+an `http` URL with no host. The frozen controller stopped immediately; stage
+three was not delivered, so the two-compaction/two-restart gate **failed**.
+Both delivered generations and their owned sessions verified. The resource
+guard did not fire; telemetry was complete, pressure normal, sampled swap
+growth zero, and the candidate volume detached.
+
+The immutable run result and private analysis SHA-256 values are
+`52869eed783e4dc2a6e8f19c8392a2f8a33bf71bca9a1b93c8da8293ad86e5dc`
+and `26cfca8086d541ce0b2530341f5fb8f89a54f4637b83cab94a5a93ef0360141e`.
+The 80-file owner-only archive and independently rehashed index are
+`8928015866c1fb9c9981ab35c8ba1eae5e21ef8e9c62227a548ce871df42aedf`
+and `8108aa18918180430681b5b7bbfec0fd3378ccbb27efe435ca214d4385266e9a`.
+Roster V12 records the task's model exposure and remains unsealed (SHA-256
+`0fa00d2b3cca5cdf2d6d9f25f216620ea064cc5240543c497473b75e14c407dc`).
+This measures partial continuity mechanics and a local-model coding failure
+on **development** data, not protected H1 or end-to-end long-workflow quality.
