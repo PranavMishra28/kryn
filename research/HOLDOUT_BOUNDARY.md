@@ -78,13 +78,9 @@ evidence, source checkout, encrypted image and a 58-file SHA-256 manifest are
 under `/private/tmp/kryn-boundary-public-20261003-01/` on this Mac; the manifest
 hash is `886318d070d7abfa4794c98e664501579e204cd8a0af17a11ba19bc07fab068d`.
 
-**B1 passes this public compatibility screen.** No sealed holdout result
-exists. The canary checks selected alias paths, not every possible macOS
-information channel. A full 30-task roster, independently isolated hidden
-graders, browser/source-gateway boundary tests, broken-seed/reference/partial-
-patch controls and frozen hashes remain prerequisites before H1 can use a
-protected set. This screen measures boundary mechanics, not local-model
-engineering quality or frontier-agent parity.
+The first script reported a pass, but independent review found defects that
+invalidate that provisional public-workflow verdict. Its raw receipt remains
+useful for diagnosis; the correction and later results follow.
 
 ## Independent-review correction before any protected task
 
@@ -108,3 +104,35 @@ repeat must demonstrate a successful model-side Python check as well as the
 independent grade. The first receipt stays available and is not silently
 reclassified. These changes do not alter installed v1.0.0, H1 thresholds,
 candidate task answer, model or resource guard.
+
+The repaired encrypted-volume canary passed direct and alias denials, denied
+listing the run root, and used OpenCode's `/api/shell` to read an allowed file
+and fail to read the oracle. The same-volume hardlink control still failed as
+intended. The candidate grader rejected a deliberate reference-file read and
+oversized output; a spawned child was killed before grading returned. The
+research PATH now permits `python3` through the canonical interpreter path.
+
+Two fresh public turns preserve the mixed evidence:
+
+| Run | Pinned source | Agent result | Independent result | Executable verdict |
+| --- | --- | --- | --- | --- |
+| `02` | `0cbbba579f0bb0754e7c9e1350f42b15514fe180` | Completed; `python3 solve.py` exit 0 on four sample arrays | Hidden cases pass; image detached | FAIL: receipt parser raised after grading because it looked for the shell exit in the wrong event field. Raw evidence supports the check and grade but the executable did not finish cleanly. |
+| `03` | `5dbfbaef861bc5d7979ccd4c5fb11709322701dc` | Completed; its own object-shaped Python samples exited 0 | FAIL: it changed the pre-existing JSON array input into an object input; image detached | FAIL: the corrected runner returned a valid failed verdict. |
+
+The `02` patch hash is
+`0469ac99a377288e0d333a2368af9223bc17d5cdb56433a37ca087b55eaaafe2`;
+the `03` patch hash is
+`312a6868de7265caf54229d71c753c7d97990645e05b3c3c972af02ab2bf13f7`.
+Raw receipts and SHA-256 manifests remain under
+`/private/tmp/kryn-boundary-public-20261003-02/` (manifest
+`adf6efc1f37303def135dbbd1ee71f76ba2f6d3edf91d53f7e911e962243afc4`)
+and `/private/tmp/kryn-boundary-public-20261003-03/` (manifest
+`9ef4d1b10e35214766c904290314cf52c9c19f80bc295030026fd4c85629d88e`).
+
+**Boundary mechanics pass the current no-model and OpenCode shell probes; the
+public model workflow has mixed results and no clean executable success on the
+repaired runner.** No sealed holdout result exists. These selected alias
+checks do not cover every macOS information channel. A frozen 30-task roster,
+browser/source-gateway boundaries, broken-seed/reference/partial-patch
+controls and exact hashes remain prerequisites before protected H1 analysis.
+The three public turns measure neither a success rate nor frontier-agent parity.

@@ -119,6 +119,7 @@ def server_probe(workspace, log, oracle, marker):
         raw = run(server.background_prefix + ["/bin/cat", str(oracle)])
         visible_exit, visible_output = shell(server, ["/bin/cat", workspace / "visible.txt"])
         hidden_exit, hidden_output = shell(server, ["/bin/cat", oracle])
+        python_exit, python_output = shell(server, ["python3", "-c", "print('python-ready')"])
         return {
             "native_server_started": True,
             "product_plugin_active": len(products) == 1 and len(product) == 1
@@ -129,6 +130,8 @@ def server_probe(workspace, log, oracle, marker):
                 and visible_output == "candidate-visible",
             "api_shell_oracle_read_denied": hidden_exit != 0
                 and marker not in hidden_output,
+            "api_shell_python_ready": python_exit == 0
+                and python_output == "python-ready\n",
         }
 
 
