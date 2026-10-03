@@ -20,7 +20,8 @@ from learning import InferenceRelay  # noqa: E402
 from native_client import MODEL_ID  # noqa: E402
 
 
-async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, install_only: bool,
+async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: str,
+                    install_only: bool,
                     relay: InferenceRelay):
     evidence = trials_dir / name / "host-guard"
     evidence.mkdir(parents=True, exist_ok=False)
@@ -32,7 +33,8 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, install_o
         agent=AgentConfig(import_path="research.harbor_kryn_agent:" +
                           ("NativeOpenCode" if arm == "native" else "KrynOpenCode"),
                           model_name="local/qwen", override_timeout_sec=900,
-                          env={"KRYN_HARBOR_RELAY_PORT": str(relay.port)}),
+                          env={"KRYN_HARBOR_RELAY_PORT": str(relay.port),
+                               "KRYN_HARBOR_VARIANT": variant}),
         environment=EnvironmentConfig(type=EnvironmentType.DOCKER, delete=True),
     )
     trial = await Trial.create(config)
@@ -72,7 +74,8 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, install_o
     reason = monitor.guard.reason if monitor is not None else None
     (evidence / "inference.json").write_text(json.dumps(relay.records, indent=2) + "\n")
     report = {
-        "harbor_trial": name, "arm": arm, "harbor_result": str(trial.paths.result_path),
+        "harbor_trial": name, "arm": arm, "variant": variant,
+        "harbor_result": str(trial.paths.result_path),
         "install_only": install_only, "reward": reward,
         "exception": result.exception_info.exception_type if result.exception_info else None,
         "guard_preflight_passed": monitor.preflight_passed if monitor else False,
@@ -89,9 +92,10 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, install_o
     return 0 if install_only and report["exception"] is None or report["strict_accepted"] else 1
 
 
-async def run(task: Path, trials_dir: Path, name: str, arm: str, install_only: bool):
+async def run(task: Path, trials_dir: Path, name: str, arm: str, variant: str,
+              install_only: bool):
     with InferenceRelay(MODEL_ID, 8192, 360) as relay:
-        return await run_trial(task, trials_dir, name, arm, install_only, relay)
+        return await run_trial(task, trials_dir, name, arm, variant, install_only, relay)
 
 
 if __name__ == "__main__":
@@ -100,7 +104,8 @@ if __name__ == "__main__":
     parser.add_argument("trials_dir", type=Path)
     parser.add_argument("name")
     parser.add_argument("--arm", choices=("kryn", "native"), default="kryn")
+    parser.add_argument("--variant", choices=("default", "fast"), default="default")
     parser.add_argument("--install-only", action="store_true")
     args = parser.parse_args()
     raise SystemExit(asyncio.run(run(args.task.resolve(), args.trials_dir.resolve(),
-                                     args.name, args.arm, args.install_only)))
+                                     args.name, args.arm, args.variant, args.install_only)))

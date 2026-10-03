@@ -11,6 +11,8 @@ failure-only repair-feedback candidate and its resource-guard stop.
 sample task, the exact KRYN OpenCode adapter and Harbor's official verifier.
 [REVIEWER_SCREEN.md](REVIEWER_SCREEN.md) preregisters a read-only Reviewer
 mechanism screen on two archived, public Harbor worker failures.
+[EFFORT_POLYGLOT.md](EFFORT_POLYGLOT.md) preregisters a Default/Fast product-mode
+screen on a fresh public software-engineering task with Harbor's verifier.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Neither rejected candidate changed the product.
 
