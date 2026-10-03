@@ -82,6 +82,11 @@ three-turn canary for two native compactions and two actual server restarts.
 [PUBLIC_STAGED_MODEL.md](PUBLIC_STAGED_MODEL.md) freezes and reports the first
 matched three-stage live-model coding calibration. KRYN failed its final
 independent case; the released product was unchanged.
+[PUBLIC_STAGED_SCHEMA.md](PUBLIC_STAGED_SCHEMA.md) records a separate public
+three-turn/two-compaction/one-restart 9B screen. Its first two stages passed,
+but the frozen final oracle contradicted the required schema shape, making
+quality inconclusive. The failed raw screen and a zero-model oracle correction
+are preserved; the task is retired from protected use.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 
