@@ -503,6 +503,7 @@ function checkIdentity(event, directory) {
     call_id_sha256: typeof event.id === 'string' && event.id.length > 0 && event.id.length <= 160 ? sha(event.id) : null };
 }
 const REPEATED_SHELL = 'KRYN observed the same foreground shell command and unchanged output three times. Change the input or investigate a different hypothesis; do not repeat this call. If no useful next step remains, report the blocker and unfinished work. This is repeated evidence, not an inferred HTTP or test failure.';
+const REPEATED_WRITE = 'KRYN stopped an identical no-op file write. The file already has these bytes. Inspect the latest failed check or change approach before writing again; do not repeat this call.';
 function shellIdentity(event, directory) {
   if (event.tool !== 'shell' || event.input?.background === true || typeof event.input?.command !== 'string') return null;
   let workdir = path.resolve(directory, typeof event.input.workdir === 'string' ? event.input.workdir : directory);
@@ -560,7 +561,8 @@ export default {
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         uiBrowserFingerprint: null,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
-        verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
+        verification: verificationLedger(), previousTracker: null, shellRepeat: null, writeRepeat: null,
+        maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
         recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map(),
@@ -705,6 +707,7 @@ export default {
       item.pendingReads.clear();
       item.pendingEdits.clear();
       item.shellRepeat = null;
+      item.writeRepeat = null;
       item.maskedCheckDenials = 0;
       item.reviewCalls = 0; item.reviewCompactions = 0; item.reviewClosing = false; item.reviewClosingSteps = 0;
       // Keep the current request in memory, not in metadata-only tracking files.
@@ -871,6 +874,22 @@ export default {
     await ctx.tool.hook('execute.before', event => {
       assertHealthy();
       const item = session(event.sessionID);
+      const sameWrite = AGENT_ROLES.has(event.agent) && event.tool === 'write' &&
+        typeof event.input?.content === 'string' &&
+        projectSnapshot(ctx.location.directory, event.input?.path);
+      const fingerprint = sameWrite && sameWrite.hash === sha(event.input.content) ?
+        sameWrite.file + '\0' + sameWrite.hash : null;
+      if (!fingerprint) item.writeRepeat = null;
+      else {
+        const repeat = item.writeRepeat?.fingerprint === fingerprint ? item.writeRepeat :
+          { fingerprint, count: 0, blocked: 0 };
+        item.writeRepeat = repeat;
+        if (repeat.count >= 2) {
+          repeat.blocked = Math.min(2, repeat.blocked + 1);
+          throw new Error(REPEATED_WRITE);
+        }
+        repeat.count++;
+      }
       if (event.tool === 'read' && event.id) {
         const beforeRead = projectSnapshot(ctx.location.directory, event.input?.path);
         if (beforeRead) {
@@ -1176,6 +1195,15 @@ export default {
             const info = await ctx.session.get({ sessionID: id });
             if (!controller.signal.aborted && epoch === item.promptEpoch && item.shellRepeat === repeat &&
                 info.id === id && sameLocation(info.location)) {
+              item.stopped = true;
+              await ctx.session.interrupt({ sessionID: id });
+            }
+          }
+          if (item.writeRepeat?.blocked >= 2 && !item.stopped) {
+            const epoch = item.promptEpoch;
+            const info = await ctx.session.get({ sessionID: id });
+            if (!controller.signal.aborted && epoch === item.promptEpoch &&
+                AGENT_ROLES.has(info.agent) && info.id === id && sameLocation(info.location)) {
               item.stopped = true;
               await ctx.session.interrupt({ sessionID: id });
             }
