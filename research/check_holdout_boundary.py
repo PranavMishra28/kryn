@@ -135,7 +135,9 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
         background["private_parent"] = private_parent
     if tool_path is not None:
         background["tool_path"] = str(tool_path)
-    with NativeServer(workspace, config, log=log, background=background) as server:
+    native_server = NativeServer(workspace, config, log=log, background=background)
+    native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
+    with native_server as server:
         server.inventory()
         for domain in ("config", "agent", "command", "skill"):
             server.request("GET", "/api/" + domain, timeout=5)
@@ -162,8 +164,11 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
         if tool_venv is not None:
             rg_exit, rg_output = shell(server, ["rg", "candidate-visible", workspace / "visible.txt"])
             pytest_exit, pytest_output = shell(server, ["python3", "-I", "-m", "pytest", "--version"])
+            git_exit, git_output = shell(server, ["git", "-C", workspace,
+                                                  "rev-parse", "--is-inside-work-tree"])
             checks["api_shell_rg_ready"] = rg_exit == 0 and rg_output == "candidate-visible\n"
             checks["api_shell_pytest_ready"] = pytest_exit == 0 and pytest_output.startswith("pytest ")
+            checks["api_shell_git_ready"] = git_exit == 0 and git_output == "true\n"
         return checks
 
 

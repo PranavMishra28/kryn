@@ -116,8 +116,12 @@ def benchmark_tools(venv):
     if (venv != venv.resolve() or not venv.is_relative_to(Path("/private/tmp")) or
             not (venv / "pyvenv.cfg").is_file() or not (venv / "bin/python3").is_file() or
             (venv / "bin/python3").is_symlink() or not (venv / "bin/rg").is_file() or
-            (venv / "bin/rg").is_symlink()):
-        raise ValueError("Benchmark tool venv needs copied Python/rg binaries inside /private/tmp")
+            (venv / "bin/rg").is_symlink() or not (venv / "bin/git").is_file()):
+        raise ValueError("Benchmark tool venv needs Python, rg and Git inside /private/tmp")
+    git_binary = (venv / "bin/git").resolve()
+    if not (git_binary.is_relative_to(venv) or
+            git_binary.is_relative_to(Path("/Library/Developer/CommandLineTools"))):
+        raise ValueError("Benchmark Git must be copied or use the installed Command Line Tools")
     pytest = subprocess.run([str(venv / "bin/python3"), "-I", "-m", "pytest", "--version"],
                             capture_output=True, text=True, timeout=10)
     if pytest.returncode:
@@ -134,10 +138,11 @@ def benchmark_tools(venv):
     package_listing = subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
         "import importlib.metadata as m,json; print(json.dumps(sorted((d.metadata['Name'], d.version) for d in m.distributions())))"],
         text=True, timeout=10)
-    return venv / "bin", [venv, base, *libraries], {
+    return venv / "bin", [venv, base, git_binary, *libraries], {
         "pytest_version": pytest.stdout.strip(),
         "python_sha256": hashlib.sha256((venv / "bin/python3").resolve().read_bytes()).hexdigest(),
         "rg_sha256": hashlib.sha256((venv / "bin/rg").read_bytes()).hexdigest(),
+        "git_sha256": hashlib.sha256(git_binary.read_bytes()).hexdigest(),
         "packages": json.loads(package_listing),
     }
 
@@ -204,7 +209,10 @@ def run(args):
                 background["private_parent"] = private_parent
             if tool_path is not None:
                 background["tool_path"] = str(tool_path)
-            with NativeServer(workspace, config, evidence / "native.log", background=background) as server:
+            native_server = NativeServer(workspace, config, evidence / "native.log",
+                                         background=background)
+            native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
+            with native_server as server:
                 # /api/info can become ready before asynchronous plugin discovery.
                 for _ in range(75):
                     inventory = server.request("GET", "/api/plugin")

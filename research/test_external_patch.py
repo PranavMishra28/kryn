@@ -47,7 +47,7 @@ class ExternalPreflightTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
             venv = Path(tmp) / "venv"
             (venv / "bin").mkdir(parents=True)
-            for name in ("pyvenv.cfg", "bin/python3", "bin/rg"):
+            for name in ("pyvenv.cfg", "bin/python3", "bin/rg", "bin/git"):
                 (venv / name).touch()
             with patch("run_external_patch.subprocess.check_output", side_effect=[
                 "/private/tmp/python-base\n", "/private/tmp/venv/bin/rg:\n"
@@ -59,7 +59,8 @@ class ExternalPreflightTest(unittest.TestCase):
                 bin_path, dependencies, manifest = benchmark_tools(venv)
             self.assertEqual(bin_path, venv / "bin")
             self.assertEqual(dependencies[:2], [venv, Path("/private/tmp/python-base")])
-            self.assertEqual(len(dependencies), 3)
+            self.assertEqual(len(dependencies), 4)
+            self.assertEqual(dependencies[2], venv / "bin/git")
             self.assertEqual(manifest["pytest_version"], "pytest 8.3.3")
             self.assertEqual(manifest["packages"], [["pytest", "8.3.3"]])
             with patch("run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
@@ -68,7 +69,7 @@ class ExternalPreflightTest(unittest.TestCase):
                     benchmark_tools(venv)
             (venv / "bin/python3").unlink()
             (venv / "bin/python3").symlink_to("/usr/bin/python3")
-            with self.assertRaisesRegex(ValueError, "copied Python/rg binaries"):
+            with self.assertRaisesRegex(ValueError, "Python, rg and Git"):
                 benchmark_tools(venv)
 
     def test_exact_clean_base_and_separate_oracle(self):
