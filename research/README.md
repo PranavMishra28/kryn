@@ -58,6 +58,9 @@ improve accepted work.
 [CRITERION_REPAIR.md](CRITERION_REPAIR.md) records one public, guarded repair of
 that exposed failure: the independent functional grader passed, while the
 worker deleted its tracked test afterward. No product change was promoted.
+[CANDIDATE_PLUGIN_PROVENANCE.md](CANDIDATE_PLUGIN_PROVENANCE.md) records the
+research-runner correction that loads exact isolated candidate plugin bytes.
+Its no-model OpenCode boundary check passed; no product plugin was changed.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
