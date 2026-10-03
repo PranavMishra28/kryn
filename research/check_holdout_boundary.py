@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """No-model alias canary for the actual whole-process research sandbox.
 
-The same-volume control must fail; the encrypted-volume case must pass. A
-passing canary is not a qualified protected holdout or a full agent run.
+The same-volume control must fail; the two separate-volume cases must pass.
+A passing canary is not a qualified protected holdout or a full agent run.
 """
 import argparse
 import errno
@@ -31,7 +31,15 @@ def run(command, *, input=None):
                           timeout=20, close_fds=True)
 
 
-def probe(workspace, private, oracle, image=None, device=None):
+def mount_active(base, mount):
+    try:
+        return mount.stat().st_dev != base.stat().st_dev
+    except OSError:
+        return True  # Never recursively remove a base whose mount state is unknown.
+
+
+def probe(workspace, private, oracle, image=None, device=None, run_root=None,
+          same_volume_control=False):
     marker = oracle.read_text()
     alias = workspace / "oracle-symlink"
     alias.symlink_to(oracle)
@@ -41,7 +49,11 @@ def probe(workspace, private, oracle, image=None, device=None):
 
     def denied(name, command):
         result = run(prefix + command)
-        return name, result.returncode != 0 and marker not in result.stdout + result.stderr
+        return name, result.returncode != 0 and result.stdout == "" and marker not in result.stderr
+
+    def listing_denied(directory):
+        result = run(prefix + ["/bin/ls", "-a", str(directory)])
+        return result.returncode != 0 and result.stdout == ""
 
     visible_result = run(prefix + ["/bin/cat", str(workspace / "visible.txt")])
     checks = dict([
@@ -50,8 +62,10 @@ def probe(workspace, private, oracle, image=None, device=None):
         denied("copy_read", ["/bin/cp", str(oracle), str(workspace / "copied")]),
         denied("metadata_read", ["/usr/bin/stat", str(oracle)]),
         denied("file_url_read", ["/usr/bin/curl", "-sS", "file://" + str(oracle)]),
-        denied("ancestor_listing_denied", ["/bin/ls", "-a", str(workspace.parent)]),
     ])
+    checks["ancestor_listing_denied"] = listing_denied(workspace.parent)
+    if run_root is not None:
+        checks["runroot_listing_denied"] = listing_denied(run_root)
     # The visible file is required to work; all hidden-file probes must fail.
     checks["workspace_read"] = (visible_result.returncode == 0
                                 and visible_result.stdout == "candidate-visible")
@@ -61,10 +75,15 @@ def probe(workspace, private, oracle, image=None, device=None):
     try:
         os.link(oracle, hardlink)  # Trusted parent simulates a pre-existing alias.
         checks["hardlink_impossible"] = False
-        checks["hardlink_read_denied"] = denied("hardlink_read_denied", ["/bin/cat", str(hardlink)])[1]
+        linked = run(prefix + ["/bin/cat", str(hardlink)])
+        checks["hardlink_read_denied"] = linked.returncode != 0 and marker not in linked.stdout + linked.stderr
+        if same_volume_control:
+            checks["hardlink_marker_read"] = linked.returncode == 0 and linked.stdout == marker
     except OSError as error:
         checks["hardlink_impossible"] = error.errno == errno.EXDEV
         checks["hardlink_read_denied"] = True  # There is no alias to read.
+        if same_volume_control:
+            checks["hardlink_marker_read"] = False
     checks["candidate_link_denied"] = denied("candidate_link_denied",
         ["/bin/ln", str(oracle), str(workspace / "candidate-hardlink")])[1]
     if image is not None:
@@ -76,7 +95,7 @@ def probe(workspace, private, oracle, image=None, device=None):
     return checks
 
 
-def server_probe(workspace, log, oracle, marker):
+def server_probe(workspace, log, oracle, marker, private_parent=None):
     # Use the same product configuration and dependency builder as the external
     # candidate runner. API inventory initializes plugins without inference.
     subprocess.run(["/usr/bin/git", "init", "-q", str(workspace)], check=True,
@@ -100,17 +119,18 @@ def server_probe(workspace, log, oracle, marker):
             while info.get("status") == "running" and time.monotonic() < deadline:
                 time.sleep(.1)
                 info = server.request("GET", endpoint, timeout=5).get("data", {})
-            if info.get("status") == "running":
-                raise RuntimeError("Native shell canary did not settle")
+            if info.get("status") != "exited" or type(info.get("exit")) is not int:
+                raise RuntimeError("Native shell canary did not exit with a verified status")
             output = server.request("GET", endpoint + "/output?cursor=0&limit=4096",
                                     timeout=5).get("data", {})
             return info.get("exit"), output.get("output", "")
         finally:
             server.request("DELETE", endpoint, timeout=5)
 
-    with NativeServer(workspace, config, log=log,
-                      background={"dependencies": dependencies,
-                                  "inference_port": 19876}) as server:
+    background = {"dependencies": dependencies, "inference_port": 19876}
+    if private_parent is not None:
+        background["private_parent"] = private_parent
+    with NativeServer(workspace, config, log=log, background=background) as server:
         server.inventory()
         for domain in ("config", "agent", "command", "skill"):
             server.request("GET", "/api/" + domain, timeout=5)
@@ -137,25 +157,45 @@ def server_probe(workspace, log, oracle, marker):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("same-volume", "encrypted-volume"),
+    parser.add_argument("mode", choices=("same-volume", "encrypted-volume", "candidate-volume"),
                         help="same-volume is the expected failing hardlink control")
     args = parser.parse_args()
     ROOT.mkdir(mode=0o700, exist_ok=True)
     base = Path(tempfile.mkdtemp(prefix="kryn-holdout-boundary-", dir=ROOT))
-    workspace, private, grader = (base / name for name in ("workspace", "private", "grader"))
-    for directory in (workspace, private, grader):
-        directory.mkdir(mode=0o700)
-    (workspace / "visible.txt").write_text("candidate-visible")
+    mount = base / ("mount" if args.mode == "candidate-volume" else "grader")
+    mount.mkdir(mode=0o700)
+    workspace = (mount if args.mode == "candidate-volume" else base) / "workspace"
+    private = (mount if args.mode == "candidate-volume" else base) / "private"
+    grader = base / "grader"
+    if args.mode != "candidate-volume":
+        for directory in (workspace, private):
+            directory.mkdir(mode=0o700)
+    if args.mode != "encrypted-volume":
+        grader.mkdir(mode=0o700, exist_ok=True)
     marker = "oracle-" + secrets.token_hex(16)
     mounted = False
     device = None
-    image = base / "oracle.dmg"
+    image = base / ("candidate.sparseimage" if args.mode == "candidate-volume" else "oracle.dmg")
     oracle = grader / "oracle.txt"
     checks = {}
     error = None
     cleanup_ok = True
     try:
-        if args.mode == "encrypted-volume":
+        if args.mode == "candidate-volume":
+            created = run(["hdiutil", "create", "-size", "64m", "-type", "SPARSE",
+                           "-fs", "APFS", "-volname", "KRYNCandidateCanary", str(image)])
+            if created.returncode:
+                raise RuntimeError("Candidate image creation failed: " + created.stderr[:200])
+            attached = run(["hdiutil", "attach", "-nobrowse", "-noverify",
+                            "-mountpoint", str(mount), str(image)])
+            if attached.returncode:
+                raise RuntimeError("Candidate image mount failed: " + attached.stderr[:200])
+            mounted = True
+            devices = re.findall(r"/dev/disk\d+(?:s\d+)?", attached.stdout)
+            device = devices[-1] if devices else None
+            for directory in (workspace, private):
+                directory.mkdir(mode=0o700)
+        elif args.mode == "encrypted-volume":
             key = secrets.token_hex(32) + "\n"  # Never write to disk/env/argv.
             created = run(["hdiutil", "create", "-size", "16m", "-fs", "APFS",
                            "-volname", "KRYNHoldoutCanary", "-encryption", "AES-256",
@@ -172,27 +212,42 @@ def main():
             mounted = True
             devices = re.findall(r"/dev/disk\d+(?:s\d+)?", attached.stdout)
             device = devices[-1] if devices else None
+        (workspace / "visible.txt").write_text("candidate-visible")
         oracle.write_text(marker)
-        checks = probe(workspace, private, oracle, image if mounted else None, device)
+        checks = probe(workspace, private, oracle, image if mounted else None, device,
+                       base if args.mode == "candidate-volume" else None,
+                       args.mode == "same-volume")
         if mounted and all(checks.values()):
-            checks.update(server_probe(workspace, base / "native.log", oracle, marker))
+            checks.update(server_probe(workspace, base / "native.log", oracle, marker,
+                                       private if args.mode == "candidate-volume" else None))
     except Exception as failure:
         error = type(failure).__name__ + ": " + str(failure)
     finally:
-        if mounted:
+        if mount_active(base, mount):
             try:
-                detached = run(["hdiutil", "detach", str(grader)])
-                cleanup_ok = detached.returncode == 0
+                run(["hdiutil", "detach", str(mount)])
+                cleanup_ok = not mount_active(base, mount)
             except Exception:
                 cleanup_ok = False
             if not cleanup_ok:
                 print("Mounted image could not be detached; inspect " + str(base), file=sys.stderr)
-        if cleanup_ok:
+        if cleanup_ok and not mount_active(base, mount):
             shutil.rmtree(base)
     checks["oracle_detached"] = cleanup_ok
+    if args.mode == "same-volume":
+        control_exposed = (error is None and cleanup_ok and
+                           checks.get("direct_read") is True and
+                           checks.get("symlink_read") is True and
+                           checks.get("hardlink_impossible") is False and
+                           checks.get("hardlink_marker_read") is True)
+    else:
+        control_exposed = None
     passed = error is None and bool(checks) and all(checks.values())
     print(json.dumps({"mode": args.mode, "passed": passed, "checks": checks,
+                      "negative_control_exposed": control_exposed,
                       "error": error}, sort_keys=True))
+    if args.mode == "same-volume":
+        return 1 if control_exposed else 2  # Distinguish expected exposure from a broken control.
     return 0 if passed else 1
 
 

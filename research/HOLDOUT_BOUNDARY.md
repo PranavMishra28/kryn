@@ -61,7 +61,9 @@ and loaded `kryn.product` with the external runner's dependency configuration.
 The image detached cleanly. These probes are executable with
 `python3 -B research/check_holdout_boundary.py same-volume` (expected exit 1)
 and `python3 -B research/check_holdout_boundary.py encrypted-volume`
-(expected exit 0).
+(expected exit 0). The negative control must also report
+`negative_control_exposed: true`; exit 2 means the control itself failed and
+cannot be counted as proof of a hardlink leak.
 
 The preregistered public compatibility task then ran via
 `research/run_boundary_public.py` with a fresh encrypted oracle mounted for
@@ -136,3 +138,45 @@ checks do not cover every macOS information channel. A frozen 30-task roster,
 browser/source-gateway boundaries, broken-seed/reference/partial-patch
 controls and exact hashes remain prerequisites before protected H1 analysis.
 The three public turns measure neither a success rate nor frontier-agent parity.
+
+## Candidate-volume alternative, no-model screen
+
+The 30 new task drafts prompted a second isolation layout. The candidate Git
+workspace and its OpenCode temporary directory can be siblings on a disposable
+APFS volume, while private grader material stays on the host volume. This makes
+same-volume hardlink aliases to the grader impossible without keeping a mounted
+grader volume during the Agent turn. The research-only `private_parent` option
+in `NativeServer` requires those siblings to be on a device different from
+`/private/tmp`; ordinary product runs retain their original temporary layout.
+
+`python3 -B research/check_holdout_boundary.py candidate-volume` passed a
+no-model canary on this Mac. It verified different device IDs, direct/symlink/
+copy/metadata/file-URL denials, impossible trusted-parent hardlink, denied
+candidate hardlink, denied raw device and image reads, denied run-root listing,
+visible workspace access, a working `python3` through OpenCode's real shell
+API, hidden-oracle read denial through that API, active product plugin, and
+successful image detachment. The same-volume control still exposes the alias.
+This is a boundary mechanism test, **not** admission of the 30 draft tasks.
+The eventual protected runner must compare each real grader's device ID to
+the candidate workspace device, prove the grader is outside all readable
+dependencies, and rerun the real path/alias canary. Supplying
+`--private-parent` by itself does not establish that separation.
+
+Independent draft review found that 12 of the second task author's graders
+import candidate code directly into the privileged grader process. They must
+be rewritten to run candidate code in a constrained subprocess before those
+tasks can be protected. The three browser tasks additionally need a qualified
+browser gateway; their offline Playwright controls do not establish one.
+The local Chrome process aborted in macOS application registration under the
+whole-process research profile, before navigation. No browser task is scored
+as a protected model result on this basis.
+
+An alternative no-model probe downloaded Playwright 1.55.0's dedicated
+Chromium headless shell (build 1187) into a disposable `/private/tmp` cache.
+Its first launch was correctly denied because Playwright tried to create
+artifacts in the host temporary directory; after redirecting `TMPDIR`, `TMP`,
+`TEMP`, and `HOME` to the candidate-private volume, the launch did not finish
+within 20 seconds. No matching process remained after timeout. This does not
+qualify a browser gateway, and a repeated prompt/flag tweak is not treated as
+an acceptance path. A separately isolated browser service or a different
+audited browser channel would need its own hidden-file and navigation checks.

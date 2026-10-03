@@ -29,7 +29,9 @@ uplift for v1.0.0. Do not select changes from a holdout outcome.
 symlink Seatbelt preflight missed a same-volume hardlink alias. It cannot
 qualify any protected result. The separately preregistered encrypted-volume
 boundary screen in [HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md) passed public
-compatibility checks, but no 30-task sealed holdout has been created or run.
+no-model compatibility checks. Thirty offline task drafts now exist, but
+independent review found grader-isolation and criterion-coverage defects; no
+combined sealed roster has been admitted or run.
 The H1 thresholds and task-retirement rules below are unchanged.
 
 ## Three evaluation layers
