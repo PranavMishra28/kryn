@@ -374,7 +374,7 @@ def prepare(workspace, prompt_file, evidence, base_commit, *, private_parent=Non
     return workspace, prompt_file, evidence, state_dir, config_sha
 
 
-def configuration(workspace, state_dir, arm, relay_url):
+def configuration(workspace, state_dir, arm, relay_url, source_file=None):
     config = copy.deepcopy(owned_config())
     if arm == "native":
         config = native_control_config(config)
@@ -397,6 +397,15 @@ def configuration(workspace, state_dir, arm, relay_url):
         {"action": "shell", "resource": "*", "effect": "allow"},
         {"action": "external_directory", "resource": "*", "effect": "deny"},
     ]
+    if source_file is not None:
+        source = str(source_file)
+        siblings = str(source_file.parent / "*")
+        config["permissions"] += [
+            {"action": "external_directory", "resource": siblings, "effect": "allow"},
+            {"action": "read", "resource": siblings, "effect": "deny"},
+            {"action": "read", "resource": source, "effect": "allow"},
+            {"action": "edit", "resource": siblings, "effect": "deny"},
+        ]
     provider = config["providers"]["local"]
     provider["settings"]["baseURL"] = relay_url
     model = provider["models"]["qwen"]
@@ -548,7 +557,8 @@ def run(args, *, defer_patch=False):
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
-            workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1")
+            workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1",
+            source_file=source_file)
         ui_gateway = getattr(args, "ui_gateway", None)
         monitor = NativeResourceGuard(evidence, samples)
         broker_child = None
