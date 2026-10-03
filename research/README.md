@@ -46,7 +46,11 @@ zero-model, exact-file read-only official-source channel canary in both arms.
 It does not admit external-information tasks or measure model quality.
 [SOURCE_AGENT_TRIAL.md](SOURCE_AGENT_TRIAL.md) records the native Agent shell
 output-cap failure and the passing six-chunk, zero-model Agent-to-Docker handoff.
-The live-model coding pair and protected task admission remain pending.
+That handoff does not test live-model coding or protected task admission.
+[PUBLIC_SOURCE_PAGINATION.md](PUBLIC_SOURCE_PAGINATION.md) records the first
+public, official-source coding pair. Its grader controls passed, but native
+missed two cases and KRYN stopped after an external-read permission denial;
+neither outcome is a protected score.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
