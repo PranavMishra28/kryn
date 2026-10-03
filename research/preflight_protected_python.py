@@ -13,6 +13,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import resource
 import signal
@@ -21,7 +22,7 @@ import sys
 import tempfile
 
 from check_holdout_boundary import background_boundary, mount_active, probe, server_probe
-from run_external_patch import configuration
+from run_external_patch import benchmark_tools, configuration
 
 
 def command(argv, *, timeout=20):
@@ -84,6 +85,8 @@ def main():
     parser.add_argument("draft", type=Path, help="offline draft root with manifest.json")
     parser.add_argument("task_id")
     parser.add_argument("receipt", type=Path, help="new /private/tmp receipt directory")
+    parser.add_argument("--tool-venv", type=Path,
+                        help="pinned Python/ripgrep environment used by both candidate arms")
     args = parser.parse_args()
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,80}", args.task_id):
         parser.error("Task ID must be a simple slug")
@@ -92,6 +95,9 @@ def main():
             receipt.parent != Path("/private/tmp") or receipt.exists() or
             receipt.is_symlink()):
         parser.error("Use a canonical draft and a new direct /private/tmp receipt")
+    if args.tool_venv is not None and (args.tool_venv.is_relative_to(draft)
+                                      or args.tool_venv.is_relative_to(receipt)):
+        parser.error("Benchmark tools must not overlap the hidden draft or candidate receipt")
     receipt.mkdir(mode=0o700)
     mount = receipt / "mount"; mount.mkdir(mode=0o700)
     image = receipt / "candidate.sparseimage"
@@ -113,6 +119,14 @@ def main():
         if len(matches) != 1:
             raise RuntimeError("Task ID missing or duplicated in manifest")
         entry = matches[0]
+        grader_python = Path(sys.executable).resolve()
+        report["grader_python_version"] = platform.python_version()
+        report["grader_python_sha256"] = sha(grader_python)
+        report["grader_interpreter_matches"] = (
+            entry.get("grader_python_version") == report["grader_python_version"]
+            and entry.get("grader_python_sha256") == report["grader_python_sha256"])
+        if not report["grader_interpreter_matches"]:
+            raise RuntimeError("Trusted grader interpreter differs from the frozen task validation")
         seed = draft / "tasks" / args.task_id / "seed"
         prompt = draft / "tasks" / args.task_id / "prompt.md"
         oracle = draft / "private" / "oracles" / (args.task_id + ".py")
@@ -167,13 +181,16 @@ def main():
         if command(["git", "-C", str(workspace), "remote", "remove", "origin"]).returncode:
             raise RuntimeError("Could not remove source remote from candidate checkout")
         dependency_checks = {}
+        tool_path, tool_dependencies, tool_manifest = benchmark_tools(args.tool_venv)
+        report["benchmark_tool_path"] = str(tool_path) if tool_path else None
+        report["benchmark_tool_manifest"] = tool_manifest
         for arm in ("native", "kryn"):
             _, _, dependencies = configuration(
                 workspace, workspace / ".git" / "preflight-state", arm,
                 "http://127.0.0.1:19876/v1")
             dependency_checks[arm] = all(
                 not (draft == path or draft.is_relative_to(path) or path.is_relative_to(draft))
-                for path in (Path(item).resolve() for item in dependencies))
+                for path in (Path(item).resolve() for item in dependencies + tool_dependencies))
         report["code_only_dependencies_exclude_draft"] = dependency_checks
         report["grader_device_separate"] = workspace.stat().st_dev != oracle.stat().st_dev
         report["reference_device_separate"] = workspace.stat().st_dev != reference.stat().st_dev
@@ -198,7 +215,11 @@ def main():
                                    devices[-1] if devices else None, receipt)
         if all(report["boundary"].values()):
             report["server_boundary"] = server_probe(
-                workspace, receipt / "native-server.log", oracle, oracle.read_text(), private)
+                workspace, receipt / "native-server.log", oracle, oracle.read_text(), private,
+                tool_venv=args.tool_venv)
+            report["server_boundary_native"] = server_probe(
+                workspace, receipt / "native-control-server.log", oracle,
+                oracle.read_text(), private, arm="native", tool_venv=args.tool_venv)
         for name in ("visible.txt", "oracle-symlink", "oracle-hardlink",
                      "candidate-hardlink", "copied"):
             (workspace / name).unlink(missing_ok=True)
@@ -213,6 +234,8 @@ def main():
             raise RuntimeError("Real task boundary preflight failed")
         if not all(report.get("server_boundary", {}).values()):
             raise RuntimeError("Real task native OpenCode server boundary failed")
+        if not all(report.get("server_boundary_native", {}).values()):
+            raise RuntimeError("Real task native control server boundary failed")
         report["seed"] = grade(oracle, workspace, private, boundary, draft,
                                receipt / "seed-grader.log")
         if command(["git", "-C", str(workspace), "apply", str(reference)]).returncode:
@@ -263,6 +286,8 @@ def main():
                                 report.get("controls_pass") and
                                 all(report.get("server_boundary", {}).values()) and
                                 report.get("server_boundary") and report["detached"]
+                                and all(report.get("server_boundary_native", {}).values())
+                                and report.get("server_boundary_native")
                                 and "error" not in report)
         if report["source_tree_dirty"]:
             report["admission_note"] = "Research source tree is dirty; controls are development-only"
