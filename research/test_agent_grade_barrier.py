@@ -94,6 +94,7 @@ class AgentGradeBarrierTest(unittest.TestCase):
             with patch.object(barrier, "run", fake_agent), patch.object(
                     barrier, "benchmark_tools", return_value=(barrier.GIT.parent, [],
                                                                  {"canary": True})), patch.object(
+                    barrier, "configuration", return_value=({}, [], [])), patch.object(
                     barrier, "detach", detach_then_doubt), patch.object(
                     barrier, "NativeResourceGuard", FakeGuard), patch.object(
                     barrier, "runtime_is_idle", return_value=True), patch.object(
