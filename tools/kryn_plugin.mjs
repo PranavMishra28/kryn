@@ -560,8 +560,7 @@ export default {
         recoveries: 0, promptEpoch: 0, stopped: false, truncated: false,
         uiBrowserFingerprint: null,
         reviewCalls: 0, reviewCompactions: 0, reviewClosing: false, reviewClosingSteps: 0,
-        verification: verificationLedger(), checkGuidance: new Map(), previousTracker: null,
-        shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
+        verification: verificationLedger(), previousTracker: null, shellRepeat: null, maskedCheckDenials: 0, checkpointRepo: null,
         anchors: userAnchors(options.observe && fs.existsSync(path.join(folders.anchors, key + '.json'))
           ? ownedFile(path.join(folders.anchors, key + '.json')) : undefined),
         recentReads: new Map(), pendingReads: new Map(), pendingEdits: new Map(),
@@ -701,7 +700,6 @@ export default {
       const item = session(event.sessionID);
       staleChecks(item); tracker(item);
       item.promptEpoch++; item.recoveries = 0; item.stopped = false; item.truncated = false;
-      item.checkGuidance.clear();
       item.uiBrowserFingerprint = null;
       item.recentReads.clear();
       item.pendingReads.clear();
@@ -757,41 +755,35 @@ export default {
       if (AGENT_ROLES.has(event.agent)) event.system.push({ type: 'text', text:
         'Verification observations: browser calls alone do not prove acceptance. Direct browser calls or a delegated Browse result must supply actual observations. Do not invent browser actions or mark UI checks passed from source inspection. Tests must exercise imported production code or the actual UI, not a copied implementation.' });
       if (options.observe) {
-        const role = AGENT_ROLES.has(event.agent) ? 'write' : 'read';
-        if (item.checkGuidance.has(role)) event.system.push(...item.checkGuidance.get(role));
-        else {
-          const before = event.system.length;
-          const ledger = item.verification;
-          const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
-          const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
-          event.system.push({ type: 'text', text: 'Observed-check ledger snapshot: ' + counts +
-            (ledger.complete ? '.' : '; partial observation/provenance.') +
-            ' Subsequent tool results may supersede this snapshot. Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. ' +
-            (AGENT_ROLES.has(event.agent)
-              ? 'Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. '
-              : 'This role cannot execute checks; report unresolved or unrun checks and hand execution to Agent. ') +
-            'State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
-          if (unresolved.length) event.system.push({ type: 'text', text: 'Unresolved check references: ' +
-            unresolved.slice(0, 8).map(check => check.kind + ':' + check.state + ' #' + check.key.slice(0, 12) +
-              ' runner=' + check.runner + (check.exit_code === null ? '' : ' exit=' + check.exit_code) +
-              (check.diagnostic ? ' output-hint=' + check.diagnostic : '') +
-              (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
-            (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
-          const stale = ledger.checks.filter(check => check.state === 'stale');
-          if (stale.length) event.system.push({ type: 'text', text: 'Historical stale check references (previously passed; current result unknown): ' +
-            stale.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
-              (check.message_id ? ' at ' + check.message_id : '')).join('; ') +
-            (stale.length > 4 ? '; ' + (stale.length - 4) + ' older records retained in the private tracker.' : '.') });
-          const rechecked = ledger.checks.filter(check => check.previous_failure && !['failed', 'pending'].includes(check.state))
-            .sort((a, b) => a.observed_at - b.observed_at);
-          if (rechecked.length) event.system.push({ type: 'text', text: 'Earlier failed checks with later exit observations (not application acceptance): ' +
-            rechecked.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
-              ' failed at ' + (check.previous_failure.message_id ?? 'unknown message') +
-              ' (' + check.previous_failure.diagnostic + ')' +
-              ', later ' + check.state + ' at ' + (check.message_id ?? 'unknown message')).join('; ') +
-            (rechecked.length > 4 ? '; ' + (rechecked.length - 4) + ' older records retained in the private tracker.' : '.') });
-          item.checkGuidance.set(role, event.system.slice(before));
-        }
+        const ledger = item.verification;
+        const counts = ['failed', 'pending', 'stale', 'passed'].map(state => state + '=' + ledger.checks.filter(check => check.state === state).length).join(', ');
+        const unresolved = ledger.checks.filter(check => ['failed', 'pending'].includes(check.state));
+        event.system.push({ type: 'text', text: 'Observed-check ledger: ' + counts +
+          (ledger.complete ? '.' : '; partial observation/provenance.') +
+          ' Coverage is observed simple commands only; required task acceptance remains unestablished. Passed and stale are historical exit observations, never guarantees of current correctness. Stale alone is not unresolved debt or a rerun demand. Reconcile failed/pending checks with native tool records and current files. ' +
+          (AGENT_ROLES.has(event.agent)
+            ? 'Rerun relevant checks for changed behavior or final acceptance using the shell workdir field; never repeatedly run checks merely to clear counters. '
+            : 'This role cannot execute checks; report unresolved or unrun checks and hand execution to Agent. ') +
+          'State unrun requirements explicitly. Browser actions and model-written reports cannot settle this ledger.' });
+        if (unresolved.length) event.system.push({ type: 'text', text: 'Unresolved check references: ' +
+          unresolved.slice(0, 8).map(check => check.kind + ':' + check.state + ' #' + check.key.slice(0, 12) +
+            ' runner=' + check.runner + (check.exit_code === null ? '' : ' exit=' + check.exit_code) +
+            (check.diagnostic ? ' output-hint=' + check.diagnostic : '') +
+            (check.message_id ? ' at ' + check.message_id : ' (native provenance unavailable)')).join('; ') +
+          (unresolved.length > 8 ? '; ' + (unresolved.length - 8) + ' further records retained in the private tracker.' : '.') });
+        const stale = ledger.checks.filter(check => check.state === 'stale');
+        if (stale.length) event.system.push({ type: 'text', text: 'Historical stale check references (previously passed; current result unknown): ' +
+          stale.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
+            (check.message_id ? ' at ' + check.message_id : '')).join('; ') +
+          (stale.length > 4 ? '; ' + (stale.length - 4) + ' older records retained in the private tracker.' : '.') });
+        const rechecked = ledger.checks.filter(check => check.previous_failure && !['failed', 'pending'].includes(check.state))
+          .sort((a, b) => a.observed_at - b.observed_at);
+        if (rechecked.length) event.system.push({ type: 'text', text: 'Earlier failed checks with later exit observations (not application acceptance): ' +
+          rechecked.slice(-4).map(check => check.kind + ' #' + check.key.slice(0, 12) +
+            ' failed at ' + (check.previous_failure.message_id ?? 'unknown message') +
+            ' (' + check.previous_failure.diagnostic + ')' +
+            ', later ' + check.state + ' at ' + (check.message_id ?? 'unknown message')).join('; ') +
+          (rechecked.length > 4 ? '; ' + (rechecked.length - 4) + ' older records retained in the private tracker.' : '.') });
       }
       if (event.agent === 'reviewer') {
         event.system.push({ type: 'text', text: REVIEW_GUIDANCE + '\nAfter 48 tool attempts or 2 compactions, finish with findings and explicit unreviewed scope; the tool phase ends.' });
@@ -822,7 +814,6 @@ export default {
     await ctx.session.hook('generate', instructions);
     await ctx.session.hook('compaction', async event => {
       if (event.agent === 'reviewer') session(event.sessionID).reviewCompactions++;
-      session(event.sessionID).checkGuidance.clear();
       instructions(event);
       const item = session(event.sessionID);
       const current = await userContinuity(event, true);
