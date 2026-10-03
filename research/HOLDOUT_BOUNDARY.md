@@ -341,3 +341,27 @@ oracle, reference and task ID. This corrects one independently identified
 defect, not a broad oracle-completeness proof or protected admission. Every
 private manifest still says `protected_status=false`; the combined roster,
 non-Python categories and real paired Agent turns remain open gates.
+
+## Error-recovery draft oracle correction
+
+An independent no-model audit of the owner-only `06-verified-restore` draft
+found that its grader accepted a mutation selecting the **oldest** valid
+snapshot: the original test supplied only one valid snapshot, so it did not
+measure its newest-valid requirement. The old draft and its manifest remain
+unchanged. A separate owner-only replacement clarifies that snapshot filenames
+encode creation order, then tests two valid snapshots whose filesystem mtimes
+point in the opposite order, followed by corrupt and malformed newer files.
+
+The old-oracle wrong-oldest pass is reproduced by private receipt SHA-256
+`c74061a7c9810f53ce500c2693e519b368e2ad78d2219dc0798f04f39a9394ef`.
+With the corrected oracle, the seed and partial patch fail, a reference and
+structurally different implementation pass, and four targeted mutants fail:
+oldest-first, mtime-first, digest bypass and in-place write. The eight-control
+receipt SHA-256 is
+`11b1ed063f2bb80b79ae8408ce5c68de199d0363456a5a02589e16fd260d0f37`;
+the 16-file owner-only archive index SHA-256 is
+`3cb02fbf87d113c0f19705d3ce3153abd1c6e671530b677cab76a32d3eb2e7c6`.
+Its compact [history entry](history/ui_gateway.jsonl) discloses no task prompt
+or oracle. This is a stronger **draft**, not protected admission: no candidate
+model request, real OpenCode boundary, 30-task roster seal or paired grading
+was performed. Its manifest still says `protected_status=false`.
