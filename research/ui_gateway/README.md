@@ -78,9 +78,24 @@ showed pressure 1→2 and zero swap growth, then settled its session/runtime and
 container. It cannot establish live dispatch or model quality; repeating that
 same resource-gated turn is not justified.
 
-Remaining gates: independently review the optional third-port change and the
-new synthetic dispatch path; establish guarded live model quality on a
-representative occupied host;
+The preregistered deferred-worker candidate started the same image only on
+the first authorized browser operation. Its clean-source no-model preflight
+passed 36/36 checks, and a synthetic OpenCode dispatch passed in both arms
+with equal full tool catalogs. The first browser call took 0.688 seconds,
+including worker startup. In the single live 9B attempt, the worker remained
+absent before inference, yet the unchanged two-warning host guard again
+stopped model prefill before any browser call. Pressure reached warning,
+sampled runtime footprint reached 10.75 GB, swap did not grow, and the owned
+session and container settled. The candidate is **rejected**: removing the
+worker's idle footprint was insufficient for this occupied-host gate. The
+eager diagnostic came from dirty research source and the two host states were
+not matched, so this does not measure a causal resource saving or model quality.
+Compact provenance is in [`../history/ui_gateway.jsonl`](../history/ui_gateway.jsonl);
+the owner-only archive contains the candidate patch and all raw receipts. No
+deferred-worker code was merged or installed.
+
+Remaining gates: establish guarded live model quality on a representative
+occupied host with a materially different, preregistered resource approach;
 review the container and broker security independently;
 freeze a valid 30-task roster before any protected candidate run. The current
 synthetic check proves OpenCode routed these tools, not that a model chose them.
