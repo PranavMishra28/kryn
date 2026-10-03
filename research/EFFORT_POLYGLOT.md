@@ -73,3 +73,16 @@ public task would trigger a predeclared fresh-task replication and a genuine
 fixed-Default versus adaptive policy comparison; it cannot change the
 production default or support a frontier claim by itself. Sequential cache
 warmth and power differences will be disclosed rather than hidden.
+
+### Environment interruption amendment, 2026-10-03T02:35Z
+
+The first Default trial reached 16 local-model requests, then Docker Desktop
+requested a graceful shutdown at 02:28:48Z during the agent turn. Harbor could
+not add its tests because the Docker socket disappeared. Its result has no
+official reward and cannot count as a coding failure or a completed comparison.
+The unchanged resource guard did not stop it. The raw trial is retained under
+`/private/tmp/kryn-harbor-effort-polyglot-20261002/trials/effort-polyglot-default-20261002`.
+Docker was restarted and its API is healthy. The frozen Fast arm may run once
+as a one-arm diagnostic, but **no outcome of it can make this pair a positive
+or negative Default/Fast screen**. There will be no retry of this Default arm.
+A future mode comparison needs a newly preregistered task and two graded arms.
