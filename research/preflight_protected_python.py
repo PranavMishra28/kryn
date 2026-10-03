@@ -85,8 +85,8 @@ def main():
     parser.add_argument("draft", type=Path, help="offline draft root with manifest.json")
     parser.add_argument("task_id")
     parser.add_argument("receipt", type=Path, help="new /private/tmp receipt directory")
-    parser.add_argument("--tool-venv", type=Path,
-                        help="pinned Python/ripgrep environment used by both candidate arms")
+    parser.add_argument("--tool-venv", required=True, type=Path,
+                        help="pinned Python/ripgrep/Git environment used by both candidate arms")
     args = parser.parse_args()
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,80}", args.task_id):
         parser.error("Task ID must be a simple slug")
@@ -95,8 +95,7 @@ def main():
             receipt.parent != Path("/private/tmp") or receipt.exists() or
             receipt.is_symlink()):
         parser.error("Use a canonical draft and a new direct /private/tmp receipt")
-    if args.tool_venv is not None and (args.tool_venv.is_relative_to(draft)
-                                      or args.tool_venv.is_relative_to(receipt)):
+    if args.tool_venv.is_relative_to(draft) or args.tool_venv.is_relative_to(receipt):
         parser.error("Benchmark tools must not overlap the hidden draft or candidate receipt")
     receipt.mkdir(mode=0o700)
     mount = receipt / "mount"; mount.mkdir(mode=0o700)
@@ -119,6 +118,8 @@ def main():
         if len(matches) != 1:
             raise RuntimeError("Task ID missing or duplicated in manifest")
         entry = matches[0]
+        report["retired_from_holdout"] = bool(entry.get("retirement_reason"))
+        report["scientific_flags"] = entry.get("scientific_flags", [])
         grader_python = Path(sys.executable).resolve()
         report["grader_python_version"] = platform.python_version()
         report["grader_python_sha256"] = sha(grader_python)
@@ -192,6 +193,10 @@ def main():
                 not (draft == path or draft.is_relative_to(path) or path.is_relative_to(draft))
                 for path in (Path(item).resolve() for item in dependencies + tool_dependencies))
         report["code_only_dependencies_exclude_draft"] = dependency_checks
+        report["grader_dependencies_exclude_draft"] = all(
+            not (draft == path or draft.is_relative_to(path) or path.is_relative_to(draft))
+            for path in (Path(item).resolve() for item in
+                         (sys.executable, sys.prefix, sys.base_prefix, boundary)))
         report["grader_device_separate"] = workspace.stat().st_dev != oracle.stat().st_dev
         report["reference_device_separate"] = workspace.stat().st_dev != reference.stat().st_dev
         draft_paths = list(draft.rglob("*"))
@@ -199,6 +204,11 @@ def main():
             all(not path.is_symlink() for path in draft_paths) and
             all(path.stat().st_dev != workspace.stat().st_dev
                 for path in draft_paths if path.is_file()))
+        # A hidden file with one link cannot be aliased inside any readable
+        # host-volume dependency, including the separately pinned tool venv.
+        report["hidden_file_hardlinks_absent"] = all(
+            path.stat().st_nlink == 1 for path in draft_paths
+            if not path.is_symlink() and path.is_file())
         report["answer_aliases_impossible"] = {}
         for label, hidden in (("reference", reference), ("partial", partial),
                               ("validation", validation)):
@@ -216,20 +226,25 @@ def main():
         if all(report["boundary"].values()):
             report["server_boundary"] = server_probe(
                 workspace, receipt / "native-server.log", oracle, oracle.read_text(), private,
-                tool_venv=args.tool_venv)
+                tool_venv=args.tool_venv,
+                extra_hidden=(("reference", reference), ("manifest", manifest_file)))
             report["server_boundary_native"] = server_probe(
                 workspace, receipt / "native-control-server.log", oracle,
-                oracle.read_text(), private, arm="native", tool_venv=args.tool_venv)
+                oracle.read_text(), private, arm="native", tool_venv=args.tool_venv,
+                extra_hidden=(("reference", reference), ("manifest", manifest_file)))
         for name in ("visible.txt", "oracle-symlink", "oracle-hardlink",
                      "candidate-hardlink", "copied"):
             (workspace / name).unlink(missing_ok=True)
-        candidate_status = command(["git", "-C", str(workspace), "status", "--porcelain"])
+        candidate_status = command(["git", "-C", str(workspace), "status", "--porcelain=v1",
+                                    "--untracked-files=all", "--ignored"])
         report["candidate_clean_after_probe"] = (candidate_status.returncode == 0
                                                   and candidate_status.stdout == "")
         if not (report["grader_device_separate"] and report["reference_device_separate"]
                 and report["draft_files_separate"]
+                and report["hidden_file_hardlinks_absent"]
                 and all(report["answer_aliases_impossible"].values())
                 and all(report["code_only_dependencies_exclude_draft"].values())
+                and report["grader_dependencies_exclude_draft"]
                 and all(report["boundary"].values()) and report["candidate_clean_after_probe"]):
             raise RuntimeError("Real task boundary preflight failed")
         if not all(report.get("server_boundary", {}).values()):
@@ -282,18 +297,22 @@ def main():
         report["detached"] = detach_ok and not mount_active(receipt, mount) and image_absent
         if report["detached"] and image.exists():
             image.unlink()
-        report["passed"] = bool(not report["source_tree_dirty"] and
-                                report.get("controls_pass") and
-                                all(report.get("server_boundary", {}).values()) and
-                                report.get("server_boundary") and report["detached"]
-                                and all(report.get("server_boundary_native", {}).values())
-                                and report.get("server_boundary_native")
-                                and "error" not in report)
+        report["mechanics_passed"] = bool(not report["source_tree_dirty"] and
+                                          report.get("controls_pass") and
+                                          all(report.get("server_boundary", {}).values()) and
+                                          report.get("server_boundary") and report["detached"]
+                                          and all(report.get("server_boundary_native", {}).values())
+                                          and report.get("server_boundary_native")
+                                          and "error" not in report)
+        report["passed"] = bool(report["mechanics_passed"] and
+                                not report.get("retired_from_holdout") and
+                                not report.get("scientific_flags"))
         if report["source_tree_dirty"]:
             report["admission_note"] = "Research source tree is dirty; controls are development-only"
         (receipt / "report.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps({key: report.get(key) for key in ("task_id", "passed", "controls_pass",
-                                                  "detached", "admission_note", "error")},
+    print(json.dumps({key: report.get(key) for key in ("task_id", "passed", "mechanics_passed",
+                                                  "retired_from_holdout", "scientific_flags",
+                                                  "controls_pass", "detached", "admission_note", "error")},
                      sort_keys=True))
     return 0 if report["passed"] else 1
 
