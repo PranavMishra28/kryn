@@ -45,3 +45,48 @@ requests/tokens/tool errors, pressure, swap and cleanup. A single public pair
 cannot establish transfer, confidence intervals, protected H1 or frontier
 adjacency even if it passes. Preserve failed attempts and do not tune the
 grader after model exposure.
+
+## Frozen controls and first live pair
+
+From clean `728f043e4f5bc9ab42e72696f5aa2bebbba5870f`, `make check` passed
+before generation. Fresh networkless Docker clones produced the preregistered
+controls: seed 2/8, deliberate partial 2/8, reference 8/8. The source,
+provenance, seed, prompt and patch hashes are in
+`/private/tmp/kryn-public-rate-limit-20261003-01/fixture.json` (SHA-256
+`3ee47a1e1facc0b64da13aae66f1e4e22dc38279f80758461385d5b1f62ebc3d`).
+
+The native-first guarded pair completed with equal effective permissions and
+identical model, output, sampling/thinking and ten-tool wire contracts. **Both
+arms failed strict acceptance at 7/8 independent Docker cases.** The raw pair
+receipt is `/private/tmp/kryn-public-rate-limit-20261003-01/pair.json`, SHA-256
+`825e4f494e19e1420c636cb366d5c32e3c62d1b26d08cd244e4ccb3e5cb12b6c`.
+
+| Arm | Independent result | Work and resources |
+| --- | --- | --- |
+| Native OpenCode | 7/8; retry exhaustion failed. | 195.164 s; 12 model requests and tool calls, no tool errors; 24,219 input / 8,187 output / 124,928 cached-read session tokens; sampled listener physical peak 12.05 GB. |
+| KRYN | 7/8; the same retry-exhaustion case failed. | 682.028 s; 34 model requests and tool calls, two read-before-edit denials; 199,423 input / 20,905 output / 622,592 cached-read session tokens; sampled listener physical peak 13.56 GB. |
+
+Both agents made an untruncated native read of the pinned source. The guard
+reported complete telemetry, AC power, normal sampled pressure and zero
+sampled swap growth. Source and provenance hashes stayed unchanged; candidate,
+capture and grader images detached, and no Docker container remained.
+
+The frozen retry-exhaustion criterion required `RuntimeError` after two total
+fetches and only the first 60-second wait. A separate read-only diagnostic
+executed each captured patch in the same pinned networkless Docker worker and
+observed `RuntimeError`, two fetches **and waits of 60 then 120 seconds** in
+both arms. Their own test files asserted the exception but did not assert the
+sleep sequence; both final messages claimed completion. That is a measured
+false completion in each arm. KRYN's extra requests and local repair attempts
+did not improve accepted work on this fresh task.
+The separate diagnostic receipt is
+`/private/tmp/kryn-public-rate-limit-20261003-01/diagnostic.json`, SHA-256
+`c26659c3938366b5b0782fc060543043403365131166d3f4dab3cfe2b790bf08`;
+it retains the pinned worker/image and both captured patch hashes.
+
+**Decision:** retain this public failure without changing its task or grader.
+The source channel transferred, but successful autonomous implementation did
+not. This one public task cannot estimate H1 or admit the external-information
+category. The observed deficiency is exact criterion-to-check coverage at a
+retry boundary; any general remedy needs a separate preregistered candidate
+and fresh validation, not a task-specific prompt rule or replay of this oracle.
