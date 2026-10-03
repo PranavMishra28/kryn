@@ -169,7 +169,7 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
             "api_shell_workspace_read": visible_exit == 0
                 and visible_output == "candidate-visible",
             "api_shell_oracle_read_denied": hidden_exit != 0
-                and hidden_output == "",
+                and hidden_output == f"cat: {oracle}: Operation not permitted\n",
             "api_shell_python_ready": python_exit == 0
                 and python_output == "python-ready\n",
         }
