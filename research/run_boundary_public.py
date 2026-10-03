@@ -72,7 +72,7 @@ def grade(workspace, private, oracle, source=None):
 
 
 def model_check_succeeded(path):
-    for line in path.read_text().splitlines():
+    for line in Path(path).read_text().splitlines():
         entry = json.loads(line)
         part = entry.get("part", {})
         if part.get("type") != "tool" or part.get("tool") != "shell":

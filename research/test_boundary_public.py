@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import sys
 import tempfile
+import time
 import unittest
 
 from run_boundary_public import grade, model_check_succeeded
@@ -52,8 +53,14 @@ class PublicGraderBoundaryTest(unittest.TestCase):
                 "print(sum(json.load(sys.stdin)))\n")
             self.assertTrue(grade(workspace, private, oracle))
             child_pid = int((workspace / "child.pid").read_text())
-            with self.assertRaises(ProcessLookupError):
-                os.kill(child_pid, 0)
+            for _ in range(40):
+                try:
+                    os.kill(child_pid, 0)
+                except ProcessLookupError:
+                    break
+                time.sleep(.05)
+            else:
+                self.fail("Sandboxed grader child survived process-group cleanup")
 
 
 if __name__ == "__main__":
