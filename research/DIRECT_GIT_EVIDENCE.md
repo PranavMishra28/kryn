@@ -58,3 +58,28 @@ complete with no guard stop, and the raw Agent trace has no irrelevant
 JavaScript-coverage notice. The source, prompt, grader, model, tool environment
 and resource policy are frozen; no operator repair or retry after generation.
 This tests real OpenCode compatibility, not same-model harness uplift.
+
+## Live screen disposition
+
+The first no-model preflight ran from a source clone under world-writable
+`/private/tmp`; the trusted oracle correctly refused that source. The owner-
+only source clone passed boundary mechanics and seed/reference/partial
+controls, while its final eligibility remained false because the task is
+retired. One guarded Agent turn then completed and passed its independent
+functional grader with clean resource telemetry and volume detachment.
+However, its OpenCode inventory loaded the **installed v1.0.0 plugin**
+(`24c55c06a0b9ba6fe126034247479004885af1bf349d2d47dfb365dcf1aefc3f`),
+not this candidate (`e1580149d3e2665b0fb12779306c6df42bf6fcaf1f73630b94bb6c78df2ca877`).
+The irrelevant JavaScript warning appeared once. The live candidate screen
+therefore **failed provenance** and cannot be counted as candidate validation,
+even though the underlying coding task passed. It is not retried under this
+frozen one-attempt screen.
+
+The invalid live barrier report SHA-256 is
+`3c484cbaf13f99889f2b0b0488beaa3951d7fab95ee1608993fc9ab3853b96bd`.
+Its owner-only 30-file evidence archive hashes to
+`3105f8ac87cb376281c57bb01b628ff3b4d1c3a0a6b2adb410a5c8973c642d87`
+and its index to
+`e6568a31e80fc05ea258f7d9651cda975381a38bb9643df3c3c9f5644be773e1`.
+The separate research-runner loader correction is required before a new,
+fresh-task candidate trial. No production integration is justified yet.
