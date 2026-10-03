@@ -122,6 +122,18 @@ receipt hashes are `a8a699ce313f769c04ecdd635d28238e8a466527f4aaf5d0fc383b00f003
 and `de2966c03aa913867a16d637471b29db59bb3f355692bf9d82e4f79c935f58f1`.
 No generation was requested in any of these three probes.
 
+A separate owner-only v4 draft replaced the retired task and strengthened the
+oracles. Its manifest SHA-256 is
+`5ab818f490729bcd1825efef4136966cea07e7fb251943ec527c9e5a4d89f90c`.
+At clean source `be38fd4`, all 15/15 real-task no-model preflights passed
+mechanics and detached; 12/15 returned `passed=true`, while three declared
+coverage-limited tasks returned `passed=false` as required. The 15-receipt
+summary is `/private/tmp/kryn-v4-current-preflight-20261003-01-summary.json`,
+SHA-256 `27b13693c890868a0e0a6c19f481354285cea9a8ab39bd2d2311d59a8baccf35`.
+Independent oracle review found an additional unflagged ISO-timestamp gap in
+`ledger-legacy-records`; a corrected draft is required before roster admission.
+These 15 probes made zero model requests and provide no H1 score.
+
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-native-20261003-01/`, and
