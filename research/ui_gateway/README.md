@@ -58,10 +58,11 @@ OpenCode's actual MCP tool dispatch initially failed because it adds optional
 `_meta` to `tools/call` parameters; the adapter's exact-key check rejected the
 call. The adapter now accepts only the two ordinary keys plus optional object
 `_meta`. The clean-source synthetic inference canary at
-`/private/tmp/kryn-ui-synthetic-wire-20261003-06/result.json` (SHA-256
-`6862b8e08f52207647bce314c8e07de39f455b693a31e5d7f76a0e05e5caefa7`)
-passes in both real OpenCode arms: each wire request exposes the same six browser
-tools, and navigation, click, and snapshot all complete with the changed
+`/private/tmp/kryn-ui-synthetic-wire-20261003-07/result.json` (SHA-256
+`0efb2f70cd01c6a3a0c9cd302c12c2aff3a9be9f9ac631727d1c0536c684a6b8`)
+passes in both real OpenCode arms: each starts from a separate clean checkout,
+all four requests expose the same eight-tool catalog, and navigation, click,
+and snapshot all complete with the changed
 `Activated` page state. It made **zero real model requests** and is not an
 agent-quality or protected score. An earlier synthetic run exposed a full Browse
 tool-catalog mismatch: native exposed `glob`, `grep`, and `skill` while KRYN's
