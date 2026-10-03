@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import shutil
 import sys
+import time
 
 from harbor.models.environment_type import EnvironmentType
 from harbor.models.trial.config import AgentConfig, EnvironmentConfig, TaskConfig, TrialConfig
@@ -21,10 +22,17 @@ from learning import InferenceRelay  # noqa: E402
 from native_client import MODEL_ID  # noqa: E402
 
 MIN_DATA_FREE_BYTES = 12 * 1024**3
+AGENT_WALL_SECONDS = 900
 
 
 def data_free_bytes():
     return shutil.disk_usage("/private/tmp").free
+
+
+def clean_resource_evidence(resources):
+    return bool(resources and resources.get("telemetry_complete") is True and
+                resources.get("warning_or_critical_observed") is False and
+                resources.get("swap_peak_growth_bytes") == 0)
 
 
 async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: str,
@@ -46,7 +54,7 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
         install_only=install_only,
         agent=AgentConfig(import_path="research.harbor_kryn_agent:" +
                           ("NativeOpenCode" if arm == "native" else "KrynOpenCode"),
-                          model_name="local/qwen", override_timeout_sec=900,
+                          model_name="local/qwen", override_timeout_sec=AGENT_WALL_SECONDS,
                           env={"KRYN_HARBOR_RELAY_PORT": str(relay.port),
                                "KRYN_HARBOR_VARIANT": variant}),
         environment=EnvironmentConfig(type=EnvironmentType.DOCKER, delete=True),
@@ -56,13 +64,18 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
         raise RuntimeError("Data volume fell below 12 GiB during trial setup")
     monitor = None
     samples = []
+    agent_started_wall = None
+    agent_finished_wall = None
 
     async def begin(_event):
-        nonlocal monitor
+        nonlocal monitor, agent_started_wall
+        agent_started_wall = time.time()
         monitor = NativeResourceGuard(evidence, samples, warning_samples=None)
         monitor.start()
 
     async def end(_event):
+        nonlocal agent_finished_wall
+        agent_finished_wall = time.time()
         if monitor is not None and not monitor.log.closed:
             monitor.close()
 
@@ -71,8 +84,16 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
     active = asyncio.create_task(trial.run())
     cancelled = False
     disk_stopped = False
+    wall_stopped = False
     try:
         while not active.done():
+            if (agent_started_wall is not None and agent_finished_wall is None and
+                    time.time() - agent_started_wall >= AGENT_WALL_SECONDS):
+                wall_stopped = True
+                cancelled = True
+                relay.cancel()
+                active.cancel()
+                break
             if data_free_bytes() < MIN_DATA_FREE_BYTES:
                 disk_stopped = True
                 cancelled = True
@@ -95,20 +116,29 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
 
     disk_end = data_free_bytes()
     disk_stopped = disk_stopped or disk_end < MIN_DATA_FREE_BYTES
-    reward = (result.verifier_result.rewards or {}).get("reward") if result.verifier_result else None
+    agent_wall_elapsed = ((agent_finished_wall or time.time()) - agent_started_wall
+                          if agent_started_wall else None)
+    wall_stopped = wall_stopped or (agent_wall_elapsed is not None and
+                                   agent_wall_elapsed >= AGENT_WALL_SECONDS)
+    reward = ((result.verifier_result.rewards or {}).get("reward")
+              if result is not None and result.verifier_result else None)
     reason = monitor.guard.reason if monitor is not None else None
     (evidence / "inference.json").write_text(json.dumps(relay.records, indent=2) + "\n")
     report = {
         "harbor_trial": name, "arm": arm, "variant": variant,
         "harbor_result": str(trial.paths.result_path),
         "install_only": install_only, "reward": reward,
-        "exception": result.exception_info.exception_type if result.exception_info else None,
+        "exception": (result.exception_info.exception_type
+                      if result is not None and result.exception_info else None),
         "guard_preflight_passed": monitor.preflight_passed if monitor else False,
         "guard_reason": reason, "guard_cancelled": cancelled,
         "disk_free_start_bytes": disk_start,
         "disk_free_end_bytes": disk_end,
         "disk_min_free_bytes": MIN_DATA_FREE_BYTES,
         "disk_stopped": disk_stopped,
+        "agent_wall_limit_seconds": AGENT_WALL_SECONDS,
+        "agent_wall_elapsed_seconds": agent_wall_elapsed,
+        "wall_stopped": wall_stopped,
         "inference_requests": len(relay.records),
         "resources": summarize_resources(samples) if samples else None,
         "runtime_idle": runtime_is_idle(evidence, "final-idle") if monitor else None,
@@ -116,11 +146,14 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
     report["strict_accepted"] = bool(not install_only and reward == 1 and relay.records and
                                      report["exception"] is None and reason is None and
                                      report["runtime_idle"] and report["guard_preflight_passed"] and
-                                     report["resources"] and report["resources"]["telemetry_complete"] and
-                                     not disk_stopped)
+                                     clean_resource_evidence(report["resources"]) and
+                                     not disk_stopped and not wall_stopped)
+    report["install_passed"] = bool(install_only and report["exception"] is None and
+                                     report["guard_preflight_passed"] and reason is None and
+                                     report["runtime_idle"] and not disk_stopped and not wall_stopped)
     (evidence / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, sort_keys=True))
-    return 0 if install_only and report["exception"] is None or report["strict_accepted"] else 1
+    return 0 if report["install_passed"] or report["strict_accepted"] else 1
 
 
 async def run(task: Path, trials_dir: Path, name: str, arm: str, variant: str,
