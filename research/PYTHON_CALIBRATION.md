@@ -153,11 +153,19 @@ shell canary showed that a `setsid` child holding a candidate file descriptor
 blocks normal detachment, while a detached child without such a descriptor
 cannot read the new candidate mount or read/write the fresh grader mount even
 when given their exact paths. Its receipt is
-`/private/tmp/kryn-agent-grade-canary-7urivi8z/canary.json`, SHA-256
-`c4c675d327bc15eeaf218567be93557049e9bef62fd0a3ca9dc07c977bf4b48e`.
+`/private/tmp/kryn-agent-grade-canary-y0e05rmh/canary.json`, SHA-256
+`eef5f527818aaa9625669fb75e423bfcbb2d12933287bb824246d04cc63c52ad`.
 An immediate equal-length tracked edit exposed a copied-index stat-cache miss;
 patch capture now resets tracked stat entries in its private index before diff.
 The regression also retains an intent-to-add new file in the patch.
+Read-only capture keeps the same 512-MiB swap-growth and two-warning resource
+guard active through candidate-controlled Git, with cancellation passed to each
+Git child. Missing telemetry, resource cancellation or a non-idle runtime
+withholds grading. A synthetic no-model trial with the real guard (and a fake
+Agent) recorded four complete green samples and idle runtime before and after
+capture; its `barrier.json` SHA-256 is
+`4f042f85116b09913001193e8b0be00bf1e534c50cf01718b206783455cb891c`
+at `/private/tmp/kryn-capture-guard-real-7edc63782e56`.
 This tests the path barrier, not exhaustive process-tree termination or private
 grader confinement; no protected model trial has used the barrier.
 

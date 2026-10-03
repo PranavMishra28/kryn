@@ -16,8 +16,10 @@ import time
 from dataclasses import dataclass
 from types import SimpleNamespace
 
-from run_external_patch import (benchmark_tools, collect_patch, configuration,
-                                git_config_sha256, isolated_git, quiet_command, run)
+from run_external_patch import (CaptureCancelled, MODEL_ID, NativeResourceGuard,
+                                benchmark_tools, collect_patch, configuration,
+                                git_config_sha256, isolated_git, quiet_command, run,
+                                runtime_is_idle, summarize_resources)
 
 GIT = Path("/Library/Developer/CommandLineTools/usr/bin/git")
 
@@ -132,7 +134,8 @@ def clean_clone(seed, workspace, base_commit):
     command([str(GIT), "-C", str(workspace), "remote", "remove", "origin"])
 
 
-def capture_readonly(volume, root, base_commit, agent, evidence, arm, tool_venv):
+def capture_readonly(volume, root, base_commit, agent, evidence, arm, tool_venv,
+                     cancelled):
     old_mount = Path(agent["workspace"]).parent
     if volume.mount == old_mount or volume.mount.is_relative_to(old_mount):
         raise BarrierError("Read-only capture reused the Agent workspace path")
@@ -144,12 +147,14 @@ def capture_readonly(volume, root, base_commit, agent, evidence, arm, tool_venv)
         raise BarrierError("Pinned benchmark tools changed during the Agent turn")
     _, _, dependencies = configuration(workspace, workspace / ".git", arm,
                                        "http://127.0.0.1:19876/v1")
+    if cancelled():
+        raise CaptureCancelled("Resource guard interrupted read-only patch capture")
     with tempfile.TemporaryDirectory(prefix="kryn-capture-private-", dir=root) as temporary:
         _, names, size, digest = collect_patch(
             workspace, base_commit, evidence, private=Path(temporary),
             dependencies=dependencies + tool_dependencies,
             git_binary=tool_path / "git", tool_path=tool_path,
-            cancelled=lambda: False, readonly_workspace=True)
+            cancelled=cancelled, readonly_workspace=True)
     return {"patch_sha256": digest, "patch_size_bytes": size,
             "untracked_files_included_in_patch": names}
 
@@ -221,9 +226,41 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
             raise BarrierError("Agent did not complete an isolated deferred-patch turn")
         frozen = attach(candidate.image, receipt, readonly=True)
         def capture_phase():
-            captured = capture_readonly(frozen, receipt, base_commit, agent,
-                                        receipt / "agent-evidence", arm, tool_venv)
-            report["capture"] = captured
+            evidence = receipt / "capture-evidence"
+            evidence.mkdir(mode=0o700)
+            samples = []
+            monitor = NativeResourceGuard(evidence, samples)
+            before_idle = after_idle = False
+            try:
+                before_idle = runtime_is_idle(evidence, "runtime-before", model_id=MODEL_ID,
+                                              guard_gib=22)
+                if not before_idle:
+                    raise BarrierError("Model runtime was not idle before patch capture")
+                monitor.start()
+                captured = capture_readonly(frozen, receipt, base_commit, agent,
+                                            receipt / "agent-evidence", arm, tool_venv,
+                                            monitor.cancel.is_set)
+                report["capture"] = captured
+                after_idle = runtime_is_idle(evidence, "runtime-after", model_id=MODEL_ID,
+                                             guard_gib=22)
+            finally:
+                try:
+                    monitor.close()
+                finally:
+                    report["capture_guard"] = {
+                        "preflight_passed": monitor.preflight_passed,
+                        "cancelled": monitor.cancel.is_set(),
+                        "reason": monitor.guard.reason,
+                        "max_swap_growth_bytes": monitor.guard.max_swap_growth,
+                        "warning_samples_to_abort": monitor.guard.warning_samples,
+                        "runtime_before_idle": before_idle,
+                        "runtime_after_idle": after_idle,
+                        "resources": summarize_resources(samples),
+                    }
+            guard = report["capture_guard"]
+            if (guard["cancelled"] or guard["reason"] or
+                    not guard["resources"]["telemetry_complete"] or not after_idle):
+                raise BarrierError("Read-only patch capture resource or runtime settlement failed")
             return captured
         do_then_detach(frozen, report, "capture_detached", capture_phase)
         grader = create_volume(receipt, "grader")
