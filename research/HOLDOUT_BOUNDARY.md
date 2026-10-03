@@ -139,6 +139,17 @@ browser/source-gateway boundaries, broken-seed/reference/partial-patch
 controls and exact hashes remain prerequisites before protected H1 analysis.
 The three public turns measure neither a success rate nor frontier-agent parity.
 
+A fourth fresh public turn on merged source `aad56ec` used the repaired parser.
+It was stopped by the unchanged sustained-host-warning guard during the first
+model request, before a tool call or patch. The sampled pressure rose from
+normal to warning twice in succession; swap growth was zero, and the owned
+session and runtime settled. The boundary/seed/reference checks passed and the
+oracle image detached. This is an occupied-host fit failure, not a coding
+outcome or a reason to weaken the guard. The raw receipt is
+`/private/tmp/kryn-boundary-public-20261003-04/`; its 56-file manifest SHA-256
+is `22ad1a7b739c7e1456ff3c46d5cc71db1499ccfe1ddbb74ea9eb00982ac9a810`.
+No identical retry is scheduled.
+
 ## Candidate-volume alternative, no-model screen
 
 The 30 new task drafts prompted a second isolation layout. The candidate Git

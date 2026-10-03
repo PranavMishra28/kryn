@@ -13,6 +13,7 @@ import re
 import secrets
 import shlex
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -97,7 +98,7 @@ def probe(workspace, private, oracle, image=None, device=None, run_root=None,
 
 
 def server_probe(workspace, log, oracle, marker, private_parent=None,
-                 *, arm="kryn", tool_venv=None):
+                 *, arm="kryn", tool_venv=None, extra_hidden=()):
     # Use the same product configuration and dependency builder as the external
     # candidate runner. API inventory initializes plugins without inference.
     subprocess.run(["/usr/bin/git", "init", "-q", str(workspace)], check=True,
@@ -138,7 +139,9 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
         background["tool_path"] = str(tool_path)
     native_server = NativeServer(workspace, config, log=log, background=background)
     native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
-    with native_server as server:
+    with socket.socket() as blocked_listener, native_server as server:
+        blocked_listener.bind(("127.0.0.1", 0))
+        blocked_listener.listen(1)
         server.inventory()
         for domain in ("config", "agent", "command", "skill"):
             server.request("GET", "/api/" + domain, timeout=5)
@@ -173,6 +176,20 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
             "api_shell_python_ready": python_exit == 0
                 and python_output == "python-ready\n",
         }
+        for label, hidden_path in extra_hidden:
+            raw_hidden = run(server.background_prefix + ["/bin/cat", str(hidden_path)])
+            api_exit, api_output = shell(server, ["/bin/cat", hidden_path])
+            checks[f"server_profile_{label}_read_denied"] = (
+                raw_hidden.returncode != 0 and raw_hidden.stdout == "")
+            checks[f"api_shell_{label}_read_denied"] = (
+                api_exit != 0 and api_output ==
+                f"cat: {hidden_path}: Operation not permitted\n")
+        blocked_port = blocked_listener.getsockname()[1]
+        connect_script = ("import socket; s=socket.socket(); "
+                          f"print('DENIED:'+str(s.connect_ex(('127.0.0.1',{blocked_port}))))")
+        connect_exit, connect_output = shell(server, ["python3", "-c", connect_script])
+        checks["api_shell_unlisted_loopback_denied"] = (
+            connect_exit == 0 and connect_output in ("DENIED:1\n", "DENIED:13\n"))
         if tool_venv is not None:
             rg_exit, rg_output = shell(server, ["rg", "candidate-visible", workspace / "visible.txt"])
             pytest_exit, pytest_output = shell(server, ["python3", "-I", "-m", "pytest", "--version"])

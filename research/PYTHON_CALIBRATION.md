@@ -104,6 +104,15 @@ Both run directories are under `/private/tmp/kryn-python-postcapture-development
 This is adapter compatibility and a resource-guard observation, **not** an H1
 estimate or a protected model result.
 
+The next research-only admission correction requires the pinned Python/rg/Git
+tool environment, treats ignored checkout residue as dirty, and checks that the
+grader interpreter paths do not overlap the hidden draft. Each arm's no-model
+OpenCode shell canary must also deny the reference and manifest files and a
+live unlisted localhost service. The offline preflight now separates mechanics
+from task eligibility: a retired task or one with declared scientific coverage
+flags cannot report `passed=true`. This does not repair the still-unflagged
+oracle coverage gaps or qualify the combined 30-task roster.
+
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-native-20261003-01/`, and
