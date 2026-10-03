@@ -111,3 +111,59 @@ inference. The later edits came from the trusted controller, so it does not
 establish autonomous long-workflow quality, model-visible context fidelity,
 protected task admission or same-model H1 uplift. The private staged tasks
 remain unsealed.
+
+## Guarded live-model Docker transfer screen
+
+The next screen repeated the already exposed public Python task with **real**
+Qwen3.5-9B-6bit turns. Its owner-only plan was frozen before the grader change
+(SHA-256 `d84438f2c197337518745ab067be669eae821386d3d6f4a8bb2b0078b6fba3bc`).
+This is a development transport test, not fresh validation or a protected
+holdout. The frozen fixture and installed profile were pinned by hash. The
+research adapter at `6234dda` cloned only the current two regular source files
+from each candidate APFS workspace into a fresh host checkout after each turn;
+the Docker grader saw that checkout, not the candidate volume or expected
+answers. It used the pinned Python image, networkless read-only non-root
+containers, bounded output, and host-side oracle comparison. Docker controls
+confirmed seed failure, reference passes at all three stages, and rejection of
+a stale separator before model generation.
+
+| Arm | Stage grades | Read before edit | Requests | Tool errors | Wall time |
+| --- | --- | --- | ---: | ---: | ---: |
+| KRYN | pass, pass, **fail** | 3/3 | 25 | 2 | 174.777 s |
+| Native OpenCode | pass, pass, **fail** | 3/3 | 38 | 3 | 201.173 s |
+
+Both arms kept one session through two completed compactions and two real
+server restarts. All three prompts remained in raw history; both candidate
+images detached; every stage clone matched its APFS source bytes; no trial
+container remained. Each guard had complete telemetry, normal sampled host
+pressure, AC power, zero sampled swap growth and no intervention. The full
+tool schema stayed stable within each arm and matched at first wire.
+
+The **original executable matched-permissions check failed**. Its configured
+rules matched, but it hashed four generated OpenCode private-state paths
+literally. Posthoc inspection of the saved `/api/agent` inventories found the
+same 28 rules in the same order; narrowly replacing each arm's exact owned
+`kryn-isolated-*` path makes the lists equal. A later research-only normalizer
+uses that exact path and has a negative control for a changed rule. The
+original result remains `matched_effective_permissions=false`; it is **not**
+retroactively counted as a protocol-matched H1 pair or rerun to improve score.
+
+The functional failures are also clear. KRYN tracked suffixes per base slug,
+so distinct bases could yield the same final slug. Native began collision
+suffixes at 1 despite the task's explicit starting value of 2 and also reused
+a slug. Each final answer claimed completion. A separate **posthoc, unscored**
+collision case failed in both final sources while the frozen reference passed.
+The corrected transport does not turn either failed model output into accepted
+work. No v1 product, installed profile or resource guard changed.
+
+The immutable raw `result.json` SHA-256 is
+`503700fb60a6d248a4182947e174eec3b83eb3f7c3de7fa501f21bba50cfe85c`.
+The owner-only 170-file raw index SHA-256 is
+`4d263d0364185c3edd991eacd8aff2ec7da1c0ecb7998b09b232b1479d77c321`;
+the posthoc result SHA-256 is
+`7aced4ea1671cead2463b55a6a1c275461be1462f371e648fd8096404e8036ba`.
+The private receipt, retained disk images and final source snapshots are at
+`~/Documents/Codex/kryn-research-private/experiments/public-staged-docker-live-20261003/`.
+This screen advances live staged **grader-transport feasibility** only. The
+unsealed private tasks, genuine long-workflow acceptance, same-model uplift,
+and frontier-relative gates remain open.

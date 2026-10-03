@@ -116,6 +116,23 @@ def functional_rejection(result):
                 for case in result["cases"]))
 
 
+def effective_permission_hash(permissions, workspace, server_private):
+    """Normalize only the two runtime-owned disposable paths."""
+    normalized = []
+    for item in permissions:
+        copy = dict(item)
+        resource = copy.get("resource")
+        if isinstance(resource, str):
+            for actual, marker in ((str(server_private), "<server_private>"),
+                                   (str(workspace), "<workspace>")):
+                if resource == actual or resource.startswith(actual + "/"):
+                    resource = marker + resource[len(actual):]
+                    break
+            copy["resource"] = resource
+        normalized.append(copy)
+    return sha(json_bytes(normalized))
+
+
 def seed_and_preflight(root):
     seed = root / "seed"
     seed.mkdir(mode=0o700)
@@ -219,9 +236,8 @@ def arm(root, which, seed, grader, preflight, tools):
                 agent = next((item for item in inventory if item.get("id") == "agent"), None)
                 if not agent or not isinstance(agent.get("permissions"), list):
                     raise RuntimeError("Effective Agent permissions are unavailable")
-                normalized = json.dumps(agent["permissions"], sort_keys=True).replace(
-                    str(workspace), "<workspace>").replace(str(private), "<private>")
-                result["effective_permissions_sha256"] = sha(normalized.encode())
+                result["effective_permissions_sha256"] = effective_permission_hash(
+                    agent["permissions"], workspace, server.temporary.name)
                 (folder / "agent-inventory.json").write_text(json.dumps(inventory, indent=2) + "\n")
                 sid = server.request("POST", "/api/session", {
                     "title": "public-staged-model", "agent": "agent",
