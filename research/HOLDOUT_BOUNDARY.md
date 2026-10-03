@@ -341,3 +341,62 @@ oracle, reference and task ID. This corrects one independently identified
 defect, not a broad oracle-completeness proof or protected admission. Every
 private manifest still says `protected_status=false`; the combined roster,
 non-Python categories and real paired Agent turns remain open gates.
+
+## Error-recovery draft oracle corrections
+
+An independent no-model audit of the owner-only `06-verified-restore` draft
+found that its grader accepted a mutation selecting the **oldest** valid
+snapshot: the original test supplied only one valid snapshot, so it did not
+measure its newest-valid requirement. The old draft and its manifest remain
+unchanged. A separate owner-only replacement clarifies that snapshot filenames
+encode creation order, then tests two valid snapshots whose filesystem mtimes
+point in the opposite order, followed by corrupt and malformed newer files.
+
+The old-oracle wrong-oldest pass is reproduced by private receipt SHA-256
+`c74061a7c9810f53ce500c2693e519b368e2ad78d2219dc0798f04f39a9394ef`.
+With the corrected oracle, the seed and partial patch fail, a reference and
+structurally different implementation pass, and four targeted mutants fail:
+oldest-first, mtime-first, digest bypass and in-place write. The eight-control
+receipt SHA-256 is
+`11b1ed063f2bb80b79ae8408ce5c68de199d0363456a5a02589e16fd260d0f37`;
+the 16-file owner-only archive index SHA-256 is
+`3cb02fbf87d113c0f19705d3ce3153abd1c6e671530b677cab76a32d3eb2e7c6`.
+Its compact [history entry](history/ui_gateway.jsonl) discloses no task prompt
+or oracle. This is a stronger **draft**, not protected admission: no candidate
+model request, real OpenCode boundary, 30-task roster seal or paired grading
+was performed. Its manifest still says `protected_status=false`.
+
+A second audit of the owner-only upload-retry draft found its grader accepted a
+mutation that passed a **negative** retry delay to the injected sleep callback,
+despite the prompt's nonnegative-delay requirement. The original oracle also
+required exact error-message text absent from the task contract. A separate
+replacement tests negative delay and rejection of 302 as a 2xx success, while
+accepting a structurally different implementation with different error text.
+The old-oracle mutant pass has private receipt SHA-256
+`a4734531922e23c26d89b9d31500c14bf23d137555aea76aa32025b2a93736d7`.
+The seed and partial patch fail, reference and alternative pass, and negative-
+delay, redirect-as-success and two-try mutants fail in the new seven-control
+receipt, SHA-256
+`8b62d8013d37964c3800f4e34bf32e1565f5b1b5eefa0716638f576399c80c31`.
+The 16-file owner-only archive index SHA-256 is
+`74e26492df7f7b73271ea7f845032af27d8f6927fc3e4fbfa1ffe9aaf014a6dd`.
+Its [history entry](history/ui_gateway.jsonl) contains no hidden prompt or
+grader. This also remains an unsealed no-model draft with
+`protected_status=false` and no real candidate-volume admission.
+
+The third error-recovery slot had a similar gap: its mailbox grader accepted a
+reference mutation that quarantined malformed line 1 only. A separate owner-
+only replacement makes checkpoint and quarantine JSON shapes explicit and
+tests two malformed positions, ordered delivery, callback-failure resume and
+deduplication after checkpoint rewind. The original mutant pass has private
+receipt SHA-256
+`8eb77cf02ccb17db2f1455ecae1a107455cd6875d608ebd5cab8ad764d5442ba`.
+The seed and partial patch fail, reference and structurally different
+alternative pass, and index-one-only and duplicate-quarantine mutants fail in
+the new six-control receipt, SHA-256
+`4bc902d10790b14baac7e7ee3e36c39da0e6ea8e942b08c8d3e25d9b4d27fd54`.
+The 16-file owner-only archive index SHA-256 is
+`417ec569e52aa92136d1cc7a8de4f0ba58d04f56596adcbe767d4906ffaaf260`.
+Its [history entry](history/ui_gateway.jsonl) also omits the hidden prompt and
+grader. All three corrected recovery slots remain unsealed and unscored; these
+targeted controls do not establish complete oracle coverage.
