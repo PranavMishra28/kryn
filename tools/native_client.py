@@ -104,28 +104,35 @@ def background_boundary(workspace, private, dependencies, inference_port, native
     # Bun resolves cwd through parent directories. Literal directory reads permit
     # this traversal without granting any parent subtree's file contents.
     ancestors = "\n".join(f'    (literal {quote(p)})' for p in sorted(set(workspace.parents) | set(private.parents)))
+    # Interpreters can realpath their executable through dependency parents;
+    # expose only parent metadata, not sibling directory listings or contents.
+    dependency_parents = "\n".join(f'    (literal {quote(p)})'
+                                   for p in sorted({parent for item in reads
+                                                    for parent in item.parents}))
     # Seatbelt's address grammar accepts localhost/*, not numeric hosts.
     # All actual listeners/requests are bound to explicit IPv4 loopback addresses.
     network = "\n".join(f'(allow network-outbound (remote ip "localhost:{p}"))' for p in ports)
     inbound = f'(allow network-inbound (local ip "localhost:{native_port}"))' if native_port else ''
     profile = f'''(version 1)
 (allow default)
-(deny file-read-data)
+(deny file-read*)
 (deny file-write*)
 (deny network*)
 (deny mach-lookup)
 (deny appleevent-send)
 (deny process-info*)
 (allow process-info* (target self))
-(allow file-read-data
+(allow file-read*
 {allowed}
 {ancestors}
     (literal "/dev/null") (literal "/dev/random") (literal "/dev/urandom"))
+(allow file-read-metadata
+{dependency_parents})
 (allow file-write* (subpath {quote(workspace)}) (subpath {quote(private)}))
-(deny file-read-data file-write* (subpath {quote(workspace / '.opencode')})
+(deny file-read* file-write* (subpath {quote(workspace / '.opencode')})
     (literal {quote(workspace / 'opencode.json')}) (literal {quote(workspace / 'opencode.jsonc')}))
 ;; Even an interpreter allowance must never expose installed evaluation answers.
-(deny file-read-data file-write* (subpath {quote(PROJECT / 'tools')}) (subpath {quote(PROJECT / 'evals')}))
+(deny file-read* file-write* (subpath {quote(PROJECT / 'tools')}) (subpath {quote(PROJECT / 'evals')}))
 (allow file-write-data (literal "/dev/null") (literal "/dev/tty"))
 {inbound}
 {network}

@@ -65,6 +65,9 @@ def configuration(workspace, state_dir, arm, relay_url):
         products[0]["options"]["observe"] = True
         products[0]["options"]["inferenceBaseURL"] = relay_url
         dependencies.append(Path(products[0]["package"]).resolve())
+        node_binary = products[0]["options"].get("nodeBinary")
+        if node_binary:
+            dependencies.append(Path(node_binary).resolve())
     config["mcp"] = {"servers": {}}
     config["skills"] = []
     config["permissions"] += [
