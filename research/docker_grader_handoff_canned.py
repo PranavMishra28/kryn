@@ -56,7 +56,8 @@ def fixture(output):
 
 
 def trial(seed, prompt, hidden, tool_venv, grade_root, arm):
-    sequence = [("write", {"path": "answer.py", "content": FIXED})]
+    sequence = [("shell", {"command": "cat " + str(hidden)}),
+                ("write", {"path": "answer.py", "content": FIXED})]
 
     class CannedRelay:
         def __init__(self, *_args, **_kwargs):
@@ -142,21 +143,33 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm):
     agent = result["agent"]
     catalogs = [request["tools"] for request in agent["requests"]]
     graded = result["grader_result"]
+    shell_calls = []
+    for export in (receipt / "agent-evidence").glob("ses_*.export.json"):
+        data = json.loads(export.read_text())["data"]
+        shell_calls.extend(part for message in data["messages"]
+                           for part in message.get("content", [])
+                           if part.get("type") == "tool" and part.get("name") == "shell")
+    shell_exit = (shell_calls[0].get("state", {}).get("metadata", {}).get("exit")
+                  if len(shell_calls) == 1 else None)
+    hidden_denied = (type(shell_exit) is int and shell_exit != 0 and
+                     hidden.read_text().strip() not in json.dumps(shell_calls[0]))
     passed = bool(result["graded"] and agent["completed"] and
                   agent["inference_relay_settled"] and
+                  hidden_denied and
                   result["candidate_detached"] and result["capture_detached"] and
                   result["grader_detached"] and graded["docker_exit"] == 0 and
                   graded["docker_stdout"] == "PUBLIC PASS\n" and
                   graded["container_absent"] and graded["staged_equals_apfs"] and
                   graded["patch_sha256"] == result["capture"]["patch_sha256"] and
-                  len(catalogs) >= 2 and all(catalog == catalogs[0] for catalog in catalogs)
-                  and "write" in catalogs[0] and
+                  len(catalogs) >= 3 and all(catalog == catalogs[0] for catalog in catalogs)
+                  and "write" in catalogs[0] and "shell" in catalogs[0] and
                   agent["resources"]["telemetry_complete"] and
                   not agent["resources"]["warning_or_critical_observed"] and
                   result["capture_guard"]["resources"]["telemetry_complete"] and
                   not result["capture_guard"]["cancelled"])
     return {"arm": arm, "receipt": str(receipt), "passed": passed,
             "catalogs": catalogs, "grader": graded,
+            "hidden_shell_read_denied": hidden_denied,
             "candidate_detached": result["candidate_detached"],
             "capture_detached": result["capture_detached"],
             "grader_detached": result["grader_detached"],
