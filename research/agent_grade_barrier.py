@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import re
 import shutil
 import subprocess
 import tempfile
@@ -171,7 +172,7 @@ def apply_patch(workspace, private, patch):
 
 
 def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
-                            hidden_paths, grade, timeout=900):
+                            hidden_paths, grade, timeout=900, browser_image=None):
     """Run an admitted task; grade is a trusted callback(workspace, private, evidence).
 
     This function deliberately emits no protected pass/fail verdict. A study
@@ -182,6 +183,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
     hidden_paths = [Path(path).absolute() for path in hidden_paths]
     if arm not in {"native", "kryn"} or type(timeout) is not int or not 30 <= timeout <= 1800:
         raise ValueError("Use a known OpenCode arm and a 30–1800 second timeout")
+    if browser_image is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}", browser_image):
+        raise ValueError("Browser image must be an exact local image ID")
     inputs = (seed, prompt, tool_venv, receipt, *hidden_paths)
     if any(path != path.resolve() or any(parent.is_symlink() for parent in path.parents)
            for path in inputs):
@@ -196,6 +199,7 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
     receipt.mkdir(mode=0o700)
     report = {"kind": "research_agent_grade_data_barrier", "task_id": task_id,
               "arm": arm, "protected_score": False, "graded": False,
+              "browser_image": browser_image,
               "barrier_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     started = time.monotonic()
     try:
@@ -215,14 +219,15 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
                                    task_id=task_id, prompt=prompt,
                                    evidence=receipt / "agent-evidence", arm=arm,
                                    tool_venv=tool_venv, private_parent=private,
-                                   timeout=timeout)
+                                   timeout=timeout, ui_image=browser_image)
             result = run(args, defer_patch=True)
             report["agent"] = result
             report["agent"]["workspace"] = str(workspace)
             return result
         agent = do_then_detach(candidate, report, "candidate_detached", agent_phase)
         if (not agent["completed"] or not agent["patch_deferred"] or
-                not agent.get("inference_relay_settled")):
+                not agent.get("inference_relay_settled") or
+                (browser_image is not None and not agent.get("browser_settled"))):
             raise BarrierError("Agent did not complete an isolated deferred-patch turn")
         frozen = attach(candidate.image, receipt, readonly=True)
         def capture_phase():

@@ -3,18 +3,46 @@ from pathlib import Path
 import hashlib
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 
 from unittest.mock import patch
 
 from run_external_patch import (PatchBudgetExceeded, benchmark_tools, collect_patch,
-                                drive, prepare)
+                                drive, prepare, stop_browser_broker)
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_browser_cleanup_requires_exact_container_absence_and_closed_listener(self):
+        child = SimpleNamespace(poll=lambda: None)
+        broker = {"container": "kryn-ui-test-exact", "port": 65431}
+        absent = subprocess.CompletedProcess([], 0, stdout="", stderr="")
+        unknown = subprocess.CompletedProcess([], 1, stdout="", stderr="daemon unavailable")
+        with patch("ui_gateway.preflight.stop_group", return_value=True), patch(
+                "run_external_patch.subprocess.run", return_value=absent) as docker:
+            self.assertTrue(stop_browser_broker(child, broker))
+            self.assertEqual(docker.call_args.args[0][4], "name=" + broker["container"])
+        with patch("ui_gateway.preflight.stop_group", return_value=True), patch(
+                "run_external_patch.subprocess.run", return_value=unknown), patch(
+                "run_external_patch.time.sleep"):
+            with self.assertRaisesRegex(RuntimeError, "absence could not be proved"):
+                stop_browser_broker(child, broker)
+        with socket.socket() as listener:
+            listener.bind(("127.0.0.1", 0))
+            listener.listen(1)
+            broker["port"] = listener.getsockname()[1]
+            with patch("ui_gateway.preflight.stop_group", return_value=True), patch(
+                    "run_external_patch.subprocess.run", return_value=absent):
+                with self.assertRaisesRegex(RuntimeError, "listener remains reachable"):
+                    stop_browser_broker(child, broker)
+        with patch("ui_gateway.preflight.stop_group", return_value=False), patch(
+                "run_external_patch.subprocess.run", return_value=absent):
+            self.assertFalse(stop_browser_broker(child, broker))
+
     def test_patch_includes_new_files_without_mutating_candidate_index(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
             root = Path(tmp).resolve()

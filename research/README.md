@@ -86,6 +86,11 @@ require independent admission review before any protected result can be scored.
 `research/preflight_protected_python.py` adds a no-model real-task boundary and
 grader-control check for the private Python draft. A passing receipt requires a
 clean research commit; it is not a protected model result.
+The research-only fixed-page UI gateway now has a paired zero-model
+Agent→Browse→fresh-grader canary in
+[`ui_gateway/barrier_canned.py`](ui_gateway/barrier_canned.py). It verifies
+native routing and lifecycle, not protected task admission or local-model
+quality.
 
 The protected holdout and a representative Harbor subset remain pending. One
 public Harbor sample calibration ran through the official verifier and failed;
