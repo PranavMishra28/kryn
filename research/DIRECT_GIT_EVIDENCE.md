@@ -122,3 +122,29 @@ its per-file index hashes to
 This is a one-task compatibility result, **not** a matched harness-uplift
 estimate, protected transfer, or production qualification. The candidate stays
 isolated and the installed v1.0.0 plugin remains unchanged.
+
+## Post-hoc native control
+
+After observing the KRYN success, one native OpenCode control was preregistered
+on the **same exposed public task**. The source runner, prompt, seed, model,
+sampler, full ten-tool wire schema and offline provider/MCP/permission settings
+matched. Native OpenCode also passed the independent oracle and visible tests
+with its tracked test preserved, six local model requests, normal sampled
+pressure and zero swap growth. Its Agent used seven tools, versus seven for
+the KRYN candidate. Native took 63.908 seconds with 10,305 new input and
+1,853 output tokens; KRYN took 72.404 seconds with 12,326 and 2,211. The
+order and cache/host state were not randomized, so those timing and token
+differences are descriptive, not a performance estimate.
+
+The owner-only frozen control at
+`experiments/direct-git-evidence-20261003/live-02-native-retrospective/FREEZE.json`
+has SHA-256
+`794c5ce49b07b4a44633cd030d5d88884aee7779b5fff448b6b63d2f767352b7`;
+its analysis SHA-256 is
+`ee1b136f616fa3f1e83181aca1b950cd077c91ce2a01ea937997a3b07de1659f`
+and native raw receipt archive SHA-256 is
+`3bdbfba1cfc4dec959814c96347092237ef7c87997c673afa8226e4a133438d5`.
+Both arms accepted this one task. There is **no observed acceptance uplift** in
+this diagnostic and it cannot enter H1. The direct-Git sandbox-evidence fix
+remains real, but protected transfer and production qualification are still
+unproved; no product or installed profile changed.
