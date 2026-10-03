@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 from agent_grade_barrier import clean_clone, create_volume, detach, image_entry
 from check_holdout_boundary import probe, server_probe
@@ -47,6 +48,7 @@ def fixture(output):
 
 
 def main():
+    started = time.monotonic()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-dir", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
@@ -164,6 +166,7 @@ def main():
             except BaseException as error:
                 report["detached"] = False
                 report["detach_error"] = type(error).__name__ + ": " + str(error)
+        report["wall_seconds"] = round(time.monotonic() - started, 3)
         report["passed"] = bool(report.get("detached") and "error" not in report)
         (output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"output": str(output), "passed": report["passed"],
