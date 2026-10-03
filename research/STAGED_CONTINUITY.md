@@ -73,3 +73,10 @@ context fidelity, real-model staged coding, hidden-grader isolation, or
 accepted work. Private tasks 07–12 remain unadmitted. The next test is a
 research-only staged Agent-to-grader runner with trusted stage checks and
 then guarded live local-model turns, if the occupied-host preflight permits.
+
+A follow-up clean-source canary at `c4ef326ef804120c0e67cc66d311dabe8b7ada80`
+also waited for the native policy and selected KRYN plugin to become active
+after each restart and required every wire tool schema to remain identical.
+Both arms passed again with normal pressure and zero swap growth. Its result
+SHA-256 is `bd7708907fc36d8a2449c2c7db01076b70666030235782a4a423372dab4cbaca`;
+the earlier passing receipt remains indexed rather than replaced.
