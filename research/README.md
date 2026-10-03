@@ -64,6 +64,11 @@ Its no-model OpenCode boundary check passed; no product plugin was changed.
 The isolated [direct-Git candidate](https://github.com/PranavMishra28/kryn/tree/806e86f7d334f508ccbb8844c58df1564551cbf8)
 passed one public coding compatibility screen after that loader correction;
 protected transfer and production promotion are open. A separate
+post-hoc native OpenCode control also passed that public task with the same
+model, sampler and full wire tool schema. It does not establish uplift; its
+selection after seeing the KRYN result and unrandomized host/cache state
+exclude it from H1. The compact receipt is in
+[development history](history/development.jsonl). A separate
 [real-model staged screen](https://github.com/PranavMishra28/kryn/tree/e8d55b97ad7272d1da6f0336c03d45cbd89e287a)
 passed three-turn/two-compaction/two-restart mechanics, but its frozen oracle
 rejected an ambiguously specified parser edge. It is not a quality score.
