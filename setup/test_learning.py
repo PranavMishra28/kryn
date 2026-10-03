@@ -7,6 +7,7 @@ import http.client
 import io
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import threading
@@ -412,7 +413,9 @@ class LearningTests(unittest.TestCase):
         workspace.mkdir(); private.mkdir()
         prefix = native_client.background_boundary(workspace, private, [Path(sys.prefix).resolve()], 19876, 19877)
         profile = prefix[-1]
-        self.assertIn('(deny file-read-data)', profile)
+        self.assertIn('(deny file-read*)', profile)
+        self.assertIn('(allow file-read*', profile)
+        self.assertIn('(allow file-read-metadata', profile)
         self.assertIn('(deny network*)', profile)
         self.assertIn('(allow process-info* (target self))',profile)
         self.assertIn('(literal '+json.dumps(str(self.base.parent))+')',profile)
@@ -425,6 +428,21 @@ class LearningTests(unittest.TestCase):
         with self.assertRaises(RuntimeError): native_client.background_boundary(Path.home(),private,[],19876)
         grading = native_client.background_boundary(workspace,private,[Path(sys.prefix).resolve()],None)[-1]
         self.assertNotIn('(allow network-outbound',grading)
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS Seatbelt runtime check')
+    def test_whole_process_boundary_runs_python_but_denies_oracle_metadata(self):
+        workspace, private, grader = (self.base / name for name in ('workspace', 'private', 'grader'))
+        for folder in (workspace, private, grader): folder.mkdir(mode=0o700)
+        hidden = grader / 'oracle.txt'; hidden.write_text('hidden')
+        python = Path(sys.executable).resolve()
+        prefix = native_client.background_boundary(
+            workspace, private, [python, Path(sys.base_prefix).resolve()], None)
+        run = subprocess.run(prefix + [str(python), '-I', '-c', 'print(7)'],
+                             capture_output=True, text=True, timeout=10)
+        self.assertEqual((run.returncode, run.stdout), (0, '7\n'), run.stderr)
+        denied = subprocess.run(prefix + ['/usr/bin/stat', str(hidden)],
+                                capture_output=True, text=True, timeout=5)
+        self.assertNotEqual(denied.returncode, 0)
 
     def test_installed_nested_venv_does_not_expose_package_or_hidden_answers(self):
         runtime=self.base/'base-python'; runtime.mkdir()
@@ -442,7 +460,7 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(set(dependencies),{runtime,binary,venv/'pyvenv.cfg'})
         with patch.object(native_client,'PROJECT',payload):
             profile=native_client.background_boundary(workspace,private,dependencies,None)[-1]
-        self.assertIn('(deny file-read-data file-write* (subpath '+json.dumps(str(payload/'tools')),profile)
+        self.assertIn('(deny file-read* file-write* (subpath '+json.dumps(str(payload/'tools')),profile)
         self.assertNotIn('(subpath '+json.dumps(str(venv))+')',profile)
 
     def test_native_background_uses_private_discovery_and_read_only_public_git(self):

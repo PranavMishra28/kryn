@@ -25,6 +25,13 @@ for prior tuning and are **development data only**. Older September comparisons 
 49K context, an earlier plugin, and too few trials; their outcomes cannot establish
 uplift for v1.0.0. Do not select changes from a holdout outcome.
 
+**Holdout isolation correction (2026-10-03):** the earlier direct-path and
+symlink Seatbelt preflight missed a same-volume hardlink alias. It cannot
+qualify any protected result. The separately preregistered encrypted-volume
+boundary screen in [HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md) passed public
+compatibility checks, but no 30-task sealed holdout has been created or run.
+The H1 thresholds and task-retirement rules below are unchanged.
+
 ## Three evaluation layers
 
 1. **Development:** public TaskboardLite plus prior failure reproductions. Run two

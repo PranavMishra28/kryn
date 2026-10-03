@@ -23,6 +23,9 @@ public Task03 pairs using the user-facing Agent role. Native OpenCode accepted
 [PRESERVED_TESTS.md](PRESERVED_TESTS.md) records the rejected explicit
 preserved-test guard screen: the functional grader passed, but the Agent timed
 out and the candidate guard never fired. Its code was reverted.
+[HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md) freezes the correction to the
+protected-holdout isolation gate after a same-volume hardlink exposed a hidden
+oracle. No protected task is qualified yet.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 
@@ -56,13 +59,18 @@ public development runs. Preserve raw failed and interrupted runs. For protected
 research, create an independently isolated grader and a new sealed task roster;
 these public fixtures cannot be relabeled as holdout evidence.
 
-On macOS, `python3 -B research/check_holdout_boundary.py` checks that the existing
-Seatbelt boundary can read a candidate workspace but cannot read a separate grader,
-even through a workspace symlink. This is only a boundary preflight; protected
-holdout qualification also requires a full sandboxed candidate run with the grader
-outside its readable and reachable surfaces.
-An actual sandboxed OpenCode call on a public development fixture passed this
-runner preflight; its evidence and limitations are in [DEVELOPMENT.md](DEVELOPMENT.md).
+On macOS, run both boundary modes:
+
+- `python3 -B research/check_holdout_boundary.py same-volume` (expected exit 1)
+- `python3 -B research/check_holdout_boundary.py encrypted-volume` (expected exit 0)
+
+The second canary checks a separate encrypted grader volume, real OpenCode
+startup and shell-tool denials. It is a
+boundary preflight, not a protected score: the same-volume control exposes a
+workspace hardlink to the hidden oracle, while the separate encrypted volume
+prevents that alias. The public OpenCode model turns and their mixed results
+are distinct from these checker verdicts; their receipts and
+remaining gates are in [HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md).
 
 The protected holdout and a representative Harbor subset remain pending. One
 public Harbor sample calibration ran through the official verifier and failed;

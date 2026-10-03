@@ -700,6 +700,9 @@ def _native_turn(directory, config, workspace, prompt, champion, seconds, *, ref
     for item in config.get("plugins", []):
         if isinstance(item, dict) and Path(item.get("package", "")).is_absolute():
             dependencies.append(Path(item["package"]).resolve())
+            node_binary = item.get("options", {}).get("nodeBinary")
+            if node_binary:
+                dependencies.append(Path(node_binary).resolve())
     result = {"passed": False, "native_completed": False, "seconds": 0, "conditions_verified": False,
               "cache_matched": False, "reason": "incomplete", "text": "", "requests": []}
     guard = ResourceGuard(512 * 1024**2, 2)
