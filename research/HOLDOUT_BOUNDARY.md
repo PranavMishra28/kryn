@@ -400,3 +400,47 @@ The 16-file owner-only archive index SHA-256 is
 Its [history entry](history/ui_gateway.jsonl) also omits the hidden prompt and
 grader. All three corrected recovery slots remain unsealed and unscored; these
 targeted controls do not establish complete oracle coverage.
+
+## Real OpenCode boundary preflight for the recovery drafts
+
+At clean research source `7af7eac514cec1c6bedaac658d3da7aff1c88f0b`,
+`preflight_recovery_draft.py` ran the three corrected owner-only drafts without
+model requests. Each used a disposable APFS candidate checkout, the real native
+OpenCode shell in both KRYN and minimal-control configurations, and the pinned
+Python/ripgrep/Git tool environment. For each task, 14/14 direct boundary
+checks and 18/18 OpenCode checks **per arm** passed: hidden oracle, manifest,
+reference, partial and validation bytes were denied, while ordinary candidate
+reads and tools worked. The candidate volume detached before trusted grading.
+Fresh, separate Docker-visible checkouts then reproduced the frozen seed fail,
+reference pass and partial fail, including the expected output hashes. The
+three successful no-model receipt hashes are:
+
+| Draft slot | Receipt SHA-256 |
+| --- | --- |
+| Restore | `ec0a5ec04489beb9cb248262e27231dc410b51272e70429b0a132e5fefe9a6da` |
+| Upload | `5af2dae2d5cc92a76d537722d63ef85e625aae756b3cfdbb9bebf55fb9d5416d` |
+| Mailbox | `aaaf327610f37747c0889bc700cc261b3f1861b03d75a4bb88d7003020284704` |
+
+The first passing triplet at `0b0a554` is retained in the append-only
+[history](history/ui_gateway.jsonl). The later input-alias check rejects
+symlinked or escaping draft paths and seed symlinks; all three tasks passed
+again at `7af7eac` without a model request.
+
+The failed restore preflight receipts are preserved too:
+`1c5e1f675f0223d4c674a31b132880fc116e478b5102a162bdaba0afe90f4eb3`
+tried Docker grading directly on the nested APFS candidate mount; its reference
+file was invisible to Docker and the image stayed busy until a separately
+verified manual forced detach. Receipts
+`3ca91a5e5bff2403ebe6529b728036d4567ff747ebd1ba856207ef6f531a1e9f`
+and `97e6f2570d98bee4b651cacdf2255b209caaf2d755eefdc564fc055769aa2ab3`
+used a reused grading path after the first Docker bind; Docker did not see the
+subsequent Git patch. Both detached normally. A fresh checkout per control,
+patched before Docker's first bind, resolved this file-sharing artifact. No
+candidate volume or probe container remains mounted/running from these runs.
+
+This advances **boundary and grader-control mechanics only**. The corrected
+drafts retain `protected_status=false`. The production Agent-to-grader runner
+still creates a separate APFS *grading* volume; Docker's visibility of that
+actual handoff has not passed, so these receipts cannot admit the recovery
+tasks or count toward H1. Independent category/oracle review, the sealed
+30-task roster, paired model turns, and unseen task acceptance remain open.
