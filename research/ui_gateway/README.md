@@ -41,8 +41,8 @@ The original UI 01 preflight passed 34/34 checks. The interaction extension
 passed 37/37 no-model checks using image
 `sha256:7ba09f30619fa01ff7687b9fac5569b161ad23b9624aaa1199fc99c199731d64`.
 Its private receipt is
-`/private/tmp/kryn-ui-interactions-preflight-20261003-final/receipt.json`, SHA-256
-`db59076d9f92127e9ee480217a4ce80c88724a8a733cedfebf6f0b6a42c4b8af`.
+`/private/tmp/kryn-ui-interactions-preflight-20261003-c0233ae/receipt.json`, SHA-256
+`f6486ec7348b9c55de3ba0e623875924b2c228c505f7852d32d3322ea978aa4b`.
 Checks include the UI 01 reference ArrowRight interaction, form fill,
 query/Back navigation, URL-aware snapshots, Unicode query round-trip,
 malformed-query denial,
@@ -64,8 +64,8 @@ OpenCode's actual MCP tool dispatch initially failed because it adds optional
 `_meta` to `tools/call` parameters; the adapter's exact-key check rejected the
 call. The adapter now accepts only the two ordinary keys plus optional object
 `_meta`. The clean-source synthetic inference canary at
-`/private/tmp/kryn-ui-interactions-synthetic-20261003-final/result.json`
-(SHA-256 `9466f8e7dac6051789295a517a3283eac5f5752d87f5f5145df9ab7846faf749`)
+`/private/tmp/kryn-ui-interactions-synthetic-20261003-c0233ae/result.json`
+(SHA-256 `2608349c188655171e8f439449438271cf2628b44f38626d9e6a2300470a8081`)
 passes in both real OpenCode arms: each starts from a separate clean checkout,
 all eight inference requests expose the same complete tool catalog with exactly
 the eight expected browser tools. Navigation, fill, click, snapshot, Back,
@@ -106,10 +106,11 @@ semantically valid category slots: three UI/browser tasks (01–03) and three
 failure-recovery tasks (04–06). None is admitted. The extension now supplies
 the missing fill, query navigation, Back, and URL-aware snapshots. An owner-only
 no-model reference smoke at
-`/Users/pranav/Documents/Codex/kryn-research-private/ui-interaction-receipt-20261003/receipt.json`
-(SHA-256 `fdd2474882f118e3ed4bc23945eecda266d3d866a74d6f2940256fcd49186d54`)
+`/Users/pranav/Documents/Codex/kryn-research-private/ui-interaction-receipt-20261003-final/receipt.json`
+(SHA-256 `1e3dfb6e81d3470b4a85557939b983176d3965e23f557b4b42abe1ef0a1fa1c1`)
 passes 01: 6/6, 02: 13/13, and 03: 6/6 interaction checks on separate APFS
-volumes. The first attempt was invalidated by a source/image race and preserved.
+volumes at clean source commit `c0233ae9dd13a42f9eb03589b454aa9c7a775d3e`.
+The first attempt was invalidated by a source/image race and preserved.
 The valid receipt does not assert all focus/ARIA or normalized-value behavior,
 and is neither an Agent run nor a hidden-grader score. The current
 Agent-to-grader entrypoint also does not own a UI broker lifecycle or select
