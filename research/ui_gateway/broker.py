@@ -148,9 +148,11 @@ def verify_boundary(item, image):
             "user": item["Config"]["User"]}
 
 
-def run(image, lifetime, repo):
+def run(image, lifetime, repo, name):
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
         raise ValueError("browser image must be an exact local image ID")
+    if not re.fullmatch(r"kryn-ui-[0-9a-f]{32}", name):
+        raise ValueError("browser container name must be an owned random identity")
     root = Path(repo).absolute()
     if root != root.resolve() or any(path.is_symlink() for path in (root, *root.parents)):
         raise ValueError("candidate checkout must be canonical")
@@ -160,7 +162,6 @@ def run(image, lifetime, repo):
         raise RuntimeError("browser image ID changed")
     root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
     device = os.fstat(root_fd).st_dev
-    name = "kryn-ui-" + secrets.token_hex(8)
     command = ["docker", "run", "--rm", "-i", "--name", name, "--network", "none",
                "--read-only", "--user", "10001:10001", "--cap-drop", "ALL",
                "--security-opt", "no-new-privileges", "--pids-limit", "128",
@@ -242,8 +243,11 @@ def run(image, lifetime, repo):
                 cleanup_errors.append(type(error).__name__)
             for _ in range(20):
                 try:
-                    present = subprocess.run(["docker", "inspect", name], stdout=subprocess.DEVNULL,
-                                             stderr=subprocess.DEVNULL, timeout=2).returncode == 0
+                    listing = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + name,
+                                              "--format", "{{.Names}}"], capture_output=True,
+                                             text=True, timeout=2)
+                    present = (listing.returncode != 0 or
+                               name in listing.stdout.splitlines())
                 except (OSError, subprocess.TimeoutExpired):
                     present = True
                 if not present:
@@ -258,6 +262,7 @@ if __name__ == "__main__":
     parser.add_argument("--image", required=True)
     parser.add_argument("--repo", required=True)
     parser.add_argument("--lifetime", type=int, default=300)
+    parser.add_argument("--name", required=True)
     args = parser.parse_args()
     if not 1 <= args.lifetime <= 3600:
         parser.error("lifetime must be 1..3600 seconds")
@@ -265,6 +270,6 @@ if __name__ == "__main__":
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, stop)
     try:
-        run(args.image, args.lifetime, args.repo)
+        run(args.image, args.lifetime, args.repo, args.name)
     except KeyboardInterrupt:
         pass

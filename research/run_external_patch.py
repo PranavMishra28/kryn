@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import selectors
 import signal
+import socket
 import stat
 import subprocess
 import sys
@@ -486,8 +487,24 @@ def drive(child, prompt, timeout, cancelled):
     return ("resource_guard" if cancelled() else None), bytes(streams[child.stdout][0]), bytes(streams[child.stderr][0])
 
 
+def stop_browser_broker(child, broker):
+    """Prove the worker and its local listener are gone before capture."""
+    from ui_gateway.preflight import prove_container_absent, stop_group
+    early_exit = child.poll() is not None
+    graceful = stop_group(child)
+    prove_container_absent(broker["container"])
+    with socket.socket() as probe:
+        probe.settimeout(.5)
+        if probe.connect_ex(("127.0.0.1", broker["port"])) == 0:
+            raise RuntimeError("Browser broker listener remains reachable")
+    return graceful and not early_exit
+
+
 def run(args, *, defer_patch=False):
     private_parent = getattr(args, "private_parent", None)
+    ui_image = getattr(args, "ui_image", None)
+    if ui_image is not None and getattr(args, "ui_gateway", None) is not None:
+        raise ValueError("The runner must own only one browser gateway")
     if defer_patch and private_parent is None:
         raise ValueError("Deferred capture requires a separate-volume candidate private parent")
     workspace, prompt_file, evidence, state_dir, git_config_sha = prepare(
@@ -511,29 +528,45 @@ def run(args, *, defer_patch=False):
               "initial_git_config_sha256": git_config_sha,
               "patch_deferred": defer_patch}
     report["candidate_private_parent"] = str(private_parent) if private_parent else None
+    report["browser_image"] = ui_image
+    report["browser_settled"] = ui_image is None
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
             workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1")
         ui_gateway = getattr(args, "ui_gateway", None)
-        if ui_gateway is not None:
-            from ui_gateway.trial_config import with_ui_gateway
-            adapter = ROOT / "research/ui_gateway/adapter.py"
-            config = with_ui_gateway(config, python=Path(sys.executable).resolve(),
-                                     adapter=adapter, repo=workspace,
-                                     port=ui_gateway["port"], token=ui_gateway["token"])
-            dependencies += [Path(sys.executable).resolve(), Path(sys.base_prefix).resolve(), adapter]
         monitor = NativeResourceGuard(evidence, samples)
+        broker_child = None
+        broker = None
         try:
             tool_path, tool_dependencies, tool_manifest = benchmark_tools(args.tool_venv)
             dependencies += tool_dependencies
             report["benchmark_tool_path"] = str(tool_path) if tool_path else None
             report["benchmark_tool_dependencies"] = [str(path) for path in tool_dependencies]
             report["benchmark_tool_manifest"] = tool_manifest
-            report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
             if not runtime_is_idle(evidence, "runtime-before", model_id=MODEL_ID, guard_gib=22):
                 raise RuntimeError("Expected guarded model runtime is not idle")
             monitor.start()
+            if monitor.cancel.is_set():
+                raise RuntimeError("Resource guard refused browser startup")
+            if ui_image is not None:
+                from ui_gateway.preflight import broker_start
+                broker_child, broker = broker_start(
+                    ui_image, workspace, lifetime=min(args.timeout + 120, 3600),
+                    cancel=monitor.cancel.is_set)
+                ui_gateway = broker
+                report["browser_gateway"] = {key: broker[key] for key in
+                                             ("image", "container", "boundary")}
+            if monitor.cancel.is_set():
+                raise RuntimeError("Resource guard interrupted browser startup")
+            if ui_gateway is not None:
+                from ui_gateway.trial_config import with_ui_gateway
+                adapter = ROOT / "research/ui_gateway/adapter.py"
+                config = with_ui_gateway(config, python=Path(sys.executable).resolve(),
+                                         adapter=adapter, repo=workspace,
+                                         port=ui_gateway["port"], token=ui_gateway["token"])
+                dependencies += [Path(sys.executable).resolve(), Path(sys.base_prefix).resolve(), adapter]
+            report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
             background = {"dependencies": dependencies, "inference_port": relay.port,
                           "cancel": monitor.cancel.is_set}
             if ui_gateway is not None:
@@ -546,6 +579,18 @@ def run(args, *, defer_patch=False):
                                          background=background)
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                if ui_gateway is not None:
+                    for _ in range(100):
+                        if monitor.cancel.is_set():
+                            raise RuntimeError("Resource guard interrupted browser MCP startup")
+                        items = server.request("GET", "/api/mcp", timeout=5).get("data", [])
+                        if any(item.get("name") == "browser" and
+                               item.get("status", {}).get("status") == "connected" for item in items):
+                            report["browser_mcp_connected"] = True
+                            break
+                        time.sleep(.2)
+                    else:
+                        raise RuntimeError("Browser MCP did not connect before the Agent turn")
                 # /api/info can become ready before asynchronous plugin discovery.
                 for _ in range(75):
                     inventory = server.request("GET", "/api/plugin")
@@ -575,8 +620,6 @@ def run(args, *, defer_patch=False):
                 try:
                     cause, output, errors = drive(child, prompt, args.timeout, monitor.cancel.is_set)
                     report["intervention"] = cause
-                    report["settlement"] = learning.settle_background(
-                        server, sid, workspace, relay, interrupt=cause is not None)
                 finally:
                     if child.poll() is None:
                         child.terminate()
@@ -585,9 +628,16 @@ def run(args, *, defer_patch=False):
                     report["cli_exit_code"] = child.returncode
                 (evidence / "events.jsonl").write_bytes(output[:2 * 1024**2])
                 (evidence / "stderr.log").write_bytes(errors[:64 * 1024])
+                if cause is not None:
+                    relay.cancel()
                 owned = settle_owned_sessions(server, sid, workspace, evidence,
+                                               interrupt=cause is not None,
+                                               cancel=monitor.cancel,
                                                model_id=MODEL_ID, guard_gib=22)
+                report["settlement"] = owned
                 report["owned_settlement"] = owned
+                if owned.get("resource_abort"):
+                    report["intervention"] = cause = "resource_guard"
                 if not owned.get("idle"):
                     raise RuntimeError("Native descendants or runtime did not settle")
                 exports, ownership = export_owned_sessions(
@@ -632,12 +682,19 @@ def run(args, *, defer_patch=False):
             raise
         finally:
             relay.cancel()
+            if broker_child is not None:
+                try:
+                    report["browser_settled"] = stop_browser_broker(broker_child, broker)
+                except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+                    report["browser_cleanup_error"] = type(error).__name__ + ": " + str(error)
+                    report["browser_settled"] = False
             monitor.close()
             report["requests"] = relay.records
             report["resources"] = summarize_resources(samples)
             report["wall_seconds"] = round(time.monotonic() - started, 3)
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
-                                       and report["resources"].get("telemetry_complete"))
+                                       and report["resources"].get("telemetry_complete")
+                                       and report["browser_settled"])
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
     if defer_patch:
         # InferenceRelay's context manager joins its listener with a timeout.

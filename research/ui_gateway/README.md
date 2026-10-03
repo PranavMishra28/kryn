@@ -5,7 +5,7 @@ candidate checkout to a local OpenCode MCP adapter. The adapter exposes eight
 browser operations and forwards requests to a broker. Chromium runs in a
 separate container with no host mounts, network, or Docker socket. The browser
 has no grader, reference, source snapshot, or host path. Nothing here changes
-the installed product browser profile or permits a protected model turn.
+the installed product browser profile or admits a protected task by itself.
 
 The adapter accepts only `http://candidate.invalid/index.html` with an optional
 single bounded nonempty `q` query. The broker holds a trusted checkout directory
@@ -113,21 +113,50 @@ volumes at clean source commit `c0233ae9dd13a42f9eb03589b454aa9c7a775d3e`.
 The first attempt was invalidated by a source/image race and preserved.
 The valid receipt does not assert all focus/ARIA or normalized-value behavior,
 and is neither an Agent run nor a hidden-grader score. The current
-Agent-to-grader entrypoint also does not own a UI broker lifecycle or select
-the Browse agent. Drafts 07–09 are one-shot tasks rather than long sessions;
-10–12 lack real staged turns, compaction, restart and stage-one acceptance;
-13–15 use fictional synthetic sources rather than current external
-information. The audit and probe hashes are in the compact history index,
-with raw no-model receipts in the owner-only experiment archive. No protected
-task was run or relabeled to fill the roster.
+Agent-to-grader entrypoint now has an optional research-only pinned browser
+image. It starts the broker after resource admission, waits for the native MCP,
+and requires exact container absence and a closed listener before candidate
+detachment and read-only patch capture. A failed readiness response must also
+clean up the exact container identity allocated before startup. Agent remains
+the root and can delegate Browse as a foreground child. The runner uses the
+existing paginated owned-session settlement because OpenCode 2.0.10 returns a
+`next` cursor even on a nonempty final child page. The installed product is
+unchanged.
 
-Remaining gates: bind the broker to the candidate volume and run matched Agent
-and independent-grader phases; establish guarded live model quality on a
-representative occupied host with a materially different, preregistered resource
-approach; freeze a valid 30-task roster before protected candidate use. An
-independent code review found no P1/P2 boundary defect in this extension, but
-the tested no-model paths do not establish protected isolation end to end. The
-synthetic check proves OpenCode routed these tools, not that a model chose them.
+The reproducible zero-model mechanics probe is `barrier_canned.py`:
+
+```sh
+python3 -B research/ui_gateway/barrier_canned.py \
+  --seed /private/tmp/clean-public-ui-seed \
+  --tool-venv /private/tmp/pinned-research-tools \
+  --image sha256:EXACT_LOCAL_BROWSER_IMAGE_ID \
+  --output /private/tmp/new-ui-barrier-receipt
+```
+
+The seed must be a clean Git checkout with `index.html`; the output must not
+exist. Both arms use the same canned inference sequence: Agent writes a public
+nonce, delegates Browse, and Browse navigates and snapshots. The barrier then
+shuts down the broker, detaches the candidate volume, captures a patch through
+a separate read-only mount, and grades a fresh clone. It records per-role tool
+catalogs, child ownership, actual browser output, resource samples and the
+grader verdict. The paired canary and the 41-check APFS/Seatbelt preflight
+passed locally, including a negative probe with a started container and bad
+readiness. These are no-model boundary tests, not evidence that the local model
+can select or execute the workflow under occupied-host pressure.
+
+Owner-only UI v2 control drafts strengthen focus/ARIA and normalized-value
+checks; six other drafts now specify real staged turns and restart. They remain
+unsealed and unscored. Drafts 13–15 still use fictional synthetic sources,
+not current external information. No protected task was run or relabeled to
+fill the roster. The audit and probe hashes are in the compact history index;
+raw no-model receipts stay outside the runtime package.
+
+Remaining gates: independently admit a valid 30-task roster, establish guarded
+live model quality on a representative occupied host with a materially different,
+preregistered resource approach, and run actual protected staged turns with
+independent scoring. The tested no-model paths establish lifecycle mechanics,
+not protected isolation and model quality end to end. The canned check proves
+OpenCode routed these tools, not that a model chose them.
 The Dockerfile pins its base image and npm
 package lock, but `apk add chromium` resolves from a mutable Alpine repository;
 the exact tested output image ID, not a rebuild from this Dockerfile, is the

@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import select
+import secrets
 import shutil
 import signal
 import socket
@@ -43,6 +44,7 @@ def digest(path):
 
 
 def stop_group(child):
+    forced = False
     try:
         if child.poll() is None:
             child.terminate()
@@ -51,17 +53,37 @@ def stop_group(child):
     try:
         child.wait(timeout=10)
     except subprocess.TimeoutExpired:
+        forced = True
         if child.poll() is None:
             try:
                 child.kill()
             except ProcessLookupError:
                 pass
         child.wait(timeout=5)
+    for pipe in (child.stdout, child.stderr):
+        if pipe is not None:
+            pipe.close()
+    return not forced and child.returncode == 0
 
 
-def broker_start(image, repo, script=None, timeout=20):
+def prove_container_absent(name):
+    for _ in range(20):
+        listing = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + name,
+                                  "--format", "{{.Names}}"], capture_output=True,
+                                 text=True, timeout=3)
+        if listing.returncode == 0 and name not in listing.stdout.splitlines():
+            return
+        time.sleep(.1)
+    raise RuntimeError("Browser container absence could not be proved")
+
+
+def broker_start(image, repo, script=None, timeout=20, lifetime=300, cancel=None):
+    if type(lifetime) is not int or not 1 <= lifetime <= 3600:
+        raise ValueError("UI broker lifetime must be 1..3600 seconds")
+    name = "kryn-ui-" + secrets.token_hex(16)
     child = subprocess.Popen([str(PYTHON), "-B", str(script or Path(__file__).with_name("broker.py")),
-                              "--image", image, "--repo", str(repo), "--lifetime", "300"],
+                              "--image", image, "--repo", str(repo), "--lifetime", str(lifetime),
+                              "--name", name],
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              start_new_session=True)
     try:
@@ -71,17 +93,37 @@ def broker_start(image, repo, script=None, timeout=20):
         line = bytearray()
         while b"\n" not in line:
             remaining = deadline - time.monotonic()
-            if remaining <= 0 or not select.select([fd], [], [], remaining)[0]:
+            if cancel is not None and cancel():
+                raise RuntimeError("Resource guard interrupted UI broker startup")
+            if remaining <= 0:
                 raise TimeoutError("UI broker startup deadline")
+            if not select.select([fd], [], [], min(remaining, .2))[0]:
+                continue
             chunk = os.read(fd, 4097 - len(line))
             if not chunk:
                 raise RuntimeError("UI broker exited during startup")
             line.extend(chunk)
             if len(line) > 4096:
                 raise RuntimeError("UI broker startup response limit")
-        return child, json.loads(bytes(line).split(b"\n", 1)[0])
-    except BaseException:
-        stop_group(child)
+        ready = json.loads(bytes(line).split(b"\n", 1)[0])
+        if ready.get("container") != name or ready.get("image") != image:
+            raise RuntimeError("UI broker startup identity changed")
+        return child, ready
+    except BaseException as original:
+        cleanup_errors = []
+        try:
+            stop_group(child)
+        except BaseException as error:
+            cleanup_errors.append(type(error).__name__)
+        try:
+            subprocess.run(["docker", "rm", "-f", name], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=5, check=False)
+            prove_container_absent(name)
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+            cleanup_errors.append(type(error).__name__)
+        if cleanup_errors:
+            raise RuntimeError("UI broker startup cleanup unproved: " +
+                               ", ".join(cleanup_errors)) from original
         raise
 
 
@@ -330,6 +372,49 @@ def main(draft, image, output):
                 report["checks"]["startup_timeout_reaps_child"] = True
             else:
                 report["checks"]["startup_timeout_reaps_child"] = False
+        stall_pid.unlink(missing_ok=True)
+        try:
+            broker_start(image, workspace, script=stall, timeout=5,
+                         cancel=stall_pid.exists)
+        except RuntimeError as error:
+            if stall_pid.exists() and "Resource guard interrupted" in str(error):
+                try:
+                    os.kill(int(stall_pid.read_text()), 0)
+                except ProcessLookupError:
+                    report["checks"]["startup_cancel_reaps_child"] = True
+                else:
+                    report["checks"]["startup_cancel_reaps_child"] = False
+            else:
+                report["checks"]["startup_cancel_reaps_child"] = False
+        else:
+            report["checks"]["startup_cancel_reaps_child"] = False
+        rogue = output / "rogue-readiness.py"
+        rogue_name = output / "rogue-container-name.txt"
+        rogue.write_text(
+            "import argparse, json, pathlib, subprocess\n"
+            "p=argparse.ArgumentParser()\n"
+            "p.add_argument('--image'); p.add_argument('--name')\n"
+            "a,_=p.parse_known_args()\n"
+            "subprocess.run(['docker','run','-d','--name',a.name,'--network','none',"
+            "'--read-only','--user','10001:10001','--cap-drop','ALL',"
+            "'--security-opt','no-new-privileges','--pids-limit','128',"
+            "'--memory','512m','--entrypoint','sleep',a.image,'60'],"
+            "check=True,capture_output=True)\n"
+            "pathlib.Path(" + repr(str(rogue_name)) + ").write_text(a.name)\n"
+            "print(json.dumps({'image':a.image,'container':'wrong'}),flush=True)\n")
+        try:
+            broker_start(image, workspace, script=rogue, timeout=15)
+        except RuntimeError:
+            if rogue_name.is_file():
+                name = rogue_name.read_text()
+                remaining = command(["docker", "ps", "-a", "--filter", "name=" + name,
+                                     "--format", "{{.Names}}"])
+                report["checks"]["started_container_bad_readiness_reaped"] = (
+                    remaining.returncode == 0 and name not in remaining.stdout.splitlines())
+            else:
+                report["checks"]["started_container_bad_readiness_reaped"] = False
+        else:
+            report["checks"]["started_container_bad_readiness_reaped"] = False
         prefix = background_boundary(workspace, private,
             [PYTHON, Path(sys.base_prefix).resolve(), ADAPTER], inference_port,
             broker_port=broker["port"])
@@ -513,13 +598,22 @@ def main(draft, image, output):
             inference_server.server_close()
             inference_thread.join(timeout=3)
         if broker_child is not None:
-            stop_group(broker_child)
             try:
-                report["checks"]["container_cleaned"] = (broker is not None and command(
-                    ["docker", "ps", "-a", "--filter", "name=" + broker["container"],
-                     "--format", "{{.Names}}"]).stdout.strip() == "")
+                report["checks"]["broker_graceful"] = stop_group(broker_child)
             except (OSError, subprocess.TimeoutExpired):
+                report["checks"]["broker_graceful"] = False
+            try:
+                prove_container_absent(broker["container"])
+                report["checks"]["container_cleaned"] = True
+            except (OSError, RuntimeError, subprocess.TimeoutExpired, TypeError):
                 report["checks"]["container_cleaned"] = False
+            try:
+                with socket.socket() as probe:
+                    probe.settimeout(.5)
+                    report["checks"]["broker_listener_closed"] = (
+                        probe.connect_ex(("127.0.0.1", broker["port"])) != 0)
+            except (OSError, TypeError):
+                report["checks"]["broker_listener_closed"] = False
         if mounted:
             try:
                 detached = command(["hdiutil", "detach", str(mount)])
