@@ -99,7 +99,7 @@ The first **nonempty** wire request in each arm used the same
 SHA-256 `1b2a1690eeb2f4986afcb04c13e6538dd156e399bd2c3f5442d96293d18f675c`.
 Default sent thinking enabled, temperature 0.6, top-p 0.95 and presence penalty
 0; Fast sent thinking disabled, temperature 0.7, top-p 0.8 and presence penalty
-1.5. Default also sent one preceding no-tool, 128-token product probe. The
+1.5. Default also sent one preceding no-tool, 128-token request. The
 model and tool protocol were therefore connected as configured. These are
 bundled mode settings, not an isolated thinking-budget comparison.
 
