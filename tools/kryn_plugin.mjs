@@ -308,8 +308,11 @@ function checkpointSummary(item, current, directory) {
   });
 }
 
+const GIT_BINARY = fs.existsSync('/Library/Developer/CommandLineTools/usr/bin/git') ?
+  '/Library/Developer/CommandLineTools/usr/bin/git' : '/usr/bin/git';
+
 function repoEvidence(directory) {
-  const git = (...args) => execFileSync('/usr/bin/git',
+  const git = (...args) => execFileSync(GIT_BINARY,
     ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks', ...args],
     { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',
       env: { PATH: '/usr/bin:/bin', HOME: directory, GIT_CONFIG_NOSYSTEM: '1',
@@ -361,7 +364,7 @@ function repoFingerprint(directory) {
 
 function reviewDiffEvidence(directory) {
   try {
-    const diff = execFileSync('/usr/bin/git',
+    const diff = execFileSync(GIT_BINARY,
       ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks',
         'diff', '--no-ext-diff', '--no-textconv', '--unified=2', 'HEAD', '--', '.'],
       { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',

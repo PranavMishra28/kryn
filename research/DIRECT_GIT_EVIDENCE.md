@@ -25,3 +25,22 @@ this candidate if the sandbox result fails, if it widens the file/network
 boundary, or if product tests fail. These no-model checks alone do not justify
 product promotion or show accepted-work uplift; fresh model validation,
 protected transfer and release checks remain prerequisites.
+
+## No-model development result
+
+The first smoke invocation selected a Homebrew Node build whose `libuv` dylib
+was not in the sandbox's dependency list, so neither arm started. The second
+started both arms but incorrectly looked for Git evidence in a first-turn
+context hook, which intentionally does not emit a checkpoint. The corrected
+smoke uses a compaction hook and a pinned standalone Node binary. These two
+scaffolding failures are retained as the `-20261003.json` and
+`-20261003-02.json` receipts under `/private/tmp/kryn-direct-git-evidence*`;
+they do not count as candidate behavior.
+
+The corrected screen (`-03.json`) reproduced the baseline failure: no current
+Git snapshot, the irrelevant Python-task warning, and no changed-JavaScript
+syntax feedback. The candidate reported a current Git snapshot, omitted the
+Python-task warning, and reported the malformed JavaScript. Both arms exited
+normally. The candidate also passed `make check` with 215 setup, 26 research,
+87 Node and the frozen offline suite checks. This is a deterministic sandbox
+compatibility result, not an accepted coding task or evidence of H1 uplift.
