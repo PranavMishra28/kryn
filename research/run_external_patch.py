@@ -510,6 +510,18 @@ def run(args, *, defer_patch=False):
     workspace, prompt_file, evidence, state_dir, git_config_sha = prepare(
         args.workspace, args.prompt, args.evidence, args.base_commit,
         private_parent=private_parent)
+    source_file = getattr(args, "source_file", None)
+    if source_file is not None:
+        source_file = Path(source_file).absolute()
+        parent = source_file.parent
+        if (source_file != source_file.resolve() or
+                any(ancestor.is_symlink() for ancestor in source_file.parents) or
+                not source_file.is_file() or source_file.stat().st_uid != os.geteuid() or
+                source_file.stat().st_mode & 0o077 or
+                parent.stat().st_uid != os.geteuid() or parent.stat().st_mode & 0o077 or
+                source_file.stat().st_dev == workspace.stat().st_dev):
+            raise ValueError("Source allowance requires an owner-only canonical host-side file")
+        source_sha256 = hashlib.sha256(source_file.read_bytes()).hexdigest()
     prompt = prompt_file.read_bytes()
     started = time.monotonic()
     profile_path = ROOT / "setup/accepted-profile.json"
@@ -528,6 +540,9 @@ def run(args, *, defer_patch=False):
               "initial_git_config_sha256": git_config_sha,
               "patch_deferred": defer_patch}
     report["candidate_private_parent"] = str(private_parent) if private_parent else None
+    report["source_file"] = str(source_file) if source_file else None
+    report["source_sha256"] = source_sha256 if source_file else None
+    report["source_unchanged"] = None if source_file else True
     report["browser_image"] = ui_image
     report["browser_settled"] = ui_image is None
     samples = []
@@ -541,6 +556,8 @@ def run(args, *, defer_patch=False):
         try:
             tool_path, tool_dependencies, tool_manifest = benchmark_tools(args.tool_venv)
             dependencies += tool_dependencies
+            if source_file is not None:
+                dependencies.append(source_file)
             report["benchmark_tool_path"] = str(tool_path) if tool_path else None
             report["benchmark_tool_dependencies"] = [str(path) for path in tool_dependencies]
             report["benchmark_tool_manifest"] = tool_manifest
@@ -692,9 +709,15 @@ def run(args, *, defer_patch=False):
             report["requests"] = relay.records
             report["resources"] = summarize_resources(samples)
             report["wall_seconds"] = round(time.monotonic() - started, 3)
+            if source_file is not None:
+                try:
+                    report["source_unchanged"] = (
+                        hashlib.sha256(source_file.read_bytes()).hexdigest() == source_sha256)
+                except OSError:
+                    report["source_unchanged"] = False
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete")
-                                       and report["browser_settled"])
+                                       and report["browser_settled"] and report["source_unchanged"])
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
     if defer_patch:
         # InferenceRelay's context manager joins its listener with a timeout.
