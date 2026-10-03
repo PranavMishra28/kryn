@@ -7,6 +7,8 @@ agent runtime and not a product setting. Released v1.0.0 remains installed.
 prompt-stability candidate before its implementation.
 [VERIFICATION_FEEDBACK.md](VERIFICATION_FEEDBACK.md) records the rejected
 failure-only repair-feedback candidate and its resource-guard stop.
+[HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md) freezes a public Terminal-Bench
+sample task, the exact KRYN OpenCode adapter and Harbor's official verifier.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Neither rejected candidate changed the product.
 
