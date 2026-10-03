@@ -94,9 +94,25 @@ Compact provenance is in [`../history/ui_gateway.jsonl`](../history/ui_gateway.j
 the owner-only archive contains the candidate patch and all raw receipts. No
 deferred-worker code was merged or installed.
 
+An independent no-model audit of the 15 owner-only UI drafts found only six
+semantically valid category slots: three UI/browser tasks (01–03) and three
+failure-recovery tasks (04–06). None is admitted. This gateway has enough
+operations for task 01's interaction screen, but task 02 needs input fill and
+task 03 additionally needs query navigation, Back, and URL-aware snapshots.
+An actual worker negative control reached `?q=RIVER` and got
+`PAGE_LEFT_FIXED_ORIGIN` from both open and snapshot. The current
+Agent-to-grader entrypoint also does not own a UI broker lifecycle or select
+the Browse agent. Drafts 07–09 are one-shot tasks rather than long sessions;
+10–12 lack real staged turns, compaction, restart and stage-one acceptance;
+13–15 use fictional synthetic sources rather than current external
+information. The audit and probe hashes are in the compact history index,
+with raw no-model receipts in the owner-only experiment archive. No protected
+task was run or relabeled to fill the roster.
+
 Remaining gates: establish guarded live model quality on a representative
 occupied host with a materially different, preregistered resource approach;
-review the container and broker security independently;
+add bounded fill/query/history operations and bind the broker to the candidate
+volume before real UI admission; review the container and broker security independently;
 freeze a valid 30-task roster before any protected candidate run. The current
 synthetic check proves OpenCode routed these tools, not that a model chose them.
 The Dockerfile pins its base image and npm
