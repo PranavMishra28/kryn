@@ -674,6 +674,12 @@ def run(args, *, defer_patch=False):
                 (evidence / "plugin-inventory.json").write_text(json.dumps(inventory, indent=2) + "\n")
                 if not active:
                     raise RuntimeError("Requested OpenCode arm is not active")
+                agents = server.request("GET", "/api/agent", timeout=5)
+                if not isinstance(agents.get("data"), list) or not any(
+                        item.get("id") == "agent" and isinstance(item.get("permissions"), list)
+                        for item in agents["data"]):
+                    raise RuntimeError("OpenCode did not expose effective Agent permissions")
+                (evidence / "agent-inventory.json").write_text(json.dumps(agents, indent=2) + "\n")
                 agent = getattr(args, "agent", "agent")
                 session = server.request("POST", "/api/session", {
                     "title": args.task_id, "agent": agent,
