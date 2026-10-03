@@ -24,7 +24,7 @@ STATE_DIR = "/tmp/kryn-state"
 LOCAL_PORT = 18765
 
 
-def container_config():
+def container_config(*, native=False):
     """Keep the shipped policy/roles, substituting only container-owned paths."""
     config = json.loads((ROOT / "setup/opencode.template.json").read_text()
                         .replace("__ROOT__", "/tmp/kryn"))
@@ -42,6 +42,12 @@ def container_config():
     product["options"].update(stateDir=STATE_DIR, nodeBinary="/usr/bin/node",
                               profileId="terminal-bench-calibration",
                               inferenceBaseURL=base_url)
+    if native:
+        config["plugins"] = [entry for entry in config["plugins"] if entry is not product]
+        config["agents"] = {
+            name: {key: value for key, value in agent.items()
+                   if key in {"mode", "hidden", "model", "permissions", "description"}}
+            for name, agent in config["agents"].items()}
     return config
 
 
@@ -49,6 +55,7 @@ class KrynOpenCode(OpenCode):
     """Use Harbor's official verifier with KRYN's actual 2.0.10 worker bytes."""
 
     MODEL_CONNECTION = None
+    ARM = "kryn"
     SYSTEM_PACKAGES = {**OpenCode.SYSTEM_PACKAGES, "socat": PackageSpec.standard("socat")}
 
     @staticmethod
@@ -63,11 +70,12 @@ class KrynOpenCode(OpenCode):
             environment,
             "npm i -g @opencode/cli@2.0.10 && test \"$(opencode --version)\" = 'opencode v2.0.10'",
         )
-        with TemporaryDirectory(prefix="kryn-harbor-plugin-") as temporary:
-            source = Path(temporary)
-            for name, data in product_plugin_files(ROOT).items():
-                (source / name).write_bytes(data)
-            await environment.upload_dir(source, PLUGIN_DIR)
+        if self.ARM == "kryn":
+            with TemporaryDirectory(prefix="kryn-harbor-plugin-") as temporary:
+                source = Path(temporary)
+                for name, data in product_plugin_files(ROOT).items():
+                    (source / name).write_bytes(data)
+                await environment.upload_dir(source, PLUGIN_DIR)
         await self.exec_as_agent(environment, f"mkdir -p {STATE_DIR} {self.environment_logs_dir} "
                                  "/tmp/kryn/xdg/config /tmp/kryn/xdg/data "
                                  "/tmp/kryn/xdg/cache /tmp/kryn/xdg/state")
@@ -92,7 +100,7 @@ class KrynOpenCode(OpenCode):
                    "--format json --auto -- " + shlex.quote(instruction) +
                    f" 2>&1 </dev/null | tee {output}")
         await self.exec_as_agent(environment, command, env={
-            "OPENCODE_CONFIG_CONTENT": json.dumps(container_config()),
+            "OPENCODE_CONFIG_CONTENT": json.dumps(container_config(native=self.ARM == "native")),
             "OPENCODE_CLI_CONFIG_CONTENT": '{"session":{"permissions":"auto"}}',
             "NO_PROXY": "host.docker.internal,127.0.0.1,localhost",
             "XDG_CONFIG_HOME": "/tmp/kryn/xdg/config",
@@ -102,3 +110,13 @@ class KrynOpenCode(OpenCode):
         })
         if messages := self._error_messages():
             raise RuntimeError("OpenCode error event: " + "; ".join(messages[:3]))
+
+
+class NativeOpenCode(KrynOpenCode):
+    """Matched OpenCode arm without KRYN guidance or product hooks."""
+
+    ARM = "native"
+
+    @staticmethod
+    def name() -> str:
+        return "native-opencode"

@@ -95,6 +95,38 @@ that a working official grader connection does not imply task reliability.
 It leaves the external-transfer, protected holdout, same-model uplift and
 frontier-adjacency gates unqualified.
 
+## Post-hoc native-control diagnostic, frozen 2026-10-03T01:27:01Z
+
+The KRYN failure above was inspected before this control was chosen. A single
+native OpenCode run on the **same public task** can diagnose whether its 9B
+worker also makes the aggregation error, but selection after seeing KRYN's
+result prevents a causal H1 or benchmark-uplift claim. There is no second KRYN
+attempt. The only arm change is removal of KRYN's product plugin and extra
+agent system guidance, matching the native-control definition in
+`tools/run_native_trial.py`; the main agent description, model, sampler,
+CLI, container image, task, visible tools, permissions, timeout and unchanged
+daily-use resource guard remain the same. Native and KRYN container configs
+have identical provider, MCP, permissions, main agent and every other
+non-treatment field in an offline diff. Their SHA-256 hashes after rendering
+are respectively `bc28c1be7db60dac1c059d1d7f326b36dba2bb163523a0d59585e0587e640c24`
+and `c652945d5aed398a131fc623a60d6c768b5f670811bd3454cdf2eb691223f4c5`.
+The amended adapter SHA-256 is
+`f371cb7e5c46fc7e9804a6a8f70f8b5758c037d0b7b92fb68cf73e3a42ce7676`;
+the guarded runner SHA-256 is
+`ff0de868f797a638582ea25c408a95b0da7d9fa5e3ce0ea33874eec59f50c3c6`.
+The base source commit is `9f7dc5b1941dba26b8413f513f74f3c8a7319b3a`.
+
+Run exactly one fresh native trial named `native-harbor-control-20261002`
+with `--arm native` and the original task and trials directory above. Require
+normal OpenCode completion, the official Harbor reward, actual Qwen inference,
+a clean guard verdict and runtime settlement. Before comparing behavior,
+also compare the first nonempty wire tool-schema hash, tool count and numeric
+sampler fields from both relay logs; a mismatch invalidates the matched-tool
+interpretation. Record completion, reward, code trajectory, false-completion
+claim, runtime, tokens, resource samples and any guard stop. A failure or
+guard stop is a result, not a reason to retry. No product change is promoted
+from this one post-hoc diagnostic.
+
 To reproduce the adapter check, install Harbor from the pinned commit in a
 disposable Python 3.12 environment, download
 `terminal-bench-sample@2.0` with `harbor datasets download`, and pin the

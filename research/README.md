@@ -50,8 +50,10 @@ outside its readable and reachable surfaces.
 An actual sandboxed OpenCode call on a public development fixture passed this
 runner preflight; its evidence and limitations are in [DEVELOPMENT.md](DEVELOPMENT.md).
 
-The protected-holdout and Harbor layers remain pending. Docker is running on
-the research host. The first pinned official SWE-bench calibration and the
+The protected holdout and a representative Harbor subset remain pending. One
+public Harbor sample calibration ran through the official verifier and failed;
+see [HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md). Docker is running on the
+research host. The first pinned official SWE-bench calibration and the
 frozen six-task Lite/Verified subset are documented in
 [EXTERNAL.md](EXTERNAL.md). Record every subset attempt with
 `research/record_external.py`; it checks task/prompt/base identity and, when an
