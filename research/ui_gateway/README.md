@@ -51,15 +51,15 @@ and volume detachment. The receipt explicitly retains
 An exploratory registry-RPC check at
 `/private/tmp/kryn-ui-gateway-preflight-15/receipt.json` failed with HTTP 400:
 this research config does not enable the optional inference-audit tool-list RPC.
-That unqualified no-model attempt was retained and its code reverted; the 32-check
+That unqualified no-model attempt was retained and its code reverted; the 34-check
 receipt above remains the last passing preflight.
 
 OpenCode's actual MCP tool dispatch initially failed because it adds optional
 `_meta` to `tools/call` parameters; the adapter's exact-key check rejected the
 call. The adapter now accepts only the two ordinary keys plus optional object
 `_meta`. The clean-source synthetic inference canary at
-`/private/tmp/kryn-ui-synthetic-wire-20261003-07/result.json` (SHA-256
-`0efb2f70cd01c6a3a0c9cd302c12c2aff3a9be9f9ac631727d1c0536c684a6b8`)
+`/private/tmp/kryn-ui-synthetic-wire-20261003-08/result.json` (SHA-256
+`9f62214a31153992672918d9585c85b08805d2ce3a00924029116efb3b653c6f`)
 passes in both real OpenCode arms: each starts from a separate clean checkout,
 all four requests expose the same eight-tool catalog, and navigation, click,
 and snapshot all complete with the changed
