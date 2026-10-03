@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -28,6 +29,26 @@ BROKEN = "def answer():\n    return 0\n"
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def source_chunks(path, limit=2000):
+    """Make line-bounded reads below the native shell tool's output cap."""
+    lines = Path(path).read_bytes().splitlines(keepends=True)
+    chunks = []
+    first = 1
+    payload = b""
+    for line_number, line in enumerate(lines, 1):
+        if len(line) > limit:
+            raise ValueError("Pinned source has a line too large for a native shell read")
+        if payload and len(payload) + len(line) > limit:
+            chunks.append((first, line_number - 1, payload))
+            first, payload = line_number, b""
+        payload += line
+    if payload:
+        chunks.append((first, len(lines), payload))
+    if not chunks or b"".join(chunk[2] for chunk in chunks) != Path(path).read_bytes():
+        raise ValueError("Pinned source could not be partitioned exactly")
+    return chunks
 
 
 def checked(argv, *, env=None, cwd=None, timeout=20):
@@ -59,10 +80,15 @@ def fixture(output):
 
 def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
     sequence = []
+    chunks = source_chunks(source_file) if source_file is not None else []
     if source_file is not None:
-        sequence += [("shell", {"command": "cat " + str(source_file)}),
-                     ("shell", {"command": "cat " + str(source_file.parent / "SOURCE.json")}),
-                     ("shell", {"command": "printf tampered >> " + str(source_file)})]
+        sequence += [("shell", {"command":
+                     f"sed -n '{first},{last}p' {shlex.quote(str(source_file))}"})
+                     for first, last, _ in chunks]
+        sequence += [("shell", {"command": "cat " +
+                      shlex.quote(str(source_file.parent / "SOURCE.json"))}),
+                     ("shell", {"command": "printf tampered >> " +
+                      shlex.quote(str(source_file))})]
     sequence += [("shell", {"command": "cat " + str(hidden)}),
                  ("write", {"path": "answer.py", "content": FIXED})]
 
@@ -164,17 +190,21 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
                      hidden.read_text().strip() not in json.dumps(hidden_call))
     source_checks = {}
     if source_file is not None:
+        reads = shell_calls[:len(chunks)]
+        source_read_exact = (len(reads) == len(chunks) and
+            all(call.get("state", {}).get("metadata", {}).get("exit") == 0 and
+                call.get("state", {}).get("metadata", {}).get("truncated") is False and
+                call.get("state", {}).get("content", [{}])[0].get("text", "").encode()
+                    == expected
+                for call, (_, _, expected) in zip(reads, chunks)))
         source_checks = {
-            "source_read_exact": (len(shell_calls) == 4 and
-                shell_calls[0].get("state", {}).get("metadata", {}).get("exit") == 0 and
-                shell_calls[0].get("state", {}).get("content", [{}])[0].get("text", "").encode()
-                == source_file.read_bytes()),
-            "source_sibling_denied": (len(shell_calls) == 4 and
-                shell_calls[1].get("state", {}).get("metadata", {}).get("exit") != 0 and
+            "source_read_exact": source_read_exact,
+            "source_sibling_denied": (len(shell_calls) == len(chunks) + 3 and
+                shell_calls[len(chunks)].get("state", {}).get("metadata", {}).get("exit") != 0 and
                 source_file.parent.joinpath("SOURCE.json").read_text() not in
-                json.dumps(shell_calls[1])),
-            "source_write_denied": (len(shell_calls) == 4 and
-                shell_calls[2].get("state", {}).get("metadata", {}).get("exit") != 0 and
+                json.dumps(shell_calls[len(chunks)])),
+            "source_write_denied": (len(shell_calls) == len(chunks) + 3 and
+                shell_calls[len(chunks) + 1].get("state", {}).get("metadata", {}).get("exit") != 0 and
                 sha(source_file) == EXPECTED_SOURCE_SHA),
         }
     else:
@@ -196,6 +226,7 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
     return {"arm": arm, "receipt": str(receipt), "passed": passed,
             "catalogs": catalogs, "grader": graded,
             "source_checks": source_checks,
+            "source_read_chunks": len(chunks),
             "hidden_shell_read_denied": hidden_denied,
             "candidate_detached": result["candidate_detached"],
             "capture_detached": result["capture_detached"],

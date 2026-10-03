@@ -33,3 +33,21 @@ can validate the runner and diagnose behavior; it cannot count as protected
 H1 uplift or admit the still-fictional external-information drafts. Three
 fresh current-source tasks and an independently reviewed, sealed 30-task
 roster remain prerequisites.
+
+## First mechanics attempt: native shell truncation
+
+The first clean-source canned run (`75fcd15`, zero real model requests) failed
+the full-source-read criterion in **both** arms. OpenCode's native Agent shell
+tool returned exit 0 but set `truncated: true`, exposing only its saved-output
+tail: about 4.3K characters of the 10,088-byte file. Direct API shell access
+in the earlier preflight had returned the full file, so that check did not
+exercise the Agent-visible output limit. The sibling/write denials, edit,
+detached patch capture and independent Docker grade did pass in both arms;
+neither result is upgraded to a full handoff pass. The unchanged first receipt
+is `/private/tmp/kryn-public-source-handoff-20261003-01/result.json`, SHA-256
+`3a3635a857162673b280eda17123cf0c82fd450fec58e641b9ed444e98adba27`.
+
+The minimal measurement correction is to request the same pinned file in
+line-bounded chunks below the native output cap, require every chunk to be
+untruncated and byte-exact, then reconstruct the full source. The source,
+allowance, model, guard, grader and acceptance rule are unchanged.
