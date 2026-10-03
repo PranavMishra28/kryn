@@ -67,3 +67,30 @@ more instructions.
 The protected holdout, official Terminal-Bench, six long-horizon sequences and
 frontier comparator remain separate gates. This experiment cannot by itself
 support a frontier-adjacent or autonomous-production claim.
+
+## Frozen trial input and preflight
+
+The prompt in all four disposable runs is exactly:
+
+> In this disposable TaskboardLite workspace, add a Cancel Edit button that appears only while editing an existing entry. Clicking it must leave stored data untouched, clear edit mode, and reset the form, so Save can create a new entry again. Inspect the existing source and tests yourself; no clarifying question is needed. Preserve existing behavior, run relevant tests, and report only observed checks.
+
+Its SHA-256 is `91d2a2c70ae2d9a02da743068501b2c20e7da43dbf801fac1513bad08d85e996`.
+The two declared requirements are that exact request and preservation of the
+seed's Task06 API, tests and browser flows. Both map to one command check:
+`python3 -B evals/development_acceptance.py <WORKSPACE> <EVIDENCE>`, with a
+300-second check limit. The normalized managed-spec SHA-256 is
+`24cfdaf89996a83b0c6a301074d6211928a88c02c3ea478f745a52c0d7eee105`;
+the actual spec hashes differ only in disposable workspace/evidence paths.
+The frozen suite manifest is `186fd74343eff01992b48ac7d29b9a01ed7543968da6048745e6c42e1ec63ab6`;
+the checker source hash is `539894f1e3b71471d044111a8298f9aa90b8314b2bd11bdcbf7bf86eafd4d30b`.
+The common trial driver is `af90430` (source hash
+`deb4745bb2dc4a9072deb05955e5d908b95ddd713814226a17e4414dd08b00f4`);
+the control controller source hash is
+`b8e2de5b99db7c106a020541fd8dff35a7aebe576971e412d7da338d26e96679`,
+and the candidate controller source hash is
+`0f1be378b8a51c1bc1536386d154b402c6df0724f9fea8cdbab219fd45aa143f`.
+
+A preflight on an untouched prepared control workspace ran the public checker
+successfully as a checker process and returned the expected **failure**: both
+`task06_browser` and `cancel_edit_browser` failed against the seed. This
+establishes a nontrivial baseline and does not count as an agent trial.
