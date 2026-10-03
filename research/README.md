@@ -28,6 +28,8 @@ protected-holdout isolation gate after a same-volume hardlink exposed a hidden
 oracle. No protected task is qualified yet.
 [PYTHON_CALIBRATION.md](PYTHON_CALIBRATION.md) records the development-only
 candidate-volume model screen and the isolated Python/Git tool correction.
+[ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
+browser gateway, its no-model OpenCode dispatch check and remaining UI gates.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 

@@ -54,13 +54,35 @@ this research config does not enable the optional inference-audit tool-list RPC.
 That unqualified no-model attempt was retained and its code reverted; the 32-check
 receipt above remains the last passing preflight.
 
-Remaining gates: independently review the optional third-port change; prove the
-model-facing OpenCode tool catalog and tool dispatch
-through a separate public compatibility turn or a supported no-model native
-tool invocation path; review the container and broker security independently;
+OpenCode's actual MCP tool dispatch initially failed because it adds optional
+`_meta` to `tools/call` parameters; the adapter's exact-key check rejected the
+call. The adapter now accepts only the two ordinary keys plus optional object
+`_meta`. The clean-source synthetic inference canary at
+`/private/tmp/kryn-ui-synthetic-wire-20261003-04/result.json` (SHA-256
+`2c1208d2239fb71c1343de16f499233a107de33f750618622b20717d01763c70`)
+passes in both real OpenCode arms: each wire request exposes the same six browser
+tools, and navigation, click, and snapshot all complete with the changed
+`Activated` page state. It made **zero real model requests** and is not an
+agent-quality or protected score. The full Browse wire catalogs still differ:
+native exposes `glob`, `grep`, and `skill` while KRYN's product policy hides
+them. Therefore this Browse configuration is not a matched H1 pair.
+
+One public live 9B Browse turn at
+`/private/tmp/kryn-ui-public-dispatch-20261003-01/result.json` (SHA-256
+`edb461946d841d48a1158e503fe6d244d62892420e7de54699fd4c972128227f`)
+hit the unchanged sustained-host-memory warning on its first request before a
+browser call. It was diagnostic from a dirty research source, lasted 12.8 s,
+showed pressure 1→2 and zero swap growth, then settled its session/runtime and
+container. It cannot establish live dispatch or model quality; repeating that
+same resource-gated turn is not justified.
+
+Remaining gates: independently review the optional third-port change and the
+new synthetic dispatch path; resolve full Browse tool-catalog parity before an
+H1 pair; establish guarded live model quality on a representative occupied host;
+review the container and broker security independently;
 freeze a valid 30-task roster before any protected candidate run. The current
-OpenCode startup check proves the browser MCP server connected in both arms,
-not that a model invoked its tools. The Dockerfile pins its base image and npm
+synthetic check proves OpenCode routed these tools, not that a model chose them.
+The Dockerfile pins its base image and npm
 package lock, but `apk add chromium` resolves from a mutable Alpine repository;
 the exact tested output image ID, not a rebuild from this Dockerfile, is the
 executable identity used in the receipt.
