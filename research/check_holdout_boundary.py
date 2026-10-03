@@ -21,7 +21,7 @@ import urllib.parse
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from native_client import NativeServer, background_boundary
-from run_external_patch import configuration
+from run_external_patch import benchmark_tools, configuration
 
 ROOT = Path("/private/tmp")
 
@@ -95,7 +95,8 @@ def probe(workspace, private, oracle, image=None, device=None, run_root=None,
     return checks
 
 
-def server_probe(workspace, log, oracle, marker, private_parent=None):
+def server_probe(workspace, log, oracle, marker, private_parent=None,
+                 *, arm="kryn", tool_venv=None):
     # Use the same product configuration and dependency builder as the external
     # candidate runner. API inventory initializes plugins without inference.
     subprocess.run(["/usr/bin/git", "init", "-q", str(workspace)], check=True,
@@ -103,7 +104,9 @@ def server_probe(workspace, log, oracle, marker, private_parent=None):
     state = workspace / ".git" / "kryn-boundary-canary"
     state.mkdir(mode=0o700)
     config, products, dependencies = configuration(
-        workspace, state, "kryn", "http://127.0.0.1:19876/v1")
+        workspace, state, arm, "http://127.0.0.1:19876/v1")
+    tool_path, tool_dependencies, _ = benchmark_tools(tool_venv)
+    dependencies += tool_dependencies
 
     def shell(server, argv):
         command = " ".join(shlex.quote(str(value)) for value in argv)
@@ -130,6 +133,8 @@ def server_probe(workspace, log, oracle, marker, private_parent=None):
     background = {"dependencies": dependencies, "inference_port": 19876}
     if private_parent is not None:
         background["private_parent"] = private_parent
+    if tool_path is not None:
+        background["tool_path"] = str(tool_path)
     with NativeServer(workspace, config, log=log, background=background) as server:
         server.inventory()
         for domain in ("config", "agent", "command", "skill"):
@@ -140,10 +145,11 @@ def server_probe(workspace, log, oracle, marker, private_parent=None):
         visible_exit, visible_output = shell(server, ["/bin/cat", workspace / "visible.txt"])
         hidden_exit, hidden_output = shell(server, ["/bin/cat", oracle])
         python_exit, python_output = shell(server, ["python3", "-c", "print('python-ready')"])
-        return {
+        checks = {
             "native_server_started": True,
-            "product_plugin_active": len(products) == 1 and len(product) == 1
-                and product[0].get("state", {}).get("status") == "active",
+            "requested_arm_active": (len(products) == 1 and len(product) == 1
+                and product[0].get("state", {}).get("status") == "active") if arm == "kryn"
+                else len(products) == 0 and not product,
             "server_profile_oracle_read_denied": raw.returncode != 0
                 and marker not in raw.stdout + raw.stderr,
             "api_shell_workspace_read": visible_exit == 0
@@ -153,6 +159,12 @@ def server_probe(workspace, log, oracle, marker, private_parent=None):
             "api_shell_python_ready": python_exit == 0
                 and python_output == "python-ready\n",
         }
+        if tool_venv is not None:
+            rg_exit, rg_output = shell(server, ["rg", "candidate-visible", workspace / "visible.txt"])
+            pytest_exit, pytest_output = shell(server, ["python3", "-I", "-m", "pytest", "--version"])
+            checks["api_shell_rg_ready"] = rg_exit == 0 and rg_output == "candidate-visible\n"
+            checks["api_shell_pytest_ready"] = pytest_exit == 0 and pytest_output.startswith("pytest ")
+        return checks
 
 
 def main():

@@ -8,7 +8,9 @@ import argparse
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import time
@@ -28,6 +30,30 @@ ROOT = Path(__file__).resolve().parents[1]
 def git(workspace, *args):
     return subprocess.check_output(["git", "-C", str(workspace), *args], text=True,
                                    stderr=subprocess.STDOUT, timeout=20).strip()
+
+
+def collect_patch(workspace, base_commit, evidence):
+    """Include new source files without changing the agent's Git index."""
+    workspace, evidence = Path(workspace), Path(evidence)
+    untracked = subprocess.check_output([
+        "git", "-C", str(workspace), "ls-files", "--others", "--exclude-standard", "-z"],
+        timeout=20).split(b"\0")
+    names = [os.fsdecode(name) for name in untracked if name]
+    index = workspace / ".git/index"
+    temporary_index = evidence / "patch.index"
+    shutil.copyfile(index, temporary_index)
+    env = os.environ.copy()
+    env["GIT_INDEX_FILE"] = str(temporary_index)
+    try:
+        if names:
+            subprocess.run(["git", "-C", str(workspace), "add", "-N", "--", *names],
+                           env=env, check=True, timeout=20)
+        patch = subprocess.check_output([
+            "git", "-C", str(workspace), "diff", "--binary", "--no-ext-diff",
+            "--no-textconv", base_commit, "--"], env=env, timeout=20)
+    finally:
+        temporary_index.unlink(missing_ok=True)
+    return patch, names
 
 
 def prepare(workspace, prompt_file, evidence, base_commit):
@@ -89,8 +115,9 @@ def benchmark_tools(venv):
     venv = Path(venv).absolute()
     if (venv != venv.resolve() or not venv.is_relative_to(Path("/private/tmp")) or
             not (venv / "pyvenv.cfg").is_file() or not (venv / "bin/python3").is_file() or
-            not (venv / "bin/rg").is_file()):
-        raise ValueError("Benchmark tool venv must be a real disposable /private/tmp Python venv with rg")
+            (venv / "bin/python3").is_symlink() or not (venv / "bin/rg").is_file() or
+            (venv / "bin/rg").is_symlink()):
+        raise ValueError("Benchmark tool venv needs copied Python/rg binaries inside /private/tmp")
     pytest = subprocess.run([str(venv / "bin/python3"), "-I", "-m", "pytest", "--version"],
                             capture_output=True, text=True, timeout=10)
     if pytest.returncode:
@@ -240,13 +267,9 @@ def run(args):
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete"))
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
-    patch = subprocess.check_output(["git", "-C", str(workspace), "diff", "--binary",
-                                     args.base_commit, "--"], timeout=20)
+    patch, untracked = collect_patch(workspace, args.base_commit, evidence)
     (evidence / "model.patch").write_bytes(patch)
-    untracked = git(workspace, "ls-files", "--others", "--exclude-standard").splitlines()
-    if untracked:
-        report["untracked_files_omitted_from_patch"] = untracked
-        report["completed"] = False
+    report["untracked_files_included_in_patch"] = untracked
     report["patch_sha256"] = hashlib.sha256(patch).hexdigest()
     (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
     return report

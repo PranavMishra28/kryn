@@ -1,15 +1,40 @@
 """The external adapter refuses dirty or ambiguous benchmark workspaces."""
 from pathlib import Path
+import hashlib
 import subprocess
 import tempfile
 import unittest
 
 from unittest.mock import patch
 
-from run_external_patch import benchmark_tools, drive, prepare
+from run_external_patch import benchmark_tools, collect_patch, drive, prepare
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_patch_includes_new_files_without_mutating_candidate_index(self):
+        with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
+            root = Path(tmp).resolve()
+            workspace = root / "workspace"
+            workspace.mkdir()
+            subprocess.run(["git", "init", "-q", str(workspace)], check=True)
+            (workspace / "source.py").write_text("print(1)\n")
+            subprocess.run(["git", "-C", str(workspace), "add", "source.py"], check=True)
+            subprocess.run(["git", "-C", str(workspace), "-c", "user.name=Research",
+                            "-c", "user.email=research@example.invalid", "commit", "-qm", "seed"], check=True)
+            base = subprocess.check_output(["git", "-C", str(workspace), "rev-parse", "HEAD"],
+                                           text=True).strip()
+            before = hashlib.sha256((workspace / ".git/index").read_bytes()).digest()
+            (workspace / "source.py").write_text("print(2)\n")
+            (workspace / "new test.py").write_text("assert True\n")
+            evidence = root / "evidence"; evidence.mkdir()
+            patch_bytes, names = collect_patch(workspace, base, evidence)
+            self.assertEqual(names, ["new test.py"])
+            self.assertIn(b"new file mode", patch_bytes)
+            self.assertIn(b"+assert True", patch_bytes)
+            self.assertIn(b"+print(2)", patch_bytes)
+            self.assertEqual(before, hashlib.sha256((workspace / ".git/index").read_bytes()).digest())
+            self.assertFalse((evidence / "patch.index").exists())
+
     def test_finished_cli_cannot_silently_truncate_events(self):
         class Child:
             def communicate(self, **kwargs):
@@ -41,6 +66,10 @@ class ExternalPreflightTest(unittest.TestCase):
                     [], 1, "", "No module named pytest")):
                 with self.assertRaisesRegex(RuntimeError, "lacks runnable pytest"):
                     benchmark_tools(venv)
+            (venv / "bin/python3").unlink()
+            (venv / "bin/python3").symlink_to("/usr/bin/python3")
+            with self.assertRaisesRegex(ValueError, "copied Python/rg binaries"):
+                benchmark_tools(venv)
 
     def test_exact_clean_base_and_separate_oracle(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
