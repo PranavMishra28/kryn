@@ -518,3 +518,48 @@ its verified archive index is
 `43d94128ca70296ddcdcebb69f08626797d5bb772ef5d24a0e62330234a87eff`.
 The draft remains `protected_status=false` pending independent admission
 review and the remaining category gates.
+
+## Three-source Agent read screen
+
+Two more owner-only external-information drafts use different pinned official
+guides. For each, the seed and partial implementation fail, the reference and
+a structurally different alternative pass, and targeted wrong variants fail
+in pinned networkless Docker. The first draft tests five wrong variants across
+13 cases; the second tests six across 11 cases. These are sampled oracle
+controls, not protected Agent results. Both also passed a zero-model
+candidate-volume preflight: 14/14 direct boundary checks and 21/21 real
+OpenCode checks **per arm**, exact source shell read, denied source write and
+private-sibling read, reference grade after a bounded host copy, and clean
+volume detachment.
+
+A separate public-fixture canary then exercised the **native Agent `read`
+tool** for all three exact source paths, with synthetic inference and zero
+real model requests. Each of six native/KRYN arms returned the expected
+bounded first page, denied the private sibling and source write, reconstructed
+the full file through untruncated shell chunks, passed detached Docker grading
+of the same trivial public edit, and detached candidate/capture/grader images.
+Tool catalogs and effective permissions matched between arms for each source;
+the guard reported complete telemetry without a sampled memory warning or
+swap increase. An owner-only verified archive preserves 270 raw files. These
+three sources all come from GitHub Docs, so they do not establish broad
+external-domain diversity.
+
+The two new draft freeze SHA-256 values are
+`2de4b2038982b6d4ce70b5e6c26fde619ec7e0e0d30ce89a0cf9da8ed29ee195`
+and `24296a293362d386dcbae8aa56e9c01d9ac06219dfb113ae0741a37478731f5f`;
+their validation receipts are
+`8efd645db5c8aa1941ac497b070200b6fafed630efaeb5c3320e984181379c7d`
+and `7ba701bcca9f62f9f56d2c44a341915cfc0f466c63d4366be7da141c9ed8f120`.
+Their no-model preflight result SHA-256 values are
+`2a75348c4ce635290a51e70f1a701eb2228dbd9db860efff4432c25652560e23`
+and `eaaf8bf40c886f3bf5069bd3ac5ad382519c91763905a94a42050dc6444454c8`.
+The three-source native canary roster is
+`f91e28d7543816b08ca1a7444a2b965ded45bf6289494925f2aaa48bd5790a1d`;
+its raw-receipt archive index is
+`87c6a367269cdd79b4009fdc84a6c67cfb2b0d4960787a3b86d1cfa438c3937a`.
+
+**Decision:** the exact-source read channel and sampled grader mechanics may
+advance. The three drafts remain `protected_status=false`. Independent task
+admission, a sealed combined 30-task roster, actual paired model work on
+unseen tasks, source-use evidence during those turns, and external benchmark
+transfer are still required. Six canned Agent turns are not an H1 score.
