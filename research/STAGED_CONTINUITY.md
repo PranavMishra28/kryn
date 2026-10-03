@@ -167,3 +167,42 @@ The private receipt, retained disk images and final source snapshots are at
 This screen advances live staged **grader-transport feasibility** only. The
 unsealed private tasks, genuine long-workflow acceptance, same-model uplift,
 and frontier-relative gates remain open.
+
+## Rejected post-edit check signal on a retired staged task
+
+After the separate newsletter canary failed stage two with a hostless URL,
+the already exposed task was used for one development experiment. The
+preregistered plan (SHA-256
+`8a63c3f63827193190e6653c0a6f9ddd3f45831492dc1adfb31541918caf5425`)
+tested one research-only plugin change: after a verified native edit, a short
+signal asked for an executable boundary check until a later recognized check
+passed. The candidate commit was `0eddb4bbaf278b8b99c24ea351d0002d69c0ae7a`;
+its focused unit test, full offline checks and clean package smoke passed.
+The installed v1.0.0 plugin, model profile and resource guard were unchanged.
+
+In the single guarded live run, stage one passed. After one real compaction and
+server restart, stage two failed its unchanged independent Docker grader. The
+Agent ran two inline Python checks: the first found that its code rejected a
+valid `http://` URL, and the second passed after a repair. It still used a
+`^https?://` prefix regex that accepted hostless `http:///missing` and
+`https://`; a separate posthoc networkless probe confirmed both. Its final
+message claimed that all its chosen tests passed. Inline `python3 -c` checks
+do not match the existing `isCheck` observation predicate, so the candidate
+signal did not clear; the live wire receipt does not retain system text, so
+the exact model-visible signal is unproven. Stage three was withheld.
+
+The run made 15 local-model requests in 99.075 seconds. The unchanged guard
+recorded normal pressure, complete telemetry, AC power, zero sampled swap
+growth and no stop; the hidden grader was unreadable and the candidate volume
+detached. The candidate is **rejected** under its frozen stage-two acceptance
+rule. It is one retired synthetic task under a different host/time condition
+from baseline, not a causal uplift estimate, protected score, or continuity
+pass. The owner-only 67-file archive SHA-256 is
+`a2df6260eba35784de91b93070f51768789fea90b5535abf4a1a2ce9c8edf099`,
+its independently rehashed index is
+`fae7695b5fa053a96829e7b0dee9da6730c8a3ffbe9dc0bcb563616c386ebb3e`,
+and the analysis SHA-256 is
+`e3da2c1a1e45a01f2381173a1e7f4402495b7120f105c7c05866cf87f1da4ded`.
+No candidate plugin code is promoted. Future verification work needs a
+different mechanism that checks *which behavior* was exercised, not merely
+whether a command ran.
