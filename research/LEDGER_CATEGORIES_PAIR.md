@@ -91,3 +91,53 @@ receives guarded setup-only warmup, and the first guard stop ends the pair.
 The corrected, now-frozen matcher decides validity prospectively. This repeat
 is still development data and cannot repair the missing protected H1 roster or
 support a production change by itself.
+
+## Completed reverse-order result
+
+At clean source `74a966c9c04652bf1802a51e4c2b2b49d44191ba`, the fresh
+no-model preflight passed its real OpenCode boundaries, seed/partial failures,
+reference pass and image detachment. Both setup-only warmups loaded the same
+local model. The reverse-order pair was **fully matched** under all ten frozen
+controls: source, task, model/revision/profile/binary, tool environment,
+timeout, wire sampler and tool schema, normalized permissions, warm model,
+AC power and clean guard. Both arms used the 10-tool wire schema
+`1b56b6b37c804f7fd30cd60d131476c6a619cda5269ac2ccf9d2fc8a5d34a81e`.
+
+| Arm | Strict result | Agent time | Model requests | Tools / errors | New input / output / cache-read tokens |
+| --- | --- | ---: | ---: | ---: | ---: |
+| KRYN first | **Accepted**; oracle exit 0 | 174.486 s | 21 | 26 / 3 | 33,852 / 6,897 / 143,360 |
+| Native second | **Failed**; oracle exit 1 | 125.294 s | 22 | 21 / 5 | 29,137 / 4,593 / 110,592 |
+
+The native turn completed and claimed “all changes are complete and tested,”
+but its patch omitted the top-level export of `category_totals`. Its own
+checks imported internal modules and missed the public API shape; the hidden
+grader's package-level import failed. KRYN read all five relevant source files,
+including `__init__.py`, before editing and exported the function. This is a
+trace observation, not a one-variable causal attribution. In the earlier
+**unmatched** pair, native did read `__init__.py` and both arms passed. The
+stochastic difference on one task prevents a general quality claim.
+
+Both reverse-order arms completed without operator intervention or a guard
+stop. Sampled pressure stayed normal, sampled swap growth was zero, and the
+candidate, read-only capture and fresh grader volumes all detached. Sampled
+peak oMLX physical footprint was 12.25 GB for KRYN and 11.64 GB for native;
+these process-wide samples may miss transients and do not isolate KV usage.
+KRYN took longer and used more new tokens in the matched pair. The result is
+one KRYN-only accepted task, not a rate or confidence-interval estimate.
+
+The private `pair.json` for the matched repeat hashes to
+`34a8c7ceae5473fba83cfdee4d077deced037e2c4fa0c80dbc77e75aae06ee45`; its 184-file raw archive and independently checked
+index hash to `f2be362095773bbdc84c1c629ed18c1b3b3bbe7429131801b419f75537210c2e`
+and `e12d52cd773f1f6309491d36404a803f3ea969e887b0b8a6f0edbbc6e825b5d7`.
+The owner-only analysis SHA-256 is
+`ddd3a8bc9f32760e2a24c45b92bcf84dc948d2fa367fe223f5e7b5e556e41985`.
+Provisional roster V6 records four development model turns and permanently
+withholds this task from protected use (SHA-256
+`472d878e4476001d82ae7238df7a045245e2726cf483906d2e897e0d774fe46f`).
+The original invalid preflight and unmatched pair remain in the same archive.
+
+**Decision:** retain released v1.0.0 unchanged. The development observation
+justifies testing source-coverage and public-API verification on fresh tasks,
+but H1's protected roster, statistical uplift, UI and long-session gates remain
+open. It does not offset the earlier matched public Task03 losses or qualify
+frontier adjacency.
