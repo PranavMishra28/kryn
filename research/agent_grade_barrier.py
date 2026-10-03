@@ -172,7 +172,8 @@ def apply_patch(workspace, private, patch):
 
 
 def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
-                            hidden_paths, grade, timeout=900, browser_image=None):
+                            hidden_paths, grade, timeout=900, browser_image=None,
+                            source_file=None):
     """Run an admitted task; grade is a trusted callback(workspace, private, evidence).
 
     This function deliberately emits no protected pass/fail verdict. A study
@@ -180,18 +181,23 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
     """
     seed, prompt, tool_venv, receipt = (Path(path).absolute() for path in
                                         (seed, prompt, tool_venv, receipt))
+    source_file = Path(source_file).absolute() if source_file is not None else None
     hidden_paths = [Path(path).absolute() for path in hidden_paths]
     if arm not in {"native", "kryn"} or type(timeout) is not int or not 30 <= timeout <= 1800:
         raise ValueError("Use a known OpenCode arm and a 30–1800 second timeout")
     if browser_image is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}", browser_image):
         raise ValueError("Browser image must be an exact local image ID")
-    inputs = (seed, prompt, tool_venv, receipt, *hidden_paths)
+    inputs = (seed, prompt, tool_venv, receipt, *hidden_paths,
+              *((source_file,) if source_file is not None else ()))
     if any(path != path.resolve() or any(parent.is_symlink() for parent in path.parents)
            for path in inputs):
         raise ValueError("Trial paths must be canonical and without symlinks")
     if (receipt.parent != Path("/private/tmp") or receipt.exists() or
             not hidden_paths or not seed.is_dir() or not prompt.is_file() or
             not tool_venv.is_dir() or any(not path.exists() for path in hidden_paths) or
+            (source_file is not None and (not source_file.is_file() or
+                source_file in hidden_paths or source_file.is_relative_to(seed) or
+                source_file.is_relative_to(tool_venv))) or
             any(path.is_relative_to(seed) or seed.is_relative_to(path) or
                 path.is_relative_to(tool_venv) or tool_venv.is_relative_to(path)
                 for path in hidden_paths)):
@@ -201,6 +207,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
               "arm": arm, "protected_score": False, "graded": False,
               "browser_image": browser_image,
               "barrier_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+    source_sha256 = hashlib.sha256(source_file.read_bytes()).hexdigest() if source_file else None
+    report["source_sha256"] = source_sha256
     started = time.monotonic()
     try:
         base_commit = command([str(GIT), "-C", str(seed), "rev-parse", "HEAD"]).decode().strip()
@@ -219,7 +227,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
                                    task_id=task_id, prompt=prompt,
                                    evidence=receipt / "agent-evidence", arm=arm,
                                    tool_venv=tool_venv, private_parent=private,
-                                   timeout=timeout, ui_image=browser_image)
+                                   timeout=timeout, ui_image=browser_image,
+                                   source_file=source_file)
             result = run(args, defer_patch=True)
             report["agent"] = result
             report["agent"]["workspace"] = str(workspace)
@@ -227,6 +236,7 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
         agent = do_then_detach(candidate, report, "candidate_detached", agent_phase)
         if (not agent["completed"] or not agent["patch_deferred"] or
                 not agent.get("inference_relay_settled") or
+                (source_file is not None and not agent.get("source_unchanged")) or
                 (browser_image is not None and not agent.get("browser_settled"))):
             raise BarrierError("Agent did not complete an isolated deferred-patch turn")
         frozen = attach(candidate.image, receipt, readonly=True)
@@ -268,6 +278,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
                 raise BarrierError("Read-only patch capture resource or runtime settlement failed")
             return captured
         do_then_detach(frozen, report, "capture_detached", capture_phase)
+        if source_file is not None and hashlib.sha256(source_file.read_bytes()).hexdigest() != source_sha256:
+            raise BarrierError("Allowed source changed before grading")
         grader = create_volume(receipt, "grader")
         def grade_phase():
             workspace = grader.mount / "workspace"
@@ -283,6 +295,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
             return grade(workspace, private, receipt)
         result = do_then_detach(grader, report, "grader_detached", grade_phase)
         report["grader_result"] = result
+        if source_file is not None and hashlib.sha256(source_file.read_bytes()).hexdigest() != source_sha256:
+            raise BarrierError("Allowed source changed after grading")
         report["graded"] = True
         return report
     except BaseException as error:

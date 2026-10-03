@@ -17,6 +17,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 sys.path.insert(0, str(ROOT / "research"))
 import learning  # noqa: E402
 from agent_grade_barrier import clean_clone, run_candidate_to_grader  # noqa: E402
+from preflight_source_gateway import EXPECTED_SOURCE_BYTES, EXPECTED_SOURCE_SHA  # noqa: E402
+from run_external_patch import configuration  # noqa: E402
 from ui_gateway.synthetic_dispatch import FakeInference  # noqa: E402
 
 PYTHON_IMAGE = "python@sha256:399babc8b49529dabfd9c922f2b5eea81d611e4512e3ed250d75bd2e7683f4b0"
@@ -55,9 +57,14 @@ def fixture(output):
     return seed, prompt, hidden
 
 
-def trial(seed, prompt, hidden, tool_venv, grade_root, arm):
-    sequence = [("shell", {"command": "cat " + str(hidden)}),
-                ("write", {"path": "answer.py", "content": FIXED})]
+def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
+    sequence = []
+    if source_file is not None:
+        sequence += [("shell", {"command": "cat " + str(source_file)}),
+                     ("shell", {"command": "cat " + str(source_file.parent / "SOURCE.json")}),
+                     ("shell", {"command": "printf tampered >> " + str(source_file)})]
+    sequence += [("shell", {"command": "cat " + str(hidden)}),
+                 ("write", {"path": "answer.py", "content": FIXED})]
 
     class CannedRelay:
         def __init__(self, *_args, **_kwargs):
@@ -136,7 +143,9 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm):
             result = run_candidate_to_grader(
                 seed=seed, prompt=prompt, task_id="public-docker-handoff-" + arm,
                 arm=arm, tool_venv=tool_venv, receipt=receipt,
-                hidden_paths=[hidden], grade=grade, timeout=120)
+                hidden_paths=[hidden] + ([source_file.parent / "SOURCE.json"]
+                                         if source_file is not None else []),
+                grade=grade, timeout=120, source_file=source_file)
     except BaseException as error:
         return {"arm": arm, "receipt": str(receipt), "passed": False,
                 "error": type(error).__name__ + ": " + str(error)}
@@ -149,13 +158,30 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm):
         shell_calls.extend(part for message in data["messages"]
                            for part in message.get("content", [])
                            if part.get("type") == "tool" and part.get("name") == "shell")
-    shell_exit = (shell_calls[0].get("state", {}).get("metadata", {}).get("exit")
-                  if len(shell_calls) == 1 else None)
+    hidden_call = shell_calls[-1] if shell_calls else {}
+    shell_exit = hidden_call.get("state", {}).get("metadata", {}).get("exit")
     hidden_denied = (type(shell_exit) is int and shell_exit != 0 and
-                     hidden.read_text().strip() not in json.dumps(shell_calls[0]))
+                     hidden.read_text().strip() not in json.dumps(hidden_call))
+    source_checks = {}
+    if source_file is not None:
+        source_checks = {
+            "source_read_exact": (len(shell_calls) == 4 and
+                shell_calls[0].get("state", {}).get("metadata", {}).get("exit") == 0 and
+                shell_calls[0].get("state", {}).get("content", [{}])[0].get("text", "").encode()
+                == source_file.read_bytes()),
+            "source_sibling_denied": (len(shell_calls) == 4 and
+                shell_calls[1].get("state", {}).get("metadata", {}).get("exit") != 0 and
+                source_file.parent.joinpath("SOURCE.json").read_text() not in
+                json.dumps(shell_calls[1])),
+            "source_write_denied": (len(shell_calls) == 4 and
+                shell_calls[2].get("state", {}).get("metadata", {}).get("exit") != 0 and
+                sha(source_file) == EXPECTED_SOURCE_SHA),
+        }
+    else:
+        source_checks = {"source_not_requested": len(shell_calls) == 1}
     passed = bool(result["graded"] and agent["completed"] and
                   agent["inference_relay_settled"] and
-                  hidden_denied and
+                  hidden_denied and all(source_checks.values()) and
                   result["candidate_detached"] and result["capture_detached"] and
                   result["grader_detached"] and graded["docker_exit"] == 0 and
                   graded["docker_stdout"] == "PUBLIC PASS\n" and
@@ -169,11 +195,15 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm):
                   not result["capture_guard"]["cancelled"])
     return {"arm": arm, "receipt": str(receipt), "passed": passed,
             "catalogs": catalogs, "grader": graded,
+            "source_checks": source_checks,
             "hidden_shell_read_denied": hidden_denied,
             "candidate_detached": result["candidate_detached"],
             "capture_detached": result["capture_detached"],
             "grader_detached": result["grader_detached"],
             "wall_seconds": result["wall_seconds"],
+            "synthetic_request_count": len(agent["requests"]),
+            "source_unchanged": agent.get("source_unchanged"),
+            "resources": agent["resources"],
             "swap_growth_bytes": agent["resources"]["swap_peak_growth_bytes"]}
 
 
@@ -182,30 +212,55 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--tool-venv", required=True, type=Path)
     parser.add_argument("--grade-root", required=True, type=Path)
+    parser.add_argument("--source-dir", type=Path,
+                        help="Owner-only pinned GitHub Docs snapshot; enables source canary")
     args = parser.parse_args()
     output, grade_root = args.output.absolute(), args.grade_root.absolute()
     if (output.parent != Path("/private/tmp") or output.exists() or
             grade_root != grade_root.resolve() or not grade_root.is_dir() or
             grade_root.stat().st_uid != os.geteuid() or grade_root.stat().st_mode & 0o077):
         parser.error("Use a fresh /private/tmp output and an owned private Docker-shared root")
+    source_file = None
+    if args.source_dir is not None:
+        source_dir = args.source_dir.absolute()
+        source_file = source_dir / "github-pagination.md"
+        if (source_dir != source_dir.resolve() or
+                not source_dir.is_dir() or source_dir.stat().st_uid != os.geteuid() or
+                source_dir.stat().st_mode & 0o077 or not source_file.is_file() or
+                source_file.stat().st_size != EXPECTED_SOURCE_BYTES or
+                sha(source_file) != EXPECTED_SOURCE_SHA or
+                not (source_dir / "SOURCE.json").is_file()):
+            parser.error("Pinned owner-only GitHub Docs source identity changed")
     output.mkdir(mode=0o700)
     image_id = checked(["docker", "image", "inspect", PYTHON_IMAGE,
                         "--format", "{{.Id}}"], timeout=10).strip()
     seed, prompt, hidden = fixture(output)
     runs = [trial(seed, prompt, hidden, args.tool_venv.absolute(), grade_root,
-                  arm) for arm in ("native", "kryn")]
+                  arm, source_file) for arm in ("native", "kryn")]
+    configs = [configuration(seed, seed / ".git" / arm, arm,
+                             "http://127.0.0.1:19876/v1")[0] for arm in ("native", "kryn")]
+    permission_equal = (configs[0]["permissions"] == configs[1]["permissions"] and
+        {name: agent.get("permissions", []) for name, agent in configs[0].get("agents", {}).items()}
+        == {name: agent.get("permissions", []) for name, agent in configs[1].get("agents", {}).items()})
     equal = (all(run.get("passed") for run in runs) and
              runs[0]["catalogs"] == runs[1]["catalogs"] and
-             runs[0]["grader"]["patch_sha256"] == runs[1]["grader"]["patch_sha256"])
-    report = {"schema": 1, "kind": "public_zero_model_docker_grade_handoff",
+             runs[0]["grader"]["patch_sha256"] == runs[1]["grader"]["patch_sha256"] and
+             permission_equal)
+    report = {"schema": 1, "kind": ("public_zero_model_source_docker_handoff"
+                                    if source_file else "public_zero_model_docker_grade_handoff"),
               "source_commit": checked(["git", "-C", str(ROOT), "rev-parse", "HEAD"]).strip(),
               "source_dirty": bool(checked(["git", "-C", str(ROOT), "status", "--porcelain"])),
               "script_sha256": sha(Path(__file__)), "seed_commit": checked(
                   ["git", "-C", str(seed), "rev-parse", "HEAD"]).strip(),
               "prompt_sha256": sha(prompt), "real_model_requests": 0,
               "protected_score": False, "image": PYTHON_IMAGE,
+              "source_sha256": EXPECTED_SOURCE_SHA if source_file else None,
+              "source_unchanged": sha(source_file) == EXPECTED_SOURCE_SHA if source_file else True,
               "image_id": image_id, "tool_venv": str(args.tool_venv.absolute()),
-              "paired_catalogs_equal": equal, "passed": equal, "runs": runs}
+              "paired_catalogs_equal": (runs[0].get("catalogs") is not None and
+                                        runs[0].get("catalogs") == runs[1].get("catalogs")),
+              "paired_permissions_equal": permission_equal,
+              "passed": equal, "runs": runs}
     report["passed"] = bool(report["passed"] and not report["source_dirty"])
     (output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"output": str(output), "passed": report["passed"],
