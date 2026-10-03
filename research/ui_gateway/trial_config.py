@@ -35,6 +35,8 @@ def with_ui_gateway(base, *, python, adapter, repo, port, token):
         agent["permissions"] += [
             {"action": "webfetch", "resource": "*", "effect": "deny"},
             {"action": "search_*", "resource": "*", "effect": "deny"},
+            *([{"action": tool, "resource": "*", "effect": "deny"}
+               for tool in ("glob", "grep", "skill")] if name == "browse" else []),
             *(copy.deepcopy(browser_rules) if name == "browse" else
               [{"action": "browser_*", "resource": "*", "effect": "deny"}]),
         ]

@@ -187,9 +187,10 @@ def main():
         parser.error("Use a canonical public /private/tmp Git checkout and fresh receipt")
     receipt.mkdir(mode=0o700)
     results = [trial(workspace, args.image, arm, receipt) for arm in ("native", "kryn")]
-    passed = all(result["passed"] for result in results)
+    dispatch_passed = all(result["passed"] for result in results)
     native_tools = results[0].get("inference_calls", [{}])[0].get("tools", [])
     kryn_tools = results[1].get("inference_calls", [{}])[0].get("tools", [])
+    full_tool_catalog_equal = native_tools == kryn_tools
     output = {"schema": 1, "kind": "synthetic_browser_wire_dispatch",
               "real_model_requests": 0, "protected_score": False,
               "source_commit": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
@@ -200,13 +201,14 @@ def main():
               "adapter_sha256": hashlib.sha256(ADAPTER.read_bytes()).hexdigest(),
               "candidate_html_sha256": hashlib.sha256((workspace / "index.html").read_bytes()).hexdigest(),
               "browser_image": args.image,
-              "full_tool_catalog_equal": native_tools == kryn_tools,
+              "dispatch_passed": dispatch_passed,
+              "full_tool_catalog_equal": full_tool_catalog_equal,
               "browser_tool_catalog_equal": [name for name in native_tools if name.startswith("browser_")] ==
                                             [name for name in kryn_tools if name.startswith("browser_")],
-              "results": results, "passed": passed}
+              "results": results, "passed": dispatch_passed and full_tool_catalog_equal}
     (receipt / "result.json").write_text(json.dumps(output, indent=2) + "\n")
     print(json.dumps(output, sort_keys=True))
-    return 0 if passed else 1
+    return 0 if output["passed"] else 1
 
 
 if __name__ == "__main__":
