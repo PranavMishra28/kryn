@@ -198,39 +198,39 @@ def main():
         detached = True
         report["candidate_detached_before_grading"] = True
         # Docker Desktop cannot bind-mount this Mac's nested APFS candidate
-        # image. The real Agent-to-grader barrier also detaches the candidate
-        # first, then applies its patch to a fresh host-side grading checkout.
-        grading = receipt / "grading"
-        grading.mkdir(mode=0o700)
-        grader_workspace = grading / "workspace"
-        clean_clone(seed, grader_workspace, manifest["base_commit"])
-        report["grader_workspace_fresh"] = (
-            grader_workspace.stat().st_dev == oracle.stat().st_dev
-            and grader_workspace != workspace)
-        if not report["grader_workspace_fresh"]:
-            raise RuntimeError("Fresh grading checkout identity failed")
-        outcomes = {item["variant"]: item for item in validation["outcomes"]}
-        for variant, patch in (("seed", None), ("reference", reference),
-                               ("partial", partial)):
-            if patch is not None:
-                applied = command(["git", "-C", str(grader_workspace), "apply", str(patch)])
-                if applied.returncode:
-                    raise RuntimeError("Frozen " + variant + " patch did not apply")
-            report[variant] = grade(bundle, grader_workspace, variant, receipt)
-            expected = outcomes[variant]
-            if ((report[variant]["exit"] == 0) != expected["passed"] or
-                    not report[variant]["output_bounded"] or report[variant]["timed_out"]
-                    or report[variant]["stdout_sha256"] != expected["stdout_sha256"]
-                    or report[variant]["stderr_sha256"] != expected["stderr_sha256"]):
-                raise RuntimeError("Real-volume " + variant + " grader differed")
-            if variant != "seed":
-                reset = command(["git", "-C", str(grader_workspace), "reset", "--hard",
-                                 manifest["base_commit"]])
-                if reset.returncode:
-                    raise RuntimeError("Could not reset real-volume control checkout")
-        report["controls_pass"] = (report["seed"]["exit"] != 0 and
-                                   report["reference"]["exit"] == 0 and
-                                   report["partial"]["exit"] != 0)
+        # image. The real barrier also detaches the candidate first, then
+        # grades a fresh host-side checkout. /Users is Docker-shared here;
+        # /private/tmp newly created checkouts appeared late to its VM.
+        with tempfile.TemporaryDirectory(prefix="recovery-grader-", dir=draft.parent) as grading:
+            grader_workspace = Path(grading) / "workspace"
+            clean_clone(seed, grader_workspace, manifest["base_commit"])
+            report["grader_workspace_fresh"] = (
+                grader_workspace.stat().st_dev == oracle.stat().st_dev
+                and grader_workspace != workspace)
+            if not report["grader_workspace_fresh"]:
+                raise RuntimeError("Fresh grading checkout identity failed")
+            outcomes = {item["variant"]: item for item in validation["outcomes"]}
+            for variant, patch in (("seed", None), ("reference", reference),
+                                   ("partial", partial)):
+                if patch is not None:
+                    applied = command(["git", "-C", str(grader_workspace), "apply", str(patch)])
+                    if applied.returncode:
+                        raise RuntimeError("Frozen " + variant + " patch did not apply")
+                report[variant] = grade(bundle, grader_workspace, variant, receipt)
+                expected = outcomes[variant]
+                if ((report[variant]["exit"] == 0) != expected["passed"] or
+                        not report[variant]["output_bounded"] or report[variant]["timed_out"]
+                        or report[variant]["stdout_sha256"] != expected["stdout_sha256"]
+                        or report[variant]["stderr_sha256"] != expected["stderr_sha256"]):
+                    raise RuntimeError("Fresh-checkout " + variant + " grader differed")
+                if variant != "seed":
+                    reset = command(["git", "-C", str(grader_workspace), "reset", "--hard",
+                                     manifest["base_commit"]])
+                    if reset.returncode:
+                        raise RuntimeError("Could not reset fresh control checkout")
+            report["controls_pass"] = (report["seed"]["exit"] != 0 and
+                                       report["reference"]["exit"] == 0 and
+                                       report["partial"]["exit"] != 0)
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
     finally:
