@@ -383,3 +383,20 @@ The 16-file owner-only archive index SHA-256 is
 Its [history entry](history/ui_gateway.jsonl) contains no hidden prompt or
 grader. This also remains an unsealed no-model draft with
 `protected_status=false` and no real candidate-volume admission.
+
+The third error-recovery slot had a similar gap: its mailbox grader accepted a
+reference mutation that quarantined malformed line 1 only. A separate owner-
+only replacement makes checkpoint and quarantine JSON shapes explicit and
+tests two malformed positions, ordered delivery, callback-failure resume and
+deduplication after checkpoint rewind. The original mutant pass has private
+receipt SHA-256
+`8eb77cf02ccb17db2f1455ecae1a107455cd6875d608ebd5cab8ad764d5442ba`.
+The seed and partial patch fail, reference and structurally different
+alternative pass, and index-one-only and duplicate-quarantine mutants fail in
+the new six-control receipt, SHA-256
+`4bc902d10790b14baac7e7ee3e36c39da0e6ea8e942b08c8d3e25d9b4d27fd54`.
+The 16-file owner-only archive index SHA-256 is
+`417ec569e52aa92136d1cc7a8de4f0ba58d04f56596adcbe767d4906ffaaf260`.
+Its [history entry](history/ui_gateway.jsonl) also omits the hidden prompt and
+grader. All three corrected recovery slots remain unsealed and unscored; these
+targeted controls do not establish complete oracle coverage.
