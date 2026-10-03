@@ -37,11 +37,27 @@ This remains a **no-model admission check**, not a protected score.
 The adapter now builds its patch through a temporary intent-to-add Git index,
 so new files are included without changing the agent checkout's index. The
 unit test checks tracked and new file content plus unchanged index bytes.
-The candidate Python grader still leaves `__pycache__` after grading because
-its `-I` child ignores `PYTHONDONTWRITEBYTECODE`; it runs **after** patch
-capture, so it did not affect these grades, but the private draft should be
-corrected before sealing. The UI draft still lacks a qualified browser/source
-gateway, and the combined 30-task roster remains unsealed.
+The private Python grader initially left `__pycache__` after grading because
+its `-I` child ignored `PYTHONDONTWRITEBYTECODE`. The unsealed draft now invokes
+that child with `-B`; it runs **after** patch capture, so this did not affect
+the recorded grades. A subsequent all-task preflight using Python 3.13 passed
+14/15 exact controls and failed `ledger-journal`: its traceback differed from
+the frozen Python 3.14 validation. The preflight now requires the frozen grader
+binary hash and version. An explicit 3.13 negative control fails before a
+candidate starts; all **15/15** no-model preflights pass with Python 3.14.6,
+including both OpenCode arms' Python/pytest/ripgrep/Git canaries, seed/reference/
+partial controls and image detachment. The private manifest SHA-256 is
+`08aa7a5da0d4b56efe94136294fdf929e1e11696cdb0c43fe73d518f97bd4603`;
+the 15-receipt summary is
+`/private/tmp/kryn-python-v3-preflight-20261003-summary.json` (SHA-256
+`f5aaa3a7500c089d58e9432e1ddcb6dffacbd718a7d9933b4c776c8f70f75fd4`).
+The failed 14/15 calibration remains at
+`/private/tmp/kryn-python-v2-preflight-20261003-summary.json`.
+
+These controls qualify only the draft mechanics. Four Python tasks still
+carry explicit scientific-coverage limitations, one is retired, the UI draft
+still lacks a qualified browser/source gateway, and the combined 30-task
+roster remains unsealed.
 
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,
