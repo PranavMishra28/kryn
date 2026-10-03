@@ -67,3 +67,32 @@ without extending its prompt. A positive result still requires a fresh,
 predeclared coding task distribution, whole-workflow acceptance, resource cost
 and a same-model ablation before any product integration. No result from these
 already-seen failures can support H1 or frontier adjacency.
+
+## Observed result and decision
+
+Both frozen turns completed through the actual OpenCode `reviewer` role, with
+zero operator interventions, normal host pressure, AC power, zero swap growth,
+no guard stop, and verified owner-runtime settlement. The Reviewer read each
+candidate source; KRYN's review also attempted to read `/app/logs` outside its
+workspace and was correctly denied. Neither turn accessed the Harbor grader.
+
+| Archived artifact | Wall time | New input / output tokens | Frozen finding |
+| --- | ---: | ---: | --- |
+| KRYN Python | 103.158 s | 15,774 / 3,910 | **Missed** the double addition to `total` despite reading lines 84–92. It cited `candidate.py:30` for a wrong earliest-date comment, one line off, and falsely said that value was unused by filtering. |
+| Native shell | 68.059 s | 10,439 / 2,596 | **Partial only.** It found the July 27 hard-code at `candidate.sh:34-35`, but said the required 30-day window starts July 13 instead of July 14 and labeled absent log bodies in this review fixture a defect in the original task. |
+
+Both reviews therefore fail the preregistered rubric: **0/2 strict**. The
+second response is useful as a suspicion, not a correct independent review.
+Extra review work consumed 171.217 seconds and 6,506 generated output tokens
+without establishing acceptance. The compact receipts are
+`history/reviewer_screen.jsonl`; the two private 46-file evidence manifest
+SHA-256 values are
+`9bde5099e83f86d91fd58376e35c0a212939103e2bd008e23cab55bcb698e679`
+and `e69249687fd48454e83d5240494e6a3537c2693b98778cb6b8b1f61fa2f6ffd2`.
+
+**Reject R1.** Do not add an automatic Reviewer pass or lengthen its prompt
+based on this screen. The source was available; the first failure was a
+reasoning miss, not a source-read failure. A future worker mechanism needs
+executable, task-derived invariants and fresh-task validation before it can
+replace human supervision. The sealed holdout, official external subset,
+long-horizon and frontier-comparator gates remain unqualified.
