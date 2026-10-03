@@ -55,6 +55,9 @@ neither pair is a protected H1 score.
 official-source task with frozen Docker controls. Both arms reached the source
 but failed the same retry-exhaustion criterion; the longer KRYN run did not
 improve accepted work.
+[CRITERION_REPAIR.md](CRITERION_REPAIR.md) records one public, guarded repair of
+that exposed failure: the independent functional grader passed, while the
+worker deleted its tracked test afterward. No product change was promoted.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
@@ -90,11 +93,20 @@ tool catalog, first wire tool schema, sampling settings, guard or power state.
 It also fails closed when invocation-time runner, binary, model-profile or timeout
 provenance was not captured; the initial pilot predates those fields and is
 diagnostic evidence only.
-Raw traces, browser artifacts and source snapshots stay in ignored `evals/runs/`;
+Public-fixture raw traces, browser artifacts and source snapshots generally stay
+in ignored `evals/runs/`;
 `research/history/development.jsonl` is an append-only compact index of the
 public development runs. Preserve raw failed and interrupted runs. For protected
 research, create an independently isolated grader and a new sealed task roster;
 these public fixtures cannot be relabeled as holdout evidence.
+The recent public official-source traces and source snapshots also have an
+owner-only durable archive at
+`~/Documents/Codex/kryn-research-private/experiments/public-source-20261003-archive/`:
+`evidence.tar.gz` SHA-256
+`85d7f31d5ca72f68c6d4db6edd970cb547ea43dfa133ae6e924958136bbaa474`,
+and its 670-file SHA-256 `manifest.json` SHA-256
+`032766d27701eae1d3b9b06da8ca209fcdad81a8469cb5b73a31937399244380`.
+The archive is local and private, not a public reproducibility download.
 
 On macOS, run both boundary modes:
 

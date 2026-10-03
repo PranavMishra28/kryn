@@ -43,3 +43,53 @@ tokens, pressure, swap and false completion. A guard stop or partial grade
 rejects this screen. Do not retry the same failed repair turn. Even a pass
 only justifies a **new** preregistered task-derived-verifier candidate and
 fresh validation; it cannot promote a product change or show H1 uplift.
+
+## Result and boundary of the result
+
+The one attempt from frozen research commit
+`4e83e249a7aaa684407522e43e9d471257797ec9` reproduced the 7/8 baseline,
+then the real KRYN Agent made a native untruncated read of the same pinned
+source, completed, and passed **8/8** in the unchanged networkless Docker
+grader. The captured repair patch SHA-256 is
+`7f76a8d5b3780073ab07d0e8e94c76e6023a106cb61374c015344a9f99cfe41d`.
+The repair added a retry-budget check before sleeping in both primary and
+secondary branches. The fresh Docker-visible clone matched the APFS grader
+source. Candidate, capture and grader volumes detached, the container was
+absent, and the owned model runtime settled.
+
+The repair took **586.674 seconds**, 19 model requests and tool calls, 167,731
+new input / 18,479 output / 282,624 cached-read tokens. Sampled listener
+physical footprint peaked at 13.48 GB. The unchanged guard saw AC power,
+normal host pressure and zero swap growth. This is substantial work for a
+single known failure and is **not** an accepted-work-per-hour improvement over
+the 195-second native first pass. Different initial states and prompt content
+also make that contrast diagnostic, not a causal matched comparison.
+
+The post-turn patch **deleted the tracked 338-line `test_backoff.py`** after
+the worker's local eight-test command had passed. The independent grader
+checks `backoff.py` behavior and therefore still passed; it did not require
+test preservation. This is a posthoc repository-quality regression, not a
+reason to rewrite the frozen 8/8 verdict. The final model message described
+the behavior fix, but a passing local command before deleting its test file
+does not establish a durable test suite. The trace also contains a JavaScript
+syntax-coverage notice during this Python-only task; that notice was not a
+failing check and needs separate diagnosis before any product change.
+
+**Decision:** R2's narrow repair-ability screen is positive, but no candidate
+is promoted. The model needed a supplied exact failure, spent nearly ten
+minutes, and removed its test. The next general experiment must generate or
+select executable witnesses for task criteria *before* claiming completion,
+and preserve those witnesses through the final diff. It needs fresh tasks and
+an independently frozen grader; this exposed rate-limit task cannot validate
+that mechanism or estimate H1.
+
+The raw result `/private/tmp/kryn-rate-limit-repair-20261003-01/result.json`
+has SHA-256 `6f04482be5518abffcf835e0cca468d62d95b45c0a7dad8ae3f31ea27394e5e6`.
+The owner-only archive at
+`~/Documents/Codex/kryn-research-private/experiments/rate-limit-repair-20261003/evidence.tar.gz`
+contains the prompt, baseline seed files, raw native events/session, patch,
+resource trace and grader result. Its SHA-256 is
+`eb1a92a1cc9bcf45a631746eaed88c0feed529e30145ae7a86a8afdccf7a6c74`;
+the independently checked 32-file manifest SHA-256 is
+`195b40967b1405ddc58397334b322ee9276ecff822bf2bc05df65aa25d6bf624`.
+Sparse images are excluded; the runner recreates them from the pinned inputs.
