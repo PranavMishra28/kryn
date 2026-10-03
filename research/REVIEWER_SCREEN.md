@@ -1,0 +1,98 @@
+# Read-only Reviewer screen on archived Harbor failures
+
+Frozen 2026-10-03 before Reviewer model generation. This is public
+**development** data selected after two failed Harbor outputs were inspected.
+It is a mechanism screen, not a protected test, an independent Harbor score,
+or a product change. Released v1.0.0 stays installed and unchanged.
+
+## Hypothesis and fixed inputs
+
+**R1:** a separate use of KRYN's existing read-only `reviewer` agent can
+identify a concrete logic defect in a worker's output before another coding
+turn. The changed variable relative to the completed one-pass trajectories is
+one additional read-only model turn. No Reviewer system prompt or product hook
+is changed. A positive screen would justify testing an automatic review-and-repair
+workflow on fresh tasks; it would not qualify one for the product.
+
+Two disposable Git workspaces contain only the public Harbor sample's
+`instruction.md`, the final agent-generated `candidate.py` or `candidate.sh`,
+the agent's own `summary.csv`, and a sorted list of the 164 task image log
+filenames. They contain no official verifier output, expected counts, hidden
+oracle, or reference solution. Source task image:
+`ghcr.io/laude-institute/terminal-bench/log-summary-date-ranges@sha256:277e7926a960bd0c9db733f50ce9861635abad6f5281910a33759d89e52bf9ab`.
+The archived worker outputs are from the two trials in
+[HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md). The same read-only prompt is
+used in both cases, SHA-256
+`fecbb7a4ca8ea16f4c5ff6352bbfb7c6081605e66de76188ea916c3b263d908d`.
+The source hashes are `d0c0aa582282e5413ca2f9f40a43be8af429de889ebb3c2e12af995e332125fc`
+(KRYN Python) and `76b82bf1a095157e8004469b49b2b4d7424a679d2ea5879329585e507a22779c`
+(native shell). The task instruction is
+`c1d4516ad4ec2238209740eaf01291df9ab48b0028a3fc5df383c6f831453484`;
+the shared filenames are
+`75bbbcd7e4daf9068cff65fbece3c187fe84b5953b7f0a4af10433566a386330`.
+The agent-output CSV hashes are
+`86461431e7cf171bc4f217a3c3e3e30df049c08f645d0b4ce13bbc8083334318`
+and `a1ccec7c44376e32ec2a71219037cc4ad5a704af6a0da2cbcb9c30e91f71816b`.
+Raw disposable inputs remain in ignored
+`/private/tmp/kryn-reviewer-screen-20261002/` and are not production payload.
+
+## Frozen trial and decision
+
+Run one Reviewer turn on each fresh workspace, KRYN artifact first and native
+artifact second, with `tools/run_native_trial.py --agent reviewer --variant
+default --daily-use-guard --candidate-product-source --without-browser
+--timeout 300`. Use the exact prepared `prompt.txt` per case. The Reviewer is
+read-only under the product role; no shell, edits or hidden grader. Record
+native completion, source reads, final findings, guard state, latency and
+tokens. Stop if the unchanged resource guard fires; do not retry an attempted
+generation on the same case.
+
+The fixed independent rubric is:
+
+- For `candidate.py`, identify that `total` is incremented once explicitly
+  and again through the loop over periods including `total`, cite the relevant
+  current `candidate.py` line, and state the resulting aggregate invariant.
+- For `candidate.sh`, identify that its hard-coded last-30-day file pattern
+  starts on July 27 even though the required inclusive window starts July 14
+  and the filename inventory includes dates in that gap; cite the relevant
+  current `candidate.sh` line.
+- In both, do not claim to have executed checks, seen the Harbor grader, or
+  established acceptance from source inspection alone. Label unverifiable
+  assertions as such.
+
+R1 screens positive only if both one-shot reviews complete with clean guard
+and report their respective defect with a valid source citation within the
+300-second turn cap. One or zero correct findings rejects this Reviewer path
+without extending its prompt. A positive result still requires a fresh,
+predeclared coding task distribution, whole-workflow acceptance, resource cost
+and a same-model ablation before any product integration. No result from these
+already-seen failures can support H1 or frontier adjacency.
+
+## Observed result and decision
+
+Both frozen turns completed through the actual OpenCode `reviewer` role, with
+zero operator interventions, normal host pressure, AC power, zero swap growth,
+no guard stop, and verified owner-runtime settlement. The Reviewer read each
+candidate source; KRYN's review also attempted to read `/app/logs` outside its
+workspace and was correctly denied. Neither turn accessed the Harbor grader.
+
+| Archived artifact | Wall time | New input / output tokens | Frozen finding |
+| --- | ---: | ---: | --- |
+| KRYN Python | 103.158 s | 15,774 / 3,910 | **Missed** the double addition to `total` despite reading lines 84–92. It cited `candidate.py:30` for a wrong earliest-date comment, one line off, and falsely said that value was unused by filtering. |
+| Native shell | 68.059 s | 10,439 / 2,596 | **Partial only.** It found the July 27 hard-code at `candidate.sh:34-35`, but said the required 30-day window starts July 13 instead of July 14 and labeled absent log bodies in this review fixture a defect in the original task. |
+
+Both reviews therefore fail the preregistered rubric: **0/2 strict**. The
+second response is useful as a suspicion, not a correct independent review.
+Extra review work consumed 171.217 seconds and 6,506 generated output tokens
+without establishing acceptance. The compact receipts are
+`history/reviewer_screen.jsonl`; the two private 46-file evidence manifest
+SHA-256 values are
+`9bde5099e83f86d91fd58376e35c0a212939103e2bd008e23cab55bcb698e679`
+and `e69249687fd48454e83d5240494e6a3537c2693b98778cb6b8b1f61fa2f6ffd2`.
+
+**Reject R1.** Do not add an automatic Reviewer pass or lengthen its prompt
+based on this screen. The source was available; the first failure was a
+reasoning miss, not a source-read failure. A future worker mechanism needs
+executable, task-derived invariants and fresh-task validation before it can
+replace human supervision. The sealed holdout, official external subset,
+long-horizon and frontier-comparator gates remain unqualified.
