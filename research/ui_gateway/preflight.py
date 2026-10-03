@@ -151,7 +151,11 @@ def native_catalog(workspace, private, inference_port, broker, report):
         if set(config["mcp"]["servers"]) != {"browser"}:
             raise RuntimeError("source MCP survived UI trial configuration")
         dependencies += [PYTHON, Path(sys.base_prefix).resolve(), ADAPTER]
-        configurations[arm] = {key: config[key] for key in ("mcp", "permissions")}
+        configurations[arm] = {
+            **{key: config[key] for key in ("mcp", "permissions")},
+            "agent_permissions": {name: agent.get("permissions", [])
+                                  for name, agent in config.get("agents", {}).items()},
+        }
         with NativeServer(workspace, config, workspace.parent.parent / (arm + "-native.log"),
                           background={"dependencies": dependencies,
                                       "inference_port": inference_port,
