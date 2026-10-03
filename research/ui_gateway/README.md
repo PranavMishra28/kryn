@@ -151,6 +151,21 @@ not current external information. No protected task was run or relabeled to
 fill the roster. The audit and probe hashes are in the compact history index;
 raw no-model receipts stay outside the runtime package.
 
+An additional no-model oracle audit found three false acceptances in those
+unsealed UI drafts. The tab grader accepted a reference with every `tabpanel`
+role removed; the bakery grader accepted an invalid quantity still displayed
+as `oops`; and the station grader accepted a positive spaced search that failed
+to match. Corrected owner-only drafts pass their references and reject those
+mutants. A second alignment screen found that the tab and station graders also
+rejected valid implementations solely because of renamed internal IDs or a
+URL query that preserved surrounding spaces. Their corrected drafts accept
+both valid alternatives and still reject broken variants. All screens used a
+pinned local Chrome executable and **zero model requests**. The original
+drafts and every raw receipt are retained; the newest drafts remain
+`protected_status=false` until the model-facing browser gateway and complete
+roster qualify. Freeze and archive hashes are in
+[`../history/ui_gateway.jsonl`](../history/ui_gateway.jsonl).
+
 Remaining gates: independently admit a valid 30-task roster, establish guarded
 live model quality on a representative occupied host with a materially different,
 preregistered resource approach, and run actual protected staged turns with
