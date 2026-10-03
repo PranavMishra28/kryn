@@ -55,6 +55,33 @@ class CommandCheck:
                 "exit_code": result.returncode, "detail": detail}
 
 
+def repair_detail(detail):
+    """Keep failed subchecks visible when one verifier returns a combined JSON report."""
+    try:
+        report, _ = json.JSONDecoder().raw_decode(detail.lstrip())
+        checks = report["checks"]
+        failed = [(str(name)[:80], row) for name, row in checks.items()
+                  if isinstance(row, dict) and row.get("pass") is False]
+        if not failed:
+            return detail[:900]
+        names = ", ".join(name.replace("\n", " ") for name, _ in failed)
+        lines = ["Failed subchecks: " + names[:600]]
+        for name, row in failed[:8]:
+            observed = row.get("observed")
+            if isinstance(observed, dict):
+                observed = observed.get("failures") or observed.get("failure") or observed.get("page_errors")
+            diagnostic = observed or row.get("error") or row.get("output") or "failed"
+            if not isinstance(diagnostic, str):
+                diagnostic = json.dumps(diagnostic, ensure_ascii=False)
+            line = name.replace("\n", " ") + ": " + diagnostic.replace("\n", " ")[:170]
+            if len("\n".join((*lines, line))) > 1200:
+                break
+            lines.append(line)
+        return "\n".join(lines)
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return detail[:900]
+
+
 def source_state(workspace):
     """Fingerprint current changed paths and HEAD; ignored runtime files stay out."""
     workspace = Path(workspace).resolve()
@@ -294,7 +321,7 @@ class AcceptanceController:
                     break
                 report["state"] = "repair_required"
                 self.save(report)
-                failed = [f"{name} ({item['status']}): {item.get('detail', '')[:900]}"
+                failed = [f"{name} ({item['status']}): {repair_detail(item.get('detail', ''))}"
                           for name, item in outcomes.items() if item["status"] != "passed"]
                 obligations = [f"{record['id']} [{record['status']}]: " + ", ".join(
                     key for key in record["checks"] if outcomes[key]["status"] != "passed")
