@@ -204,6 +204,11 @@ def main():
             all(not path.is_symlink() for path in draft_paths) and
             all(path.stat().st_dev != workspace.stat().st_dev
                 for path in draft_paths if path.is_file()))
+        # A hidden file with one link cannot be aliased inside any readable
+        # host-volume dependency, including the separately pinned tool venv.
+        report["hidden_file_hardlinks_absent"] = all(
+            path.stat().st_nlink == 1 for path in draft_paths
+            if not path.is_symlink() and path.is_file())
         report["answer_aliases_impossible"] = {}
         for label, hidden in (("reference", reference), ("partial", partial),
                               ("validation", validation)):
@@ -236,6 +241,7 @@ def main():
                                                   and candidate_status.stdout == "")
         if not (report["grader_device_separate"] and report["reference_device_separate"]
                 and report["draft_files_separate"]
+                and report["hidden_file_hardlinks_absent"]
                 and all(report["answer_aliases_impossible"].values())
                 and all(report["code_only_dependencies_exclude_draft"].values())
                 and report["grader_dependencies_exclude_draft"]
