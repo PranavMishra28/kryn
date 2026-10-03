@@ -777,3 +777,16 @@ Roster V12 records the task's model exposure and remains unsealed (SHA-256
 `0fa00d2b3cca5cdf2d6d9f25f216620ea064cc5240543c497473b75e14c407dc`).
 This measures partial continuity mechanics and a local-model coding failure
 on **development** data, not protected H1 or end-to-end long-workflow quality.
+
+Two later development experiments also exposed the retired newsletter task:
+one isolated post-edit check signal and one separate test-writer turn. Neither
+passed its frozen screen; neither is a protected score. Owner-only roster V13
+records all three model exposures without changing any task prompt, grader or
+seed identity. Its SHA-256 is
+`c2c626f90e759ddf5b7efc926a9d566fee3513ca7910cf80d61d24d96f582b74`;
+the direct 30-task/90-identity-check audit hashes to
+`1ca658e45aa7311314044bea8e101b324160550ef1987a933dbcf78103555fa1`.
+Five slots are now explicitly retired: three invalid one-turn long-workflow
+drafts, the used multi-file task, and this used context/restart task. The
+combined roster remains unsealed, and independent semantic admission and
+replacement tasks are still required before any H1 holdout run.

@@ -93,3 +93,39 @@ resource trace and grader result. Its SHA-256 is
 the independently checked 32-file manifest SHA-256 is
 `195b40967b1405ddc58397334b322ee9276ecff822bf2bc05df65aa25d6bf624`.
 Sparse images are excluded; the runner recreates them from the pinned inputs.
+
+## Separate test-writer screen on the retired newsletter task
+
+Baseline verification guidance and an experimental post-edit signal did not
+yield an accepted stage-two implementation. The next preregistered screen
+used a separate local OpenCode Agent to write `unittest` witnesses before a
+coding turn. It
+saw only the incomplete renderer, the owner's updated template and the
+candidate-facing request. The frozen plan and prompt SHA-256 values are
+`01549e16a3297fee60d6cb13a409ded115b59a86ae1fc099fa51c48ca217b77c`
+and `07af5521e80e3354fb40193734a0ff62b64b34dba114ea92ef3821cd81ec501d`.
+This was another exposure of already retired task 11, not a fresh holdout.
+
+The writer completed in 104.438 seconds with seven local-model requests,
+normal pressure, complete telemetry, zero sampled swap growth and no guard
+stop. It created an 8,906-byte file containing 28 behavioral tests and left
+the renderer and template unchanged. The same generated tests were then run
+unchanged in pinned networkless Docker against the incomplete seed, the frozen
+correct reference and the previously observed bad prefix-regex implementation.
+All three failed: seed 25 failures/2 errors, reference **9 failures/2 errors**,
+bad patch 9 failures/3 errors. Several exact-output assertions omitted the
+template's existing final newline; others required space percent-encoding or
+exception classes absent from the request. No test exercised hostless
+`http:///missing` or bare `https://`. A failing bad patch was therefore no
+evidence that the witness caught the target defect.
+
+**Reject this witness as an acceptance check.** It falsely rejects a correct
+implementation and missed the observed boundary. No test was edited after
+the variant results, and no product code was changed. The owner-only 79-file
+archive SHA-256 is
+`8f7ea08d20777a5fd2091ff07a5662325b8febda0d9f979526b1836aab8d1347`;
+its rehashed index and analysis are
+`5774ad97041809609d00f574fde5ddf0e88e407914eed30e126ef3e9ac7fa198`
+and `7cc6e2cf9d5b87c93b5eb822c7343db5a34d6383b357c888049809690f411862`.
+One exposed task cannot establish whether separate test writing improves
+accepted work on fresh engineering tasks.
