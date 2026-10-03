@@ -59,11 +59,17 @@ public development runs. Preserve raw failed and interrupted runs. For protected
 research, create an independently isolated grader and a new sealed task roster;
 these public fixtures cannot be relabeled as holdout evidence.
 
-On macOS, run `python3 -B research/check_holdout_boundary.py same-volume`
-(expected exit 1) and `python3 -B research/check_holdout_boundary.py
-encrypted-volume` (expected exit 0). The second canary checks a separate
-encrypted grader volume, real OpenCode startup and shell-tool denials. It is a
-boundary preflight, not a protected score; the public model receipts and
+On macOS, run both boundary modes:
+
+- `python3 -B research/check_holdout_boundary.py same-volume` (expected exit 1)
+- `python3 -B research/check_holdout_boundary.py encrypted-volume` (expected exit 0)
+
+The second canary checks a separate encrypted grader volume, real OpenCode
+startup and shell-tool denials. It is a
+boundary preflight, not a protected score: the same-volume control exposes a
+workspace hardlink to the hidden oracle, while the separate encrypted volume
+prevents that alias. The public OpenCode model turns and their mixed results
+are distinct from these checker verdicts; their receipts and
 remaining gates are in [HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md).
 
 The protected holdout and a representative Harbor subset remain pending. One
