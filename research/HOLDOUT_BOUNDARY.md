@@ -163,10 +163,15 @@ dependencies, and rerun the real path/alias canary. Supplying
 `--private-parent` by itself does not establish that separation.
 
 Independent draft review found that 12 of the second task author's graders
-import candidate code directly into the privileged grader process. They must
-be rewritten to run candidate code in a constrained subprocess before those
-tasks can be protected. The three browser tasks additionally need a qualified
-browser gateway; their offline Playwright controls do not establish one.
+initially imported candidate code into the privileged grader process. The
+revised offline draft runs those probes in pinned, networkless Docker containers
+with bounded output and lifetime; its 15 seed/reference/partial controls pass.
+Every task remains protected-ineligible: three browser tasks need a qualified
+model-facing browser gateway, three long-workflow and three restart tasks need
+real staged model turns, and three external-information tasks use synthetic
+sources rather than current external information. The three error-recovery
+drafts have not run through the real candidate-volume grader path. Offline
+Playwright and Docker controls do not establish protected model results.
 The local Chrome process aborted in macOS application registration under the
 whole-process research profile, before navigation. No browser task is scored
 as a protected model result on this basis.
@@ -180,3 +185,35 @@ within 20 seconds. No matching process remained after timeout. This does not
 qualify a browser gateway, and a repeated prompt/flag tweak is not treated as
 an acceptance path. A separately isolated browser service or a different
 audited browser channel would need its own hidden-file and navigation checks.
+
+## Private Python draft preflight
+
+The separate Python draft has 15 synthetic tasks across repository bugs,
+multi-file features, API compatibility, persistence and refactoring. Its
+private manifest SHA-256 is
+`b0c36b7fc82e67bbb5d132aa045f01bc3c18eb13c5607e109d0e2ccd2d7b50de`.
+All seed/reference/partial, direct-import, omission, output-limit and isolation
+controls passed offline. Four task-specific coverage limits remain flagged in
+the private manifest. No candidate model has seen these tasks.
+
+`research/preflight_protected_python.py` verifies one real task with its
+candidate checkout and private temp on a fresh disposable APFS volume. It
+checks exact prompt/grader/reference/partial hashes, a clean seed, all private
+files on another device, impossible answer hardlinks, direct Seatbelt probes,
+the native OpenCode shell API, expected seed/reference/partial outcomes and
+image detachment. A `passed=true` receipt requires a clean committed research
+tree. It issues no model request. For this code-only trial scope, the external
+runner uses no benchmark-tool venv or MCP gateway; adding either changes the
+dependency boundary and requires a new preflight. Example on this Mac:
+
+```sh
+python3 -B research/preflight_protected_python.py \
+  /private/tmp/kryn-protected-python-draft-20261003 \
+  linecfg-duplicate-key \
+  /private/tmp/kryn-python-preflight-new-receipt
+```
+
+Even a passing task preflight is not a protected H1 trial: the 30-task roster,
+all category-valid graders, paired model turns and independent scoring remain
+separate gates. The private draft and raw receipts stay outside the public
+repository and runtime package.

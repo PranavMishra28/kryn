@@ -78,6 +78,9 @@ alternative layout with candidate workspace and temporary files on a separate
 APFS volume and the hidden oracle on the host. Its no-model OpenCode shell
 canary passes, but the draft task graders and browser/source gateways still
 require independent admission review before any protected result can be scored.
+`research/preflight_protected_python.py` adds a no-model real-task boundary and
+grader-control check for the private Python draft. A passing receipt requires a
+clean research commit; it is not a protected model result.
 
 The protected holdout and a representative Harbor subset remain pending. One
 public Harbor sample calibration ran through the official verifier and failed;
