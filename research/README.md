@@ -44,6 +44,9 @@ It does not admit private recovery tasks or measure model quality.
 [SOURCE_GATEWAY.md](SOURCE_GATEWAY.md) preregisters and records a passing
 zero-model, exact-file read-only official-source channel canary in both arms.
 It does not admit external-information tasks or measure model quality.
+[SOURCE_AGENT_TRIAL.md](SOURCE_AGENT_TRIAL.md) records the native Agent shell
+output-cap failure and the passing six-chunk, zero-model Agent-to-Docker handoff.
+The live-model coding pair and protected task admission remain pending.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.

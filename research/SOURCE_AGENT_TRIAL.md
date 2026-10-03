@@ -51,3 +51,42 @@ The minimal measurement correction is to request the same pinned file in
 line-bounded chunks below the native output cap, require every chunk to be
 untruncated and byte-exact, then reconstruct the full source. The source,
 allowance, model, guard, grader and acceptance rule are unchanged.
+
+## Corrected no-model handoff result
+
+From clean source `f3ecfffab7b346f0a71faa24fd9f41bbb5bd5a17`, the same
+source was retrieved through six `sed` reads, each at most 2,000 source bytes.
+Every native shell result had exit 0, `truncated: false`, and exact expected
+bytes; concatenation reconstructed the full pinned source. Both arms also
+denied the `SOURCE.json` sibling and source write, made the same fixture edit,
+captured identical patch SHA-256
+`f4368f87b6286c90cd99aa4cee06a9fe5d9c3860e18fa6eda85977c00bba2f71`,
+and passed the networkless, read-only, non-root Docker verifier on the fresh
+host-visible clone after the APFS candidate detached. Candidate, capture and
+grader images all detached; no canary container remains.
+
+Each arm made 11 **synthetic** requests and zero real model requests. Native and
+KRYN tool catalogs and effective permissions matched. Their wall times were
+16.657 and 16.937 seconds; resource telemetry was complete, with AC power,
+normal sampled pressure and zero sampled swap growth. The source hash stayed
+unchanged. The retained receipt is
+`/private/tmp/kryn-public-source-handoff-20261003-02/result.json`, SHA-256
+`a6bb9052cc93fc0ce8e441bdc4288691c7a4719c037a06d7ec67652d5b2d59c9`;
+the runner SHA-256 is
+`4bbb7c3f633ade563442ce5d920bbed0bccaeb3b851f7e0a285fa986effaeb06`.
+
+Run a fresh copy with:
+
+```sh
+/opt/homebrew/bin/python3.14 -B research/docker_grader_handoff_canned.py \
+  --output /private/tmp/kryn-public-source-handoff-NEW \
+  --tool-venv /private/tmp/kryn-python-tools-v2-20261003 \
+  --grade-root /Users/pranav/Documents/Codex/kryn-research-private \
+  --source-dir /Users/pranav/Documents/Codex/kryn-research-private/external-sources-github-20261003
+```
+
+**Decision:** the exact-file allowance may advance to a public development
+model task. The real Agent's shell-output cap must be respected; a successful
+`cat` exit alone is not evidence that the model saw the document. This result
+is not a protected external-information task, accepted coding work, H1 uplift,
+or a complete macOS information-boundary proof.
