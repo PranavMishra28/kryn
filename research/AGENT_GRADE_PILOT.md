@@ -58,5 +58,37 @@ environment, and normal volume detachment. Its `mechanics_passed=true` and
 `passed=false` are both expected because the task is retired. That preflight
 was on source `b24f0ca` and its report SHA-256 is
 `7af48800a43b6cf75f2ee66a87c902c4cf195bdb0c9bd50b0db1b2c51981271e`.
-The final model invocation requires a fresh current-commit preflight; no model
-has been called for this pilot yet.
+The final model invocation required a fresh current-commit preflight. At
+this correction point, no model had been called for the pilot.
+
+## Completed pilot
+
+The fresh current-commit preflight at `f2e348b` again passed all mechanical
+controls and detached its candidate volume. Its task-level `passed=false`
+remained correct because the task is retired; `report.json` SHA-256 is
+`4f6975b92380e1d6b22c4c881364cdc149cf5ecffba79a019ab229d26243daa5`.
+The one preregistered real KRYN turn then completed in 71.012 Agent seconds;
+the complete Agent-to-grader barrier took 79.895 seconds. It made ten local
+model requests, produced a 1,211-byte patch (SHA-256
+`e7c83f851aac46a6a91093d3223843e030d96163776469cbed13f1059e8e9855`),
+and had no intervention. The independent oracle exited 0 with
+`PASS linecfg-duplicate-key`. Candidate, read-only capture, and fresh grader
+volumes each detached normally; a separate `hdiutil` inventory check found
+none still attached. The capture monitor observed four complete green samples,
+normal host pressure and zero sampled swap growth. The Agent monitor observed
+35 complete samples, normal pressure, AC power and zero sampled swap growth.
+
+The strict **pilot barrier gate passed**. Raw reports and images are retained
+in an owner-only archive outside the public repository; the verified 45-file
+archive index SHA-256 is
+`59f7e7ca5c3d8379faf2a8da996b35db41786a40b1df1bb29cb7ab6ca9659833`.
+The raw `barrier.json` and `pilot-summary.json` SHA-256 values are
+`4574463d35efbe689633d167d612a0ee4feeb00bd1ffd3ca2f6dd066ab7bf7a7`
+and `16306d5288fc218604ef89afadc2ab4eed435baef3f6d445235f467e43b3c201`.
+The compact public record is
+[`history/agent_grade_pilot.jsonl`](history/agent_grade_pilot.jsonl).
+
+This is one easy, already-seen coding task. It does not estimate autonomous
+success, demonstrate H1 uplift, admit the unsealed 30-task roster, validate
+the model-facing browser path, or prove termination of every possible
+unowned descendant. Those remain separate gates.
