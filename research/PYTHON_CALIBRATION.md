@@ -112,6 +112,15 @@ live unlisted localhost service. The offline preflight now separates mechanics
 from task eligibility: a retired task or one with declared scientific coverage
 flags cannot report `passed=true`. This does not repair the still-unflagged
 oracle coverage gaps or qualify the combined 30-task roster.
+At clean source `63858e0`, the current-source `linecfg-interpolation` no-model
+preflight passed both arms, the real hidden-file and localhost-service canaries,
+seed/reference/partial controls, and volume detachment; its `report.json` SHA-256
+is `b71d18f175b0b01f5482b80b3e2985f76fb05bfb228d131a61fc6837ac562556`.
+The retired `linecfg-duplicate-key` and flagged `linecfg-tokenizer-extract`
+drafts each passed mechanics but correctly returned `passed=false`; their
+receipt hashes are `a8a699ce313f769c04ecdd635d28238e8a466527f4aaf5d0fc383b00f00365a6`
+and `de2966c03aa913867a16d637471b29db59bb3f355692bf9d82e4f79c935f58f1`.
+No generation was requested in any of these three probes.
 
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,
