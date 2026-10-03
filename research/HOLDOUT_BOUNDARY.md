@@ -596,3 +596,25 @@ The owner-only verified raw-archive index for V3 is
 permission parity under canned inference. It does not prove the model can
 repair the task, admit any draft to a sealed holdout, or resolve the remaining
 browser, staged-workflow and roster gates.
+
+## Provisional 30-slot identity inventory
+
+An owner-only inventory selects 30 **draft** slots, exactly three in each of
+the ten preregistered categories: 15 Python drafts, eight original mixed
+UI/long/restart drafts, three corrected recovery drafts, one replacement
+restart draft, and three official-source drafts. All seed Git checkouts were
+clean and matched their recorded commits. A separate audit rehashed the
+selected prompts and graders against 15 Python manifest entries, 61 mixed
+bundle files, three UI admission entries, 48 recovery archive files, 78
+restart freeze files, and 36 external-source freeze files. It found zero
+identity mismatches. The provisional roster SHA-256 is
+`56ee6c2a307bb8c1106a6839c01c8604afa5ba2c413d2fa98345c6bb8ed84bd5`;
+the audit receipt SHA-256 is
+`bb4f2f5b8c2170f2546747ba02a8b6f7221b4b2334960490e9c4809fc29d2c73`.
+Private task text, grader code, references and exact paths stay outside Git.
+
+This is **not** a sealed holdout or task admission. One Python persistence
+draft explicitly does not prove physical power-loss recovery. Browser use on
+the occupied host, two context/restart slots, three long-workflow slots,
+independent per-task admission and paired real-model trials remain open.
+Exact byte identity cannot establish semantic oracle coverage or model quality.
