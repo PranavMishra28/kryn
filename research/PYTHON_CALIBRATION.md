@@ -134,6 +134,41 @@ Independent oracle review found an additional unflagged ISO-timestamp gap in
 `ledger-legacy-records`; a corrected draft is required before roster admission.
 These 15 probes made zero model requests and provide no H1 score.
 
+The later v5 private-draft matrix at source `3499531` reports 15/15 mechanics
+passing with volumes detached, 12/15 returning `passed=true`, and three declared
+scientific-limit tasks withheld (`linecfg-tokenizer-extract`, `ledger-journal`,
+`ledger-amount-parser`). Its 15-receipt summary is
+`/private/tmp/kryn-v5-current-preflight-20261003-01-summary.json`, SHA-256
+`0af68e420400b1a42fdf5eab92f694e1cc793f80519c8bc11d0525b5cbf65306`.
+It made zero model requests and does not seal a protected roster.
+The 15 tasks draw from only three underlying repository families (five tasks
+each), so they are correlated and provide neither 15 independent repository
+samples nor an H1 power estimate.
+
+A separate research-only Agent-to-grader barrier prototype requires normal detachment
+of each candidate APFS image before patch capture on a new read-only mount,
+then applies the bounded patch in a fresh grading image. If detachment or
+endpoint settlement is uncertain, it does not grade. A real no-model OpenCode
+shell canary showed that a `setsid` child holding a candidate file descriptor
+blocks normal detachment, while a detached child without such a descriptor
+cannot read the new candidate mount or read/write the fresh grader mount even
+when given their exact paths. Its receipt is
+`/private/tmp/kryn-agent-grade-canary-y0e05rmh/canary.json`, SHA-256
+`eef5f527818aaa9625669fb75e423bfcbb2d12933287bb824246d04cc63c52ad`.
+An immediate equal-length tracked edit exposed a copied-index stat-cache miss;
+patch capture now resets tracked stat entries in its private index before diff.
+The regression also retains an intent-to-add new file in the patch.
+Read-only capture keeps the same 512-MiB swap-growth and two-warning resource
+guard active through candidate-controlled Git, with cancellation passed to each
+Git child. Missing telemetry, resource cancellation or a non-idle runtime
+withholds grading. A synthetic no-model trial with the real guard (and a fake
+Agent) recorded four complete green samples and idle runtime before and after
+capture; its `barrier.json` SHA-256 is
+`4f042f85116b09913001193e8b0be00bf1e534c50cf01718b206783455cb891c`
+at `/private/tmp/kryn-capture-guard-real-7edc63782e56`.
+This tests the path barrier, not exhaustive process-tree termination or private
+grader confinement; no protected model trial has used the barrier.
+
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-native-20261003-01/`, and
