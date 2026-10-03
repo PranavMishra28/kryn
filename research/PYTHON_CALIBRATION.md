@@ -79,6 +79,31 @@ checkout may retain Git settings that distort patch construction even when the
 hidden oracle remains inaccessible.
 The two paired model turns above predate this capture correction.
 
+A first clean-source post-correction preflight at `f3a451d` failed because the
+stricter API-shell denial check required an empty combined output stream;
+OpenCode included the expected `cat: …: Operation not permitted` diagnostic.
+The exact-denial matcher at `f151eca` passed the candidate-volume boundary
+canary and a fresh real-task preflight for `linecfg-interpolation` with both
+arms. The failed and passing reports remain at
+`/private/tmp/kryn-python-postcapture-preflight-20261003-01/report.json`
+(SHA-256 `934eaf0709b5e002fd3da02fbbd533ced0168b141a00a160e3e35476976e77b1`)
+and `/private/tmp/kryn-python-postcapture-preflight-20261003-02/report.json`
+(SHA-256 `afe908569463a954f6b0e3b0ff14fc1c12593307ee350953081d4ba124f2ac86`).
+
+One actual KRYN turn on the **retired** `linecfg-duplicate-key` draft at
+`f151eca` stopped under the unchanged host-memory warning after one inference
+request; its `result.json` SHA-256 is
+`a98b4c62d2da346e4e9dd6300ed6624418ae0bbd5cb9c785ca6c69f1a04cff0a`.
+With pressure back to normal, one fresh retry completed and independently
+passed in 106.1 seconds with 18 requests, normal sampled pressure and no swap
+growth. It captured a 1,192-byte patch (SHA-256
+`769d83272418880f1eba957ec5450b887fb393dcede1bdc6f30ec2b8d348a464`)
+and unchanged Git-config hash; the retry `result.json` SHA-256 is
+`47d305a4c189db748828233c0554129343a4901517dea8485516204b12fefbbd`.
+Both run directories are under `/private/tmp/kryn-python-postcapture-development-kryn-20261003-0{1,2}`.
+This is adapter compatibility and a resource-guard observation, **not** an H1
+estimate or a protected model result.
+
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-native-20261003-01/`, and
