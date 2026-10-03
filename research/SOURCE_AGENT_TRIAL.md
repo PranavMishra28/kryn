@@ -137,3 +137,22 @@ verdict stays failed at `/private/tmp/kryn-source-native-read-20261003-01/result
 (SHA-256 `d48772ccccfd9312eb8ef9eaf8ec908f3f524c070a6240dcc069d71bfe201db5`).
 The measurement correction requires all 20 expected lines and the exact
 continuation marker; it does not change the permission rules or trial inputs.
+
+At clean `2ad0e74143ed7610c32ae555bc2666e47dd02e5b`, the corrected S3
+canary passed in both arms. Each native `read` returned precisely lines 1–20
+with the explicit next-offset marker; the native sibling `read` and source
+`write` failed. The earlier six bounded shell reads reconstructed the full
+10,088-byte source, its hash and provenance stayed unchanged, and the hidden
+file remained inaccessible. Both arms produced the same patch and passed the
+fresh networkless Docker grade. Permissions and tool catalogs matched; each
+arm made 14 synthetic requests, zero real model requests, and took 16.562 s
+(native) or 17.006 s (KRYN). AC power, normal sampled pressure, zero sampled
+swap growth, complete telemetry, detached APFS images and removed containers
+were observed. The raw pass receipt is
+`/private/tmp/kryn-source-native-read-20261003-02/result.json`, SHA-256
+`bfe8669cd917c5f23a9e323750bb89d7bca6ed540208aa75c7bfc2776c504b93`.
+The no-source canned regression also passed both arms, receipt SHA-256
+`a3fe23c43a345a52577403aa8f96dcf3adb571b91f81535a296f36d213da0d2d`.
+`make check` passed. This admits the research source adapter for further
+public development trials; it does not admit external-information tasks to
+the protected holdout or establish a live-model capability gain.
