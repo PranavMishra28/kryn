@@ -25,6 +25,14 @@ The final export must retain all three user prompts and both compaction records;
 the prompts' exact nonces must appear in stored history. The resource guard
 must remain clean, there must be no real model request, and the candidate
 volume must detach. Keep raw receipts and a compact hash-indexed result.
+The manual endpoint and durable-history semantics follow
+[OpenCode's V2 compaction documentation](https://opencode.ai/v2/docs/compaction).
+
+From a clean KRYN checkout on this Mac, run:
+
+```sh
+python3 -B research/staged_lifecycle_canned.py /private/tmp/a-new-receipt-directory
+```
 
 Reject this mechanics screen if any compaction never completes, a restart
 loses or changes the session, stale/extra compaction records appear, guard
