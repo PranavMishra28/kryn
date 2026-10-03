@@ -57,3 +57,39 @@ external transfer before product promotion. Otherwise reject the candidate
 code and retain a compact failed receipt. The prior Task03 baseline attempts
 have different order/cache histories and cannot form a matched causal pair
 with this one candidate run.
+
+## Completed development screen
+
+The candidate commit `4831c71ec23e4c76566adfe6e05209ab4198637d`
+passed its focused hook fixtures, `make check`, and clean package smoke before
+generation. One fresh Task03 Agent trial then ran from that source snapshot with
+the frozen prompt, full ready tool catalog, local Qwen3.5-9B-6bit, Default
+variant, 96K profile, 900-second cap, and unchanged daily-use guard. oMLX was
+idle with no model loaded at preflight, so the driver wall time includes a cold
+load; no concurrent heavy generation or operator repair occurred.
+
+The frozen grader **passed** its three checks, confirmed `test_existing.py` and
+`data/entries.csv` unchanged, and the additional report/CLI/HTTP probe passed.
+But the native turn **timed out** after 908.084 driver seconds, so strict
+acceptance is **false**. The trace has 48 tool calls and four tool errors, none
+from the new preserved-file guard. The model read the existing test and wrote
+new tests; it never attempted a native edit/write to the protected test. It
+spent the end of the run repairing its new HTTP tests and port conflicts.
+Sampled memory pressure stayed normal, swap did not grow, and the resource
+guard did not stop the turn. The trial consumed 269,493 new input and 19,308
+output tokens. This one trajectory cannot identify a causal effect of the
+candidate on quality or latency, and a functional pass after a timed-out turn
+cannot be promoted as accepted autonomous work.
+
+**Decision: reject P1.** The preregistered guard-trigger and native-completion
+conditions both failed. Commit `935cd6a` reverts the candidate hook and its
+focused tests; the product plugin again hashes to the base
+`24c55c06a0b9ba6fe126034247479004885af1bf349d2d47dfb365dcf1aefc3f`.
+No owner installation or released v1.0.0 profile changed. The compact trial
+receipt is in `history/development.jsonl`; raw trace, source snapshot, grader,
+supplemental probe, resource samples and a per-file SHA-256 manifest remain in
+ignored `evals/runs/preserve-tests-candidate-03-20261003/` on this Mac. The
+private manifest at `/private/tmp/kryn-preserved-tests-20261003/raw-manifest.json`
+hashes to `34eb67be48c3af42831eafed9e4555a54d0de103a21fe48a1731e819c73ecb71`.
+The repeated self-authored-test repair and late port-conflict loop are useful
+development observations, not validation of a new mechanism.
