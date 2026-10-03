@@ -13,6 +13,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import resource
 import signal
@@ -118,6 +119,14 @@ def main():
         if len(matches) != 1:
             raise RuntimeError("Task ID missing or duplicated in manifest")
         entry = matches[0]
+        grader_python = Path(sys.executable).resolve()
+        report["grader_python_version"] = platform.python_version()
+        report["grader_python_sha256"] = sha(grader_python)
+        report["grader_interpreter_matches"] = (
+            entry.get("grader_python_version") == report["grader_python_version"]
+            and entry.get("grader_python_sha256") == report["grader_python_sha256"])
+        if not report["grader_interpreter_matches"]:
+            raise RuntimeError("Trusted grader interpreter differs from the frozen task validation")
         seed = draft / "tasks" / args.task_id / "seed"
         prompt = draft / "tasks" / args.task_id / "prompt.md"
         oracle = draft / "private" / "oracles" / (args.task_id + ".py")
