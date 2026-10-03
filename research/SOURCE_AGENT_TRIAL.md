@@ -103,3 +103,56 @@ with runner SHA-256
 The original no-source Agent-to-Docker canary also passed both arms with the
 final script; its regression receipt SHA-256 is
 `21c967d13242d29f242e638f237dd6822fb3364b82c78091236d2e34cbf4a9e7`.
+
+## S3 preregistration: native read permission
+
+The first public coding pair found that OpenCode denied its native `read` on
+the pinned external source, while the process sandbox allowed exact-file
+shell reads. This is a research-adapter defect. Hypothesis: adding one narrow
+OpenCode external-directory boundary and an exact-file `read` exception will
+make the native tool usable without widening the actual process boundary.
+The baseline is the current research configuration; the candidate changes
+only source-file permissions when an owner-only `source_file` is supplied.
+Neither the production configuration nor the Seatbelt policy changes.
+
+Before another real-model trial, run a paired zero-model Agent canary in both
+arms. Require the native `read` on the source to return the pinned bytes or an
+explicit bounded, untruncated portion; native `read` on its provenance sibling
+and native `write` on the source must be denied. The existing six exact shell
+chunks, hidden-file denial, identical fixture patch, detached Docker grade,
+equal effective permissions and tool schemas, complete telemetry, normal host
+pressure, and clean APFS/container teardown must still pass. A native source
+read that fails, truncates silently, or opens the sibling rejects the candidate.
+Record wall time, synthetic request count, source hash, and resource samples.
+Do not run a model or count this as protected task success until the canary
+passes. A public model retry, if any, remains development data.
+
+The first S3 canary at clean `9dcc73c` returned the exact requested first 20
+numbered source lines in both arms, followed by OpenCode's explicit
+`Continue reading with offset: 21` marker. OpenCode correctly marked the
+*file* as truncated because more pages remain; the canary mistakenly required
+`metadata.truncated: false` for a bounded page. All sibling/write denials,
+six exact shell chunks, Docker grades and parity checks passed, but its raw
+verdict stays failed at `/private/tmp/kryn-source-native-read-20261003-01/result.json`
+(SHA-256 `d48772ccccfd9312eb8ef9eaf8ec908f3f524c070a6240dcc069d71bfe201db5`).
+The measurement correction requires all 20 expected lines and the exact
+continuation marker; it does not change the permission rules or trial inputs.
+
+At clean `2ad0e74143ed7610c32ae555bc2666e47dd02e5b`, the corrected S3
+canary passed in both arms. Each native `read` returned precisely lines 1–20
+with the explicit next-offset marker; the native sibling `read` and source
+`write` failed. The earlier six bounded shell reads reconstructed the full
+10,088-byte source, its hash and provenance stayed unchanged, and the hidden
+file remained inaccessible. Both arms produced the same patch and passed the
+fresh networkless Docker grade. Permissions and tool catalogs matched; each
+arm made 14 synthetic requests, zero real model requests, and took 16.562 s
+(native) or 17.006 s (KRYN). AC power, normal sampled pressure, zero sampled
+swap growth, complete telemetry, detached APFS images and removed containers
+were observed. The raw pass receipt is
+`/private/tmp/kryn-source-native-read-20261003-02/result.json`, SHA-256
+`bfe8669cd917c5f23a9e323750bb89d7bca6ed540208aa75c7bfc2776c504b93`.
+The no-source canned regression also passed both arms, receipt SHA-256
+`a3fe23c43a345a52577403aa8f96dcf3adb571b91f81535a296f36d213da0d2d`.
+`make check` passed. This admits the research source adapter for further
+public development trials; it does not admit external-information tasks to
+the protected holdout or establish a live-model capability gain.

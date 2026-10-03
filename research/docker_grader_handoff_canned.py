@@ -88,6 +88,9 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
     sequence = []
     chunks = source_chunks(source_file) if source_file is not None else []
     if source_file is not None:
+        sequence += [("read", {"path": str(source_file), "offset": 1, "limit": 20}),
+                     ("read", {"path": str(source_file.parent / "SOURCE.json")}),
+                     ("write", {"path": str(source_file), "content": "tampered\n"})]
         sequence += [("shell", {"command":
                      f"sed -n '{first},{last}p' {shlex.quote(str(source_file))}"})
                      for first, last, _ in chunks]
@@ -185,8 +188,12 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
     catalogs = [request["tools"] for request in agent["requests"]]
     graded = result["grader_result"]
     shell_calls = []
+    native_calls = []
     for export in (receipt / "agent-evidence").glob("ses_*.export.json"):
         data = json.loads(export.read_text())["data"]
+        native_calls.extend(part for message in data["messages"]
+                            for part in message.get("content", [])
+                            if part.get("type") == "tool" and part.get("name") in {"read", "write"})
         shell_calls.extend(part for message in data["messages"]
                            for part in message.get("content", [])
                            if part.get("type") == "tool" and part.get("name") == "shell")
@@ -196,6 +203,18 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
                      hidden.read_text().strip() not in json.dumps(hidden_call))
     source_checks = {}
     if source_file is not None:
+        source_read, sibling_read, source_write = (native_calls[:3] if len(native_calls) >= 3
+                                                  else ({}, {}, {}))
+        numbered = first_tool_text(source_read)
+        expected_lines = [f"{index}: {line}" for index, line in
+                          enumerate(source_file.read_text().splitlines()[:20], 1)]
+        page = numbered.splitlines() if isinstance(numbered, str) else []
+        native_read_exact = (len(native_calls) == 4 and
+            source_read.get("name") == "read" and
+            source_read.get("state", {}).get("status") == "completed" and
+            source_read.get("state", {}).get("metadata", {}).get("truncated") is True and
+            page == [f"Read file {source_file}, lines 1-20", *expected_lines,
+                     "[Output truncated. Continue reading with offset: 21]"])
         reads = shell_calls[:len(chunks)]
         source_read_exact = (len(reads) == len(chunks) and
             all(call.get("state", {}).get("metadata", {}).get("exit") == 0 and
@@ -204,6 +223,14 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
                 first_tool_text(call).encode() == expected
                 for call, (_, _, expected) in zip(reads, chunks)))
         source_checks = {
+            "native_source_read_exact": native_read_exact,
+            "native_source_sibling_denied": (sibling_read.get("name") == "read" and
+                sibling_read.get("state", {}).get("status") == "error" and
+                source_file.parent.joinpath("SOURCE.json").read_text() not in
+                json.dumps(sibling_read)),
+            "native_source_write_denied": (source_write.get("name") == "write" and
+                source_write.get("state", {}).get("status") == "error" and
+                sha(source_file) == EXPECTED_SOURCE_SHA),
             "source_read_exact": source_read_exact,
             "source_sibling_denied": (len(shell_calls) == len(chunks) + 3 and
                 shell_calls[len(chunks)].get("state", {}).get("metadata", {}).get("exit") != 0 and
@@ -276,7 +303,8 @@ def main():
     runs = [trial(seed, prompt, hidden, args.tool_venv.absolute(), grade_root,
                   arm, source_file) for arm in ("native", "kryn")]
     configs = [configuration(seed, seed / ".git" / arm, arm,
-                             "http://127.0.0.1:19876/v1")[0] for arm in ("native", "kryn")]
+                             "http://127.0.0.1:19876/v1", source_file=source_file)[0]
+               for arm in ("native", "kryn")]
     permission_equal = (configs[0]["permissions"] == configs[1]["permissions"] and
         {name: agent.get("permissions", []) for name, agent in configs[0].get("agents", {}).items()}
         == {name: agent.get("permissions", []) for name, agent in configs[1].get("agents", {}).items()})

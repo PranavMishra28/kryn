@@ -368,7 +368,7 @@ def pair(args, source, provenance):
             frozen["partial_patch_sha256"] != sha(args.output / "partial.patch")):
         raise ValueError("Public fixture identity changed since controls")
     configs = [configuration(args.output / "seed", args.output / "seed" / ".git" / arm,
-                             arm, "http://127.0.0.1:19876/v1")[0]
+                             arm, "http://127.0.0.1:19876/v1", source_file=source)[0]
                for arm in ("native", "kryn")]
     permissions_equal = (configs[0]["permissions"] == configs[1]["permissions"] and
         {name: agent.get("permissions", []) for name, agent in configs[0].get("agents", {}).items()}
