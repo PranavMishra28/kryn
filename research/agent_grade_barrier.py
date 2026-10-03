@@ -173,7 +173,7 @@ def apply_patch(workspace, private, patch):
 
 def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
                             hidden_paths, grade, timeout=900, browser_image=None,
-                            source_file=None):
+                            source_file=None, candidate_product_source=False):
     """Run an admitted task; grade is a trusted callback(workspace, private, evidence).
 
     This function deliberately emits no protected pass/fail verdict. A study
@@ -185,6 +185,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
     hidden_paths = [Path(path).absolute() for path in hidden_paths]
     if arm not in {"native", "kryn"} or type(timeout) is not int or not 30 <= timeout <= 1800:
         raise ValueError("Use a known OpenCode arm and a 30–1800 second timeout")
+    if candidate_product_source and arm != "kryn":
+        raise ValueError("Native OpenCode cannot load a KRYN candidate plugin")
     if browser_image is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}", browser_image):
         raise ValueError("Browser image must be an exact local image ID")
     inputs = (seed, prompt, tool_venv, receipt, *hidden_paths,
@@ -205,6 +207,7 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
     receipt.mkdir(mode=0o700)
     report = {"kind": "research_agent_grade_data_barrier", "task_id": task_id,
               "arm": arm, "protected_score": False, "graded": False,
+              "candidate_product_source": bool(candidate_product_source),
               "browser_image": browser_image,
               "barrier_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     source_sha256 = hashlib.sha256(source_file.read_bytes()).hexdigest() if source_file else None
@@ -228,7 +231,8 @@ def run_candidate_to_grader(*, seed, prompt, task_id, arm, tool_venv, receipt,
                                    evidence=receipt / "agent-evidence", arm=arm,
                                    tool_venv=tool_venv, private_parent=private,
                                    timeout=timeout, ui_image=browser_image,
-                                   source_file=source_file)
+                                   source_file=source_file,
+                                   candidate_product_source=candidate_product_source)
             result = run(args, defer_patch=True)
             report["agent"] = result
             report["agent"]["workspace"] = str(workspace)

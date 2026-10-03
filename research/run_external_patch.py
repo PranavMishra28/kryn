@@ -22,7 +22,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import learning
-from native_client import BINARY, MODEL_ID, NativeServer, background_boundary, owned_config
+from native_client import BINARY, MODEL_ID, NativeServer, background_boundary, owned_config, product_plugin_files
 from context_probe import summarize_resources
 from run_native_trial import (NativeResourceGuard, export_owned_sessions,
                               generation_completion, native_control_config,
@@ -374,7 +374,37 @@ def prepare(workspace, prompt_file, evidence, base_commit, *, private_parent=Non
     return workspace, prompt_file, evidence, state_dir, config_sha
 
 
-def configuration(workspace, state_dir, arm, relay_url, source_file=None):
+def candidate_plugin_package(source_root, evidence):
+    """Copy only the source plugin payload into this trial's read-only allowance."""
+    source_root = Path(source_root).resolve()
+    if git(source_root, "status", "--porcelain"):
+        raise ValueError("Candidate plugin source must be a clean checkout")
+    source_dir = source_root / ("plugin" if (source_root / "plugin/server.js").is_file()
+                                else "tools")
+    source_names = {"server.js": "kryn_plugin.mjs", "tui.tsx": "kryn_tui.tsx"}
+    names = ("server.js", "tui.tsx", "permission_display.mjs", "update_notice.mjs")
+    if source_dir.name == "plugin":
+        names += ("package.json",)
+    if any(not (source_dir / (source_names.get(name, name) if source_dir.name == "tools" else name)).is_file()
+           or (source_dir / (source_names.get(name, name) if source_dir.name == "tools" else name)).is_symlink()
+           for name in names):
+        raise ValueError("Candidate plugin source file is missing or linked")
+    files = product_plugin_files(source_root)
+    if set(files) != {"server.js", "tui.tsx", "permission_display.mjs",
+                      "update_notice.mjs", "package.json"}:
+        raise ValueError("Candidate plugin payload differs from the five known files")
+    package = evidence / "candidate-product"
+    package.mkdir(mode=0o700)
+    hashes = {}
+    for name, data in files.items():
+        target = package / name
+        target.write_bytes(data)
+        target.chmod(0o600)
+        hashes[name] = hashlib.sha256(data).hexdigest()
+    return package, hashes
+
+
+def configuration(workspace, state_dir, arm, relay_url, source_file=None, candidate_package=None):
     config = copy.deepcopy(owned_config())
     if arm == "native":
         config = native_control_config(config)
@@ -382,6 +412,10 @@ def configuration(workspace, state_dir, arm, relay_url, source_file=None):
                 and "profileId" in p.get("options", {})]
     if len(products) != (0 if arm == "native" else 1):
         raise RuntimeError("Unexpected product plugin count")
+    if candidate_package is not None:
+        if arm != "kryn" or len(products) != 1:
+            raise ValueError("Candidate plugin is available only in the KRYN arm")
+        products[0]["package"] = str(candidate_package)
     dependencies = [BINARY.parent.parent.resolve(), *learning.python_dependencies()]
     if products:
         products[0]["options"]["stateDir"] = str(state_dir)
@@ -510,6 +544,9 @@ def stop_browser_broker(child, broker):
 
 
 def run(args, *, defer_patch=False):
+    candidate_product_source = getattr(args, "candidate_product_source", False)
+    if candidate_product_source and args.arm != "kryn":
+        raise ValueError("Native OpenCode cannot load a KRYN candidate plugin")
     private_parent = getattr(args, "private_parent", None)
     ui_image = getattr(args, "ui_image", None)
     if ui_image is not None and getattr(args, "ui_gateway", None) is not None:
@@ -554,11 +591,16 @@ def run(args, *, defer_patch=False):
     report["source_unchanged"] = None if source_file else True
     report["browser_image"] = ui_image
     report["browser_settled"] = ui_image is None
+    candidate_package = None
+    if candidate_product_source:
+        candidate_package, hashes = candidate_plugin_package(ROOT, evidence)
+        report["candidate_plugin_files_sha256"] = hashes
+    report["candidate_product_source"] = bool(candidate_product_source)
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
             workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1",
-            source_file=source_file)
+            source_file=source_file, candidate_package=candidate_package)
         ui_gateway = getattr(args, "ui_gateway", None)
         monitor = NativeResourceGuard(evidence, samples)
         broker_child = None
@@ -725,9 +767,15 @@ def run(args, *, defer_patch=False):
                         hashlib.sha256(source_file.read_bytes()).hexdigest() == source_sha256)
                 except OSError:
                     report["source_unchanged"] = False
+            if candidate_package is not None:
+                report["candidate_plugin_unchanged"] = all(
+                    (candidate_package / name).is_file() and
+                    hashlib.sha256((candidate_package / name).read_bytes()).hexdigest() == digest
+                    for name, digest in report["candidate_plugin_files_sha256"].items())
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete")
-                                       and report["browser_settled"] and report["source_unchanged"])
+                                       and report["browser_settled"] and report["source_unchanged"]
+                                       and report.get("candidate_plugin_unchanged", True))
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
     if defer_patch:
         # InferenceRelay's context manager joins its listener with a timeout.
@@ -757,6 +805,8 @@ def main():
     parser.add_argument("--evidence", required=True, type=Path)
     parser.add_argument("--arm", choices=("native", "kryn"), default="kryn")
     parser.add_argument("--tool-venv", type=Path, help="preflighted disposable benchmark Python/ripgrep venv")
+    parser.add_argument("--candidate-product-source", action="store_true",
+                        help="load the clean source checkout's plugin in this disposable KRYN run")
     parser.add_argument("--private-parent", type=Path,
                         help="sibling private directory on the mounted candidate volume")
     parser.add_argument("--timeout", type=int, default=900)
