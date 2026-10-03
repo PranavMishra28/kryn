@@ -98,7 +98,7 @@ def probe(workspace, private, oracle, image=None, device=None, run_root=None,
 
 
 def server_probe(workspace, log, oracle, marker, private_parent=None,
-                 *, arm="kryn", tool_venv=None, extra_hidden=()):
+                 *, arm="kryn", tool_venv=None, extra_hidden=(), source_file=None):
     # Use the same product configuration and dependency builder as the external
     # candidate runner. API inventory initializes plugins without inference.
     subprocess.run(["/usr/bin/git", "init", "-q", str(workspace)], check=True,
@@ -109,8 +109,14 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
         workspace, state, arm, "http://127.0.0.1:19876/v1")
     tool_path, tool_dependencies, _ = benchmark_tools(tool_venv)
     dependencies += tool_dependencies
+    if source_file is not None:
+        source_file = Path(source_file)
+        if (not source_file.is_file() or source_file != source_file.resolve()
+                or source_file.stat().st_dev == workspace.stat().st_dev):
+            raise RuntimeError("Source allowance requires a canonical host-side file")
+        dependencies.append(source_file)
 
-    def shell(server, argv):
+    def shell(server, argv, *, output_limit=4096):
         command = " ".join(shlex.quote(str(value)) for value in argv)
         response = server.request("POST", "/api/shell", {
             "command": command, "cwd": str(workspace), "timeout": 10000}, timeout=15)
@@ -126,7 +132,8 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
                 info = server.request("GET", endpoint, timeout=5).get("data", {})
             if info.get("status") != "exited" or type(info.get("exit")) is not int:
                 raise RuntimeError("Native shell canary did not exit with a verified status")
-            output = server.request("GET", endpoint + "/output?cursor=0&limit=4096",
+            output = server.request("GET", endpoint +
+                                    f"/output?cursor=0&limit={output_limit}",
                                     timeout=5).get("data", {})
             return info.get("exit"), output.get("output", "")
         finally:
@@ -198,6 +205,19 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
             checks["api_shell_rg_ready"] = rg_exit == 0 and rg_output == "candidate-visible\n"
             checks["api_shell_pytest_ready"] = pytest_exit == 0 and pytest_output.startswith("pytest ")
             checks["api_shell_git_ready"] = git_exit == 0 and git_output == "true\n"
+        if source_file is not None:
+            before = source_file.read_bytes()
+            source_exit, source_output = shell(server, ["/bin/cat", source_file],
+                                               output_limit=16384)
+            write_exit, _ = shell(server, ["python3", "-c",
+                "from pathlib import Path; Path(" + repr(str(source_file)) +
+                ").write_text('tampered')"])
+            list_exit, _ = shell(server, ["/bin/ls", "-a", source_file.parent])
+            checks["api_shell_source_exact_read"] = (
+                source_exit == 0 and source_output.encode() == before)
+            checks["api_shell_source_write_denied"] = (
+                write_exit != 0 and source_file.read_bytes() == before)
+            checks["api_shell_source_parent_listing_denied"] = list_exit != 0
         return checks
 
 

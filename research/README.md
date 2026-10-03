@@ -41,6 +41,9 @@ count as holdout evidence.
 [DOCKER_GRADER_HANDOFF.md](DOCKER_GRADER_HANDOFF.md) preregisters and records a
 passing public zero-model Agent-to-Docker-grader handoff in both OpenCode arms.
 It does not admit private recovery tasks or measure model quality.
+[SOURCE_GATEWAY.md](SOURCE_GATEWAY.md) preregisters and records a passing
+zero-model, exact-file read-only official-source channel canary in both arms.
+It does not admit external-information tasks or measure model quality.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
