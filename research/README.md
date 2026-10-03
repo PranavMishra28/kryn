@@ -51,6 +51,10 @@ That handoff does not test live-model coding or protected task admission.
 first public official-source pair and the later accepted six-case pair after
 the research-only exact-file permission fix. The task was reused for diagnosis;
 neither pair is a protected H1 score.
+[PUBLIC_SOURCE_RATE_LIMIT.md](PUBLIC_SOURCE_RATE_LIMIT.md) records a fresh
+official-source task with frozen Docker controls. Both arms reached the source
+but failed the same retry-exhaustion criterion; the longer KRYN run did not
+improve accepted work.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
