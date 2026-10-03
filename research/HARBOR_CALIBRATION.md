@@ -36,8 +36,9 @@ plugin its required loopback URL. No paid provider or extra model is used. The
 unchanged 22-GiB oMLX process ceiling and KRYN daily-use host guard apply:
 critical pressure, missing telemetry, changed listener, or more than 512 MiB
 whole-probe swap growth aborts the trial. Warning pressure alone does not
-abort this daily-use policy. Guard cancellation closes the relay and cancels
-Harbor's owned trial; an accepted result also requires the runtime to settle.
+abort this daily-use policy. The runner is wired to close the relay and cancel
+Harbor's owned trial on a guard stop; that cancellation path did not fire in
+this calibration. An accepted result also requires the runtime to settle.
 
 The gold-solution preflight, before candidate generation, returned official
 `reward: 1.0` with no grader error in trial
@@ -58,3 +59,56 @@ calibration does **not** qualify as a sealed security boundary or protected
 holdout. The earlier inspected `regex-log` sample is excluded from this
 calibration. Raw trial logs and resource samples remain under ignored
 `/private/tmp/kryn-harbor-calibration/`.
+
+## Recorded result, 2026-10-03
+
+The preregistered one-shot KRYN trial was
+`kryn-harbor-candidate-20261002`. Harbor identified the agent as
+`kryn-opencode`, version `opencode v2.0.10`, with `local/qwen`; the product
+plugin created its container-owned state. The inference-only relay recorded
+12 local requests. OpenCode exited normally after 109.192 seconds of agent
+work, 11 tool calls, 97,553 new input tokens, 75,776 cache-read tokens and
+2,610 output tokens. Host telemetry was complete across 56 samples, remained
+at normal or warning pressure, saw AC power only and zero swap growth. The
+unchanged guard did not stop the trial, and the model runtime settled idle.
+
+**Official reward: 0.0; strict acceptance: fail.** Harbor's verifier found
+the CSV and accepted its header and first 12 period/severity rows, but the
+three `total` counts were wrong. The emitted `total,ERROR` was `20151`
+against the verifier's `14160`; `total,WARNING` and `total,INFO` were also
+inflated. The worker's generated script added each file to `total` explicitly
+and then added it again when iterating all periods, which included `total`.
+It inspected sample daily counts and the output file but never tested the
+aggregate invariant; its final message asserted the results were accurate.
+That is a false completion claim about a simple aggregation bug, not a Docker,
+relay, model-protocol or memory-guard failure. The worker was not retried on
+this task.
+
+The compact machine-readable receipt is
+`history/harbor_calibration.jsonl`. The candidate trial's 19-file SHA-256
+manifest hashes to
+`2da5412e24cb4d068cc277d076c635cc11bd1186e10f1971d82b10f44f423437`;
+the gold preflight manifest hashes to
+`93c4e4da6fbd2506d08ae1a9d3fc1fbd6ce1ee1b908db448a533322feec69919`.
+Full raw evidence remains local and ignored. This single public failure shows
+that a working official grader connection does not imply task reliability.
+It leaves the external-transfer, protected holdout, same-model uplift and
+frontier-adjacency gates unqualified.
+
+To reproduce the adapter check, install Harbor from the pinned commit in a
+disposable Python 3.12 environment, download
+`terminal-bench-sample@2.0` with `harbor datasets download`, and pin the
+copied task's `docker_image` to the digest above. Before model generation,
+run its gold oracle with `harbor trials start -p <task> -a oracle`; it must
+return reward 1.0. Then run one fresh trial with:
+
+```sh
+PYTHONPATH=<KRYN checkout> <Harbor venv>/bin/python -B \
+  <KRYN checkout>/research/run_harbor_calibration.py \
+  <pinned task> <private trials directory> <fresh trial name>
+```
+
+The runner imports Harbor only in this optional research environment; KRYN's
+production package has no Harbor dependency. Its trial result and guard
+summary are in the private trials directory. Preserve failed runs rather
+than reusing a trial name or treating the sample as a full benchmark score.
