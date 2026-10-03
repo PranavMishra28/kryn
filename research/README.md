@@ -61,6 +61,14 @@ worker deleted its tracked test afterward. No product change was promoted.
 [CANDIDATE_PLUGIN_PROVENANCE.md](CANDIDATE_PLUGIN_PROVENANCE.md) records the
 research-runner correction that loads exact isolated candidate plugin bytes.
 Its no-model OpenCode boundary check passed; no product plugin was changed.
+The isolated [direct-Git candidate](https://github.com/PranavMishra28/kryn/tree/research/direct-git-evidence)
+passed one public coding compatibility screen after that loader correction;
+protected transfer and production promotion are open. A separate
+[real-model staged screen](https://github.com/PranavMishra28/kryn/tree/research/staged-model-public)
+passed three-turn/two-compaction/two-restart mechanics, but its frozen oracle
+rejected an ambiguously specified parser edge. It is not a quality score.
+Both raw receipts are indexed in [development history](history/development.jsonl)
+and the unqualified code remains off `main`.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
