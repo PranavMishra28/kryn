@@ -64,9 +64,12 @@ The H1 thresholds and task-retirement rules below are unchanged.
 Before pushing any research branch, keep every unsealed task ID, prompt,
 acceptance case, grader hash and seed identity out of public files, commit
 messages and PR text. Run `research/check_holdout_publication.py` with the
-private roster and proposed PR text before publication. Its exact-match scan
-is a preflight, not a substitute for human review of paraphrases or historical
-Git/PR content. Public exposure retires the affected task from protected use.
+private roster, its independently recorded SHA-256 digest, and proposed PR text
+before publication. It verifies the remote public `main` base, then scans current
+tracked and staged files, every commit added since that base, and proposed PR text.
+Its exact-match scan is a preflight, not a substitute for human review of
+paraphrases, independently admitting the full roster, older public history, or
+later PR edits. Public exposure retires the affected task from protected use.
 
 ## Endpoints and decision rules
 
