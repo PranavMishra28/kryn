@@ -90,3 +90,16 @@ model task. The real Agent's shell-output cap must be respected; a successful
 `cat` exit alone is not evidence that the model saw the document. This result
 is not a protected external-information task, accepted coding work, H1 uplift,
 or a complete macOS information-boundary proof.
+
+The final canary code also requires the provenance sibling's frozen SHA at
+entry and in the top-level verdict; a missing or changed source now fails that
+verdict. A clean-source recheck at `a02e59176da928a699a379ab025b7b186cccd777`
+passed both source arms again (16.600/16.782 seconds, AC, normal sampled
+pressure, zero sampled swap growth). The receipt is
+`/private/tmp/kryn-public-source-handoff-20261003-03/result.json`, SHA-256
+`e411c170fc40eb4673050ef2f86096b14bdc33e779b8f148ec7a88ecb53140d9`,
+with runner SHA-256
+`8cba3d896cf3e12106c67efd195c0f0ac2729f6029064af17c2eec4a53edeac2`.
+The original no-source Agent-to-Docker canary also passed both arms with the
+final script; its regression receipt SHA-256 is
+`21c967d13242d29f242e638f237dd6822fb3364b82c78091236d2e34cbf4a9e7`.
