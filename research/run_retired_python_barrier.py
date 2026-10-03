@@ -14,7 +14,7 @@ from preflight_protected_python import grade as grade_task
 
 
 TASK = "linecfg-duplicate-key"
-MANIFEST_SHA256 = "08aa7a5da0d4b56efe94136294fdf929e1e11696cdb0c43fe73d518f97bd4603"
+MANIFEST_SHA256 = "804278f90dac2d253d28b008b4150c449e361f0b4513ff41929968b1d025c314"
 
 
 def sha(path):
