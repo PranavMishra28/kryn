@@ -14,8 +14,11 @@ mechanism screen on two archived, public Harbor worker failures.
 [EFFORT_POLYGLOT.md](EFFORT_POLYGLOT.md) records an inconclusive Default/Fast
 mode screen: Docker interrupted Default, and Fast exhausted the research relay
 after repeated writes before a successful grade.
+[WRITE_LOOP.md](WRITE_LOOP.md) records the preregistered, rejected no-op write
+hook screen. Its official Harbor reward was 0.0, the hook never fired, and the
+candidate code was reverted. The raw and compact failed evidence is retained.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
-public-development receipts. Neither rejected candidate changed the product.
+public-development receipts. Rejected candidates did not change the product.
 
 To reproduce one public-fixture pair from a checkout with the installed local
 model and oMLX already available:

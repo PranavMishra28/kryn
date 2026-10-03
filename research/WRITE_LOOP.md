@@ -64,3 +64,35 @@ accepted-work/hour cost; it still cannot change production. Otherwise reject
 the candidate code and retain only a compact failed receipt. Power/cache
 differences versus the archived baseline are disclosed, never treated as
 matched speed evidence.
+
+## Result and decision
+
+The candidate was frozen in commit `da741024ae54ae71116bbe3b48bc5f59353441b9`
+after the preregistration in `5bed0ea`. Its focused tests, `make check`, package
+smoke, and a zero-inference Harbor install preflight passed. The one guarded
+Fast trial then completed normally in 55.670 agent seconds (187.081 seconds
+including setup and grading) with 12 local-model requests, ten tool calls,
+normal sampled host pressure, no swap growth, and no resource-guard stop.
+The **official Harbor reward was 0.0**. The agent made only one write, so the
+new hook never fired. The shorter path cannot be attributed to this candidate.
+
+The agent successfully spot-checked Python and compiled C execution, then
+claimed completion while leaving its `cmain` binary beside the required sole
+`main.py.c` source. Harbor's first verifier assertion rejected the extra file
+before exercising the source. A separate, read-only reconstruction of the
+final source passed the public test function after the binary was absent; that
+post-hoc check is **not** an official reward and does not repair the failed
+trial. It narrows this failure to acceptance cleanup and false completion,
+while leaving general coding quality unproven. The task's example compiler
+command produces `cmain`, so a successful agent needed to remove that artifact
+before final handoff.
+
+W1 failed its preregistered strict-acceptance screen. Commit `822cd60` reverted
+the hook and its tests; the product plugin is byte-identical to the base SHA-256
+above. No owner profile, installed product, mode, guard, or release changed.
+The compact receipt is [history/write_loop.jsonl](history/write_loop.jsonl).
+Private raw install and trial manifests have SHA-256
+`5a926c2021e9db43a809037d8de1e1651d743c40830df0fabd9152cfab51c32a`
+and `3502c7645f38a9e898c5638d6b8d38649958924f546b1bf5d033c81439958280`;
+raw traces remain under `/private/tmp/kryn-write-loop-20261003/` on this Mac.
+This public-task replay is not holdout evidence or a frontier comparison.
