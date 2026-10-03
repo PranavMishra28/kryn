@@ -9,6 +9,8 @@ prompt-stability candidate before its implementation.
 failure-only repair-feedback candidate and its resource-guard stop.
 [HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md) freezes a public Terminal-Bench
 sample task, the exact KRYN OpenCode adapter and Harbor's official verifier.
+[HARBOR_SUBSET.md](HARBOR_SUBSET.md) records a preregistered three-task public
+Harbor subset, including one ungraded pair and two strict-success ties.
 [REVIEWER_SCREEN.md](REVIEWER_SCREEN.md) preregisters a read-only Reviewer
 mechanism screen on two archived, public Harbor worker failures.
 [EFFORT_POLYGLOT.md](EFFORT_POLYGLOT.md) records an inconclusive Default/Fast
@@ -165,9 +167,11 @@ Agent→Browse→fresh-grader canary in
 native routing and lifecycle, not protected task admission or local-model
 quality.
 
-The protected holdout and a representative Harbor subset remain pending. One
-public Harbor sample calibration ran through the official verifier and failed;
-see [HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md). Docker availability is checked
+The protected holdout and any full Harbor benchmark score remain pending.
+The completed three-task public subset showed no observed same-model uplift;
+see [HARBOR_SUBSET.md](HARBOR_SUBSET.md). One earlier public Harbor sample
+calibration ran through the official verifier and failed; see
+[HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md). Docker availability is checked
 at each external trial; it was interrupted once during the mode screen. The first
 pinned official SWE-bench calibration and the
 frozen six-task Lite/Verified subset are documented in

@@ -44,6 +44,12 @@ OpenCode free model provider. KRYN made 23 inference requests; native made
 128. Both had official reward 0.0, complete telemetry, warning-pressure
 samples, no swap growth, no guard stop, and an idle runtime afterward. The
 loop makes the elapsed times unsuitable as a causal speed comparison.
+KRYN's final-pair worker compiled SQLite, but the independent grader could
+not find `sqlite3` on `PATH` in its fresh process. The worker had seen
+`which sqlite3` fail in a fresh shell, then checked it only after sourcing
+`/etc/environment` and wrote an interactive-shell startup file before
+claiming completion. This is an observed environment-propagation and
+verification failure, not evidence that a task-specific prompt fix transfers.
 
 Raw logs, model traces, task copies, resource samples, launch receipts and
 independent pair reviews remain in the private local research directory.
