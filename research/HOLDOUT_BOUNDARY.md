@@ -241,8 +241,8 @@ combined 30-task roster, prove model-facing browser work, or count as an H1
 trial. The third persistence slot still needs a fully qualified task or a
 justified change to the preregistered roster before sealing.
 
-The owner-only full receipts are in
-`/Users/pranav/Documents/Codex/kryn-research-private/preflight-v7-current-20261003`.
+The full receipts are retained in an owner-only archive outside the public
+repository.
 The summary SHA-256 is
 `08898eca87c2daba919ad59f7bdb849e54e4c6dd4dad2a271d32e7a3f5e6f7f8`,
 and its 15-report archive index SHA-256 is
