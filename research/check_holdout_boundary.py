@@ -11,10 +11,13 @@ import os
 from pathlib import Path
 import re
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
+import urllib.parse
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from native_client import NativeServer, background_boundary
@@ -47,6 +50,7 @@ def probe(workspace, private, oracle, image=None, device=None):
         denied("copy_read", ["/bin/cp", str(oracle), str(workspace / "copied")]),
         denied("metadata_read", ["/usr/bin/stat", str(oracle)]),
         denied("file_url_read", ["/usr/bin/curl", "-sS", "file://" + str(oracle)]),
+        denied("ancestor_listing_denied", ["/bin/ls", "-a", str(workspace.parent)]),
     ])
     # The visible file is required to work; all hidden-file probes must fail.
     checks["workspace_read"] = (visible_result.returncode == 0
@@ -81,6 +85,29 @@ def server_probe(workspace, log, oracle, marker):
     state.mkdir(mode=0o700)
     config, products, dependencies = configuration(
         workspace, state, "kryn", "http://127.0.0.1:19876/v1")
+
+    def shell(server, argv):
+        command = " ".join(shlex.quote(str(value)) for value in argv)
+        response = server.request("POST", "/api/shell", {
+            "command": command, "cwd": str(workspace), "timeout": 10000}, timeout=15)
+        info = response.get("data", {})
+        shell_id = info.get("id")
+        if not isinstance(shell_id, str) or not shell_id.startswith("sh_"):
+            raise RuntimeError("Native shell canary did not return an owned job")
+        endpoint = "/api/shell/" + urllib.parse.quote(shell_id, safe="")
+        try:
+            deadline = time.monotonic() + 12
+            while info.get("status") == "running" and time.monotonic() < deadline:
+                time.sleep(.1)
+                info = server.request("GET", endpoint, timeout=5).get("data", {})
+            if info.get("status") == "running":
+                raise RuntimeError("Native shell canary did not settle")
+            output = server.request("GET", endpoint + "/output?cursor=0&limit=4096",
+                                    timeout=5).get("data", {})
+            return info.get("exit"), output.get("output", "")
+        finally:
+            server.request("DELETE", endpoint, timeout=5)
+
     with NativeServer(workspace, config, log=log,
                       background={"dependencies": dependencies,
                                   "inference_port": 19876}) as server:
@@ -90,12 +117,18 @@ def server_probe(workspace, log, oracle, marker):
         plugins = server.request("GET", "/api/plugin", timeout=5).get("data", [])
         product = [entry for entry in plugins if entry.get("id") == "kryn.product"]
         raw = run(server.background_prefix + ["/bin/cat", str(oracle)])
+        visible_exit, visible_output = shell(server, ["/bin/cat", workspace / "visible.txt"])
+        hidden_exit, hidden_output = shell(server, ["/bin/cat", oracle])
         return {
             "native_server_started": True,
             "product_plugin_active": len(products) == 1 and len(product) == 1
                 and product[0].get("state", {}).get("status") == "active",
             "server_profile_oracle_read_denied": raw.returncode != 0
                 and marker not in raw.stdout + raw.stderr,
+            "api_shell_workspace_read": visible_exit == 0
+                and visible_output == "candidate-visible",
+            "api_shell_oracle_read_denied": hidden_exit != 0
+                and marker not in hidden_output,
         }
 
 
@@ -115,6 +148,8 @@ def main():
     device = None
     image = base / "oracle.dmg"
     oracle = grader / "oracle.txt"
+    checks = {}
+    error = None
     cleanup_ok = True
     try:
         if args.mode == "encrypted-volume":
@@ -138,17 +173,24 @@ def main():
         checks = probe(workspace, private, oracle, image if mounted else None, device)
         if mounted and all(checks.values()):
             checks.update(server_probe(workspace, base / "native.log", oracle, marker))
-        passed = all(checks.values())
-        print(json.dumps({"mode": args.mode, "passed": passed, "checks": checks}, sort_keys=True))
-        return 0 if passed else 1
+    except Exception as failure:
+        error = type(failure).__name__ + ": " + str(failure)
     finally:
         if mounted:
-            detached = run(["hdiutil", "detach", str(grader)])
-            cleanup_ok = detached.returncode == 0
+            try:
+                detached = run(["hdiutil", "detach", str(grader)])
+                cleanup_ok = detached.returncode == 0
+            except Exception:
+                cleanup_ok = False
             if not cleanup_ok:
                 print("Mounted image could not be detached; inspect " + str(base), file=sys.stderr)
         if cleanup_ok:
             shutil.rmtree(base)
+    checks["oracle_detached"] = cleanup_ok
+    passed = error is None and bool(checks) and all(checks.values())
+    print(json.dumps({"mode": args.mode, "passed": passed, "checks": checks,
+                      "error": error}, sort_keys=True))
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

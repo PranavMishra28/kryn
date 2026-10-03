@@ -85,3 +85,26 @@ graders, browser/source-gateway boundary tests, broken-seed/reference/partial-
 patch controls and frozen hashes remain prerequisites before H1 can use a
 protected set. This screen measures boundary mechanics, not local-model
 engineering quality or frontier-agent parity.
+
+## Independent-review correction before any protected task
+
+Review of the first public receipt found that its model-side Python checks all
+failed because the research PATH selected Apple's `python3` shim. It also found
+that the public grader put `reference.py` inside its own candidate-readable
+private root, that candidate stdout and descendants were not bounded, and that
+the no-model canary could report success before image detachment. These are
+public compatibility and grader-integrity defects, not a protected holdout
+result. The one-line patch passed the independent cases, but the full prompt's
+"run a check" requirement was **not** met; the earlier `passed` flag overstates
+that turn.
+
+The correction is fixed before repeating the model call: use the canonical
+interpreter directory in the research PATH; place the reference on the
+different-device encrypted volume and allow its exact file only for reference
+preflight; bound candidate grader output and kill its process group; make
+detachment part of both verdicts; and deny run-root listing while proving a
+visible read and hidden read denial through the real OpenCode shell API. The
+repeat must demonstrate a successful model-side Python check as well as the
+independent grade. The first receipt stays available and is not silently
+reclassified. These changes do not alter installed v1.0.0, H1 thresholds,
+candidate task answer, model or resource guard.

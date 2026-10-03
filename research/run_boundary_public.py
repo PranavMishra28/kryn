@@ -7,11 +7,15 @@ external adapter owns the real OpenCode loop and resource guard.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import resource
 import secrets
+import signal
 import subprocess
 import sys
+import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from native_client import background_boundary
@@ -24,21 +28,62 @@ def command(args, *, input=None, timeout=30):
                           timeout=timeout, close_fds=True)
 
 
+def _bound_output():
+    resource.setrlimit(resource.RLIMIT_FSIZE, (65536, 65536))
+
+
 def grade(workspace, private, oracle, source=None):
     cases = json.loads(oracle.read_text())
     python = Path(sys.executable).resolve()
-    prefix = background_boundary(workspace, private, [python,
-             Path(sys.base_prefix).resolve()], None)
+    dependencies = [python, Path(sys.base_prefix).resolve()]
+    if source is not None:
+        dependencies.append(source.resolve())  # Exact reference file, for reference preflight only.
+    prefix = background_boundary(workspace, private, dependencies, None)
     results = []
     for case in cases:
-        attempt = command(prefix + [str(python), "-I", "-B", str(source or workspace / "solve.py")],
-                          input=json.dumps(case["input"]), timeout=10)
+        with tempfile.TemporaryFile() as output:
+            process = subprocess.Popen(prefix + [str(python), "-I", "-B",
+                str(source or workspace / "solve.py")], cwd=workspace, stdin=subprocess.PIPE,
+                stdout=output, stderr=subprocess.DEVNULL, close_fds=True,
+                start_new_session=True, preexec_fn=_bound_output)
+            timed_out = False
+            try:
+                try:
+                    process.communicate(input=json.dumps(case["input"]).encode(), timeout=10)
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+            finally:
+                # A child holding stdout cannot prevent cleanup or retain the mount.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                if process.poll() is None:
+                    process.wait(timeout=2)
+            output.seek(0)
+            payload = output.read(65537)
         try:
-            actual = json.loads(attempt.stdout)
+            actual = json.loads(payload)
         except json.JSONDecodeError:
             actual = None
-        results.append(attempt.returncode == 0 and actual == case["expected"])
+        results.append(not timed_out and len(payload) <= 65536
+                       and process.returncode == 0 and actual == case["expected"])
     return all(results)
+
+
+def model_check_succeeded(path):
+    for line in path.read_text().splitlines():
+        entry = json.loads(line)
+        part = entry.get("part", {})
+        if part.get("type") != "tool" or part.get("tool") != "shell":
+            continue
+        state = part.get("state", {})
+        command = state.get("input", {}).get("command", "")
+        exit_code = state.get("output", {}).get("metadata", {}).get("metadata", {}).get("exit")
+        if (state.get("status") == "completed" and exit_code == 0 and
+                "python" in command and ("solve.py" in command or "import solve" in command)):
+            return True
+    return False
 
 
 def main():
@@ -102,11 +147,17 @@ def main():
         if not all(result["boundary"].values()):
             raise RuntimeError("Encrypted boundary preflight failed")
         result["broken_seed_rejected"] = not grade(workspace, private, oracle)
-        reference = private / "reference.py"
+        reference = mount / "reference.py"
         reference.write_text(
             "import json,sys\n"
             "def total(values):\n    return sum(values)\n"
             "if __name__ == '__main__':\n    print(json.dumps(total(json.load(sys.stdin))))\n")
+        candidate_prefix = background_boundary(workspace, private,
+            [Path(sys.executable).resolve(), Path(sys.base_prefix).resolve()], None)
+        hidden = command(candidate_prefix + ["/bin/cat", str(reference)], timeout=5)
+        result["reference_hidden_from_candidate"] = hidden.returncode != 0
+        if not result["reference_hidden_from_candidate"]:
+            raise RuntimeError("Candidate grader can read the reference")
         result["reference_passed"] = grade(workspace, private, oracle, reference)
         if not (result["broken_seed_rejected"] and result["reference_passed"]):
             raise RuntimeError("Public fixture seed/reference preflight failed")
@@ -117,13 +168,20 @@ def main():
         result["intervention"] = trial.get("intervention")
         result["wall_seconds"] = trial.get("wall_seconds")
         result["independent_grade_passed"] = grade(workspace, private, oracle)
+        result["model_check_succeeded"] = model_check_succeeded(root / "evidence/events.jsonl")
         result["patch_sha256"] = trial.get("patch_sha256")
         result["resource_guard_reason"] = trial.get("resources", {}).get("guard_reason")
-        result["passed"] = bool(result["driver_completed"] and result["independent_grade_passed"])
+        result["passed"] = bool(result["driver_completed"] and result["independent_grade_passed"]
+                                and result["model_check_succeeded"])
+    except Exception as failure:
+        result["error"] = type(failure).__name__ + ": " + str(failure)
     finally:
         if mounted:
-            detached = command(["hdiutil", "detach", str(mount)])
-            result["oracle_detached"] = detached.returncode == 0
+            try:
+                detached = command(["hdiutil", "detach", str(mount)])
+                result["oracle_detached"] = detached.returncode == 0
+            except Exception:
+                result["oracle_detached"] = False
         result["passed"] = bool(result.get("passed") and result.get("oracle_detached"))
         (root / "result.json").write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
     print(json.dumps(result, sort_keys=True))

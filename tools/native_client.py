@@ -101,14 +101,15 @@ def background_boundary(workspace, private, dependencies, inference_port, native
         reads.append(path)
     quote = lambda path: json.dumps(str(path))
     allowed = "\n".join(f'    ({"subpath" if p.is_dir() else "literal"} {quote(p)})' for p in reads)
-    # Bun resolves cwd through parent directories. Literal directory reads permit
-    # this traversal without granting any parent subtree's file contents.
-    ancestors = "\n".join(f'    (literal {quote(p)})' for p in sorted(set(workspace.parents) | set(private.parents)))
+    # Bun needs ancestor directory reads for cwd resolution. Keep the run root
+    # metadata-only so the candidate cannot list sibling grader artifacts.
+    ancestor_paths = set(workspace.parents) | set(private.parents)
+    read_ancestors = "\n".join(f'    (literal {quote(p)})'
+                               for p in sorted(ancestor_paths - {workspace.parent}))
     # Interpreters can realpath their executable through dependency parents;
     # expose only parent metadata, not sibling directory listings or contents.
-    dependency_parents = "\n".join(f'    (literal {quote(p)})'
-                                   for p in sorted({parent for item in reads
-                                                    for parent in item.parents}))
+    metadata_paths = ancestor_paths | {parent for item in reads for parent in item.parents}
+    metadata = "\n".join(f'    (literal {quote(p)})' for p in sorted(metadata_paths))
     # Seatbelt's address grammar accepts localhost/*, not numeric hosts.
     # All actual listeners/requests are bound to explicit IPv4 loopback addresses.
     network = "\n".join(f'(allow network-outbound (remote ip "localhost:{p}"))' for p in ports)
@@ -124,10 +125,10 @@ def background_boundary(workspace, private, dependencies, inference_port, native
 (allow process-info* (target self))
 (allow file-read*
 {allowed}
-{ancestors}
+{read_ancestors}
     (literal "/dev/null") (literal "/dev/random") (literal "/dev/urandom"))
 (allow file-read-metadata
-{dependency_parents})
+{metadata})
 (allow file-write* (subpath {quote(workspace)}) (subpath {quote(private)}))
 (deny file-read* file-write* (subpath {quote(workspace / '.opencode')})
     (literal {quote(workspace / 'opencode.json')}) (literal {quote(workspace / 'opencode.jsonc')}))
@@ -363,7 +364,7 @@ class NativeServer:
         options = self.background
         if set(options) - {"dependencies", "inference_port", "cancel", "tool_path"} or not {"dependencies", "inference_port"}.issubset(options):
             raise RuntimeError("Unexpected background isolation options")
-        tool_path = Path(options.get("tool_path", Path(sys.executable).parent))
+        tool_path = Path(options.get("tool_path", Path(sys.executable).resolve().parent))
         if "tool_path" in options and (not tool_path.is_dir() or tool_path != tool_path.resolve() or
                 not any(tool_path.is_relative_to(Path(dep).resolve()) for dep in options["dependencies"])):
             raise RuntimeError("Background tool path must be inside an explicit readable dependency")
