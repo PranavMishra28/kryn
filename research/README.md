@@ -5,6 +5,10 @@ research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.
 [CACHE_ABLATION.md](CACHE_ABLATION.md) preregisters the first one-variable
 prompt-stability candidate before its implementation.
+[VERIFICATION_FEEDBACK.md](VERIFICATION_FEEDBACK.md) records the rejected
+failure-only repair-feedback candidate and its resource-guard stop.
+`python3 -B research/summarize_verification_feedback.py` checks its compact
+public-development receipts. Neither rejected candidate changed the product.
 
 To reproduce one public-fixture pair from a checkout with the installed local
 model and oMLX already available:
