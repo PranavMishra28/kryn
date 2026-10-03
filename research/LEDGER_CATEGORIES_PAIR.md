@@ -49,3 +49,45 @@ all raw failed and successful receipts outside the public package.
 
 The v1.0.0 installation, production model/profile, guard thresholds, release
 gates, grader and protected H1 thresholds do not change.
+
+## Instrumentation correction before reverse-order repeat
+
+The first no-model preflight used the copied tool venv as its **trusted grader**
+interpreter. Its candidate sandbox could not load that venv's Homebrew Python
+framework, so reference control failed before any model request. That failed
+receipt remains at `/private/tmp/kryn-ledger-development-pair-20261003-01`.
+The second preflight used the draft's frozen canonical Python 3.14.6
+interpreter and passed before generation. No task, oracle or model setting was
+changed.
+
+The first live pair at source `ac968d9` produced a valid strict acceptance in
+**both** arms: native completed in 152.714 Agent seconds with 27 model requests;
+KRYN completed in 120.142 seconds with 14. The hidden oracle exited zero for
+both. Both had normal sampled pressure, zero sampled swap growth, normal
+candidate/capture/grader detachments and no intervention. Its frozen comparator
+nevertheless returned `matched=false`, solely on effective permissions. Raw
+permission records differ in the randomly generated `kryn-isolated-*` server
+private directory beneath each arm's APFS mount; no other permission field
+differs. The original pair receipt SHA-256 is
+`74cb0e61d22ba65b66608d9282043cfd2cc0d2601c382cff28e0b824817391a0`.
+**Do not retroactively count this pair as preregistered matched evidence.**
+
+The comparator now normalizes only that exact generated server-private root,
+alongside the already normalized candidate workspace and OpenCode temporary
+basename. A regression proves two randomized roots match, while a real `allow`
+→ `deny` change remains unequal and a missing expected root fails closed. The
+corrected driver SHA-256 is
+`cc7ca58d4c0c64f370fce806d99a13775737a66c625cfa7e561e7b127befbc48`;
+its focused regression SHA-256 is
+`a260a383d3503712d95562f61c2c832643f226ad1e36dd7ccce04a6a881211f8`.
+Recomputing on the preserved first-pair inventories gives the same permission
+digest `747d4ef55102ad727d4e26f6d547d1f8d3fac1c7cf9d264015185fb943ba086a`
+in both arms, but that is post-hoc diagnosis only.
+
+Run one **reverse-order** pair (KRYN → native) with the unchanged task, frozen
+oracle, model, guard, arm acceptance and no-repair rules. A fresh no-model
+preflight is required at the corrected clean source commit. Each arm again
+receives guarded setup-only warmup, and the first guard stop ends the pair.
+The corrected, now-frozen matcher decides validity prospectively. This repeat
+is still development data and cannot repair the missing protected H1 roster or
+support a production change by itself.

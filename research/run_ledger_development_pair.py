@@ -91,6 +91,17 @@ def warmup(folder):
     return result
 
 
+def permissions_digest(items, workspace, private):
+    raw = json.dumps(items, sort_keys=True)
+    raw = raw.replace(workspace, "<WORKSPACE>")
+    pattern = re.escape(private) + r"/kryn-isolated-[a-z0-9]+"
+    raw, count = re.subn(pattern, "<SERVER_PRIVATE>", raw)
+    if not count:
+        return None
+    raw = re.sub(r"\.localai-tmp-[a-z0-9_]+", "<TMP>", raw)
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
 def permissions(receipt, barrier):
     inventory_file = receipt / "agent-evidence" / "agent-inventory.json"
     if not inventory_file.is_file():
@@ -99,16 +110,16 @@ def permissions(receipt, barrier):
     agents = [item for item in inventory["data"] if item.get("id") == "agent"]
     if len(agents) != 1:
         raise RuntimeError("Expected one user-facing Agent permission inventory")
-    raw = json.dumps(agents[0]["permissions"], sort_keys=True)
-    raw = raw.replace(barrier["agent"]["workspace"], "<WORKSPACE>")
-    raw = re.sub(r"\.localai-tmp-[a-z0-9_]+", "<TMP>", raw)
-    return hashlib.sha256(raw.encode()).hexdigest()
+    agent = barrier["agent"]
+    return permissions_digest(agents[0]["permissions"], agent["workspace"],
+                              agent["candidate_private_parent"])
 
 
 def main():
-    if len(sys.argv) != 5:
-        raise SystemExit("usage: run_ledger_development_pair.py DRAFT ROSTER TOOL_VENV NEW_RECEIPT_ROOT")
-    draft, roster, tool_venv, root = (Path(p).absolute() for p in sys.argv[1:])
+    if len(sys.argv) not in (5, 6) or (len(sys.argv) == 6 and sys.argv[5] != "--reverse"):
+        raise SystemExit("usage: run_ledger_development_pair.py DRAFT ROSTER TOOL_VENV NEW_RECEIPT_ROOT [--reverse]")
+    draft, roster, tool_venv, root = (Path(p).absolute() for p in sys.argv[1:5])
+    order = ORDER[::-1] if len(sys.argv) == 6 else ORDER
     repo = Path(__file__).resolve().parents[1]
     if (root.parent != Path("/private/tmp") or root.exists() or
             any(p != p.resolve() for p in (draft, roster, tool_venv, root)) or
@@ -148,8 +159,8 @@ def main():
     summary = {"kind": "ledger_categories_development_pair", "protected_score": False,
                "source_commit": source, "task_id": TASK, "roster_sha256": ROSTER_SHA,
                "manifest_sha256": MANIFEST_SHA, "preflight_sha256": sha(preflight / "report.json"),
-               "order": ORDER, "arms": {}, "matched": False, "accepted": {}}
-    for arm in ORDER:
+               "order": order, "arms": {}, "matched": False, "accepted": {}}
+    for arm in order:
         folder = root.with_name(root.name + "-" + arm)
         setup = warmup(root / (arm + "-warmup"))
         def grade(workspace, private, evidence):
@@ -184,7 +195,7 @@ def main():
             summary["stop_reason"] = "resource_guard; no same-condition second arm"
             break
     if len(summary["arms"]) == 2:
-        native, kryn = (summary["arms"][name] for name in ORDER)
+        native, kryn = summary["arms"]["native"], summary["arms"]["kryn"]
         a, b = native["agent"], kryn["agent"]
         first = [item["requests"][0] if item["requests"] else {} for item in (a, b)]
         controls = {
