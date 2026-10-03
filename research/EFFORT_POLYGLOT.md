@@ -74,7 +74,7 @@ fixed-Default versus adaptive policy comparison; it cannot change the
 production default or support a frontier claim by itself. Sequential cache
 warmth and power differences will be disclosed rather than hidden.
 
-### Environment interruption amendment, 2026-10-03T02:35Z
+### Environment interruption amendment, 2026-10-03T02:30Z
 
 The first Default trial reached 16 local-model requests, then Docker Desktop
 requested a graceful shutdown at 02:28:48Z during the agent turn. Harbor could
