@@ -286,3 +286,32 @@ Even a passing task preflight is not a protected H1 trial: the 30-task roster,
 all category-valid graders, paired model turns and independent scoring remain
 separate gates. The private draft and raw receipts stay outside the public
 repository and runtime package.
+
+## Persistence-slot replacement draft
+
+The frozen v7 journal task and its physical-recovery flag remain unchanged.
+An owner-only **new** persistence draft was built for that category slot; its
+manifest SHA-256 is
+`1f61ee77dc6008ce469b52765ee97f636fccf455e2c3a87e004ffb4efce65e02`.
+Its seed and incomplete patch fail, its reference and a structurally different
+valid implementation pass, and five wrong-solution variants fail. The control
+receipt SHA-256 is
+`68ccc93665ecd077e5f35a47c3694257baae9e5a32a790df74f01c7534250b1e`.
+At clean source `57a92beadcfc1481c2ce047a47158bef0c237010`, the same
+current-source no-model task preflight passed its real OpenCode KRYN/native
+boundary and grader controls, with normal volume detachment. Its report
+SHA-256 is
+`919bf34cd2d7bf1470486fa928f7771fa30937e9bc4b58459dbd747373db105e`;
+the verified owner-only archive index SHA-256 is
+`acf4dd1fe563156e407de692468f4e48669f3b40d1603507d733eace694b3bac`.
+The compact [history entry](history/protected_preflight.jsonl) discloses no
+prompt, oracle, reference or task ID before roster sealing.
+
+This gives the Python side 14 v7 draft slots plus one mechanically passing
+replacement slot without clearing the journal flag. **None** has been
+admitted to a sealed combined roster or exposed to a candidate model as a
+protected task; every private manifest still says `protected_status=false`.
+An independent oracle review, the remaining non-Python categories and the
+actual 30-task Agent-to-grader study are still required. The Python tasks
+also share only three repository families, so they cannot stand in for 15
+independent repositories.
