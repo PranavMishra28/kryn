@@ -36,8 +36,8 @@ keyboard control runs afterward and the seed page is reloaded before cleanup.
 The latest local no-model run used image
 `sha256:16c1133894770bceab9f2f3a9bfac4e7ec1b3dde1fe2f0f6a7063ba49b3436a2`.
 Its private receipt is
-`/private/tmp/kryn-ui-gateway-preflight-20/receipt.json`, SHA-256
-`076428afe0ba986231600fcdfc86bc00c6fc13e40e4ed477a43a9a323b683855`.
+`/private/tmp/kryn-ui-gateway-preflight-21/receipt.json`, SHA-256
+`04da92d905067d249f9f0646c61027aad0f7b5af2a6a78983ef0cc43d591de88`.
 All 34 no-model checks passed, including a reference ArrowRight interaction,
 hidden-file and hardlink denial, malicious page file/network attempts, symlink
 swap, FIFO, oversize entry, rejection of caller-supplied HTML, zero-limit and
@@ -58,8 +58,8 @@ OpenCode's actual MCP tool dispatch initially failed because it adds optional
 `_meta` to `tools/call` parameters; the adapter's exact-key check rejected the
 call. The adapter now accepts only the two ordinary keys plus optional object
 `_meta`. The clean-source synthetic inference canary at
-`/private/tmp/kryn-ui-synthetic-wire-20261003-08/result.json` (SHA-256
-`9f62214a31153992672918d9585c85b08805d2ce3a00924029116efb3b653c6f`)
+`/private/tmp/kryn-ui-synthetic-wire-20261003-09/result.json` (SHA-256
+`ea62469be0ad810c3a87c6445d71e23a11d273c52358a1fcc1273e1ba46a764b`)
 passes in both real OpenCode arms: each starts from a separate clean checkout,
 all four requests expose the same eight-tool catalog, and navigation, click,
 and snapshot all complete with the changed
