@@ -25,6 +25,7 @@ sys.path.insert(0, str(RESEARCH))
 sys.path.insert(0, str(Path(__file__).parent))
 from native_client import NativeServer, background_boundary  # noqa: E402
 from run_external_patch import configuration  # noqa: E402
+from broker import verify_boundary  # noqa: E402
 from trial_config import TOOLS, with_ui_gateway  # noqa: E402
 
 URL = "http://candidate.invalid/index.html"
@@ -40,17 +41,46 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def broker_start(image):
-    child = subprocess.Popen([str(PYTHON), "-B", str(Path(__file__).with_name("broker.py")),
-                              "--image", image, "--lifetime", "300"],
+def stop_group(child):
+    try:
+        os.killpg(child.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        child.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        if child.poll() is None:
+            try:
+                os.killpg(child.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        child.wait(timeout=5)
+
+
+def broker_start(image, repo, script=None, timeout=20):
+    child = subprocess.Popen([str(PYTHON), "-B", str(script or Path(__file__).with_name("broker.py")),
+                              "--image", image, "--repo", str(repo), "--lifetime", "300"],
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              start_new_session=True)
-    if not select.select([child.stdout], [], [], 20)[0]:
-        raise RuntimeError("UI broker did not start")
-    line = child.stdout.readline()
-    if not line:
-        raise RuntimeError("UI broker exited: " + child.stderr.read(500).decode(errors="replace"))
-    return child, json.loads(line)
+    try:
+        fd = child.stdout.fileno()
+        os.set_blocking(fd, False)
+        deadline = time.monotonic() + timeout
+        line = bytearray()
+        while b"\n" not in line:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0 or not select.select([fd], [], [], remaining)[0]:
+                raise TimeoutError("UI broker startup deadline")
+            chunk = os.read(fd, 4097 - len(line))
+            if not chunk:
+                raise RuntimeError("UI broker exited during startup")
+            line.extend(chunk)
+            if len(line) > 4096:
+                raise RuntimeError("UI broker startup response limit")
+        return child, json.loads(bytes(line).split(b"\n", 1)[0])
+    except BaseException:
+        stop_group(child)
+        raise
 
 
 def mcp(prefix, repo, broker, calls):
@@ -134,6 +164,7 @@ def main(draft, image, output):
               "port_substitution": "broker occupied the inference-only port for this no-model startup probe",
               "browser_image": image, "adapter_sha256": digest(ADAPTER),
               "broker_sha256": digest(Path(__file__).with_name("broker.py")),
+              "preflight_sha256": digest(__file__),
               "worker_sha256": digest(Path(__file__).with_name("worker.js")),
               "checks": {}, "passed": False}
     mounted = False
@@ -167,9 +198,44 @@ def main(draft, image, output):
         except OSError as error:
             report["checks"]["hardlink_impossible"] = error.errno == errno.EXDEV
         (workspace / "answer-link").symlink_to(hidden)
-        broker_child, broker = broker_start(image)
+        broker_child, broker = broker_start(image, workspace)
         report["container"] = broker["container"]
         report["container_boundary"] = broker["boundary"]
+        actual_inspect = command(["docker", "inspect", broker["container"]])
+        if actual_inspect.returncode:
+            raise RuntimeError("UI browser container inspect failed")
+        inspected = json.loads(actual_inspect.stdout)[0]
+        report["checks"]["container_attestation"] = verify_boundary(inspected, image) == broker["boundary"]
+        mutants_rejected = []
+        for section, field, value in (("HostConfig", "PidsLimit", 0),
+                                      ("HostConfig", "Memory", 0),
+                                      ("Config", "User", "0:0")):
+            mutant = json.loads(json.dumps(inspected))
+            mutant[section][field] = value
+            try:
+                verify_boundary(mutant, image)
+            except RuntimeError:
+                mutants_rejected.append(True)
+            else:
+                mutants_rejected.append(False)
+        report["checks"]["zero_limits_and_root_rejected"] = all(mutants_rejected)
+        stall = output / "stalled-broker.py"
+        stall_pid = output / "stalled-broker.pid"
+        stall.write_text("import os, time\n"
+                         "open(" + repr(str(stall_pid)) + ", 'w').write(str(os.getpid()))\n"
+                         "print('partial', end='', flush=True)\n"
+                         "time.sleep(60)\n")
+        try:
+            broker_start(image, workspace, script=stall, timeout=.3)
+            report["checks"]["startup_timeout_reaps_child"] = False
+        except TimeoutError:
+            pid = int(stall_pid.read_text())
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                report["checks"]["startup_timeout_reaps_child"] = True
+            else:
+                report["checks"]["startup_timeout_reaps_child"] = False
         prefix = background_boundary(workspace, private,
             [PYTHON, Path(sys.base_prefix).resolve(), ADAPTER], broker["port"])
         for label, argv in (("hidden_read_denied", ["/bin/cat", str(hidden)]),
@@ -194,7 +260,10 @@ def main(draft, image, output):
         report["checks"]["url_and_code_denied"] = all(item.get("isError") is True for item in denied)
         report["checks"]["direct_broker_denied"] = (
             broker_request(broker, {"token": "0" * 48, "op": "snapshot"}).get("error") == "DENIED" and
-            broker_request(broker, {"token": broker["token"], "op": "open", "path": str(hidden)}).get("error") == "DENIED")
+            broker_request(broker, {"token": broker["token"], "op": "open", "path": str(hidden)}).get("error") == "DENIED" and
+            broker_request(broker, {"token": broker["token"], "op": "open",
+                                    "html_b64": base64.b64encode(b"<p>forged answer</p>").decode()}).get("error") == "DENIED" and
+            "Harbor accounts" in broker_request(broker, {"token": broker["token"], "op": "open"}).get("text", ""))
         original = (workspace / "index.html").read_bytes()
         hits = []
         class Handler(BaseHTTPRequestHandler):
@@ -250,22 +319,24 @@ def main(draft, image, output):
         verified = mcp(prefix, workspace, broker, [tool("browser_navigate", {"url": URL}),
             tool("browser_click", {"selector": '#tab-overview'}), tool("browser_press_key", {"key": "ArrowRight"})])
         report["checks"]["reference_keyboard_browser"] = 'tab "Activity" [selected]' in text(verified[2])
+        (workspace / "index.html").write_bytes(original)
+        (workspace / "answer-link").unlink()
+        seed_head = json.loads((Path(draft).resolve() / "bundles/01-harbor-tabs/manifest.json").read_text())["base_commit"]
+        current_head = command(["git", "-C", str(workspace), "rev-parse", "HEAD"])
+        current_status = command(["git", "-C", str(workspace), "status", "--porcelain"])
+        report["checks"]["seed_state_at_opencode_start"] = (
+            current_head.returncode == 0 and current_head.stdout.strip() == seed_head and
+            current_status.returncode == 0 and current_status.stdout.strip() == "" and
+            (workspace / "index.html").read_bytes() == original)
+        if not report["checks"]["seed_state_at_opencode_start"]:
+            raise RuntimeError("candidate checkout differs from clean seed at OpenCode startup")
         report["checks"]["paired_opencode_mcp"] = native_catalog(workspace, private, broker, report)
         report["passed"] = all(report["checks"].values())
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
     finally:
         if broker_child is not None:
-            try:
-                if broker_child.poll() is None:
-                    os.killpg(broker_child.pid, signal.SIGTERM)
-                broker_child.wait(timeout=10)
-            except (OSError, subprocess.TimeoutExpired):
-                try:
-                    os.killpg(broker_child.pid, signal.SIGKILL)
-                    broker_child.wait(timeout=5)
-                except (OSError, subprocess.TimeoutExpired):
-                    pass
+            stop_group(broker_child)
             try:
                 report["checks"]["container_cleaned"] = (broker is not None and command(
                     ["docker", "ps", "-a", "--filter", "name=" + broker["container"],
