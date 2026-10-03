@@ -618,3 +618,41 @@ draft explicitly does not prove physical power-loss recovery. Browser use on
 the occupied host, two context/restart slots, three long-workflow slots,
 independent per-task admission and paired real-model trials remain open.
 Exact byte identity cannot establish semantic oracle coverage or model quality.
+
+## Revised provisional roster and Python real-path controls
+
+A further prompt/oracle review found five unstated Python contracts, several
+graders that required incidental implementation details, and a transition
+grader that contradicted its seed's idempotent behavior. Versioned owner-only
+drafts retain the failed predecessors. The revised Python draft manifest
+SHA-256 is `554ee191ebe626d314bf7b3c87052479854a6231c89c8c97f6913e4b5642b5b9`;
+its offline admission receipt SHA-256 is
+`b2cd2a43dec337f11a025c5bba83abf61b3957d2708a5c57202b0d793113c4de`.
+All 15 seeds and 15 partials fail, all 15 references and five valid
+alternatives pass, and 22 wrong-solution mutations plus four acceptance
+omissions are rejected. Isolation and child-resource controls pass. This
+semantic pass was performed by the same research agent, **not an independent
+reviewer**.
+
+The provisional roster now points to already corrected UI graders and
+replaces the scientifically flagged journal slot with a separately controlled
+persistence task. The old journal and its failing scientific admission
+verdict remain archived. The revised **unsealed** 30-slot roster SHA-256 is
+`aa048661e52a3cf5ff10800036c072b2b7919d56b918e0bada5e801e0f933284`.
+No task prompt, oracle, reference solution or hidden source is tracked here.
+
+From clean `main` at `a004eb79007de090a8629ccb594b6120e91b363b`,
+the current `preflight_protected_python.py` ran all 15 selected Python
+slots through real KRYN/native OpenCode boundaries on separate candidate
+APFS volumes, then reproduced their frozen seed/reference/partial grades.
+All 15 passed hashes, controls, both boundaries and volume detachment with
+zero model requests. The verified owner-only 90-file archive SHA-256 is
+`6dd6e1d238f7115857eed6139f60c33f0705db9af93aa0b56b5fe27ff3536467`;
+its index SHA-256 is
+`0a599b039d38aa85910c434b1bd526f79f0cdb36d53999a07dc141d66b47cc6c`.
+
+This advances **offline mechanics only**. The 15 Python slots still span
+just three small source families. Independent task admission, the other
+15 category slots, a sustained occupied-host model-facing browser path,
+real staged long/restart work and the matched protected H1 study remain
+open. Every draft remains `protected_eligible=false`; no uplift claim follows.
