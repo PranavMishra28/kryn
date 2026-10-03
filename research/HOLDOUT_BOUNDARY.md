@@ -799,8 +799,8 @@ The original draft is preserved. An owner-only v11 replacement adds the missing
 case without changing its candidate-facing prompt, seed or reference solution.
 An offline subprocess probe passes the reference and rejects the mutant with
 the corrected oracle. Separately, the isolated APFS/OpenCode preflight passed
-in both arms. It rejected the broken seed and partial solution, and detached
-the candidate volume. The v11 manifest,
+both arm boundary probes, accepted the reference, rejected the broken seed and
+partial solution, and detached the candidate volume. The v11 manifest,
 preflight, old-mutant and new-mutant receipt SHA-256 values are respectively
 `bc9121c42ffd55449c9306f16335db82d552a69ad51a7d54939a999a4503769c`,
 `c262ec373478c2942a83ea56d85a23327cc89522ffa458ab563a9696242ee1dd`,
@@ -813,3 +813,22 @@ No model request or protected score occurred; semantic admission and five
 replacement slots remain open. Later three-turn drafts for the retired
 long-workflow slots do not demonstrate multi-hour useful work, process restarts
 and changed repository state, so they cannot fill those slots.
+
+The same bounded review found a second unsealed Python compatibility oracle
+that accepted a mutant violating the existing-value contract. A separate
+owner-only v11 correction passes the reference and rejects that mutant in the
+offline subprocess probe. Its real APFS/OpenCode preflight passed both arm
+boundary probes, accepted the reference, rejected the seed and partial, and
+detached the candidate volume. Two earlier preflight attempts were rejected
+for a dirty research checkout and a world-writable clean-worktree parent;
+those receipts are retained.
+The second manifest, accepted preflight, old-mutant and new-mutant receipt
+SHA-256 values are `1d5777ed6ceaf26504ac3996fa79298bdc7ea86a712344319af884446ac1dd9d`,
+`5580c9d1956a4054c5b0b817d3005559efa1bd620fdbfed03e5021a13bc02119`,
+`a323ea99b94269561118ba700f383ac6c2b9b624437ec9cfe8ca1b278045956b`,
+and `ad789f33ce0a794fcd6fc52bd8d13be5c5fbf5ac9fdd4ccdc4efc2674fe97f24`.
+Owner-only provisional roster V15 now points to both corrected oracles. Its
+30-task/120-identity-check audit found zero mismatches; roster and audit
+SHA-256 values are `208d9369dc807acb3bf0efc2426802f1c688bd2e789bcdb06284b6a62c685ea3`
+and `6dc21f396800d2c962badddb06b8dd02fa4127a749f83d8ba355df523b789e52`.
+Neither correction has been exposed to a model, and the roster remains unsealed.
