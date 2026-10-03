@@ -79,7 +79,7 @@ def model_check_succeeded(path):
             continue
         state = part.get("state", {})
         command = state.get("input", {}).get("command", "")
-        exit_code = state.get("output", {}).get("metadata", {}).get("metadata", {}).get("exit")
+        exit_code = state.get("metadata", {}).get("metadata", {}).get("exit")
         if (state.get("status") == "completed" and exit_code == 0 and
                 "python" in command and ("solve.py" in command or "import solve" in command)):
             return True
