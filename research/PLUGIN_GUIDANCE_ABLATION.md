@@ -59,9 +59,12 @@ Strict acceptance was **G 1/2, K 1/2**. The first G failure and second K
 timeout are different failure modes; neither establishes that the product
 plugin helps or hurts. The K timeout trace includes two correctly denied
 check commands whose pipelines hid exit status and one read-before-edit denial.
-These added repair steps, but the trace does not establish that removing the
-guards would have produced a completed, accepted turn. The K arms used 87 tool
-calls and 1,284.882 driver seconds total; G used 65 calls and 581.597 seconds.
+Its late work repeatedly repaired a new 25-case test module: early runs failed
+on fixtures and HTTP setup, a later run passed all 25, and the turn was
+interrupted after running the two existing tests. The trace does not establish
+that removing the guards would have produced a completed, accepted turn. The K
+arms used 87 tool calls and 1,284.882 driver seconds total; G used 65 calls
+and 581.597 seconds.
 These are observations from four attempts on one already-seen task, not
 reliable cost or quality estimates. The earlier unchanged-product Task03 pilot
 had K 0/2, while this one had K 1/2, illustrating run-to-run variation.

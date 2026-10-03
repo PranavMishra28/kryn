@@ -20,9 +20,10 @@ candidate code was reverted. The raw and compact failed evidence is retained.
 [H1_PROVENANCE_PILOT.md](H1_PROVENANCE_PILOT.md) records two fully matched
 public Task03 pairs using the user-facing Agent role. Native OpenCode accepted
 2/2 and KRYN 0/2; this validates the corrected runner, not H1 transfer.
-[PLUGIN_GUIDANCE_ABLATION.md](PLUGIN_GUIDANCE_ABLATION.md) preregisters a
+[PLUGIN_GUIDANCE_ABLATION.md](PLUGIN_GUIDANCE_ABLATION.md) records a matched
 public Task03 diagnostic that retains KRYN guidance while removing only its
-product plugin. It cannot establish protected uplift.
+product plugin. Strict acceptance tied at 1/2 per arm; it cannot establish
+protected uplift.
 [PRESERVED_TESTS.md](PRESERVED_TESTS.md) records the rejected explicit
 preserved-test guard screen: the functional grader passed, but the Agent timed
 out and the candidate guard never fired. Its code was reverted.
