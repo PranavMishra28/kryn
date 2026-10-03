@@ -101,6 +101,10 @@ require independent admission review before any protected result can be scored.
 `research/preflight_protected_python.py` adds a no-model real-task boundary and
 grader-control check for the private Python draft. A passing receipt requires a
 clean research commit; it is not a protected model result.
+`research/preflight_recovery_draft.py` likewise checks the three corrected
+owner-only recovery drafts through both real OpenCode shell configurations and
+fresh Docker grader controls. All three no-model mechanics receipts pass; the
+actual Docker Agent-to-grader handoff and protected roster remain unqualified.
 The research-only fixed-page UI gateway now has a paired zero-model
 Agent→Browse→fresh-grader canary in
 [`ui_gateway/barrier_canned.py`](ui_gateway/barrier_canned.py). It verifies
