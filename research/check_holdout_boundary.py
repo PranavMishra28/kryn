@@ -101,7 +101,7 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
     # candidate runner. API inventory initializes plugins without inference.
     subprocess.run(["/usr/bin/git", "init", "-q", str(workspace)], check=True,
                    capture_output=True, timeout=10)
-    state = workspace / ".git" / "kryn-boundary-canary"
+    state = workspace / ".git" / ("kryn-boundary-canary-" + arm)
     state.mkdir(mode=0o700)
     config, products, dependencies = configuration(
         workspace, state, arm, "http://127.0.0.1:19876/v1")
