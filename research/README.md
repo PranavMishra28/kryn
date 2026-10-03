@@ -61,7 +61,8 @@ these public fixtures cannot be relabeled as holdout evidence.
 
 On macOS, run both boundary modes:
 
-- `python3 -B research/check_holdout_boundary.py same-volume` (expected exit 1)
+- `python3 -B research/check_holdout_boundary.py same-volume` (expected exit 1
+  **and** `negative_control_exposed: true`; exit 2 means an invalid control)
 - `python3 -B research/check_holdout_boundary.py encrypted-volume` (expected exit 0)
 
 The second canary checks a separate encrypted grader volume, real OpenCode
@@ -71,6 +72,12 @@ workspace hardlink to the hidden oracle, while the separate encrypted volume
 prevents that alias. The public OpenCode model turns and their mixed results
 are distinct from these checker verdicts; their receipts and
 remaining gates are in [HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md).
+
+`python3 -B research/check_holdout_boundary.py candidate-volume` tests the
+alternative layout with candidate workspace and temporary files on a separate
+APFS volume and the hidden oracle on the host. Its no-model OpenCode shell
+canary passes, but the draft task graders and browser/source gateways still
+require independent admission review before any protected result can be scored.
 
 The protected holdout and a representative Harbor subset remain pending. One
 public Harbor sample calibration ran through the official verifier and failed;

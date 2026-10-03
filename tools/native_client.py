@@ -101,11 +101,13 @@ def background_boundary(workspace, private, dependencies, inference_port, native
         reads.append(path)
     quote = lambda path: json.dumps(str(path))
     allowed = "\n".join(f'    ({"subpath" if p.is_dir() else "literal"} {quote(p)})' for p in reads)
-    # Bun needs ancestor directory reads for cwd resolution. Keep the run root
-    # metadata-only so the candidate cannot list sibling grader artifacts.
+    # Bun needs full reads of stable platform ancestors for cwd resolution.
+    # Run-specific ancestors remain metadata-only: a nested candidate volume
+    # has several such directories containing private sibling artifacts.
     ancestor_paths = set(workspace.parents) | set(private.parents)
+    platform_ancestors = {Path("/"), Path("/private"), Path("/private/tmp")}
     read_ancestors = "\n".join(f'    (literal {quote(p)})'
-                               for p in sorted(ancestor_paths - {workspace.parent}))
+                               for p in sorted(ancestor_paths & platform_ancestors))
     # Interpreters can realpath their executable through dependency parents;
     # expose only parent metadata, not sibling directory listings or contents.
     metadata_paths = ancestor_paths | {parent for item in reads for parent in item.parents}
@@ -362,13 +364,20 @@ class NativeServer:
 
     def _enter_background(self):
         options = self.background
-        if set(options) - {"dependencies", "inference_port", "cancel", "tool_path"} or not {"dependencies", "inference_port"}.issubset(options):
+        if set(options) - {"dependencies", "inference_port", "cancel", "tool_path", "private_parent"} or not {"dependencies", "inference_port"}.issubset(options):
             raise RuntimeError("Unexpected background isolation options")
         tool_path = Path(options.get("tool_path", Path(sys.executable).resolve().parent))
         if "tool_path" in options and (not tool_path.is_dir() or tool_path != tool_path.resolve() or
                 not any(tool_path.is_relative_to(Path(dep).resolve()) for dep in options["dependencies"])):
             raise RuntimeError("Background tool path must be inside an explicit readable dependency")
-        self.temporary = tempfile.TemporaryDirectory(prefix="kryn-isolated-", dir="/private/tmp", delete=False)
+        parent = Path(options.get("private_parent", "/private/tmp"))
+        if "private_parent" in options:
+            _owned_directory(parent)
+            if (parent.parent != self.directory.parent or
+                    parent.stat().st_dev != self.directory.stat().st_dev or
+                    parent.stat().st_dev == Path("/private/tmp").stat().st_dev):
+                raise RuntimeError("Research private parent must be a sibling on a separate volume")
+        self.temporary = tempfile.TemporaryDirectory(prefix="kryn-isolated-", dir=parent, delete=False)
         private = Path(self.temporary.name)
         effective = json.loads(self.env["OPENCODE_CONFIG_CONTENT"])
         # The whole server and descendants are sandboxed; do not route a nested

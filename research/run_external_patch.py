@@ -154,6 +154,8 @@ def run(args):
               "model_profile_sha256": hashlib.sha256(profile_path.read_bytes()).hexdigest(),
               "model_repository": profile["repository"], "model_revision": profile["revision"],
               "model_id": MODEL_ID, "timeout_seconds": args.timeout, "completed": False}
+    private_parent = getattr(args, "private_parent", None)
+    report["candidate_private_parent"] = str(private_parent) if private_parent else None
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
@@ -171,6 +173,8 @@ def run(args):
             monitor.start()
             background = {"dependencies": dependencies, "inference_port": relay.port,
                           "cancel": monitor.cancel.is_set}
+            if private_parent is not None:
+                background["private_parent"] = private_parent
             if tool_path is not None:
                 background["tool_path"] = str(tool_path)
             with NativeServer(workspace, config, evidence / "native.log", background=background) as server:
@@ -257,6 +261,8 @@ def main():
     parser.add_argument("--evidence", required=True, type=Path)
     parser.add_argument("--arm", choices=("native", "kryn"), default="kryn")
     parser.add_argument("--tool-venv", type=Path, help="preflighted disposable benchmark Python/ripgrep venv")
+    parser.add_argument("--private-parent", type=Path,
+                        help="sibling private directory on the mounted candidate volume")
     parser.add_argument("--timeout", type=int, default=900)
     args = parser.parse_args()
     if not 30 <= args.timeout <= 1800:
