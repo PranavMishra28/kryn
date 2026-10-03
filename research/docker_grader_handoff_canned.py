@@ -208,11 +208,13 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
         numbered = first_tool_text(source_read)
         expected_lines = [f"{index}: {line}" for index, line in
                           enumerate(source_file.read_text().splitlines()[:20], 1)]
+        page = numbered.splitlines() if isinstance(numbered, str) else []
         native_read_exact = (len(native_calls) == 4 and
             source_read.get("name") == "read" and
             source_read.get("state", {}).get("status") == "completed" and
-            source_read.get("state", {}).get("metadata", {}).get("truncated") is False and
-            isinstance(numbered, str) and numbered.splitlines()[1:] == expected_lines)
+            source_read.get("state", {}).get("metadata", {}).get("truncated") is True and
+            page == [f"Read file {source_file}, lines 1-20", *expected_lines,
+                     "[Output truncated. Continue reading with offset: 21]"])
         reads = shell_calls[:len(chunks)]
         source_read_exact = (len(reads) == len(chunks) and
             all(call.get("state", {}).get("metadata", {}).get("exit") == 0 and

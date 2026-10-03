@@ -126,3 +126,14 @@ read that fails, truncates silently, or opens the sibling rejects the candidate.
 Record wall time, synthetic request count, source hash, and resource samples.
 Do not run a model or count this as protected task success until the canary
 passes. A public model retry, if any, remains development data.
+
+The first S3 canary at clean `9dcc73c` returned the exact requested first 20
+numbered source lines in both arms, followed by OpenCode's explicit
+`Continue reading with offset: 21` marker. OpenCode correctly marked the
+*file* as truncated because more pages remain; the canary mistakenly required
+`metadata.truncated: false` for a bounded page. All sibling/write denials,
+six exact shell chunks, Docker grades and parity checks passed, but its raw
+verdict stays failed at `/private/tmp/kryn-source-native-read-20261003-01/result.json`
+(SHA-256 `d48772ccccfd9312eb8ef9eaf8ec908f3f524c070a6240dcc069d71bfe201db5`).
+The measurement correction requires all 20 expected lines and the exact
+continuation marker; it does not change the permission rules or trial inputs.
