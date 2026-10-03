@@ -3,6 +3,8 @@
 [PROTOCOL.md](PROTOCOL.md) freezes the hypothesis, controls, acceptance rule and
 research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.
+[CACHE_ABLATION.md](CACHE_ABLATION.md) preregisters the first one-variable
+prompt-stability candidate before its implementation.
 
 To reproduce one public-fixture pair from a checkout with the installed local
 model and oMLX already available:
