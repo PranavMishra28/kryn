@@ -48,6 +48,15 @@ request. Seed must fail and reference must pass every applicable stage. A
 stale-separator negative control must fail stage 3. Oracle data stays outside
 the candidate volume; this does not qualify it as a protected holdout.
 
+Frozen fixture SHA-256: `b7209bb5bac3ead98fa6b5f8d15e9346c803f520d6edc27af7e61125b1ad4630`.
+Reference SHA-256: `2f1eb648830b588129537e54b811784dc7b203b73b90cf75ddc0fc77f95d3626`.
+Stage 1/2/3 oracle SHA-256 respectively:
+`c88aee5abe7f4fe0bf181152db1480c6b3e1bca7bd223db8174f294e2f5be36f`,
+`5ca38a3a0499df2e855f0a024e37f3b84229be202c66963abcfdb3bc1c5e26c8`,
+`bb03e6bb0f12883c8acac0b6067feb0ac032326a61615c5696621518e1ba3748`.
+The no-model preflight passed all seed/reference/stale-rule controls twice before
+generation; the private receipts remain in `/private/tmp/kryn-public-staged-preflight-20261003-0{1,2}`.
+
 ## Acceptance and reporting
 
 Each arm must complete three native Agent turns in one root session; finish

@@ -80,16 +80,17 @@ def settle(server, sid, workspace, folder, guard):
                                    model_id=MODEL_ID, guard_gib=22)
     if guard.cancel.is_set() or not result.get("idle"):
         raise RuntimeError("Owned native session or runtime did not settle")
+    return result
 
 
-def turn(server, sid, workspace, folder, prompt, guard):
+def turn(server, sid, workspace, folder, prompt, guard, timeout=45):
     argv = server.background_prefix + [str(BINARY), "run", "--server", server.url,
         "--session", sid, "--agent", "agent", "--model", "local/qwen",
         "--format", "json", "--thinking"]
     child = subprocess.Popen(argv, cwd=workspace, env=server.env,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        cause, output, errors = drive(child, prompt.encode(), 45, guard.cancel.is_set)
+        cause, output, errors = drive(child, prompt.encode(), timeout, guard.cancel.is_set)
     finally:
         if child.poll() is None:
             child.terminate()
@@ -102,17 +103,18 @@ def turn(server, sid, workspace, folder, prompt, guard):
     (folder / "stderr.log").write_bytes(errors)
     if cause or child.returncode != 0:
         raise RuntimeError("Native turn failed: " + str(cause or child.returncode))
-    settle(server, sid, workspace, folder, guard)
-    return {"exit_code": child.returncode, "events_sha256": hashlib.sha256(output).hexdigest()}
+    settled = settle(server, sid, workspace, folder, guard)
+    return {"exit_code": child.returncode, "events_sha256": hashlib.sha256(output).hexdigest(),
+            "verified_sessions": settled["verified_sessions"]}
 
 
-def compact(server, sid, workspace, folder, guard):
+def compact(server, sid, workspace, folder, guard, timeout=60):
     before = {m["id"] for m in export(server, sid)["messages"]
               if m.get("type") == "compaction" and m.get("status") == "completed"}
     response = server.request("POST", "/api/session/" + sid + "/compact", {}, timeout=10)
     if response is None or response.get("error"):
         raise RuntimeError("Native compaction request was not accepted")
-    deadline = time.monotonic() + 60
+    deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if guard.cancel.is_set():
             raise RuntimeError("Resource guard interrupted compaction")
