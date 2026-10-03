@@ -41,3 +41,54 @@ power and cold/warm status. A mismatch is retained as an invalid pair rather
 than counted as a capability difference. Record raw traces and append compact
 receipts with `research/record_trial.py`. A pass here qualifies the runner for
 future protected tasks; Task03 outcomes themselves remain development data.
+
+## Completed result
+
+Both frozen pairs passed the fail-closed comparator. Each arm used the same
+loaded local model, Default sampler, AC power, 900-second cap, daily-use guard,
+41 wire tools, identical full tool catalogs and effective permissions. The first-wire tool-schema SHA-256
+was `3fcb5b056c05da695548bfe35da9002b628b51df87a2e2aca80e78906da9e085`
+and the effective-permission SHA-256 was
+`d66eff9de90022486e7e8bdc3555b484174fc7af9dd6c7bcfa976b8b8db9f6e6`
+in all four turns. Invocation-time runner, OpenCode binary, model-profile and
+timeout provenance were present and matched; model revision provenance was
+verified. No turn tripped the guard or grew sampled swap. One KRYN turn saw
+warning pressure, permitted by the unchanged daily-use guard.
+
+| Pair and order | Native OpenCode | KRYN |
+| --- | --- | --- |
+| 1, native first | **accepted**, 329.432 s, 37 requests | **failed**, 908.193 s, 57 requests; native turn timed out |
+| 2, KRYN first | **accepted**, 584.754 s, 55 requests | **failed**, 330.473 s, 36 requests; changed an existing test file |
+
+In pair 1, the KRYN workspace passed both functional probes after the turn,
+but its Agent never completed within 900 seconds. It spent many calls repairing
+its own malformed test file, then continued API checks. The trace contains a
+read-before-edit denial, a browser wait with no open page, and a correctly
+denied direct process signal. Those hard guards remained in force; the model's
+repair trajectory and extra checking consumed the bound. In pair 2, KRYN
+completed and passed the functional probes but appended 61 lines of new tests
+to `test_existing.py`. The frozen task explicitly required all existing tests
+unchanged and allowed *new* focused tests. The grader detected the changed
+file. KRYN's final answer presented the work as complete, so this is one
+observed false-completion claim. Native preserved the file in both runs.
+
+Strict acceptance was **native 2/2, KRYN 0/2** on this seen task. Native spent
+914.186 driver wall seconds and produced 7.88 accepted trials per driver hour;
+KRYN spent 1,238.666 seconds and produced zero. KRYN used 427,344 new input
+tokens versus native's 163,128, despite nearly equal model-request counts
+(93 versus 92). Native's primary system prompt stayed byte-identical across
+both turns; KRYN's changed 16 times. This supports a cache/prompt-churn
+diagnosis but does not attribute the acceptance failures to that churn. The
+earlier C1 prompt-stability candidate reduced churn while worsening accepted
+work, so this result does not justify reviving C1 or adding prompt rules.
+
+The four compact receipts are appended to
+[history/development.jsonl](history/development.jsonl). Raw traces, workspace
+state, independent grades and a private per-file manifest remain in ignored
+`evals/runs/h1p-03-*` on this Mac. The private manifest at
+`/private/tmp/kryn-h1-provenance-20261003/raw-manifest.json` hashes to
+`bd92178d24e9295a305cf0d34c5eff5f8ad20de809920d33ddecb0f45e79df72`.
+This two-pair public pilot validates the corrected matched-runner controls and
+shows **no demonstrated harness uplift** on Task03. It is not a protected
+holdout, a representative task distribution, a confidence interval, or a
+frontier comparison. No product/profile/release change is promoted.
