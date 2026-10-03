@@ -23,6 +23,9 @@ public Task03 pairs using the user-facing Agent role. Native OpenCode accepted
 [PRESERVED_TESTS.md](PRESERVED_TESTS.md) records the rejected explicit
 preserved-test guard screen: the functional grader passed, but the Agent timed
 out and the candidate guard never fired. Its code was reverted.
+[HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md) freezes the correction to the
+protected-holdout isolation gate after a same-volume hardlink exposed a hidden
+oracle. No protected task is qualified yet.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 
