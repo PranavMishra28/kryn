@@ -790,3 +790,26 @@ Five slots are now explicitly retired: three invalid one-turn long-workflow
 drafts, the used multi-file task, and this used context/restart task. The
 combined roster remains unsealed, and independent semantic admission and
 replacement tasks are still required before any H1 holdout run.
+
+## Provisional oracle correction before model exposure
+
+A new no-model semantic audit found that one unsealed Python multi-file oracle
+accepted a deliberately incorrect implementation of a negative-path requirement.
+The original draft is preserved. An owner-only v11 replacement adds the missing
+case without changing its candidate-facing prompt, seed or reference solution.
+An offline subprocess probe passes the reference and rejects the mutant with
+the corrected oracle. Separately, the isolated APFS/OpenCode preflight passed
+in both arms. It rejected the broken seed and partial solution, and detached
+the candidate volume. The v11 manifest,
+preflight, old-mutant and new-mutant receipt SHA-256 values are respectively
+`bc9121c42ffd55449c9306f16335db82d552a69ad51a7d54939a999a4503769c`,
+`c262ec373478c2942a83ea56d85a23327cc89522ffa458ab563a9696242ee1dd`,
+`b5e64e53c54f1aac435e1d236471ddc19d8fa3a193103251ef8cb0afadd8106e`,
+and `da16995ae08ad51dac0513275e2654d11c268cbcd1996410cf9e95147e37222c`.
+The owner-only roster V14 and direct 30-task/120-identity-check audit SHA-256
+values are `d9dbc8ab262dc740170d7c61b81e070594289059b9ade4c956e1ac22e9abdd35`
+and `89db39405302857ffca0c625c6fe40fdb7c644fb11b9e1ac9a17f807f99e96a0`.
+No model request or protected score occurred; semantic admission and five
+replacement slots remain open. Later three-turn drafts for the retired
+long-workflow slots do not demonstrate multi-hour useful work, process restarts
+and changed repository state, so they cannot fill those slots.
