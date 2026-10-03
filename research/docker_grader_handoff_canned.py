@@ -23,6 +23,7 @@ from run_external_patch import configuration  # noqa: E402
 from ui_gateway.synthetic_dispatch import FakeInference  # noqa: E402
 
 PYTHON_IMAGE = "python@sha256:399babc8b49529dabfd9c922f2b5eea81d611e4512e3ed250d75bd2e7683f4b0"
+PROVENANCE_SHA = "bb4eecab83669283cddb071eedcbba496cabe60b4644171967237e6b91ac9f2a"
 FIXED = "def answer():\n    return 42\n"
 BROKEN = "def answer():\n    return 0\n"
 
@@ -49,6 +50,11 @@ def source_chunks(path, limit=2000):
     if not chunks or b"".join(chunk[2] for chunk in chunks) != Path(path).read_bytes():
         raise ValueError("Pinned source could not be partitioned exactly")
     return chunks
+
+
+def first_tool_text(call):
+    parts = call.get("state", {}).get("content", [])
+    return parts[0].get("text") if parts and isinstance(parts[0], dict) else None
 
 
 def checked(argv, *, env=None, cwd=None, timeout=20):
@@ -89,7 +95,7 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
                       shlex.quote(str(source_file.parent / "SOURCE.json"))}),
                      ("shell", {"command": "printf tampered >> " +
                       shlex.quote(str(source_file))})]
-    sequence += [("shell", {"command": "cat " + str(hidden)}),
+    sequence += [("shell", {"command": "cat " + shlex.quote(str(hidden))}),
                  ("write", {"path": "answer.py", "content": FIXED})]
 
     class CannedRelay:
@@ -194,8 +200,8 @@ def trial(seed, prompt, hidden, tool_venv, grade_root, arm, source_file=None):
         source_read_exact = (len(reads) == len(chunks) and
             all(call.get("state", {}).get("metadata", {}).get("exit") == 0 and
                 call.get("state", {}).get("metadata", {}).get("truncated") is False and
-                call.get("state", {}).get("content", [{}])[0].get("text", "").encode()
-                    == expected
+                isinstance(first_tool_text(call), str) and
+                first_tool_text(call).encode() == expected
                 for call, (_, _, expected) in zip(reads, chunks)))
         source_checks = {
             "source_read_exact": source_read_exact,
@@ -260,7 +266,8 @@ def main():
                 source_dir.stat().st_mode & 0o077 or not source_file.is_file() or
                 source_file.stat().st_size != EXPECTED_SOURCE_BYTES or
                 sha(source_file) != EXPECTED_SOURCE_SHA or
-                not (source_dir / "SOURCE.json").is_file()):
+                not (source_dir / "SOURCE.json").is_file() or
+                sha(source_dir / "SOURCE.json") != PROVENANCE_SHA):
             parser.error("Pinned owner-only GitHub Docs source identity changed")
     output.mkdir(mode=0o700)
     image_id = checked(["docker", "image", "inspect", PYTHON_IMAGE,
@@ -287,12 +294,15 @@ def main():
               "protected_score": False, "image": PYTHON_IMAGE,
               "source_sha256": EXPECTED_SOURCE_SHA if source_file else None,
               "source_unchanged": sha(source_file) == EXPECTED_SOURCE_SHA if source_file else True,
+              "provenance_unchanged": (sha(source_file.parent / "SOURCE.json") == PROVENANCE_SHA
+                                       if source_file else True),
               "image_id": image_id, "tool_venv": str(args.tool_venv.absolute()),
               "paired_catalogs_equal": (runs[0].get("catalogs") is not None and
                                         runs[0].get("catalogs") == runs[1].get("catalogs")),
               "paired_permissions_equal": permission_equal,
               "passed": equal, "runs": runs}
-    report["passed"] = bool(report["passed"] and not report["source_dirty"])
+    report["passed"] = bool(report["passed"] and not report["source_dirty"] and
+                            report["source_unchanged"] and report["provenance_unchanged"])
     (output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"output": str(output), "passed": report["passed"],
                       "arms": [{"arm": item["arm"], "passed": item["passed"]} for item in runs]}))
