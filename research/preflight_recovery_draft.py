@@ -113,11 +113,15 @@ def main():
             raise RuntimeError("Research source must be a clean commit")
         archived = archive["files"]
         report["archived_hashes_match"] = bool(archived) and all(
-            (draft / name).is_file() and sha(draft / name) == digest
+            (draft / name).is_relative_to(draft)
+            and (draft / name) == (draft / name).resolve()
+            and (draft / name).is_file() and sha(draft / name) == digest
             for name, digest in archived.items())
         checksums = json.loads((bundle / "SHA256SUMS.json").read_text())
         report["bundle_hashes_match"] = bool(checksums) and all(
-            (bundle / name).is_file() and sha(bundle / name) == digest
+            (bundle / name).is_relative_to(bundle)
+            and (bundle / name) == (bundle / name).resolve()
+            and (bundle / name).is_file() and sha(bundle / name) == digest
             for name, digest in checksums.items())
         seed = bundle / "repo"
         oracle = draft / "trusted_grader.py"
@@ -135,7 +139,8 @@ def main():
                                "--untracked-files=all", "--ignored"])
         report["seed_clean"] = (head.returncode == 0 and seed_status.returncode == 0
                                 and head.stdout.strip() == manifest["base_commit"]
-                                and not seed_status.stdout)
+                                and not seed_status.stdout
+                                and all(not path.is_symlink() for path in seed.rglob("*")))
         if not all(report[key] for key in ("archived_hashes_match", "bundle_hashes_match",
                                        "frozen_identity_match", "seed_clean")):
             raise RuntimeError("Owner-only task identity or seed changed")
