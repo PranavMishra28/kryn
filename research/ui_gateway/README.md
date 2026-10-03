@@ -33,15 +33,15 @@ OpenCode arms start from the clean seed checkout with a fresh browser worker bef
 reference bytes are loaded. A blank-worker check follows startup; the reference
 keyboard control runs afterward and the seed page is reloaded before cleanup.
 
-The final local no-model run used image
+The latest local no-model run used image
 `sha256:16c1133894770bceab9f2f3a9bfac4e7ec1b3dde1fe2f0f6a7063ba49b3436a2`.
 Its private receipt is
-`/private/tmp/kryn-ui-gateway-preflight-14/receipt.json`, SHA-256
-`679796d895dfdb45026edc1225fc73b04d8bdc229f37b477591bed37605cbfda`.
-All 32 no-model checks passed, including a reference ArrowRight interaction,
+`/private/tmp/kryn-ui-gateway-preflight-19/receipt.json`, SHA-256
+`27422fc97134fb2129a1b9be4dc8f932f6a49a0dd865bb5f04554f47b3221d69`.
+All 33 no-model checks passed, including a reference ArrowRight interaction,
 hidden-file and hardlink denial, malicious page file/network attempts, symlink
 swap, FIFO, oversize entry, rejection of caller-supplied HTML, zero-limit and
-root container attestation mutants, startup-timeout reaping, clean seed state
+root and container-escape attestation mutants, startup-timeout reaping, clean seed state
 and blank browser through both-arm MCP connection/config parity, seed restoration,
 distinct inference/browser ports, malformed and duplicate port rejection,
 permitted dummy inference access, denied fourth-port access, container cleanup,
@@ -58,14 +58,15 @@ OpenCode's actual MCP tool dispatch initially failed because it adds optional
 `_meta` to `tools/call` parameters; the adapter's exact-key check rejected the
 call. The adapter now accepts only the two ordinary keys plus optional object
 `_meta`. The clean-source synthetic inference canary at
-`/private/tmp/kryn-ui-synthetic-wire-20261003-04/result.json` (SHA-256
-`2c1208d2239fb71c1343de16f499233a107de33f750618622b20717d01763c70`)
+`/private/tmp/kryn-ui-synthetic-wire-20261003-06/result.json` (SHA-256
+`6862b8e08f52207647bce314c8e07de39f455b693a31e5d7f76a0e05e5caefa7`)
 passes in both real OpenCode arms: each wire request exposes the same six browser
 tools, and navigation, click, and snapshot all complete with the changed
 `Activated` page state. It made **zero real model requests** and is not an
-agent-quality or protected score. The full Browse wire catalogs still differ:
-native exposes `glob`, `grep`, and `skill` while KRYN's product policy hides
-them. Therefore this Browse configuration is not a matched H1 pair.
+agent-quality or protected score. An earlier synthetic run exposed a full Browse
+tool-catalog mismatch: native exposed `glob`, `grep`, and `skill` while KRYN's
+product policy hid them. Identical per-arm Browse deny rules now hide those tools
+in native too; the clean-source `06` receipt confirms equal full wire catalogs.
 
 One public live 9B Browse turn at
 `/private/tmp/kryn-ui-public-dispatch-20261003-01/result.json` (SHA-256
@@ -77,8 +78,8 @@ container. It cannot establish live dispatch or model quality; repeating that
 same resource-gated turn is not justified.
 
 Remaining gates: independently review the optional third-port change and the
-new synthetic dispatch path; resolve full Browse tool-catalog parity before an
-H1 pair; establish guarded live model quality on a representative occupied host;
+new synthetic dispatch path; establish guarded live model quality on a
+representative occupied host;
 review the container and broker security independently;
 freeze a valid 30-task roster before any protected candidate run. The current
 synthetic check proves OpenCode routed these tools, not that a model chose them.

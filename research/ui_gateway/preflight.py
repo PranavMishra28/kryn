@@ -17,6 +17,7 @@ import sys
 import tempfile
 from threading import Thread
 import time
+import traceback
 
 RESEARCH = Path(__file__).resolve().parents[1]
 ROOT = RESEARCH.parent
@@ -43,7 +44,8 @@ def digest(path):
 
 def stop_group(child):
     try:
-        os.killpg(child.pid, signal.SIGTERM)
+        if child.poll() is None:
+            child.terminate()
     except ProcessLookupError:
         pass
     try:
@@ -51,7 +53,7 @@ def stop_group(child):
     except subprocess.TimeoutExpired:
         if child.poll() is None:
             try:
-                os.killpg(child.pid, signal.SIGKILL)
+                child.kill()
             except ProcessLookupError:
                 pass
         child.wait(timeout=5)
@@ -288,6 +290,20 @@ def main(draft, image, output):
             else:
                 mutants_rejected.append(False)
         report["checks"]["zero_limits_and_root_rejected"] = all(mutants_rejected)
+        escape_mutants = []
+        for field, value in (("PidMode", "host"), ("IpcMode", "host"),
+                             ("CgroupnsMode", "host"), ("Devices", [{"PathOnHost": "/dev/disk0"}]),
+                             ("CapAdd", ["SYS_ADMIN"]), ("Binds", ["/:/host:ro"]),
+                             ("SecurityOpt", ["no-new-privileges", "seccomp=unconfined"])):
+            mutant = json.loads(json.dumps(inspected))
+            mutant["HostConfig"][field] = value
+            try:
+                verify_boundary(mutant, image)
+            except RuntimeError:
+                escape_mutants.append(True)
+            else:
+                escape_mutants.append(False)
+        report["checks"]["container_escape_mutants_rejected"] = all(escape_mutants)
         stall = output / "stalled-broker.py"
         stall_pid = output / "stalled-broker.pid"
         stall.write_text("import os, time\n"
@@ -436,6 +452,7 @@ def main(draft, image, output):
         report["passed"] = all(report["checks"].values())
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
+        report["error_traceback"] = traceback.format_exc(limit=6)
     finally:
         if inference_server is not None:
             inference_server.shutdown()

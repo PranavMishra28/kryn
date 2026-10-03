@@ -113,13 +113,21 @@ def verify_boundary(item, image):
     host = item["HostConfig"]
     if (item["Image"] != image or item["Mounts"] or host["NetworkMode"] != "none" or
             host["ReadonlyRootfs"] is not True or host["Privileged"] is not False or
-            "ALL" not in host["CapDrop"] or "no-new-privileges" not in host["SecurityOpt"] or
+            set(host["CapDrop"] or []) != {"ALL"} or
+            set(host["SecurityOpt"] or []) != {"no-new-privileges"} or
+            host["PidMode"] not in ("", "private") or host["IpcMode"] != "private" or
+            host["CgroupnsMode"] != "private" or host["UsernsMode"] not in ("", "private") or
+            host["Devices"] or host["DeviceCgroupRules"] or host["CapAdd"] or
+            host["Binds"] or host.get("Mounts") or host["VolumesFrom"] or
+            host["PortBindings"] or host["PublishAllPorts"] is not False or
             not 0 < host["PidsLimit"] <= 128 or not 0 < host["Memory"] <= 512 * 1024 * 1024 or
             item["Config"]["User"] != "10001:10001"):
         raise RuntimeError("browser container boundary differs")
     return {"image_id": item["Image"], "mounts": len(item["Mounts"]),
             "network": host["NetworkMode"], "read_only": host["ReadonlyRootfs"],
             "privileged": host["Privileged"], "cap_drop": host["CapDrop"],
+            "pid_mode": host["PidMode"], "ipc_mode": host["IpcMode"],
+            "cgroup_mode": host["CgroupnsMode"], "security_opt": host["SecurityOpt"],
             "pids_limit": host["PidsLimit"], "memory_limit": host["Memory"],
             "user": item["Config"]["User"]}
 

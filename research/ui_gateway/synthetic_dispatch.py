@@ -101,13 +101,32 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def trial(workspace, image, arm, receipt):
+    source = workspace
+    workspace = receipt / (arm + "-workspace")
     broker_child = None
     broker = None
+    clean_state = None
     inference = FakeInference()
     thread = Thread(target=inference.serve_forever, daemon=True)
     thread.start()
     report = {"arm": arm, "passed": False, "synthetic_inference": True}
     try:
+        clone = subprocess.run(["git", "clone", "--no-hardlinks", "-q", str(source),
+                                str(workspace)], capture_output=True, text=True, timeout=20)
+        if clone.returncode:
+            raise RuntimeError("fresh arm clone failed: " + clone.stderr[-300:])
+        expected_head = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"],
+                                                text=True).strip()
+        expected_html = hashlib.sha256((source / "index.html").read_bytes()).hexdigest()
+        def clean_state():
+            return (subprocess.check_output(["git", "-C", str(workspace), "rev-parse", "HEAD"],
+                                            text=True).strip() == expected_head and
+                    not subprocess.check_output(["git", "-C", str(workspace),
+                                                 "status", "--porcelain"], text=True) and
+                    hashlib.sha256((workspace / "index.html").read_bytes()).hexdigest() == expected_html)
+        report["start_state_clean"] = clean_state()
+        if not report["start_state_clean"]:
+            raise RuntimeError("arm did not start from the clean candidate checkout")
         broker_child, broker = broker_start(image, workspace)
         state = workspace / ".git" / ("synthetic-ui-" + arm)
         state.mkdir(mode=0o700, exist_ok=True)
@@ -151,9 +170,12 @@ def trial(workspace, image, arm, receipt):
                                           "status": part.get("state", {}).get("status")}
                                          for part in calls],
                           stderr=cli.stderr.decode(errors="replace")[-500:])
+            catalogs = [call["tools"] for call in inference.calls]
+            report["request_catalogs_consistent"] = (
+                len(catalogs) == 4 and all(catalog == catalogs[0] for catalog in catalogs))
             (receipt / (arm + "-events.jsonl")).write_bytes(cli.stdout[:2 * 1024 * 1024])
             observed = [(part.get("tool"), part.get("state", {}).get("status")) for part in calls]
-            report["passed"] = bool(cli.returncode == 0 and len(inference.calls) >= 4 and
+            report["passed"] = bool(cli.returncode == 0 and report["request_catalogs_consistent"] and
                                     observed == [(name, "completed") for name, _ in TOOLS] and
                                     "Activated" in calls[-1].get("state", {}).get("output", ""))
     except BaseException as error:
@@ -168,7 +190,13 @@ def trial(workspace, image, arm, receipt):
                 "name=" + broker["container"], "--format", "{{.Names}}"],
                 capture_output=True, text=True, timeout=10)
             report["container_cleaned"] = cleaned.returncode == 0 and not cleaned.stdout.strip()
-        report["passed"] = report["passed"] and report.get("container_cleaned", False)
+        if workspace.is_dir() and clean_state is not None:
+            try:
+                report["end_state_clean"] = clean_state()
+            except (OSError, subprocess.CalledProcessError):
+                report["end_state_clean"] = False
+        report["passed"] = (report["passed"] and report.get("container_cleaned", False)
+                            and report.get("end_state_clean", False))
     return report
 
 
@@ -185,12 +213,16 @@ def main():
             or receipt.exists() or not (workspace / ".git").is_dir()
             or not (workspace / "index.html").is_file()):
         parser.error("Use a canonical public /private/tmp Git checkout and fresh receipt")
+    if subprocess.check_output(["git", "-C", str(workspace), "status", "--porcelain"], text=True):
+        parser.error("Candidate checkout must be clean before both arms")
     receipt.mkdir(mode=0o700)
     results = [trial(workspace, args.image, arm, receipt) for arm in ("native", "kryn")]
     dispatch_passed = all(result["passed"] for result in results)
-    native_tools = results[0].get("inference_calls", [{}])[0].get("tools", [])
-    kryn_tools = results[1].get("inference_calls", [{}])[0].get("tools", [])
-    full_tool_catalog_equal = native_tools == kryn_tools
+    catalogs = [[call["tools"] for call in result.get("inference_calls", [])] for result in results]
+    native_tools = catalogs[0][0] if catalogs[0] else []
+    kryn_tools = catalogs[1][0] if catalogs[1] else []
+    full_tool_catalog_equal = (all(len(calls) == 4 for calls in catalogs) and
+                               all(catalog == native_tools for calls in catalogs for catalog in calls))
     output = {"schema": 1, "kind": "synthetic_browser_wire_dispatch",
               "real_model_requests": 0, "protected_score": False,
               "source_commit": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
