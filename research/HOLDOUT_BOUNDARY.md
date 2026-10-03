@@ -563,3 +563,36 @@ advance. The three drafts remain `protected_status=false`. Independent task
 admission, a sealed combined 30-task roster, actual paired model work on
 unseen tasks, source-use evidence during those turns, and external benchmark
 transfer are still required. Six canned Agent turns are not an H1 score.
+
+## Recovery draft through the actual Agent-to-Docker handoff
+
+A zero-model canary exercised one owner-only recovery draft through the full
+`run_candidate_to_grader` path rather than only its separate boundary and
+grader controls. Both native OpenCode and KRYN attempted a hidden-oracle read
+and appended the same harmless comment to the broken seed. The hidden read was
+denied; each captured patch matched the fresh APFS grading checkout and a
+separate Docker-visible host clone. The unchanged grader returned the frozen
+seed **failure** with the same output hashes in both arms. Candidate and grader
+images detached, no probe container remained, telemetry was complete, sampled
+pressure stayed normal, and sampled swap growth was zero. The private task
+prompt and reference patch were never sent to the synthetic Agent; there were
+zero real model requests.
+
+The first receipt reported a pass but checked configured, not runtime-resolved,
+permissions. A research-only runner change now retains OpenCode's `/api/agent`
+inventory at invocation. The second canary kept its failed verdict because
+four OpenCode-generated allowed temporary paths differed by the disposable
+private directory in each arm. After freezing a normalization of only the
+recorded workspace, private-root and generated temp components, a third fresh
+pair passed with identical effective permission rules and wire tool schemas.
+The V1, failed V2 and passing V3 result SHA-256 values are respectively
+`911cd5d2f50efc80ca086b7c4e53e01358d8dc404e019cf7c15b50520c0572a7`,
+`8e69f996b157f2f3844f804a318712ad1334ea42df4fd10ce7442568d174fac8`,
+and `79b24eff060eeea2512a8962f20134ed9b245ff6b03cfd41117ad09cc972f7eb`.
+The owner-only verified raw-archive index for V3 is
+`4a7967264ff2f201d198125563cbf3f020207d3620beda8280392357a3889d63`.
+
+**Decision:** this validates one recovery grader's Docker-visible handoff and
+permission parity under canned inference. It does not prove the model can
+repair the task, admit any draft to a sealed holdout, or resolve the remaining
+browser, staged-workflow and roster gates.
