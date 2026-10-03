@@ -227,6 +227,39 @@ after physical power loss remains untested; the exposed duplicate-key task
 remains retired. Every v7 task still has `protected_status=false`, and no v7
 model or real Agent-to-grader turn has been scored.
 
+At clean research commit `682f9b3268beca203cf35b81877cb86d764f3251`,
+the current-source **no-model** `preflight_protected_python.py` was run once for
+each of the 15 frozen v7 tasks. All 15 passed its seed/reference/partial and
+real OpenCode candidate-volume boundary mechanics in both KRYN and native
+arms, with matching input hashes, a pinned Python/rg/pytest/Git environment,
+hidden oracle/reference/manifest and unlisted loopback denial, and proved
+image detachment. No model request was made. Fourteen returned `passed=true`;
+`ledger-journal` correctly returned `passed=false` despite passing mechanics
+because its frozen scientific flag says physical power-loss recovery is
+untested. This does **not** upgrade any manifest `protected_status`, seal the
+combined 30-task roster, prove model-facing browser work, or count as an H1
+trial. The third persistence slot still needs a fully qualified task or a
+justified change to the preregistered roster before sealing.
+
+The owner-only full receipts are in
+`/Users/pranav/Documents/Codex/kryn-research-private/preflight-v7-current-20261003`.
+The summary SHA-256 is
+`08898eca87c2daba919ad59f7bdb849e54e4c6dd4dad2a271d32e7a3f5e6f7f8`,
+and its 15-report archive index SHA-256 is
+`a2782563af202ce346aa8c7100f296870421a3c235e904b0d09cd0a1e381be50`.
+The compact public entry is
+[`history/protected_preflight.jsonl`](history/protected_preflight.jsonl).
+To repeat one task with a fresh receipt name on this Mac, use the v7 draft
+directory, a manifest task ID, the existing pinned tool venv, and the command
+shown below for `linecfg-leading-bom`:
+
+```sh
+/opt/homebrew/bin/python3.14 -B research/preflight_protected_python.py \
+  /Users/pranav/Documents/Codex/kryn-research-private/python-draft-v7-20261003 \
+  linecfg-leading-bom /private/tmp/a-new-v7-preflight-receipt \
+  --tool-venv /private/tmp/kryn-python-tools-v2-20261003
+```
+
 `research/preflight_protected_python.py` verifies one real task with its
 candidate checkout and private temp on a fresh disposable APFS volume. It
 checks exact prompt/grader/reference/partial hashes, a clean seed, all private
