@@ -87,6 +87,10 @@ three-turn/two-compaction/one-restart 9B screen. Its first two stages passed,
 but the frozen final oracle contradicted the required schema shape, making
 quality inconclusive. The failed raw screen and a zero-model oracle correction
 are preserved; the task is retired from protected use.
+[LEDGER_CATEGORIES_PAIR.md](LEDGER_CATEGORIES_PAIR.md) records a retired
+multi-file development pair. The prospective reverse-order KRYN/native pair
+matched its controls; KRYN passed and native omitted a public API export. One
+task is not evidence of general harness uplift or protected H1 performance.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 
