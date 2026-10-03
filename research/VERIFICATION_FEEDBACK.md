@@ -70,7 +70,7 @@ support a frontier-adjacent or autonomous-production claim.
 
 ## Frozen trial input and preflight
 
-The prompt in all four disposable runs is exactly:
+The prompt frozen for all four planned disposable runs is exactly:
 
 > In this disposable TaskboardLite workspace, add a Cancel Edit button that appears only while editing an existing entry. Clicking it must leave stored data untouched, clear edit mode, and reset the form, so Save can create a new entry again. Inspect the existing source and tests yourself; no clarifying question is needed. Preserve existing behavior, run relevant tests, and report only observed checks.
 
@@ -94,3 +94,56 @@ A preflight on an untouched prepared control workspace ran the public checker
 successfully as a checker process and returned the expected **failure**: both
 `task06_browser` and `cancel_edit_browser` failed against the seed. This
 establishes a nontrivial baseline and does not count as an agent trial.
+
+## Completed first pair and decision
+
+Only the first, control-then-candidate pair generated. The common driver,
+model profile, OpenCode binary, prompt, normalized check spec, product plugin,
+41-tool wire schema, effective permissions, sampling settings and daily-use
+guard matched by hash. The control began with the model cold; the candidate
+began warm. Both crossed AC/battery states at different times, and occupied-host
+pressure evolved differently. This is **not a fully matched causal quality or
+latency comparison**. Exact compact receipts are in
+`history/verification_feedback.jsonl`; run
+`python3 -B research/summarize_verification_feedback.py` for the recorded totals.
+
+| Arm | Native/controller outcome | Independent checks | Wall time | Swap growth |
+| --- | --- | --- | ---: | ---: |
+| Control | Native completed; controller blocked after two repairs | Task06 browser still failed | 1,035.305 s | 0 MiB |
+| Candidate | Final repair stopped by unchanged guard; controller blocked | Task06 browser and Cancel Edit still failed after first repair | 1,170.589 s | 706.31 MiB |
+
+The candidate changed the repair message as intended. The control's two repair
+messages were 1,300 and 1,233 characters, each containing a 900-character
+prefix of the combined check output. Its first prefix cut off the Task06 browser
+diagnostic after verbose diff-hygiene output. The candidate's messages were 818
+and 649 characters, and both named every failing subcheck, including the later
+Cancel Edit browser failure. This confirms delivery of more relevant check
+evidence per feedback character. It did **not** produce accepted work: its first
+repair took 709.4 seconds, fixed only diff hygiene, and left both browser flows
+failing. The independent checker repeated after the guard abort still failed
+both flows; that diagnostic is not counted as native acceptance. Both arms had
+model completion claims contradicted by independent checks; the controller did
+not promote either claim to acceptance.
+
+During the candidate's final repair, whole-host swap grew by 740,619,714 bytes,
+exceeding the unchanged 512-MiB daily-use budget. The guard stopped it and
+verified that the owned runtime settled. No guard threshold was changed. This
+single unbalanced pair cannot prove that the feedback change caused the swap
+growth or any quality difference. Accepted work per generation-hour was zero
+for both arms. The candidate nonetheless fails the preregistered
+no-extra-guard-stop gate under this occupied-host trial. The reverse-order
+pair was **not run**: it could not rescue that gate, the model cache and host
+swap state had changed, and the Mac was on battery during sustained generation.
+The unused prepared workspaces contain no model attempts.
+
+**Decision: reject V1 and change approach.** The candidate controller edit and
+its fixture test were reverted; the net product-code diff is empty. Only the
+common research-driver ability to use the existing daily-use guard remains.
+Released v1.0.0 and the installed owner profile were never changed. Full raw
+traces, exported sessions, browser check reports and source snapshots are in
+the local ignored `evals/runs/verification-feedback-v1-20261002/` archive;
+its SHA-256 manifest is
+`d7be3575e1c1f28b117a637a286ba3aa0e77d6814bfd38abfd43618ca94d228b`.
+This is a public development failure, not a protected validation result. The
+remaining H1, protected holdout, Harbor, long-horizon and frontier-comparator
+gates remain unqualified.
