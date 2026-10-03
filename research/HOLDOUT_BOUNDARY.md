@@ -315,3 +315,29 @@ An independent oracle review, the remaining non-Python categories and the
 actual 30-task Agent-to-grader study are still required. The Python tasks
 also share only three repository families, so they cannot stand in for 15
 independent repositories.
+
+## Persistence draft oracle correction
+
+An independent read-only audit found that the v1 replacement reference failed
+one of its own malformed-record error requirements, while its oracle omitted
+that case. Its manifest and preflight receipt remain unchanged. A new owner-only
+v2 draft makes the contract explicit, corrects the reference, adds the missing
+oracle branch and an error-specific negative control. The v2 manifest SHA-256
+is `8eb5fab22cf02158a19314272410068797a942858c4220e8ad450f098baf7bbf`.
+Its seed and partial patch fail, the reference and a structurally different
+valid alternative pass, and six targeted wrong variants fail. No candidate
+model has seen either draft.
+
+On clean merged `main` at `7728c8e380c58726fc74df238363a0c3e01cf18f`,
+the corrected draft passed the current-source no-model KRYN/native preflight:
+exact task hashes, separate-device grader, hidden-file and unlisted-loopback
+denial, seed/reference/partial controls, and candidate-volume detachment. The
+report SHA-256 is
+`0c1d0d76931471d9a25d31baf9258ac229edda922d583996d91809d2d3e19d6e`;
+the owner-only archive index SHA-256 is
+`cdcb0e77b573ee8818df5954a48c9ae4184adf1087c401f75d20078b4b0b3149`.
+The compact [history entry](history/protected_preflight.jsonl) omits the prompt,
+oracle, reference and task ID. This corrects one independently identified
+defect, not a broad oracle-completeness proof or protected admission. Every
+private manifest still says `protected_status=false`; the combined roster,
+non-Python categories and real paired Agent turns remain open gates.
