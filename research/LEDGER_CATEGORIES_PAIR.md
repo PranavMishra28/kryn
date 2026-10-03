@@ -173,3 +173,36 @@ and `d1c2bc8e6344a42991be0d10d8f82b3c2f640755246bbe6f13c1f7e6508c8589`.
 This remains one repeated **development** task, without a protected H1 score
 or evidence of general uplift. The second preregistered pair will use the
 corrected matcher prospectively after this measurement fix merges.
+
+## Prospective reverse-order replication
+
+The corrected matcher merged before the second new pair. From clean `main` at
+`ed5f48bdae85dfd47e88227d16171d99ec9663f0`, a fresh preflight passed and
+all ten parity controls matched prospectively. KRYN ran first and passed the
+independent grader; native ran second and failed. The native patch exported
+`category_totals` but used `Decimal` in its body without importing it, so the
+grader raised `NameError`. The final response nevertheless described the
+function as working. Neither arm called an executable coding check in its
+turn, a verification weakness common to both traces.
+
+| Arm | Strict result | Agent time | Model requests | Tools / errors | New input / output / cache-read tokens |
+| --- | --- | ---: | ---: | ---: | ---: |
+| KRYN first | **Accepted**; oracle exit 0 | 83.017 s | 14 | 20 / 3 | 17,209 / 2,560 / 63,488 |
+| Native second | **Failed**; oracle exit 1 | 80.067 s | 13 | 16 / 0 | 17,340 / 2,332 / 53,248 |
+
+Both arms completed without intervention, resource guard stop or sampled swap
+growth. The original matched pair is SHA-256
+`bfb8d3c33cc094f36608e24949aa5058480ac474e77b6168ce0d4fb74d09eeb8`;
+its owner-only 84-file archive and independently rehashed index are
+`e0228539524de928e8bb8ca0bc81fbb918d296e15a59be725df78a61428be733`
+and `ede154c5a0b23db2e2ed605dabd0641d88679c1a9cbdc62ec1f31b2a3ede02de`.
+The private analysis SHA-256 is
+`bd788bfc3c8403f0d7f2c714d82abb216be7c7ee420ffefb93ecf6ee7fb5c91d`.
+
+Across the two new pairs, KRYN passed twice; native passed once and failed
+once. The prespecified **KRYN-only win in both new pairs was not met** because
+native passed R1. R1's parity correction was retrospective, while R2's was
+prospective. The separate earlier matched reverse-order pair was also a
+KRYN-only win, but all of these runs repeat one retired development task.
+There is no independent-task transfer or protected H1 score. Further repeats
+of this same task would add little; the next test needs fresh admitted tasks.
