@@ -95,6 +95,84 @@ that a working official grader connection does not imply task reliability.
 It leaves the external-transfer, protected holdout, same-model uplift and
 frontier-adjacency gates unqualified.
 
+## Post-hoc native-control diagnostic, frozen 2026-10-03T01:27:01Z
+
+The KRYN failure above was inspected before this control was chosen. A single
+native OpenCode run on the **same public task** can diagnose whether its 9B
+worker also makes the aggregation error, but selection after seeing KRYN's
+result prevents a causal H1 or benchmark-uplift claim. There is no second KRYN
+attempt. The only arm change is removal of KRYN's product plugin and extra
+agent system guidance, matching the native-control definition in
+`tools/run_native_trial.py`; the main agent description, model, sampler,
+CLI, container image, task, visible tools, permissions, timeout and unchanged
+daily-use resource guard remain the same. Native and KRYN container configs
+have identical provider, MCP, permissions, main agent and every other
+non-treatment field in an offline diff. Their SHA-256 hashes after rendering
+are respectively `bc28c1be7db60dac1c059d1d7f326b36dba2bb163523a0d59585e0587e640c24`
+and `c652945d5aed398a131fc623a60d6c768b5f670811bd3454cdf2eb691223f4c5`.
+The amended adapter SHA-256 is
+`f371cb7e5c46fc7e9804a6a8f70f8b5758c037d0b7b92fb68cf73e3a42ce7676`;
+the guarded runner SHA-256 is
+`ff0de868f797a638582ea25c408a95b0da7d9fa5e3ce0ea33874eec59f50c3c6`.
+The base source commit is `9f7dc5b1941dba26b8413f513f74f3c8a7319b3a`.
+
+Run exactly one fresh native trial named `native-harbor-control-20261002`
+with `--arm native` and the original task and trials directory above. Require
+normal OpenCode completion, the official Harbor reward, actual Qwen inference,
+a clean guard verdict and runtime settlement. Before comparing behavior,
+also compare the first nonempty wire tool-schema hash, tool count and numeric
+sampler fields from both relay logs; a mismatch invalidates the matched-tool
+interpretation. Record completion, reward, code trajectory, false-completion
+claim, runtime, tokens, resource samples and any guard stop. A failure or
+guard stop is a result, not a reason to retry. No product change is promoted
+from this one post-hoc diagnostic.
+
+### Environment-only amendment, frozen 2026-10-03T01:47:31Z
+
+The first native trial exited during `apt-get install` with intermittent
+`deb.debian.org` DNS failure. It made **zero** inference requests, never
+started the model guard, and has no grader result. Its 11-file raw evidence
+manifest SHA-256 is
+`3f89fc64a72d527c98ed4b79abde24c9b128ffa40ff8ea998e2e1307e9be7772`.
+This is an adapter-environment failure, retained as a distinct failed trial;
+it is not an unsuccessful model generation. Docker DNS now resolves again.
+To test the already declared native control without hiding this fault, run a
+new `native-harbor-preflight-20261002` **install-only** trial first. If that
+setup passes, run one new `native-harbor-control2-20261002` generation with
+identical task, adapter, model, config, guard and evaluation rules. If the
+preflight or generation setup fails again, stop this Harbor control screen
+and change approach. Do not aggregate either setup trial as an agent success
+or silently replace its evidence. This amendment was committed before any
+native-model generation on this task.
+
+The install-only preflight passed with zero model requests; its raw manifest
+SHA-256 is `88ad56fe259cc11dc72742dad201fbc94bb17a18167bfea5bcf85371567c0d07`.
+The one generated native control then completed through the official Harbor
+verifier, with 11 Qwen requests, 10 tool calls, 155.208 seconds of agent work,
+91,794 new input tokens, 75,776 cache-read tokens and 5,030 output tokens.
+The first nonempty wire request matched KRYN's model, `max_tokens`, sampler,
+thinking setting, 10-tool count and full tool-schema SHA-256
+`1b2a1690eeb2f4986afcb04c13e6538dd156e399bd2c3f5442d96293d18f675c`.
+The unchanged guard recorded 77 samples, normal/warning pressure, AC power,
+161,354,875 bytes of swap growth (below its 512-MiB stop threshold), and a
+sampled oMLX footprint peak of 11,923,037,576 bytes. It did not stop the
+trial, and the owner runtime settled idle. The raw 19-file manifest SHA-256
+is `f02be27c21e8db69e5c89ee4eda973aabfe09c50595be0600efd49a81e5fd1c7`.
+
+**Native official reward: 0.0; strict acceptance: fail.** It produced a CSV
+with 12 of 15 counts correct, but hard-coded file patterns omitted log dates
+inside the last-30-day range. For example, `last_30_days,ERROR` was `5991`
+instead of `9594`. It read the CSV after editing and claimed the counts were
+correct. KRYN's 12/15 miss was different: its last-30-day counts were right,
+but it double-counted all three `total` rows. Both were false completions on
+one seen public task. The successful preflight and matched wire settings show
+no adapter or model-configuration mismatch that explains either CSV error.
+They do **not** establish a policy effect: trial order and cache state
+were not randomized, and one post-hoc task has no power to estimate uplift.
+Accepted work per generation-hour is zero for both arms. No candidate is
+promoted. The next mechanism should address the worker's missing independent
+functional checks, not simply restate completion instructions.
+
 To reproduce the adapter check, install Harbor from the pinned commit in a
 disposable Python 3.12 environment, download
 `terminal-bench-sample@2.0` with `harbor datasets download`, and pin the
@@ -107,6 +185,10 @@ PYTHONPATH=<KRYN checkout> <Harbor venv>/bin/python -B \
   <KRYN checkout>/research/run_harbor_calibration.py \
   <pinned task> <private trials directory> <fresh trial name>
 ```
+
+Append `--arm native` for the control. Keep its setup and generation receipts
+separate; a fresh replay is another stochastic sample, not a replacement for
+these archived outcomes.
 
 The runner imports Harbor only in this optional research environment; KRYN's
 production package has no Harbor dependency. Its trial result and guard
