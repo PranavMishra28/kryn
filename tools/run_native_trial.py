@@ -1130,7 +1130,7 @@ def main():
     managed = None
     if args.managed_acceptance:
         spec_path = args.managed_acceptance.resolve()
-        if not args.guard_resources or args.session or not spec_path.is_relative_to(run) or \
+        if not (args.guard_resources or args.daily_use_guard) or args.session or not spec_path.is_relative_to(run) or \
                 spec_path.is_relative_to(workspace) or args.attachment:
             ap.error("Managed acceptance requires a fresh guarded run and a check spec outside its workspace")
         try:

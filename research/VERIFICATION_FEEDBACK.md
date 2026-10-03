@@ -58,8 +58,8 @@ The mechanistic gate is all-failures-visible feedback on each repair request.
 The **development promotion screen** requires at least one additional strictly
 accepted candidate trial out of the two paired runs, no loss on another pair,
 no extra false completion or guard stop, and accepted work per hour no lower
-than control. Because this is only two previously seen public tasks with a
-single task family, a positive result would trigger fresh validation; it would
+than control. Because these are two repetitions of one previously seen task
+family, a positive result would trigger fresh validation; it would
 not promote the change into KRYN. A tie or regression rejects this candidate.
 After two failed attempts at this mechanism, change approach instead of adding
 more instructions.
