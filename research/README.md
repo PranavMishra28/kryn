@@ -28,6 +28,9 @@ protected-holdout isolation gate after a same-volume hardlink exposed a hidden
 oracle. No protected task is qualified yet.
 [PYTHON_CALIBRATION.md](PYTHON_CALIBRATION.md) records the development-only
 candidate-volume model screen and the isolated Python/Git tool correction.
+[AGENT_GRADE_PILOT.md](AGENT_GRADE_PILOT.md) records a passing real
+Agent-to-grader volume handoff on an already-retired Python task; it cannot
+count as holdout evidence.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
