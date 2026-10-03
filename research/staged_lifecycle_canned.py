@@ -62,6 +62,19 @@ def check_session(server, sid, workspace):
         raise RuntimeError("Native session identity changed across restart")
 
 
+def wait_arm_ready(server, arm, products):
+    for _ in range(75):
+        inventory = server.request("GET", "/api/plugin", timeout=5)
+        policy = any(p.get("id") == "opencode.config.policy" and
+                     p.get("state", {}).get("status") == "active" for p in inventory.get("data", []))
+        selected = (plugin_absent(inventory, "kryn.product") if arm == "native" else
+                    plugin_active(inventory, "kryn.product", Path(products[0]["package"])))
+        if policy and selected:
+            return
+        time.sleep(.2)
+    raise RuntimeError("Requested OpenCode arm did not become active")
+
+
 def settle(server, sid, workspace, folder, guard):
     result = settle_owned_sessions(server, sid, workspace, folder, cancel=guard.cancel,
                                    model_id=MODEL_ID, guard_gib=22)
@@ -193,15 +206,7 @@ def run_arm(root, arm):
         with NativeServer(workspace, config, folder / "native.log", background={
             "dependencies": dependencies, "inference_port": fake.server_address[1],
             "private_parent": private, "cancel": guard.cancel.is_set}) as server:
-            for _ in range(75):
-                inventory = server.request("GET", "/api/plugin", timeout=5)
-                ready = (plugin_absent(inventory, "kryn.product") if arm == "native" else
-                         plugin_active(inventory, "kryn.product", Path(products[0]["package"])))
-                if ready:
-                    break
-                time.sleep(.2)
-            else:
-                raise RuntimeError("Requested OpenCode arm did not become active")
+            wait_arm_ready(server, arm, products)
             session = server.request("POST", "/api/session", {"title": "public-staged-canary",
                 "agent": "agent", "model": {"providerID": "local", "id": "qwen", "variant": "default"},
                 "location": {"directory": str(workspace)}}, timeout=5)["data"]
@@ -219,6 +224,7 @@ def run_arm(root, arm):
                 if index < 2:
                     result["compactions"].append(compact(server, sid, workspace, stage, guard))
                     result["restarts"].append(restart(server, guard))
+                    wait_arm_ready(server, arm, products)
                     check_session(server, sid, workspace)
             data = export(server, sid)
             (folder / "final-export.json").write_text(json.dumps(data, indent=2) + "\n")
@@ -256,7 +262,8 @@ def run_arm(root, arm):
         result["passed"] = bool(result["passed"] and result.get("server_shutdown_proved") and
                                 result["volume_detached"] and result.get("guard_reason") is None and
                                 "guard_cleanup_error" not in result and result["all_requests_local_qwen"] and
-                                len(result["wire_tool_schema_sha256"]) >= 3)
+                                len(result["wire_tool_schema_sha256"]) >= 3 and
+                                len(set(result["wire_tool_schema_sha256"])) == 1)
         result["wall_seconds"] = round(time.monotonic() - started, 3)
         (folder / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
