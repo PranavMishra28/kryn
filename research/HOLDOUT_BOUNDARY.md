@@ -403,7 +403,7 @@ targeted controls do not establish complete oracle coverage.
 
 ## Real OpenCode boundary preflight for the recovery drafts
 
-At clean research source `0b0a554472d7776e1dadf82c3def56a08f25ebec`,
+At clean research source `7af7eac514cec1c6bedaac658d3da7aff1c88f0b`,
 `preflight_recovery_draft.py` ran the three corrected owner-only drafts without
 model requests. Each used a disposable APFS candidate checkout, the real native
 OpenCode shell in both KRYN and minimal-control configurations, and the pinned
@@ -417,9 +417,14 @@ three successful no-model receipt hashes are:
 
 | Draft slot | Receipt SHA-256 |
 | --- | --- |
-| Restore | `40e093cbebfb78144d705671d0f812e1ea3cd2ca23671c66a16c9c6259236c99` |
-| Upload | `d399ecad348fa94c4cc0a269ed6833470f3958fe6892f52cd0ef810e138ef282` |
-| Mailbox | `46a03b5e05281f7359666ba28194027bdf4e34630960f2fcb09db2ed369584dd` |
+| Restore | `ec0a5ec04489beb9cb248262e27231dc410b51272e70429b0a132e5fefe9a6da` |
+| Upload | `5af2dae2d5cc92a76d537722d63ef85e625aae756b3cfdbb9bebf55fb9d5416d` |
+| Mailbox | `aaaf327610f37747c0889bc700cc261b3f1861b03d75a4bb88d7003020284704` |
+
+The first passing triplet at `0b0a554` is retained in the append-only
+[history](history/ui_gateway.jsonl). The later input-alias check rejects
+symlinked or escaping draft paths and seed symlinks; all three tasks passed
+again at `7af7eac` without a model request.
 
 The failed restore preflight receipts are preserved too:
 `1c5e1f675f0223d4c674a31b132880fc116e478b5102a162bdaba0afe90f4eb3`
