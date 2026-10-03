@@ -21,6 +21,7 @@ import urllib.parse
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from native_client import NativeServer, background_boundary
+from run_native_trial import plugin_active, plugin_absent
 from run_external_patch import benchmark_tools, configuration
 
 ROOT = Path("/private/tmp")
@@ -141,23 +142,34 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
         server.inventory()
         for domain in ("config", "agent", "command", "skill"):
             server.request("GET", "/api/" + domain, timeout=5)
-        plugins = server.request("GET", "/api/plugin", timeout=5).get("data", [])
-        product = [entry for entry in plugins if entry.get("id") == "kryn.product"]
+        for _ in range(75):
+            inventory = server.request("GET", "/api/plugin", timeout=5)
+            plugins = inventory.get("data", [])
+            policy_ready = any(entry.get("id") == "opencode.config.policy" and
+                               entry.get("state", {}).get("status") == "active"
+                               for entry in plugins)
+            arm_ready = ((len(products) == 1 and plugin_active(
+                          inventory, "kryn.product", Path(products[0]["package"])))
+                         if arm == "kryn" else len(products) == 0 and plugin_absent(
+                          inventory, "kryn.product"))
+            if (policy_ready and arm_ready) or any(
+                    entry.get("state", {}).get("status") in {"failed", "error"}
+                    for entry in plugins):
+                break
+            time.sleep(.2)
         raw = run(server.background_prefix + ["/bin/cat", str(oracle)])
         visible_exit, visible_output = shell(server, ["/bin/cat", workspace / "visible.txt"])
         hidden_exit, hidden_output = shell(server, ["/bin/cat", oracle])
         python_exit, python_output = shell(server, ["python3", "-c", "print('python-ready')"])
         checks = {
             "native_server_started": True,
-            "requested_arm_active": (len(products) == 1 and len(product) == 1
-                and product[0].get("state", {}).get("status") == "active") if arm == "kryn"
-                else len(products) == 0 and not product,
+            "requested_arm_active": policy_ready and arm_ready,
             "server_profile_oracle_read_denied": raw.returncode != 0
-                and marker not in raw.stdout + raw.stderr,
+                and raw.stdout == "" and marker not in raw.stderr,
             "api_shell_workspace_read": visible_exit == 0
                 and visible_output == "candidate-visible",
             "api_shell_oracle_read_denied": hidden_exit != 0
-                and marker not in hidden_output,
+                and hidden_output == "",
             "api_shell_python_ready": python_exit == 0
                 and python_output == "python-ready\n",
         }

@@ -10,14 +10,17 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import shutil
+import selectors
+import signal
+import stat
 import subprocess
 import sys
+import tempfile
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import learning
-from native_client import BINARY, MODEL_ID, NativeServer, owned_config
+from native_client import BINARY, MODEL_ID, NativeServer, background_boundary, owned_config
 from context_probe import summarize_resources
 from run_native_trial import (NativeResourceGuard, export_owned_sessions,
                               generation_completion, native_control_config,
@@ -25,6 +28,21 @@ from run_native_trial import (NativeResourceGuard, export_owned_sessions,
                               settle_owned_sessions)
 
 ROOT = Path(__file__).resolve().parents[1]
+PATCH_BUDGET = 16 * 1024**2
+UNTRACKED_LIST_BUDGET = 256 * 1024
+UNTRACKED_COUNT_BUDGET = 1024
+
+
+class PatchBudgetExceeded(RuntimeError):
+    """The candidate produced more source evidence than this trial can retain."""
+
+
+class CaptureCancelled(RuntimeError):
+    """The host resource guard interrupted patch capture."""
+
+
+class CandidateGitConfigChanged(RuntimeError):
+    """The patch would no longer use the checkout's preregistered Git rules."""
 
 
 def git(workspace, *args):
@@ -32,31 +50,256 @@ def git(workspace, *args):
                                    stderr=subprocess.STDOUT, timeout=20).strip()
 
 
-def collect_patch(workspace, base_commit, evidence):
-    """Include new source files without changing the agent's Git index."""
-    workspace, evidence = Path(workspace), Path(evidence)
-    untracked = subprocess.check_output([
-        "git", "-C", str(workspace), "ls-files", "--others", "--exclude-standard", "-z"],
-        timeout=20).split(b"\0")
-    names = [os.fsdecode(name) for name in untracked if name]
-    index = workspace / ".git/index"
-    temporary_index = evidence / "patch.index"
-    shutil.copyfile(index, temporary_index)
-    env = os.environ.copy()
-    env["GIT_INDEX_FILE"] = str(temporary_index)
+def kill_group(child):
+    # The leader has not yet been reaped. Its process-group ID cannot have been
+    # reused, even when a Git filter has forked descendants holding stdout.
+    failure = None
     try:
-        if names:
-            subprocess.run(["git", "-C", str(workspace), "add", "-N", "--", *names],
-                           env=env, check=True, timeout=20)
-        patch = subprocess.check_output([
-            "git", "-C", str(workspace), "diff", "--binary", "--no-ext-diff",
-            "--no-textconv", base_commit, "--"], env=env, timeout=20)
+        os.killpg(child.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    except PermissionError:
+        # macOS can return EPERM for an already exited sandbox-exec leader
+        # whose group has vanished; it permits the same kill while live.
+        if os.waitid(os.P_PID, child.pid,
+                     os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            child.kill()
+            failure = RuntimeError("Could not terminate live Git process group")
+    status = child.wait()
+    if failure is not None:
+        raise failure
+    return status
+
+
+def bounded_output(command, destination, limit, *, env, cwd, cancelled, timeout=20):
+    """Stream a command to disk, stopping before it can exceed its byte budget."""
+    digest = hashlib.sha256()
+    total = 0
+    deadline = time.monotonic() + timeout
+    child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE,
+                             stderr=subprocess.DEVNULL, env=env, start_new_session=True)
+    try:
+        with destination.open("wb") as output, selectors.DefaultSelector() as selector:
+            selector.register(child.stdout, selectors.EVENT_READ)
+            while True:
+                if cancelled():
+                    raise CaptureCancelled("Resource guard interrupted patch capture")
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise subprocess.TimeoutExpired(command, timeout)
+                if not selector.select(min(remaining, .25)):
+                    continue
+                chunk = os.read(child.stdout.fileno(), min(64 * 1024, limit + 1 - total))
+                if not chunk:
+                    break
+                if total + len(chunk) > limit:
+                    raise PatchBudgetExceeded(f"Git output exceeded {limit} bytes")
+                output.write(chunk)
+                digest.update(chunk)
+                total += len(chunk)
+        while os.waitid(os.P_PID, child.pid,
+                        os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            if cancelled():
+                raise CaptureCancelled("Resource guard interrupted patch capture")
+            if time.monotonic() >= deadline:
+                raise subprocess.TimeoutExpired(command, timeout)
+            time.sleep(.05)
+    except BaseException:
+        try:
+            kill_group(child)
+        finally:
+            child.stdout.close()
+        raise
+    try:
+        status = kill_group(child)
     finally:
-        temporary_index.unlink(missing_ok=True)
-    return patch, names
+        child.stdout.close()
+    if status:
+        raise subprocess.CalledProcessError(status, command)
+    return total, digest.hexdigest()
 
 
-def prepare(workspace, prompt_file, evidence, base_commit):
+def quiet_command(command, *, env, cwd, cancelled, timeout=20):
+    child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, env=env, start_new_session=True)
+    deadline = time.monotonic() + timeout
+    try:
+        while os.waitid(os.P_PID, child.pid,
+                        os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            if cancelled():
+                raise CaptureCancelled("Resource guard interrupted patch capture")
+            if time.monotonic() >= deadline:
+                raise subprocess.TimeoutExpired(command, timeout)
+            time.sleep(.1)
+    except BaseException:
+        kill_group(child)
+        raise
+    status = kill_group(child)
+    if status:
+        raise subprocess.CalledProcessError(status, command)
+
+
+def candidate_file_size(root_fd, name, device, *, missing_ok=False):
+    """Stat a candidate path without following a swapped directory or file link."""
+    path = Path(name)
+    if path.is_absolute() or not path.parts or ".." in path.parts:
+        raise PatchBudgetExceeded("Candidate path leaves the workspace")
+    current = os.dup(root_fd)
+    try:
+        for component in path.parts[:-1]:
+            try:
+                following = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                                    dir_fd=current)
+            except FileNotFoundError:
+                if missing_ok:
+                    return 0
+                raise
+            os.close(current)
+            current = following
+            if os.fstat(current).st_dev != device:
+                raise PatchBudgetExceeded("Candidate path crosses a device boundary")
+        try:
+            info = os.stat(path.parts[-1], dir_fd=current, follow_symlinks=False)
+        except FileNotFoundError:
+            if missing_ok:
+                return 0
+            raise
+        if info.st_dev != device or not (stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)):
+            raise PatchBudgetExceeded("Candidate path is not a regular file or link")
+        return info.st_size
+    finally:
+        os.close(current)
+
+
+def git_config_sha256(workspace):
+    """Pin candidate Git configuration without following model-created links."""
+    root = os.open(workspace, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        device = os.fstat(root).st_dev
+        directory = os.open(".git", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                            dir_fd=root)
+        try:
+            if os.fstat(directory).st_dev != device:
+                raise PatchBudgetExceeded("Candidate Git directory crosses a device boundary")
+            config = os.open("config", os.O_RDONLY | os.O_NOFOLLOW, dir_fd=directory)
+            try:
+                info = os.fstat(config)
+                if not stat.S_ISREG(info.st_mode) or info.st_dev != device or info.st_size > 1024**2:
+                    raise PatchBudgetExceeded("Candidate Git config exceeds a safe bound")
+                with os.fdopen(config, "rb", closefd=False) as source:
+                    payload = source.read(1024**2 + 1)
+                if len(payload) > 1024**2:
+                    raise PatchBudgetExceeded("Candidate Git config grew beyond a safe bound")
+                return hashlib.sha256(payload).hexdigest()
+            finally:
+                os.close(config)
+        finally:
+            os.close(directory)
+    finally:
+        os.close(root)
+
+
+def isolated_git(workspace, private, dependencies, git_binary, tool_path):
+    """Build the same networkless Git boundary for preflight and patch capture."""
+    for name in ("tmpdir", "tmp", "temp", "xdg_config_home"):
+        (private / name).mkdir(mode=0o700, exist_ok=True)
+    # Git reads candidate-controlled config/attributes and can execute their
+    # fsmonitor or filter commands. Run every Git child under a networkless
+    # whole-process read boundary; the host only receives bounded pipe output.
+    toolchain = Path("/Library/Developer/CommandLineTools")
+    capture_dependencies = [*dependencies]
+    if toolchain.is_dir():
+        capture_dependencies.append(toolchain.resolve())
+    prefix = background_boundary(workspace, private, capture_dependencies, None)
+    capture_env = {
+        "PATH": str(tool_path) + ":/usr/bin:/bin" if tool_path else "/usr/bin:/bin",
+        "HOME": str(private), "TMPDIR": str(private / "tmpdir"),
+        "TMP": str(private / "tmp"), "TEMP": str(private / "temp"),
+        "XDG_CONFIG_HOME": str(private / "xdg_config_home"),
+        "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_SYSTEM": "/dev/null", "LANG": "C",
+    }
+    git_command = prefix + [str(git_binary), "-C", str(workspace),
+                            "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+    return git_command, capture_env
+
+
+def collect_patch(workspace, base_commit, evidence, *, private, dependencies,
+                  git_binary, tool_path, cancelled):
+    """Include new source files in a bounded patch without changing the agent index."""
+    workspace, evidence, private = Path(workspace), Path(evidence), Path(private)
+    git_command, capture_env = isolated_git(
+        workspace, private, dependencies, git_binary, tool_path)
+    names_file = evidence / "untracked.paths"
+    changed_file = evidence / "changed.paths"
+    temporary_index = None
+    workspace_fd = os.open(workspace, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    device = os.fstat(workspace_fd).st_dev
+    patch_file = evidence / "model.patch"
+    try:
+        bounded_output(git_command + ["ls-files", "--others", "--exclude-standard", "-z"],
+                       names_file, UNTRACKED_LIST_BUDGET, env=capture_env,
+                       cwd=workspace, cancelled=cancelled)
+        names = [os.fsdecode(name) for name in names_file.read_bytes().split(b"\0") if name]
+        if len(names) > UNTRACKED_COUNT_BUDGET:
+            raise PatchBudgetExceeded("Too many untracked candidate files")
+        if sum(candidate_file_size(workspace_fd, name, device) for name in names) > PATCH_BUDGET:
+            raise PatchBudgetExceeded("Untracked candidate files exceed patch budget")
+        bounded_output(git_command + ["diff", "--name-only", "-z", base_commit, "--"],
+                       changed_file, UNTRACKED_LIST_BUDGET, env=capture_env,
+                       cwd=workspace, cancelled=cancelled)
+        changed = [os.fsdecode(name) for name in changed_file.read_bytes().split(b"\0") if name]
+        if len(changed) > UNTRACKED_COUNT_BUDGET:
+            raise PatchBudgetExceeded("Too many changed candidate files")
+        if sum(candidate_file_size(workspace_fd, name, device, missing_ok=True)
+               for name in changed) > PATCH_BUDGET:
+            raise PatchBudgetExceeded("Changed candidate files exceed patch budget")
+        git_dir_fd = os.open(".git", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                             dir_fd=workspace_fd)
+        try:
+            if os.fstat(git_dir_fd).st_dev != device:
+                raise PatchBudgetExceeded("Candidate Git directory crosses a device boundary")
+            index_fd = os.open("index", os.O_RDONLY | os.O_NOFOLLOW, dir_fd=git_dir_fd)
+            try:
+                info = os.fstat(index_fd)
+                if (not stat.S_ISREG(info.st_mode) or
+                        info.st_dev != device or info.st_size > PATCH_BUDGET):
+                    raise PatchBudgetExceeded("Candidate Git index exceeds patch budget")
+                with tempfile.NamedTemporaryFile(prefix="patch-index-", dir=private,
+                                                 delete=False) as temporary:
+                    temporary_index = Path(temporary.name)
+                    with os.fdopen(index_fd, "rb", closefd=False) as source:
+                        copied = 0
+                        while chunk := source.read(64 * 1024):
+                            copied += len(chunk)
+                            if copied > PATCH_BUDGET:
+                                raise PatchBudgetExceeded("Candidate Git index grew beyond patch budget")
+                            temporary.write(chunk)
+            finally:
+                os.close(index_fd)
+        finally:
+            os.close(git_dir_fd)
+        capture_env["GIT_INDEX_FILE"] = str(temporary_index)
+        if names:
+            quiet_command(git_command + ["add", "-N", "--", *names], env=capture_env,
+                          cwd=workspace, cancelled=cancelled)
+        size, sha = bounded_output(git_command + ["diff", "--binary", "--no-ext-diff",
+                                    "--no-textconv", base_commit, "--"],
+                                   patch_file, PATCH_BUDGET, env=capture_env,
+                                   cwd=workspace, cancelled=cancelled)
+        return patch_file, names, size, sha
+    except BaseException:
+        patch_file.unlink(missing_ok=True)
+        raise
+    finally:
+        names_file.unlink(missing_ok=True)
+        changed_file.unlink(missing_ok=True)
+        if temporary_index is not None:
+            temporary_index.unlink(missing_ok=True)
+        os.close(workspace_fd)
+
+
+def prepare(workspace, prompt_file, evidence, base_commit, *, private_parent=None):
     paths = [Path(p).absolute() for p in (workspace, prompt_file, evidence)]
     if any(path != path.resolve() or any(parent.is_symlink() for parent in path.parents)
            for path in paths):
@@ -66,15 +309,33 @@ def prepare(workspace, prompt_file, evidence, base_commit):
             or prompt_file.is_relative_to(workspace) or evidence.is_relative_to(workspace)
             or workspace.is_relative_to(evidence) or evidence.exists()):
         raise ValueError("Use a clean disposable /private/tmp Git checkout and separate fresh inputs/evidence")
-    if git(workspace, "rev-parse", "HEAD") != base_commit or git(workspace, "status", "--porcelain"):
-        raise ValueError("External task checkout differs from its declared clean base commit")
+    parent = Path(private_parent or "/private/tmp")
+    if private_parent is not None and (parent != parent.resolve() or
+            parent.parent != workspace.parent or parent.stat().st_dev != workspace.stat().st_dev or
+            parent.stat().st_dev == Path("/private/tmp").stat().st_dev):
+        raise ValueError("Protected task private parent must be a sibling on the candidate volume")
+    with tempfile.TemporaryDirectory(prefix="kryn-preflight-", dir=parent) as temporary:
+        private = Path(temporary)
+        command, env = isolated_git(
+            workspace, private, [],
+            Path("/Library/Developer/CommandLineTools/usr/bin/git"), None)
+        head = private / "head.txt"
+        status = private / "status.txt"
+        bounded_output(command + ["rev-parse", "HEAD"], head, 128,
+                       env=env, cwd=workspace, cancelled=lambda: False)
+        bounded_output(command + ["status", "--porcelain=v1", "--untracked-files=all",
+                                  "--ignored"], status,
+                       UNTRACKED_LIST_BUDGET, env=env, cwd=workspace, cancelled=lambda: False)
+        if head.read_text().strip() != base_commit or status.stat().st_size:
+            raise ValueError("External task checkout differs from its declared clean base commit")
     if not prompt_file.is_file() or not prompt_file.read_bytes().strip():
         raise ValueError("External task prompt is missing")
+    config_sha = git_config_sha256(workspace)
     evidence.mkdir(mode=0o700)
     # Keep plugin state fresh across failed startup attempts in the same checkout.
     state_dir = workspace / (".git/kryn-external-" + hashlib.sha256(str(evidence).encode()).hexdigest()[:16])
     state_dir.mkdir(mode=0o700)
-    return workspace, prompt_file, evidence, state_dir
+    return workspace, prompt_file, evidence, state_dir, config_sha
 
 
 def configuration(workspace, state_dir, arm, relay_url):
@@ -148,30 +409,53 @@ def benchmark_tools(venv):
 
 
 def drive(child, prompt, timeout, cancelled):
-    deadline, first = time.monotonic() + timeout, True
-    output = errors = b""
-    while True:
-        if cancelled():
-            return "resource_guard", output, errors
-        remaining = deadline - time.monotonic()
-        if remaining <= 0:
-            return "timeout", output, errors
-        try:
-            output, errors = child.communicate(input=prompt if first else None,
-                                               timeout=min(.5, remaining))
-            if len(output) > 2 * 1024**2 or len(errors) > 64 * 1024:
-                return "output_budget", output, errors
-            return ("resource_guard" if cancelled() else None), output, errors
-        except subprocess.TimeoutExpired as error:
-            first = False
-            output, errors = error.output or b"", error.stderr or b""
-            if len(output) > 2 * 1024**2 or len(errors) > 64 * 1024:
-                return "output_budget", output, errors
+    deadline = time.monotonic() + timeout
+    streams = {child.stdout: (bytearray(), 2 * 1024**2),
+               child.stderr: (bytearray(), 64 * 1024)}
+    pending = memoryview(prompt)
+    with selectors.DefaultSelector() as selector:
+        for stream in streams:
+            os.set_blocking(stream.fileno(), False)
+            selector.register(stream, selectors.EVENT_READ)
+        os.set_blocking(child.stdin.fileno(), False)
+        selector.register(child.stdin, selectors.EVENT_WRITE)
+        while selector.get_map():
+            if cancelled():
+                return "resource_guard", bytes(streams[child.stdout][0]), bytes(streams[child.stderr][0])
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return "timeout", bytes(streams[child.stdout][0]), bytes(streams[child.stderr][0])
+            for key, _ in selector.select(min(.25, remaining)):
+                stream = key.fileobj
+                if stream is child.stdin:
+                    try:
+                        written = os.write(stream.fileno(), pending[:64 * 1024]) if pending else 0
+                        pending = pending[written:]
+                    except BrokenPipeError:
+                        pending = memoryview(b"")
+                    if not pending:
+                        selector.unregister(stream)
+                        stream.close()
+                else:
+                    buffer, limit = streams[stream]
+                    try:
+                        chunk = os.read(stream.fileno(), min(64 * 1024, limit + 1 - len(buffer)))
+                    except BlockingIOError:
+                        continue
+                    if not chunk:
+                        selector.unregister(stream)
+                    else:
+                        buffer.extend(chunk)
+                        if len(buffer) > limit:
+                            return "output_budget", bytes(streams[child.stdout][0]), bytes(streams[child.stderr][0])
+    return ("resource_guard" if cancelled() else None), bytes(streams[child.stdout][0]), bytes(streams[child.stderr][0])
 
 
 def run(args):
-    workspace, prompt_file, evidence, state_dir = prepare(
-        args.workspace, args.prompt, args.evidence, args.base_commit)
+    private_parent = getattr(args, "private_parent", None)
+    workspace, prompt_file, evidence, state_dir, git_config_sha = prepare(
+        args.workspace, args.prompt, args.evidence, args.base_commit,
+        private_parent=private_parent)
     prompt = prompt_file.read_bytes()
     started = time.monotonic()
     profile_path = ROOT / "setup/accepted-profile.json"
@@ -185,8 +469,8 @@ def run(args):
               "opencode_binary_sha256": hashlib.sha256(BINARY.read_bytes()).hexdigest(),
               "model_profile_sha256": hashlib.sha256(profile_path.read_bytes()).hexdigest(),
               "model_repository": profile["repository"], "model_revision": profile["revision"],
-              "model_id": MODEL_ID, "timeout_seconds": args.timeout, "completed": False}
-    private_parent = getattr(args, "private_parent", None)
+              "model_id": MODEL_ID, "timeout_seconds": args.timeout, "completed": False,
+              "initial_git_config_sha256": git_config_sha}
     report["candidate_private_parent"] = str(private_parent) if private_parent else None
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
@@ -263,8 +547,37 @@ def run(args):
                     exports, 0, sid, set(owned["verified_sessions"]))
                 report["completed"] = bool(cause is None and child.returncode == 0
                     and ownership["verified"] and report["generation"]["verified"])
+            try:
+                post_git_config_sha = git_config_sha256(workspace)
+                report["post_git_config_sha256"] = post_git_config_sha
+                if post_git_config_sha != git_config_sha:
+                    raise CandidateGitConfigChanged("Candidate Git config changed during the model turn")
+                with tempfile.TemporaryDirectory(prefix="kryn-patch-",
+                                                 dir=private_parent or "/private/tmp") as capture_private:
+                    _, untracked, patch_size, patch_sha = collect_patch(
+                        workspace, args.base_commit, evidence,
+                        private=Path(capture_private), dependencies=dependencies,
+                        git_binary=(tool_path / "git" if tool_path else
+                                    Path("/Library/Developer/CommandLineTools/usr/bin/git")),
+                        tool_path=tool_path, cancelled=monitor.cancel.is_set)
+                report["untracked_files_included_in_patch"] = untracked
+                report["patch_size_bytes"] = patch_size
+                report["patch_sha256"] = patch_sha
+            except PatchBudgetExceeded as error:
+                report["intervention"] = "patch_budget"
+                report["patch_error"] = str(error)
+                report["completed"] = False
+            except CandidateGitConfigChanged as error:
+                report["intervention"] = "git_config_changed"
+                report["patch_error"] = str(error)
+                report["completed"] = False
+            except CaptureCancelled as error:
+                report["intervention"] = "resource_guard"
+                report["patch_error"] = str(error)
+                report["completed"] = False
         except BaseException as error:
             report["error"] = type(error).__name__ + ": " + str(error)
+            report["completed"] = False
             raise
         finally:
             relay.cancel()
@@ -275,11 +588,6 @@ def run(args):
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete"))
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
-    patch, untracked = collect_patch(workspace, args.base_commit, evidence)
-    (evidence / "model.patch").write_bytes(patch)
-    report["untracked_files_included_in_patch"] = untracked
-    report["patch_sha256"] = hashlib.sha256(patch).hexdigest()
-    (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
     return report
 
 

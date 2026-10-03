@@ -48,7 +48,10 @@ candidate starts; all **15/15** no-model preflights pass with Python 3.14.6,
 including both OpenCode arms' Python/pytest/ripgrep/Git canaries, seed/reference/
 partial controls and image detachment. The private manifest SHA-256 is
 `08aa7a5da0d4b56efe94136294fdf929e1e11696cdb0c43fe73d518f97bd4603`;
-the 15-receipt summary is
+that manifest is the owner-only durable copy at
+`/Users/pranav/Documents/Codex/kryn-research-private/python-draft-20261003/manifest.json`,
+not the older `/private/tmp/kryn-protected-python-draft-20261003` snapshot. The
+15-receipt summary is
 `/private/tmp/kryn-python-v3-preflight-20261003-summary.json` (SHA-256
 `f5aaa3a7500c089d58e9432e1ddcb6dffacbd718a7d9933b4c776c8f70f75fd4`).
 The failed 14/15 calibration remains at
@@ -58,6 +61,23 @@ These controls qualify only the draft mechanics. Four Python tasks still
 carry explicit scientific-coverage limitations, one is retired, the UI draft
 still lacks a qualified browser/source gateway, and the combined 30-task
 roster remains unsealed.
+
+Independent review also found that pre-turn Git status and post-turn patch
+collection could execute candidate-controlled Git fsmonitor/filter commands on
+the trusted host. The research adapter now runs both in a fresh, networkless
+whole-process sandbox, streams bounded output, opens Git metadata without
+following candidate links, pins the checkout's Git config across the turn, and
+keeps the resource monitor active through capture. A real
+no-tool capture and a pinned-tool capture both produced the expected patch. A
+candidate-controlled clean filter fired in a no-model canary but could not read
+a synthetic oracle outside the workspace; the regression test requires an empty
+leak file. The exact policy-plugin/source check in both-arm canaries and a
+bounded CLI event stream are part of this correction. These screens do **not**
+qualify a protected model result or exhaustively prove descendant settlement.
+Protected admission still requires fresh trusted checkout provenance; a reused
+checkout may retain Git settings that distort patch construction even when the
+hidden oracle remains inaccessible.
+The two paired model turns above predate this capture correction.
 
 Raw local receipts: `/private/tmp/kryn-python-development-kryn-20261003-01/`,
 `/private/tmp/kryn-python-development-tools-kryn-20261003-01/`,

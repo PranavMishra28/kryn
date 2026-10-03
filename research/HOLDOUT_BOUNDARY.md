@@ -190,11 +190,17 @@ audited browser channel would need its own hidden-file and navigation checks.
 
 The separate Python draft has 15 synthetic tasks across repository bugs,
 multi-file features, API compatibility, persistence and refactoring. Its
-private manifest SHA-256 is
+original `/private/tmp` manifest SHA-256 was
 `b0c36b7fc82e67bbb5d132aa045f01bc3c18eb13c5607e109d0e2ccd2d7b50de`.
+The current durable owner-only copy is under
+`/Users/pranav/Documents/Codex/kryn-research-private/python-draft-20261003`;
+its manifest SHA-256 is
+`08aa7a5da0d4b56efe94136294fdf929e1e11696cdb0c43fe73d518f97bd4603`.
 All seed/reference/partial, direct-import, omission, output-limit and isolation
 controls passed offline. Four task-specific coverage limits remain flagged in
-the private manifest. No candidate model has seen these tasks.
+the private manifest. The `linecfg-duplicate-key` task was exposed during
+development calibration and is retired; the remaining Python tasks have not
+been used in model turns.
 
 `research/preflight_protected_python.py` verifies one real task with its
 candidate checkout and private temp on a fresh disposable APFS volume. It
@@ -202,16 +208,21 @@ checks exact prompt/grader/reference/partial hashes, a clean seed, all private
 files on another device, impossible answer hardlinks, direct Seatbelt probes,
 the native OpenCode shell API, expected seed/reference/partial outcomes and
 image detachment. A `passed=true` receipt requires a clean committed research
-tree. It issues no model request. For this code-only trial scope, the external
-runner uses no benchmark-tool venv or MCP gateway; adding either changes the
-dependency boundary and requires a new preflight. Example on this Mac:
+tree. It issues no model request. The copied Python/ripgrep/pytest and CLT Git
+environment is an explicit dependency for both arms; its final no-model
+preflight passed all 15 drafts from clean `2ce1309`. Example on this Mac:
 
 ```sh
-python3 -B research/preflight_protected_python.py \
-  /private/tmp/kryn-protected-python-draft-20261003 \
-  linecfg-duplicate-key \
-  /private/tmp/kryn-python-preflight-new-receipt
+/opt/homebrew/bin/python3.14 -B research/preflight_protected_python.py \
+  /Users/pranav/Documents/Codex/kryn-research-private/python-draft-20261003 \
+  linecfg-interpolation \
+  /private/tmp/kryn-python-preflight-new-receipt \
+  --tool-venv /private/tmp/kryn-python-tools-v2-20261003
 ```
+
+The exposed `linecfg-duplicate-key` task is retired from sealed use. The
+development-only model calibration and exact receipts are in
+[PYTHON_CALIBRATION.md](PYTHON_CALIBRATION.md).
 
 Even a passing task preflight is not a protected H1 trial: the 30-task roster,
 all category-valid graders, paired model turns and independent scoring remain
