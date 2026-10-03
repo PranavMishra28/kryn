@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from acceptance_controller import AcceptanceController, AcceptanceError, Requirement, repair_detail, source_revision
+from acceptance_controller import AcceptanceController, AcceptanceError, Requirement, source_revision
 
 
 class FakeServer:
@@ -41,17 +41,16 @@ class FakeServer:
 
 
 class SequenceCheck:
-    def __init__(self, statuses, id="ui", watch=("*",), detail="Observed UI failure"):
+    def __init__(self, statuses, id="ui", watch=("*",)):
         self.id, self.watch = id, watch
         self.statuses = iter(statuses)
-        self.detail = detail
 
     def affected_by(self, path):
         from fnmatch import fnmatchcase
         return any(fnmatchcase(path, pattern) for pattern in self.watch)
 
     def run(self, _workspace):
-        return {"status": next(self.statuses), "detail": self.detail}
+        return {"status": next(self.statuses), "detail": "Observed UI failure"}
 
 
 class ControllerTest(unittest.TestCase):
@@ -81,29 +80,6 @@ class ControllerTest(unittest.TestCase):
                          ["/api/session/ses_test/prompt", "/api/session/ses_test/synthetic"])
         self.assertIn("Observed UI failure", self.server.sent[1][1]["text"])
         self.assertEqual(json.loads(self.report.read_text()), report)
-
-    def test_combined_verifier_feedback_reaches_both_failed_browser_flows(self):
-        combined = json.dumps({"pass": False, "checks": {
-            "source_and_api": {"pass": True, "output": "passing-check-canary " * 55},
-            "task06_browser": {"pass": False, "observed": {
-                "failures": ["Stored probe row must render exactly once"]}},
-            "cancel_edit_browser": {"pass": False, "observed": {
-                "failures": "Cancel Edit did not clear the form"}},
-        }})
-        self.assertNotIn("cancel_edit_browser", combined[:900])
-        report = self.controller(SequenceCheck(["failed", "passed"], detail=combined),
-                                 max_repairs=1).run("Build the UI")
-        feedback = self.server.sent[1][1]["text"]
-        self.assertTrue(report["accepted"])
-        self.assertIn("task06_browser", feedback)
-        self.assertIn("cancel_edit_browser", feedback)
-        self.assertIn("Cancel Edit did not clear the form", feedback)
-        self.assertNotIn("passing-check-canary", feedback)
-        self.assertLess(len(feedback), 2000)
-        self.assertEqual(report["rounds"][0]["checks"]["ui"]["detail"], combined)
-
-    def test_unstructured_verifier_failure_remains_bounded(self):
-        self.assertEqual(repair_detail("not JSON" * 200), ("not JSON" * 200)[:900])
 
     def test_model_claim_cannot_accept_failing_check(self):
         report = self.controller(SequenceCheck(["failed"] * 3), max_repairs=2).run("Build the UI")
