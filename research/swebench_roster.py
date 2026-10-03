@@ -6,8 +6,6 @@ import hashlib
 import json
 from pathlib import Path
 
-from datasets import load_dataset
-
 SEED = "kryn-swebench-campaign-20261003-v1"
 REPOS = ("django/django", "sphinx-doc/sphinx", "matplotlib/matplotlib",
          "scikit-learn/scikit-learn", "pytest-dev/pytest", "astropy/astropy")
@@ -29,6 +27,7 @@ def sha(data):
 
 
 def freeze(datasets_root, output):
+    from datasets import load_dataset
     if output.exists():
         raise FileExistsError(output)
     datasets = {}
