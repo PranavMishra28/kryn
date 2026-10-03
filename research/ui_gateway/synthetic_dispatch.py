@@ -17,21 +17,29 @@ sys.path.insert(0, str(RESEARCH))
 from native_client import BINARY, NativeServer  # noqa: E402
 from run_external_patch import configuration  # noqa: E402
 from ui_gateway.preflight import broker_start, stop_group  # noqa: E402
-from ui_gateway.trial_config import with_ui_gateway  # noqa: E402
+from ui_gateway.trial_config import TOOLS as BROWSER_TOOLS, with_ui_gateway  # noqa: E402
 
 MODEL = "Qwen3.5-9B-6bit"
 URL = "http://candidate.invalid/index.html"
 ADAPTER = Path(__file__).with_name("adapter.py").resolve()
 PYTHON = Path(sys.executable).resolve()
-TOOLS = [("browser_browser_navigate", {"url": URL}),
-         ("browser_browser_click", {"selector": "#toggle"}),
-         ("browser_browser_snapshot", {})]
+BASIC_TOOLS = [("browser_browser_navigate", {"url": URL}),
+               ("browser_browser_click", {"selector": "#toggle"}),
+               ("browser_browser_snapshot", {})]
+INTERACTION_TOOLS = [("browser_browser_navigate", {"url": URL}),
+                     ("browser_browser_fill_form", {"selector": "#q", "value": "RIVER"}),
+                     ("browser_browser_click", {"selector": "#go"}),
+                     ("browser_browser_snapshot", {}),
+                     ("browser_browser_navigate_back", {}),
+                     ("browser_browser_snapshot", {}),
+                     ("browser_browser_navigate", {"url": URL + "?q=BLUE"})]
 
 
 class FakeInference(ThreadingHTTPServer):
-    def __init__(self):
+    def __init__(self, sequence):
         super().__init__(("127.0.0.1", 0), Handler)
         self.calls = []
+        self.sequence = sequence
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -67,11 +75,12 @@ class Handler(BaseHTTPRequestHandler):
                                   "stream": payload.get("stream")})
         number = len(self.server.calls)
         if (payload.get("model") != MODEL or
-                (number <= len(TOOLS) and TOOLS[number - 1][0] not in tools)):
+                (number <= len(self.server.sequence) and
+                 self.server.sequence[number - 1][0] not in tools)):
             self.send_error(400)
             return
-        if number <= len(TOOLS):
-            name, arguments = TOOLS[number - 1]
+        if number <= len(self.server.sequence):
+            name, arguments = self.server.sequence[number - 1]
             delta = {"role": "assistant", "tool_calls": [{"index": 0,
                 "id": "call_kryn_browser_" + str(number), "type": "function",
                 "function": {"name": name, "arguments": json.dumps(arguments)}}]}
@@ -100,13 +109,13 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def trial(workspace, image, arm, receipt):
+def trial(workspace, image, arm, receipt, sequence):
     source = workspace
     workspace = receipt / (arm + "-workspace")
     broker_child = None
     broker = None
     clean_state = None
-    inference = FakeInference()
+    inference = FakeInference(sequence)
     thread = Thread(target=inference.serve_forever, daemon=True)
     thread.start()
     report = {"arm": arm, "passed": False, "synthetic_inference": True}
@@ -172,12 +181,17 @@ def trial(workspace, image, arm, receipt):
                           stderr=cli.stderr.decode(errors="replace")[-500:])
             catalogs = [call["tools"] for call in inference.calls]
             report["request_catalogs_consistent"] = (
-                len(catalogs) == 4 and all(catalog == catalogs[0] for catalog in catalogs))
+                len(catalogs) == len(sequence) + 1 and
+                all(catalog == catalogs[0] for catalog in catalogs))
             (receipt / (arm + "-events.jsonl")).write_bytes(cli.stdout[:2 * 1024 * 1024])
             observed = [(part.get("tool"), part.get("state", {}).get("status")) for part in calls]
+            outputs = [part.get("state", {}).get("output", "") for part in calls]
+            result_visible = (("Activated" in outputs[-1]) if sequence is BASIC_TOOLS else
+                              ("Result RIVER" in outputs[3] and "No query" in outputs[5] and
+                               "Result BLUE" in outputs[-1])) if outputs else False
             report["passed"] = bool(cli.returncode == 0 and report["request_catalogs_consistent"] and
-                                    observed == [(name, "completed") for name, _ in TOOLS] and
-                                    "Activated" in calls[-1].get("state", {}).get("output", ""))
+                                    observed == [(name, "completed") for name, _ in sequence] and
+                                    result_visible)
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
     finally:
@@ -205,6 +219,8 @@ def main():
     parser.add_argument("workspace", type=Path, help="public checkout with one index.html")
     parser.add_argument("receipt", type=Path, help="new /private/tmp receipt directory")
     parser.add_argument("--image", required=True)
+    parser.add_argument("--interactions", action="store_true",
+                        help="dispatch fill, history Back, and query navigation on a public form fixture")
     args = parser.parse_args()
     workspace = args.workspace.absolute()
     receipt = args.receipt.absolute()
@@ -216,15 +232,21 @@ def main():
     if subprocess.check_output(["git", "-C", str(workspace), "status", "--porcelain"], text=True):
         parser.error("Candidate checkout must be clean before both arms")
     receipt.mkdir(mode=0o700)
-    results = [trial(workspace, args.image, arm, receipt) for arm in ("native", "kryn")]
+    sequence = INTERACTION_TOOLS if args.interactions else BASIC_TOOLS
+    results = [trial(workspace, args.image, arm, receipt, sequence) for arm in ("native", "kryn")]
     dispatch_passed = all(result["passed"] for result in results)
     catalogs = [[call["tools"] for call in result.get("inference_calls", [])] for result in results]
     native_tools = catalogs[0][0] if catalogs[0] else []
     kryn_tools = catalogs[1][0] if catalogs[1] else []
-    full_tool_catalog_equal = (all(len(calls) == 4 for calls in catalogs) and
+    full_tool_catalog_equal = (all(len(calls) == len(sequence) + 1 for calls in catalogs) and
                                all(catalog == native_tools for calls in catalogs for catalog in calls))
+    expected_browser = sorted("browser_" + name for name in BROWSER_TOOLS)
+    browser_tool_catalog_expected = all(
+        sorted(name for name in tools if name.startswith("browser_")) == expected_browser
+        for calls in catalogs for tools in calls)
     output = {"schema": 1, "kind": "synthetic_browser_wire_dispatch",
               "real_model_requests": 0, "protected_score": False,
+              "interaction_sequence": args.interactions,
               "source_commit": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
                                                        text=True).strip(),
               "source_dirty": bool(subprocess.check_output(["git", "-C", str(ROOT),
@@ -237,7 +259,9 @@ def main():
               "full_tool_catalog_equal": full_tool_catalog_equal,
               "browser_tool_catalog_equal": [name for name in native_tools if name.startswith("browser_")] ==
                                             [name for name in kryn_tools if name.startswith("browser_")],
-              "results": results, "passed": dispatch_passed and full_tool_catalog_equal}
+              "browser_tool_catalog_expected": browser_tool_catalog_expected,
+              "results": results, "passed": dispatch_passed and full_tool_catalog_equal and
+                                           browser_tool_catalog_expected}
     (receipt / "result.json").write_text(json.dumps(output, indent=2) + "\n")
     print(json.dumps(output, sort_keys=True))
     return 0 if output["passed"] else 1

@@ -393,6 +393,51 @@ def main(draft, image, output):
             broker_request(broker, {"token": broker["token"], "op": "open",
                                     "html_b64": base64.b64encode(b"<p>forged answer</p>").decode()}).get("error") == "DENIED" and
             "Harbor accounts" in broker_request(broker, {"token": broker["token"], "op": "open"}).get("text", ""))
+        interaction_page = ("<!doctype html><title>Public interaction probe</title>"
+            "<label>Query <input id='q'></label><button id='go'>Find</button>"
+            "<p id='result'></p><script>"
+            "function render(){let q=new URLSearchParams(location.search).get('q');"
+            "document.getElementById('result').textContent=q?'Result '+q:'No query'}"
+            "document.getElementById('go').onclick=()=>{let q=document.getElementById('q').value;"
+            "history.pushState({},'', '?q='+encodeURIComponent(q));render()};"
+            "addEventListener('popstate',render);render()</script>")
+        (workspace / "index.html").write_text(interaction_page)
+        interacted = mcp(prefix, workspace, broker, [
+            tool("browser_navigate", {"url": URL}),
+            tool("browser_fill_form", {"selector": "#q", "value": "RIVER"}),
+            tool("browser_click", {"selector": "#go"}),
+            tool("browser_snapshot"),
+            tool("browser_navigate_back"),
+            tool("browser_snapshot"),
+            tool("browser_navigate", {"url": URL + "?q=BLUE"})])
+        report["checks"]["fill_query_history_and_url_snapshot"] = (
+            all(not item.get("isError") for item in interacted) and
+            "RIVER" in text(interacted[1]) and
+            "URL: " + URL + "?q=RIVER" in text(interacted[2]) and
+            "Result RIVER" in text(interacted[3]) and
+            "URL: " + URL + "\n" in text(interacted[4]) and
+            "No query" in text(interacted[5]) and
+            "URL: " + URL + "?q=BLUE" in text(interacted[6]) and
+            "Result BLUE" in text(interacted[6]))
+        unicode_query = "😀" * 128
+        unicode_result = mcp(prefix, workspace, broker, [
+            tool("browser_navigate", {"url": URL + "?q=" + unicode_query})])
+        report["checks"]["unicode_query_roundtrip"] = (
+            not unicode_result[0].get("isError") and
+            "Result " + unicode_query in text(unicode_result[0]))
+        denied_urls = mcp(prefix, workspace, broker, [
+            tool("browser_navigate", {"url": "http://candidate.invalid/other.html"}),
+            tool("browser_navigate", {"url": URL + "?q="}),
+            tool("browser_navigate", {"url": URL + "?q=BLUE&extra=1"}),
+            tool("browser_navigate", {"url": URL + "?q=%FF"}),
+            tool("browser_navigate", {"url": URL + "?q=%ZZ"}),
+            tool("browser_navigate", {"url": URL + "?q=" + "X" * 129}),
+            tool("browser_navigate", {"url": "http://127.0.0.1:1/index.html?q=BLUE"})])
+        report["checks"]["query_boundary_denied"] = (
+            all(item.get("isError") is True for item in denied_urls) and
+            broker_request(broker, {"token": broker["token"], "op": "open",
+                                    "query": "X" * 129}).get("error") == "DENIED")
+        (workspace / "index.html").write_bytes(original)
         hits = []
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):

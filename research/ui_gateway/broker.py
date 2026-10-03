@@ -18,7 +18,7 @@ import time
 MAX_HTML = 1024 * 1024
 MAX_REQUEST = 1_500_000
 MAX_RESPONSE = 3_000_000
-OPERATIONS = {"open", "snapshot", "click", "key", "resize", "screenshot"}
+OPERATIONS = {"open", "snapshot", "click", "fill", "back", "key", "resize", "screenshot"}
 
 
 def line_from_fd(fd, buffer, limit, deadline):
@@ -76,9 +76,14 @@ def valid_command(message):
         return False
     op = message["op"]
     if op == "open":
-        return exact(message, ("op",))
+        return (exact(message, ("op",)) or
+                (exact(message, ("op", "query")) and valid_query(message["query"])))
     if op == "click":
         return exact(message, ("op", "selector")) and isinstance(message["selector"], str) and len(message["selector"]) <= 128
+    if op == "fill":
+        return (exact(message, ("op", "selector", "value")) and
+                isinstance(message["selector"], str) and len(message["selector"]) <= 128 and
+                isinstance(message["value"], str) and len(message["value"]) <= 256)
     if op == "key":
         return (exact(message, ("op", "key")) and isinstance(message["key"], str) and
                 message["key"] in {"ArrowLeft", "ArrowRight", "Home", "End", "Tab", "Enter", "Space"})
@@ -87,6 +92,11 @@ def valid_command(message):
                 type(message["width"]) is int and type(message["height"]) is int and
                 320 <= message["width"] <= 1440 and 240 <= message["height"] <= 1200)
     return exact(message, ("op",))
+
+
+def valid_query(value):
+    return (isinstance(value, str) and len(value) <= 128 and
+            all(32 <= ord(character) != 127 for character in value))
 
 
 def read_client(connection):
@@ -196,7 +206,8 @@ def run(image, lifetime, repo):
                             except (OSError, ValueError):
                                 response = {"ok": False, "error": "PAGE_REJECTED"}
                             else:
-                                message = {"op": "open", "html_b64": base64.b64encode(page).decode()}
+                                message = {"op": "open", "html_b64": base64.b64encode(page).decode(),
+                                           "query": message.get("query", "")}
                         if response is None:
                             write_fd(child.stdin.fileno(), (json.dumps(message) + "\n").encode(), time.monotonic() + 10)
                             raw, buffer = line_from_fd(child.stdout.fileno(), buffer, MAX_RESPONSE, time.monotonic() + 10)

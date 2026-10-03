@@ -2,7 +2,8 @@
 import copy
 from pathlib import Path
 
-TOOLS = ("browser_navigate", "browser_snapshot", "browser_click",
+TOOLS = ("browser_navigate", "browser_snapshot", "browser_click", "browser_fill_form",
+         "browser_navigate_back",
          "browser_press_key", "browser_take_screenshot", "browser_resize")
 
 
