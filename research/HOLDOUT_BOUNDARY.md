@@ -444,3 +444,41 @@ still creates a separate APFS *grading* volume; Docker's visibility of that
 actual handoff has not passed, so these receipts cannot admit the recovery
 tasks or count toward H1. Independent category/oracle review, the sealed
 30-task roster, paired model turns, and unseen task acceptance remain open.
+
+## Replacement context/restart draft
+
+The public staged-schema task in [PUBLIC_STAGED_SCHEMA.md](PUBLIC_STAGED_SCHEMA.md)
+is retired after model exposure and a mismatched final oracle. A fresh owner-only
+replacement draft was created for that category. Its first frozen oracle passed
+a wrong-solution mutant; that draft and its no-model receipt are preserved, then
+a versioned replacement corrected the criterion. The corrected draft's seed
+fails all three staged checks, a partial implementation passes only stage one,
+the reference and a structurally different valid implementation pass all
+three, and two targeted mutants fail at the expected stages. This is sampled
+oracle control, not a claim of complete semantic coverage.
+
+At clean `main` commit `7b2e7c04800f1807969349d30e6ec09575707ef3`, a
+separate **zero-model** preflight tested the corrected draft in the real
+candidate-volume layout. Its first run passed all 14 direct boundary checks
+and all 16 OpenCode checks in each arm, then failed before grading because
+the host-copy parent directory was missing. The candidate volume detached.
+The single path-creation repair was preregistered; the fresh second run passed
+those same checks, copied only three bounded regular files to a Docker-visible
+host workspace on another device, detached the candidate volume, and passed
+the independent reference control. Neither run contacted the model. The
+replacement remains `protected_status=false`: independent admission review,
+the complete 30-task roster, real model-facing staged turns, and paired H1
+grading remain open.
+
+The owner-only source and receipts are archived outside the repository. The
+rejected v1 freeze SHA-256 is
+`c08a71768e17bee8c475e479ec009e0486b98fe351dd74c8a1166938c1fc50d5`;
+the corrected v2 freeze is
+`42071dd5a1d5e534ed706ca083aee4af5f31e6d13e69b1150520e8392cf20d04`.
+The corrected six-variant, three-stage control receipt is
+`b9fd1fd215400c3701180c5c7d68750b4586201506e31b5c989e536324a70e7f`.
+The two verified preflight archives have an owner-only index SHA-256
+`a89baff8da27c82f239645cc4ec8338ffe477cea925c421c95e8382229b531ef`;
+the failed and passed result SHA-256 values are respectively
+`a73d639940f1513297d375db9725e8675f1d3024657b6539090d5ccf0dcffbab`
+and `6f011f668b9e3b19f8d624649299bd3e5fe08927e9c88dee1336efc2e965d71a`.
