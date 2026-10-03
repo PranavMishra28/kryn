@@ -11,6 +11,9 @@ failure-only repair-feedback candidate and its resource-guard stop.
 sample task, the exact KRYN OpenCode adapter and Harbor's official verifier.
 [REVIEWER_SCREEN.md](REVIEWER_SCREEN.md) preregisters a read-only Reviewer
 mechanism screen on two archived, public Harbor worker failures.
+[EFFORT_POLYGLOT.md](EFFORT_POLYGLOT.md) records an inconclusive Default/Fast
+mode screen: Docker interrupted Default, and Fast exhausted the research relay
+after repeated writes before a successful grade.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Neither rejected candidate changed the product.
 
@@ -54,8 +57,9 @@ runner preflight; its evidence and limitations are in [DEVELOPMENT.md](DEVELOPME
 
 The protected holdout and a representative Harbor subset remain pending. One
 public Harbor sample calibration ran through the official verifier and failed;
-see [HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md). Docker is running on the
-research host. The first pinned official SWE-bench calibration and the
+see [HARBOR_CALIBRATION.md](HARBOR_CALIBRATION.md). Docker availability is checked
+at each external trial; it was interrupted once during the mode screen. The first
+pinned official SWE-bench calibration and the
 frozen six-task Lite/Verified subset are documented in
 [EXTERNAL.md](EXTERNAL.md). Record every subset attempt with
 `research/record_external.py`; it checks task/prompt/base identity and, when an

@@ -85,8 +85,11 @@ class KrynOpenCode(OpenCode):
                   context: AgentContext) -> None:
         self._instruction = instruction
         port = int(self.extra_env["KRYN_HARBOR_RELAY_PORT"])
+        variant = self.extra_env.get("KRYN_HARBOR_VARIANT", "default")
         if not 1024 <= port <= 65535:
             raise ValueError("Invalid inference-only host relay port")
+        if variant not in {"default", "fast"}:
+            raise ValueError("Unsupported KRYN research variant")
         await self.exec_as_agent(environment,
             f"socat TCP-LISTEN:{LOCAL_PORT},bind=127.0.0.1,reuseaddr,fork "
             f"TCP:host.docker.internal:{port} > {self.environment_logs_dir}/relay.log "
@@ -96,7 +99,8 @@ class KrynOpenCode(OpenCode):
             f"http://127.0.0.1:{LOCAL_PORT}/v1/models >/dev/null && exit 0; "
             "sleep 0.2; done; exit 1")
         output = shlex.quote(str(self.environment_logs_dir / self._OUTPUT_FILENAME))
-        command = ("opencode run --standalone --model local/qwen --agent agent "
+        model = "local/qwen" + ("#fast" if variant == "fast" else "")
+        command = ("opencode run --standalone --model " + shlex.quote(model) + " --agent agent "
                    "--format json --auto -- " + shlex.quote(instruction) +
                    f" 2>&1 </dev/null | tee {output}")
         await self.exec_as_agent(environment, command, env={
