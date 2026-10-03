@@ -119,8 +119,8 @@ def server_probe(workspace, log, oracle, marker, private_parent=None):
             while info.get("status") == "running" and time.monotonic() < deadline:
                 time.sleep(.1)
                 info = server.request("GET", endpoint, timeout=5).get("data", {})
-            if info.get("status") == "running":
-                raise RuntimeError("Native shell canary did not settle")
+            if info.get("status") != "exited" or type(info.get("exit")) is not int:
+                raise RuntimeError("Native shell canary did not exit with a verified status")
             output = server.request("GET", endpoint + "/output?cursor=0&limit=4096",
                                     timeout=5).get("data", {})
             return info.get("exit"), output.get("output", "")
