@@ -66,12 +66,12 @@ WRITE_PROFILE = """;; Direct filesystem-write containment for ordinary shell des
 """
 
 
-def background_boundary(workspace, private, dependencies, inference_port, native_port=0):
+def background_boundary(workspace, private, dependencies, inference_port, native_port=0, *, broker_port=None):
     """Whole-process boundary for disposable learning, never ordinary user work.
 
     The trusted worker/grader stays outside this sandbox. No personal XDG state,
     evaluator files, credentials or non-loopback service is readable/reachable.
-    Only the inference-only worker proxy is reachable, never runtime admin APIs.
+    Only explicitly named research loopback services are reachable.
     """
     sandbox = Path("/usr/bin/sandbox-exec")
     if sys.platform != "darwin" or not sandbox.is_file() or sandbox.stat().st_uid != 0 or sandbox.stat().st_mode & 0o022:
@@ -83,9 +83,16 @@ def background_boundary(workspace, private, dependencies, inference_port, native
         raise RuntimeError("Background private root is too broad")
     if workspace == private or _within(workspace, private) or _within(private, workspace):
         raise RuntimeError("Background workspace/private roots must be separate")
-    ports = ([inference_port] if inference_port is not None else []) + ([native_port] if native_port else [])
-    if any(type(p) is not int or not 1024 <= p <= 65535 for p in ports):
+    if type(native_port) is not int or (native_port and not 1024 <= native_port <= 65535):
         raise RuntimeError("Background boundary requires explicit unprivileged ports")
+    if any(p is not None and (type(p) is not int or not 1024 <= p <= 65535)
+           for p in (inference_port, broker_port)):
+        raise RuntimeError("Background boundary requires explicit unprivileged ports")
+    ports = (([inference_port] if inference_port is not None else []) +
+             ([native_port] if native_port else []) +
+             ([broker_port] if broker_port is not None else []))
+    if len(ports) != len(set(ports)):
+        raise RuntimeError("Background boundary loopback ports must be distinct")
     reads = [workspace, private, Path("/System"), Path("/usr/lib"), Path("/usr/share"),
              Path("/usr/bin"), Path("/bin"), Path("/sbin"), Path("/Library/Apple"),
              Path("/private/var/db/timezone")]
@@ -364,7 +371,7 @@ class NativeServer:
 
     def _enter_background(self):
         options = self.background
-        if set(options) - {"dependencies", "inference_port", "cancel", "tool_path", "private_parent"} or not {"dependencies", "inference_port"}.issubset(options):
+        if set(options) - {"dependencies", "inference_port", "broker_port", "cancel", "tool_path", "private_parent"} or not {"dependencies", "inference_port"}.issubset(options):
             raise RuntimeError("Unexpected background isolation options")
         tool_path = Path(options.get("tool_path", Path(sys.executable).resolve().parent))
         if "tool_path" in options and (not tool_path.is_dir() or tool_path != tool_path.resolve() or
@@ -401,7 +408,8 @@ class NativeServer:
         git_toolchain = Path("/Library/Developer/CommandLineTools")
         if git_toolchain.is_dir(): dependencies.append(git_toolchain.resolve())
         prefix = background_boundary(self.directory, private, dependencies,
-                                     options["inference_port"], self.port)
+                                     options["inference_port"], self.port,
+                                     broker_port=options.get("broker_port"))
         self.background_prefix = prefix
         self.log_file = _open_owned_log(self.log_path)
         self.process = subprocess.Popen(prefix + [str(BINARY), "serve", "--hostname", "127.0.0.1",

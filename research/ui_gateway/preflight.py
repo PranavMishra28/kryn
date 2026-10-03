@@ -117,14 +117,35 @@ def broker_request(info, message):
         return json.loads(output.split(b"\n", 1)[0])
 
 
-def native_catalog(workspace, private, broker, report):
+def port_validation(workspace, private, inference_port, broker_port):
+    malformed = ((0, 0, None), (True, 0, None), ("8000", 0, None),
+                 (inference_port, None, None), (inference_port, True, None),
+                 (inference_port, 0, 0), (inference_port, 0, True),
+                 (inference_port, 0, "8000"),
+                 (inference_port, 0, 65536),
+                 (inference_port, inference_port, None),
+                 (inference_port, 0, inference_port),
+                 (inference_port, broker_port, broker_port))
+    for inference, native, broker in malformed:
+        try:
+            background_boundary(workspace, private, [], inference, native, broker_port=broker)
+        except RuntimeError:
+            continue
+        return False
+    legacy = background_boundary(workspace, private, [], inference_port)[2]
+    return (legacy.count("(allow network-outbound") == 1 and
+            '(allow network-outbound (remote ip "localhost:' + str(inference_port) + '"))' in legacy)
+
+
+def native_catalog(workspace, private, inference_port, broker, report):
     catalogs = {}
     configurations = {}
+    profiles = {}
     for arm in ("native", "kryn"):
         state = workspace / ".git" / ("ui-preflight-" + arm)
         state.mkdir(mode=0o700, exist_ok=True)
         config, _, dependencies = configuration(
-            workspace, state, arm, "http://127.0.0.1:" + str(broker["port"]) + "/v1")
+            workspace, state, arm, "http://127.0.0.1:" + str(inference_port) + "/v1")
         config = with_ui_gateway(config, python=PYTHON, adapter=ADAPTER, repo=workspace,
                                  port=broker["port"], token=broker["token"])
         if set(config["mcp"]["servers"]) != {"browser"}:
@@ -133,8 +154,16 @@ def native_catalog(workspace, private, broker, report):
         configurations[arm] = {key: config[key] for key in ("mcp", "permissions")}
         with NativeServer(workspace, config, workspace.parent.parent / (arm + "-native.log"),
                           background={"dependencies": dependencies,
-                                      "inference_port": broker["port"],
+                                      "inference_port": inference_port,
+                                      "broker_port": broker["port"],
                                       "private_parent": private}) as server:
+            profile = server.background_prefix[2]
+            outbound = sorted(line.strip() for line in profile.splitlines()
+                              if line.strip().startswith("(allow network-outbound "))
+            expected = sorted('(allow network-outbound (remote ip "localhost:' + str(port) + '"))'
+                              for port in (inference_port, server.port, broker["port"]))
+            profiles[arm] = (outbound == expected and
+                             '(allow network-inbound (local ip "localhost:' + str(server.port) + '"))' in profile)
             deadline = time.monotonic() + 30
             while time.monotonic() < deadline:
                 items = server.request("GET", "/api/mcp", timeout=5).get("data", [])
@@ -148,9 +177,11 @@ def native_catalog(workspace, private, broker, report):
                                    for item in items)
     report["paired_mcp_and_permissions_equal"] = configurations["native"] == configurations["kryn"]
     report["paired_mcp_status_equal"] = catalogs["native"] == catalogs["kryn"]
+    report["checks"]["three_port_profiles_exact"] = all(profiles.values())
     report["mcp_status"] = catalogs
     report["opencode_tool_catalog_unverified"] = True
-    return report["paired_mcp_and_permissions_equal"] and report["paired_mcp_status_equal"]
+    return (report["paired_mcp_and_permissions_equal"] and report["paired_mcp_status_equal"]
+            and report["checks"]["three_port_profiles_exact"])
 
 
 def main(draft, image, output):
@@ -161,15 +192,19 @@ def main(draft, image, output):
     disk = output / "candidate.sparseimage"
     report = {"schema": 1, "scope": "no-model UI 01 gateway preflight",
               "protected_eligible": False, "model_gateway_qualified": False,
-              "port_substitution": "broker occupied the inference-only port for this no-model startup probe",
+              "port_substitution": "distinct dummy inference and live browser broker ports; no model calls",
               "browser_image": image, "adapter_sha256": digest(ADAPTER),
               "broker_sha256": digest(Path(__file__).with_name("broker.py")),
+              "native_client_sha256": digest(ROOT / "tools/native_client.py"),
               "preflight_sha256": digest(__file__),
               "worker_sha256": digest(Path(__file__).with_name("worker.js")),
               "checks": {}, "passed": False}
     mounted = False
     broker_child = None
     broker = None
+    inference_server = None
+    inference_thread = None
+    inference_hits = []
     try:
         created = command(["hdiutil", "create", "-size", "128m", "-type", "SPARSE",
                            "-fs", "APFS", "-volname", "KRYNUICandidate", str(disk)])
@@ -189,9 +224,26 @@ def main(draft, image, output):
             raise RuntimeError("seed clone failed: " + cloned.stderr[-300:])
         command(["git", "-C", str(workspace), "remote", "remove", "origin"])
         original = (workspace / "index.html").read_bytes()
+        class InferenceHandler(BaseHTTPRequestHandler):
+            def respond(self):
+                inference_hits.append((self.command, self.path))
+                self.send_response(204 if (self.command, self.path) == ("GET", "/probe") else 503)
+                self.end_headers()
+            do_GET = respond
+            do_POST = respond
+            def log_message(self, *_args):
+                pass
+        inference_server = ThreadingHTTPServer(("127.0.0.1", 0), InferenceHandler)
+        inference_thread = Thread(target=inference_server.serve_forever, daemon=True)
+        inference_thread.start()
+        inference_port = inference_server.server_address[1]
         broker_child, broker = broker_start(image, workspace)
         report["container"] = broker["container"]
         report["container_boundary"] = broker["boundary"]
+        report["dummy_inference_port"] = inference_port
+        report["broker_port"] = broker["port"]
+        report["checks"]["distinct_inference_and_broker_ports"] = inference_port != broker["port"]
+        report["checks"]["port_validation"] = port_validation(workspace, private, inference_port, broker["port"])
         seed_head = json.loads((Path(draft).resolve() / "bundles/01-harbor-tabs/manifest.json").read_text())["base_commit"]
         current_head = command(["git", "-C", str(workspace), "rev-parse", "HEAD"])
         current_status = command(["git", "-C", str(workspace), "status", "--porcelain"])
@@ -201,7 +253,7 @@ def main(draft, image, output):
             (workspace / "index.html").read_bytes() == original)
         if not report["checks"]["seed_state_at_opencode_start"]:
             raise RuntimeError("candidate checkout differs from clean seed at OpenCode startup")
-        report["checks"]["paired_opencode_mcp"] = native_catalog(workspace, private, broker, report)
+        report["checks"]["paired_opencode_mcp"] = native_catalog(workspace, private, inference_port, broker, report)
         report["checks"]["browser_blank_after_opencode_start"] = (
             broker_request(broker, {"token": broker["token"], "op": "snapshot"}).get("error") == "PAGE_NOT_OPEN")
         hidden = output / "hidden-canary.txt"
@@ -250,7 +302,42 @@ def main(draft, image, output):
             else:
                 report["checks"]["startup_timeout_reaps_child"] = False
         prefix = background_boundary(workspace, private,
-            [PYTHON, Path(sys.base_prefix).resolve(), ADAPTER], broker["port"])
+            [PYTHON, Path(sys.base_prefix).resolve(), ADAPTER], inference_port,
+            broker_port=broker["port"])
+        probe = ("import socket, sys\n"
+                 "try:\n"
+                 "    with socket.create_connection(('127.0.0.1', int(sys.argv[1])), timeout=3) as s:\n"
+                 "        s.sendall(b'GET /probe HTTP/1.0\\r\\nHost: 127.0.0.1\\r\\n\\r\\n')\n"
+                 "        print(s.recv(128).split(b'\\r\\n', 1)[0].decode())\n"
+                 "except OSError as e:\n"
+                 "    print(type(e).__name__)\n"
+                 "    sys.exit(3)\n")
+        allowed = command(prefix + [str(PYTHON), "-B", "-c", probe, str(inference_port)])
+        report["dummy_probe_detail"] = {"exit": allowed.returncode, "stdout": allowed.stdout[:200],
+                                        "stderr": allowed.stderr[:200]}
+        report["checks"]["dummy_inference_port_reachable"] = (
+            allowed.returncode == 0 and allowed.stdout.strip() == "HTTP/1.0 204 No Content" and
+            ("GET", "/probe") in inference_hits)
+        blocked_hits = []
+        class BlockedHandler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                blocked_hits.append(self.path)
+                self.send_response(204)
+                self.end_headers()
+            def log_message(self, *_args):
+                pass
+        blocked_server = ThreadingHTTPServer(("127.0.0.1", 0), BlockedHandler)
+        blocked_thread = Thread(target=blocked_server.serve_forever, daemon=True)
+        blocked_thread.start()
+        try:
+            blocked = command(prefix + [str(PYTHON), "-B", "-c", probe,
+                                        str(blocked_server.server_address[1])])
+            report["checks"]["unlisted_loopback_port_denied"] = (
+                blocked.returncode == 3 and blocked.stdout.strip() == "PermissionError" and not blocked_hits)
+        finally:
+            blocked_server.shutdown()
+            blocked_server.server_close()
+            blocked_thread.join(timeout=3)
         for label, argv in (("hidden_read_denied", ["/bin/cat", str(hidden)]),
                             ("hidden_stat_denied", ["/usr/bin/stat", str(hidden)]),
                             ("symlink_read_denied", ["/bin/cat", str(workspace / "answer-link")])):
@@ -340,10 +427,16 @@ def main(draft, image, output):
             current_head.returncode == 0 and current_head.stdout.strip() == seed_head and
             current_status.returncode == 0 and current_status.stdout.strip() == "" and
             (workspace / "index.html").read_bytes() == original and text(reset[0]) == text(result[2]))
+        report["dummy_inference_hits"] = inference_hits
+        report["checks"]["dummy_inference_probe_only"] = inference_hits == [("GET", "/probe")]
         report["passed"] = all(report["checks"].values())
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
     finally:
+        if inference_server is not None:
+            inference_server.shutdown()
+            inference_server.server_close()
+            inference_thread.join(timeout=3)
         if broker_child is not None:
             stop_group(broker_child)
             try:

@@ -25,28 +25,31 @@ kryn-ui-worker:research-20261003 .`, then use the resulting exact image ID with
 `python3 -B preflight.py --draft PRIVATE_DRAFT --image sha256:IMAGE_ID --output NEW_PRIVATE_DIR`.
 The preflight uses a disposable APFS candidate volume, a host-side hidden
 canary, the actual Seatbelt profile, direct MCP calls, and no-model OpenCode
-startup for native and KRYN arms. It intentionally substitutes the broker port
-for the inference port; this cannot support a model turn. Both OpenCode arms
-start from the clean seed checkout with a fresh browser worker before any
+startup for native and KRYN arms. An optional research background setting admits
+the broker as a third explicit loopback port alongside distinct inference and
+native ports. The preflight runs a live dummy inference listener; it makes no
+model request. Ordinary installed `NativeServer` behavior is unchanged. Both
+OpenCode arms start from the clean seed checkout with a fresh browser worker before any
 reference bytes are loaded. A blank-worker check follows startup; the reference
 keyboard control runs afterward and the seed page is reloaded before cleanup.
 
 The final local no-model run used image
 `sha256:16c1133894770bceab9f2f3a9bfac4e7ec1b3dde1fe2f0f6a7063ba49b3436a2`.
 Its private receipt is
-`/private/tmp/kryn-ui-gateway-preflight-08/receipt.json`, SHA-256
-`bf7173ebf76d6d2fbd9b93334ed97cfdd03a3a4ba6a9d92755172b8f972e7e17`.
-All 26 no-model checks passed, including a reference ArrowRight interaction,
+`/private/tmp/kryn-ui-gateway-preflight-13/receipt.json`, SHA-256
+`e6e1c70ed4b4b6a6385751854e2c5dbaa38ce8c6f1869bd515889e256bd22e74`.
+All 32 no-model checks passed, including a reference ArrowRight interaction,
 hidden-file and hardlink denial, malicious page file/network attempts, symlink
 swap, FIFO, oversize entry, rejection of caller-supplied HTML, zero-limit and
 root container attestation mutants, startup-timeout reaping, clean seed state
 and blank browser through both-arm MCP connection/config parity, seed restoration,
-container cleanup, and volume detachment. The receipt explicitly retains
+distinct inference/browser ports, malformed and duplicate port rejection,
+permitted dummy inference access, denied fourth-port access, container cleanup,
+and volume detachment. The receipt explicitly retains
 `protected_eligible=false` and `model_gateway_qualified=false`.
 
-Remaining gates: add and independently review an explicit third loopback port
-in the research-only NativeServer boundary while keeping inference and native
-ports intact; prove the model-facing OpenCode tool catalog and tool dispatch
+Remaining gates: independently review the optional third-port change; prove the
+model-facing OpenCode tool catalog and tool dispatch
 through a separate public compatibility turn or a supported no-model native
 tool invocation path; review the container and broker security independently;
 freeze a valid 30-task roster before any protected candidate run. The current
