@@ -656,3 +656,38 @@ just three small source families. Independent task admission, the other
 15 category slots, a sustained occupied-host model-facing browser path,
 real staged long/restart work and the matched protected H1 study remain
 open. Every draft remains `protected_eligible=false`; no uplift claim follows.
+
+## One corrected context/restart draft remains unsealed
+
+The provisional task `10-quota-restart` had two scheduled turns, so it could
+not exercise the preregistered two-compaction/two-restart gate. Its single
+reference also read a region file before that file was introduced at stage
+two. An owner-only v3 copy now has three separate candidate prompts, two
+external user edits, stage-specific Docker oracles, a stage-one implementation
+and a final implementation that both preserve config bytes. The seed and
+stage-one-only implementation fail at the expected later stages; a distinct
+valid implementation passes all three; a cached-config mutant passes the
+first two and fails the third; and a zero-override mutant fails. All **18
+offline controls** passed with zero model requests against the pinned Python
+Docker image. The first failed control, which overrequired rereads at stage
+one, was retained; its oracle was corrected before the passing screen.
+
+The owner-only freeze SHA-256 is
+`ce68904eb42301f79ae00baadc630bc93440beb76517224f7b2abdd657655f7b`;
+the three-stage schedule and grader hash to
+`d3b2ed55ca1d4b51963ed71dd9d79988166f80f50436d1dcf8c9127c27002e38`
+and `e7a52612126b467b763003685d09e6f30c6e2e79fda86c4b597b4d1afecdf8ae`.
+The private 1,153-file archive was independently rehashed (archive SHA-256
+`b9453cbcb33311fe4d4b4a85c10d87d43318d69b0758cd20a7c9a285e77d0924`,
+index SHA-256
+`a7a5a20f31cfb66578663da3a12658533304e2ce71dc1e0d814f6dc3a431b644`).
+Provisional roster V7 points to this version and hashes to
+`6d4d92852d66543d42cf5f19e7916e5476e7172ba83e5de10c75dbf0492f0b25`.
+That roster also permanently retires one separate multi-file task used for
+the [development pair](LEDGER_CATEGORIES_PAIR.md).
+
+The new task is still `protected_eligible=false`. These checks prove only
+offline discrimination, not that OpenCode can deliver the three turns, compact
+twice, restart twice, or grade a stopped Agent without oracle access. The
+other context/restart slots, three long-workflow slots, UI resource fit and
+independent admission remain open.
