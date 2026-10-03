@@ -156,7 +156,7 @@ def docker_grade(workspace):
                     for case in cases()]
     expected = [{"id": case["id"], **case["expected"]} for case in cases()]
     container = "kryn-public-pagination-" + secrets.token_hex(10)
-    argv = ["docker", "run", "--rm", "--name", container, "--network", "none",
+    argv = ["docker", "run", "-i", "--rm", "--name", container, "--network", "none",
             "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
             "--pids-limit", "32", "--memory", "256m", "--cpus", "1",
             "--user", "65534:65534", "--mount",

@@ -42,3 +42,12 @@ read, unmatched tool/permission contract, or failed grade is a recorded failure;
 no retry to chase a pass. This single public pair may diagnose the runner and
 worker. It cannot establish generalization, confidence intervals, protected
 uplift or frontier adjacency.
+
+The first offline control attempt from `8368ea46173e581fcfd603cbdbab7757a415a358`
+failed **all three controls** before generation: the Docker CLI lacked `-i`,
+so the isolated worker received empty stdin and raised `JSONDecodeError`.
+The failed receipt is retained at
+`/private/tmp/kryn-public-pagination-20261003-01/fixture.json`, SHA-256
+`09248df70df5e177e9997827d2619057f3455fb743862c7`. This is a grader
+transport defect, not a model result. The correction adds Docker's stdin flag;
+the task, source, cases and reference remain unchanged.
