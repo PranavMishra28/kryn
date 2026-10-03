@@ -44,3 +44,17 @@ Python-task warning, and reported the malformed JavaScript. Both arms exited
 normally. The candidate also passed `make check` with 215 setup, 26 research,
 87 Node and the frozen offline suite checks. This is a deterministic sandbox
 compatibility result, not an accepted coding task or evidence of H1 uplift.
+
+## Frozen live compatibility screen
+
+Before any model request, use the already-retired `linecfg-duplicate-key`
+development task (private manifest SHA-256
+`804278f90dac2d253d28b008b4150c449e361f0b4513ff41929968b1d025c314`)
+in one fresh candidate-volume KRYN Agent turn. This task cannot enter a sealed
+holdout. Run the current-source no-model preflight first. The one-attempt live
+screen passes only if the unchanged guarded turn completes, the independent
+grader passes, the candidate/capture/grader volumes detach, telemetry is
+complete with no guard stop, and the raw Agent trace has no irrelevant
+JavaScript-coverage notice. The source, prompt, grader, model, tool environment
+and resource policy are frozen; no operator repair or retry after generation.
+This tests real OpenCode compatibility, not same-model harness uplift.
