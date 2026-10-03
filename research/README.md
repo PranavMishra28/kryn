@@ -61,6 +61,9 @@ worker deleted its tracked test afterward. No product change was promoted.
 [CANDIDATE_PLUGIN_PROVENANCE.md](CANDIDATE_PLUGIN_PROVENANCE.md) records the
 research-runner correction that loads exact isolated candidate plugin bytes.
 Its no-model OpenCode boundary check passed; no product plugin was changed.
+[DIRECT_GIT_EVIDENCE.md](DIRECT_GIT_EVIDENCE.md) records an isolated candidate
+for Git evidence inside the research sandbox and its public live compatibility
+screen; production promotion and protected transfer remain open.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
