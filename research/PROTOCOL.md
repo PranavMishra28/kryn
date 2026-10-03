@@ -29,9 +29,11 @@ uplift for v1.0.0. Do not select changes from a holdout outcome.
 symlink Seatbelt preflight missed a same-volume hardlink alias. It cannot
 qualify any protected result. The separately preregistered encrypted-volume
 boundary screen in [HOLDOUT_BOUNDARY.md](HOLDOUT_BOUNDARY.md) passed public
-no-model compatibility checks. Thirty offline task drafts now exist, but
-independent review found grader-isolation and criterion-coverage defects; no
-combined sealed roster has been admitted or run.
+no-model compatibility checks. Thirty offline task drafts were built, but
+their provisional identities and some acceptance details entered public
+research records before sealing. A current-tree scan found 18 exposed
+identities. The entire old draft roster is development-only; no combined
+protected roster has been admitted or run.
 The H1 thresholds and task-retirement rules below are unchanged.
 
 ## Three evaluation layers

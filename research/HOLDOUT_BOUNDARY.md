@@ -790,3 +790,23 @@ Five slots are now explicitly retired: three invalid one-turn long-workflow
 drafts, the used multi-file task, and this used context/restart task. The
 combined roster remains unsealed, and independent semantic admission and
 replacement tasks are still required before any H1 holdout run.
+
+## Provisional-task retirement after public metadata disclosure
+
+Two provisional Python tasks were audited and corrected in owner-only drafts.
+Their isolated, zero-model boundary and reference controls passed, and a
+separate read-only semantic review accepted the corrected contracts. Before
+any protected model trial, however, this public research branch disclosed the
+task identities and acceptance details. Future candidates could retrieve that
+information. Both tasks and their descendants are therefore **retired from
+protected H1** and remain development diagnostics only. Neither produced an H1
+score. Their failed reviews, corrected drafts and receipts remain in the
+owner-only archive.
+
+A follow-up scan found 18 of the 30 draft identities in the current public
+tracked tree; public Git and PR history can expose more. Because the combined
+roster was never sealed, the entire old 30-draft roster is now
+**development-only**. It cannot supply a protected H1 denominator. Its 120
+file/Git identity checks establish only recorded bytes and clean seeds.
+A fresh privately authored roster, independent admission, and matched model
+trials are required. No product change or frontier-capability claim follows.
