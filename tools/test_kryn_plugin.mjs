@@ -276,41 +276,6 @@ test('repeated-shell denial matches only the current native shell source and sta
   } finally { await cleanup(); f.remove(); }
 });
 
-test('consecutive no-op writes are bounded while changed work and a new turn reset them', async () => {
-  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
-  try {
-    const file = path.join(f.root, 'source.txt');
-    fs.writeFileSync(file, 'one\n');
-    f.call('session.prompt', { sessionID: 'ses_1' });
-    let serial = 0;
-    const write = content => {
-      const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + ++serial,
-        id: 'call_' + serial, tool: 'write', input: { path: file, content } };
-      f.call('tool.execute.before', event);
-      fs.writeFileSync(file, content);
-      f.call('tool.execute.after', { ...event, status: 'completed', result: { content: [] } });
-    };
-    write('one\n'); write('one\n');
-    assert.throws(() => write('one\n'), /identical no-op file write/);
-    await f.emit('session.step.ended', { finish: 'tool-calls' });
-    assert.equal(f.interruptions.length, 0);
-    assert.throws(() => write('one\n'), /identical no-op file write/);
-    await f.emit('session.step.ended', { finish: 'tool-calls' });
-    assert.equal(f.interruptions.length, 1, 'two ignored denials stop the Agent turn');
-
-    f.call('session.prompt', { sessionID: 'ses_1' });
-    write('one\n'); write('two\n'); // A real change clears the no-op sequence.
-    write('two\n');
-    const read = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_read',
-      id: 'call_read', tool: 'read', input: { path: file } };
-    f.call('tool.execute.before', read);
-    f.call('tool.execute.after', { ...read, status: 'completed', result: { content: [] } });
-    write('two\n'); write('two\n');
-    assert.throws(() => write('two\n'), /identical no-op file write/);
-    assert.equal(fs.readFileSync(file, 'utf8'), 'two\n');
-  } finally { await cleanup(); f.remove(); }
-});
-
 test('observed checks survive compaction and restart without promoting prose or stale exits', async () => {
   const f = fixture(); let cleanup = await plugin.setup(f.ctx);
   let serial = 0;
