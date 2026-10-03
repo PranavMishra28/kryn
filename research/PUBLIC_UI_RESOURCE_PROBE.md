@@ -41,3 +41,43 @@ power, wall time, frozen grader, and any independent browser evidence. A pass
 would show only that this different *public* browser path is feasible under
 the observed host state; it would not prove that the isolated gateway is at
 fault or that a protected grader boundary exists.
+
+## Observed result
+
+The one frozen Agent turn started with the model loaded and idle on AC power.
+It completed 55 native step-finish events, made 74 tool calls, and invoked 35
+browser tools (29 completed, 6 errored). Navigation, screenshots, form input,
+clicks, snapshots, console and network inspection all ran through the existing
+browser MCP. This demonstrates **initial model-facing browser dispatch** on
+this public path. After 364.882 seconds the unchanged strict guard observed
+sustained host-memory warning and interrupted the turn. Sampled swap growth
+was zero and peak sampled oMLX physical footprint was 13.84 GB. The session
+and runtime settled. The preregistered sustained resource gate therefore
+**failed**; the earlier isolated-gateway prefill failures cannot be attributed
+causally to that gateway from unmatched host and browser conditions.
+
+The frozen automatic grader passed both API/original tests and found the
+existing test and data files unchanged. Independent Chrome 154/Playwright
+1.55.0 checks used a fresh browser context and disposable server/database.
+They confirmed valid save and reload, evaluator-injected 503 followed by one
+persisted retry, responsive Save-button bounds and saved screenshots, plus
+console/network inspection. Invalid form input triggered native HTML validity
+but produced **no persistent accessible error message**, so the frozen manual
+review records five passes and that one failure. The resulting Task06 grade is
+`FAIL`, independently of the resource abort. The Agent also created the
+`.fail-next` marker itself during its own testing, contrary to the prompt's
+evaluator-control instruction; the later independent evaluator injection
+proves code behavior, not correct Agent procedure. Browser call errors included
+startup connection refusals, stale element references and invalid fill
+arguments; the Agent recovered from some but did not finish.
+
+The compact development receipt is in
+[history/development.jsonl](history/development.jsonl) as
+`public-ui-resource-20261003`. Raw Agent/browser evidence, independent QA
+script, screenshots, frozen grade and a private 82-run-file/7-QA-file manifest
+remain outside the tracked repository; its SHA-256 is
+`881d93b8e5718f9d53cd06c546bfb38b9c86f639a4f105a07a9c7a24bf1f1330`.
+The result supports a narrower conclusion: model-facing browser operations
+are possible for several minutes on the occupied host, but the strict guarded
+turn and full UI task did not pass. No product or resource-guard change is
+promoted, and the same resource-gated condition will not be retried.
