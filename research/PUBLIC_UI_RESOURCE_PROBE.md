@@ -52,9 +52,11 @@ browser MCP. This demonstrates **initial model-facing browser dispatch** on
 this public path. After 364.882 seconds the unchanged strict guard observed
 sustained host-memory warning and interrupted the turn. Sampled swap growth
 was zero and peak sampled oMLX physical footprint was 13.84 GB. The session
-and runtime settled. The preregistered sustained resource gate therefore
-**failed**; the earlier isolated-gateway prefill failures cannot be attributed
-causally to that gateway from unmatched host and browser conditions.
+and runtime settled. The preregistered browser-dispatch resource gate **passed**
+because model generation and a browser call completed before the abort. The
+separate sustained-memory guard verdict **failed**; the earlier
+isolated-gateway prefill failures cannot be attributed causally to that gateway
+from unmatched host and browser conditions.
 
 The frozen automatic grader passed both API/original tests and found the
 existing test and data files unchanged. Independent Chrome 154/Playwright
