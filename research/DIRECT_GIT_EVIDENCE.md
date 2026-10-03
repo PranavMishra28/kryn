@@ -83,3 +83,42 @@ and its index to
 `e6568a31e80fc05ea258f7d9651cda975381a38bb9643df3c3c9f5644be773e1`.
 The separate research-runner loader correction is required before a new,
 fresh-task candidate trial. No production integration is justified yet.
+
+## Corrected-loader development screen
+
+Research-only loader PR #218 was merged as `fd5b483d39958c3c7c8eff3ff37351749947f03b`.
+The direct-Git candidate was rebased onto that commit without changing its
+`server.js` SHA-256 (`e1580149d3e2665b0fb12779306c6df42bf6fcaf1f73630b94bb6c78df2ca877`).
+A no-model OpenCode loader canary passed from clean candidate commit
+`da2c668f176d9556fc1fc8203f4681cecabbeb92`: KRYN loaded the exact
+candidate bytes, native loaded no KRYN plugin, hidden reads and candidate
+package writes were denied, and the candidate volume detached. Its receipt is
+`/private/tmp/kryn-direct-git-loader-20261003-01/report.json`.
+
+Before the next model request, a **new public development task** was frozen at
+owner-only `experiments/direct-git-evidence-20261003/live-02/manifest.json`
+(SHA-256 `90f7d3f9b902931e4614ab701ef855c7ba15db12791a242a7de82597aee07cc6`).
+The seed's visible tests passed; its independent oracle failed; a separate
+reference implementation passed the oracle. The one-attempt gate required the
+exact loaded candidate hash, a completed shell call without the irrelevant
+JavaScript notice, independent functional acceptance with the tracked test
+preserved, complete resource telemetry, no warning or swap growth, and three
+detached isolated volumes.
+
+That guarded turn passed all frozen checks in 72.404 seconds and six model
+requests. The independent oracle and visible tests passed, the tracked test
+was byte-identical, and there was no irrelevant notice in the exported Agent
+messages. The plugin inventory named the disposable candidate package at the
+exact expected hash. Sampled pressure stayed normal; swap did not grow. The
+screen, barrier, and driver SHA-256 values are respectively
+`0e80acfdd2a9a11249ddeb4130579595a2d7826a20b7f5f38a5854d49d0ff839`,
+`a7dd221dc5906ad7b0768681e9202df10baa863877a0a0f56bf28ea53ac4edcb`,
+and `23dd5280022f9eb5af611f06d273ba81ae6ba7890b50bc22984f21dbd3a7dc1d`.
+The owner-only 34-file evidence archive hashes to
+`0218a288a6d7e9e7335f08f401218a01bad3ab41adf1ae2859af83686dab4c90`;
+its per-file index hashes to
+`918ca6bd51083891db708895930ae6d99ef40ac218ec51afb277377e7de2b2f6`.
+
+This is a one-task compatibility result, **not** a matched harness-uplift
+estimate, protected transfer, or production qualification. The candidate stays
+isolated and the installed v1.0.0 plugin remains unchanged.
