@@ -1,10 +1,13 @@
 """Negative controls for the public staged acceptance checks."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
 
-from run_public_staged_model import event_metrics, prompts_retained, read_before_edit
+from run_public_staged_model import (effective_permission_hash, event_metrics, functional_rejection,
+                                     prompts_retained, read_before_edit)
+from staged_docker_grade import MAX_SOURCE, source_bytes
 
 
 class StagedEvidenceTest(unittest.TestCase):
@@ -50,6 +53,44 @@ class StagedEvidenceTest(unittest.TestCase):
         self.assertEqual(prompts_retained(history, [prompt]), [True])
         history["messages"].append({"type": "user", "text": prompt})
         self.assertEqual(prompts_retained(history, [prompt]), [False])
+
+    def test_stage_source_rejects_link_fifo_and_oversize(self):
+        with tempfile.TemporaryDirectory() as root:
+            root = Path(root)
+            (root / "solve.py").write_bytes(b"valid")
+            self.assertEqual(source_bytes(root, "solve.py"), b"valid")
+            (root / "link.py").symlink_to(root / "solve.py")
+            with self.assertRaises(OSError):
+                source_bytes(root, "link.py")
+            os.mkfifo(root / "pipe.py")
+            with self.assertRaises(RuntimeError):
+                source_bytes(root, "pipe.py")
+            (root / "large.py").write_bytes(b"x" * (MAX_SOURCE + 1))
+            with self.assertRaises(RuntimeError):
+                source_bytes(root, "large.py")
+
+    def test_negative_control_requires_valid_execution(self):
+        valid = {"passed": False, "candidate_source_unchanged": True,
+                 "cases": [{"passed": False, "exit": 0, "cause": None,
+                            "valid_json": True}]}
+        self.assertTrue(functional_rejection(valid))
+        for change in ({"exit": 1}, {"cause": "timeout"}, {"valid_json": False}):
+            invalid = dict(valid, cases=[dict(valid["cases"][0], **change)])
+            self.assertFalse(functional_rejection(invalid))
+
+    def test_effective_permissions_ignore_only_owned_disposable_paths(self):
+        a = [{"action": "external_directory", "effect": "allow",
+              "resource": "/tmp/a-private/opencode/tool-output/*"},
+             {"action": "shell", "effect": "allow", "resource": "*"}]
+        b = [{**a[0], "resource": "/tmp/b-private/opencode/tool-output/*"}, a[1]]
+        self.assertEqual(effective_permission_hash(a, "/workspace/a", "/tmp/a-private"),
+                         effective_permission_hash(b, "/workspace/b", "/tmp/b-private"))
+        changed = [b[0], {**b[1], "effect": "ask"}]
+        self.assertNotEqual(effective_permission_hash(a, "/workspace/a", "/tmp/a-private"),
+                            effective_permission_hash(changed, "/workspace/b", "/tmp/b-private"))
+        sibling = [{**a[0], "resource": "/tmp/a-private-other/opencode/tool-output/*"}, a[1]]
+        self.assertNotEqual(effective_permission_hash(a, "/workspace/a", "/tmp/a-private"),
+                            effective_permission_hash(sibling, "/workspace/a", "/tmp/a-private"))
 
 
 if __name__ == "__main__":

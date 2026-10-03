@@ -21,10 +21,13 @@ from run_boundary_public import grade  # noqa: E402
 from staged_lifecycle_canned import (check_session, compact, create_volume, detach,
                                      export, image_entry, restart, turn, wait_arm_ready)  # noqa: E402
 from public_staged_fixture import PROMPTS, REFERENCE, SEED, json_bytes, oracle  # noqa: E402
+from staged_docker_grade import IMAGE, grade as docker_grade  # noqa: E402
 
 SEED_TEXT = "kryn-public-staged-20261003-v1"
 ORDER = ("kryn", "native")  # First byte of SHA-256(SEED_TEXT) is odd.
 TOOL_VENV = Path("/private/tmp/kryn-python-tools-v2-20261003")
+FIXTURE_SHA256 = "b7209bb5bac3ead98fa6b5f8d15e9346c803f520d6edc27af7e61125b1ad4630"
+PROFILE_SHA256 = "05c4645f3b691ae09b239534c026a9da5fa929677e39cff3c0d867fe9e91fe52"
 
 
 def sha(data):
@@ -106,6 +109,30 @@ def prompts_retained(history, prompts):
     return [stored.count(prompt) == 1 for prompt in prompts]
 
 
+def functional_rejection(result):
+    return (not result["passed"] and result["candidate_source_unchanged"] and
+            any(not case["passed"] for case in result["cases"]) and
+            all(case["exit"] == 0 and case["cause"] is None and case["valid_json"]
+                for case in result["cases"]))
+
+
+def effective_permission_hash(permissions, workspace, server_private):
+    """Normalize only the two runtime-owned disposable paths."""
+    normalized = []
+    for item in permissions:
+        copy = dict(item)
+        resource = copy.get("resource")
+        if isinstance(resource, str):
+            for actual, marker in ((str(server_private), "<server_private>"),
+                                   (str(workspace), "<workspace>")):
+                if resource == actual or resource.startswith(actual + "/"):
+                    resource = marker + resource[len(actual):]
+                    break
+            copy["resource"] = resource
+        normalized.append(copy)
+    return sha(json_bytes(normalized))
+
+
 def seed_and_preflight(root):
     seed = root / "seed"
     seed.mkdir(mode=0o700)
@@ -136,8 +163,30 @@ def seed_and_preflight(root):
     command("git", "-C", str(seed), "add", "solve.py", "rules.json")
     command("git", "-C", str(seed), "-c", "user.name=PublicResearch", "-c",
             "user.email=public@example.invalid", "commit", "-qm", "seed")
-    return seed, grader, {"controls": results, "seed_commit": command("git", "-C", str(seed),
-        "rev-parse", "HEAD"), "reference_sha256": sha(REFERENCE.encode()),
+    base = command("git", "-C", str(seed), "rev-parse", "HEAD")
+    stage_root = root / "docker-preflight"
+    docker = {"image_id": command("docker", "image", "inspect", IMAGE,
+                                  "--format", "{{.Id}}"),
+              "seed_fails_stage1": functional_rejection(docker_grade(
+                  seed, seed, base, grader / "stage1.json", stage_root)),
+              "reference": [], "stale_separator_fails_stage3": None}
+    for stage in (1, 2):
+        docker["reference"].append(docker_grade(
+            seed, seed, base, grader / f"stage{stage}.json", stage_root,
+            source_override=grader / "reference.py")["passed"])
+    docker["stale_separator_fails_stage3"] = functional_rejection(docker_grade(
+        seed, seed, base, grader / "stage3.json", stage_root,
+        source_override=grader / "reference.py"))
+    (seed / "rules.json").write_bytes(json_bytes({"separator": "_"}))
+    docker["reference"].append(docker_grade(
+        seed, seed, base, grader / "stage3.json", stage_root,
+        source_override=grader / "reference.py")["passed"])
+    (seed / "rules.json").write_bytes(json_bytes({"separator": "-"}))
+    if not (docker["seed_fails_stage1"] and all(docker["reference"]) and
+            docker["stale_separator_fails_stage3"]):
+        raise RuntimeError("Frozen Docker-stage controls failed: " + repr(docker))
+    return seed, grader, {"controls": results, "docker_controls": docker,
+        "seed_commit": base, "reference_sha256": sha(REFERENCE.encode()),
         "oracle_sha256": [sha((grader / f"stage{n}.json").read_bytes()) for n in (1, 2, 3)]}
 
 
@@ -183,6 +232,13 @@ def arm(root, which, seed, grader, preflight, tools):
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
                 wait_arm_ready(server, which, products)
+                inventory = server.request("GET", "/api/agent", timeout=5)["data"]
+                agent = next((item for item in inventory if item.get("id") == "agent"), None)
+                if not agent or not isinstance(agent.get("permissions"), list):
+                    raise RuntimeError("Effective Agent permissions are unavailable")
+                result["effective_permissions_sha256"] = effective_permission_hash(
+                    agent["permissions"], workspace, server.temporary.name)
+                (folder / "agent-inventory.json").write_text(json.dumps(inventory, indent=2) + "\n")
                 sid = server.request("POST", "/api/session", {
                     "title": "public-staged-model", "agent": "agent",
                     "model": {"providerID": "local", "id": "qwen", "variant": "default"},
@@ -202,8 +258,11 @@ def arm(root, which, seed, grader, preflight, tools):
                     step["ownership_verified"] = ownership["verified"]
                     step["read_before_edit"] = read_before_edit(stage / "events.jsonl", index)
                     step["events"] = event_metrics(stage / "events.jsonl")
-                    step["independent_grade_passed"] = grade(
-                        workspace, grader / "private", grader / f"stage{index}.json")
+                    step["docker_grade"] = docker_grade(
+                        workspace, seed, preflight["seed_commit"],
+                        grader / f"stage{index}.json", folder / "docker-stages",
+                        cancelled=guard.cancel.is_set)
+                    step["independent_grade_passed"] = step["docker_grade"]["passed"]
                     step["rules_sha256"] = sha((workspace / "rules.json").read_bytes())
                     result["stages"].append(step)
                     (stage / "stage-result.json").write_text(json.dumps(step, indent=2) + "\n")
@@ -228,6 +287,9 @@ def arm(root, which, seed, grader, preflight, tools):
             result["server_shutdown_proved"] = server.process.poll() is not None and not server.forced_shutdown
             result["requests"] = relay.records
             result["relay_settled"] = not relay.connections and not relay.gate.locked()
+            result["wire_schema_stable"] = bool(relay.records and all(
+                item["tool_schema_sha256"] == relay.records[0]["tool_schema_sha256"]
+                for item in relay.records))
         result["passed"] = (len(result["stages"]) == 3 and
             all(s["generation_verified"] and s["ownership_verified"] and
                 s["read_before_edit"]["passed"] and s["independent_grade_passed"]
@@ -235,7 +297,8 @@ def arm(root, which, seed, grader, preflight, tools):
             len(result["compactions"]) == len(result["restarts"]) == 2 and
             result["stored_compactions"] == result["compactions"] and
             all(result["stored_prompts"]) and result["server_shutdown_proved"] and
-            result["relay_settled"] and result["rule_after_owner_edit_sha256"] ==
+            result["relay_settled"] and result["wire_schema_stable"] and
+            result["rule_after_owner_edit_sha256"] ==
             sha(json_bytes({"separator": "_"})))
     except BaseException as error:
         result["error"] = type(error).__name__ + ": " + str(error)
@@ -270,6 +333,9 @@ def main():
     output = args.output.absolute()
     if output.parent != Path("/private/tmp") or output != output.resolve() or output.exists():
         parser.error("Choose a fresh direct /private/tmp receipt directory")
+    if (sha((ROOT / "research/public_staged_fixture.py").read_bytes()) != FIXTURE_SHA256 or
+            sha((ROOT / "setup/accepted-profile.json").read_bytes()) != PROFILE_SHA256):
+        parser.error("Frozen public fixture or installed model profile changed")
     if not args.preflight_only and command("git", "-C", str(ROOT), "status", "--porcelain"):
         parser.error("Commit the frozen runner/fixture before any model request")
     output.mkdir(mode=0o700)
@@ -291,8 +357,14 @@ def main():
             rows[1]["requests"][0]["tool_schema_sha256"])
         report["matched_permissions"] = (rows[0].get("permissions_sha256") ==
                                           rows[1].get("permissions_sha256"))
+        report["matched_effective_permissions"] = (
+            rows[0].get("effective_permissions_sha256") is not None and
+            rows[0].get("effective_permissions_sha256") ==
+            rows[1].get("effective_permissions_sha256"))
         report["passed"] = (all(row["passed"] for row in rows) and
-                            report["matched_first_wire_schema"] and report["matched_permissions"])
+                            report["matched_first_wire_schema"] and
+                            report["matched_permissions"] and
+                            report["matched_effective_permissions"])
     (output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"preflight": preflight["controls"], "source_commit": report["source_commit"],
                       "results": [{"arm": row["arm"], "passed": row["passed"],
