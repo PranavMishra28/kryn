@@ -31,6 +31,8 @@ candidate-volume model screen and the isolated Python/Git tool correction.
 [ui_gateway/README.md](ui_gateway/README.md) records the research-only fixed-page
 browser gateway, its no-model OpenCode dispatch check, the rejected
 deferred-worker resource experiment and remaining UI gates.
+[STAGED_CONTINUITY.md](STAGED_CONTINUITY.md) preregisters a public, zero-model
+three-turn canary for two native compactions and two actual server restarts.
 `python3 -B research/summarize_verification_feedback.py` checks its compact
 public-development receipts. Rejected candidates did not change the product.
 

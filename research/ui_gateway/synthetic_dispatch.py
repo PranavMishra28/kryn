@@ -36,10 +36,11 @@ INTERACTION_TOOLS = [("browser_browser_navigate", {"url": URL}),
 
 
 class FakeInference(ThreadingHTTPServer):
-    def __init__(self, sequence):
+    def __init__(self, sequence, final_text="Browser tool call finished."):
         super().__init__(("127.0.0.1", 0), Handler)
         self.calls = []
         self.sequence = sequence
+        self.final_text = final_text
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -72,6 +73,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(400)
             return
         self.server.calls.append({"model": payload.get("model"), "tools": tools,
+                                  "tool_schema_sha256": hashlib.sha256(json.dumps(
+                                      payload.get("tools", []), sort_keys=True).encode()).hexdigest(),
                                   "stream": payload.get("stream")})
         number = len(self.server.calls)
         if (payload.get("model") != MODEL or
@@ -86,7 +89,7 @@ class Handler(BaseHTTPRequestHandler):
                 "function": {"name": name, "arguments": json.dumps(arguments)}}]}
             finish = "tool_calls"
         else:
-            delta = {"role": "assistant", "content": "Browser tool call finished."}
+            delta = {"role": "assistant", "content": self.server.final_text}
             finish = "stop"
         chunks = [
             {"id": "chatcmpl-kryn-wire", "object": "chat.completion.chunk", "created": 0,
