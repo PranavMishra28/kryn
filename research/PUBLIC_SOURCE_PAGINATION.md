@@ -108,3 +108,59 @@ the already-allowed exact source file; it must pass no-model read, edit-denial,
 and sibling-denial checks before another live task. Reusing this public fixture
 after that change is development work only. Protected H1 and current-source
 category admission remain closed.
+
+## Post-permission public diagnostic preregistration
+
+The exact-source native-read canary passed both arms at `2ad0e741` (receipt
+SHA-256 `bfe8669cd917c5f23a9e323750bb89d7bca6ed540208aa75c7bfc2776c504b93`).
+From `main` `88f175e`, repeat this **same public development task once** with
+the only behavioral change being the research adapter's external-file
+permission. Recreate the seed, prompt, source and grader controls and verify
+their hashes against the first pair before generation. Keep native-first arm
+order, Qwen3.5-9B-6bit, 8192 output cap, tool catalog, agent variants,
+900-second cap, same daily-use guard and same host occupancy policy. Do not
+relax any resource threshold. A resource abort stops the pair.
+
+Primary diagnostic: does KRYN now complete a native source `read` and reach a
+candidate patch? Strict task success still requires all six independent Docker
+cases, no false completion, matched permissions/wire contracts, complete
+telemetry and cleanup. Record request/token counts, tool failures, wall time,
+pressure, swap and source-use evidence. The original failed pair remains
+immutable; a better result here is **not** a protected effect size because this
+task has been used to diagnose the adapter. If both arms still fail, classify
+the remaining worker/verification failures rather than adding prompt rules.
+
+## Post-permission diagnostic result
+
+At clean preregistered source `b32435cbcdac7a9a85fb98cac88c4bc805477683`,
+the recreated source, provenance, seed commit, prompt, reference and partial
+patches, Docker image and six control verdicts matched the first pair. The
+new fixture receipt is
+`/private/tmp/kryn-public-pagination-20261003-postperm-01/fixture.json`
+(SHA-256 `29e6912013bea35edab43827f30240272dcaad1cc1762664a45cb74ba9b2653c`).
+The native-first real-model pair then **passed strict acceptance in both
+arms**. The raw pair receipt is
+`/private/tmp/kryn-public-pagination-20261003-postperm-01/pair.json`
+(SHA-256 `17a38b3b340015171a2b67c5368ea30bf74ea6f959d2500e3052dc4f94a85319`).
+
+| Arm | Independent grade | Work and resources |
+| --- | --- | --- |
+| Native OpenCode | 6/6 Docker cases, accepted. | 153.436 s, 12 model requests, 12 tool calls, no tool errors; 24,790 input / 5,772 output / 108,544 cached-read session tokens. |
+| KRYN | 6/6 Docker cases, accepted. | 135.213 s, 8 model requests, 8 tool calls, no tool errors; 34,164 input / 4,427 output / 47,104 cached-read session tokens. |
+
+Both agents completed an untruncated native `read` of the pinned source, made
+different accepted patches, and ended without a false completion claim. The
+8192-output model contract, sampling/thinking values and ten-tool wire schema
+matched across every request. Effective permissions matched. Telemetry was
+complete on AC power with normal sampled pressure and zero sampled swap
+growth; sampled listener physical footprints peaked at 12.06 GB (native) and
+12.36 GB (KRYN). The source/provenance hashes did not change, all APFS images
+detached and no grader container remains.
+
+**Interpretation:** the narrow permission change removed the source-delivery
+failure in the KRYN arm and let both workers finish this public task. This
+does not isolate a KRYN harness effect: both arms gained source access, the
+task was reused, and model stochasticity is uncontrolled in one pair. KRYN's
+lower wall time and request count here are descriptive, not an uplift claim.
+External-source category admission still needs fresh tasks, and protected H1,
+long-horizon and frontier comparisons remain unqualified.
