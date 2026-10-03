@@ -47,7 +47,9 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
     }, indent=2) + "\n")
     if disk_start < MIN_DATA_FREE_BYTES:
         raise RuntimeError("Data volume has less than 12 GiB free before trial")
-    if not runtime_is_idle(evidence, "preflight-idle", model_id=MODEL_ID, guard_gib=22):
+    preflight_idle = runtime_is_idle(evidence, "preflight-idle", model_id=MODEL_ID,
+                                     guard_gib=22)
+    if not preflight_idle:
         raise RuntimeError("The guarded local model runtime is not idle")
     config = TrialConfig(
         task=TaskConfig(path=task), trial_name=name, trials_dir=trials_dir,
@@ -128,6 +130,7 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
         "harbor_trial": name, "arm": arm, "variant": variant,
         "harbor_result": str(trial.paths.result_path),
         "install_only": install_only, "reward": reward,
+        "preflight_idle_passed": preflight_idle,
         "exception": (result.exception_info.exception_type
                       if result is not None and result.exception_info else None),
         "guard_preflight_passed": monitor.preflight_passed if monitor else False,
@@ -141,16 +144,17 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
         "wall_stopped": wall_stopped,
         "inference_requests": len(relay.records),
         "resources": summarize_resources(samples) if samples else None,
-        "runtime_idle": runtime_is_idle(evidence, "final-idle") if monitor else None,
+        "runtime_idle": runtime_is_idle(evidence, "final-idle"),
     }
     report["strict_accepted"] = bool(not install_only and reward == 1 and relay.records and
                                      report["exception"] is None and reason is None and
                                      report["runtime_idle"] and report["guard_preflight_passed"] and
                                      clean_resource_evidence(report["resources"]) and
                                      not disk_stopped and not wall_stopped)
-    report["install_passed"] = bool(install_only and report["exception"] is None and
-                                     report["guard_preflight_passed"] and reason is None and
-                                     report["runtime_idle"] and not disk_stopped and not wall_stopped)
+    report["install_passed"] = bool(install_only and result is not None and
+                                     report["exception"] is None and preflight_idle and
+                                     report["runtime_idle"] and not relay.records and
+                                     not disk_stopped and not wall_stopped)
     (evidence / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, sort_keys=True))
     return 0 if report["install_passed"] or report["strict_accepted"] else 1
