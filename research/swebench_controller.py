@@ -105,6 +105,12 @@ def grade_once(campaign, task, run_id, prediction_path):
         if marker.exists():
             stop_orphan(marker, run_id, "swebench.harness.run_evaluation")
         return {"graded": False, "resolved": None, "reason": "interrupted_grader"}
+    while problem := room(campaign, starting=True):
+        atomic(campaign / "pause.json", {"reason": problem, "next": run_id,
+                                          "updated_unix": time.time()})
+        time.sleep(60)
+    if not runtime_idle():
+        raise RuntimeError("Owned model runtime did not settle before official grading")
     evidence.mkdir(mode=0o700, parents=True)
     grade_root = campaign / "grade-root"
     grade_root.mkdir(exist_ok=True)
