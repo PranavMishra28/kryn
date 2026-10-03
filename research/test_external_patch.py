@@ -1,6 +1,7 @@
 """The external adapter refuses dirty or ambiguous benchmark workspaces."""
 from pathlib import Path
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -45,6 +46,47 @@ class ExternalPreflightTest(unittest.TestCase):
             self.assertIn(b"+print(2)", patch_bytes)
             self.assertEqual(before, hashlib.sha256((workspace / ".git/index").read_bytes()).digest())
             self.assertFalse(list(private.glob("patch-index-*")))
+
+    def test_patch_rehashes_same_size_tracked_edit_with_stale_index_stat(self):
+        with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
+            root = Path(tmp).resolve()
+            workspace = root / "workspace"; workspace.mkdir()
+            subprocess.run(["git", "init", "-q", str(workspace)], check=True)
+            source = workspace / "source.py"
+            source.write_text("value = 1\n")
+            subprocess.run(["git", "-C", str(workspace), "config", "core.trustctime",
+                            "false"], check=True)
+            subprocess.run(["git", "-C", str(workspace), "add", "source.py"], check=True)
+            subprocess.run(["git", "-C", str(workspace), "-c", "user.name=Research",
+                            "-c", "user.email=research@example.invalid", "commit", "-qm",
+                            "seed"], check=True)
+            base = subprocess.check_output(["git", "-C", str(workspace), "rev-parse",
+                                            "HEAD"], text=True).strip()
+            before = source.stat()
+            source.write_text("value = 2\n")
+            # Recreate the equal-size/equal-mtime cache collision that can
+            # occur immediately after cloning a task checkout.
+            os.utime(source, ns=(before.st_atime_ns, before.st_mtime_ns))
+            staged_new = workspace / "new_test.py"
+            staged_new.write_text("assert True\n")
+            # A candidate index can explicitly suppress that same-size edit;
+            # the private capture index must still describe the worktree.
+            subprocess.run(["git", "-C", str(workspace), "update-index",
+                            "--assume-unchanged", "source.py"], check=True)
+            self.assertNotIn("source.py", subprocess.check_output(
+                ["git", "-C", str(workspace), "diff", "--name-only", base], text=True))
+            subprocess.run(["git", "-C", str(workspace), "add", "-N", "new_test.py"],
+                           check=True)
+            evidence = root / "evidence"; evidence.mkdir()
+            private = root / "private"; private.mkdir()
+            with patch("run_external_patch.background_boundary", return_value=[]):
+                patch_file, _, _, _ = collect_patch(
+                    workspace, base, evidence, private=private, dependencies=[],
+                    git_binary=Path(shutil.which("git")), tool_path=None,
+                    cancelled=lambda: False)
+            payload = patch_file.read_text()
+            self.assertIn("+value = 2", payload)
+            self.assertIn("+assert True", payload)
 
     def test_patch_budget_fails_closed_and_removes_partial_output(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:

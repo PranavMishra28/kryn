@@ -5,6 +5,7 @@ The benchmark oracle remains outside the whole-process candidate boundary. This
 adapter owns lifecycle and evidence only; OpenCode remains the agent loop.
 """
 import argparse
+import contextlib
 import copy
 import hashlib
 import json
@@ -31,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PATCH_BUDGET = 16 * 1024**2
 UNTRACKED_LIST_BUDGET = 256 * 1024
 UNTRACKED_COUNT_BUDGET = 1024
+STAGED_LIST_BUDGET = 4 * 1024**2
 
 
 class PatchBudgetExceeded(RuntimeError):
@@ -119,24 +121,26 @@ def bounded_output(command, destination, limit, *, env, cwd, cancelled, timeout=
     return total, digest.hexdigest()
 
 
-def quiet_command(command, *, env, cwd, cancelled, timeout=20):
-    child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL, env=env, start_new_session=True)
-    deadline = time.monotonic() + timeout
-    try:
-        while os.waitid(os.P_PID, child.pid,
-                        os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
-            if cancelled():
-                raise CaptureCancelled("Resource guard interrupted patch capture")
-            if time.monotonic() >= deadline:
-                raise subprocess.TimeoutExpired(command, timeout)
-            time.sleep(.1)
-    except BaseException:
-        kill_group(child)
-        raise
-    status = kill_group(child)
-    if status:
-        raise subprocess.CalledProcessError(status, command)
+def quiet_command(command, *, env, cwd, cancelled, timeout=20, stdin_file=None):
+    with (Path(stdin_file).open("rb") if stdin_file else contextlib.nullcontext(None)) as source:
+        child = subprocess.Popen(command, cwd=cwd, stdin=source or subprocess.DEVNULL,
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                 env=env, start_new_session=True)
+        deadline = time.monotonic() + timeout
+        try:
+            while os.waitid(os.P_PID, child.pid,
+                            os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+                if cancelled():
+                    raise CaptureCancelled("Resource guard interrupted patch capture")
+                if time.monotonic() >= deadline:
+                    raise subprocess.TimeoutExpired(command, timeout)
+                time.sleep(.1)
+        except BaseException:
+            kill_group(child)
+            raise
+        status = kill_group(child)
+        if status:
+            raise subprocess.CalledProcessError(status, command)
 
 
 def candidate_file_size(root_fd, name, device, *, missing_ok=False):
@@ -225,13 +229,23 @@ def isolated_git(workspace, private, dependencies, git_binary, tool_path):
 
 
 def collect_patch(workspace, base_commit, evidence, *, private, dependencies,
-                  git_binary, tool_path, cancelled):
+                  git_binary, tool_path, cancelled, readonly_workspace=False):
     """Include new source files in a bounded patch without changing the agent index."""
     workspace, evidence, private = Path(workspace), Path(evidence), Path(private)
     git_command, capture_env = isolated_git(
         workspace, private, dependencies, git_binary, tool_path)
+    if readonly_workspace:
+        # `git add -N` writes the empty blob even when its index is private.
+        # Keep those objects outside the read-only candidate mount while Git
+        # still reads the frozen clone's objects as an alternate.
+        objects = private / "objects"
+        objects.mkdir(mode=0o700)
+        capture_env["GIT_OBJECT_DIRECTORY"] = str(objects)
+        capture_env["GIT_ALTERNATE_OBJECT_DIRECTORIES"] = str(workspace / ".git/objects")
     names_file = evidence / "untracked.paths"
     changed_file = evidence / "changed.paths"
+    staged_file = evidence / "staged.paths"
+    index_info_file = private / "tracked.index-info"
     temporary_index = None
     workspace_fd = os.open(workspace, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     device = os.fstat(workspace_fd).st_dev
@@ -245,15 +259,6 @@ def collect_patch(workspace, base_commit, evidence, *, private, dependencies,
             raise PatchBudgetExceeded("Too many untracked candidate files")
         if sum(candidate_file_size(workspace_fd, name, device) for name in names) > PATCH_BUDGET:
             raise PatchBudgetExceeded("Untracked candidate files exceed patch budget")
-        bounded_output(git_command + ["diff", "--name-only", "-z", base_commit, "--"],
-                       changed_file, UNTRACKED_LIST_BUDGET, env=capture_env,
-                       cwd=workspace, cancelled=cancelled)
-        changed = [os.fsdecode(name) for name in changed_file.read_bytes().split(b"\0") if name]
-        if len(changed) > UNTRACKED_COUNT_BUDGET:
-            raise PatchBudgetExceeded("Too many changed candidate files")
-        if sum(candidate_file_size(workspace_fd, name, device, missing_ok=True)
-               for name in changed) > PATCH_BUDGET:
-            raise PatchBudgetExceeded("Changed candidate files exceed patch budget")
         git_dir_fd = os.open(".git", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
                              dir_fd=workspace_fd)
         try:
@@ -280,6 +285,34 @@ def collect_patch(workspace, base_commit, evidence, *, private, dependencies,
         finally:
             os.close(git_dir_fd)
         capture_env["GIT_INDEX_FILE"] = str(temporary_index)
+        # The copied index can have the same stat tuple as a same-size edit
+        # made immediately after clone. Clear tracked entries' stat cache in
+        # the private copy so Git hashes actual worktree bytes. Preserve
+        # intent-to-add entries (zero object ID) and their extended flags.
+        bounded_output(git_command + ["ls-files", "--stage", "-z"],
+                       staged_file, STAGED_LIST_BUDGET, env=capture_env,
+                       cwd=workspace, cancelled=cancelled)
+        with index_info_file.open("wb") as source:
+            for entry in staged_file.read_bytes().split(b"\0"):
+                if not entry:
+                    continue
+                fields = entry.split(b"\t", 1)[0].split(b" ")
+                if len(fields) != 3 or not fields[1]:
+                    raise PatchBudgetExceeded("Malformed candidate Git index entry")
+                if fields[1].strip(b"0"):
+                    source.write(entry + b"\0")
+        quiet_command(git_command + ["update-index", "-z", "--index-info"],
+                      env=capture_env, cwd=workspace, cancelled=cancelled,
+                      stdin_file=index_info_file)
+        bounded_output(git_command + ["diff", "--name-only", "-z", base_commit, "--"],
+                       changed_file, UNTRACKED_LIST_BUDGET, env=capture_env,
+                       cwd=workspace, cancelled=cancelled)
+        changed = [os.fsdecode(name) for name in changed_file.read_bytes().split(b"\0") if name]
+        if len(changed) > UNTRACKED_COUNT_BUDGET:
+            raise PatchBudgetExceeded("Too many changed candidate files")
+        if sum(candidate_file_size(workspace_fd, name, device, missing_ok=True)
+               for name in changed) > PATCH_BUDGET:
+            raise PatchBudgetExceeded("Changed candidate files exceed patch budget")
         if names:
             quiet_command(git_command + ["add", "-N", "--", *names], env=capture_env,
                           cwd=workspace, cancelled=cancelled)
@@ -294,6 +327,8 @@ def collect_patch(workspace, base_commit, evidence, *, private, dependencies,
     finally:
         names_file.unlink(missing_ok=True)
         changed_file.unlink(missing_ok=True)
+        staged_file.unlink(missing_ok=True)
+        index_info_file.unlink(missing_ok=True)
         if temporary_index is not None:
             temporary_index.unlink(missing_ok=True)
         os.close(workspace_fd)
@@ -451,8 +486,10 @@ def drive(child, prompt, timeout, cancelled):
     return ("resource_guard" if cancelled() else None), bytes(streams[child.stdout][0]), bytes(streams[child.stderr][0])
 
 
-def run(args):
+def run(args, *, defer_patch=False):
     private_parent = getattr(args, "private_parent", None)
+    if defer_patch and private_parent is None:
+        raise ValueError("Deferred capture requires a separate-volume candidate private parent")
     workspace, prompt_file, evidence, state_dir, git_config_sha = prepare(
         args.workspace, args.prompt, args.evidence, args.base_commit,
         private_parent=private_parent)
@@ -470,7 +507,8 @@ def run(args):
               "model_profile_sha256": hashlib.sha256(profile_path.read_bytes()).hexdigest(),
               "model_repository": profile["repository"], "model_revision": profile["revision"],
               "model_id": MODEL_ID, "timeout_seconds": args.timeout, "completed": False,
-              "initial_git_config_sha256": git_config_sha}
+              "initial_git_config_sha256": git_config_sha,
+              "patch_deferred": defer_patch}
     report["candidate_private_parent"] = str(private_parent) if private_parent else None
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
@@ -547,34 +585,35 @@ def run(args):
                     exports, 0, sid, set(owned["verified_sessions"]))
                 report["completed"] = bool(cause is None and child.returncode == 0
                     and ownership["verified"] and report["generation"]["verified"])
-            try:
-                post_git_config_sha = git_config_sha256(workspace)
-                report["post_git_config_sha256"] = post_git_config_sha
-                if post_git_config_sha != git_config_sha:
-                    raise CandidateGitConfigChanged("Candidate Git config changed during the model turn")
-                with tempfile.TemporaryDirectory(prefix="kryn-patch-",
-                                                 dir=private_parent or "/private/tmp") as capture_private:
-                    _, untracked, patch_size, patch_sha = collect_patch(
-                        workspace, args.base_commit, evidence,
-                        private=Path(capture_private), dependencies=dependencies,
-                        git_binary=(tool_path / "git" if tool_path else
-                                    Path("/Library/Developer/CommandLineTools/usr/bin/git")),
-                        tool_path=tool_path, cancelled=monitor.cancel.is_set)
-                report["untracked_files_included_in_patch"] = untracked
-                report["patch_size_bytes"] = patch_size
-                report["patch_sha256"] = patch_sha
-            except PatchBudgetExceeded as error:
-                report["intervention"] = "patch_budget"
-                report["patch_error"] = str(error)
-                report["completed"] = False
-            except CandidateGitConfigChanged as error:
-                report["intervention"] = "git_config_changed"
-                report["patch_error"] = str(error)
-                report["completed"] = False
-            except CaptureCancelled as error:
-                report["intervention"] = "resource_guard"
-                report["patch_error"] = str(error)
-                report["completed"] = False
+            if not defer_patch:
+                try:
+                    post_git_config_sha = git_config_sha256(workspace)
+                    report["post_git_config_sha256"] = post_git_config_sha
+                    if post_git_config_sha != git_config_sha:
+                        raise CandidateGitConfigChanged("Candidate Git config changed during the model turn")
+                    with tempfile.TemporaryDirectory(prefix="kryn-patch-",
+                                                     dir=private_parent or "/private/tmp") as capture_private:
+                        _, untracked, patch_size, patch_sha = collect_patch(
+                            workspace, args.base_commit, evidence,
+                            private=Path(capture_private), dependencies=dependencies,
+                            git_binary=(tool_path / "git" if tool_path else
+                                        Path("/Library/Developer/CommandLineTools/usr/bin/git")),
+                            tool_path=tool_path, cancelled=monitor.cancel.is_set)
+                    report["untracked_files_included_in_patch"] = untracked
+                    report["patch_size_bytes"] = patch_size
+                    report["patch_sha256"] = patch_sha
+                except PatchBudgetExceeded as error:
+                    report["intervention"] = "patch_budget"
+                    report["patch_error"] = str(error)
+                    report["completed"] = False
+                except CandidateGitConfigChanged as error:
+                    report["intervention"] = "git_config_changed"
+                    report["patch_error"] = str(error)
+                    report["completed"] = False
+                except CaptureCancelled as error:
+                    report["intervention"] = "resource_guard"
+                    report["patch_error"] = str(error)
+                    report["completed"] = False
         except BaseException as error:
             report["error"] = type(error).__name__ + ": " + str(error)
             report["completed"] = False
@@ -588,6 +627,22 @@ def run(args):
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete"))
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
+    if defer_patch:
+        # InferenceRelay's context manager joins its listener with a timeout.
+        # A deferred patch may advance to volume detachment only once that
+        # listener and any forwarded request have actually settled.
+        for _ in range(20):
+            if not relay.thread.is_alive() and not relay.connections and not relay.gate.locked():
+                break
+            time.sleep(.1)
+        report["inference_relay_settled"] = (
+            not relay.thread.is_alive() and not relay.connections and not relay.gate.locked())
+        if not report["inference_relay_settled"]:
+            report["completed"] = False
+            report["error"] = "Inference relay did not settle after server shutdown"
+        (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
+        if not report["inference_relay_settled"]:
+            raise RuntimeError(report["error"])
     return report
 
 
