@@ -482,3 +482,39 @@ The two verified preflight archives have an owner-only index SHA-256
 the failed and passed result SHA-256 values are respectively
 `a73d639940f1513297d375db9725e8675f1d3024657b6539090d5ccf0dcffbab`
 and `6f011f668b9e3b19f8d624649299bd3e5fe08927e9c88dee1336efc2e965d71a`.
+
+## Official-source external-information draft
+
+An owner-only replacement for one fictional external-information slot now uses
+a pinned current official documentation snapshot. No candidate model has seen
+the task. The first oracle incorrectly accepted a wrong implementation that
+placed a timing-safe comparison in dead code; its frozen draft and failed audit
+remain archived. A runtime-call check then accepted a second wrong
+implementation that made an irrelevant comparison before using ordinary
+equality. The corrected draft adds a forced-false comparison probe. Its seed,
+partial solution, and four targeted wrong variants fail; a reference and a
+structurally different alternative pass the networkless, read-only Docker
+grader. These controls test sampled behavior and do not prove exhaustive
+timing security.
+
+At clean `main` `90a3fa84a81022490919337d8702a9e1adba74bf`, a zero-model
+preflight cloned the frozen seed onto a disposable candidate APFS volume. All
+14 direct boundary checks and all 21 real OpenCode checks in **each** native
+and KRYN arm passed. Both arms read the exact pinned source through their
+shell API; source writes, private-sibling reads, hidden-grader reads and
+unlisted loopback were denied. The source and provenance hashes were
+unchanged. A bounded host copy of the reference passed independent Docker
+grading after the candidate image detached. This is source-channel and oracle
+mechanics only: it does not prove the native Agent selected and read that
+source, admit a protected task, seal the combined roster, or measure H1.
+
+The owner-only corrected draft freeze is
+`a51edabc8a8b546199d6f322917f57c49f372995b6f3f042ce2053d1bdbdf953`;
+its eight-variant validation receipt is
+`c8392d520332b1825cf411ef923f7969f3456eca491014ae2f9e9f758bb876c4`.
+The no-model preflight result SHA-256 is
+`153a13bfd6c8dedaa5142a69e3b7e88752ea16ac90666e6cd6e8f5f692488b77`;
+its verified archive index is
+`43d94128ca70296ddcdcebb69f08626797d5bb772ef5d24a0e62330234a87eff`.
+The draft remains `protected_status=false` pending independent admission
+review and the remaining category gates.
