@@ -53,6 +53,9 @@ verification failure, not evidence that a task-specific prompt fix transfers.
 
 Raw logs, model traces, task copies, resource samples, launch receipts and
 independent pair reviews remain in the private local research directory.
+The six compact, machine-readable arm receipts are public in
+`research/history/harbor_subset.jsonl` (SHA-256
+`aab30ba05d88a99523d49dc98f49f9937c86ac381bcf521e52d77cd4db165c0d`).
 The frozen environment lock v7 SHA-256 is
 `0502bbcc8df9de226a6a6cf4dff29749e98eda85e8a0b2cddbff26ae5bcf7440`.
 The three independent pair-review receipt hashes are recorded beside those
