@@ -61,6 +61,16 @@ The H1 thresholds and task-retirement rules below are unchanged.
    called an official full-suite score. Docker is installed but its daemon was not
    running at preregistration; the external gate is pending, not passed.
 
+Before pushing any research branch, keep every unsealed task ID, prompt,
+acceptance case, grader hash and seed identity out of public files, commit
+messages and PR text. Run `research/check_holdout_publication.py` with the
+private roster, its independently recorded SHA-256 digest, and proposed PR text
+before publication. It verifies the remote public `main` base, then scans current
+tracked and staged files, every commit added since that base, and proposed PR text.
+Its exact-match scan is a preflight, not a substitute for human review of
+paraphrases, independently admitting the full roster, older public history, or
+later PR edits. Public exposure retires the affected task from protected use.
+
 ## Endpoints and decision rules
 
 Primary endpoint: fraction of trials with every frozen acceptance criterion passed
