@@ -293,6 +293,7 @@ def main(draft, image, output):
         escape_mutants = []
         for field, value in (("PidMode", "host"), ("IpcMode", "host"),
                              ("CgroupnsMode", "host"), ("Devices", [{"PathOnHost": "/dev/disk0"}]),
+                             ("DeviceRequests", [{"Driver": "nvidia"}]),
                              ("CapAdd", ["SYS_ADMIN"]), ("Binds", ["/:/host:ro"]),
                              ("SecurityOpt", ["no-new-privileges", "seccomp=unconfined"])):
             mutant = json.loads(json.dumps(inspected))
@@ -304,6 +305,14 @@ def main(draft, image, output):
             else:
                 escape_mutants.append(False)
         report["checks"]["container_escape_mutants_rejected"] = all(escape_mutants)
+        network_mutant = json.loads(json.dumps(inspected))
+        network_mutant["NetworkSettings"]["Networks"] = {"bridge": {}}
+        try:
+            verify_boundary(network_mutant, image)
+        except RuntimeError:
+            report["checks"]["attached_network_rejected"] = True
+        else:
+            report["checks"]["attached_network_rejected"] = False
         stall = output / "stalled-broker.py"
         stall_pid = output / "stalled-broker.pid"
         stall.write_text("import os, time\n"

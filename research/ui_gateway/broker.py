@@ -111,13 +111,19 @@ def inspect_container(name, image):
 
 def verify_boundary(item, image):
     host = item["HostConfig"]
+    networks = item["NetworkSettings"]["Networks"]
     if (item["Image"] != image or item["Mounts"] or host["NetworkMode"] != "none" or
+            not isinstance(networks, dict) or set(networks) != {"none"} or
+            not isinstance(networks["none"], dict) or
+            any(networks["none"].get(key) for key in
+                ("Gateway", "IPAddress", "IPv6Gateway", "GlobalIPv6Address")) or
             host["ReadonlyRootfs"] is not True or host["Privileged"] is not False or
             set(host["CapDrop"] or []) != {"ALL"} or
             set(host["SecurityOpt"] or []) != {"no-new-privileges"} or
             host["PidMode"] not in ("", "private") or host["IpcMode"] != "private" or
             host["CgroupnsMode"] != "private" or host["UsernsMode"] not in ("", "private") or
-            host["Devices"] or host["DeviceCgroupRules"] or host["CapAdd"] or
+            host["Devices"] or host.get("DeviceRequests") or
+            host["DeviceCgroupRules"] or host["CapAdd"] or
             host["Binds"] or host.get("Mounts") or host["VolumesFrom"] or
             host["PortBindings"] or host["PublishAllPorts"] is not False or
             not 0 < host["PidsLimit"] <= 128 or not 0 < host["Memory"] <= 512 * 1024 * 1024 or

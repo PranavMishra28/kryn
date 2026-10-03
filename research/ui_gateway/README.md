@@ -36,9 +36,9 @@ keyboard control runs afterward and the seed page is reloaded before cleanup.
 The latest local no-model run used image
 `sha256:16c1133894770bceab9f2f3a9bfac4e7ec1b3dde1fe2f0f6a7063ba49b3436a2`.
 Its private receipt is
-`/private/tmp/kryn-ui-gateway-preflight-19/receipt.json`, SHA-256
-`27422fc97134fb2129a1b9be4dc8f932f6a49a0dd865bb5f04554f47b3221d69`.
-All 33 no-model checks passed, including a reference ArrowRight interaction,
+`/private/tmp/kryn-ui-gateway-preflight-20/receipt.json`, SHA-256
+`076428afe0ba986231600fcdfc86bc00c6fc13e40e4ed477a43a9a323b683855`.
+All 34 no-model checks passed, including a reference ArrowRight interaction,
 hidden-file and hardlink denial, malicious page file/network attempts, symlink
 swap, FIFO, oversize entry, rejection of caller-supplied HTML, zero-limit and
 root and container-escape attestation mutants, startup-timeout reaping, clean seed state
