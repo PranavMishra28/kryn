@@ -27,6 +27,7 @@ def main():
     parser.add_argument("preflight_report", type=Path)
     parser.add_argument("receipt", type=Path)
     parser.add_argument("--tool-venv", required=True, type=Path)
+    parser.add_argument("--candidate-product-source", action="store_true")
     args = parser.parse_args()
     draft, preflight, receipt = (path.absolute() for path in
                                  (args.draft, args.preflight_report, args.receipt))
@@ -74,7 +75,8 @@ def main():
             seed=seed, prompt=prompt, task_id=TASK, arm="kryn",
             tool_venv=args.tool_venv, receipt=receipt,
             hidden_paths=[oracle, reference, partial, manifest_file],
-            grade=grade, timeout=900)
+            grade=grade, timeout=900,
+            candidate_product_source=args.candidate_product_source)
     except BaseException as exc:
         error = type(exc).__name__ + ": " + str(exc)
     barrier = json.loads((receipt / "barrier.json").read_text()) if (receipt / "barrier.json").exists() else {}
@@ -92,6 +94,7 @@ def main():
     summary = {"schema": 1, "kind": "retired_python_agent_grade_pilot",
                "source_commit": source_commit, "task_id": TASK,
                "draft_manifest_sha256": MANIFEST_SHA256,
+               "candidate_product_source": args.candidate_product_source,
                "preflight_report_sha256": sha(preflight / "report.json"),
                "barrier_report_sha256": sha(receipt / "barrier.json") if barrier else None,
                "accepted": accepted, "protected_result": False, "error": error}
