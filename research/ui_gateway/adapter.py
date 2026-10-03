@@ -4,21 +4,29 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import sys
+from urllib.parse import parse_qsl, urlsplit
 
 URL = "http://candidate.invalid/index.html"
 MAX_RPC = 65536
 MAX_REPLY = 3_000_000
 TOOLS = [
-    {"name": "browser_navigate", "description": "Open or reload the candidate page at the fixed URL only.",
-     "inputSchema": {"type": "object", "properties": {"url": {"type": "string", "enum": [URL]}},
+    {"name": "browser_navigate", "description": "Open the fixed candidate page, optionally with one bounded q query.",
+     "inputSchema": {"type": "object", "properties": {"url": {"type": "string", "maxLength": 256}},
                      "required": ["url"], "additionalProperties": False}},
     {"name": "browser_snapshot", "description": "Read the current page's accessible structure.",
      "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False}},
     {"name": "browser_click", "description": "Click one element on the candidate page by CSS selector.",
      "inputSchema": {"type": "object", "properties": {"selector": {"type": "string", "maxLength": 128}},
                      "required": ["selector"], "additionalProperties": False}},
+    {"name": "browser_fill_form", "description": "Fill one visible form field on the candidate page.",
+     "inputSchema": {"type": "object", "properties": {"selector": {"type": "string", "maxLength": 128},
+                                                  "value": {"type": "string", "maxLength": 256}},
+                     "required": ["selector", "value"], "additionalProperties": False}},
+    {"name": "browser_navigate_back", "description": "Return to the previous candidate-page history entry.",
+     "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False}},
     {"name": "browser_press_key", "description": "Press one navigation key in the candidate page.",
      "inputSchema": {"type": "object", "properties": {"key": {"type": "string", "enum":
                      ["ArrowLeft", "ArrowRight", "Home", "End", "Tab", "Enter", "Space"]}},
@@ -58,13 +66,43 @@ def exact(value, keys):
     return isinstance(value, dict) and set(value) == set(keys)
 
 
+def candidate_query(url):
+    if not isinstance(url, str) or len(url) > 256:
+        return None
+    try:
+        parsed = urlsplit(url)
+    except ValueError:
+        return None
+    if (parsed.scheme != "http" or parsed.netloc != "candidate.invalid" or
+            parsed.path != "/index.html" or parsed.fragment or
+            parsed.geturl() != url):
+        return None
+    if not parsed.query:
+        return "" if url == URL else None
+    if re.search(r"%(?![0-9A-Fa-f]{2})", parsed.query):
+        return None
+    try:
+        query = parse_qsl(parsed.query, strict_parsing=True, keep_blank_values=True,
+                          errors="strict")
+    except ValueError:
+        return None
+    if (len(query) != 1 or query[0][0] != "q" or not 1 <= len(query[0][1]) <= 128 or
+            any(ord(character) < 32 or ord(character) == 127 for character in query[0][1])):
+        return None
+    return query[0][1]
+
+
 def call_tool(name, arguments, port, token):
-    if name == "browser_navigate" and exact(arguments, ("url",)) and arguments["url"] == URL:
-        command = {"op": "open"}
+    if name == "browser_navigate" and exact(arguments, ("url",)) and (query := candidate_query(arguments["url"])) is not None:
+        command = {"op": "open", "query": query}
     elif name == "browser_snapshot" and exact(arguments, ()):
         command = {"op": "snapshot"}
     elif name == "browser_click" and exact(arguments, ("selector",)) and isinstance(arguments["selector"], str) and len(arguments["selector"]) <= 128:
         command = {"op": "click", "selector": arguments["selector"]}
+    elif name == "browser_fill_form" and exact(arguments, ("selector", "value")) and isinstance(arguments["selector"], str) and isinstance(arguments["value"], str) and len(arguments["selector"]) <= 128 and len(arguments["value"]) <= 256:
+        command = {"op": "fill", "selector": arguments["selector"], "value": arguments["value"]}
+    elif name == "browser_navigate_back" and exact(arguments, ()):
+        command = {"op": "back"}
     elif name == "browser_press_key" and exact(arguments, ("key",)) and arguments["key"] in {"ArrowLeft", "ArrowRight", "Home", "End", "Tab", "Enter", "Space"}:
         command = {"op": "key", "key": arguments["key"]}
     elif name == "browser_take_screenshot" and exact(arguments, ()):

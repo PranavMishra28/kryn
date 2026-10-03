@@ -203,15 +203,29 @@ The separate Python draft has 15 synthetic tasks across repository bugs,
 multi-file features, API compatibility, persistence and refactoring. Its
 original `/private/tmp` manifest SHA-256 was
 `b0c36b7fc82e67bbb5d132aa045f01bc3c18eb13c5607e109d0e2ccd2d7b50de`.
-The current durable owner-only copy is under
+The original durable owner-only copy is under
 `/Users/pranav/Documents/Codex/kryn-research-private/python-draft-20261003`;
 its manifest SHA-256 is
 `08aa7a5da0d4b56efe94136294fdf929e1e11696cdb0c43fe73d518f97bd4603`.
 All seed/reference/partial, direct-import, omission, output-limit and isolation
 controls passed offline. Four task-specific coverage limits remain flagged in
-the private manifest. The `linecfg-duplicate-key` task was exposed during
+that original private manifest. The `linecfg-duplicate-key` task was exposed during
 development calibration and is retired; the remaining Python tasks have not
 been used in model turns.
+
+A later owner-only v7 offline draft is frozen at
+`/Users/pranav/Documents/Codex/kryn-research-private/python-draft-v7-20261003`
+(manifest SHA-256 `0431ca91cc2dcab0448aec8107e3835bcd3cab3aa0eb924b322b100237d6d0a3`,
+freeze receipt SHA-256 `b31097edd384f7b1ba4f98ea64c81e6ba859fb3f8e272fe21f1ab24060c036e2`).
+All 15 seeds and partial patches fail; all 15 references and five valid
+alternatives pass; 19 wrong-solution mutations and four omissions fail. An
+independent read-only review verified that the tokenizer probe checks tuple
+type and arity before JSON conversion and the amount parser compares invalid
+errors to a trusted baseline under the same pinned sandboxed interpreter.
+These are sampled controls, not exhaustive semantic proofs. Journal recovery
+after physical power loss remains untested; the exposed duplicate-key task
+remains retired. Every v7 task still has `protected_status=false`, and no v7
+model or real Agent-to-grader turn has been scored.
 
 `research/preflight_protected_python.py` verifies one real task with its
 candidate checkout and private temp on a fresh disposable APFS volume. It
