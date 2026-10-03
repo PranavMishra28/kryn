@@ -103,3 +103,26 @@ with runner SHA-256
 The original no-source Agent-to-Docker canary also passed both arms with the
 final script; its regression receipt SHA-256 is
 `21c967d13242d29f242e638f237dd6822fb3364b82c78091236d2e34cbf4a9e7`.
+
+## S3 preregistration: native read permission
+
+The first public coding pair found that OpenCode denied its native `read` on
+the pinned external source, while the process sandbox allowed exact-file
+shell reads. This is a research-adapter defect. Hypothesis: adding one narrow
+OpenCode external-directory boundary and an exact-file `read` exception will
+make the native tool usable without widening the actual process boundary.
+The baseline is the current research configuration; the candidate changes
+only source-file permissions when an owner-only `source_file` is supplied.
+Neither the production configuration nor the Seatbelt policy changes.
+
+Before another real-model trial, run a paired zero-model Agent canary in both
+arms. Require the native `read` on the source to return the pinned bytes or an
+explicit bounded, untruncated portion; native `read` on its provenance sibling
+and native `write` on the source must be denied. The existing six exact shell
+chunks, hidden-file denial, identical fixture patch, detached Docker grade,
+equal effective permissions and tool schemas, complete telemetry, normal host
+pressure, and clean APFS/container teardown must still pass. A native source
+read that fails, truncates silently, or opens the sibling rejects the candidate.
+Record wall time, synthetic request count, source hash, and resource samples.
+Do not run a model or count this as protected task success until the canary
+passes. A public model retry, if any, remains development data.
