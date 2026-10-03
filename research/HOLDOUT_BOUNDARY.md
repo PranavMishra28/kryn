@@ -691,3 +691,39 @@ offline discrimination, not that OpenCode can deliver the three turns, compact
 twice, restart twice, or grade a stopped Agent without oracle access. The
 other context/restart slots, three long-workflow slots, UI resource fit and
 independent admission remain open.
+
+## A second corrected context/restart draft remains unsealed
+
+The provisional `11-newsletter-restart` also had only two turns and a final
+oracle. An owner-only v3 copy now has three separate candidate prompts, two
+external template edits, and stage-specific Docker oracles. The final stage
+checks that the renderer sees a further edit **in the same process** while
+retaining the earlier URL-safety rule. The seed and stage-one-only solution
+fail later stages; two distinct valid implementations pass all stages; cache,
+unsafe-URL and unescaped-text mutants fail at their targeted stages. All
+**21 offline controls** passed with zero model requests. The first screen
+missed the inherited URL rule at stage three; it is retained, and the oracle
+was amended before the passing screen.
+
+The owner-only freeze SHA-256 is
+`e60be250dbcf65647f16f22b91622d90f50c21f97e1c5e6198554623e168e2f0`;
+the three-stage schedule and grader hash to
+`182993997a84b1ca38150a2a8c3473f791ef2978001eccaa3e8a5d90829b0237`
+and `8fbfee5996882f31b112f29f4ad6b4d8f8a8413445d7fba9db2e40a2cd2d5501`.
+The private 1,295-file archive was independently rehashed (archive SHA-256
+`f1150df96e1746c26309f95eaa99cfadab83928deb1d591165511eb42ad9aac1`,
+index SHA-256
+`7e94e8b7634a2e5e7a92d22c0f995559c99aedc57d8f761a580035d862515782`).
+
+A direct-path audit of provisional roster V8 caught 15 Python rows where a
+manifest **wrapper** hash had been copied into the field for an **oracle-file**
+path. V8 is retained as invalid. V9 points to the files' matching oracle
+hashes and passes direct prompt, grader, clean-seed and category-count checks
+for all 30 draft slots (SHA-256
+`66d452d52e3a78016acac2aeff951f0d8130b7cf8a6606777aa1410b0bd50d38`).
+Neither roster is sealed or eligible for a protected score.
+
+This remains offline task mechanics. Both corrected restart drafts still need
+native staged model turns, two real compactions, two server restarts and an
+independent semantic review. One original restart slot, three long-workflow
+slots, the occupied-host browser path and the paired H1 study remain open.
