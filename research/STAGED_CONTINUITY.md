@@ -80,3 +80,34 @@ after each restart and required every wire tool schema to remain identical.
 Both arms passed again with normal pressure and zero swap growth. Its result
 SHA-256 is `bd7708907fc36d8a2449c2c7db01076b70666030235782a4a423372dab4cbaca`;
 the earlier passing receipt remains indexed rather than replaced.
+
+## Public staged Docker handoff screen
+
+A separate no-model public-fixture canary combined the actual three-turn
+session lifecycle with fresh Docker grading **after each stage**, while the
+candidate APFS volume stayed mounted for the next turn. In each native/KRYN
+arm, the first OpenCode tool call failed to read a host-only oracle; the second
+wrote stage-one source through the native tool. A trusted test controller made
+the stage-two and stage-three source changes after their canned text turns.
+Each stage was copied into a new host Git clone before Docker's first bind,
+byte-compared with the candidate source, and graded in a pinned, networkless,
+read-only, non-root container. The broken seed failed stage one; all three
+expected stage grades passed in both arms.
+
+Each arm retained one session through two completed compactions and two real
+server restarts, with all three exact prompts in raw history. Runtime-resolved
+Agent permissions, full wire tool schema and tool catalogs matched across
+arms. Native made seven synthetic requests and KRYN five because its native
+compaction used deterministic checkpoints; neither made a real model request.
+The unchanged guard recorded normal pressure, zero sampled swap growth and
+complete telemetry. Both candidate images detached and no trial container
+remained. The private result SHA-256 is
+`4eae6d8adfa8e7a19412a927a7da9e76519846d4445b08d3a4b3a3301be40ad8`;
+its verified 164-file owner-only archive index SHA-256 is
+`e95429242d88466016d8d2c4c149aab193a8037c43a1a39a309ed4c162141538`.
+
+**Scope:** this proves a public three-stage grader transport path under canned
+inference. The later edits came from the trusted controller, so it does not
+establish autonomous long-workflow quality, model-visible context fidelity,
+protected task admission or same-model H1 uplift. The private staged tasks
+remain unsealed.
