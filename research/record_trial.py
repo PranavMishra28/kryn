@@ -55,7 +55,7 @@ def receipt(run, stage):
             or file_hash(ROOT / "evals/frozen.sha256.json") != meta.get("suite_manifest_sha256")
             or file_hash(evidence / "requested-config.json") != driver.get("config_sha256")):
         raise ValueError("Trial, config, suite and grader identities do not match")
-    if driver.get("arm") not in {"native", "kryn"} or type(driver.get("completed")) is not bool:
+    if driver.get("arm") not in {"native", "kryn", "guidance"} or type(driver.get("completed")) is not bool:
         raise ValueError("Driver has no verified arm/completion state")
     controls = {key: config.get(key) for key in ("model", "providers", "permissions", "mcp",
                                                    "skills", "compaction", "tool_output")}
@@ -136,6 +136,8 @@ def receipt(run, stage):
         "interventions": driver.get("interventions"), "resources": driver.get("resources"),
         "guard": guard, "evidence_path": str(evidence.relative_to(ROOT)),
         "limitations": ["public development fixture", "same-account grader is not a protected holdout",
+                        *(["guidance-only arm is a diagnostic ablation, not a product profile"]
+                          if driver["arm"] == "guidance" else []),
                         *([] if driver.get("driver_source_sha256") else
                           ["runner source hash was not captured at invocation"]),
                         *([] if driver.get("opencode_binary_sha256") else

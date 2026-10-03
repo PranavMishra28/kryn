@@ -293,7 +293,16 @@ def native_control_config(config):
     return control
 
 
-def isolate_trial_config(config, target, managed, *, native=False):
+def guidance_only_config(config):
+    """Development ablation: keep KRYN guidance, remove only its product plugin."""
+    guided = copy.deepcopy(config)
+    guided["plugins"] = [plugin for plugin in guided.get("plugins", [])
+                         if not (isinstance(plugin, dict) and
+                                 "profileId" in plugin.get("options", {}))]
+    return guided
+
+
+def isolate_trial_config(config, target, managed, *, native=False, preserve_guidance=False):
     """Freeze trial inputs without merging the incumbent product plugin back in.
 
     OpenCode merges plugin packages by path, so an inline config cannot replace a
@@ -330,7 +339,7 @@ def isolate_trial_config(config, target, managed, *, native=False):
         for name in names:
             if name == "cli.json" and not (origin / name).exists():
                 continue
-            raw = b"" if native and name == "AGENTS.md" else (origin / name).read_bytes()
+            raw = b"" if native and not preserve_guidance and name == "AGENTS.md" else (origin / name).read_bytes()
             if fresh:
                 (destination / name).write_bytes(raw)
                 (destination / name).chmod(0o444)
@@ -826,6 +835,13 @@ def self_check():
         assert native["agents"]["build"]["permissions"] == matched["agents"]["build"]["permissions"]
         assert "system" not in native["agents"]["build"] and "commands" not in native
         assert native["plugins"] == [] and matched["plugins"]
+        guided = guidance_only_config(matched)
+        assert guided["plugins"] == [] and guided["agents"] == matched["agents"]
+        assert "commands" in guided and "system" in guided["agents"]["build"]
+        guided_root, guided_product, guided_hashes = isolate_trial_config(
+            guided, root / "guided", managed, native=True, preserve_guidance=True)
+        assert guided_product is None and (guided_root / "AGENTS.md").read_text() == "AGENTS.md"
+        assert hashes_match(guided_root, guided_hashes["config"])
         native_root, no_product, native_hashes = isolate_trial_config(
             native, root / "native-frozen", managed, native=True)
         assert no_product is None and (native_root / "AGENTS.md").read_bytes() == b""
@@ -1061,8 +1077,8 @@ def main():
     ap.add_argument("run", type=Path, nargs="?")
     ap.add_argument("--stage", default="attempt1")
     ap.add_argument("--agent", default="build")
-    ap.add_argument("--arm", choices=("kryn", "native"), default="kryn",
-                    help="matched research arm; native omits KRYN guidance and product plugin")
+    ap.add_argument("--arm", choices=("kryn", "native", "guidance"), default="kryn",
+                    help="research arm; guidance keeps KRYN instructions without its product plugin")
     ap.add_argument("--variant", default="default", choices=("default", "fast"))
     ap.add_argument("--prompt", type=Path)
     ap.add_argument("--session")
@@ -1092,8 +1108,8 @@ def main():
         return 0
     if args.run is None or (args.no_tools and args.session):
         ap.error("A prepared run is required; --no-tools requires a fresh session (omit --session)")
-    if args.arm == "native" and (args.candidate_product_source or args.managed_acceptance or args.session):
-        ap.error("Native control requires a fresh session and no candidate plugin or managed acceptance")
+    if args.arm != "kryn" and (args.candidate_product_source or args.managed_acceptance or args.session):
+        ap.error("Plugin-free research arms require a fresh session and no candidate plugin or managed acceptance")
     replacement = (args.replacement_model_id, args.replacement_context,
                    args.replacement_output, args.replacement_guard_gib)
     if any(value is not None for value in replacement):
@@ -1157,6 +1173,8 @@ def main():
     config = copy.deepcopy(owned_config())
     if args.arm == "native":
         config = native_control_config(config)
+    elif args.arm == "guidance":
+        config = guidance_only_config(config)
     if args.replacement_model_id:
         replacement_config(config, model_id, args.replacement_context, args.replacement_output,
                            args.replacement_guard_gib)
@@ -1181,7 +1199,8 @@ def main():
     # Outside the workspace and shell's writable evidence/log directory.
     config_root, product_plugin, input_hashes = isolate_trial_config(
         config, (folder / "candidate-inputs" if args.candidate_product_source else run / "trial-inputs" / "frozen"),
-        ROOT / "xdg/config/opencode", native=args.arm == "native")
+        ROOT / "xdg/config/opencode", native=args.arm != "kryn",
+        preserve_guidance=args.arm == "guidance")
     # These eval-only permissions remove interactive waiting in the disposable repo.
     # Ordinary daily launches retain ask. They are not an OS filesystem sandbox.
     config["permissions"] += [
@@ -1273,9 +1292,9 @@ def main():
                 raise RuntimeError("Native inference audit hook did not initialize")
             plugin_before = server.request("GET", "/api/plugin")
             report["product_plugin_active_before"] = (plugin_absent(plugin_before, "kryn.product")
-                if args.arm == "native" else plugin_active(plugin_before, "kryn.product", product_plugin))
+                if args.arm != "kryn" else plugin_active(plugin_before, "kryn.product", product_plugin))
             if not (report["product_plugin_active_before"] and
-                    (args.arm == "native" or hashes_match(product_plugin, input_hashes["product"]))
+                    (args.arm != "kryn" or hashes_match(product_plugin, input_hashes["product"]))
                     and hashes_match(config_root, input_hashes["config"])):
                 raise RuntimeError("Frozen trial plugin/config is not in the requested arm; no prompt sent")
             report["audit_plugin_active_before"] = plugin_active(plugin_before, "localai.inference-audit", audit_plugin)
@@ -1410,7 +1429,7 @@ def main():
             (folder / "plugin-inventory-after.json").write_text(json.dumps(plugin_after, indent=2) + "\n")
             report["audit_plugin_active_after"] = plugin_active(plugin_after, "localai.inference-audit", audit_plugin)
             report["product_plugin_active_after"] = (plugin_absent(plugin_after, "kryn.product")
-                if args.arm == "native" else plugin_active(plugin_after, "kryn.product", product_plugin))
+                if args.arm != "kryn" else plugin_active(plugin_after, "kryn.product", product_plugin))
             if args.no_tools or attachment or args.thinking_budget is not None:
                 audit = [json.loads(line) for line in audit_path.read_text().splitlines() if line.strip()]
                 checks = acceptance_checks(audit, session["id"], args.no_tools, image_info,
@@ -1466,7 +1485,7 @@ def main():
         report["routing_verified"] = report["route_coverage"]["verified"]
         report.setdefault("acceptance_checks", {})["trial_inputs_verified"] = bool(
             report.get("product_plugin_active_before") and report.get("product_plugin_active_after")
-            and (args.arm == "native" or hashes_match(product_plugin, input_hashes["product"]))
+            and (args.arm != "kryn" or hashes_match(product_plugin, input_hashes["product"]))
             and hashes_match(config_root, input_hashes["config"]))
         report["completed"] &= report["acceptance_checks"]["trial_inputs_verified"]
         if ready_tools or args.no_tools or attachment or args.thinking_budget is not None or monitor is not None:

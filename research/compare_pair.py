@@ -30,10 +30,10 @@ def effective_permissions(run, folder):
     return hashlib.sha256(json.dumps(normalized, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
-def compare(native_run, kryn_run, stage):
+def compare(native_run, kryn_run, stage, control_arm="native"):
     a, b = receipt(native_run, stage), receipt(kryn_run, stage)
-    if a["arm"] != "native" or b["arm"] != "kryn":
-        raise ValueError("Expected native control first and KRYN candidate second")
+    if control_arm not in {"native", "guidance"} or a["arm"] != control_arm or b["arm"] != "kryn":
+        raise ValueError("Expected selected plugin-free control first and KRYN candidate second")
     unequal = [key for key in MATCHED if a.get(key) != b.get(key)]
     unverified = [key for key in ("runner_sha256_at_invocation", "opencode_binary_sha256_at_invocation",
                                 "model_profile_sha256_at_invocation", "turn_timeout_seconds")
@@ -85,12 +85,12 @@ def compare(native_run, kryn_run, stage):
         unequal.append("treatment plugin delta")
     return {"matched": not unequal and not unverified, "observed_controls_matched": not unequal,
             "unequal_controls": unequal, "unverified_controls": unverified, "split": "development",
-            "task": a["task"], "model_loaded_before": loaded,
+            "task": a["task"], "control_arm": control_arm, "model_loaded_before": loaded,
             "wire_tool_schema_sha256": [wire.get("toolsSha256") for wire in wires],
             "wire_workspace_normalized_schema_sha256": normalized,
             "effective_permissions_sha256": effective,
-            "native": {"run": a["run"], "accepted": a["accepted"], "seconds": a["wall_seconds"],
-                       "grader_status": a["grader_status"], "supplemental": a["supplemental"]},
+            control_arm: {"run": a["run"], "accepted": a["accepted"], "seconds": a["wall_seconds"],
+                          "grader_status": a["grader_status"], "supplemental": a["supplemental"]},
             "kryn": {"run": b["run"], "accepted": b["accepted"], "seconds": b["wall_seconds"],
                      "grader_status": b["grader_status"], "supplemental": b["supplemental"]},
             "caveat": "Public development task; serial same-task cache may favor the second arm. No uplift inference from one pair."}
@@ -101,8 +101,9 @@ def main():
     parser.add_argument("native_run", type=Path)
     parser.add_argument("kryn_run", type=Path)
     parser.add_argument("--stage", default="attempt1")
+    parser.add_argument("--control-arm", choices=("native", "guidance"), default="native")
     args = parser.parse_args()
-    result = compare(args.native_run, args.kryn_run, args.stage)
+    result = compare(args.native_run, args.kryn_run, args.stage, args.control_arm)
     print(json.dumps(result, indent=2))
     raise SystemExit(0 if result["matched"] else 1)
 
