@@ -188,6 +188,22 @@ def main(draft, image, output):
         if cloned.returncode:
             raise RuntimeError("seed clone failed: " + cloned.stderr[-300:])
         command(["git", "-C", str(workspace), "remote", "remove", "origin"])
+        original = (workspace / "index.html").read_bytes()
+        broker_child, broker = broker_start(image, workspace)
+        report["container"] = broker["container"]
+        report["container_boundary"] = broker["boundary"]
+        seed_head = json.loads((Path(draft).resolve() / "bundles/01-harbor-tabs/manifest.json").read_text())["base_commit"]
+        current_head = command(["git", "-C", str(workspace), "rev-parse", "HEAD"])
+        current_status = command(["git", "-C", str(workspace), "status", "--porcelain"])
+        report["checks"]["seed_state_at_opencode_start"] = (
+            current_head.returncode == 0 and current_head.stdout.strip() == seed_head and
+            current_status.returncode == 0 and current_status.stdout.strip() == "" and
+            (workspace / "index.html").read_bytes() == original)
+        if not report["checks"]["seed_state_at_opencode_start"]:
+            raise RuntimeError("candidate checkout differs from clean seed at OpenCode startup")
+        report["checks"]["paired_opencode_mcp"] = native_catalog(workspace, private, broker, report)
+        report["checks"]["browser_blank_after_opencode_start"] = (
+            broker_request(broker, {"token": broker["token"], "op": "snapshot"}).get("error") == "PAGE_NOT_OPEN")
         hidden = output / "hidden-canary.txt"
         marker = "KRYN-UI-HIDDEN-" + os.urandom(12).hex()
         hidden.write_text(marker)
@@ -198,9 +214,6 @@ def main(draft, image, output):
         except OSError as error:
             report["checks"]["hardlink_impossible"] = error.errno == errno.EXDEV
         (workspace / "answer-link").symlink_to(hidden)
-        broker_child, broker = broker_start(image, workspace)
-        report["container"] = broker["container"]
-        report["container_boundary"] = broker["boundary"]
         actual_inspect = command(["docker", "inspect", broker["container"]])
         if actual_inspect.returncode:
             raise RuntimeError("UI browser container inspect failed")
@@ -264,7 +277,6 @@ def main(draft, image, output):
             broker_request(broker, {"token": broker["token"], "op": "open",
                                     "html_b64": base64.b64encode(b"<p>forged answer</p>").decode()}).get("error") == "DENIED" and
             "Harbor accounts" in broker_request(broker, {"token": broker["token"], "op": "open"}).get("text", ""))
-        original = (workspace / "index.html").read_bytes()
         hits = []
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):
@@ -321,16 +333,13 @@ def main(draft, image, output):
         report["checks"]["reference_keyboard_browser"] = 'tab "Activity" [selected]' in text(verified[2])
         (workspace / "index.html").write_bytes(original)
         (workspace / "answer-link").unlink()
-        seed_head = json.loads((Path(draft).resolve() / "bundles/01-harbor-tabs/manifest.json").read_text())["base_commit"]
+        reset = mcp(prefix, workspace, broker, [tool("browser_navigate", {"url": URL})])
         current_head = command(["git", "-C", str(workspace), "rev-parse", "HEAD"])
         current_status = command(["git", "-C", str(workspace), "status", "--porcelain"])
-        report["checks"]["seed_state_at_opencode_start"] = (
+        report["checks"]["seed_restored_after_reference"] = (
             current_head.returncode == 0 and current_head.stdout.strip() == seed_head and
             current_status.returncode == 0 and current_status.stdout.strip() == "" and
-            (workspace / "index.html").read_bytes() == original)
-        if not report["checks"]["seed_state_at_opencode_start"]:
-            raise RuntimeError("candidate checkout differs from clean seed at OpenCode startup")
-        report["checks"]["paired_opencode_mcp"] = native_catalog(workspace, private, broker, report)
+            (workspace / "index.html").read_bytes() == original and text(reset[0]) == text(result[2]))
         report["passed"] = all(report["checks"].values())
     except BaseException as error:
         report["error"] = type(error).__name__ + ": " + str(error)
