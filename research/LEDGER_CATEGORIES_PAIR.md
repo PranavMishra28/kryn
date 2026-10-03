@@ -141,3 +141,35 @@ justifies testing source-coverage and public-API verification on fresh tasks,
 but H1's protected roster, statistical uplift, UI and long-session gates remain
 open. It does not offset the earlier matched public Task03 losses or qualify
 frontier adjacency.
+
+## Retired-task replication and permission-identity correction
+
+A preregistered native → KRYN replication from clean `main` at `717df47`
+strictly passed the hidden grader in **both** arms. Native completed in
+167.875 Agent seconds with 25 model requests, 36 tools and seven tool errors;
+KRYN completed in 163.248 seconds with 22 requests, 28 tools and three errors.
+Both arms had complete resource telemetry, AC power, zero sampled swap growth
+and clean capture/grade barriers. This does **not** repeat the earlier
+KRYN-only win.
+
+The original driver marked this pair unmatched on effective permissions.
+Inspection of the raw permission arrays found only a generated server-private
+directory suffix: native used `kryn-isolated-*_t`, KRYN used
+`kryn-isolated-*`. The comparator normalized only the latter. It now
+normalizes one direct generated path segment beneath the exact private parent;
+workspace path normalization remains exact, and an unrelated similarly named
+path or an `allow` → `deny` change stays distinct. The regression covers both
+generated forms. Recomputing from the **unchanged** raw inventories makes all
+ten controls equal, but this is explicitly a retrospective measurement fix:
+the immutable original pair remains `matched=false`.
+
+The private R1 analysis SHA-256 is
+`9d78ab8839b5d5b1d1b9d501f5d2462913171047ccce9fdc3fa9466ad654286a`;
+the raw pair SHA-256 is
+`1c14f8a00a5d2c19099b1ea545d5e17f56575cbd55143f500bfd23f50f68f5fe`.
+Its 84-file private receipt archive and independently rehashed index have
+SHA-256 values `bdf1446f3c8b683ad668642e3f3400783890586f78afcd347a9b3a5c9231f2f5`
+and `d1c2bc8e6344a42991be0d10d8f82b3c2f640755246bbe6f13c1f7e6508c8589`.
+This remains one repeated **development** task, without a protected H1 score
+or evidence of general uplift. The second preregistered pair will use the
+corrected matcher prospectively after this measurement fix merges.
