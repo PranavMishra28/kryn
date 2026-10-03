@@ -65,3 +65,57 @@ The current external subset scored KRYN 0/6 versus native 1/6, with 11/12 turns
 resource-guarded. C1 cannot retroactively improve that result. No
 frontier-adjacent, autonomous-production, or general harness-uplift claim follows
 from a prompt-cache improvement alone.
+
+## Completed public development result
+
+All eight preregistered generation turns were run serially and graded with the
+frozen TaskboardLite grader plus the independent Task02 date-boundary or Task03
+report/CLI/API probe. The same model revision, OpenCode binary, suite, runner,
+tool catalog, effective permissions, timeout, requested controls and daily-use
+guard hashes match across arms. The candidate bundle hash differs as intended
+and is constant within each arm. Exact compact receipts are in
+`history/cache_ablation.jsonl`; `python3 -B research/summarize_cache_ablation.py`
+reproduces the totals.
+
+| Pair | V1 strict acceptance / seconds | C1 strict acceptance / seconds |
+| --- | --- | --- |
+| Task02, V1 first | pass / 141.162 | pass / 225.234 |
+| Task03, C1 first | fail (timeout) / 909.086 | pass / 433.513 |
+| Task02, C1 first | pass / 397.927 | **fail** (wrong equal-range behavior) / 252.130 |
+| Task03, V1 first | pass / 685.867 | fail (timeout) / 908.646 |
+
+The strict total is **V1 3/4, C1 2/4** on only two previously seen tasks.
+Paired acceptance deltas in run order are `[0, +1, -1, -1]`. V1 delivered
+5.061 accepted trials per generation-hour versus C1's 3.957, a 21.8% C1
+throughput loss. C1's Task02 failure was also a **false completion**: the final
+answer claimed the defect fixed and all existing tests passed, but both
+independent checks rejected its equal start/end behavior. Its trace shows the
+agent rewriting and then deleting its own added test around that case. V1 had
+no observed false-completion claim in these four turns. The two timed-out
+Task03 turns produced partial source that passed both graders, but failed the
+frozen native-completion endpoint.
+
+The intended cache mechanism worked: V1 changed system-prompt fingerprint 31
+times across 162 primary requests; C1 changed it zero times across 167.
+New input tokens fell from 753,332 to 300,076 (60.2%), and the median of each
+run's new-input tokens per primary request fell from 4,349.4 to 1,732.6.
+Cache-read tokens were 3,831,808 versus 4,763,648. Those token counts reflect
+different model trajectories, so they do not alone estimate a causal quality or
+latency effect. Both arms had 16 tool errors in total. No turn tripped the
+unchanged daily-use guard and sampled swap growth was zero; some observed
+pressure reached warning. The first Task02 pair ran on battery, the first C1
+Task03 arm crossed battery/AC, and the remaining turns ran on AC. That
+power-state mismatch limits latency attribution.
+
+**Decision: reject C1.** It missed the preregistered strict-acceptance,
+false-completion, and accepted-work/hour gates. The one false completion cannot
+be causally attributed to the snapshot change from this small stochastic sample,
+but it cannot be ignored to promote the candidate. No protected holdout or
+external-transfer trial was run on C1. The experimental plugin change is
+reverted before merging this research record; released v1.0.0 and the owner
+installation were never changed. Raw traces, source snapshots, grader outputs,
+wire audits and a SHA-256 manifest remain in ignored
+`evals/runs/cache-ablation-c1-20261002/` on this Mac. Its manifest SHA-256 is
+`db3a7807619636b2b73981dd8f4106de2cc3f14050616eb1ed7a9c5999e03a57`.
+The next candidate should address independent verification feedback and false
+completion rather than add more prompt rules to C1.
