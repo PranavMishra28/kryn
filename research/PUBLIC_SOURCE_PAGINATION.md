@@ -108,3 +108,24 @@ the already-allowed exact source file; it must pass no-model read, edit-denial,
 and sibling-denial checks before another live task. Reusing this public fixture
 after that change is development work only. Protected H1 and current-source
 category admission remain closed.
+
+## Post-permission public diagnostic preregistration
+
+The exact-source native-read canary passed both arms at `2ad0e741` (receipt
+SHA-256 `bfe8669cd917c5f23a9e323750bb89d7bca6ed540208aa75c7bfc2776c504b93`).
+From `main` `88f175e`, repeat this **same public development task once** with
+the only behavioral change being the research adapter's external-file
+permission. Recreate the seed, prompt, source and grader controls and verify
+their hashes against the first pair before generation. Keep native-first arm
+order, Qwen3.5-9B-6bit, 8192 output cap, tool catalog, agent variants,
+900-second cap, same daily-use guard and same host occupancy policy. Do not
+relax any resource threshold. A resource abort stops the pair.
+
+Primary diagnostic: does KRYN now complete a native source `read` and reach a
+candidate patch? Strict task success still requires all six independent Docker
+cases, no false completion, matched permissions/wire contracts, complete
+telemetry and cleanup. Record request/token counts, tool failures, wall time,
+pressure, swap and source-use evidence. The original failed pair remains
+immutable; a better result here is **not** a protected effect size because this
+task has been used to diagnose the adapter. If both arms still fail, classify
+the remaining worker/verification failures rather than adding prompt rules.
