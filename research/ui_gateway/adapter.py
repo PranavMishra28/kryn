@@ -114,7 +114,11 @@ def serve(repo, port, token):
                     result = {"tools": TOOLS}
                 elif method == "tools/call":
                     params = request.get("params")
-                    if not exact(params, ("name", "arguments")) or not isinstance(params["name"], str):
+                    if (not isinstance(params, dict) or
+                            set(params) not in ({"name", "arguments"},
+                                                {"name", "arguments", "_meta"}) or
+                            ("_meta" in params and not isinstance(params["_meta"], dict)) or
+                            not isinstance(params["name"], str)):
                         raise ValueError("MCP tool call schema")
                     result = call_tool(params["name"], params["arguments"], port, token)
                 else:

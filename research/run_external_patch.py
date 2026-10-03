@@ -500,6 +500,7 @@ def run(args, *, defer_patch=False):
     if profile.get("repository", "").rsplit("/", 1)[-1] != MODEL_ID:
         raise RuntimeError("Installed champion profile does not identify the requested model")
     report = {"schema": 1, "task_id": args.task_id, "arm": args.arm,
+              "agent": getattr(args, "agent", "agent"),
               "base_commit": args.base_commit, "prompt_sha256": hashlib.sha256(prompt).hexdigest(),
               "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "source_commit": git(ROOT, "rev-parse", "HEAD"),
@@ -514,6 +515,14 @@ def run(args, *, defer_patch=False):
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
         config, products, dependencies = configuration(
             workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1")
+        ui_gateway = getattr(args, "ui_gateway", None)
+        if ui_gateway is not None:
+            from ui_gateway.trial_config import with_ui_gateway
+            adapter = ROOT / "research/ui_gateway/adapter.py"
+            config = with_ui_gateway(config, python=Path(sys.executable).resolve(),
+                                     adapter=adapter, repo=workspace,
+                                     port=ui_gateway["port"], token=ui_gateway["token"])
+            dependencies += [Path(sys.executable).resolve(), Path(sys.base_prefix).resolve(), adapter]
         monitor = NativeResourceGuard(evidence, samples)
         try:
             tool_path, tool_dependencies, tool_manifest = benchmark_tools(args.tool_venv)
@@ -527,6 +536,8 @@ def run(args, *, defer_patch=False):
             monitor.start()
             background = {"dependencies": dependencies, "inference_port": relay.port,
                           "cancel": monitor.cancel.is_set}
+            if ui_gateway is not None:
+                background["broker_port"] = ui_gateway["port"]
             if private_parent is not None:
                 background["private_parent"] = private_parent
             if tool_path is not None:
@@ -549,13 +560,14 @@ def run(args, *, defer_patch=False):
                 (evidence / "plugin-inventory.json").write_text(json.dumps(inventory, indent=2) + "\n")
                 if not active:
                     raise RuntimeError("Requested OpenCode arm is not active")
+                agent = getattr(args, "agent", "agent")
                 session = server.request("POST", "/api/session", {
-                    "title": args.task_id, "agent": "agent",
+                    "title": args.task_id, "agent": agent,
                     "model": {"providerID": "local", "id": "qwen", "variant": "default"},
                     "location": {"directory": str(workspace)}}, timeout=5)["data"]
                 sid = session["id"]
                 command = server.background_prefix + [str(BINARY), "run", "--server", server.url,
-                    "--session", sid, "--agent", "agent", "--model", "local/qwen",
+                    "--session", sid, "--agent", agent, "--model", "local/qwen",
                     "--format", "json", "--thinking"]
                 child = subprocess.Popen(command, cwd=workspace, env=server.env,
                                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,

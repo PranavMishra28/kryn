@@ -48,6 +48,12 @@ permitted dummy inference access, denied fourth-port access, container cleanup,
 and volume detachment. The receipt explicitly retains
 `protected_eligible=false` and `model_gateway_qualified=false`.
 
+An exploratory registry-RPC check at
+`/private/tmp/kryn-ui-gateway-preflight-15/receipt.json` failed with HTTP 400:
+this research config does not enable the optional inference-audit tool-list RPC.
+That unqualified no-model attempt was retained and its code reverted; the 32-check
+receipt above remains the last passing preflight.
+
 Remaining gates: independently review the optional third-port change; prove the
 model-facing OpenCode tool catalog and tool dispatch
 through a separate public compatibility turn or a supported no-model native
