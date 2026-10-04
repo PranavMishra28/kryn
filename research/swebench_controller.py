@@ -16,13 +16,15 @@ import shutil
 import signal
 import subprocess
 import sys
+import tarfile
 import time
 from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from research import swebench_local
 from research.swebench_roster import EVALUATOR
-from research.local_campaign import (atomic, controlled_env, file_sha,
+from research.local_campaign import (MAX_RAW, MIN_FREE, atomic, bytes_under,
+                                     controlled_env, file_sha,
                                      plugin_hashes, room, run_child, runtime_idle,
                                      sha, stop_orphan)
 
@@ -93,6 +95,28 @@ def work_bytes(work):
             except FileNotFoundError:
                 pass
     return total
+
+
+def archive_interrupted_candidate(candidate, campaign, name):
+    """Keep the interrupted checkout before the next arm reuses its path."""
+    if not candidate.exists():
+        return None
+    archive = campaign / "interruptions" / name
+    output = archive / "candidate.tar.gz"
+    temporary = archive / "candidate.tar.gz.tmp"
+    if archive.exists():
+        raise RuntimeError("Interrupted candidate archive already exists; audit before resuming")
+    candidate_bytes = work_bytes(candidate)
+    if (shutil.disk_usage(campaign).free < candidate_bytes + MIN_FREE or
+            bytes_under(campaign) + candidate_bytes > MAX_RAW):
+        raise RuntimeError("Insufficient disk headroom to retain interrupted candidate")
+    archive.mkdir(mode=0o700, parents=True)
+    with tarfile.open(temporary, "w:gz") as bundle:
+        bundle.add(candidate, arcname="candidate")
+    os.replace(temporary, output)
+    atomic(archive / "receipt.json", {"name": name, "archive_sha256": file_sha(output),
+                                      "archive_bytes": output.stat().st_size})
+    return output
 
 
 def wait_for_safe(campaign, work, next_name):
@@ -354,6 +378,7 @@ def run(campaign, work, expected_sha):
                 elif marker.exists() or log.exists():
                     candidate = work / ident / "candidate"
                     if candidate.exists():
+                        archive_interrupted_candidate(candidate, campaign, name)
                         shutil.rmtree(candidate)
                     row = {"name": name, "arm": arm, "instance_id": ident,
                            "accepted": False, "status": "interrupted_before_receipt"}

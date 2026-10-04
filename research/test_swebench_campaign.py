@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -250,6 +251,45 @@ class SWEbenchCampaignTests(unittest.TestCase):
             self.assertFalse(checkout.exists())
             self.assertTrue((prepared / "image-release.json").is_file())
             release.assert_called_once()
+
+    def test_interrupted_arm_archives_partial_checkout_before_reusing_path(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            campaign, work = root / "campaign", root / "work"
+            attempts = campaign / "attempts"
+            attempts.mkdir(parents=True)
+            candidate = work / "one/candidate"
+            candidate.mkdir(parents=True)
+            (candidate / "partial.txt").write_text("unfinished model edit")
+            (attempts / "s01-kryn.running.json").write_text('{"pid": 123}')
+            (attempts / "s01-kryn.stdout.log").write_text("interrupted")
+            (attempts / "s01-native.final.json").write_text(
+                json.dumps({"accepted": False, "instance_id": "one"}))
+            manifest = {"kind": "swebench_local_baseline", "evaluator_commit": EVALUATOR,
+                        "tasks": [{"instance_id": "one", "arm_order": ["kryn", "native"]}]}
+            data = (json.dumps(manifest) + "\n").encode()
+            (campaign / "manifest.json").write_bytes(data)
+            (campaign / "manifest.sha256").write_text(sha(data) + "\n")
+            with patch.object(swebench_controller, "source_lock"), patch.object(
+                    swebench_controller, "wait_for_safe"), patch.object(
+                    swebench_controller, "stop_orphan"), patch.object(
+                    swebench_controller.swebench_local, "prepare",
+                    return_value=(work / "one/base", root / "prompt", {})), patch.object(
+                    swebench_controller, "grade_once",
+                    return_value={"clean_grade": True, "resolved": True}), patch.object(
+                    swebench_controller, "run_child") as worker:
+                report = swebench_controller.run(campaign, work, sha(data))
+            worker.assert_not_called()
+            self.assertTrue(report["finished"])
+            self.assertEqual(json.loads((attempts / "s01-kryn.final.json").read_text())
+                             ["status"], "interrupted_before_receipt")
+            archive = campaign / "interruptions/s01-kryn/candidate.tar.gz"
+            receipt = json.loads((archive.parent / "receipt.json").read_text())
+            self.assertEqual(receipt["archive_sha256"], file_sha(archive))
+            with tarfile.open(archive) as bundle:
+                self.assertEqual(bundle.extractfile("candidate/partial.txt").read(),
+                                 b"unfinished model edit")
+            self.assertFalse(candidate.exists())
 
     def test_image_cleanup_refuses_repointed_tag_or_retained_image(self):
         info = {"image_owned": True, "image_tag": "official:tag",
