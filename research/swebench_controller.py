@@ -343,6 +343,8 @@ def run(campaign, work, expected_sha):
                     shutil.rmtree(candidate)
                 atomic(final, row)
                 atomic(campaign / "progress.json", summarize(campaign, manifest))
+                if row["status"] == "ungraded" and row["driver_sha256"] is None:
+                    raise RuntimeError("External worker wrote no driver receipt; stop the campaign")
             prepared = campaign / "prepared" / ident / "receipt.json"
             released = campaign / "prepared" / ident / "image-release.json"
             if prepared.is_file() and not released.exists():

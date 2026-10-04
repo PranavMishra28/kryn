@@ -14,6 +14,39 @@ summarize = swebench_controller.summarize
 
 
 class SWEbenchCampaignTests(unittest.TestCase):
+    def test_missing_driver_stops_after_first_arm_and_keeps_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            campaign, work = root / "campaign", root / "work"
+            campaign.mkdir()
+            manifest = {"kind": "swebench_local_baseline", "evaluator_commit": EVALUATOR,
+                        "tasks": [{"instance_id": "one", "arm_order": ["kryn", "native"],
+                                   "base_commit": "frozen"}]}
+            data = (json.dumps(manifest) + "\n").encode()
+            (campaign / "manifest.json").write_bytes(data)
+            (campaign / "manifest.sha256").write_text(sha(data) + "\n")
+
+            def candidate(*_):
+                path = work / "one" / "candidate"
+                path.mkdir(parents=True)
+                return path
+
+            with patch.object(swebench_controller, "source_lock"), patch.object(
+                    swebench_controller, "wait_for_safe"), patch.object(
+                    swebench_controller.swebench_local, "prepare",
+                    return_value=(work / "one/base", root / "prompt", {})), patch.object(
+                    swebench_controller, "grade_once",
+                    return_value={"clean_grade": True, "resolved": True}), patch.object(
+                    swebench_controller.swebench_local, "fresh_candidate",
+                    side_effect=candidate), patch.object(
+                    swebench_controller, "run_child",
+                    return_value={"returncode": 1, "stop_reason": None}) as worker:
+                with self.assertRaisesRegex(RuntimeError, "no driver receipt"):
+                    swebench_controller.run(campaign, work, sha(data))
+            self.assertTrue((campaign / "attempts/s01-kryn.final.json").is_file())
+            self.assertFalse((campaign / "attempts/s01-native.final.json").exists())
+            worker.assert_called_once()
+
     def test_unmatched_tool_or_power_never_supports_uplift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
