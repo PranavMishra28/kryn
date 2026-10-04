@@ -9,8 +9,10 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 sys.path.insert(0, str(ROOT / "research"))
+from research import local_only  # noqa: E402
 import learning  # noqa: E402
 from native_client import BINARY, MODEL_ID, NativeServer  # noqa: E402
 from context_probe import summarize_resources  # noqa: E402
@@ -214,8 +216,10 @@ def arm(root, which, seed, grader, preflight, tools):
         tool_path, tool_deps, tool_manifest = tools
         result["tool_manifest"] = tool_manifest
         with learning.InferenceRelay(MODEL_ID, 8192, 360) as relay:
+            relay_url = f"http://127.0.0.1:{relay.port}/v1"
             config, products, dependencies = configuration(workspace, state, which,
-                f"http://127.0.0.1:{relay.port}/v1")
+                relay_url)
+            result["local_config_sha256"] = local_only.check_config(config, relay_url)
             dependencies += tool_deps
             result["permissions_sha256"] = sha(json_bytes(config["permissions"]))
             result["config_sha256"] = sha(json_bytes(config))
@@ -231,6 +235,8 @@ def arm(root, which, seed, grader, preflight, tools):
                 "cancel": guard.cancel.is_set})
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                result["local_only"] = local_only.attest(
+                    server.env, server.temporary.name, relay_url)
                 wait_arm_ready(server, which, products)
                 inventory = server.request("GET", "/api/agent", timeout=5)["data"]
                 agent = next((item for item in inventory if item.get("id") == "agent"), None)
@@ -286,6 +292,14 @@ def arm(root, which, seed, grader, preflight, tools):
                 result["server_pid_end"] = server.process.pid
             result["server_shutdown_proved"] = server.process.poll() is not None and not server.forced_shutdown
             result["requests"] = relay.records
+            local_receipt = result["local_only"]
+            local_receipt["runtime_same_after"] = local_only.same_runtime(local_receipt)
+            local_receipt["observed_requests"] = len(relay.records)
+            local_receipt["observed_local_model_only"] = bool(relay.records and all(
+                item.get("model") == MODEL_ID for item in relay.records))
+            local_receipt["generation_proven"] = bool(
+                local_receipt["runtime_same_after"] and
+                local_receipt["observed_local_model_only"])
             result["relay_settled"] = not relay.connections and not relay.gate.locked()
             result["wire_schema_stable"] = bool(relay.records and all(
                 item["tool_schema_sha256"] == relay.records[0]["tool_schema_sha256"]
@@ -298,6 +312,7 @@ def arm(root, which, seed, grader, preflight, tools):
             result["stored_compactions"] == result["compactions"] and
             all(result["stored_prompts"]) and result["server_shutdown_proved"] and
             result["relay_settled"] and result["wire_schema_stable"] and
+            result["local_only"]["generation_proven"] and
             result["rule_after_owner_edit_sha256"] ==
             sha(json_bytes({"separator": "_"})))
     except BaseException as error:
