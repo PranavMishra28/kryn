@@ -3,8 +3,10 @@
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 SEED = "kryn-swebench-campaign-20261003-v1"
 REPOS = ("django/django", "sphinx-doc/sphinx", "matplotlib/matplotlib",
@@ -24,6 +26,19 @@ EVALUATOR = "02e7a74ffd0b707aab73d203fe87bdc7c76afc8e"
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def evaluator_archive_sha256():
+    if importlib.metadata.version("swebench") != "5.0.2":
+        raise RuntimeError("Pinned SWE-bench evaluator is unavailable")
+    direct = importlib.metadata.distribution("swebench").read_text("direct_url.json")
+    if not direct:
+        raise RuntimeError("SWE-bench source archive is unavailable")
+    url = urlparse(json.loads(direct)["url"])
+    archive = Path(unquote(url.path))
+    if url.scheme != "file" or not archive.is_file():
+        raise RuntimeError("SWE-bench source archive is unavailable")
+    return sha(archive.read_bytes())
 
 
 def freeze(datasets_root, output):
@@ -60,7 +75,9 @@ def freeze(datasets_root, output):
                 "previously_exposed_ids_excluded": sorted(EXPOSED),
                 "datasets": {kind: {"test_sha256": item[0], "revision": item[1]}
                              for kind, item in PARQUET.items()},
-                "evaluator_commit": EVALUATOR, "model": "Qwen3.5-9B-6bit",
+                "evaluator_commit": EVALUATOR,
+                "evaluator_archive_sha256": evaluator_archive_sha256(),
+                "model": "Qwen3.5-9B-6bit",
                 "prompt_prefix": PREFIX, "timeout_seconds": 900,
                 "max_heavy_generations": 1, "tasks": tasks}
     output.mkdir(mode=0o700, parents=True)

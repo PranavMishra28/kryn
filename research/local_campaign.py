@@ -342,21 +342,42 @@ def tree_sha(directory):
 def release_owned_image(campaign, task):
     prepared = campaign / "tasks" / (task["name"] + ".prepared.json")
     receipt = campaign / "tasks" / (task["name"] + ".image-release.json")
-    if not prepared.is_file() or receipt.exists():
+    if not prepared.is_file():
         return
     info = json.loads(prepared.read_text())
+    if receipt.exists():
+        prior = json.loads(receipt.read_text())
+        if prior.get("image_owned") != info["image_owned"]:
+            raise RuntimeError("Image release receipt disagrees with preparation")
+        if ((info["image_owned"] and prior.get("image_removed") is True) or
+                (not info["image_owned"] and
+                 prior.get("preserved_preexisting_image") is True)):
+            return
     if info["image_owned"]:
         # Never use --force. Docker refuses removal if another workload adopted it.
-        subprocess.run(["docker", "image", "rm", info["image_tag"]],
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
-        subprocess.run(["docker", "image", "rm", info["image_digest"]],
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
-    still_present = subprocess.run(["docker", "image", "inspect", info["image_id"]],
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                   timeout=15).returncode == 0
+        for reference in (info["image_tag"], info["image_digest"]):
+            current = docker_image_id(reference)
+            if current is not None and current != info["image_id"]:
+                raise RuntimeError("Owned Harbor image reference changed before cleanup")
+            if current is not None:
+                subprocess.run(["docker", "image", "rm", reference],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+    still_present = info["image_owned"] and docker_image_id(info["image_id"]) is not None
     atomic(receipt, {"image_owned": info["image_owned"],
                      "image_removed": info["image_owned"] and not still_present,
                      "preserved_preexisting_image": not info["image_owned"]})
+    if still_present:
+        raise RuntimeError("Owned Harbor image remained after cleanup")
+
+
+def docker_image_id(reference):
+    result = subprocess.run(["docker", "image", "inspect", reference],
+                            capture_output=True, text=True, timeout=15)
+    if result.returncode:
+        if "No such image:" not in result.stderr:
+            raise RuntimeError("Cannot verify Docker image absence")
+        return None
+    return json.loads(result.stdout)[0]["Id"]
 
 
 def write_progress(campaign, manifest):
@@ -382,12 +403,17 @@ def main_wire(campaign, name):
     path = campaign / "trials" / name / "host-guard" / "inference.json"
     if not path.is_file():
         return None
+    first = None
     for row in json.loads(path.read_text()):
         if row.get("tool_count", 0) > 0:
-            return {key: row.get(key) for key in
+            wire = {key: row.get(key) for key in
                     ("model", "max_tokens", "numeric", "thinking", "tool_count",
                      "tool_schema_sha256")}
-    return None
+            if first is None:
+                first = wire
+            elif wire != first:
+                return None
+    return first
 
 
 def paired_summary(campaign, manifest, rows):

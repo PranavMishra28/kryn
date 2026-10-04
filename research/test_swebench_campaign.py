@@ -6,11 +6,13 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 from research import swebench_controller
 from research import swebench_local
+from research import swebench_roster
 from research.swebench_roster import EVALUATOR
 from research.local_campaign import file_sha, sha
 
@@ -18,6 +20,33 @@ summarize = swebench_controller.summarize
 
 
 class SWEbenchCampaignTests(unittest.TestCase):
+    def test_fresh_roster_includes_pinned_evaluator_archive(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            datasets = root / "datasets"
+            parquet = {}
+            for kind in ("lite", "verified"):
+                source = datasets / kind / "data/test-00000-of-00001.parquet"
+                source.parent.mkdir(parents=True)
+                source.write_bytes(kind.encode())
+                parquet[kind] = (sha(kind.encode()), "revision")
+
+            def load_dataset(_, *, data_files, split):
+                kind = Path(data_files).parts[-3]
+                return [{"repo": "repo", "instance_id": kind + "-one",
+                         "problem_statement": "Fix a bug", "base_commit": "base",
+                         "image": "repo:tag"}]
+
+            with patch.object(swebench_roster, "PARQUET", parquet), patch.object(
+                    swebench_roster, "REPOS", ("repo",)), patch.object(
+                    swebench_roster, "EXPOSED", set()), patch.object(
+                    swebench_roster, "evaluator_archive_sha256", return_value="a" * 64), patch.dict(
+                    sys.modules, {"datasets": SimpleNamespace(load_dataset=load_dataset)}):
+                digest = swebench_roster.freeze(datasets, root / "campaign")
+            manifest = json.loads((root / "campaign/manifest.json").read_text())
+            self.assertEqual(manifest["evaluator_archive_sha256"], "a" * 64)
+            self.assertEqual((root / "campaign/manifest.sha256").read_text().strip(), digest)
+
     def test_missing_driver_stops_after_first_arm_and_keeps_failure(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
