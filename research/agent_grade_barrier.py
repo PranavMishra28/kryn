@@ -101,7 +101,21 @@ def detach(volume):
         raise BarrierError("Expected disk image mount is missing or changed")
     if volume.mount.stat().st_dev != volume.device:
         raise BarrierError("Disk image device changed before detachment")
-    command(["hdiutil", "detach", str(volume.mount)])  # Never use -force.
+    # macOS can briefly retain a vnode after the grader closes its files.
+    # Retry only that transient busy result, while proving the same mount owns
+    # the image each time. A persistent or changed mount still fails closed.
+    for attempt in range(4):
+        try:
+            command(["hdiutil", "detach", str(volume.mount)])  # Never use -force.
+            break
+        except BarrierError as error:
+            if "resource busy" not in str(error).lower() or attempt == 3:
+                raise
+            current = image_entry(volume.image)
+            if (current is None or attached_mount(current) != [str(volume.mount)] or
+                    volume.mount.stat().st_dev != volume.device):
+                raise BarrierError("Disk image mount changed during busy detach") from error
+            time.sleep(0.25 * 2**attempt)
     if (image_entry(volume.image) is not None or
             volume.mount.stat().st_dev != volume.mount.parent.stat().st_dev):
         raise BarrierError("Disk image detachment could not be proved")
