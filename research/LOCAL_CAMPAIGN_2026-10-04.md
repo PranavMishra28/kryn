@@ -20,11 +20,13 @@ battery reached the recorded 15% emergency cutoff. No grader, model worker or
 benchmark-owned container remained afterward, and the local runtime was
 healthy and idle. The second pair's native arm is interrupted, not scored as
 a loss or retried. Its partial checkout and patch are archived privately with
-hash receipts before any future resume.
+hashes and full archive-member reads recorded in
+`swebench-v3-checkpoint-evidence.json` before any future resume.
 
-The one complete pair, `django__django-15863`, passed an independent raw-arm
+The one complete pair, `django__django-15863`, passed the frozen independent raw-arm
 audit for matching model/tool wire, invocation controls, effective permissions,
-power source, local-only generation and clean official grading. Native
+power source, local-only generation and clean official grading; the same private
+checkpoint receipt binds both arm files by SHA-256. Native
 OpenCode completed and resolved the issue in about 9.5 worker minutes. KRYN's
 patch also resolved in the official grader, but the Agent reached the 900-second
 timeout; strict acceptance was **native 1, KRYN 0**. KRYN's patch included
