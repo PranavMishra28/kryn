@@ -211,10 +211,10 @@ def run_child(command, name, attempts, campaign, *, wall=MAX_WORKER_SECONDS):
     with log.open("wb") as out:
         child = subprocess.Popen(command, stdout=out, stderr=subprocess.STDOUT,
                                  env=controlled_env(), start_new_session=True)
-        atomic(marker, {"pid": child.pid, "command_sha256": sha("\0".join(command).encode()),
-                        "started_unix": time.time()})
         awake = None
         try:
+            atomic(marker, {"pid": child.pid, "command_sha256": sha("\0".join(command).encode()),
+                            "started_unix": time.time()})
             awake = subprocess.Popen(["/usr/bin/caffeinate", "-i", "-w", str(child.pid)],
                                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL, start_new_session=True)
