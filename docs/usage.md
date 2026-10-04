@@ -85,7 +85,7 @@ Type these commands **inside KRYN**, then press Enter:
 | `/report` | Inspect machine-owned evidence for the latest project session; execution success is not task acceptance. |
 | `/update` | Check published KRYN releases; review the exact version/commit and choose Update and restart or Later. |
 | `/share` | Open OpenCode's local session export. V2 cannot create a public share link; inspect the export before sending it. |
-| `/call TASK` | **Unreleased source/private build only.** Explicitly run one coding-capable General child for a specific subtask. It can edit even if the parent is in Ask or Plan; the parent mode stays selected. The child has at most 16 model steps and cannot delegate again. Local inference remains serialized. |
+| `/call TASK` | Explicitly run one coding-capable General child for a specific subtask. It can edit even if the parent is in Ask or Plan; the parent mode stays selected. The child has at most 16 model steps and cannot delegate again. Local inference remains serialized. |
 | `/review` or `/audit` | Run a bounded read-only Reviewer child; your current mode stays selected. |
 | `/handoff` | Request a summary of completed work, checks and next steps. |
 | `/sessions` | Choose a saved session to resume. Relaunch from the same project first. |

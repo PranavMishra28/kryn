@@ -7,7 +7,8 @@ The public release gate is [supervised v1 qualification](v1-qualification.md). T
 3. On the final clean `main` commit, build with `python3 -B build_package.py --out-dir dist`. Record the commit and `dist/SHA256SUMS`; inspect the wheel manifest and verify `(cd dist && shasum -a 256 -c SHA256SUMS)`. For the owner install **before publication**, stage that exact wheel in a retained private environment and invoke the package's supported `kryn install` operation:
 
    ```sh
-   wheel="$PWD/dist/kryn-1.0.0-py3-none-any.whl"
+   version="$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+   wheel="$PWD/dist/kryn-$version-py3-none-any.whl"
    wheel_sha="$(shasum -a 256 "$wheel" | cut -d ' ' -f1)"
    root="$HOME/Library/Application Support/LocalAI"
    candidate="$root/private-candidates/$wheel_sha"
