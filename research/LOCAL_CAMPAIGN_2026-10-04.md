@@ -68,3 +68,10 @@ and candidate archive. A gold attempt interrupted before its receipt retires the
 affected pair as unscored, allowing later tasks to run without replaying the
 single-use oracle. Neither resumption nor a terminal report makes invalid work a
 pass. Independent adjudication and the remaining quality gates are still open.
+
+The supervisor's 15 recovery tests, full repository checks and clean package
+smoke passed, as did an isolated native launchd crash/restart probe. The first
+live launch is awaiting macOS's Python Documents-folder permission before script
+execution; no ninth arm has started. The private startup receipt binds all eight
+terminal arm files. These checks qualify lifecycle mechanisms, not completion of
+the campaign or a successful end-to-end power interruption of this live run.

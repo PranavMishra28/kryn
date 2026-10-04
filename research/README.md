@@ -16,6 +16,11 @@ the controller source, manifest, independent auditor and prior checkpoint files;
 `python3 -B research/campaign_supervisor.py CONFIG --check` is read-only. The
 supervisor's `status.json` and append-only `events.jsonl` record waiting, recovery,
 failure and adjudication. Adjudication completion is not a release qualification.
+On macOS, a background Python process reading a checkpoint in Documents needs
+its own Documents-folder permission. A launchd PID alone is not proof of startup:
+verify that `status.json` appears. If Python waits before executing the script,
+check the macOS permission prompt; Full Disk Access is not required. Keep the
+frozen paths and evidence unchanged while resolving the OS permission.
 [CACHE_ABLATION.md](CACHE_ABLATION.md) preregisters the first one-variable
 prompt-stability candidate before its implementation.
 [VERIFICATION_FEEDBACK.md](VERIFICATION_FEEDBACK.md) records the rejected
