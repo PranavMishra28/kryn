@@ -7,6 +7,7 @@ A coding workspace for Apple Silicon: OpenCode's terminal and browser interfaces
 | Start here | Contents |
 |---|---|
 | [Use KRYN](docs/usage.md) | Modes, permissions, models, terminal/GUI, sessions, diagnostics and recovery |
+| [Project skills](docs/usage.md#project-skills) | Add reviewed, reusable `SKILL.md` instructions through OpenCode's native skill tool |
 | [Current status](plan.md) · [Architecture](docs/architecture.md) | Supervised v1 gates, ownership and trust boundaries |
 | [Develop KRYN](CONTRIBUTING.md) · [Release runbook](docs/releasing.md) | Owning layers, focused checks and final-artifact release steps |
 | [Supervised v1 qualification](docs/v1-qualification.md) · [Research evaluations](docs/evaluation.md) | Product release checks and separate autonomous experiments |
@@ -22,7 +23,9 @@ cd "/absolute/path/to/your/project" && kryn
 
 Type a request and press Enter. New sessions use **Agent**; **Ctrl+X**, then **A** chooses Ask, Plan or Agent. Plan handles research with the selected model and effort. **Ctrl+T** cycles Default (bounded thinking) and Fast for local Qwen. **Ctrl+P** opens the command palette. Agent can delegate Explore, Browse or Reviewer work. Local generations run one at a time to protect memory. Use `/models` for native provider selection, `/settings` for permissions and display, `/report` for observed session evidence, `/sessions` to resume, and `/exit` to leave. `kryn controls` shows an offline reference. `/call TASK` runs one bounded coding child without changing the selected parent mode.
 
-Review permission prompts and generated changes. Explicit `kryn --auto` accepts all native requests not denied, including browser/network actions; see [permission scope](docs/usage.md#models-and-providers). `kryn --web` opens the companion GUI; `/web` displays its temporary credentials. `kryn --continue` resumes from the same project. Saved sessions remain on disk; compaction summaries can be inaccurate.
+Review permission prompts and generated changes. Explicit `kryn --auto` accepts all native requests not denied, including browser/network actions; see [permission scope](docs/usage.md#permissions-and-commands). `kryn --web` opens the companion GUI; `/web` displays its temporary credentials. `kryn --continue` resumes from the same project. Saved sessions remain on disk; compaction summaries can be inaccurate.
+
+For repeated workflows, add a project-local [OpenCode skill](docs/usage.md#project-skills). KRYN discovers these on demand; no extra harness or plugin is required.
 
 ## First installation
 
