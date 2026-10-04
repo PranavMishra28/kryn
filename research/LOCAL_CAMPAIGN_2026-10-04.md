@@ -48,3 +48,23 @@ Full task traces, interrupted checkout archive, source/evaluator hashes,
 manifest, power log and frozen audit code are retained in the owner's private
 `kryn-research-private` evidence store. Public counts here are a checkpoint,
 not a SWE-bench full-suite score.
+
+## Durable resumption amendment
+
+The same frozen campaign resumed on a 140 W adapter and reached eight terminal
+arms. A subsequent AC-to-battery transition stopped the one-shot wrapper during
+the next task's image preparation, before its arm or gold grader started. The
+eight completed receipts remain intact; this stop did not launch another arm.
+The private `swebench-v3-resume-power-stop.json` retains the `power_drift` event.
+
+The replacement research supervisor adds durable waiting and crash recovery
+around the separately pinned controller. It does not change the frozen source,
+task roster, model, prompts, worker timeout, grading or resource guard. Resume
+requires three safe power observations, at least 120 W AC and 40% battery; active
+work stops at 25% or on AC loss, with the existing disk/data limits retained.
+macOS launchd restarts an unexpectedly exited supervisor; caffeinate is held only
+while its controller is active. A future interruption retains its raw evidence
+and candidate archive. A gold attempt interrupted before its receipt retires the
+affected pair as unscored, allowing later tasks to run without replaying the
+single-use oracle. Neither resumption nor a terminal report makes invalid work a
+pass. Independent adjudication and the remaining quality gates are still open.

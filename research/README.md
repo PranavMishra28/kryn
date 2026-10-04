@@ -5,6 +5,17 @@ research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.
 [LOCAL_CAMPAIGN_2026-10-04.md](LOCAL_CAMPAIGN_2026-10-04.md) records the
 power-interrupted matched local campaign and its one independently audited pair.
+`campaign_supervisor.py` supervises an unchanged frozen SWE-bench controller from
+a private, pinned copy under a per-user launchd job. It waits for stable AC of at
+least 120 W and 40% battery, interrupts work on power loss or the existing resource
+limits, and resumes only remaining valid arms. It retains interrupted candidates,
+partial writes and preparation state; interrupted arms and gold attempts remain
+unscored. Controller crashes are reconciled before restart, and two unexplained
+exits without progress require inspection. Its private JSON configuration binds
+the controller source, manifest, independent auditor and prior checkpoint files;
+`python3 -B research/campaign_supervisor.py CONFIG --check` is read-only. The
+supervisor's `status.json` and append-only `events.jsonl` record waiting, recovery,
+failure and adjudication. Adjudication completion is not a release qualification.
 [CACHE_ABLATION.md](CACHE_ABLATION.md) preregisters the first one-variable
 prompt-stability candidate before its implementation.
 [VERIFICATION_FEEDBACK.md](VERIFICATION_FEEDBACK.md) records the rejected
