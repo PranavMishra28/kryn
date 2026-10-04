@@ -147,8 +147,8 @@ def bytes_under(path):
 def room(campaign, *, starting):
     if shutil.disk_usage(campaign).free < MIN_FREE or bytes_under(campaign) > MAX_RAW:
         return "disk_or_raw_data_limit"
-    plugged, percent = battery()
-    if not plugged and percent < (MIN_START_BATTERY if starting else STOP_BATTERY):
+    _, percent = battery()
+    if percent < (MIN_START_BATTERY if starting else STOP_BATTERY):
         return "battery_below_campaign_limit"
     return None
 

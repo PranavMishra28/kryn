@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -13,6 +14,25 @@ from research.local_campaign import controlled_env, paired_summary
 
 
 class CampaignTests(unittest.TestCase):
+    def test_campaign_battery_floor_applies_while_charging(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(local_campaign.shutil, "disk_usage", return_value=SimpleNamespace(
+                    free=local_campaign.MIN_FREE + 1)), patch.object(
+                    local_campaign, "bytes_under", return_value=0):
+                with patch.object(local_campaign, "battery", return_value=(True, 39)):
+                    self.assertEqual(local_campaign.room(root, starting=True),
+                                     "battery_below_campaign_limit")
+                    self.assertIsNone(local_campaign.room(root, starting=False))
+                with patch.object(local_campaign, "battery", return_value=(True, 24)):
+                    self.assertEqual(local_campaign.room(root, starting=False),
+                                     "battery_below_campaign_limit")
+                with patch.object(local_campaign, "battery", return_value=(True, 40)):
+                    self.assertIsNone(local_campaign.room(root, starting=True))
+                with patch.object(local_campaign, "battery", return_value=(False, 24)):
+                    self.assertEqual(local_campaign.room(root, starting=False),
+                                     "battery_below_campaign_limit")
+
     def test_unmatched_wire_cannot_be_scored_as_uplift(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
