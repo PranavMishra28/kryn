@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import select
 import selectors
 import signal
 import socket
@@ -55,6 +56,23 @@ def git(workspace, *args):
                                    stderr=subprocess.STDOUT, timeout=20).strip()
 
 
+def exited_unreaped(child):
+    """Observe exit without freeing the PID before its process group is stopped."""
+    if callable(getattr(os, "waitid", None)):
+        return os.waitid(os.P_PID, child.pid,
+                         os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+    if not hasattr(select, "kqueue"):
+        raise RuntimeError("Cannot observe an unreaped Git process on this host")
+    queue = select.kqueue()
+    try:
+        event = select.kevent(child.pid, filter=select.KQ_FILTER_PROC,
+                              flags=select.KQ_EV_ADD | select.KQ_EV_ENABLE,
+                              fflags=select.KQ_NOTE_EXIT)
+        return bool(queue.control([event], 1, 0))
+    finally:
+        queue.close()
+
+
 def kill_group(child):
     # The leader has not yet been reaped. Its process-group ID cannot have been
     # reused, even when a Git filter has forked descendants holding stdout.
@@ -66,8 +84,7 @@ def kill_group(child):
     except PermissionError:
         # macOS can return EPERM for an already exited sandbox-exec leader
         # whose group has vanished; it permits the same kill while live.
-        if os.waitid(os.P_PID, child.pid,
-                     os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+        if not exited_unreaped(child):
             child.kill()
             failure = RuntimeError("Could not terminate live Git process group")
     status = child.wait()
@@ -102,8 +119,7 @@ def bounded_output(command, destination, limit, *, env, cwd, cancelled, timeout=
                 output.write(chunk)
                 digest.update(chunk)
                 total += len(chunk)
-        while os.waitid(os.P_PID, child.pid,
-                        os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+        while not exited_unreaped(child):
             if cancelled():
                 raise CaptureCancelled("Resource guard interrupted patch capture")
             if time.monotonic() >= deadline:
@@ -131,8 +147,7 @@ def quiet_command(command, *, env, cwd, cancelled, timeout=20, stdin_file=None):
                                  env=env, start_new_session=True)
         deadline = time.monotonic() + timeout
         try:
-            while os.waitid(os.P_PID, child.pid,
-                            os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            while not exited_unreaped(child):
                 if cancelled():
                     raise CaptureCancelled("Resource guard interrupted patch capture")
                 if time.monotonic() >= deadline:

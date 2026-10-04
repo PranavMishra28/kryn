@@ -12,11 +12,24 @@ from types import SimpleNamespace
 
 from unittest.mock import patch
 
-from run_external_patch import (PatchBudgetExceeded, benchmark_tools, collect_patch,
-                                drive, prepare, stop_browser_broker)
+from run_external_patch import (PatchBudgetExceeded, benchmark_tools, bounded_output,
+                                collect_patch, drive, prepare, quiet_command,
+                                stop_browser_broker)
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == "darwin", "Requires macOS kqueue")
+    def test_git_commands_wait_without_waitid(self):
+        with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
+            output = Path(tmp) / "output"
+            with patch("run_external_patch.os.waitid", None, create=True):
+                size, _ = bounded_output(["/bin/echo", "ready"], output, 64,
+                                         env=os.environ.copy(), cwd=tmp,
+                                         cancelled=lambda: False)
+                quiet_command(["/usr/bin/true"], env=os.environ.copy(), cwd=tmp,
+                              cancelled=lambda: False)
+            self.assertEqual((size, output.read_text()), (6, "ready\n"))
+
     def test_browser_cleanup_requires_exact_container_absence_and_closed_listener(self):
         child = SimpleNamespace(poll=lambda: None)
         broker = {"container": "kryn-ui-test-exact", "port": 65431}
