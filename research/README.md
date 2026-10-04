@@ -3,6 +3,8 @@
 [PROTOCOL.md](PROTOCOL.md) freezes the hypothesis, controls, acceptance rule and
 research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.
+[LOCAL_CAMPAIGN_2026-10-04.md](LOCAL_CAMPAIGN_2026-10-04.md) records the
+power-interrupted matched local campaign and its one independently audited pair.
 [CACHE_ABLATION.md](CACHE_ABLATION.md) preregisters the first one-variable
 prompt-stability candidate before its implementation.
 [VERIFICATION_FEEDBACK.md](VERIFICATION_FEEDBACK.md) records the rejected
