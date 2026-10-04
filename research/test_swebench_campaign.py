@@ -46,6 +46,8 @@ class SWEbenchCampaignTests(unittest.TestCase):
             self.assertTrue((campaign / "attempts/s01-kryn.final.json").is_file())
             self.assertFalse((campaign / "attempts/s01-native.final.json").exists())
             worker.assert_called_once()
+            self.assertEqual(worker.call_args.args[0][0],
+                             str(swebench_controller.TOOL_VENV / "bin/python3"))
 
     def test_unmatched_tool_or_power_never_supports_uplift(self):
         with tempfile.TemporaryDirectory() as temporary:

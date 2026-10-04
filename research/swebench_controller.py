@@ -46,9 +46,16 @@ def source_lock(manifest, campaign):
     sys.path.insert(0, str(ROOT / "research"))
     from run_external_patch import benchmark_tools
     _, _, tool = benchmark_tools(TOOL_VENV)
+    worker_python = TOOL_VENV / "bin/python3"
+    if subprocess.run([str(worker_python), "-c",
+                       "import sys; raise SystemExit(sys.version_info < (3, 13))"],
+                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                      timeout=10).returncode:
+        raise RuntimeError("KRYN worker requires Python 3.13 or newer")
     value = {"schema": 1, "manifest_sha256": file_sha(campaign / "manifest.json"),
              "source_sha256": source, "product_plugin_sha256": plugin_hashes(),
              "tool_venv": str(TOOL_VENV), "tool_manifest": tool,
+             "worker_python": str(worker_python),
              "evaluator_package": "swebench==5.0.2",
              "evaluator_source_sha256": {"run_evaluation": file_sha(evaluator.__file__),
                                          "utils": file_sha(evaluator_utils.__file__)},
@@ -293,7 +300,8 @@ def run(campaign, work, expected_sha):
                         raise RuntimeError("Paired candidate exceeds 4-GiB workspace cap")
                     evidence = campaign / "evidence" / name
                     evidence.parent.mkdir(exist_ok=True)
-                    command = [sys.executable, "-B", str(ROOT / "research/run_external_patch.py"),
+                    command = [str(TOOL_VENV / "bin/python3"), "-B",
+                               str(ROOT / "research/run_external_patch.py"),
                                str(candidate), "--base-commit", task["base_commit"],
                                "--task-id", ident, "--prompt", str(prompt),
                                "--evidence", str(evidence), "--arm", arm,
