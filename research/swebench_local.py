@@ -74,6 +74,9 @@ def prepare(manifest, task, campaign, work, *, dataset_root=DATASET_ROOT):
         if (file_sha(prompt_file) != task["prompt_sha256"] or
                 subprocess.check_output(["git", "-C", str(base), "rev-parse", "HEAD"],
                                         text=True, timeout=20).strip() != task["base_commit"] or
+                subprocess.check_output(["git", "-C", str(base), "status", "--porcelain"],
+                                        text=True, timeout=30).strip() or
+                file_sha(base / ".git/config") != info["base_git_config_sha256"] or
                 image_identity(task)["Id"] != info["image_id"]):
             raise RuntimeError("Prepared SWE-bench task drifted")
         return base, prompt_file, info
@@ -135,6 +138,10 @@ def fresh_candidate(base, work, task):
     if subprocess.check_output(["git", "-C", str(candidate), "rev-parse", "HEAD"],
                                text=True, timeout=30).strip() != task["base_commit"]:
         raise RuntimeError("Fresh candidate is not at the frozen base commit")
+    if (subprocess.check_output(["git", "-C", str(candidate), "status", "--porcelain"],
+                                text=True, timeout=30).strip() or
+            file_sha(candidate / ".git/config") != file_sha(base / ".git/config")):
+        raise RuntimeError("Fresh candidate differs from the clean prepared base")
     return candidate
 
 

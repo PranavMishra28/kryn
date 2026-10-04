@@ -213,35 +213,46 @@ def run_child(command, name, attempts, campaign, *, wall=MAX_WORKER_SECONDS):
                                  env=controlled_env(), start_new_session=True)
         atomic(marker, {"pid": child.pid, "command_sha256": sha("\0".join(command).encode()),
                         "started_unix": time.time()})
+        awake = None
         try:
             awake = subprocess.Popen(["/usr/bin/caffeinate", "-i", "-w", str(child.pid)],
                                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL, start_new_session=True)
-        except OSError:
-            os.killpg(child.pid, signal.SIGTERM)
-            child.wait(timeout=10)
-            raise
-        started = time.monotonic()
-        stop = None
-        while child.poll() is None:
-            if time.monotonic() - started > wall:
-                stop = "outer_wall_limit"
-            else:
-                stop = room(campaign, starting=False)
-            if stop:
-                os.killpg(child.pid, signal.SIGTERM)
+            started = time.monotonic()
+            stop = None
+            while child.poll() is None:
+                if time.monotonic() - started > wall:
+                    stop = "outer_wall_limit"
+                else:
+                    stop = room(campaign, starting=False)
+                if stop:
+                    os.killpg(child.pid, signal.SIGTERM)
+                    try:
+                        child.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(child.pid, signal.SIGKILL)
+                        child.wait(timeout=10)
+                    break
+                time.sleep(5)
+            try:
+                awake.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                awake.terminate()
+                awake.wait(timeout=10)
+        finally:
+            if child.poll() is None:
+                try:
+                    os.killpg(child.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
                 try:
                     child.wait(timeout=10)
                 except subprocess.TimeoutExpired:
                     os.killpg(child.pid, signal.SIGKILL)
                     child.wait(timeout=10)
-                break
-            time.sleep(5)
-        try:
-            awake.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            awake.terminate()
-            awake.wait(timeout=10)
+            if awake is not None and awake.poll() is None:
+                awake.terminate()
+                awake.wait(timeout=10)
     power_end = battery()
     return {"returncode": child.returncode, "stop_reason": stop,
             "elapsed_seconds": round(time.monotonic() - started, 3),

@@ -3,10 +3,12 @@
 import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
 
+from research import local_campaign
 from research.local_campaign import controlled_env, paired_summary
 
 
@@ -43,6 +45,32 @@ class CampaignTests(unittest.TestCase):
         self.assertNotIn("OPENAI_API_KEY", env)
         self.assertNotIn("OPENCODE_CONFIG_CONTENT", env)
         self.assertNotIn("ANTHROPIC_AUTH_TOKEN", env)
+
+    def test_telemetry_exception_reaps_model_worker(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            real_popen = subprocess.Popen
+
+            class FinishedAwake:
+                def poll(self):
+                    return 0
+
+                def wait(self, timeout=None):
+                    return 0
+
+            def launch(command, **kwargs):
+                if command[0] == "/usr/bin/caffeinate":
+                    return FinishedAwake()
+                return real_popen(command, **kwargs)
+
+            with patch.object(local_campaign, "battery", return_value=(True, 100)), patch.object(
+                    local_campaign, "room", side_effect=RuntimeError("telemetry unavailable")), patch.object(
+                    local_campaign.subprocess, "Popen", side_effect=launch):
+                with self.assertRaisesRegex(RuntimeError, "telemetry unavailable"):
+                    local_campaign.run_child(["/bin/sleep", "30"], "attempt", root, root)
+            pid = json.loads((root / "attempt.running.json").read_text())["pid"]
+            self.assertNotEqual(subprocess.run(["ps", "-p", str(pid)],
+                                               stdout=subprocess.DEVNULL).returncode, 0)
 
 
 if __name__ == "__main__":

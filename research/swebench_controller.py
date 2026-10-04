@@ -11,11 +11,13 @@ import json
 import os
 from pathlib import Path
 import random
+import re
 import shutil
 import signal
 import subprocess
 import sys
 import time
+from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from research import swebench_local
@@ -39,6 +41,13 @@ def source_lock(manifest, campaign):
     """Freeze worker, grader and product bytes before the first local turn."""
     if importlib.metadata.version("swebench") != "5.0.2":
         raise RuntimeError("Official SWE-bench evaluator package version changed")
+    direct = json.loads(importlib.metadata.distribution("swebench").read_text("direct_url.json"))
+    source_url = urlparse(direct["url"])
+    if source_url.scheme != "file" or not manifest.get("evaluator_archive_sha256"):
+        raise RuntimeError("SWE-bench source archive is not pinned in the manifest")
+    archive = Path(unquote(source_url.path))
+    if file_sha(archive) != manifest["evaluator_archive_sha256"]:
+        raise RuntimeError("Pinned SWE-bench source archive changed")
     import swebench.harness.run_evaluation as evaluator
     import swebench.harness.utils as evaluator_utils
     lock_file = campaign / "execution-lock.json"
@@ -57,8 +66,13 @@ def source_lock(manifest, campaign):
              "tool_venv": str(TOOL_VENV), "tool_manifest": tool,
              "worker_python": str(worker_python),
              "evaluator_package": "swebench==5.0.2",
+             "evaluator_archive_sha256": file_sha(archive),
              "evaluator_source_sha256": {"run_evaluation": file_sha(evaluator.__file__),
                                          "utils": file_sha(evaluator_utils.__file__)},
+             "evaluator_package_sha256": {
+                 str(path.relative_to(Path(evaluator.__file__).parent.parent)): file_sha(path)
+                 for path in sorted(Path(evaluator.__file__).parent.parent.rglob("*"))
+                 if path.is_file() and "__pycache__" not in path.parts},
              "evaluator_commit": manifest["evaluator_commit"],
              "local_provider": "local/qwen", "model_id": "Qwen3.5-9B-6bit"}
     if lock_file.exists():
@@ -118,6 +132,13 @@ def grade_once(campaign, task, run_id, prediction_path):
         time.sleep(60)
     if not runtime_idle():
         raise RuntimeError("Owned model runtime did not settle before official grading")
+    pinned = json.loads((campaign / "manifest.json").read_text())
+    source_lock(pinned, campaign)
+    parquet = swebench_local.DATASET_ROOT / task["dataset"] / "data/test-00000-of-00001.parquet"
+    dataset_sha = pinned["datasets"][task["dataset"]]["test_sha256"]
+    prepared = json.loads((campaign / "prepared" / task["instance_id"] / "receipt.json").read_text())
+    if file_sha(parquet) != dataset_sha or swebench_local.image_identity(task)["Id"] != prepared["image_id"]:
+        raise RuntimeError("Official grader dataset or image changed before grading")
     evidence.mkdir(mode=0o700, parents=True)
     grade_root = campaign / "grade-root"
     grade_root.mkdir(exist_ok=True)
@@ -137,6 +158,7 @@ def grade_once(campaign, task, run_id, prediction_path):
         return result
     start = time.monotonic()
     child = None
+    awake = None
     stop = None
     try:
         with log.open("wb") as out:
@@ -170,7 +192,23 @@ def grade_once(campaign, task, run_id, prediction_path):
                 awake.terminate()
                 awake.wait(timeout=10)
     finally:
+        if child is not None and child.poll() is None:
+            try:
+                os.killpg(child.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                child.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                os.killpg(child.pid, signal.SIGKILL)
+                child.wait(timeout=10)
+        if awake is not None and awake.poll() is None:
+            awake.terminate()
+            awake.wait(timeout=10)
         monitor.close()
+    if file_sha(parquet) != dataset_sha or swebench_local.image_identity(task)["Id"] != prepared["image_id"]:
+        raise RuntimeError("Official grader dataset or image changed during grading")
+    source_lock(pinned, campaign)
     official = swebench_local.official_result(grade_root, task, run_id)
     after_containers = set(subprocess.check_output(["docker", "ps", "-aq"],
                                                    text=True, timeout=15).splitlines())
@@ -213,12 +251,15 @@ def summarize(campaign, manifest):
                  n.get("worker", {}).get("ac_power_start") ==
                  n.get("worker", {}).get("ac_power_end") and
                  k.get("worker", {}).get("ac_power_start") is not None)
-        matched = bool(k_wire and k_wire == n_wire and power and
+        controls = k.get("paired_controls")
+        matched = bool(k_wire and k_wire == n_wire and power and controls and
+                       controls == n.get("paired_controls") and
+                       k.get("wire_stable") is True and n.get("wire_stable") is True and
                        k.get("local_only") and n.get("local_only") and
                        k["local_only"].get("generation_proven") and
                        n["local_only"].get("generation_proven") and
-                       k.get("official", {}).get("graded") and
-                       n.get("official", {}).get("graded"))
+                       k.get("official", {}).get("clean_grade") is True and
+                       n.get("official", {}).get("clean_grade") is True)
         pairs.append({"instance_id": task["instance_id"], "matched": matched,
                       "tool_wire_match": bool(k_wire and k_wire == n_wire),
                       "power_match": power, "kryn": bool(k.get("accepted")),
@@ -239,6 +280,27 @@ def summarize(campaign, manifest):
             "delta": sum(deltas) / len(deltas) if deltas else None,
             "bootstrap_95_percentile": interval, "pairs": pairs,
             "updated_unix": time.time()}
+
+
+def paired_controls(driver, evidence):
+    """Normalize only OpenCode's random isolated root in effective permissions."""
+    inventory = evidence / "agent-inventory.json"
+    if not inventory.is_file():
+        return None
+    agents = [item for item in json.loads(inventory.read_text()).get("data", [])
+              if item.get("id") == "agent"]
+    if len(agents) != 1 or not isinstance(agents[0].get("permissions"), list):
+        return None
+    permissions = re.sub(r"/private/tmp/kryn-isolated-[^/]+", "<ISOLATED>",
+                         json.dumps(agents[0]["permissions"], sort_keys=True))
+    keys = ("agent", "base_commit", "prompt_sha256", "source_commit", "runner_sha256",
+            "model_id", "model_repository", "model_revision", "model_profile_sha256",
+            "opencode_binary_sha256", "benchmark_tool_manifest", "timeout_seconds")
+    controls = {key: driver.get(key) for key in keys}
+    if any(value is None for value in controls.values()):
+        return None
+    controls["effective_permissions_sha256"] = sha(permissions.encode())
+    return controls
 
 
 def run(campaign, work, expected_sha):
@@ -268,6 +330,8 @@ def run(campaign, work, expected_sha):
                 wait_for_safe(campaign, work, f"gold-s{index:02d}")
                 gold_id = f"gold-s{index:02d}"
                 gold = grade_once(campaign, task, gold_id, "gold")
+                if gold.get("clean_grade") is not True:
+                    raise RuntimeError("Gold official grader failed infrastructure checks")
                 gold_passed = gold.get("clean_grade") and gold.get("resolved") is True
             else:
                 gold_passed = None
@@ -326,6 +390,9 @@ def run(campaign, work, expected_sha):
                                   ("model", "max_tokens", "numeric", "thinking",
                                    "tool_count", "tool_schema_sha256")}
                                  if tool_rows else None)
+                    wire_stable = bool(main_wire and all(
+                        {key: item.get(key) for key in main_wire} == main_wire
+                        for item in tool_rows))
                     local = driver.get("local_only")
                     clean = driver.get("resources") or {}
                     sys.path.insert(0, str(ROOT / "research"))
@@ -347,6 +414,8 @@ def run(campaign, work, expected_sha):
                            "patch_sha256": file_sha(patch) if patch.is_file() else None,
                            "edited_test_paths": test_edits,
                            "local_only": local, "main_wire": main_wire,
+                           "wire_stable": wire_stable,
+                           "paired_controls": paired_controls(driver, evidence),
                            "official": official, "worker": worker}
                     shutil.rmtree(candidate)
                 atomic(final, row)
