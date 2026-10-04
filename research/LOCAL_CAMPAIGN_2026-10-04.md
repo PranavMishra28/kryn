@@ -69,9 +69,20 @@ affected pair as unscored, allowing later tasks to run without replaying the
 single-use oracle. Neither resumption nor a terminal report makes invalid work a
 pass. Independent adjudication and the remaining quality gates are still open.
 
-The supervisor's 15 recovery tests, full repository checks and clean package
-smoke passed, as did an isolated native launchd crash/restart probe. The first
-live launch is awaiting macOS's Python Documents-folder permission before script
-execution; no ninth arm has started. The private startup receipt binds all eight
-terminal arm files. These checks qualify lifecycle mechanisms, not completion of
-the campaign or a successful end-to-end power interruption of this live run.
+The first supervisor's 15 recovery tests, full repository checks and clean
+package smoke passed, as did an isolated native launchd crash/restart probe.
+After macOS's Python Documents permission cleared, it reached 12 terminal arms.
+The four new arms were resource-gated: three hit sustained host memory warnings,
+and one failed its resource preflight before sending a prompt. They are unscored;
+the matched-pair count remains three, with preliminary strict KRYN 0/native 2.
+
+A transient adapter reading of 94 W paused the next task's gold grader. The
+supervisor settled its owned container, but then incorrectly treated a stopped
+oMLX listener as a permanent preflight error. The raw stop, guard receipts and
+all 12 terminal files are bound in a private recovery diagnosis. The interrupted
+gold attempt cannot be replayed. A recovery correction distinguishes service
+absence from source/ownership/configuration drift, starts only the owned runtime
+under safe admission, and rechecks safety after startup. Lightweight pressure
+monitoring and a durable cooldown prevent the controller from consuming later
+arms while pressure remains high. These lifecycle fixes do not convert the four
+resource failures into passes or qualify the research result.

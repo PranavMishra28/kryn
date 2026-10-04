@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from unittest.mock import Mock, patch
@@ -29,6 +30,119 @@ class SupervisorTests(unittest.TestCase):
             self.assertIsNotNone(supervisor.power_problem({**good, **change}, True))
         self.assertIsNone(supervisor.power_problem({**good, "battery_percent": 30}, False))
         self.assertIsNotNone(supervisor.power_problem({**good, "battery_percent": 25}, False))
+
+    def test_runtime_absence_recovers_but_check_is_read_only_and_drift_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = self.fixture(root)
+            research, tools = root / "research", root / "tools"
+            research.mkdir()
+            tools.mkdir()
+            (research / "__init__.py").write_text("")
+            source_lock = research / "swebench_controller.py"
+            source_lock.write_text("def source_lock(*args): pass\n")
+            Path(config["auditor"]).write_text("# pinned auditor\n")
+            config.update(source_commit="frozen", auditor_sha256=supervisor.digest(config["auditor"]),
+                          manifest_sha256=supervisor.digest(Path(config["campaign"]) / "manifest.json"))
+            (Path(config["campaign"]) / "manifest.sha256").write_text(config["manifest_sha256"])
+            localai = tools / "localai.py"
+            valid = ("from pathlib import Path\nimport subprocess\n"
+                     "flag=Path(__file__).with_name('started')\n"
+                     "def ensure_runtime(): flag.touch()\n"
+                     "def runtime_identity():\n"
+                     " if not flag.exists(): raise subprocess.CalledProcessError(1, "
+                     "['/usr/sbin/lsof','-nP','-a','-iTCP:8000','-sTCP:LISTEN','-Fpu'])\n"
+                     "def runtime_metadata(): return {'healthy':True,'model':'Qwen3.5-9B-6bit',"
+                     "'model_memory_max':22*1024**3,'active_requests':0,'waiting_requests':0}\n")
+            localai.write_text(valid)
+            with patch.object(supervisor, "command", side_effect=lambda argv, **_: "frozen" if "rev-parse" in argv else ""):
+                self.assertFalse(supervisor.preflight(config))
+                self.assertFalse((tools / "started").exists())
+                self.assertTrue(supervisor.preflight(config, start_runtime=True))
+                self.assertTrue(supervisor.preflight(config))
+                for broken in (valid.replace("22*1024**3", "24*1024**3"),
+                               valid.replace("Qwen3.5-9B-6bit", "other-model"),
+                               valid + "\ndef runtime_identity(): raise RuntimeError('wrong owner')\n"):
+                    localai.write_text(broken)
+                    with self.assertRaisesRegex(RuntimeError, "preflight failed"):
+                        supervisor.preflight(config, start_runtime=True)
+                localai.write_text(valid)
+                source_lock.write_text("def source_lock(*args): raise RuntimeError('source drift')\n")
+                with self.assertRaisesRegex(RuntimeError, "source drift"):
+                    supervisor.preflight(config, start_runtime=True)
+
+    def test_safety_requires_normal_memory_before_start(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.fixture(Path(temporary))
+            with patch.object(supervisor, "power", return_value={"ac": True, "adapter_watts": 140, "battery_percent": 90}), patch.object(
+                    supervisor, "memory_pressure", return_value=2), patch.object(
+                    supervisor.shutil, "disk_usage", return_value=Mock(free=30 * 1024**3)):
+                self.assertEqual(supervisor.safety(config, True)[0], "host_memory_not_green")
+
+    def test_memory_warning_pauses_controller_and_records_cooldown(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.fixture(Path(temporary))
+            child, awake = Mock(pid=987), Mock()
+            child.poll.side_effect = [None, 0]
+            child.wait.return_value = 0
+            awake.poll.return_value = None
+            with patch.object(supervisor, "memory_pressure", return_value=2), patch.object(
+                    supervisor, "safety", return_value=(None, {})), patch.object(
+                    supervisor, "stop_pid") as stop, patch.object(supervisor.subprocess, "Popen", return_value=awake):
+                self.assertEqual(supervisor.monitor(child, config, [False]), "host_memory_guard")
+                stop.assert_called_once()
+            cooldown = supervisor.read(Path(config["state"]) / "memory-cooldown.json")
+            self.assertGreater(cooldown["until_unix"], time.time())
+            self.assertEqual(cooldown["memory"]["pressure_level"], 2)
+            awake.terminate.assert_called_once()
+
+    def test_slow_power_check_cannot_delay_memory_pause(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.fixture(Path(temporary))
+            child, awake = Mock(pid=987), Mock()
+            child.poll.side_effect = [None, 0]
+            awake.poll.return_value = None
+            probing, stopped = threading.Event(), threading.Event()
+
+            def slow_safety(*_a, **_k):
+                probing.set()
+                if not stopped.wait(3):
+                    raise RuntimeError("power probe blocked memory pause")
+                return None, {}
+
+            def pressure():
+                self.assertTrue(probing.wait(1))
+                return 2
+
+            with patch.object(supervisor, "memory_pressure", side_effect=pressure), patch.object(
+                    supervisor, "safety", side_effect=slow_safety), patch.object(
+                    supervisor, "stop_pid", side_effect=lambda *_: stopped.set()), patch.object(
+                    supervisor.subprocess, "Popen", return_value=awake):
+                self.assertEqual(supervisor.monitor(child, config, [False]), "host_memory_guard")
+            self.assertTrue(stopped.is_set())
+
+    def test_runtime_start_power_drift_and_persistent_pressure_prevent_launch(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.fixture(Path(temporary))
+            good, bad = (None, {}), ("battery_power", {"ac": False})
+            checks = [good, good, good, bad, ("host_memory_not_green", {}),
+                      ("host_memory_not_green", {})]
+            def safety(*_a, **_k):
+                if checks:
+                    return checks.pop(0)
+                raise RuntimeError("test finished")
+            with patch.object(supervisor, "safety", side_effect=safety), patch.object(
+                    supervisor, "preflight", return_value=True) as preflight, patch.object(
+                    supervisor, "settle"), patch.object(supervisor, "command", return_value=""), patch.object(
+                    supervisor.time, "sleep"), patch.object(supervisor.signal, "signal"), patch.object(
+                    supervisor.subprocess, "Popen") as launch:
+                with self.assertRaisesRegex(RuntimeError, "test finished"):
+                    supervisor.supervise(config)
+                launch.assert_not_called()
+                preflight.assert_called_once_with(config, start_runtime=True)
+            events = (Path(config["state"]) / "events.jsonl").read_text()
+            self.assertIn('"reason": "battery_power"', events)
+            self.assertIn('"reason": "host_memory_not_green"', events)
 
     def test_completed_evidence_change_or_deletion_refuses_resume(self):
         with tempfile.TemporaryDirectory() as temporary:

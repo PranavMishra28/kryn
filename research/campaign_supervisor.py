@@ -5,6 +5,7 @@ owns lifecycle only: interrupted work is retained and unscored, never replayed.
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import fcntl
 import hashlib
@@ -27,6 +28,8 @@ MIN_FREE = 12 * 1024**3
 MAX_RAW = 8 * 1024**3
 MAX_WORK = 4 * 1024**3
 POLL_SECONDS = 15
+MEMORY_POLL_SECONDS = 2
+MEMORY_COOLDOWN_SECONDS = 60
 MUTABLE = {".runner.lock", "progress.json", "pause.json"}
 
 
@@ -125,6 +128,13 @@ def power_problem(value, starting):
     return None
 
 
+def memory_pressure():
+    level = int(command(["/usr/sbin/sysctl", "-n", "kern.memorystatus_vm_pressure_level"], timeout=2))
+    if level not in (1, 2, 4, 6):
+        raise RuntimeError("memory_pressure_telemetry_unavailable")
+    return level
+
+
 def size(root):
     total = 0
     for path in root.rglob("*"):
@@ -140,13 +150,17 @@ def safety(config, starting):
     try:
         value = power()
         problem = power_problem(value, starting)
+        if starting:
+            value["pressure_level"] = memory_pressure()
+            if value["pressure_level"] != 1:
+                problem = "host_memory_not_green"
         campaign, state, work = (Path(config[key]) for key in ("campaign", "state", "work"))
         if shutil.disk_usage(campaign).free < MIN_FREE or size(campaign) + size(state) > MAX_RAW:
             problem = "disk_or_raw_data_limit"
         if size(work) > MAX_WORK:
             problem = "candidate_workspace_byte_limit"
         return problem, value
-    except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
         return "safety_telemetry_unavailable", {"error": str(error)}
 
 
@@ -413,7 +427,7 @@ def recover(config):
             event(state, "preparation_preserved_before_retry", task=prefix)
 
 
-def preflight(config):
+def preflight(config, *, start_runtime=False):
     source, campaign = Path(config["source"]), Path(config["campaign"])
     if (digest(campaign / "manifest.json") != config["manifest_sha256"] or
             (campaign / "manifest.sha256").read_text().strip() != config["manifest_sha256"]):
@@ -426,12 +440,32 @@ def preflight(config):
     for filename, expected in config.get("retained_sha256", {}).items():
         if digest(filename) != expected:
             raise RuntimeError("Retained checkpoint input changed: " + filename)
-    script = ("import json,sys; from pathlib import Path; "
-              "from research.swebench_controller import source_lock; "
-              "from research.local_campaign import runtime_idle; "
-              "c=Path(sys.argv[1]); source_lock(json.loads((c/'manifest.json').read_text()),c); "
-              "raise SystemExit(0 if runtime_idle() else 75)")
-    result = subprocess.run([config["python"], "-B", "-c", script, str(campaign)],
+    script = """import json,sys,subprocess,urllib.error
+from pathlib import Path
+from research.swebench_controller import source_lock
+c=Path(sys.argv[1])
+source_lock(json.loads((c/'manifest.json').read_text()),c)
+sys.path.insert(0, str(Path.cwd()/'tools'))
+import localai
+try:
+    if sys.argv[2] == 'start':
+        localai.ensure_runtime()
+    localai.runtime_identity()
+    data = localai.runtime_metadata()
+    if (data.get('healthy') is not True or data.get('model') != 'Qwen3.5-9B-6bit'
+            or data.get('model_memory_max') != 22 * 1024**3):
+        raise RuntimeError('Frozen runtime model or ceiling changed')
+    ready = data.get('active_requests') == 0 and data.get('waiting_requests') == 0
+except subprocess.CalledProcessError as error:
+    if error.returncode != 1 or error.cmd != ['/usr/sbin/lsof', '-nP', '-a', '-iTCP:8000', '-sTCP:LISTEN', '-Fpu']:
+        raise
+    ready = False
+except (FileNotFoundError, ConnectionRefusedError, TimeoutError, urllib.error.URLError, subprocess.TimeoutExpired):
+    ready = False
+raise SystemExit(0 if ready else 75)
+"""
+    result = subprocess.run([config["python"], "-B", "-c", script, str(campaign),
+                             "start" if start_runtime else "check"],
                             cwd=source, env={**os.environ, "PYTHONPATH": str(source)},
                             capture_output=True, text=True, timeout=120)
     if result.returncode not in (0, 75):
@@ -442,19 +476,44 @@ def preflight(config):
 def monitor(child, config, stopping):
     awake = None
     reason = None
+    next_safety = 0
+    telemetry = {}
+    observation = None
+    observer = ThreadPoolExecutor(max_workers=1)
     try:
         awake = subprocess.Popen(["/usr/bin/caffeinate", "-i", "-s", "-w", str(child.pid)],
                                  stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         while child.poll() is None:
-            problem, telemetry = safety(config, starting=False)
+            problem = None
+            # Slow power/disk inspection must not block the pressure cadence.
+            if observation is None and time.monotonic() >= next_safety:
+                observation = observer.submit(safety, config, starting=False)
+            if observation is not None and observation.done():
+                problem, telemetry = observation.result()
+                observation = None
+                next_safety = time.monotonic() + POLL_SECONDS
+            try:
+                level = memory_pressure()
+                memory = {"pressure_level": level}
+                # Conservative outer admission also protects the next arm's
+                # immediate preflight. The frozen worker guard is unchanged.
+                if level != 1:
+                    problem = "host_memory_guard"
+            except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+                memory = {"error": str(error)}
+                problem = "memory_pressure_telemetry_unavailable"
             if stopping[0] or problem:
                 reason = "supervisor_exit" if stopping[0] else problem
-                event(Path(config["state"]), "pausing", reason=reason, power=telemetry)
+                if problem in ("host_memory_guard", "memory_pressure_telemetry_unavailable"):
+                    save(Path(config["state"]) / "memory-cooldown.json",
+                         {"until_unix": time.time() + MEMORY_COOLDOWN_SECONDS,
+                          "reason": problem, "memory": memory})
+                event(Path(config["state"]), "pausing", reason=reason, power=telemetry, memory=memory)
                 stop_pid(child.pid, [str(Path(config["source"]) / "research/swebench_controller.py"), config["campaign"]])
                 child.wait(timeout=15)
                 break
             try:
-                child.wait(timeout=POLL_SECONDS)
+                child.wait(timeout=MEMORY_POLL_SECONDS)
             except subprocess.TimeoutExpired:
                 pass
     finally:
@@ -465,6 +524,7 @@ def monitor(child, config, stopping):
             if awake.poll() is None:
                 awake.terminate()
             awake.wait(timeout=15)
+        observer.shutdown(wait=True)
     return reason
 
 
@@ -519,6 +579,9 @@ def supervise(config):
                     time.sleep(POLL_SECONDS)
                     continue
                 problem, telemetry = safety(config, starting=True)
+                cooldown = state / "memory-cooldown.json"
+                if cooldown.exists() and time.time() < read(cooldown)["until_unix"]:
+                    problem = problem or "memory_guard_cooldown"
                 if problem:
                     stable = 0
                     if last_wait != problem:
@@ -533,7 +596,7 @@ def supervise(config):
                         last_wait = "power_stabilizing"
                     time.sleep(POLL_SECONDS)
                     continue
-                if not preflight(config):
+                if not preflight(config, start_runtime=True):
                     if last_wait != "runtime_not_idle":
                         event(state, "waiting", reason="runtime_not_idle")
                         last_wait = "runtime_not_idle"
@@ -562,6 +625,14 @@ def supervise(config):
                     time.sleep(POLL_SECONDS)
                     continue
                 save(state / "containers-before.json", before)
+                # Startup and recovery can take time; stale safe observations
+                # cannot authorize a launch after power or memory has changed.
+                problem, telemetry = safety(config, starting=True)
+                if problem:
+                    event(state, "waiting", reason=problem, power=telemetry)
+                    stable, last_wait = 0, problem
+                    time.sleep(POLL_SECONDS)
+                    continue
                 with (state / ("controller-" + run_id + ".log")).open("xb") as output:
                     child = subprocess.Popen(controller_command(config), cwd=config["source"],
                                              stdin=subprocess.DEVNULL, stdout=output, stderr=subprocess.STDOUT)
