@@ -107,7 +107,7 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
     state.mkdir(mode=0o700)
     config, products, dependencies = configuration(
         workspace, state, arm, "http://127.0.0.1:19876/v1")
-    tool_path, tool_dependencies, _ = benchmark_tools(tool_venv)
+    tool_path, tool_dependencies, tool_manifest = benchmark_tools(tool_venv)
     dependencies += tool_dependencies
     if source_file is not None:
         source_file = Path(source_file)
@@ -144,6 +144,7 @@ def server_probe(workspace, log, oracle, marker, private_parent=None,
         background["private_parent"] = private_parent
     if tool_path is not None:
         background["tool_path"] = str(tool_path)
+        background["dependency_aliases"] = tool_manifest.get("dependency_aliases", {})
     native_server = NativeServer(workspace, config, log=log, background=background)
     native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
     with socket.socket() as blocked_listener, native_server as server:

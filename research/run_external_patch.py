@@ -483,25 +483,63 @@ def benchmark_tools(venv):
                             capture_output=True, text=True, timeout=10)
     if pytest.returncode:
         raise RuntimeError("Benchmark tool venv lacks runnable pytest; no prompt sent")
-    base = Path(subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
-        "import sys; print(sys.base_prefix)"], text=True, timeout=5).strip()).resolve()
-    linked = subprocess.check_output(["/usr/bin/otool", "-L", str(venv / "bin/rg")],
-                                     text=True, timeout=5)
-    libraries = []
-    for line in linked.splitlines()[1:]:
-        name = line.strip().split(" ", 1)[0]
-        if name.startswith("/") and not name.startswith(("/usr/lib/", "/System/")):
-            libraries.append(Path(name).resolve())
+    runtime = json.loads(subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
+        "import sys,json,ssl,_ssl,_hashlib; print(json.dumps([sys.base_prefix,"
+        "ssl.OPENSSL_VERSION,_ssl.__file__,_hashlib.__file__]))"], text=True, timeout=5))
+    base = Path(runtime[0]).resolve()
+    libraries, aliases, seen = set(), {}, set()
+    pending = [venv / "bin/rg", *(Path(name).resolve() for name in runtime[2:])]
+    while pending:
+        binary = pending.pop()
+        if binary in seen:
+            continue
+        seen.add(binary)
+        linked = subprocess.check_output(["/usr/bin/otool", "-L", str(binary)],
+                                         text=True, timeout=5)
+        for line in linked.splitlines()[1:]:
+            name = line.strip().split(" ", 1)[0]
+            if name.startswith(("/usr/lib/", "/System/")):
+                continue
+            if not name.startswith("/"):
+                raise RuntimeError("Benchmark tool has an unresolved library install name")
+            target = Path(name).resolve(strict=True)
+            if not target.is_file():
+                raise RuntimeError("Benchmark dependency is not a regular library")
+            libraries.add(target)
+            if str(target) != name:
+                aliases[name] = str(target)
+            pending.append(target)
     package_listing = subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
         "import importlib.metadata as m,json; print(json.dumps(sorted((d.metadata['Name'], d.version) for d in m.distributions())))"],
         text=True, timeout=10)
-    return venv / "bin", [venv, base, git_binary, *libraries], {
+    return venv / "bin", [venv, base, git_binary, *sorted(libraries)], {
         "pytest_version": pytest.stdout.strip(),
         "python_sha256": hashlib.sha256((venv / "bin/python3").resolve().read_bytes()).hexdigest(),
         "rg_sha256": hashlib.sha256((venv / "bin/rg").read_bytes()).hexdigest(),
         "git_sha256": hashlib.sha256(git_binary.read_bytes()).hexdigest(),
         "packages": json.loads(package_listing),
+        "openssl_version": runtime[1], "dependency_aliases": aliases,
+        "library_sha256": {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                           for path in sorted(libraries)},
     }
+
+
+def sandbox_tool_preflight(server, tool_path, manifest, evidence):
+    """Check the actual child boundary, not only the host interpreter."""
+    if tool_path is None:
+        return
+    result = subprocess.run(server.background_prefix + [str(tool_path / "python3"),
+        "-I", "-B", "-c", "import json,ssl,_hashlib,pytest; "
+        "print(json.dumps({'openssl':ssl.OPENSSL_VERSION,'pytest':pytest.__version__}))"],
+        cwd=server.directory, env=server.env, capture_output=True, text=True, timeout=10)
+    observed = json.loads(result.stdout) if result.returncode == 0 else None
+    passed = bool(observed and observed.get("openssl") == manifest["openssl_version"] and
+                  "pytest " + observed.get("pytest", "") == manifest["pytest_version"])
+    (evidence / "tool-preflight.json").write_text(json.dumps({
+        "passed": passed, "returncode": result.returncode, "observed": observed,
+        "stderr": result.stderr[-4096:]}, indent=2) + "\n")
+    if not passed:
+        raise RuntimeError("Sandboxed benchmark Python/SSL/pytest preflight failed; no prompt sent")
 
 
 def drive(child, prompt, timeout, cancelled):
@@ -656,6 +694,7 @@ def run(args, *, defer_patch=False):
             report["local_config_sha256"] = local_only.check_config(config, relay_url)
             report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
             background = {"dependencies": dependencies, "inference_port": relay.port,
+                          "dependency_aliases": (tool_manifest or {}).get("dependency_aliases", {}),
                           "cancel": monitor.cancel.is_set}
             if ui_gateway is not None:
                 background["broker_port"] = ui_gateway["port"]
@@ -667,6 +706,7 @@ def run(args, *, defer_patch=False):
                                          background=background)
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                sandbox_tool_preflight(server, tool_path, tool_manifest, evidence)
                 report["local_only"] = local_only.attest(
                     server.env, server.temporary.name, relay_url)
                 (evidence / "local-only-preflight.json").write_text(

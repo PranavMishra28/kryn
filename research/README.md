@@ -4,7 +4,9 @@
 research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.
 [LOCAL_CAMPAIGN_2026-10-04.md](LOCAL_CAMPAIGN_2026-10-04.md) records the
-power-interrupted matched local campaign and its one independently audited pair.
+completed local campaign: three independently scoreable pairs, KRYN 0/native 2,
+with eight attrition pairs and no demonstrated uplift. It also records the
+verified power/memory recovery path and the prospective aggregate correction.
 `campaign_supervisor.py` supervises an unchanged frozen SWE-bench controller from
 a private, pinned copy under a per-user launchd job. It waits for stable AC of at
 least 120 W and 40% battery, interrupts work on power loss or the existing resource

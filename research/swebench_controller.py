@@ -260,6 +260,7 @@ def grade_once(campaign, task, run_id, prediction_path):
 
 
 def summarize(campaign, manifest):
+    """Preliminary receipt aggregate; independent raw-evidence audit is authoritative."""
     rows = {path.stem.removesuffix(".final"): json.loads(path.read_text())
             for path in (campaign / "attempts").glob("*.final.json")}
     pairs = []
@@ -282,6 +283,8 @@ def summarize(campaign, manifest):
                        k.get("local_only") and n.get("local_only") and
                        k["local_only"].get("generation_proven") and
                        n["local_only"].get("generation_proven") and
+                       k.get("edited_test_paths") == [] and
+                       n.get("edited_test_paths") == [] and
                        k.get("official", {}).get("clean_grade") is True and
                        n.get("official", {}).get("clean_grade") is True)
         pairs.append({"instance_id": task["instance_id"], "matched": matched,

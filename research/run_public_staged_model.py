@@ -18,7 +18,7 @@ from native_client import BINARY, MODEL_ID, NativeServer  # noqa: E402
 from context_probe import summarize_resources  # noqa: E402
 from run_native_trial import (NativeResourceGuard, export_owned_sessions,
                               generation_completion, runtime_is_idle)  # noqa: E402
-from run_external_patch import benchmark_tools, configuration  # noqa: E402
+from run_external_patch import benchmark_tools, configuration, sandbox_tool_preflight  # noqa: E402
 from run_boundary_public import grade  # noqa: E402
 from staged_lifecycle_canned import (check_session, compact, create_volume, detach,
                                      export, image_entry, restart, turn, wait_arm_ready)  # noqa: E402
@@ -232,10 +232,12 @@ def arm(root, which, seed, grader, preflight, tools):
             guard.start()
             native_server = NativeServer(workspace, config, folder / "native.log", background={
                 "dependencies": dependencies, "inference_port": relay.port,
+                "dependency_aliases": tool_manifest.get("dependency_aliases", {}),
                 "private_parent": private, "tool_path": str(tool_path),
                 "cancel": guard.cancel.is_set})
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                sandbox_tool_preflight(server, tool_path, tool_manifest, folder)
                 result["local_only"] = local_only.attest(
                     server.env, server.temporary.name, relay_url)
                 wait_arm_ready(server, which, products)

@@ -1,88 +1,119 @@
-# Local-only campaign checkpoint, 2026-10-04
+# Local-only campaign outcome, 2026-10-04
 
-This is an **incomplete research run**, separate from the released KRYN v1.0.0
-supervised-product qualification. It does not support an autonomous or
-frontier-adjacent claim.
+**NO DEMONSTRATED UPLIFT.** The corrected frozen SWE-bench campaign finished
+22 terminal arms across 11 tasks. Independent raw-evidence adjudication admitted
+only **three matched pairs: KRYN 0/3, native OpenCode 2/3**. Eight pairs were
+excluded. The paired difference is −66.7 percentage points, with a 10,000-resample
+95% percentile interval of [−100, 0] percentage points. This small, attrition-heavy
+subset neither qualifies frontier adjacency nor establishes a general model or
+hardware ceiling. Released v1.0.0 remains the unchanged supervised product.
 
-The frozen comparison uses OpenCode 2.0.10, the same local
-Qwen3.5-9B-6bit/oMLX 0.6.4 route, 96K configured context, tool schema,
-effective Agent permissions, 900-second task limit and official SWE-bench
-grader in both arms. KRYN adds its product plugin and guidance. The canary
-is a separate mechanics diagnostic: both canary arms generated local patches,
-reached their timeouts and received clean unresolved official grades. A
-host-side handoff bug rejected those terminal timeouts; the failed receipt is
-retained. The corrected 11-pair campaign uses a separately pinned source and
-manifest, with stricter parity, evaluator and cleanup checks.
+## Controls and authoritative evidence
 
-The corrected campaign was safely interrupted after **3 of 22 planned arms**
-because the connected 65 W adapter could not sustain the Mac under inference;
-battery reached the recorded 15% emergency cutoff. No grader, model worker or
-benchmark-owned container remained afterward, and the local runtime was
-healthy and idle. The second pair's native arm is interrupted, not scored as
-a loss or retried. Its partial checkout and patch are archived privately with
-hashes and full archive-member reads recorded in
-`swebench-v3-checkpoint-evidence.json` before any future resume.
+Both arms used OpenCode 2.0.10, local Qwen3.5-9B-6bit through oMLX 0.6.4,
+96K configured context, matching tool schemas and effective Agent permissions,
+a 900-second task limit, and the official SWE-bench grader. KRYN added its product
+plugin and guidance. The frozen source is `18c0f7da1bcaa5d338154fe67e779a9c35f5d688`;
+manifest SHA-256 is
+`9da8682ec20c87e787d58241ddeb27724dd700a595917fc5eb04dc59731da4b9`.
+These bytes were not changed by the later supervision or reporting corrections.
 
-The one complete pair, `django__django-15863`, passed the frozen independent raw-arm
-audit for matching model/tool wire, invocation controls, effective permissions,
-power source, local-only generation and clean official grading; the same private
-checkpoint receipt binds both arm files by SHA-256. Native
-OpenCode completed and resolved the issue in about 9.5 worker minutes. KRYN's
-patch also resolved in the official grader, but the Agent reached the 900-second
-timeout; strict acceptance was **native 1, KRYN 0**. KRYN's patch included
-four substitute `asgiref` files and six scratch tests, whereas the native
-patch changed only the product file. The official resolved flag does not
-certify artifact hygiene. Both arms spent time on missing local test
-dependencies, so this austere candidate environment is a quality caveat.
+The predeclared independent auditor verified raw receipts, patch/grader hashes,
+gold results, local generation, matching controls, resource telemetry and owned
+process settlement. Its completed `independent-audit.json` SHA-256 is
+`755f4ea44a9e1d5688aeffdf4e53cb8c5d391dfdfc424b1e33c0972ae6d79a2c`.
+It is authoritative for the counts above. All raw traces and interrupted archives
+remain in the owner's private `kryn-research-private` evidence store, under
+`swebench-controller-corrected-20261004-remaining-v3` and its durable-supervisor
+state. They are not a public full-suite reproduction bundle.
 
-This pair alone cannot estimate general success or prove a model ceiling.
-The earlier matched Harbor baseline had only six scoreable pairs, with KRYN
-2 versus native 3; its interval did not support uplift. Neither result
-justifies promoting a new harness policy or changing the installed model.
-The next experimental step is to resume the disjoint remaining tasks with
-adequate power, without replaying the interrupted arm, then apply the frozen
-independent adjudication and a separate power-intervention audit. Protected
-holdout, long-horizon and autonomous-release gates remain unqualified.
+The original controller report provisionally admitted five pairs (KRYN 0/native 2).
+Its aggregate omitted the existing-test-edit exclusion, admitting two extra
+failed pairs and diluting the difference. The independent auditor correctly
+excluded them. A prospective reporting fix now requires explicitly empty
+`edited_test_paths` in both receipts; a clean timeout remains a scoreable failure.
+The original report is retained unchanged at SHA-256
+`7011d6620d701916cfda38ececfc71f5dbfd37633c81b931ae9bba51fcdf4aeb`.
+The preliminary aggregate still cannot replace independent raw-evidence auditing.
 
-Full task traces, interrupted checkout archive, source/evaluator hashes,
-manifest, power log and frozen audit code are retained in the owner's private
-`kryn-research-private` evidence store. Public counts here are a checkpoint,
-not a SWE-bench full-suite score.
+## Failures and exclusions
 
-## Durable resumption amendment
+| Terminal arm classification | Count | Interpretation |
+| --- | ---: | --- |
+| Officially graded | 13 | Eight timed out: six KRYN, two native. Three edited existing tests, overlapping some timeout failures. |
+| Resource-gated without a clean grade | 4 | Real occupied-host memory stops, including one before generation. |
+| Interrupted before a terminal receipt | 3 | Two power interruptions and one host-memory interruption; retained and unscored. |
+| Retired after interrupted gold grading | 2 | One pair's oracle was interrupted at a 94 W reading; neither arm was replayed. |
 
-The same frozen campaign resumed on a 140 W adapter and reached eight terminal
-arms. A subsequent AC-to-battery transition stopped the one-shot wrapper during
-the next task's image preparation, before its arm or gold grader started. The
-eight completed receipts remain intact; this stop did not launch another arm.
-The private `swebench-v3-resume-power-stop.json` retains the `power_drift` event.
+All three independently scoreable KRYN arms timed out. Four KRYN patches across
+the campaign resolved in official grading, but every one of those agents timed
+out, so none was strictly accepted. Native had three individual strict successes;
+one had an interrupted KRYN counterpart and cannot enter the matched score.
+Editing existing tests excluded three arms across three different pairs, even
+when a grader ran successfully. A graded failure is distinct from unscored
+attrition; neither is silently converted to a pass.
 
-The replacement research supervisor adds durable waiting and crash recovery
-around the separately pinned controller. It does not change the frozen source,
-task roster, model, prompts, worker timeout, grading or resource guard. Resume
-requires three safe power observations, at least 120 W AC and 40% battery; active
-work stops at 25% or on AC loss, with the existing disk/data limits retained.
-macOS launchd restarts an unexpectedly exited supervisor; caffeinate is held only
-while its controller is active. A future interruption retains its raw evidence
-and candidate archive. A gold attempt interrupted before its receipt retires the
-affected pair as unscored, allowing later tasks to run without replaying the
-single-use oracle. Neither resumption nor a terminal report makes invalid work a
-pass. Independent adjudication and the remaining quality gates are still open.
+The completion failures justify a focused environment/termination investigation.
+The worker environment lacked historical repository dependencies. Compact traces
+show repeated test-import/install failures, unavailable SSL inside the sandbox,
+and repeated reasoning after a repair was written. In one Django arm the model
+created substitute dependency files. Official patch resolution does not certify
+artifact hygiene. These observations are failure diagnoses, not a proven causal
+explanation of every timeout. Missing dependency setup is a scope caveat shared
+by both arms, not permission to discard unfavorable results.
 
-The first supervisor's 15 recovery tests, full repository checks and clean
-package smoke passed, as did an isolated native launchd crash/restart probe.
-After macOS's Python Documents permission cleared, it reached 12 terminal arms.
-The four new arms were resource-gated: three hit sustained host memory warnings,
-and one failed its resource preflight before sending a prompt. They are unscored;
-the matched-pair count remains three, with preliminary strict KRYN 0/native 2.
+The SSL failure was reproduced without inference and corrected prospectively in
+the research runner. Its tool manifest now binds Python's OpenSSL library hashes
+as well as the existing tools. The sandbox allows only those exact library files
+and metadata for verified Homebrew install-name aliases. Before prompting, the
+runner checks SSL and pytest inside the actual child boundary. A paired no-model
+canary passed in both OpenCode configurations while synthetic hidden-file access,
+library-directory listing and non-loopback networking remained denied. Its private
+receipt SHA-256 is
+`d7456ba80354c51d1b8e721aee64e076c541d6218011032316089421e6df189d`.
+This does not permit package downloads or supply historical repo dependencies.
 
-A transient adapter reading of 94 W paused the next task's gold grader. The
-supervisor settled its owned container, but then incorrectly treated a stopped
-oMLX listener as a permanent preflight error. The raw stop, guard receipts and
-all 12 terminal files are bound in a private recovery diagnosis. The interrupted
-gold attempt cannot be replayed. A recovery correction distinguishes service
-absence from source/ownership/configuration drift, starts only the owned runtime
-under safe admission, and rechecks safety after startup. Lightweight pressure
-monitoring and a durable cooldown prevent the controller from consuming later
-arms while pressure remains high. These lifecycle fixes do not convert the four
-resource failures into passes or qualify the research result.
+Complete occupied-host cost and false-completion rates are not established by
+these counts. Interrupted arms lack complete terminal timing; missing telemetry
+stays unknown. A native-completed but oracle-failed turn is not, by itself, proof
+of a false completion claim without checking its final statement.
+
+## Operational recovery
+
+The initial 65 W run was safely stopped at the recorded 15% emergency cutoff.
+A later wrapper stopped on power drift at eight terminal arms. Its replacement
+supervisor now waits durably under launchd, requires three safe observations at
+≥120 W AC and ≥40% battery, and stops active work on AC loss or ≤25% battery.
+Existing memory, disk and retained-data limits remain unchanged. It can restart
+only the identified owned runtime, verifies model/ceiling/idle state, samples
+memory independently, and retains a durable cooldown before resumption.
+Caffeinate is held only during active work. Documents-folder permission was
+explicitly granted; no permission bypass was used.
+
+A forced-crash launchd probe passed. A real battery interruption archived the
+active arm and automatically resumed remaining work about 53 seconds later on
+140 W AC. A later non-normal-memory sample also stopped and resumed safely.
+The power-cycle receipt verifies the interrupted archive and all 18 prior final
+receipts; final inspection verified both later archives, the unchanged prior
+receipts, clean frozen source, no owned workers or containers, and an idle
+runtime. Recovery qualifies this observed lifecycle path, not task quality.
+
+## Decision and next gates
+
+The earlier Harbor baseline admitted six pairs, KRYN 2/native 3, without uplift.
+The exposed staged long-workflow pair failed in both arms. The old protected
+roster remains retired/unsealed. No fresh protected validation, autonomous
+long-horizon qualification, frontier comparison or new release is admitted by
+this result.
+
+Keep the single research PR in draft. The Python tool preflight now passes;
+historical repository environment readiness is the next prerequisite. A separate
+no-inference diagnostic checks public imports and the existing test-runner entry
+point in a pinned official image, with no network, model turn or gold/test patch.
+It cannot revise the frozen campaign or establish an agent-quality score.
+Preregister any subsequent environment or termination experiment separately on
+development tasks. Preserve the completed campaign;
+do not replay its interrupted arms or reinterpret it as a new candidate result.
+Fresh validation follows only a positive development screen. The remaining
+research ladder is not exhausted, so this checkpoint is not the overall Goal's
+completion or a demonstrated hard ceiling.

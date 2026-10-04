@@ -97,6 +97,7 @@ class SWEbenchCampaignTests(unittest.TestCase):
                            "local_only": {"generation_proven": True},
                            "official": {"graded": True, "clean_grade": True},
                            "wire_stable": True,
+                           "edited_test_paths": [],
                            "paired_controls": {"permissions": "same"},
                            "worker": {"ac_power_start": True,
                                       "ac_power_end": True}}
@@ -114,6 +115,7 @@ class SWEbenchCampaignTests(unittest.TestCase):
             for arm in ("kryn", "native"):
                 row = {"accepted": arm == "kryn", "main_wire": {"model": "same"},
                        "wire_stable": True,
+                       "edited_test_paths": [],
                        "paired_controls": {"permissions": arm},
                        "local_only": {"generation_proven": True},
                        "official": {"clean_grade": True},
@@ -122,6 +124,33 @@ class SWEbenchCampaignTests(unittest.TestCase):
             result = summarize(root, {"tasks": [{"instance_id": "one"}]})
             self.assertEqual(result["matched_pairs"], 0)
             self.assertEqual(result["attrition_pairs"], 1)
+
+    def test_test_edits_exclude_pairs_but_clean_timeouts_remain_failures(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "attempts").mkdir()
+            manifest = {"tasks": [{"instance_id": "one"}]}
+            clean = {"accepted": False, "main_wire": {"model": "same"},
+                     "wire_stable": True, "edited_test_paths": [],
+                     "paired_controls": {"permissions": "same"},
+                     "local_only": {"generation_proven": True},
+                     "official": {"clean_grade": True, "resolved": True},
+                     # The raw driver owns the timeout; the outer worker settled normally.
+                     "worker": {"ac_power_start": True, "ac_power_end": True,
+                                "returncode": 1, "stop_reason": None}}
+            for arm in ("kryn", "native"):
+                (root / "attempts" / f"s01-{arm}.final.json").write_text(json.dumps(clean))
+            result = summarize(root, manifest)
+            self.assertEqual(result["matched_pairs"], 1)
+            self.assertEqual((result["kryn_strict"], result["native_strict"]), (0, 0))
+            for arm in ("kryn", "native"):
+                path = root / "attempts" / f"s01-{arm}.final.json"
+                for edits in (["tests/test_existing.py"], None, ""):
+                    with self.subTest(arm=arm, edits=edits):
+                        changed = {**clean, "edited_test_paths": edits}
+                        path.write_text(json.dumps(changed))
+                        self.assertEqual(summarize(root, manifest)["matched_pairs"], 0)
+                path.write_text(json.dumps(clean))
 
     def test_permissions_normalize_only_isolated_runtime_root(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -20,6 +20,7 @@ ROOT = Path.home() / "Library/Application Support/LocalAI"
 PROJECT = Path(__file__).resolve().parents[1]
 BINARY = ROOT / "opencode/2.0.10/package/bin/opencode"
 MODEL_ID = "Qwen3.5-9B-6bit"
+PACKAGE_OPT_ROOTS = (Path("/opt/homebrew/opt"), Path("/usr/local/opt"))
 SHELL_SHIM = Path(__file__).absolute().with_name("native-shell")
 SHELL_SHIM_BYTES = b'#!/bin/sh\nexec "${LOCALAI_SHELL_PYTHON:?missing owned interpreter}" -B "${LOCALAI_SHELL_HELPER:?missing owned helper}" --guarded-shell "$@"\n'
 
@@ -66,7 +67,8 @@ WRITE_PROFILE = """;; Direct filesystem-write containment for ordinary shell des
 """
 
 
-def background_boundary(workspace, private, dependencies, inference_port, native_port=0, *, broker_port=None):
+def background_boundary(workspace, private, dependencies, inference_port, native_port=0, *, broker_port=None,
+                        dependency_aliases=None):
     """Whole-process boundary for disposable learning, never ordinary user work.
 
     The trusted worker/grader stays outside this sandbox. No personal XDG state,
@@ -118,6 +120,19 @@ def background_boundary(workspace, private, dependencies, inference_port, native
     # Interpreters can realpath their executable through dependency parents;
     # expose only parent metadata, not sibling directory listings or contents.
     metadata_paths = ancestor_paths | {parent for item in reads for parent in item.parents}
+    # Dynamic loaders may traverse a package-manager symlink before opening an
+    # already-admitted library. Grant metadata only, bound to that exact file.
+    for logical, expected in (dependency_aliases or {}).items():
+        alias, target = Path(logical), Path(expected)
+        opt = next((root for root in PACKAGE_OPT_ROOTS if alias.is_relative_to(root)), None)
+        if (not alias.is_absolute() or ".." in alias.parts or
+                opt is None or opt != opt.resolve() or
+                not target.is_relative_to(opt.parent / "Cellar") or
+                not any(parent.is_symlink() for parent in alias.parents if parent != opt) or
+                alias.resolve(strict=True) != target or target not in reads or
+                not target.is_file()):
+            raise RuntimeError("Dependency alias must resolve to an explicit library file")
+        metadata_paths.update((alias, *alias.parents))
     metadata = "\n".join(f'    (literal {quote(p)})' for p in sorted(metadata_paths))
     # Seatbelt's address grammar accepts localhost/*, not numeric hosts.
     # All actual listeners/requests are bound to explicit IPv4 loopback addresses.
@@ -371,7 +386,7 @@ class NativeServer:
 
     def _enter_background(self):
         options = self.background
-        if set(options) - {"dependencies", "inference_port", "broker_port", "cancel", "tool_path", "private_parent"} or not {"dependencies", "inference_port"}.issubset(options):
+        if set(options) - {"dependencies", "dependency_aliases", "inference_port", "broker_port", "cancel", "tool_path", "private_parent"} or not {"dependencies", "inference_port"}.issubset(options):
             raise RuntimeError("Unexpected background isolation options")
         tool_path = Path(options.get("tool_path", Path(sys.executable).resolve().parent))
         if "tool_path" in options and (not tool_path.is_dir() or tool_path != tool_path.resolve() or
@@ -409,7 +424,8 @@ class NativeServer:
         if git_toolchain.is_dir(): dependencies.append(git_toolchain.resolve())
         prefix = background_boundary(self.directory, private, dependencies,
                                      options["inference_port"], self.port,
-                                     broker_port=options.get("broker_port"))
+                                     broker_port=options.get("broker_port"),
+                                     dependency_aliases=options.get("dependency_aliases"))
         self.background_prefix = prefix
         self.log_file = _open_owned_log(self.log_path)
         self.process = subprocess.Popen(prefix + [str(BINARY), "serve", "--hostname", "127.0.0.1",

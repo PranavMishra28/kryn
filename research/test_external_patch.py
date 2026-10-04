@@ -1,6 +1,7 @@
 """The external adapter refuses dirty or ambiguous benchmark workspaces."""
 from pathlib import Path
 import hashlib
+import json
 import os
 import shutil
 import socket
@@ -13,7 +14,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from run_external_patch import (PatchBudgetExceeded, benchmark_tools, bounded_output,
-                                collect_patch, drive, prepare, quiet_command,
+                                collect_patch, drive, prepare, quiet_command, sandbox_tool_preflight,
                                 stop_browser_broker)
 
 
@@ -216,18 +217,35 @@ class ExternalPreflightTest(unittest.TestCase):
             (venv / "bin").mkdir(parents=True)
             for name in ("pyvenv.cfg", "bin/python3", "bin/rg", "bin/git"):
                 (venv / name).touch()
-            with patch("run_external_patch.subprocess.check_output", side_effect=[
-                "/private/tmp/python-base\n", "/private/tmp/venv/bin/rg:\n"
-                "    /usr/local/opt/pcre2/lib/libpcre2-8.0.dylib (compatibility version 1.0.0)\n"
-                "    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n",
-                "[[\"pytest\", \"8.3.3\"]]\n"]), patch(
+            base = Path(tmp) / "python-base"; base.mkdir()
+            libraries = Path(tmp) / "libraries"; libraries.mkdir()
+            for name in ("ssl.dylib", "crypto.dylib"):
+                (libraries / name).write_bytes(name.encode())
+            alias = Path(tmp) / "opt"; alias.symlink_to(libraries, target_is_directory=True)
+
+            def output(command, **_):
+                if command[0] == "/usr/bin/otool":
+                    if command[-1].endswith("ssl.dylib"):
+                        return "header\n    " + str(alias / "crypto.dylib") + " (version 1)\n"
+                    if command[-1].endswith("crypto.dylib"):
+                        return "header\n    /usr/lib/libSystem.B.dylib (version 1)\n"
+                    return "header\n    " + str(alias / "ssl.dylib") + " (version 1)\n"
+                if "import sys,json,ssl" in command[-1]:
+                    return json.dumps([str(base), "OpenSSL test", str(base / "_ssl.so"),
+                                       str(base / "_hashlib.so")])
+                return '[["pytest", "8.3.3"]]'
+
+            with patch("run_external_patch.subprocess.check_output", side_effect=output), patch(
                     "run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
                         [], 0, "pytest 8.3.3\n", "")):
                 bin_path, dependencies, manifest = benchmark_tools(venv)
             self.assertEqual(bin_path, venv / "bin")
-            self.assertEqual(dependencies[:2], [venv, Path("/private/tmp/python-base")])
-            self.assertEqual(len(dependencies), 4)
-            self.assertEqual(dependencies[2], venv / "bin/git")
+            self.assertEqual(dependencies[:3], [venv, base, venv / "bin/git"])
+            self.assertEqual(set(dependencies[3:]), {libraries / "ssl.dylib", libraries / "crypto.dylib"})
+            self.assertEqual(manifest["dependency_aliases"], {
+                str(alias / name): str(libraries / name) for name in ("ssl.dylib", "crypto.dylib")})
+            self.assertEqual(len(manifest["library_sha256"]), 2)
+            self.assertEqual(manifest["openssl_version"], "OpenSSL test")
             self.assertEqual(manifest["pytest_version"], "pytest 8.3.3")
             self.assertEqual(manifest["packages"], [["pytest", "8.3.3"]])
             with patch("run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
@@ -238,6 +256,26 @@ class ExternalPreflightTest(unittest.TestCase):
             (venv / "bin/python3").symlink_to("/usr/bin/python3")
             with self.assertRaisesRegex(ValueError, "Python, rg and Git"):
                 benchmark_tools(venv)
+
+    def test_sandbox_tool_preflight_fails_closed_before_generation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            server = SimpleNamespace(background_prefix=["sandbox", "-p", "profile"],
+                                     directory=root, env={"PATH": "/safe/bin"})
+            manifest = {"openssl_version": "OpenSSL test", "pytest_version": "pytest 8.3.3"}
+            for result, passed in ((subprocess.CompletedProcess([], 1, "", "blocked"), False),
+                                   (subprocess.CompletedProcess([], 0, json.dumps({
+                                       "openssl": "changed", "pytest": "8.3.3"}), ""), False),
+                                   (subprocess.CompletedProcess([], 0, json.dumps({
+                                       "openssl": "OpenSSL test", "pytest": "8.3.3"}), ""), True)):
+                with patch("run_external_patch.subprocess.run", return_value=result) as run:
+                    if passed:
+                        sandbox_tool_preflight(server, root, manifest, root)
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, "no prompt sent"):
+                            sandbox_tool_preflight(server, root, manifest, root)
+                self.assertEqual(run.call_args.args[0][:3], server.background_prefix)
+                self.assertEqual(json.loads((root / "tool-preflight.json").read_text())["passed"], passed)
 
     def test_exact_clean_base_and_separate_oracle(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
