@@ -111,6 +111,15 @@ historical repository environment readiness is the next prerequisite. A separate
 no-inference diagnostic checks public imports and the existing test-runner entry
 point in a pinned official image, with no network, model turn or gold/test patch.
 It cannot revise the frozen campaign or establish an agent-quality score.
+The exposed Django image passed that import/test-entry screen with network
+disabled, a read-only root, a 2-GiB container limit, normal sampled host pressure
+and no swap growth. The first diagnostic lost its terminal receipt to a private
+cleanup-argument error and is retained as failed; the corrected no-model
+diagnostic has receipt SHA-256
+`8ae0d3a46be5622e7b54a17320fe4405548a37f1953d3cc9d0bca1f3cfb2e80c`.
+This establishes one image's environment readiness, not a usable container Agent
+or an acceptance result. A container-native worker would change execution OS and
+tools and needs separate provenance, isolation and paired admission before use.
 Preregister any subsequent environment or termination experiment separately on
 development tasks. Preserve the completed campaign;
 do not replay its interrupted arms or reinterpret it as a new candidate result.
