@@ -1419,3 +1419,70 @@ task or grader was replayed and no safety predicate was relaxed.
 | Activation | `f84f8748e0f1ff422beba37773dbcf579d0548ce5c0e5aaac6f4d903921630cb` |
 | V1 retirement | `10de1a8f1f559bd8dccc083b0b1ff7d5bc25548d6cb20eaa4f4bbc48995fe716` |
 | V2 retirement | `b3b70a7e3004ac50f90b8e2e0f58d489da312f550fb61bbdc3d3cf7eabd6b1b7` |
+
+
+## Browser identity settlement and prospective counter interaction
+
+Canned browser identity V3 passed and was separately settled. Native execution
+completed in 9.320 seconds with CLI exit 0 and six canned calls; no model request
+occurred. The three-phase barrier took 19.229 seconds, captured the sole 321-byte
+page patch and accepted the fresh synthetic marker. Exact browser container
+ID/name absence and closure of the recorded broker port were checked on the
+CLI-bound local Docker endpoint. All 61 files, including two detached images,
+remained unchanged before and after removing only the inactive exit-0 job.
+Three owned mount paths were empty on the host device. Fifteen author checks
+passed before separate settlement execution; no task or grader was replayed.
+
+Unlike the earlier AC observations, this control ran on battery at 90%.
+Thirteen parent, six native and four capture samples were normal, with 11
+battery power observations covering both children and finals. Sampled swap
+growth was zero; absolute swap remained nonzero. The original runtime stayed
+unloaded and idle at 52/279,571/8,125. This is no-model battery evidence only.
+
+| Completed browser identity V3 artifact | SHA-256 |
+| --- | --- |
+| Result | `bc7927176dc34d1707a232ebda06b72fd53bfb0f41d65e770a28041cd37713d6` |
+| Driver | `34e5d1e32d68f32a5b40517d7a4da9fe20ecd44bf76d4d3644ac8bfffe333bf2` |
+| Barrier | `e610d85c880e18979313b78f392b6b6403cbe36a44fc36ccbb05b184d097835f` |
+| Patch | `6589e9ba5757cc620c1ab20fe1961249bcba134d4ea891aa4cc0a51b2f47188c` |
+| Settlement review | `7cefe899c023919c14927fedd5fbed34ef77fa58b3d55345971665d1e29608dd` |
+| Settlement | `f803b76423658c576827a28c79459a321428144ba031807527bba192a3759181` |
+| CI 37332655393 observation | `3483e4990828a35600d160aec143761b4fd938924a360178cff9010843fb2652` |
+| CI 37336300276 observation | `d5efd96c38aa584b182a70d8af79dd5c4051c8354e589e30e3eba64f0f12cecf` |
+
+Fresh `native-ui-interaction-readiness-20261005-v1` now asks local OpenCode/oMLX
+to implement a counter in the single public page, with no supplied solution.
+The root loads its skill, edits only `index.html` and delegates Browse. Exact
+native browser inputs and nontruncated accessible snapshots must show counts
+0, 1, 2, 0, 0 after open, increment, increment, reset and snapshot. Stale or
+duplicate count lines, wrong selectors, missing markers and outside URLs fail.
+The fresh applied-artifact callback only verifies bounded regular page bytes
+and marker presence; interaction evidence is separately checked from native
+tool outputs. No independent browser re-execution, official grade, quality
+score or protected claim is made.
+
+Twenty author checks covered the full current source/prior chain, actual trial
+bindings, artifact and interaction negatives, original usage accounting, and
+actual success/unload, failure/owned-stop and concurrency/no-operation branches
+with execution boundaries intercepted. Nine launcher checks preceded one
+bootstrap and verified framework-app PID 47067. Original native engine, browser
+image and isolation, 512 MiB APFS phases, parent/child emergency stops and
+battery-capable admission remain unchanged. One 300-second CLI, 300-second
+requests and the original 128-request cap bound this new fixture. Outcome is
+unknown at launch; prior results remain immutable.
+
+| Prospective counter UI artifact | SHA-256 |
+| --- | --- |
+| Runner | `596363bd619e609ba4c2a7fa46e1f1a9a4ac36ad11b831ac8103e71c5f2b0689` |
+| Predeclaration | `a536e4fbb98b19e9c6082b7adf5d5e251cb592779ffdcf9ceb5cf8a16da6ac3a` |
+| Manifest | `440001efc0884b5c8dfc05a6d64e91d8fbfa3b18e55eb3aac48172279f11e673` |
+| Author review | `4839363709a1b51c40fd85612f783d0e2e35295ebfe1484a71932a1952b30e63` |
+| Launcher review | `78f1cf2d33bd25bb0d47b9e208064b852bbe962e973edc6e642d55432a2bed13` |
+| Launch | `cba3005c5a8dee4d31ac9ae5f0c86690b1233ad1ff60fff2a2b6cf684d80b63f` |
+| Activation | `403190dd40c711acb451e9937180535660160ed9ac2fb5e20ce338b73e9f1d6d` |
+
+Both pending CI runs passed: 37332655393 at `37f2ed0`, and 37336300276 at
+`9b9ab34`. Earlier failed CI/research evidence is preserved. Broader development,
+valid fresh/protected validation, sustained coding/UI, full-context reasoning,
+long-duration endurance and final truthful production scope remain open. PR
+#242 remains draft; no release, version, tag, owner install or merge change.

@@ -1892,3 +1892,42 @@ checks and nine launcher checks passed; exact process identity was verified.
 Outcome is unknown at launch. Two earlier drafts were retired unrun: copied
 scope text, then an API/CLI endpoint binding gap missed by the first review.
 Both are preserved. This new control does not replay any prior native task.
+
+
+## Browser identity control passed; local counter UI launched
+
+The fresh canned browser identity V3 control passed: CLI exit 0, six canned
+calls, zero model requests, 9.320 seconds of native execution and a sole
+321-byte page patch. Readonly capture and the fresh marker check passed; all
+three APFS phases detached. The receipt retained the actual full browser
+container ID and port. Separate settlement verified exact ID/name/broker
+absence, closed port, three empty owned mounts and both preserved images, then
+removed only the inactive exit-0 job. All 61 files remained unchanged; 15 author
+checks preceded separate settlement execution.
+
+This run was on **battery at 90%**, with the runtime unloaded throughout.
+All 13 parent, six native and four capture resource samples were normal; 11
+battery power observations covered the work and finals. Sampled swap growth
+was zero and absolute swap was nonzero. Runtime counters stayed exactly at
+52 requests, 279,571 prompt and 8,125 completion tokens. This does not establish
+loaded-model battery endurance. CI **37332655393** (`37f2ed0`) and
+**37336300276** (`9b9ab34`) passed; full job/step observations were retained.
+
+The next fresh local-model diagnostic asks OpenCode/oMLX to implement a small
+counter in `index.html`, without supplying its implementation. Native Browse
+observations must show counts **0 → 1 → 2 → 0 → 0** after navigation, two
+increment clicks, reset and snapshot. The fresh applied-artifact callback
+checks a bounded page and public marker; it is not an independent functional
+grader. Browser tool outputs supply the interaction evidence. Workspace-only
+edits, exact prompt and role identities, complete admitted tool schemas and
+sampler controls, owned usage accounting and all existing resource/isolation
+predicates remain required.
+
+The worker was bootstrapped once with verified process identity after 20 author
+checks and nine launcher checks. It uses frozen `37f2ed0`, one 300-second CLI,
+300-second requests, the unchanged 128-request cap and automatic battery-capable
+admission. Outcome is unknown at launch. This is a new public synthetic fixture,
+not a replay or a benchmark score. Broader development, valid fresh/protected
+validation, sustained coding/UI, full-context reasoning, endurance and final
+scope remain open; PR #242 remains draft. Full pins are in the
+[container record](CONTAINER_SWE_DEVELOPMENT.md).
