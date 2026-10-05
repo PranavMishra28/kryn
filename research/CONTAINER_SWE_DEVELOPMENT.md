@@ -682,7 +682,7 @@ review passed 13 checks before the exact inactive exit-one job was removed.
 Settlement:
 `836fa0b1f73a5c0489bfe48a50315208157d254bc151a2aa1ccc677dfccf85f1`.
 
-The next prospective control uses a new synthetic fixture and **no model**.
+The subsequently attempted control used a new synthetic fixture and **no model**.
 Its first actual CLI call receives a canned fixture tool followed by a stop;
 the second receives one canned stop. Only the second invocation omits the
 redundant `--agent agent` pair. All other native CLI arguments, exact stdin,
@@ -705,3 +705,55 @@ This is a prospective CLI mechanism control, not an accepted continuity result,
 benchmark or production qualification. Frozen source remains `59ce852`; no
 policy classifier, resource stop or released product scope changed. Broader
 development, fresh/protected validation, coding/UI and endurance remain open.
+
+## Stopped-runtime control failed before generation; revised cold-start control
+
+Agent reuse control V1 attempted entry but failed at the unchanged HostGuard
+before `generation-start.json`, a worker directory, ownership journal or either
+CLI existed. The two retained resource samples had no runtime listener; the
+frozen resource guard correctly rejected incomplete telemetry. Pressure was
+normal and sampled swap growth was zero, but listener footprint/RSS were
+unavailable, so this is **not** a successful resource check. The earlier protocol
+incorrectly combined a stopped-runtime requirement with a guard requiring one
+known listener. That failure remains preserved:
+`a69f36999e240c27f3ae7de7386ec249aecd3229e28bc9881b59ab799ba7bbe8`.
+No task, model request, canned response, container or CLI ran.
+
+Separate settlement rehashed 21 unchanged files plus the full prior evidence
+chain, reproduced the exact rejection using the frozen `ResourceGuard`, retained
+the incomplete telemetry and power finals, verified absent PID/port and no
+owner-labelled Docker objects, and removed only the exact inactive exit-one job.
+Its separate author review passed nine checks before execution. Settlement:
+`fea5d31a4f2b19fe53a6664a0ae6c1aa8cfd4623242739b7cbe31ee52cf02bc0`.
+This settles the attempt; it does not accept the failed control or weaken the
+guard. The once-started controller is never replayed.
+
+The revised V2 protocol declares a new fixture and input identity. After the
+existing 60-second cooldown and three green admission observations, it verifies
+that the old runtime PID and port are absent, then makes one call to the existing
+owned runtime start command. It verifies a fresh owned PID and the same model,
+context and 22-GiB ceiling. Before any container generation, the full HostGuard
+must admit the known listener and status must show unloaded idle with zero
+request/token counters. The same fresh PID and unchanged zero counters are
+required afterward. This starts no model inference and performs no model load,
+unload or retry. Startup uses the existing bounded owned-app procedure and
+active-work-only caffeinate; no unrelated application or runtime setting changes.
+
+The native command hook, exact acceptance predicates, 30-second CLI/60-second
+combined bounds and through-end policy classifier remain unchanged from V1.
+The canned sequence still uses one fixture shell and two stop replies; only the
+second CLI omits `--agent agent`. The exact new single-file patch is 279 bytes.
+The revised main preserves the previously reviewed no-model stdin controller's
+status and resource checks, with the prospective cold start replacing its
+assumption of an already running fixed PID.
+
+Manifest:
+`30462f66d69fa08e6503742616fa43f10f4420949dafea52df4963939b59a177`.
+Predeclaration:
+`f1dd8a20a0fa50f07a63d5567270717847ba7b04645251397ad12fc2c9a4fb77`.
+Author review passed 68 checks, including actual hook tests, unchanged acceptance
+and guard control flow, cold-start success/failure mocks and refusal of wrong
+identity, profile or busy state:
+`2f791d7953d8230cdf6e173c1d8df328bc7c8b389c6d3bd022216fd22bcaa4d4`.
+No control outcome is claimed at launch. Model continuity and all broader
+production gates remain open; the earlier model policy failure is unchanged.
