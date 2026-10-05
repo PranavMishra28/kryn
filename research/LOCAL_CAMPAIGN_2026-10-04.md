@@ -409,3 +409,68 @@ query observations and explicit failed-control/phase-isolation provenance.
 It must be separately frozen and independently reviewed before launch. It
 changes observability, not safety or task policy; a failed stage remains
 unscored, and successful telemetry alone cannot qualify its admission.
+
+The separately frozen full-pipeline diagnostic completed KRYN then native,
+including parent/general-child actions and expected negative official grades
+with all 1 fail-to-pass and 9 pass-to-pass test identifiers covered. Its
+predeclared independent audit passed:
+`4471189c55e57edc4cbc9390e2666da50e50f22c12c7d8def6460cc7009ccfb3`.
+All eight parent/child generation/grader logs were present: 107 normal samples
+and 428 successful queries, with no latched guard failure. The slowest query
+took 0.111 seconds. Exact source, prior failures, wire/policy, session completion
+and recorded resource absence passed the independent checks.
+
+This is technical diagnostic evidence. The sealed receipt explicitly keeps
+`admission_qualified: false`. Neither the cause of the historical telemetry
+failure nor a causal fix is established. A separate prospective readiness assessment must
+compare the actual evidence with the next real experiment's requirements; it
+cannot rewrite the diagnostic or promote it as broad reliability or coding
+quality. Original failed controls remain failed.
+
+A separate prospective assessment compared that evidence with one real
+reverse-order development pair's requirements. It verified 198 source/evidence
+hashes, all inherited worker/grader/image/output/policy admissions and actual
+resource absence. Readiness receipt:
+`cececc0b2885ef20db6623579736131fa7c818de93b4da842f24f5fdf185d159`.
+Its scope is preparation of one guarded comparison, requiring a separately
+frozen protocol and review before launch. The diagnostic's original
+`admission_qualified: false` remains unchanged. The inactive diagnostic job was
+removed without changing evidence; cleanup receipt:
+`9d3f94cbada0d83dc09f79ce488b95d07ea8469f00b0422063f2a3450a55bd1a`.
+
+A separate metadata-only screen for the next cached repository stopped on
+battery at admission, before any Docker command or ownership allocation. Its
+private result writer then failed on a binary-mode JSON write; the empty result
+and raw guard sample remain retained, with a separate failure receipt:
+`c7fd6434ce79e478c2a22a9da59ab37b2537252196aa59abae38feb9ca4afb34`.
+No dependency-readiness conclusion follows, and the second repository probe
+remains unrun. Corrected preparation must retain this failed attempt and wait
+for safe AC admission; no resource limit changes are justified.
+
+The next real experiment is separately preregistered as one exposed public
+reverse-order development repetition. It keeps the completed pair's task,
+prompt, image, 9B model, 96K context, full sampler/tool catalogs, official grader,
+900-second arm budget, 360-second request limit and 128-call cap; KRYN runs
+before native OpenCode. Current frozen source is `9927229`, with the same
+98-input map as the successful diagnostic. Manifest:
+`7eb0503a2c63e58d04e841c5f717ec64beafe6bf1cb78dc83452729ef3fb75df`.
+
+Independent prelaunch review rehashed 212 source/evidence inputs and approved
+only this guarded development pair:
+`17ff9c28582db4eeec3821913bff711beaf32b1a33e81042cc6def6299e6d0a2`.
+Review caught an ambiguous admission pointer in an unexecuted draft. Its sealed
+replacement points generation admission to the separate readiness assessment
+and retains the explicitly unqualified diagnostic as provenance; the prior
+draft remains retired. A root precheck also initially assumed a generic review
+field, failed before executing the preparer, and is retained separately. The
+corrected operator check reads the actual approval field without changing the
+sealed review or protocol.
+
+Preparation completed once and the existing durable controller is installed
+under its own launchd job. Runtime and safety admission remain unchanged; it
+waits automatically for adequate AC power. It will not replay interrupted arms.
+The predeclared one-shot independent validity audit additionally checks every
+parent/child generation/grader resource sample, including a final latched guard
+failure. It admits accepted outcomes or clean strict failures only when all
+validity requirements pass; unscored evidence cannot enter a matched result.
+No result, uplift or production qualification is claimed before completion.
