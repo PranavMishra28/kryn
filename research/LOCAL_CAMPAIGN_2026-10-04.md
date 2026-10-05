@@ -708,3 +708,37 @@ The terminal evidence auditor is sealed before launch and must run only once
 after product adjudication. Preparation is not an execution or accepted outcome.
 This previously exposed public task remains development-only; no protected or
 fresh-validation claim, pooling with macOS, or release qualification follows.
+
+The native Sphinx attempt subsequently stopped on host memory pressure after
+20.844 seconds and one local request. It remains unscored. The controller then
+failed during recovery because Docker omitted writable-size telemetry, leaving
+the stopped owned worker retained and KRYN unstarted. There is no terminal
+adjudication or matched result. The earlier inference that waiting status meant
+no arm had started was incorrect; the correction and actual start/exit evidence
+are preserved in checkpoint
+`4a22a7ec6e63a44626b5a203b948589c6413f869fe96b110e16be5c41e8fbf7e`.
+
+A read-only direct API 1.45 request reproduced the missing size fields,
+`6e2dd7a6b97b64c8dda38ec7848e1ec966e6e7f6845b01ce4a694cd3b33e71a7`.
+A different, filtered container-list query returned an explicit 33,705,984
+writable bytes for that exact stopped ID and owner,
+`1d5196dc9e64d0c6773ada24160f7c0e76f7fdef1a002b44a1607dfce2613a65`.
+The prospective shared usage check now uses that endpoint, preserves the exact
+4-GiB cap, and rejects missing, malformed, ambiguous or foreign results. It passed
+a read-only check against the retained worker,
+`6bb67c0baf4e8768f79ef245ea1405b68f215503702361bcb654eeaeb004355c`.
+This establishes a query compatibility correction, not the cause of host pressure.
+
+A separate guarded recovery is limited to preserving the interrupted worker and
+settling its owned resources, with no agent, grader or adjudicator execution.
+Its first wrapper stopped before export because the reused canned-control
+admission copy lacked the real campaign's pinned adjudicator file. That failure
+remains retained; a separate corrected wrapper validated the complete four-file
+admission copy before launch. Frozen generation evidence and the failed campaign
+status remain unchanged. No unstarted KRYN arm will be launched from this failed
+pair. The unused terminal auditor cannot be treated as a completed audit.
+
+Repeated pressure stops in Django and Sphinx require a prospective host-memory
+readiness diagnosis before any new real campaign. Their underlying cause remains
+unknown. Resource emergency stops, the normally occupied host, local-only task
+inference and the remaining research and release gates are unchanged.

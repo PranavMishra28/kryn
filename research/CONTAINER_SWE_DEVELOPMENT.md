@@ -262,7 +262,12 @@ this one accepted pair.
 The subsequent power-interrupted control exposed an API compatibility issue:
 Docker Desktop's API 1.56 inspection omitted requested writable sizes for its
 stopped worker, while API 1.45 returned exact bytes for the same ID and owner.
-Only the sized-inspect subprocess now pins API 1.45. Missing or invalid values
-still fail closed; the 4-GiB limit and every other guard remain unchanged.
+The initial correction pinned sized inspection to API 1.45. A later stopped
+Sphinx worker still omitted both size fields at that version, including through
+a direct daemon request. The prospective usage query now uses the same local
+daemon's API 1.45 container-list endpoint with size enabled and exact ID/owner
+filters. It requires exactly one matching identity and an explicit nonnegative
+integer byte count. Missing or invalid values still fail closed; the 4-GiB limit
+and every other guard remain unchanged. No absent size is interpreted as zero.
 Original interrupted and failed recovery attempts remain unscored. See the
 campaign report for the read-only receipts and remaining live admission gate.

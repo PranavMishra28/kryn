@@ -27,6 +27,37 @@ DISK_FLOOR = 12 * 1024**3
 ARCHIVE_LIMIT = 512 * 1024**2
 
 
+def container_usage(identity, owner):
+    """Request exact bytes from the CLI's local daemon, without size fallback."""
+    import docker
+
+    deadline = time.monotonic() + 5
+    context = subprocess.run(["docker", "context", "inspect", "--format",
+                              "{{json .Endpoints.docker.Host}}"],
+                             capture_output=True, text=True, timeout=5, check=True)
+    endpoint = json.loads(context.stdout)
+    # Explicit DOCKER_HOST overrides the default context; DOCKER_CONTEXT wins
+    # over DOCKER_HOST, as it does for the other CLI operations in this worker.
+    if not os.environ.get("DOCKER_CONTEXT") and os.environ.get("DOCKER_HOST"):
+        endpoint = os.environ["DOCKER_HOST"]
+    if not isinstance(endpoint, str) or not endpoint.startswith("unix:///"):
+        raise RuntimeError("Container usage requires a local Docker socket")
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("Container usage query deadline exceeded")
+    client = docker.APIClient(base_url=endpoint, version="1.45", timeout=remaining)
+    try:
+        rows = client.containers(all=True, size=True,
+                                 filters={"id": identity, "label": LABEL + "=" + owner})
+    finally:
+        client.close()
+    if time.monotonic() > deadline:
+        raise TimeoutError("Container usage query deadline exceeded")
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+        raise RuntimeError("Container usage requires exactly one owned result")
+    return rows[0]
+
+
 def pinned_image(value):
     if not re.fullmatch(r"(?:[a-zA-Z0-9._/:-]+@)?sha256:[0-9a-f]{64}", value):
         raise ValueError("Worker images must be pinned by digest or local image ID")
@@ -242,16 +273,15 @@ class DockerWorker:
         if raw_bytes > 8 * 1024**3:
             raise RuntimeError("Raw evidence exceeds 8 GiB cap")
         for identity in self.containers:
-            # Desktop API 1.56 can omit requested sizes; the verified 1.45
-            # schema retains exact byte counts. Pin only this read-only query.
-            usage_env = dict(os.environ, DOCKER_API_VERSION="1.45")
-            value = subprocess.run(["docker", "container", "inspect", "--size", identity],
-                                   capture_output=True, text=True, timeout=5, check=True, env=usage_env)
-            info = json.loads(value.stdout)[0]
-            owner = (info["Config"].get("Labels") or {}).get(LABEL)
+            # Inspect can omit SizeRw even at API 1.45. The list endpoint
+            # computes exact sizes; absent/invalid measurements still fail closed.
+            info = container_usage(identity, self.owner)
+            owner = (info.get("Labels") or {}).get(LABEL)
             size_rw = info.get("SizeRw")
             reason = None
-            if owner != self.owner:
+            if info.get("Id") != identity:
+                reason = "container_identity_mismatch"
+            elif owner != self.owner:
                 reason = "owner_mismatch"
             elif type(size_rw) is not int or size_rw < 0:
                 reason = "size_telemetry_missing_or_invalid"
@@ -267,8 +297,7 @@ class DockerWorker:
                     "size_rw_present": "SizeRw" in info, "size_rw_type": type(size_rw).__name__,
                     "size_rw": size_rw if type(size_rw) is int and -(2**63) <= size_rw < 2**63 else None,
                     "size_rw_repr": repr(size_rw)[:128], "limit_bytes": 4 * 1024**3,
-                    "inspect_returncode": value.returncode,
-                    "inspect_stdout_bytes": len(value.stdout.encode())})
+                    "query": "container_list_size", "api_version": "1.45"})
                 raise RuntimeError("Owned container usage check failed: " + reason)
 
     def inspect(self, kind, identity, *, cleanup=False):

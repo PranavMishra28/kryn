@@ -9,7 +9,7 @@ import unittest
 import urllib.request
 from unittest.mock import Mock, patch
 
-from research.container_worker import DockerWorker, HostGuard, pinned_image, validate_worker, LABEL
+from research.container_worker import DockerWorker, HostGuard, pinned_image, validate_worker, container_usage, LABEL
 from research.container_admission import environment, tool_acceptance, source_inputs
 from research.container_config import worker_environment
 from research.local_only import check_environment
@@ -287,23 +287,21 @@ class ContainerControlsTests(unittest.TestCase):
                  (-1, "size_telemetry_missing_or_invalid"),
                  (4 * 1024**3 + 1, "work_cap_exceeded"),
                  (2**128, "work_cap_exceeded"),
-                 (4096, "owner_mismatch")]
+                 (4096, "owner_mismatch"),
+                 (4096, "container_identity_mismatch")]
         for size_rw, reason in cases:
             with self.subTest(size=size_rw, reason=reason), tempfile.TemporaryDirectory() as root:
                 worker = DockerWorker(root, Mock())
                 worker.containers = ["a" * 64]
                 owner = "foreign" * 10000 if reason == "owner_mismatch" else worker.owner
-                info = {"Id": worker.containers[0], "Config": {
-                    "Labels": {LABEL: owner}, "Env": ["SECRET=must-not-be-recorded"]}}
+                info = {"Id": "b" * 64 if reason == "container_identity_mismatch" else worker.containers[0],
+                        "Labels": {LABEL: owner}, "Env": ["SECRET=must-not-be-recorded"]}
                 if size_rw is not missing:
                     info["SizeRw"] = size_rw
-                with patch("research.container_worker.subprocess.run", return_value=Mock(
-                        stdout=json.dumps([info]), stderr="unrelated-secret", returncode=0)) as inspect:
+                with patch("research.container_worker.container_usage", return_value=info) as inspect:
                     with self.assertRaisesRegex(RuntimeError, reason):
                         worker.check_usage()
-                inspect.assert_called_once_with(["docker", "container", "inspect", "--size", "a" * 64],
-                    capture_output=True, text=True, timeout=5, check=True,
-                    env=dict(os.environ, DOCKER_API_VERSION="1.45"))
+                inspect.assert_called_once_with("a" * 64, worker.owner)
                 receipts = list(Path(root).glob("usage-failure-*.json"))
                 self.assertEqual(len(receipts), 1)
                 raw = receipts[0].read_bytes()
@@ -312,9 +310,9 @@ class ContainerControlsTests(unittest.TestCase):
                 self.assertNotIn(b"unrelated-secret", raw)
                 evidence = json.loads(raw)
                 self.assertEqual(evidence["reason"], reason)
-                self.assertEqual(evidence["inspect_returncode"], 0)
+                self.assertEqual(evidence["query"], "container_list_size")
                 self.assertEqual(evidence["expected_container_id"], "a" * 64)
-                self.assertEqual(evidence["observed_container_id"], "a" * 64)
+                self.assertEqual(evidence["observed_container_id"], info["Id"])
                 self.assertEqual(evidence["expected_owner"], worker.owner)
                 self.assertEqual(evidence["size_rw_present"], size_rw is not missing)
                 self.assertEqual(evidence["limit_bytes"], 4 * 1024**3)
@@ -324,26 +322,62 @@ class ContainerControlsTests(unittest.TestCase):
             worker = DockerWorker(root, Mock())
             worker.containers = ["a" * 64]
             for size_rw in (0, 4096, 4 * 1024**3):
-                info = {"Id": "a" * 64, "Config": {"Labels": {LABEL: worker.owner}}, "SizeRw": size_rw}
-                with patch("research.container_worker.subprocess.run", return_value=Mock(
-                        stdout=json.dumps([info]), returncode=0)) as inspect:
+                info = {"Id": "a" * 64, "Labels": {LABEL: worker.owner}, "SizeRw": size_rw}
+                with patch("research.container_worker.container_usage", return_value=info) as inspect:
                     worker.check_usage()
                     inspect.assert_called_once()
             self.assertFalse(list(Path(root).glob("usage-failure-*.json")))
 
-    def test_usage_api_pin_preserves_context_without_changing_process_environment(self):
-        with tempfile.TemporaryDirectory() as root, patch.dict(os.environ, {
-                "DOCKER_API_VERSION": "1.56", "DOCKER_CONTEXT": "owned-context",
-                "DOCKER_HOST": "unix:///same-socket"}):
-            worker = DockerWorker(root, Mock())
-            worker.containers = ["a" * 64]
-            info = {"Id": "a" * 64, "Config": {"Labels": {LABEL: worker.owner}}, "SizeRw": 4096}
-            before = dict(os.environ)
-            with patch("research.container_worker.subprocess.run", return_value=Mock(
-                    stdout=json.dumps([info]), returncode=0)) as inspect:
-                worker.check_usage()
-            self.assertEqual(inspect.call_args.kwargs["env"], {**before, "DOCKER_API_VERSION": "1.45"})
-            self.assertEqual(dict(os.environ), before)
+    def test_usage_query_uses_exact_bytes_and_cli_endpoint_without_retry(self):
+        import sys
+        sdk = Mock()
+        client = sdk.APIClient.return_value
+        row = {"Id": "a" * 64, "Labels": {LABEL: "owned"}, "SizeRw": 33705984}
+        client.containers.return_value = [row]
+        for env, endpoint in (({}, "unix:///context.sock"),
+                              ({"DOCKER_HOST": "unix:///override.sock"}, "unix:///override.sock"),
+                              ({"DOCKER_HOST": "unix:///override.sock", "DOCKER_CONTEXT": "chosen"},
+                               "unix:///context.sock")):
+            with self.subTest(env=env), patch.dict(os.environ, env, clear=True), patch.dict(
+                    sys.modules, {"docker": sdk}), patch("research.container_worker.subprocess.run",
+                    return_value=Mock(stdout='"unix:///context.sock"')) as context:
+                before = dict(os.environ)
+                self.assertEqual(container_usage("a" * 64, "owned"), row)
+                self.assertEqual(dict(os.environ), before)
+                context.assert_called_once_with(["docker", "context", "inspect", "--format",
+                    "{{json .Endpoints.docker.Host}}"], capture_output=True, text=True, timeout=5, check=True)
+                self.assertEqual(sdk.APIClient.call_args.kwargs["base_url"], endpoint)
+                self.assertEqual(sdk.APIClient.call_args.kwargs["version"], "1.45")
+                self.assertGreater(sdk.APIClient.call_args.kwargs["timeout"], 0)
+                self.assertLessEqual(sdk.APIClient.call_args.kwargs["timeout"], 5)
+                client.containers.assert_called_once_with(all=True, size=True,
+                    filters={"id": "a" * 64, "label": LABEL + "=owned"})
+                client.close.assert_called_once()
+                client.reset_mock()
+
+    def test_usage_query_rejects_ambiguous_absent_remote_and_failed_telemetry(self):
+        import sys
+        sdk = Mock()
+        client = sdk.APIClient.return_value
+        with patch.dict(os.environ, {}, clear=True), patch.dict(sys.modules, {"docker": sdk}), patch(
+                "research.container_worker.subprocess.run", return_value=Mock(stdout='"unix:///context.sock"')) as context:
+            for rows in ([], [{}, {}], None, [None]):
+                client.containers.return_value = rows
+                with self.assertRaisesRegex(RuntimeError, "exactly one"):
+                    container_usage("a" * 64, "owned")
+                client.containers.assert_called_once()
+                client.close.assert_called_once()
+                client.reset_mock()
+            client.containers.side_effect = TimeoutError("timeout")
+            with self.assertRaises(TimeoutError):
+                container_usage("a" * 64, "owned")
+            client.containers.assert_called_once()
+            client.close.assert_called_once()
+            client.reset_mock()
+            context.return_value.stdout = '"tcp://remote:2375"'
+            with self.assertRaisesRegex(RuntimeError, "local Docker socket"):
+                container_usage("a" * 64, "owned")
+            client.containers.assert_not_called()
 
     def test_cleanup_refuses_changed_owner(self):
         with tempfile.TemporaryDirectory() as root:
