@@ -594,3 +594,59 @@ writer, with the guard and request predicates unchanged. The protocol review and
 separate diagnosis preserve that distinction. Code `dfe6912` passed the full local
 checks, Python 3.11 research compatibility, clean package smoke and GitHub CI run
 `37272670062` before this launch.
+
+
+The pair is now terminal. Product adjudication accepted KRYN's arm after official
+resolution and native completion (491.260 seconds, 46 model requests). The native
+comparison hit the unchanged host-memory guard after 429.240 seconds and 40
+requests; its stopped worker was exported through recovery and remains unscored.
+Both parent and worker resource logs recorded warning pressure; sampled swap growth
+was zero. These observations establish the guard trigger, not its underlying cause.
+
+The preregistered independent auditor ran once and failed on the latched pressure
+failure, receipt
+`78b792df9dc5f2947e834a8239523bc71f70cdd87a0ac39e27b0042bab09c46c`.
+It admits **no matched score**. Product adjudication
+`5d3ee4c81a1c3f24c2e2f90d21d1ef9c65d35ac4af9c1d899fba88502a882211`
+and the compact observation
+`d7849d6c38bac1161816d113a0f2b13cc98cf8e0e6825b699410ef2f4d6b47af`
+remain separate from that failed independent qualification. This result does not
+show comparative uplift, a model ceiling, or broader release readiness. The next
+work is dependency readiness for the preselected exposed repository slate; this
+pair and its failed audit will not be replayed.
+
+
+Separate recovery and ownership settlement passed after verifying the preserved
+export, exact baseline symlinks, archive, terminal receipt links, and actual absence
+of every owned container, network, name and label. The exact inactive launchd job
+was removed with campaign receipts unchanged, settlement
+`f61aff883f27578834689da5b28da58ba6b79b5d1d1f53a97223682f0871b6a9`.
+The first root cleanup precheck had rejected legitimate baseline symlinks; its
+failure is retained. The corrected checker passed independent review before its
+single execution. This qualifies resource cleanup only and leaves the independent
+campaign audit failed.
+
+
+Both preselected repository images now passed one no-model metadata screen each.
+The old corrected AC-only probe remains sealed and retired without execution;
+the separately sealed v3 probe uses the current source and explicit
+`battery-capable` policy. Sphinx and pytest each reported Python 3.9.20, working
+SSL and a successful main-package import. Their package versions were respectively
+3.0.1 and 4.6.1.dev144+g1aefb24b3.d20260815. No task source or solution was inspected
+by Codex, and no model or grader ran in these screens.
+
+Sphinx result: `39ecbbcbfb369cf3117d744871d5c40f4fbd68095fd41b74e777854f36aa11e0`.
+Pytest result: `56abbe7f911ebb728c1e38af5606e5c33360d7d0f26d85e2dc8742498729cb44`.
+Each screen recorded five normal-pressure resource samples on AC, zero sampled
+swap growth and settled cleanup. A separate read-only observation rechecked the
+source, commands, guard logs, worker boundary, unchanged evidence and actual
+absence of owned IDs and labels:
+`5ee1935b045b7f65124973cdd92b3598ecf6c36873b73102cfbd890f7067e8d2`.
+
+The receipt field `dependency_ready` is limited to these interpreter, SSL and
+main-package imports. It does not establish complete task dependencies, a
+sanitized worker or baseline, official negative/reference grader controls, or
+battery operation under load. Those gates remain prerequisites to separate real
+preregistrations for the already exposed Sphinx and pytest development cases.
+The first metadata guard/writer failure, the retired v2 inputs and the v3 mock
+fixture precheck failure remain retained; no started screen was repeated.
