@@ -2299,3 +2299,61 @@ CI 37353184466 for code `4a37ce8` and CI 37354190481 for docs `5a92cf3`
 passed and their full job/step records were retained once. No task, grader or
 original acceptance function was replayed. PR #242 remains draft; native shell
 observations do not establish model repairability or broader product quality.
+
+## Shell failure settled; fresh read-only capture control launched
+
+Separate shell-control settlement passed without upgrading the failed result.
+All 67 pinned files stayed unchanged before and after removal of the exact
+inactive exit-one job. Both whole images remain retained and detached, three
+owned mounts are empty, and the owned native process and canned listener are
+absent. Ten power observations were AC at 90%; all parent/native/capture guard
+finals passed. The first settlement review's mistaken nine-tool expectation and
+its unexecuted settler are retained. The subsequent projection requires the
+actual ten-tool catalog, model variant and owned-session roster, plus the
+original empty-patch failure. It never calls original acceptance or grading.
+
+The empty-patch fix at `f14be06` passed 220 setup checks, 216 research checks
+(two skips), 87 Node checks, native/frozen offline checks, the targeted real
+sandboxed Git regression, clean-source package smoke, documentation/link/diff
+checks and zero-finding secret scanning. A receipt writer incorrectly expected
+both package JSON records to contain `version`; the build record contains
+`source_dirty`, while the installed-package record contains `version`. That
+writer failure is retained. The corrected writer checked each actual schema
+using the successful logs without rerunning the checks.
+
+A fresh no-model control reads a different public data fixture once through the
+native read tool and stops. It requires an empty patch to pass through all three
+APFS phases to the unchanged-byte callback, with no shell, write, skill,
+subagent, browser or model request. The declaration uses the complete observed
+ten-tool non-UI catalog, `variant: default` model metadata and the actual
+owned-session roster. These are prospective corrections to the new protocol;
+the failed shell protocol and its review remain immutable. The new source changes
+only empty-patch application and its regression in the 98-file runtime map; all
+five plugin assets are identical.
+
+Seven groups of author checks passed, including full prior-chain/source/runtime
+checks, the exact two-line source reversal, original dispatcher/guards/main
+operations, actual native metadata shapes, complete synthetic evidence with
+negative cases, capped HTTP/SSE dispatch, data-only callback checks and failure
+preservation. Nine separate launcher checks passed before one bootstrap.
+Process 64800 was verified with its executable hash, proc_pidpath and exact
+arguments. Runtime must remain unloaded and idle at 103/520655/21219; all
+admission and emergency stops remain unchanged.
+
+| Read-only capture control V1 artifact | SHA-256 |
+| --- | --- |
+| Shell failure settlement | `58a7c6918a6b9d9935ff5d8c643e7fa25c51049119493f0008527b8bdff70400` |
+| Code validation | `89454c93cecd0f5f80f21e5ee04771b166c44f80247d54fa219f884b2e97bfe8` |
+| Frozen source proof | `c1aa41b3702d905f78927e9fb39fcbe74bda7dd32136db928e31214be8a333d1` |
+| Runner | `9a42e3a83ecd605699224bbbfa755fe1258985237c3a20597b1193d7889d6f3e` |
+| Predeclaration | `ebb61fe03d995e3ea9ed9f51fe1861e7bdcbf40399ae1686bc21ef172c0bb0b6` |
+| Manifest | `694d22d9aa30b7136d2a65147fbad6b2c9b9dc1c70522194f5d918dfd36587dd` |
+| Author review | `ad9d5d5d0f0fc6c73d2c4ad2af8ebdf466db26216e7f4f073788a3904a4c28c5` |
+| Launcher review | `9c05f17f93afb1edc7f0653aba098681c30fec2a7f2f7db6f80dc85361951c20` |
+| Launch | `3ca4536df5855aa8580549b42cc4fc97549d67f914de8807bfddd3d7c16904d1` |
+| Activation | `ad35b5306d778cc1cc3d50a1babf4d0bfda9ddacd6e3e9b7f20e18bd4c05740e` |
+
+Outcome is unknown at launch. No model behavior, repairability, benchmark quality
+or production qualification follows from this control. New code and launch-doc
+CI will be inspected once at the next meaningful terminal. PR #242 remains
+draft; broader gates and final truthful scope remain open.
