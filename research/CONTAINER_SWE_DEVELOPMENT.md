@@ -2843,7 +2843,7 @@ Documentation CI `37369987295` passed; its full job and 13 steps were inspected
 once. Prior failures remain failed. Broader research and final scope gates remain
 open, and PR #242 stays draft. No version or owner installation change.
 
-### Native Git feedback passed; fresh quantity workflow launched (2026-10-05)
+### Native Git feedback passed; quantity resource abort and new runtime admission (2026-10-05)
 
 Product commit `e9bec02` passed 220 setup, 216 research (two skips) and 88 Node
 checks, native/frozen offline checks, clean-source package smoke (version 1.0.0,
@@ -2874,26 +2874,60 @@ Review SHA256:
 This verifies the observed fixed syntax-feedback mechanism, not model repair,
 independent functional grading or sustained production quality.
 
-A fresh public grouped-quantity Python workflow was launched once on the same
-separately frozen `e9bec02` source. Only local OpenCode/oMLX implements the stub.
-Its declared native workflow requires eight bounded baseline errors before any
-write and a successful final public check after the latest code change, one owned
-root and only the declared file/tool paths and exact checker command. The artifact
-callback checks bytes and unchanged trusted files without executing candidate code.
-Original 300-second limits, exact before-forward catalog/sampler checks, usage
-reconciliation, unload/owned-stop policy and all resource gates remain unchanged.
+The grouped-quantity Python workflow **strictly failed on host memory pressure**.
+One relay attempt began, but the retained native export has no completed model
+generation, tool call, public test or implementation write. The driver stopped
+with CLI 130 and `resource_guard`/`host_memory_pressure` after 13.593 seconds.
+The original controller stopped the exact owned runtime. Three retained loaded,
+idle observations before that stop showed unchanged counters: 23 requests,
+241,328 prompt and 10,194 completion tokens. This does not provide a completed
+usage receipt for the interrupted relay attempt.
 
-Seven protocol-review groups and nine launcher checks passed. Two separate
-counter-check copies exactly reverse to their frozen predecessors after removing
-qualified module references and the prospective counter argument; historical
-23/5/0 counters stay unchanged. Synthetic future-counter review exercises the full
-historical checks with only review-time live-status interception. The initial
-builder selected Python 3.14's annotation symbol table instead of the function
-symbol table and failed before writing either runner or bridge; that failure is
-preserved. The corrected builder and first protocol review passed.
+All ten parent and seven native resource observations were complete. Both streams
+recorded sustained warning pressure and their original guard stops; sampled swap
+did not grow from its nonzero baseline. Nine power observations, including the
+final record, showed AC and 89-percent battery. The cause of the occupied-host
+pressure is not established. No resource threshold or timeout was relaxed.
+Only the candidate phase ran: its whole image remains detached and its mount is
+empty. Capture, the artifact callback and grading were never reached.
+
+Separate failure-settlement review passed seven groups and 22 negative projections.
+The original pure resource guard reproduced the warning stops from retained data.
+All 55 current evidence pins and 88 declared/predecessor input pins were verified,
+along with the current frozen source, interpreter, tools and installed profile.
+The stopped app control and absence of the old runtime, worker, relay and broker
+were checked before and after removing only the inactive exit-1 job. The task
+remains failed; no original task, acceptance function or grader was replayed.
+Settlement SHA256:
+`0af3195e60ce258b64f8c7f0b00ecf3f74b889f29576988f7ebd68fec8fce088`.
+Review SHA256:
+`3a3bc9ed086d44ddb165578e4debfeaf807e3d716fe4ada3e74a20854f343360`.
+
+A distinct, inference-free runtime-epoch admission control was launched once.
+It waits durably while the app is stopped, retaining the original 60-second
+cooldown, three-green-observation rule and all host power, pressure and disk
+checks. It may call the original bounded owned-app start once, then must prove a
+new listener identity and at least 60 seconds of unloaded idle with exact zero
+inference counters. The unchanged HostGuard starts after listener verification;
+it does not cover the unavailable-listener startup interval. The old counter
+receipts remain historical. No model load, coding task or browser is part of this
+control, and an unsafe admission keeps waiting without closing unrelated apps.
+
+Five protocol-review groups and nine launcher checks passed. Static comparison
+preserves the prior epoch mechanism apart from the declared source, predecessor
+and former PID. Mocked success, owned failure and concurrent-inference cases
+verify one start, exact-owned emergency stop and no conflicting stop, respectively.
+Job `dev.kryn.native-runtime-epoch-admission-20261005-v2` has an **unknown outcome
+at launch**. Runner SHA256:
+`ed22138e9cfdff6bce5dd0af229eb2e77031f114286020376a1ac2da746f7f5a`.
 Protocol review SHA256:
-`b2c4aa61ae3e63fe08d1139d2d6a919930b25d8621e7cd6d94c32bb29c103684`.
+`9cbd1fc0b3ddd146d2e1f4c53a0447dcfbedfbef970a6036fcc6c676efd7eccd`.
 Launcher review SHA256:
-`7ff46bd177b9a05245d003c44d41b1a91146af04e687fe4282ccec12d6462e1f`.
-Outcome remains unknown at launch. Prior failed tasks remain failed. Broader
-research and truthful final scope gates remain open; PR #242 remains draft.
+`e9eed0b1de6a6959ea794f6e2869312248e59fd344e87e6679d7c3b6c95b489c`.
+
+Documentation CI `37373000667` passed; its full job and 13 steps were inspected
+and retained once. Product checks were not replayed. No product code, version or
+owner installation changed. Broader development, fresh protected validation,
+sustained coding/UI, full-context reasoning, endurance and truthful final scope
+remain open. The single PR #242 remains draft. This checkpoint is not completion,
+a model-quality result or production qualification.
