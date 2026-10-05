@@ -1919,3 +1919,69 @@ Outcome is unknown at launch. Code and launch-doc CI will be inspected once at
 the next meaningful terminal. PR #242 remains draft. Broader development, valid
 fresh/protected validation, sustained coding/UI, full-context reasoning,
 endurance and final production scope remain open; this launch is not completion.
+
+## Routing delivery verified and settled; fresh local-model length UI launched
+
+The no-model routing control passed. Its six canned native requests completed
+in 9.648 seconds. Each of three Agent requests contained the exact new guidance
+once in system content; none of the three Browse requests contained it. The
+recorded system-text hashes were stable within each role. Complete canonical
+role-schema and sampler metadata matched the retained controls, and the exact
+706-byte child user context preserved the parent criteria and inspection framing.
+The sole 312-byte index patch matched capture. This establishes guidance delivery
+in this canned control, not model compliance or full system-prompt provenance.
+
+Separate settlement used independent evidence predicates and did not invoke the
+original acceptance function. Eighteen author checks included seven metadata
+negatives and native write/delegation/navigation/snapshot chronology. All 61
+files and both whole images remained unchanged before and after removing only
+the inactive exit-zero job. Exact browser ID/name/broker absence and port closure,
+two detached images and three empty owned mount paths were verified. All 13
+parent, six native and four capture resource samples were normal; all ten power
+samples were AC at 85%, with complete finals and zero sampled swap growth.
+Absolute swap was nonzero. Runtime 85947 remained unloaded and idle at 87
+requests, 436,948 prompt and 18,102 completion units, with no runtime operation.
+No settlement review or cleanup mutation failed.
+
+| Routing control V1 terminal evidence | SHA-256 |
+| --- | --- |
+| Result | `c8babd42606b4ff01e9c827ce22d6c6c0ae5f6c650c0478b11ecf2bff205bf19` |
+| Driver | `0ecac7e88088fa4b06199154c5377a92a69fbeeb63bc1c3d36e1fb054aa86e92` |
+| Barrier | `0b771091913888148a3a5a1f17f269b1d5bcb3e4d107d5697b8ef987ae1d8d0f` |
+| Settlement review | `46b85b3ee40d4fc09fe1746177f96de585633af0c0e04d8a67553d31fcf9524e` |
+| Settlement | `3e3296cf30703099255becc5e4152f0e540d9e8ba8cf912a81772d4d55b1d380` |
+
+CI 37346459228 at `e576633` and 37347162446 at `e6e3a2f` passed; full job/step
+JSON is retained. The frozen `e576633` source now supports a fresh public
+text-length task: empty-input error, counting Maple as five characters, and
+reset. Only a blank page and requirements are supplied; local OpenCode/oMLX
+chooses and writes the implementation. The prospective one-to-three inspection
+workflow retains required intervening revisions, final verification after the
+latest edit, exact child context, all completed tools and strict state checks.
+The old duration/form/counter failures remain unchanged.
+
+Nineteen groups of author checks passed for the fresh protocol, including full
+source/prior-chain checks, intercepted trial and main paths, artifact negatives,
+one/two/three-child fixtures, state/context/chronology negatives and exact usage.
+The original duration controller functions are unchanged; the acceptance and
+state checker differ only in task literals/selectors. New source validation
+preserves every routing-control predicate with explicit forwarding of current
+counters to the isolated historical check; fixed settlement counters stay fixed.
+Nine launcher checks preceded one bootstrap with verified process 94088. The
+same 300-second CLI/request limits, canonical role schemas, before-forward relay
+checks, resource emergency stops, browser isolation and APFS phases apply.
+
+| Fresh length UI V1 artifact | SHA-256 |
+| --- | --- |
+| Runner | `1af1f139c73ad416fd9a2f2298d5fbb37fcdee74ad1ecd5ef9bc56b5fdb10dc7` |
+| Predeclaration | `e4456c89e4123e72b03e900da8f1e64ad00423b7f09b7e01fc39cec4a135eb2c` |
+| Manifest | `722a4fe6837ecfb884c031591056fcbdbf1b5a8a407bd291b59b1cc0bee89ebe` |
+| Author review | `8a738805af4fbbbc2345456ab2f2c47ff42278edbcec76717eb80e3e1fc1bfb7` |
+| Launcher review | `0c81e86ec9737c8fdd03f06f7ac3892ba9507d127954b1b6fa40c8492b1579d3` |
+| Launch | `045180c2a44d0bc06c2e648a4bacf11e19e653bd5a69abb269529b370f382fd7` |
+| Activation | `e0df2cf14004d6e300b08e80949a8b4eb02e8f3d6e5a286e8abc07b67220c238` |
+
+Outcome is unknown at launch. No product code, version or owner install changed
+in this checkpoint. PR #242 remains draft. Broader development, valid
+fresh/protected validation, sustained coding/UI, full-context reasoning,
+endurance and final truthful production scope remain open; this is not completion.
