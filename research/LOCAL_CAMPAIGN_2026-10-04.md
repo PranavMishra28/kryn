@@ -146,7 +146,8 @@ The prospective Linux path now preserves direct OpenCode exit status, native
 root/child ownership and completion, exact stopped-worker source export, full
 primary request controls, and separate official candidate grading. Frozen canned
 controls at source-map SHA-256
-`21d7859b227875a09b66f899930b714978723b4b0c283d1fa9f1cac22c772a64`
+`d0419b87442c33cc03433aa0f2e6ade0c956a559f8de885d79cdf325d4427537`
+(canonical compact JSON)
 cover 92 source files. They do not perform model inference or qualify coding.
 
 Both arms completed a parent/general-subagent run with two verified native
@@ -177,3 +178,18 @@ never rerun a started arm or grader. Empty patches need a terminal no-change
 outcome. These remaining mechanics must be tested before local generation;
 the completed v3 supervisor and evidence remain untouched. A positive accepted
 model-generated repair is still required before fresh validation or promotion.
+
+Independent no-model review passed nine composite checks across 166 cited raw
+and source hashes. It re-read the native root/child exports and policy events,
+verified exact applied patches, re-parsed coverage of every official expected
+test, and checked actual owned-resource absence. Its receipt is
+`c83d186da523825f7785a0fa2fe41ae230ee60c61cc93198541cf0ba38fecbdd`.
+The first auditor receipt remains failed because it incorrectly expected a
+standalone prompt in the grader directory; the corrected audit checks the
+pinned generation prompt instead. No arm or grader was replayed.
+
+Full local checks passed 216 setup, 148 research (two skips) and 87 Node tests;
+the pinned evaluator additionally passed 28 focused checks. Clean-source package
+smoke passed at `fe354db`. The 39-commit PR-range Gitleaks scan found no findings;
+the ten working-tree findings remain classified JSON SHA-256 mappings. These
+checks do not change the failed quality ladder or authorize publication.
