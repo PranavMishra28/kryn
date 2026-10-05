@@ -2609,3 +2609,51 @@ Outcome is unknown at launch. The next wake will inspect compact current state
 and leave an active or safely waiting worker alone. No original task, grader or
 acceptance function was replayed. All broader research gates and final scope
 remain open; this launch does not complete the overall goal.
+
+## Test-feedback startup failure settled; retain native guard reasons
+
+The test-feedback V2 control failed before a native task session or tool call.
+During browser MCP startup, child resource sample eight recorded a listener
+query timeout after 3.062534 seconds and an empty listener inventory. The original
+guard correctly latched `resource telemetry missing or listener identity
+ambiguous`; the following two samples recovered listener 85947 but retained the
+stop. Memory pressure stayed normal and sampled swap growth was zero. The
+underlying query-timeout cause is unknown; this is not evidence of model memory
+pressure or a model-ceiling problem.
+
+No canned response or model request occurred. Runtime stayed unloaded and idle
+at 103/520655/21219. No task CLI result, session export, patch, capture phase or
+grader phase exists. The candidate volume detached. Separate settlement checked
+all 40 retained files, the whole candidate image, the sole empty owned mount,
+exact browser ID/name/port and broker absence, and the closed canned-relay port.
+It removed only the inactive exit-one job. The 20 parent resource samples and 13
+AC power observations passed their original checks; the 11 child resource
+samples retain the telemetry failure. A settlement-review fixture initially
+tried hashing an intercepted output receipt that did not exist. The failed
+review is retained; a separately corrected review intercepted only that output
+hash and passed before actual cleanup. No task or original acceptance replay.
+
+The native external driver already rejects a latched guard failure, but its
+report omitted the reason when startup raised before a session existed. One
+report assignment now records `monitor.guard.reason` after monitor closure.
+The regression exercises the real monitor and driver failure/finally path with
+missing telemetry followed by a recovered final sample; a separate unrelated
+preflight failure retains a null guard reason. No native server, browser, model
+or external request runs in that test. Guard logic, query deadlines, emergency
+stops, admission and completion predicates are unchanged. Old frozen receipts
+are not rewritten.
+
+| Test-feedback V2 failure and reporting evidence | SHA-256 |
+| --- | --- |
+| Original failed result | `eb697808be910f122570beb2c5ec485d7007f422db507bfc20ba0c855338d930` |
+| Driver | `b872de9f76f4eb1671b2db8a2e39fb17f77c6dfc0db228971e99e05dfc75d26a` |
+| Barrier | `9a90a9387a285eb79282e271f5266797322e01bd76ac3fa7fc88a4975febe31f` |
+| Passed settlement review | `0aee550977be9b1773851379ac8514f19a91febccace130322cae1e4f09b4d71` |
+| Settlement | `6fc6f2909e02e504f94ba53d7acd454cd11cc9b8c8dc5e0235a9194a3b9a4443` |
+| Reporting diagnosis | `7afcf11863272c25bebe7f87a12212740a1eba20c17536c01363b9777cefd795` |
+
+CI 37351882965 for docs `5b62b15` passed and its full job/step record was retained
+once. The next prospective control will isolate native shell exit/output
+reporting without a browser, using a fresh fixed public probe rather than
+replaying the failed workflow. It will not demonstrate model repairability or
+benchmark quality. PR #242 remains draft; broader gates and final scope are open.

@@ -827,6 +827,7 @@ def run(args, *, defer_patch=False):
                     report["browser_cleanup_error"] = type(error).__name__ + ": " + str(error)
                     report["browser_settled"] = False
             monitor.close()
+            report["guard_reason"] = monitor.guard.reason
             report["requests"] = relay.records
             local_receipt = report.get("local_only")
             if local_receipt is not None:

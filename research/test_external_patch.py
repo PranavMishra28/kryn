@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import ExitStack
 from types import SimpleNamespace
 
 from unittest.mock import patch
@@ -20,6 +21,55 @@ from run_external_patch import (PatchBudgetExceeded, benchmark_tools, bounded_ou
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_startup_guard_reason_survives_a_recovered_final_sample(self):
+        import run_external_patch as adapter
+        # Exercise the real monitor and driver's finally path without starting
+        # a native server, relay, browser, or model request.
+        sample = {"pressure_level": 1, "swap_used_bytes": 0,
+                  "listener_processes": [{"pid": 123, "rss_bytes": 1024}]}
+        for first, expected in [({}, "resource telemetry missing or listener identity ambiguous"),
+                                (sample, None)]:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / "setup").mkdir()
+                (root / "setup/accepted-profile.json").write_text(json.dumps({
+                    "repository": "local/" + adapter.MODEL_ID, "revision": "test"}))
+                binary = root / "binary"
+                binary.write_bytes(b"test binary")
+                prompt = root / "prompt"
+                prompt.write_text("Public fixture")
+                relay = SimpleNamespace(port=12345, records=[], cancel=lambda: None)
+                args = SimpleNamespace(workspace=root, prompt=prompt, evidence=root,
+                                       base_commit="test", task_id="guard-report", arm="native",
+                                       tool_venv=None, timeout=120)
+                with ExitStack() as stack:
+                    for target, value in [("ROOT", root), ("BINARY", binary)]:
+                        stack.enter_context(patch.object(adapter, target, value))
+                    stack.enter_context(patch.object(adapter, "prepare", return_value=
+                        (root, prompt, root, root, "test")))
+                    stack.enter_context(patch.object(adapter, "git", return_value="test"))
+                    stack.enter_context(patch.object(adapter, "configuration", return_value=({}, [], [])))
+                    mocked_relay = stack.enter_context(patch.object(adapter.learning, "InferenceRelay"))
+                    mocked_relay.return_value.__enter__.return_value = relay
+                    stack.enter_context(patch("run_native_trial.resources", side_effect=[first, sample]))
+                    stack.enter_context(patch.object(adapter, "runtime_is_idle", return_value=True))
+                    tools = stack.enter_context(patch.object(adapter, "benchmark_tools", return_value=(None, [], None)))
+                    if expected is None:
+                        tools.side_effect = ValueError("unrelated preflight failure")
+                    server = stack.enter_context(patch.object(adapter, "NativeServer"))
+                    with self.assertRaisesRegex((RuntimeError, ValueError),
+                            expected or "unrelated preflight failure"):
+                        adapter.run(args)
+                    server.assert_not_called()
+                report = json.loads((root / "driver.json").read_text())
+                self.assertFalse(report["completed"])
+                self.assertEqual(report["requests"], [])
+                self.assertEqual(report["guard_reason"], expected)
+                rows = [json.loads(line) for line in (root / "resources.jsonl").read_text().splitlines()]
+                if expected:
+                    self.assertEqual(rows[-1]["listener_processes"], sample["listener_processes"])
+                    self.assertEqual(rows[-1]["guard_reason"], expected)
+
     def test_browser_receipt_binds_inspected_id_to_requested_name(self):
         name, image = "kryn-ui-" + "a" * 32, "sha256:" + "b" * 64
         item = {"Id": "c" * 64, "Name": "/" + name, "Image": image, "Mounts": [],
