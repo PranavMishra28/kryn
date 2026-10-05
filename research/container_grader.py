@@ -20,6 +20,114 @@ from research.swebench_controller import source_lock
 from research import swebench_local
 from tools.context_probe import summarize_resources
 
+EXEC_OUTPUT_LIMIT = 8 * 1024**2
+SOCKET_READ_LIMIT = 64 * 1024
+
+
+class ExecOutputBudgetExceeded(RuntimeError):
+    pass
+
+
+class BoundedExecStream:
+    """Keep one Docker SDK exec result bounded and close its HTTP stream."""
+
+    def __init__(self, source, receipt):
+        self.source = source
+        try:
+            # Docker 7.2.0's CancellableStream turns socket errors into EOF.
+            # Read its underlying frame iterator so transport errors fail closed.
+            self.iterator = iter(getattr(source, "_stream", source))
+        except BaseException:
+            close = getattr(source, "close", None)
+            if close:
+                try:
+                    close()
+                except Exception:
+                    pass
+            raise
+        self.receipt = Path(receipt)
+        self.bytes = 0
+        self.closed = False
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.closed:
+            raise StopIteration
+        try:
+            chunk = next(self.iterator)
+        except StopIteration:
+            self.close()
+            raise
+        except BaseException:
+            self.close()
+            raise
+        if self.closed:
+            raise StopIteration
+        if not isinstance(chunk, (bytes, bytearray, memoryview)):
+            self.close()
+            raise TypeError("Docker exec returned non-byte output")
+        observed = self.bytes + len(chunk)
+        if observed > EXEC_OUTPUT_LIMIT:
+            self.close()
+            atomic(self.receipt, {"kind": "docker_sdk_exec_output_limit",
+                                  "limit_bytes": EXEC_OUTPUT_LIMIT,
+                                  "observed_bytes": observed})
+            raise ExecOutputBudgetExceeded(f"Docker exec output exceeded {EXEC_OUTPUT_LIMIT} bytes")
+        self.bytes = observed
+        return bytes(chunk)
+
+    def close(self):
+        if self.closed:
+            return
+        self.closed = True
+        for owner in (self.source, getattr(self.source, "_response", None)):
+            close = getattr(owner, "close", None)
+            if close:
+                try:
+                    close()
+                except Exception:
+                    pass
+
+
+def install_exec_output_budget(client, receipt, *, socket_module=None):
+    """Stream every SDK exec result; cap socket reads before Docker frames grow."""
+    if socket_module is None:
+        from docker.utils import socket as socket_module
+    original_read = socket_module.read
+
+    def bounded_read(sock, n=4096):
+        if type(n) is not int or n <= 0:
+            raise RuntimeError("Unexpected Docker socket read size")
+        return original_read(sock, min(n, SOCKET_READ_LIMIT))
+
+    socket_module.read = bounded_read
+    original_start = client.api.exec_start
+
+    def bounded_start(exec_id, detach=False, tty=False, stream=False, socket=False, demux=False):
+        if tty or socket or demux:
+            raise RuntimeError("Unsupported Docker exec output mode")
+        if detach:
+            if stream:
+                raise RuntimeError("Detached Docker exec cannot stream")
+            return original_start(exec_id, detach=True)
+        source = original_start(exec_id, stream=True)
+        bounded = BoundedExecStream(source, receipt)
+        if stream:
+            return bounded
+        try:
+            return b"".join(bounded)
+        finally:
+            bounded.close()
+
+    client.api.exec_start = bounded_start
+
+
+def reject_output_breach(evidence):
+    if (Path(evidence) / "output-budget.json").exists():
+        raise ExecOutputBudgetExceeded("Docker exec output budget was exceeded")
+
 
 def wheel_paths(manifest):
     root = Path(manifest["wheelhouse"])
@@ -119,6 +227,9 @@ def official_child(campaign):
     import docker
     import swebench.harness.run_evaluation as evaluator
 
+    if docker.__version__ != "7.2.0":
+        raise RuntimeError("Unreviewed Docker SDK exec transport")
+
     manifest = json.loads((campaign / "manifest.json").read_text())
     frozen(campaign, manifest)
     control = json.loads((campaign / "grade/control.json").read_text())
@@ -141,6 +252,7 @@ def official_child(campaign):
     owned = client.containers.get(control["container"])
     owned.reload()
     require_owned(owned.attrs, control)
+    install_exec_output_budget(client, campaign / "grade/output-budget.json")
 
     def create(test_spec, _client, run_id, _logger):
         if (test_spec.instance_id != manifest["task"]["instance_id"]
@@ -160,6 +272,7 @@ def official_child(campaign):
     prediction = {"instance_id": spec.instance_id, "model_name_or_path": "kryn-no-model-admission",
                   "model_patch": (campaign / "model.patch").read_text()}
     result = evaluator.run_instance(spec, prediction, client, control["run_id"], timeout=1800)
+    reject_output_breach(campaign / "grade")
     if not result or result[0] != spec.instance_id:
         raise RuntimeError("Official grader did not produce an instance report")
     expected_tests = {"FAIL_TO_PASS": spec.FAIL_TO_PASS, "PASS_TO_PASS": spec.PASS_TO_PASS}
@@ -216,6 +329,7 @@ def grade(campaign):
                                 "research.container_grader", "--child", str(campaign)],
                                evidence / "official.log", 8 * 1024**2, env=env, cwd=evidence,
                                cancelled=cancelled, timeout=2100)
+                reject_output_breach(evidence)
                 frozen(campaign, manifest)
                 official = swebench_local.official_result(
                     evidence, manifest["task"], control["run_id"], model_patch=campaign / "model.patch")
@@ -241,6 +355,13 @@ def grade(campaign):
                             and resources.get("swap_peak_growth_bytes") == 0)
     except Exception as error:
         report.update(passed=False, error=str(error))
+    breach = evidence / "output-budget.json"
+    if breach.exists():
+        report["passed"] = False
+        try:
+            report["output_budget"] = json.loads(breach.read_text())
+        except (OSError, ValueError):
+            report["output_budget"] = {"receipt_unreadable": True}
     report["wall_seconds"] = round(time.monotonic() - start, 3)
     atomic(evidence / "result.json", report)
     return report

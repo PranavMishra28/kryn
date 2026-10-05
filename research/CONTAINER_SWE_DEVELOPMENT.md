@@ -128,21 +128,52 @@ with `PIP_NO_INDEX` and a fixed local wheel directory. No network access, offici
 test edit or score override was introduced. These controls qualify transport
 and grading readiness only, not a successful model-generated repair.
 
-Before generation, bound the official SDK's in-memory test-output stream for
-arbitrary candidate code, qualify effective native API/policy controls, and freeze
-a separate development experiment's source, exposed task selection, image,
-prompt, arm order, sampler, complete wire controls, budgets and adjudication.
+The official Docker SDK output path now streams attached exec results through
+an 8-MiB limit and caps raw socket reads at 64 KiB, before a large frame can be
+allocated. Overflow closes the transport, writes a breach receipt, and fails
+the parent even if the official evaluator catches the exception. Official
+patch application, tests, parser and scoring remain unchanged. A frozen live
+no-model control preserved exact 7-MiB output and rejected 9-MiB output in both
+streaming and byte-return modes. Owned resources settled, all six resource
+samples were complete, and swap did not grow. Its result receipt is
+`2ec6f9c342736594eb62b16d33eed7d2effe8078e3ecfbdc1d5804716620a5ca`.
+Focused tests also exercise the pinned Docker 7.2.0 multiplexed-frame path.
+
+Before generation, freeze a separate development experiment's source, exposed
+task selection, image, prompt, arm order, sampler, complete wire controls,
+budgets and independent adjudication.
 Record the actual OpenCode exit code directly. An interrupted or unsafe arm
 remains unscored and cannot be silently replayed.
 
 Read-only review found that the shell inherits the native server's authentication
 environment and can reach its loopback session-mutation API. This is shared
 OpenCode behavior, not a demonstrated container-specific escape. Protecting
-plugin files alone does not freeze agent, model or session permissions. Reuse
-native plugin/agent/session inventories and actual relay model records; a canned
-mutation control must establish their detection limits. Final snapshots cannot
-exclude a transient change followed by restoration. Do not claim that stronger
-boundary without evidence or replace the native framework to assume it.
+plugin files alone does not freeze agent, model or session permissions.
+`container_admission.py --policy-probe` now qualifies a fixed, canned shell
+control in both native and KRYN: agent, model variant and permissions change
+and restore; a continuous public SSE observer captures all six transitions
+inside the local shell call. Native inventories still verify protected plugin
+activation/absence, matching tool schemas, and exact exported patches. The
+local plugin cannot be updated through the package-only updater; the control
+checks the rejection and unchanged inventory.
+An independent audit verifies all 88 frozen source hashes, the raw event
+ordering, restored values, exact patches, both arms' 12 normal-pressure samples,
+unchanged swap, and actual owned-resource absence. Its receipt is
+`cf02ca69af4cbfff2d99f304b9019356746b081f5b20650f354531353e138343`.
+
+The first policy probe failed and is retained: the pinned CLI does not enable
+durable event persistence, so its historical log returned only a sync marker;
+an omitted permission list also differed from the restored empty list. The
+corrected control subscribes to `/api/event`, waits for `server.connected`
+before starting work, and requires a post-turn sentinel and native watermarks.
+It fails on disconnect, overflow, missing sentinel or unexpected transitions.
+Public event sequences omit private usage records; gaps do **not** prove lost
+events. These receipts establish the observed API behavior, not absence of all
+transient changes or protection against same-UID interference with the server
+or observer files. Environment and global configuration changes are not covered
+by the six-event control. Future trials must retain this scope and record the
+actual relay model and wire settings independently; no new framework or stronger
+isolation claim follows from the control.
 
 The first study should test whether ready dependencies reduce observed tool
 failures and timeouts. A reused public task is development-only. Require genuine

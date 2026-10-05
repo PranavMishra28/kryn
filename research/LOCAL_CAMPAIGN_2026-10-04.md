@@ -125,8 +125,13 @@ bounded stopped-worker export, active protected plugin bytes and matching tool
 schemas. Independent worker admission passed 40 raw-evidence checks. A separate
 official-grader handoff now passes negative and reference controls with exact
 patch and parsed-test evidence; an earlier offline-build dependency failure is
-retained. Arbitrary-output/API controls and a new development preregistration
-still precede model generation.
+retained. Subsequent no-model controls preserve exact output below the official
+SDK cap and reject oversized output, and capture six native session-policy
+changes/restorations in both arms. The first policy probe's missing persistent
+log assumption failed and is retained; the corrected live observer establishes
+only its documented public-event scope. These are instrumentation results.
+A new development preregistration and frozen generation/adjudication path still
+precede model generation.
 This changes execution OS and tools and retains separate development provenance.
 Preregister any subsequent environment or termination experiment separately on
 development tasks. Preserve the completed campaign;

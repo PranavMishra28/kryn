@@ -200,7 +200,7 @@ print(json.dumps(r))
             marker.shutdown()
 
 
-def arm(image, directory, native, baseline, baseline_symlinks):
+def arm(image, directory, native, baseline, baseline_symlinks, *, policy_probe=False):
     from research.container_export import extract_worktree
     directory.mkdir(mode=0o700)
     report = {"passed": False, "native": native, "synthetic_inference": True}
@@ -264,13 +264,43 @@ def arm(image, directory, native, baseline, baseline_symlinks):
                 docker.command("exec", "-d", "-w", "/testbed", worker, "/bin/sh", "-c",
                                "exec " + server_command + " > /tmp/kryn-server.log 2>&1")
                 report["plugin_before"] = plugin_inventory(docker, worker, native, env["OPENCODE_PASSWORD"])
+                session_args = []
+                if policy_probe:
+                    from research.container_policy import parse_log, policy_during_tools
+                    probe_path = "/opt/kryn-policy-probe.py"
+                    docker.command("cp", str(ROOT / "research/container_policy.py"), worker + ":" + probe_path)
+                    def probe(mode, *args):
+                        return docker.command("exec", "-e", "OPENCODE_PASSWORD=" + env["OPENCODE_PASSWORD"],
+                                              worker, PYTHON, "-I", probe_path, mode, *args, timeout=45)
+                    session = json.loads(probe("create"))["data"]["id"]
+                    session_args = ["--session", session]
+                    atomic(directory / "policy-before.json", json.loads(probe("snapshot", session)))
+                    docker.command("exec", "-d", "-e", "OPENCODE_PASSWORD=" + env["OPENCODE_PASSWORD"],
+                                   worker, PYTHON, "-I", probe_path, "watch", session)
+                    atomic(directory / "policy-observer-ready.json", json.loads(probe("ready")))
+                    sequence[-1][1]["command"] += " && " + shlex.join([PYTHON, "-I", probe_path, "mutate", session])
                 output = docker.command("exec", "-w", "/testbed", worker, "/usr/bin/env", "-i",
                                         *[k + "=" + v for k, v in sorted(env.items())],
                                         "/usr/local/bin/opencode", "run", "--server", SERVER, "--model", "local/qwen",
-                                        "--agent", "agent", "--format", "json", "--auto", "--title", "Synthetic worker admission", "--",
+                                        "--agent", "agent", "--format", "json", "--auto", *session_args, "--title", "Synthetic worker admission", "--",
                                         "Run the synthetic worker admission canary.", timeout=180)
                 (directory / "events.jsonl").write_text(output)
                 report["plugin_after"] = plugin_inventory(docker, worker, native, env["OPENCODE_PASSWORD"])
+                if policy_probe:
+                    after = json.loads(probe("snapshot", session))
+                    atomic(directory / "policy-after.json", after)
+                    raw_log = probe("finish", session)
+                    (directory / "policy-log.sse").write_text(raw_log)
+                    mutations = policy_during_tools(parse_log(raw_log, session))
+                    expected = ["session.agent.selected"] * 2 + ["session.model.selected"] * 2 + ["session.permissions"] * 2
+                    control = json.loads(probe("plugin-update"))
+                    atomic(directory / "plugin-update-control.json", control)
+                    report["policy_control"] = {"session_id": session, "mutations": mutations,
+                        "passed": [item["type"] for item in mutations] == expected
+                            and all(list(item["tools"].values()) == ["shell"] for item in mutations)
+                            and control["before"] == control["after"]}
+                    if not report["policy_control"]["passed"]:
+                        raise RuntimeError("Native policy event or plugin update control failed")
                 capture_server_log()
                 docker.settle(worker)
                 docker.settle(side)
@@ -330,6 +360,7 @@ def main():
     parser.add_argument("--image", required=True, type=pinned_image)
     parser.add_argument("--baseline", required=True, type=Path, help="Trusted, sealed image checkout captured before agent work")
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--policy-probe", action="store_true", help="Fixed no-model mutation and public-event control")
     args = parser.parse_args()
     if not args.image.startswith("sha256:"):
         parser.error("Admission records the exact local worker image ID")
@@ -337,6 +368,7 @@ def main():
     baseline = args.baseline.resolve(strict=True)
     baseline_symlinks = baseline_links(baseline)
     manifest = {"kind": "swe_container_no_model_admission", "image": args.image,
+                "policy_probe": args.policy_probe,
                 "base_commit": subprocess.check_output(["git", "-C", str(baseline), "rev-parse", "HEAD"], text=True).strip(),
                 "git_config_sha256": hashlib.sha256((baseline / ".git/config").read_bytes()).hexdigest(),
                 "baseline_symlinks": baseline_symlinks,
@@ -351,7 +383,8 @@ def main():
     results = []
     for name in ("native", "kryn"):
         unchanged(manifest, baseline)
-        results.append(arm(args.image, args.out / name, name == "native", baseline, baseline_symlinks))
+        results.append(arm(args.image, args.out / name, name == "native", baseline, baseline_symlinks,
+                           policy_probe=args.policy_probe))
         if not results[-1]["passed"]:
             break
     unchanged(manifest, baseline)
