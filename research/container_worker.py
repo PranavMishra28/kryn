@@ -195,8 +195,11 @@ class DockerWorker:
         if raw_bytes > 8 * 1024**3:
             raise RuntimeError("Raw evidence exceeds 8 GiB cap")
         for identity in self.containers:
+            # Desktop API 1.56 can omit requested sizes; the verified 1.45
+            # schema retains exact byte counts. Pin only this read-only query.
+            usage_env = dict(os.environ, DOCKER_API_VERSION="1.45")
             value = subprocess.run(["docker", "container", "inspect", "--size", identity],
-                                   capture_output=True, text=True, timeout=5, check=True)
+                                   capture_output=True, text=True, timeout=5, check=True, env=usage_env)
             info = json.loads(value.stdout)[0]
             owner = (info["Config"].get("Labels") or {}).get(LABEL)
             size_rw = info.get("SizeRw")

@@ -250,3 +250,11 @@ adjudication checks the observed chronology and excludes order violations.
 Repetitions and reused public tasks remain explicitly exposed development work.
 No general uplift, frontier equivalence or production promotion follows from
 this one accepted pair.
+
+The subsequent power-interrupted control exposed an API compatibility issue:
+Docker Desktop's API 1.56 inspection omitted requested writable sizes for its
+stopped worker, while API 1.45 returned exact bytes for the same ID and owner.
+Only the sized-inspect subprocess now pins API 1.45. Missing or invalid values
+still fail closed; the 4-GiB limit and every other guard remain unchanged.
+Original interrupted and failed recovery attempts remain unscored. See the
+campaign report for the read-only receipts and remaining live admission gate.

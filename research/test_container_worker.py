@@ -212,7 +212,8 @@ class ContainerControlsTests(unittest.TestCase):
                     with self.assertRaisesRegex(RuntimeError, reason):
                         worker.check_usage()
                 inspect.assert_called_once_with(["docker", "container", "inspect", "--size", "a" * 64],
-                    capture_output=True, text=True, timeout=5, check=True)
+                    capture_output=True, text=True, timeout=5, check=True,
+                    env=dict(os.environ, DOCKER_API_VERSION="1.45"))
                 receipts = list(Path(root).glob("usage-failure-*.json"))
                 self.assertEqual(len(receipts), 1)
                 raw = receipts[0].read_bytes()
@@ -239,6 +240,20 @@ class ContainerControlsTests(unittest.TestCase):
                     worker.check_usage()
                     inspect.assert_called_once()
             self.assertFalse(list(Path(root).glob("usage-failure-*.json")))
+
+    def test_usage_api_pin_preserves_context_without_changing_process_environment(self):
+        with tempfile.TemporaryDirectory() as root, patch.dict(os.environ, {
+                "DOCKER_API_VERSION": "1.56", "DOCKER_CONTEXT": "owned-context",
+                "DOCKER_HOST": "unix:///same-socket"}):
+            worker = DockerWorker(root, Mock())
+            worker.containers = ["a" * 64]
+            info = {"Id": "a" * 64, "Config": {"Labels": {LABEL: worker.owner}}, "SizeRw": 4096}
+            before = dict(os.environ)
+            with patch("research.container_worker.subprocess.run", return_value=Mock(
+                    stdout=json.dumps([info]), returncode=0)) as inspect:
+                worker.check_usage()
+            self.assertEqual(inspect.call_args.kwargs["env"], {**before, "DOCKER_API_VERSION": "1.45"})
+            self.assertEqual(dict(os.environ), before)
 
     def test_cleanup_refuses_changed_owner(self):
         with tempfile.TemporaryDirectory() as root:

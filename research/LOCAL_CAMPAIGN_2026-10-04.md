@@ -316,3 +316,22 @@ retry or cap increase. Credential/environment fields are excluded. Separately
 guarded recovery preserves stopped work as unscored; it cannot turn the failed
 admission into a pass. A new source-frozen no-model admission is required before
 the next real comparison.
+
+A second recovery attempt encountered the same rejection and remains failed.
+The unlaunched durable recovery wrapper was retired instead of repeating it.
+Read-only diagnosis then reproduced missing `SizeRw` in both the CLI and direct
+Engine API 1.56 response for the exact stopped worker. ID, owner and image still
+matched. On the same Docker endpoint, API 1.45 returned an integer 4,096 bytes;
+the exact-ID list endpoint independently returned that value. This establishes
+an observed API compatibility difference, not the daemon's internal cause or
+the contents of earlier unrecorded responses.
+
+The prospective correction pins **only** the sized-inspect subprocess to the
+verified API 1.45 schema. It preserves the selected
+Docker context, all other process environment, the strict integer requirement
+and the unchanged 4-GiB limit. There is no retry or alternate-size fallback.
+The scoped CLI confirmation receipt is
+`a1048aec47335ddd64f66b43efd2620c10b03c112d275833e4414e6376473537`.
+Recovery with this correction needs a separately pinned, unscored adapter;
+the frozen failed source and original receipts remain unchanged. Neither that
+cleanup nor read-only telemetry qualifies the next model comparison.
