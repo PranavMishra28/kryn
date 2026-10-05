@@ -3204,3 +3204,53 @@ failures remain failed. Broader development, fresh/protected validation, sustain
 coding/UI, full-context reasoning, endurance and final production scope remain
 open. No independent grade, causal repairability, benchmark uplift or frontier
 quality is claimed. PR #242 remains draft.
+
+### Two-module failure settled; read-only Git observation control (2026-10-05)
+
+The public two-module slug workflow **strictly failed**. Its native root finished,
+but seven shell calls were outside the declared command and the final action was
+an extra shell call after the successful public check. An edit was also rejected
+because the file needed a current read; a later read and edit completed. Four
+bounded declared checks reported eight errors, one failure, one failure and then
+eight passing tests. That final public result does not override the policy failure
+or establish independent grading or causal repairability.
+
+All 18 completed local requests reconciled exactly to 208,981 prompt and 8,852
+completion tokens, advancing the runtime from five to 23 requests. The original
+controller unloaded the model once. The data-only callback verified both modules,
+the exact 2,697-byte captured patch and unchanged trusted files. The 115 parent,
+108 native and four capture resource observations were complete and normal, with
+no sampled swap growth; 104 power observations showed AC and at least 89-percent
+battery. This is not endurance qualification. Separate settlement review passed
+seven groups and 26 negative projections. All 73 pinned files, both whole detached
+images and three empty owned mount directories were preserved before removing
+only the exact inactive exit-1 job. Settlement SHA256:
+`8c8f56901b887ff0730a647a063d57a66282ac559d0e4f7feeadc8fb6663c64e`.
+Review SHA256:
+`defdf118d4a3fdff3937c34ebc4193b7efac15064326048ef76ebfa94c2f25ca`.
+
+A repository-inspection warning also appeared during the Python workflow. Its
+cause is not established. A fresh **no-model read-only control** now compares
+Apple's Git shim and the direct Command Line Tools binary inside the existing
+native boundary. The trusted probe uses the same four repository-inspection
+queries, isolated Git environment, 1,500-ms timeout and 32,768-byte command limit;
+it additionally captures stderr. Eight raw Git outcomes are retained as
+observations, including nonzero exits. No implementation, model forwarding,
+browser or runtime operation is part of this control. Seven protocol-review
+groups, 48 negative cases and nine separate launcher checks passed. Job
+`dev.kryn.native-git-observation-control-20261005-v1` was bootstrapped once;
+**outcome is unknown at launch**. Runner SHA256:
+`d99833c6df6a539891136f32b02b3e4157748384f7a37ad66a57d639520926c6`.
+Protocol review SHA256:
+`95abe8bfff98775ce46e61e37dcdf11ab8161aaf5480d613adcf75274fe044f5`.
+Launcher review SHA256:
+`1ac0a2616e39e0af0ba8fc2180b983dc0d8eba7613a6f39b896e9792fc4c9fb8`.
+
+Documentation CI `37368185079` passed with all 13 steps inspected once. The older
+queued run `37366560264` ended failed with its sole job cancelled and zero steps;
+that result is preserved without claiming a cause or executed check coverage.
+No product code, version, installation, guard, deadline or scoring changed.
+Previously passed product checks were not replayed. All prior task failures remain
+failed. Broader development, fresh/protected validation, sustained coding/UI,
+full-context reasoning, endurance and final truthful scope remain open. PR #242
+stays draft; this checkpoint is not completion or frontier qualification.
