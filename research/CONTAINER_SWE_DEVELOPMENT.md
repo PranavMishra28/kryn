@@ -2088,3 +2088,79 @@ phases remain unchanged. No task, acceptance function or grader was replayed.
 Outcome is unknown at launch. Code and launch-doc CI will be inspected once at
 the next meaningful terminal. PR #242 remains draft; production scope and broader
 research gates remain open. This launch is not overall completion.
+
+## Relevant-skill delivery settled; native test feedback next
+
+The relevant-skill guidance control passed. Six canned requests completed in
+9.778 seconds, with the corrected guidance exactly once in every Agent system
+request and absent from Browse system requests. The separate terminal review
+verified complete canonical tool catalogs, sampler/body metadata, exact child
+context, native chronology, initial policy inventories and the sole 318-byte
+patch against capture. This proves delivery of the guidance, not improved model
+behavior or full system-prompt provenance.
+
+Settlement passed after a separate 18-check author review and removed only the
+inactive exit-zero job. All 61 retained files remained unchanged, both images
+were retained and detached, all three owned mounts were empty, and the exact
+browser ID/name/port and broker were absent. Runtime 85947 remained unloaded and
+idle at 103 requests, 520655 prompt units and 21219 completion units, with no
+runtime operation. All 13 parent, six native and four capture resource samples
+were normal with zero sampled swap growth; 11 power observations were AC at 90%
+and 94 W. Absolute swap remained nonzero. This is not endurance evidence.
+
+| Relevant-skill V1 terminal artifact | SHA-256 |
+| --- | --- |
+| Passed result | `82130499b88af89b329a29a1fe44c2dd2eed72ad3752ff4f3a57bf14b0d55c27` |
+| Driver | `0b74368cde88c145ef0de75d366011567c6e51a7e38b8f8f2c4703ebbb84c79e` |
+| Barrier | `1e7712c71b2b1116d8d38e7658d87987864e3359dae538e07f491ebd788fa29f` |
+| Settlement review | `73f0bb9877aa83eb5e1954b8567da439fbfbf9049b11ffef6df2b92dd7b9110e` |
+| Settlement | `9ec673740b44611de6112b692bebfde2b3eb0dc23a844e2db3803e642d8bf290` |
+
+CI 37350022379 for code `23815ca` and CI 37350192990 for launch docs `3f8b283`
+both passed; full job/step records were retained once. There is no product-code
+change at this checkpoint. PR #242 remains draft.
+
+The next mechanism changes approach to native test feedback: a fixed canned
+Agent writes a public before fixture, runs an unchanged trusted Python check
+that must exit one with the expected failure, writes the after fixture, runs the
+same check that must exit zero with the expected success, then stops. No skill
+or subagent is required. It retains the existing native boundary, catalogs,
+permissions, browser isolation and three APFS phases; the browser is present but
+unexercised. The artifact callback only compares data and trusted-check bytes;
+it does not execute candidate code. This control cannot demonstrate model repair
+ability or benchmark quality.
+
+The first new preparation mistakenly included `.git` in a file-permission glob,
+removing directory traversal. Its first review stopped before admission. That
+entire V1 draft is retained and retired unrun; a fresh V2 restricts permission
+changes to regular files. V2's first review completed the actual preflight but
+its synthetic barrier fixture omitted the existing `workspace` field. That
+review failure is also retained. The subsequent review restores the actual
+barrier/driver relationship and asserts its schema before exercising acceptance;
+the V2 runner remains unchanged. Neither failure started a native task, browser,
+APFS trial or model request. All prior UI task failures remain strict failures.
+
+The V2 control passed eight groups of author checks, including the complete
+preflight, unchanged dispatcher/boundary/admission/main operations, trusted
+check outputs, synthetic native exports and failure cases, actual capped
+HTTP/SSE dispatch, artifact negatives and main failure preservation. Nine
+launcher checks preceded one bootstrap. Process 19703 was verified by its
+framework executable hash, proc_pidpath and exact arguments. The existing
+supervisor enforces safe admission and all original emergency stops. Runtime
+must remain unloaded and idle at 103/520655/21219 without any runtime operation.
+
+| Native test-feedback control V2 artifact | SHA-256 |
+| --- | --- |
+| V1 retired-unrun record | `fc3b3220979daeabae21f70af93d0fc605c4726adb860104d6095c3e32ebd2c1` |
+| Runner | `1ef48733643dc010d3bfc9ce501b66e8356213cd18baadc67dd90cf8997add43` |
+| Predeclaration | `3e9aecfd0c4c3059f5be9dd089e97ef9986188d8594732ceaeb02273f4c30c86` |
+| Manifest | `7cf41b12da6e77555307aa1e8666e0b8533c85a29320b0e7be1e0fe94e1bb26a` |
+| Passed author review | `41b3a53967e3349c8802d92929286ee67ef713ee8e5a6ca191261c32fbd9951b` |
+| Launcher review | `b57e05c4858af3b8fa110b1dc7d73fbe858bb305d954293bb0535a27017819c7` |
+| Launch | `61be7c57c46f70946ce68ef41ae0e8e7615626f7410e9ee538239c9e4727f08a` |
+| Activation | `24fa01b3547695f2e164c7c47f953ea6be0ac7788198afb69d2bb7922e8f4d1f` |
+
+Outcome is unknown at launch. The next wake will inspect compact current state
+and leave an active or safely waiting worker alone. No original task, grader or
+acceptance function was replayed. All broader research gates and final scope
+remain open; this launch does not complete the overall goal.
