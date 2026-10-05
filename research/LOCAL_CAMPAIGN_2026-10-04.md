@@ -374,3 +374,38 @@ stops immediately and stays latched. This closes an observability gap, not a
 proven runtime fix. The next diagnostic isolates export and resource sampling
 without running another agent or grader; another unchanged full control is
 not justified. Further real development remains gated.
+
+The completed controller's frozen independent audit is failed:
+`904d21f9c882079c0e0db74fa76076915428c3be4e2843f2e12e479bfc7e4eb5`.
+Separate cleanup verification checks both recovered archives and 6,882 inventory
+entries per arm, all original source/receipt pins, no grader launch, and absence
+of each arm's three containers and one network. The inactive controller job was
+removed without changing evidence. Cleanup-only receipt:
+`d2b8bf68d77a3bf68a4c4277898359a8e73bc4278c724b0c4f3fa750c2c2a8a5`.
+
+Diagnostics source `9927229` passes GitHub CI, clean-source package smoke,
+independent review and a 48-commit Gitleaks scan with no findings. Local suites
+passed 220 setup, 189 research (two skips) and 87 Node tests; evaluator Python
+3.11 passed 189 research tests (one skip). The shell logging wrapper failed
+after those suites completed because it assigned zsh's read-only `status`
+variable. That wrapper failure and the successful test logs remain retained;
+the later exact-source CI passed without that wrapper.
+
+The isolated TAR-only diagnostic completed in 10.514 seconds using the frozen
+`9927229` source and the exact recovered native archive. Parent/child guards
+recorded ten normal samples; all 40 telemetry queries succeeded, with the
+slowest taking 0.066 seconds. The extracted member/byte counts match the
+retained archive, the child settled, its disposable capture was removed, and
+all eleven original/failure pins remain unchanged. Result receipt:
+`804b07908b6da74c698f2b8e9a273ba409ed262c46066036f6ed4747a606115b`.
+This did not reproduce the combined stage's missing telemetry and does not
+identify its historical cause. The first diagnostic draft was rejected before
+launch for a shutdown race; its sealed script and review remain retained. The
+corrected draft passed seven mocked shutdown/finalization checks and independent
+review before its single execution. No original arm, grader or auditor reran.
+
+The next diagnostic uses the existing full no-model controller with the new
+query observations and explicit failed-control/phase-isolation provenance.
+It must be separately frozen and independently reviewed before launch. It
+changes observability, not safety or task policy; a failed stage remains
+unscored, and successful telemetry alone cannot qualify its admission.
