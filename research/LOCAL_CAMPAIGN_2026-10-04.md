@@ -879,13 +879,61 @@ bind the complete interval, unchanged source/runtime inputs and 61 pinned files.
 The original runtime was idle and unloaded; only the inactive diagnostic job was
 removed. No settings, inference requests or unrelated apps were changed.
 
-The next separately frozen diagnostic sends one fixed synthetic text request to
-local oMLX with the existing sampler, 8,192 output-token limit and 3,072 thinking
-budget. Its actual input usage must be between 8,192 and 24,576 tokens. It retains
-the existing guards, safe admission, bounded transport and exact owned-runtime
-emergency stop, with no retries. It includes no benchmark or coding task and
-cannot establish task quality, container concurrency, full-context readiness or
-endurance. Loaded-idle success alone does not admit another real comparison.
+Two separately frozen single-request diagnostics subsequently passed. The first
+used only local oMLX; the second kept an isolated, idle OpenCode/KRYN worker
+present. Actual usage was 14,381 prompt / 340 completion tokens in 25.863279
+seconds, and 14,383 / 573 in 30.215682 seconds, respectively. Both reconciled
+request/token counters exactly and unloaded the model. Their 16 and 19 resource
+observations had normal pressure and zero sampled swap growth; their 13 and 16
+power observations were valid and on AC. These were fixed synthetic text
+requests, with no agent session, tool task, benchmark or grade. Process-wide
+physical footprints do not establish model or KV-memory bounds.
+
+The direct-request result
+`93c700bed811db7dd0b5f2fb03dd098275645b52a8c52c88fb7ec14ce7b85737`
+and settlement
+`2b321393c4f2c02b371ff7070fa87427142e9ac30d7c0f7faba9137dd2e08340`
+bind 43 unchanged files. The container-presence result
+`f53d77e8ebac1024ab7036f69c77538db6befdf5b3adcd0a3599e389fe428e78`
+and settlement
+`774ee0f3ffc10c26ae4514e9b24e49a7be09f02a91093277b343394d0239e018`
+bind 100 unchanged files, complete response/usage reconciliation and actual
+owned-container absence. Both inactive jobs were removed. The first
+container-presence settlement precheck used the previous job label and failed
+before removal; that failure was retained, and a separately reviewed correction
+removed only the correct inactive job. No inference was replayed.
+
+The next real local synthetic agent diagnostic **failed**. Its root shell
+created a temporary fixture and delegated to one general child. The child read
+of that fixture outside the project remained unfinished until the unchanged
+900-second CLI timeout. Both owned sessions were interrupted and exported;
+there was no repository patch or test edit. Three local requests reconciled
+exactly with 14,376 prompt tokens (including cache reads) and 601 completion
+tokens. All 421 parent and 419 child resource observations had normal pressure
+and zero sampled swap growth; all 370 and 368 power observations were valid and
+on AC. This is a timeout failure, not evidence of another pressure stop.
+
+After generation, the runtime reported unloaded idle. The wrapper required a
+loaded model at that point, raised an assertion, and stopped its reverified owned
+runtime. Result
+`1345019fa72bae3fc1615bda5c1dfd084a12b72cc514c5b0b95f761e927a4d42`
+remains failed. Separate settlement
+`135a57419c6fbb1f1c85ef9dd5685ce96668fb980aa43139ea7ba325daa1fc5f`
+verified the complete export archive/member set, all guard finals, 1,299
+unchanged files, actual owned-resource absence and the stopped runtime, then
+removed only the inactive job. Settlement does not upgrade readiness.
+
+The frozen general-agent policy asks permission for external directories. The
+retained CLI source handles permission replies for the root session; the failed
+run did not capture the child's pending permission inventory, so the exact
+cause remains unproven. A new no-model diagnostic is prepared to capture that
+inventory using canned tool calls and read-only native APIs. It schedules only
+KRYN, expects a bounded 60-second timeout, and neither replies to permission
+requests nor changes policy. A separately declared cold start restores the same
+owned runtime only after settlement; the probe requires unloaded idle and
+unchanged counters throughout. No failed task, request or grader is replayed.
+Full-context, endurance, agent readiness and real-comparison admission remain
+open.
 
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`

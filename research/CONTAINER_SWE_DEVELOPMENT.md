@@ -327,6 +327,28 @@ the inference counters and reported 8,597,826,742 bytes of model memory. The 87
 resource observations had normal pressure and no sampled swap growth; all 75
 power observations were on AC. Settlement verified unchanged inputs and receipts,
 the original runtime idle and unloaded, and removal of the inactive job. This
-qualifies only the observed idle interval. A separately frozen single synthetic
-text request is the next guarded readiness step; inference load, container
-concurrency, full context and endurance remain unqualified.
+qualifies only the observed idle interval.
+
+Two later fixed synthetic text requests passed, first without a worker and then
+with an idle isolated OpenCode/KRYN worker present. Actual prompt/completion
+usage was 14,381/340 and 14,383/573 tokens, with exact runtime-counter
+reconciliation, normal sampled pressure, zero sampled swap growth and final
+model unload. Their separate settlements preserved 43 and 100 pinned files and
+removed only inactive jobs. Neither request exercised agent tools or a benchmark.
+
+The subsequent real synthetic root/general-child tool diagnostic failed at the
+900-second CLI timeout. The root created its temporary fixture; the child read
+outside the project remained unfinished. Three local requests used 14,376 prompt
+tokens including cache reads and 601 completion tokens. Both sessions were
+interrupted and exported, with an empty repository patch. All 840 parent/child
+resource observations had normal pressure and zero sampled swap growth. The
+wrapper rejected the subsequently unloaded idle state and stopped the owned
+runtime. Separate settlement verified the complete archive, 1,299 unchanged
+files and actual resource absence before removing the inactive job. The failed
+result remains failed.
+
+External-directory approval is a supported hypothesis; the failed run did not
+capture the child's pending permission request. A new canned-response diagnostic
+is prepared to observe that request without model inference, policy changes or
+permission replies. Full context, endurance, agent readiness and admission to a
+new real comparison remain unqualified.
