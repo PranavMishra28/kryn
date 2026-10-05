@@ -3288,7 +3288,7 @@ Documentation CI `37369987295` passed; its full job and 13 steps were inspected
 once. Prior failures remain failed. Broader research and final scope gates remain
 open, and PR #242 stays draft. No version or owner installation change.
 
-### Native Git feedback passed; quantity resource abort and new runtime admission (2026-10-05)
+### Native Git feedback, quantity resource abort and fresh JavaScript workflow (2026-10-05)
 
 Product commit `e9bec02` passed 220 setup, 216 research (two skips) and 88 Node
 checks, native/frozen offline checks, clean-source package smoke (version 1.0.0,
@@ -3348,31 +3348,58 @@ Settlement SHA256:
 Review SHA256:
 `3a3bc9ed086d44ddb165578e4debfeaf807e3d716fe4ada3e74a20854f343360`.
 
-A distinct, inference-free runtime-epoch admission control was launched once.
-It waits durably while the app is stopped, retaining the original 60-second
-cooldown, three-green-observation rule and all host power, pressure and disk
-checks. It may call the original bounded owned-app start once, then must prove a
-new listener identity and at least 60 seconds of unloaded idle with exact zero
-inference counters. The unchanged HostGuard starts after listener verification;
-it does not cover the unavailable-listener startup interval. The old counter
-receipts remain historical. No model load, coding task or browser is part of this
-control, and an unsafe admission keeps waiting without closing unrelated apps.
+The distinct inference-free runtime-epoch admission control **passed**. Five safe
+observations satisfied the original 60-second cooldown before one bounded owned
+app start. The new listener was verified, followed by five unloaded, idle
+observations spanning at least 60 seconds with exact zero inference counters.
+All 32 resource and 29 power samples were complete and normal, with no sampled
+swap growth and AC power at 89-percent battery. The unchanged HostGuard covered
+the period after listener verification; it did not cover the unavailable-listener
+startup interval. No model load, coding task or browser was part of this control.
 
-Five protocol-review groups and nine launcher checks passed. Static comparison
-preserves the prior epoch mechanism apart from the declared source, predecessor
-and former PID. Mocked success, owned failure and concurrent-inference cases
-verify one start, exact-owned emergency stop and no conflicting stop, respectively.
-Job `dev.kryn.native-runtime-epoch-admission-20261005-v2` has an **unknown outcome
-at launch**. Runner SHA256:
-`ed22138e9cfdff6bce5dd0af229eb2e77031f114286020376a1ac2da746f7f5a`.
+Separate settlement review passed six groups and 17 negative projections. It
+verified the actual new runtime identity, all 30 current evidence pins, current
+frozen source and retained predecessor inputs, then removed only the inactive
+exit-0 job. The admitted runtime remained unloaded and idle. Old runtime counters
+remain historical. Settlement SHA256:
+`fb5263beb4dee17b9f9324a8cfb86fade214b2f58f9fa8b7029b8d4f5ada9a5a`.
+Review SHA256:
+`063cf919b7d8450e808379bc10f3a6b2a382d88d4bf9b9dbc0f731c45cf039ca`.
+This verifies startup and idle admission only, without model-quality or endurance
+qualification.
+
+A fresh public JavaScript array-batch workflow was launched once. Only local
+OpenCode/oMLX may implement the two exported functions from throwing stubs. Eight
+public tests and a bounded checker cover chunking and round-robin interleaving.
+The declared workflow requires a failing baseline before edits and a final passing
+checker after the latest edit, with only the declared files and checker command.
+It rejects truncated summaries, repository-inspection warnings, extra commands,
+policy violations and modified trusted files. The artifact callback checks bytes
+and hashes without executing the implementation. Native public tests do not
+provide an independent functional grade.
+
+Seven protocol-review groups and nine launcher checks passed. Review exercised
+30 negative policy/output/context projections, future counter forwarding, exact
+usage/unload behavior, owned failure and concurrent-inference handling. The
+checker was reviewed using fixed synthetic functions without executing candidate
+code or the public tests. Current source and predecessor evidence remain pinned;
+only the newly declared runtime supplies live identity and counters. Historical
+runtime predicates were not rebound to the new epoch.
+
+The original five-minute task deadline, exact before-forward request catalog,
+resource admission, emergency stops and isolated artifact boundary are unchanged.
+Job `dev.kryn.native-batches-readiness-20261005-v1` has an **unknown outcome at
+launch**. Runner SHA256:
+`4dca68863e889d3b8f730fd58aa5200668727e083ad9535605001f32f57d38e3`.
 Protocol review SHA256:
-`9cbd1fc0b3ddd146d2e1f4c53a0447dcfbedfbef970a6036fcc6c676efd7eccd`.
+`3e1ebd2f2eb2204ad8f8c15c5a7e367a25a346d0e946e2ab79d318cfaabe5782`.
 Launcher review SHA256:
-`e9eed0b1de6a6959ea794f6e2869312248e59fd344e87e6679d7c3b6c95b489c`.
+`05907cb15f20b46db0884842437e64a570f9cba99e7930d0e94d6d4af13931b4`.
 
-Documentation CI `37373000667` passed; its full job and 13 steps were inspected
-and retained once. Product checks were not replayed. No product code, version or
-owner installation changed. Broader development, fresh protected validation,
-sustained coding/UI, full-context reasoning, endurance and truthful final scope
-remain open. The single PR #242 remains draft. This checkpoint is not completion,
-a model-quality result or production qualification.
+Documentation CI `37373000667` remains passed with its full job retained. CI
+`37374259879` was observed queued once; its jobs and steps have not been inspected.
+Product checks were not replayed. No product code, version or owner installation
+changed. Broader development, fresh protected validation, sustained coding/UI,
+full-context reasoning, endurance and truthful final scope remain open. The
+single PR #242 remains draft. This checkpoint is not completion or production
+qualification.
