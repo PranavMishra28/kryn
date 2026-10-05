@@ -1987,3 +1987,45 @@ CI 37337972945 at `30a5d10` passed, with full job/step JSON retained. Earlier
 failed results remain failed. Broader development, valid fresh/protected
 validation, sustained coding/UI, full-context reasoning, long-duration endurance
 and final truthful production scope remain open. PR #242 remains draft.
+
+
+### Fresh handoff control after the product clarification
+
+Code `4a35ab0` passed 220 setup, 214 research (two skips), 87 Node and
+native/frozen offline checks. Clean-source package smoke, documentation/link/
+diff checks and one-commit secret scanning passed; validation is
+`52acc038379ae5b6d005622001566f887ef8ce0fcb45bb62f25298b05fadd672`.
+The new detached Git source verifies all 414 tracked blobs, keeps the 98-file
+research runtime map identical, and limits runtime changes to three plugin
+string-bearing lines. Exact reversal of those lines reproduces the old plugin;
+only its existing regression and two research documents also differ. Source
+proof: `a597c20b156ba8de06b9011a61b6017387174c9bae01a7b1e2d528c439d87917`.
+
+A fresh no-model handoff V1 control was bootstrapped once with verified
+framework-app process PID 58363. It retains six canned write/delegate/navigate/
+snapshot calls, the same 120-second CLI, browser image and isolation, three
+512 MiB APFS phases, linked resource guards and battery-capable admission.
+The additional predicate compares the actual native child user prompt with the
+complete parent criteria enclosed by the new inspection-only framing. Altered
+criteria or framing, extra input and the old ambiguous child prompt are rejected.
+Twenty-two author checks and nine launcher checks passed before activation.
+
+The original runtime must remain unloaded and idle at 64/335,882/11,658;
+this runner cannot start, load, unload, stop or restart it. No actual model
+request or benchmark is scheduled. Outcome is unknown at launch. Even a pass
+would establish only delivery of the clarified native handoff, not improved
+model compliance or general UI quality. The failed counter run remains failed.
+
+| Prospective handoff V1 artifact | SHA-256 |
+| --- | --- |
+| Runner | `945c1a18d1a87a958b9e03bff467a8c247798bc3011078397c3d576092454ba3` |
+| Predeclaration | `32da558abaca3ce637dad0830e0298ca7fdfd44aaf8ada41a9ab6dd7d4a540ba` |
+| Manifest | `1b5e065b3488247200be06bf0b044fa6a836c4ba184e560f9e69b02c2e916205` |
+| Author review | `56e1b0ee8f10fa97a5967840f91dbb4e89718fa2977a8245d35bac81e8c7cc65` |
+| Launcher review | `5b0202b59b6acdd3a117a04351df7055cbd504a46978580df190393fcd1e7ecc` |
+| Launch | `fc691c2c13607684b1b5a112cdfa36d8801986e043947e34a29c2cdbd0f7bd4d` |
+| Activation | `6edbcc3a4fa2b61b065b2d30c0f751212ecf46fcdd597b2cceef2a46ebbb5269` |
+
+The heartbeat will inspect the next meaningful terminal checkpoint and continue
+eligible engineering. Broader research and production gates remain open; this
+launch is not completion, and PR #242 remains draft.
