@@ -650,3 +650,61 @@ battery operation under load. Those gates remain prerequisites to separate real
 preregistrations for the already exposed Sphinx and pytest development cases.
 The first metadata guard/writer failure, the retired v2 inputs and the v3 mock
 fixture precheck failure remain retained; no started screen was repeated.
+
+Sphinx subsequently passed trusted worker preparation. The sanitized repository
+has one commit and the exact original task-base tree, with a complete baseline
+file-hash inventory. The first preparation failed because ordinary staging omitted
+two ignored tracked files; the separate v2 preparation used forced staging and
+proved tree equality. Its result is
+`63372f25582d9fe7545a6a8e617e81bfc79ab59c4fa57a6d26f0a6fbb390e135`.
+The worker image is
+`sha256:1b5d9f87215ab9971ef379f0777197fa32412ba0f3e002952c47b2d2e0d0cc88`.
+
+The Sphinx native-then-KRYN canned controls completed once: each direct CLI exited
+zero after six canned requests, including a general child session. Both separate
+offline official grades returned the expected negative result with all one
+fail-to-pass and twelve pass-to-pass checks covered. The separate deterministic
+evidence auditor passed, receipt
+`3c51a014fd78072ba7e25ab8a943b9b3370a0683e440356b5e79858b5f97883c`.
+Eight resource logs contained 96 valid normal-pressure samples and 83 power
+observations, all on AC at 90% battery. The inactive controller job was removed
+after actual owned-resource absence and 260 unchanged JSON/JSONL receipts were
+verified, cleanup
+`422d2cdbf8e2362b0f8dbb23dfce7990392ded01104f790fb8522e0443c75a10`.
+
+A separate Sphinx reference positive control then passed the unchanged official
+grader, with complete required test coverage, seven normal-pressure resource
+samples, zero sampled swap growth and owned-resource settlement. The reference
+patch was handled programmatically and never displayed to Codex or given to a
+candidate worker. Its one-shot evidence audit is
+`47c95b4a44ceca7b3ac806b0ca9e1c8893b170b654c696ae4a3fdced1328743d`;
+inactive-job cleanup preserved all 25 audited JSON/JSONL receipts,
+`c133575b9791010e4ae1b7538cdf12f202e895312ae6041e80cb127ebbb23c48`.
+The root's static preparation review is distinct from an independent author
+review; the deterministic evidence auditor checks the recorded execution.
+These controls establish repository-specific readiness, not a model-quality or
+battery-at-load result.
+
+Pytest preparation remains unsuccessful. Its v2 attempt removed generated runtime
+version metadata during source cleanup and the package import failed. The separate
+v3 attempt invoked offline editable packaging before removing history, but failed
+on an assumed `src/_pytest/_version.py` path during its metadata hash check.
+Neither attempt created a worker image or trusted baseline, ran a model, or ran
+a grader. Their failed results remain unchanged, with actual resource absence
+verified separately. The v3 result and settlement are respectively
+`bc87ad8c7c71752a56cedf6416c49342438f1d079856ab827108ed92642d77d4` and
+`b3928bae2a2f46473704c6ca1949d04b63e8b4e5952f39caa4fd60c6ff669545`.
+After those two failures, another build requires a different approach based on
+measured package-layout metadata; neither failed build will be replayed.
+
+One real Sphinx native-then-KRYN development pair is now prepared and separately
+preregistered, manifest
+`788a7a40ae104f11a9e685a102ba4647789bd37fa7d82173254e674382764b65`,
+predeclaration
+`3d2c6860e9a1c264124d1e42d090df0698b40de85e78fd1fa82be2ccc2c5ef2a`.
+It retains the current frozen source, full model and wire controls, 900-second
+arm and 360-second request budgets, and explicit battery-capable policy.
+The terminal evidence auditor is sealed before launch and must run only once
+after product adjudication. Preparation is not an execution or accepted outcome.
+This previously exposed public task remains development-only; no protected or
+fresh-validation claim, pooling with macOS, or release qualification follows.
