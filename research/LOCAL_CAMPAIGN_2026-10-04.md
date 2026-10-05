@@ -3288,7 +3288,7 @@ Documentation CI `37369987295` passed; its full job and 13 steps were inspected
 once. Prior failures remain failed. Broader research and final scope gates remain
 open, and PR #242 stays draft. No version or owner installation change.
 
-### Native Git feedback, quantity resource abort and fresh JavaScript workflow (2026-10-05)
+### Native Git feedback and repeated host-memory aborts (2026-10-05)
 
 Product commit `e9bec02` passed 220 setup, 216 research (two skips) and 88 Node
 checks, native/frozen offline checks, clean-source package smoke (version 1.0.0,
@@ -3368,38 +3368,58 @@ Review SHA256:
 This verifies startup and idle admission only, without model-quality or endurance
 qualification.
 
-A fresh public JavaScript array-batch workflow was launched once. Only local
-OpenCode/oMLX may implement the two exported functions from throwing stubs. Eight
-public tests and a bounded checker cover chunking and round-robin interleaving.
-The declared workflow requires a failing baseline before edits and a final passing
-checker after the latest edit, with only the declared files and checker command.
-It rejects truncated summaries, repository-inspection warnings, extra commands,
-policy violations and modified trusted files. The artifact callback checks bytes
-and hashes without executing the implementation. Native public tests do not
-provide an independent functional grade.
+The fresh JavaScript array-batch workflow **strictly failed on host memory
+pressure**. Its one relay attempt produced no completed native model generation,
+tool, test or implementation write. The driver stopped after 14.447 seconds with
+CLI 130 and `resource_guard`/`host_memory_pressure`; the original controller then
+stopped the exact owned runtime. Three retained loaded-idle observations before
+the stop showed zero inference counters. The interrupted attempt has no completed
+usage receipt, and those historical zeros are not current counters after shutdown.
 
-Seven protocol-review groups and nine launcher checks passed. Review exercised
-30 negative policy/output/context projections, future counter forwarding, exact
-usage/unload behavior, owned failure and concurrent-inference handling. The
-checker was reviewed using fixed synthetic functions without executing candidate
-code or the public tests. Current source and predecessor evidence remain pinned;
-only the newly declared runtime supplies live identity and counters. Historical
-runtime predicates were not rebound to the new epoch.
+All eleven parent and eight native resource samples were complete. Both recorded
+sustained warning pressure and the original guard stops, without sampled swap
+growth from the nonzero baseline. Nine power samples showed AC, 88-percent battery
+and final coverage. Only the candidate phase ran; its whole image is retained and
+detached, with one empty mount. Capture and the artifact callback were not reached.
+The cause of the repeated occupied-host pressure is not established.
 
-The original five-minute task deadline, exact before-forward request catalog,
-resource admission, emergency stops and isolated artifact boundary are unchanged.
-Job `dev.kryn.native-batches-readiness-20261005-v1` has an **unknown outcome at
+Separate settlement review passed seven groups and 22 negative projections.
+It preserved all 54 current evidence pins, verified the stopped app and absence
+of the worker, runtime, relay and broker, then removed only the inactive exit-1
+job. Current source/history verification covered 45 unique declared/epoch pins,
+all 55 quantity-failure pins and the original 88 historical inputs. One review
+label says 48 for the 18-plus-30 input maps before their three overlapping paths;
+the actual checked union and receipt correctly report 45. No predicate or result
+was changed and no check was replayed. Settlement SHA256:
+`7ab98b576d6eb96741c1439dbb3f15c61f547b6cb4ed4049838329915900e02f`.
+Review SHA256:
+`fa286855aaab9177327e7d39bc3a8f6cb2850fe6c22f7ebe8525bf77a18fbd52`.
+
+After two consecutive pressure aborts before a completed response, a distinct
+read-only host-memory observer was launched once with the runtime left stopped.
+It collects 21 bounded snapshots over at least five minutes: raw VM counters,
+physical memory, pressure, swap and the original host/power admission signals.
+It makes no model or runtime operation and sets no new resource threshold.
+Free, speculative, inactive, compressed and other counters remain separate
+observations; they are not estimates of available memory or guarantees that a
+model load will pass. An unexpected runtime or telemetry failure stops the
+observer without touching any runtime. No unrelated app is closed.
+
+Seven protocol-review groups and nine launcher checks passed, covering exact
+read-only commands, deadlines, parsing failures, power boundaries, runtime changes,
+timing and intercepted main success/failure. No real observation loop or model
+was run during review. Job
+`dev.kryn.stopped-host-memory-observation-20261005-v1` has an **unknown outcome at
 launch**. Runner SHA256:
-`4dca68863e889d3b8f730fd58aa5200668727e083ad9535605001f32f57d38e3`.
+`c6942a105b82e88942287d35756bb21815f3b2e90ed98df4be5c6a7d759bdbd5`.
 Protocol review SHA256:
-`3e1ebd2f2eb2204ad8f8c15c5a7e367a25a346d0e946e2ab79d318cfaabe5782`.
+`190adf970456bffebf5fcd5c455182ed9efe336e498d1e9d951c317b2965eb69`.
 Launcher review SHA256:
-`05907cb15f20b46db0884842437e64a570f9cba99e7930d0e94d6d4af13931b4`.
+`d97ac71c0df3bbf2fb8f2984cfa40a8a221f1fc6fc2fce6a1dc5cd3e0c0468b5`.
 
-Documentation CI `37373000667` remains passed with its full job retained. CI
-`37374259879` was observed queued once; its jobs and steps have not been inspected.
-Product checks were not replayed. No product code, version or owner installation
-changed. Broader development, fresh protected validation, sustained coding/UI,
-full-context reasoning, endurance and truthful final scope remain open. The
-single PR #242 remains draft. This checkpoint is not completion or production
-qualification.
+Documentation CI `37374259879` and `37375371963` passed; full jobs and all 13 steps
+each were inspected and retained once. Product checks were not replayed. Product
+code, version, installation and resource stops are unchanged. Broader development,
+fresh protected validation, sustained coding/UI, full-context reasoning, endurance
+and truthful final scope remain open. PR #242 remains draft; this checkpoint is
+not completion or production qualification.
