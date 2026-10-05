@@ -2842,3 +2842,35 @@ workflow; fresh validation of the changed frozen source remains required.
 Documentation CI `37369987295` passed; its full job and 13 steps were inspected
 once. Prior failures remain failed. Broader research and final scope gates remain
 open, and PR #242 stays draft. No version or owner installation change.
+
+### Fresh native Git and syntax feedback control (2026-10-05)
+
+Product commit `e9bec02` passed 220 setup checks, 216 research checks (two
+skips), 88 Node checks, native self-checks, frozen offline checks and a clean-source
+isolated package smoke test (version 1.0.0, 23 payload files). Documentation,
+local-link, diff and secret checks passed. The shim-unavailable regression failed
+before the fix and passed afterward. Validation receipt SHA256:
+`d847aeef6a201c229b3ab8aec696e5ff1dfb1ad23d507e8af174f17194013e7f`.
+
+A separate authentic frozen clone preserves this product revision, all 414 tracked
+files, 98 unchanged runtime files and five plugin assets. Only the plugin server
+asset differs from the preceding frozen source. Source proof SHA256:
+`1d9e9cdf5e20f5b0a363de79b5f556444ccb9b7ab8d545850d9cb78f9c8fb9c7`.
+
+A fresh no-model native control was launched once against that source. Three
+canned tools change fixed JavaScript bytes to a syntax error, restore fixed valid
+bytes and read the result. The declared gate requires bounded, nontruncated native
+syntax feedback on the broken file, no syntax failure after repair, no incomplete
+repository-inspection warning and a sole captured patch matching the fixed final
+file. Four canned responses must leave runtime counters unchanged. No model
+forwarding, candidate implementation, JavaScript execution, benchmark or independent
+grade is involved; the product's JavaScript check parses syntax only.
+
+Seven protocol-review groups with 39 negative projections and nine launcher checks
+passed. Protocol review SHA256:
+`065059ecbab957ec66236b7f10d323884b5a597eaeaa763aea915aa33a5517e4`.
+Launcher review SHA256:
+`b0e1f564f7c231ef16011dbb27eb3d911b181f8d860dde23a2da5ed58eec5a29`.
+Outcome remains unknown at launch. Original resource stops and isolated native
+boundaries remain in place; prior failed observations remain failed. Broader gates
+and final production scope remain open, and PR #242 remains draft.
