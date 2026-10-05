@@ -159,7 +159,7 @@ checks the rejection and unchanged inventory.
 An independent audit verifies all 88 frozen source hashes, the raw event
 ordering, restored values, exact patches, both arms' 12 normal-pressure samples,
 unchanged swap, and actual owned-resource absence. Its receipt is
-`cf02ca69af4cbfff2d99f304b9019356746b081f5b20650f354531353e138343`.
+`377db2002c366371332b73639fba5875002e8ea78dc7e0a88f949bcf3bb0ba9c`.
 
 The first policy probe failed and is retained: the pinned CLI does not enable
 durable event persistence, so its historical log returned only a sync marker;
