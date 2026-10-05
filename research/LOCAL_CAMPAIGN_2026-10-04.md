@@ -1703,3 +1703,37 @@ The first UI-control review's 15-second Docker inventory timeout is retained.
 A separate local API health observation found no owned worker containers; the
 unchanged runner subsequently passed a separate 13-check author review and a
 nine-check launcher review. It was launched once with no outcome claimed.
+
+## Native UI source preflight failure and new control
+
+The first no-model UI control failed at the native driver's Git HEAD lookup:
+the frozen source export was not a Git checkout. The candidate APFS volume was
+detached; relay, browser, native-session, capture and grading startup had not
+been reached. A subsequent absent-driver exception and the wrapper/helper
+receipt-path mismatch are also preserved. The original result remains failed
+(`24b1710aacfb93f6213d8f9c03ce9fe1378cde0cd5515b76ac2120c944980708`).
+Separate settlement
+`38bc9fc4ca6307b1432c6a22fc84945186888511dd69e07a794c18291bf90dc9`
+verified 26 unchanged files, retained the detached candidate image, checked
+actual mount absence and unchanged unloaded runtime counters, then removed only
+the inactive job. Four normal resources and three AC/90% power samples passed
+final checks. Twelve author checks preceded separate settlement execution.
+
+Source preparation now proves an authentic detached `59ce852` commit, all 414
+tracked blobs, the original 98 runtime hashes and five matching plugin assets.
+The first whole-export assertion failure is retained: exactly two documentation
+files differed. A further preparation caught mixed module imports before any
+campaign or fixture was created; that runner is retired unrun. Neither failure
+is upgraded or replayed. Full identities are in the container protocol above.
+
+Fresh V3 uses the verified source consistently and one declared receipt for
+boundary execution, export reads and returned results. Trial failures are
+reported before dereferencing an absent driver. Fourteen author checks covered
+the actual source Git lookup and a complete mocked trial, alongside unchanged
+guards and acceptance predicates. Review
+`8113f19fe02890c8bfa66b2e4a62e605ef224d9ad0dc881e9adfcbdad4553867`
+passed before a separate nine-check launcher review and one bootstrap. This
+prospective control retains six canned calls, zero model inference, one KRYN
+arm, the original 120-second CLI and APFS/browser boundaries. No outcome is
+claimed at launch; no broad UI, endurance, benchmark or production claim follows.
+CI **37324458958** passed at `fabcf06`; older failed CI remains failed.

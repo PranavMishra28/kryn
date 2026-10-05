@@ -1027,3 +1027,76 @@ The control is now launched; no outcome is claimed at launch.
 | Predeclaration | `5a1569b49fde99d3855bd98530c8d51941c5669411494a86b0ad901c709498d8` |
 | Separate author review | `e6b1259e5341f18d1afcd32dd59aaa18a91d00723aad957a5be69235a2b9fce3` |
 | Launcher review | `dc7d3cb3caf6f6be93fd2f72ee6c27789c2fb2a3bbb166e0afda42439ea1ba08` |
+
+## Native UI source failure settled; corrected control launched
+
+The first native Agent/Browse boundary control failed before relay, browser or
+native-session construction. `run_external_patch.run` reads the source Git HEAD
+while constructing its report; the frozen source export had no Git metadata.
+The barrier retained that `rev-parse HEAD` failure and detached the candidate
+volume. No read-only capture or synthetic grading phase started. The wrapper
+then attempted to read an absent driver, retaining a second `FileNotFoundError`.
+Its returned receipt also named the canned helper's unused random directory,
+while the boundary wrapper had selected a different directory. All three facts
+remain recorded; the original control is failed and will not be replayed.
+
+Original result SHA-256 is
+`24b1710aacfb93f6213d8f9c03ce9fe1378cde0cd5515b76ac2120c944980708`;
+trial result is
+`bfa78d09a5022555a2518ad6d9e5fdceba32cdfc49c693e8875a93fa2d68bbd9`;
+barrier is
+`d1f53a680c847e3274b033a4b350cc7dbe18213dc4a6dcd24b9fb739055923c7`.
+Separate settlement
+`38bc9fc4ca6307b1432c6a22fc84945186888511dd69e07a794c18291bf90dc9`
+passed after 12 author checks and separate execution. It verified all 26 retained
+files unchanged, preserved the detached candidate image, checked actual image
+and mount absence, empty native evidence and the original error's source
+ordering, then removed only the inactive exit-1 job. Four normal resource and
+three valid AC/90% power observations passed their final checks. Runtime 85947
+remained unloaded and idle at 36 requests, 209,444 prompt and 3,317 completion
+tokens. Settlement did not upgrade the failed diagnostic.
+
+A separate source preparation retained an authentic detached `59ce852` checkout.
+Its first whole-export equality assertion failed: exactly two research documents
+differed from the earlier export. Failure
+`da4ea1bbc25b2442c2cf1fe8563e8c1ebc0de79efdf48990370cf3bdccbf514f`
+is preserved. A distinct source identity verification
+`b866ff1465458cd9b8e17a2ea7053972b6273401d564267d111f2b6c670778ba`
+proved all 414 tracked blobs against the actual Git commit and all 98 runtime
+files against the original frozen map; the five plugin assets also match.
+Only the two documentation differences are recorded as exceptions to complete
+export equality. The original export and failed preparation were not rewritten.
+
+The next preparation caught mixed old/new module imports before creating any
+campaign, fixture, predeclaration or attempt. Its runner is retired unrun;
+failure SHA-256 is
+`75d39c1705dbac5517c34531d69256095a067e21f4f732fde6b030c216e20a6c`.
+The fresh V3 control consistently imports the verified Git source and uses one
+preregistered receipt throughout the canned trial and its export lookup. Its
+wrapper preserves a trial error before reading a driver. The copied canned
+trial's AST differs only in that receipt and explicit wrapper/source arguments;
+the native engine, canned sequence, barrier, renderer and acceptance remain
+unchanged. This is a prospective new fixture, not a replay or acceptance change.
+
+V3 runner SHA-256 is
+`689c7ef2cf42ef8fbacb587001d2b43bd8c0f7168ef2f3396137494c645a90fd`;
+predeclaration is
+`e40afe3d112b385e517beb6e2898b50e611e51a4093e32515aa3f47f3ebc4006`;
+manifest is
+`fa298690feeeb4015e81456277fc38cc732b4f43e55e55aef8a2e3f30af611a9`.
+Fourteen author checks include the real native source-provenance lookup stopped
+before relay creation, a complete trial mock that reads exports from the same
+receipt, failure reporting, guard latching and rejection cases. Review
+`8113f19fe02890c8bfa66b2e4a62e605ef224d9ad0dc881e9adfcbdad4553867`
+passed before a separate nine-check launcher review and one launchd bootstrap.
+Launch receipt
+`d12f71a5da483c11397acd9364f3eafc93214b3a41fdac838ec81757c53785ef`
+records the initially verified PID 10252. No outcome is claimed at launch.
+
+One KRYN arm, six canned calls, zero real model requests, the original 120-second
+CLI bound, exact browser image, APFS barrier and linked parent/child guards are
+still required. There is no model load, unload, restart or inference operation
+in this control. It qualifies neither UI task quality nor production readiness.
+CI **37324458958** passed at `fabcf06`; observation SHA-256 is
+`68bd0e43c9a9734ad5c695b09031b0fcae4b2de42c19db6069db576bc08b23fc`.
+Earlier failed CI and controls remain failed without reruns.
