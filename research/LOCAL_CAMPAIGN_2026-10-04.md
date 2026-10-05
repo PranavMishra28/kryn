@@ -815,6 +815,52 @@ diagnostic are frozen separately. The first read-only prelaunch check timed out
 querying Docker before any diagnostic attempt; its failure is retained. No new
 control or quality admission follows from these code checks.
 
+The isolated permission diagnostic then passed and was settled. It reproduced
+foreign-owned mode `0400` as unreadable by UID 10001, and measured the identical
+mode `0444` copy as readable, nonwritable and importable, with a nonwritable
+parent. Five normal resource samples and four power observations passed; all
+source/input pins, 63 evidence files and actual owned-resource absence were
+verified before removing the inactive job. Result and settlement hashes are
+`bed9dbf00d634bf60fbd2c503189258a874e5bb8c400d63efb8423fa6c408174` and
+`4d1ffb25b3d2bc434e808ebfd93f495a28e61b7536dc7c76163f08835666e342`.
+This was a permission diagnostic, not worker or quality admission.
+
+An explicit source/image compatibility check bound the new 98-file source to the
+unchanged prepared image and all 1,007 baseline files. The only source changes
+were the shared probe installer, its two callers and its regression; guards,
+wire, policy bytes, export and grading stayed unchanged. Compatibility receipt
+`3c98bbcbebf312063523ebc3dc7727ec03e659bcc9aa2f234d16fce403b6f24f`
+allowed a new separately frozen pytest canned protocol, preserving failed v2.
+
+The corrected-source canned controls v3 passed KRYN then native: each completed
+the direct CLI and root/general-child sessions with six fixed synthetic calls,
+an identical two-path canned patch, and the expected negative official grade.
+Both grades covered the required two fail-to-pass and 86 pass-to-pass tests.
+The preregistered auditor ran once and passed,
+`88d6fa96d7165f4009cdc2d9664c8febbbe951989097a523e849bd10665b4f93`.
+Eight parent/child guard logs covered 94 normal resource samples and 77 power
+observations, all on AC, with no sampled swap growth. Settlement
+`23ee1ddb469d958e011af08d53cd1d6693d0bc1e1d65871d791dda101acc5158`
+verified all 256 evidence receipts unchanged and actual IDs, names and labels
+absent for all four owners before removing only the inactive v3 controller.
+No model ran and this is not a quality score or battery-at-load qualification.
+
+A separate pytest reference positive control is now prepared and preregistered
+on the same corrected source and prepared image. The official reference patch
+was copied privately without displaying it or supplying it to a candidate.
+Manifest and predeclaration hashes are
+`dbf10c0c59bcfb827e7e4b3c324b2fcce4f7a6ed7b197fbd43c3d6b76e28388f` and
+`002a543de3d50c9a51ea3a112b9212a1471253ebb78c8fe1cb44245d76a5ae4e`.
+Root static review
+`2aa4fe8f45f1bb2abf03fa8e3eb37a2ad300495e4b5b3dea1c5552e3a87d7062`
+checked exact source/input pins, unchanged auditor predicates and the existing
+admission loop; it is not an independent-author review. The one-shot native job
+waits for 60 seconds and three green observations before invoking the unchanged
+guarded official grader. Its result remains pending. Positive coverage and
+resource settlement are required before repository grader readiness is complete;
+loaded-model memory readiness and separate preregistration remain required for
+any real comparison.
+
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`
 compared the retained pressure logs with current host/runtime metadata. Both affected arms recorded warning

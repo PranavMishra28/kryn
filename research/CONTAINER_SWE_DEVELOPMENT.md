@@ -299,6 +299,22 @@ owned resources were absent, and the inactive controller job was removed.
 
 Admission and generation now share one installer that stages identical probe
 bytes with read-only access for all users before copying into the worker. The
-sealed host source stays unchanged. A regression covers an owner-only source;
-separate container verification is required before any new control protocol.
-The failed controls remain failed and cannot supply negative-grader admission.
+sealed host source stays unchanged. An isolated container diagnostic reproduced
+the original unreadable copy and verified identical readable, nonwritable probe
+bytes and a protected parent under the actual nonroot user. Its resources and
+cleanup passed. The original failed controls remain failed.
+
+An explicit source/image compatibility check then permitted new corrected-source
+pytest canned controls. Both KRYN and native completed the CLI and root/child
+sessions with six synthetic calls and the expected negative official grade,
+covering two fail-to-pass and 86 pass-to-pass tests. The preregistered audit passed
+all eight guard logs, including final samples; 94 resource observations were
+normal, and all 77 power observations were on AC. The 256 evidence receipts
+remained unchanged through verified ownership settlement and inactive-job removal.
+These controls establish pipeline validity, with no model-quality score.
+
+A separately preregistered positive reference control is pending under the same
+source and image. Its one-shot native runner uses the existing cooldown, healthy
+idle-runtime admission and guarded official grader. The reference patch remains
+private. Positive coverage and resource settlement, followed by loaded-model
+memory readiness, remain necessary before another real comparison.
