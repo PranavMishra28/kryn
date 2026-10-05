@@ -54,8 +54,11 @@ class FakeDocker:
 
 class Guard:
     unsafe = False
+    final_unsafe = False
+    observed_policy = None
 
-    def __init__(self, directory):
+    def __init__(self, directory, power_policy="ac-only"):
+        type(self).observed_policy = power_policy
         self.reason = None
         self.memory = Mock()
         self.memory.cancel.is_set.return_value = False
@@ -66,10 +69,12 @@ class Guard:
         return self
 
     def check(self):
-        pass
+        if self.reason:
+            raise RuntimeError(self.reason)
 
     def __exit__(self, *_):
-        pass
+        if self.final_unsafe:
+            self.reason = "battery_floor"
 
 
 class RecoveryTests(unittest.TestCase):
@@ -96,6 +101,7 @@ class RecoveryTests(unittest.TestCase):
                          "Config": {"Labels": {LABEL: self.owner}, "Image": SIDECAR_IMAGE}, "State": {"Running": True, "Pid": 13}}},
             "network": {self.net: {"Id": self.net, "Name": self.owner, "Labels": {LABEL: self.owner}, "Internal": True}}}
         FakeDocker.mutations, FakeDocker.fail_close, Guard.unsafe = [], False, False
+        Guard.final_unsafe = False
         for name, value in (("DockerWorker", FakeDocker), ("HostGuard", Guard), ("frozen", Mock(return_value=self.manifest)),
                             ("export_source", self.export_source), ("validate_worker", self.validate)):
             managed = patch.object(recovery, name, value)
@@ -119,6 +125,20 @@ class RecoveryTests(unittest.TestCase):
 
     def assert_original(self):
         self.assertEqual(self.original, {name: (self.arm / name).read_bytes() for name in self.original})
+
+    def test_final_battery_failure_keeps_export_unsealed_and_worker_stopped(self):
+        self.manifest['power_policy'] = 'battery-capable'
+        Guard.final_unsafe = True
+        receipt = recovery.recover(self.root, 'native')
+        self.assertTrue(receipt['waiting'] and receipt['unscored'])
+        self.assertEqual(receipt['reason'], 'battery_floor')
+        self.assertEqual(Guard.observed_policy, 'battery-capable')
+        self.assertFalse((self.arm / 'recovery/export.json').exists())
+        self.assertFalse(FakeDocker.objects['container'][self.worker]['State']['Running'])
+        self.assert_original()
+        Guard.final_unsafe = False
+        self.assertTrue(recovery.recover(self.root, 'native')['recovery_complete'])
+        self.assertEqual(sum(action == 'export' for action, _ in FakeDocker.mutations), 1)
 
     def test_guard_wait_stops_routes_and_worker_then_resumes_safe_export(self):
         Guard.unsafe = True

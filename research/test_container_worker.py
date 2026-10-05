@@ -9,7 +9,7 @@ import unittest
 import urllib.request
 from unittest.mock import Mock, patch
 
-from research.container_worker import DockerWorker, pinned_image, validate_worker, LABEL
+from research.container_worker import DockerWorker, HostGuard, pinned_image, validate_worker, LABEL
 from research.container_admission import environment, tool_acceptance, source_inputs
 from research.container_config import worker_environment
 from research.local_only import check_environment
@@ -19,6 +19,96 @@ from research.container_grader import frozen, require_owned, worker_settled, req
 
 
 class ContainerControlsTests(unittest.TestCase):
+    def test_host_guard_records_explicit_battery_admission_and_final_sample(self):
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaises(ValueError):
+                HostGuard(root, power_policy=[])
+            memory = Mock(cancel=threading.Event(), guard=Mock(reason=None))
+            battery = {"ac": False, "battery_percent": 90, "adapter_watts": None}
+            with patch("research.container_worker.NativeResourceGuard", return_value=memory), patch(
+                    "research.container_worker.power", return_value=battery), patch(
+                    "research.container_worker.memory_pressure", return_value=1), patch(
+                    "research.container_worker.shutil.disk_usage", return_value=Mock(free=30 * 1024**3)), patch(
+                    "research.container_worker.subprocess.Popen", return_value=Mock()):
+                guard = HostGuard(root, power_policy="battery-capable")
+                with patch.object(guard, "_watch"):
+                    with guard:
+                        guard.check()
+                    guard.check()
+            rows = [json.loads(line) for line in (Path(root) / "power.jsonl").read_text().splitlines()]
+            self.assertEqual([row["starting"] for row in rows], [True, False])
+            self.assertEqual([row["final"] for row in rows], [False, True])
+            self.assertTrue(all(row["power_policy"] == "battery-capable" and row["ac"] is False
+                                and row["battery_percent"] == 90 and row["adapter_watts"] is None
+                                and row["reason"] is None and type(row["unix"]) in (int, float)
+                                for row in rows))
+            self.assertLess((Path(root) / "power.jsonl").stat().st_size, 512 * 1024)
+
+    def test_host_guard_latches_final_battery_floor_without_raw_error_output(self):
+        with tempfile.TemporaryDirectory() as root:
+            memory = Mock(cancel=threading.Event(), guard=Mock(reason=None))
+            battery = {"ac": False, "battery_percent": 90, "adapter_watts": None}
+            with patch("research.container_worker.NativeResourceGuard", return_value=memory), patch(
+                    "research.container_worker.power", side_effect=[battery, {**battery, "battery_percent": 25}]), patch(
+                    "research.container_worker.memory_pressure", return_value=1), patch(
+                    "research.container_worker.shutil.disk_usage", return_value=Mock(free=30 * 1024**3)), patch(
+                    "research.container_worker.subprocess.Popen", return_value=Mock()):
+                guard = HostGuard(root, power_policy="battery-capable")
+                with patch.object(guard, "_watch"):
+                    with guard:
+                        pass
+                    with self.assertRaisesRegex(RuntimeError, "battery_stop_floor"):
+                        guard.check()
+            rows = [json.loads(line) for line in (Path(root) / "power.jsonl").read_text().splitlines()]
+            self.assertEqual(rows[-1]["reason"], "battery_stop_floor")
+            self.assertFalse(rows[-1]["starting"])
+            self.assertTrue(rows[-1]["final"])
+
+    def test_host_guard_final_power_sample_survives_memory_close_failure(self):
+        with tempfile.TemporaryDirectory() as root:
+            memory = Mock(cancel=threading.Event(), guard=Mock(reason=None))
+            memory.close.side_effect = RuntimeError("memory_close_failure")
+            battery = {"ac": False, "battery_percent": 90, "adapter_watts": None}
+            with patch("research.container_worker.NativeResourceGuard", return_value=memory), patch(
+                    "research.container_worker.power", return_value=battery), patch(
+                    "research.container_worker.memory_pressure", return_value=1), patch(
+                    "research.container_worker.shutil.disk_usage", return_value=Mock(free=30 * 1024**3)), patch(
+                    "research.container_worker.subprocess.Popen", return_value=Mock()) as awake:
+                guard = HostGuard(root, power_policy="battery-capable")
+                with patch.object(guard, "_watch"):
+                    with self.assertRaisesRegex(RuntimeError, "memory_close_failure"):
+                        with guard:
+                            pass
+            rows = [json.loads(line) for line in (Path(root) / "power.jsonl").read_text().splitlines()]
+            self.assertEqual([row["final"] for row in rows], [False, True])
+            awake.return_value.terminate.assert_called_once()
+            awake.return_value.wait.assert_called_once_with(timeout=5)
+
+    def test_host_guard_default_still_denies_battery_and_redacts_probe_errors(self):
+        with tempfile.TemporaryDirectory() as root:
+            memory = Mock(cancel=threading.Event(), guard=Mock(reason=None))
+            battery = {"ac": False, "battery_percent": 90, "adapter_watts": None}
+            with patch("research.container_worker.NativeResourceGuard", return_value=memory), patch(
+                    "research.container_worker.power", return_value=battery):
+                with self.assertRaisesRegex(RuntimeError, "battery_power"):
+                    with HostGuard(root):
+                        self.fail("AC-only admission reached guarded work")
+            memory.start.assert_not_called()
+            rows = [json.loads(line) for line in (Path(root) / "power.jsonl").read_text().splitlines()]
+            self.assertEqual(rows[0]["reason"], "battery_power")
+            self.assertTrue(rows[-1]["final"])
+        with tempfile.TemporaryDirectory() as root:
+            memory = Mock(cancel=threading.Event(), guard=Mock(reason=None))
+            with patch("research.container_worker.NativeResourceGuard", return_value=memory), patch(
+                    "research.container_worker.power", side_effect=RuntimeError("SECRET probe output")):
+                with self.assertRaisesRegex(RuntimeError, "SECRET probe output"):
+                    with HostGuard(root, power_policy="battery-capable"):
+                        self.fail("Missing telemetry reached guarded work")
+            raw = (Path(root) / "power.jsonl").read_bytes()
+            self.assertNotIn(b"SECRET", raw)
+            self.assertEqual(json.loads(raw.splitlines()[0])["reason"], "power_telemetry_unavailable")
+            self.assertTrue(json.loads(raw.splitlines()[-1])["final"])
+
     def test_grading_cannot_self_seal_an_unverified_evaluator(self):
         with tempfile.TemporaryDirectory() as root:
             campaign = Path(root)

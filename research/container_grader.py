@@ -190,6 +190,8 @@ def generation_settled(campaign, manifest):
             or file_sha(generation_manifest_path) != manifest["generation_manifest_sha256"]):
         raise RuntimeError("Candidate generation manifest drift")
     generation_manifest = json.loads(generation_manifest_path.read_text())
+    if generation_manifest.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+        raise RuntimeError("Candidate generation power policy drift")
     task_id = manifest["task"]["instance_id"]
     prompt = root.parent / "prompt.txt"
     prompt_sha = generation_manifest.get("prompt_sha256")
@@ -209,6 +211,8 @@ def generation_settled(campaign, manifest):
         if file_sha(path) != pins[name]:
             raise RuntimeError("Candidate generation evidence drift")
     driver = json.loads((root / "driver.json").read_text())
+    if driver.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+        raise RuntimeError("Candidate driver power policy drift")
     ownership = json.loads((root / "ownership.json").read_text())
     if (driver.get("kind") != "swe_container_generation"
             or driver.get("manifest_sha256") != manifest["generation_manifest_sha256"]
@@ -250,6 +254,8 @@ def generation_settled(campaign, manifest):
 
 
 def frozen(campaign, manifest):
+    if manifest.get("power_policy", "ac-only") not in ("ac-only", "battery-capable"):
+        raise RuntimeError("Unknown grader power policy")
     kind = manifest["kind"]
     candidate = kind == "swe_container_development_grade"
     if (file_sha(campaign / "manifest.json") != (campaign / "manifest.sha256").read_text().strip()
@@ -403,7 +409,8 @@ def grade(campaign):
     evidence = campaign / "grade"
     evidence.mkdir(mode=0o700)  # An interrupted or failed attempt is never replayed.
     candidate = manifest["kind"] == "swe_container_development_grade"
-    report = {"passed": False, "kind": manifest["kind"], "model_generation": False}
+    report = {"passed": False, "kind": manifest["kind"], "model_generation": False,
+              "power_policy": manifest.get("power_policy", "ac-only")}
     if candidate:
         report.update(generation_completed=generation["completed"],
                       generation_intervention=generation["intervention"],
@@ -412,7 +419,7 @@ def grade(campaign):
                       grade_valid=False, resolved=None)
     start = time.monotonic()
     try:
-        with HostGuard(evidence) as guard:
+        with HostGuard(evidence, power_policy=manifest.get("power_policy", "ac-only")) as guard:
             docker = DockerWorker(evidence, guard)
             try:
                 identity = docker.create("grader", manifest["official_image_id"],

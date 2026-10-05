@@ -466,9 +466,9 @@ field, failed before executing the preparer, and is retained separately. The
 corrected operator check reads the actual approval field without changing the
 sealed review or protocol.
 
-Preparation completed once and the existing durable controller is installed
-under its own launchd job. Runtime and safety admission remain unchanged; it
-waits automatically for adequate AC power. It will not replay interrupted arms.
+Preparation completed once and the existing durable controller was installed
+under its own launchd job. It waited for adequate AC power without starting an
+arm, then was retired before the prospective power-policy change below.
 The predeclared one-shot independent validity audit additionally checks every
 parent/child generation/grader resource sample, including a final latched guard
 failure. It admits accepted outcomes or clean strict failures only when all
@@ -485,3 +485,25 @@ Both probes remain unrun. They may execute only after the real comparison has
 settled, safe admission passes and each fresh evidence directory still contains
 only its sealed manifest. This preparation establishes no dependency or coding
 acceptance result.
+
+### Prospective battery-capable campaign policy
+
+The unstarted AC-only reverse-order campaign was retired with its manifest,
+source and all immutable inputs unchanged. The first retirement check failed
+because graceful shutdown appended a `supervisor_exit` event and updated the
+status file. That failed receipt remains retained. A separate read-only addendum
+verified exactly those two state changes, the unchanged event prefix, no stage
+starts or generation/grading directories, and absence of the controller/job:
+`96c87ca32c2bf855a2ebdccca7a2fa78c29761c9f72fd313a210058924940908`.
+No task arm was spent; the retired protocol and unused auditor must not run.
+
+The new explicit `battery-capable` policy retains 40% admission, a 25% stop,
+known power telemetry, and every existing memory, disk, data and local-runtime
+limit. The omitted/default policy remains AC-only. Generation, parent stages,
+recovery and grading share the frozen policy and record it in their receipts.
+Final guard failures cannot seal successful stages or exports. Independent
+adjudication requires bounded power observations spanning resource sampling,
+including a final observation, and rejects mismatched policy or invalid charge
+data. The pipeline must pass a separately frozen no-model control before a new
+real preregistration. An AC-only observation cannot establish battery-at-load
+operation, and neither is evidence of model quality or uplift.

@@ -10,6 +10,18 @@ from research.container_worker import DockerWorker, LABEL
 
 
 class GenerationTests(unittest.TestCase):
+    def test_unknown_power_policy_rejected_before_source_or_agent_admission(self):
+        with tempfile.TemporaryDirectory() as folder, patch('research.container_generation.unchanged') as source:
+            root = Path(folder)
+            for policy in ('off', None, [], True):
+                raw = json.dumps({'kind': 'swe_container_generation_canary', 'baseline': folder,
+                                  'power_policy': policy}).encode()
+                (root / 'manifest.json').write_bytes(raw)
+                (root / 'manifest.sha256').write_text(hashlib.sha256(raw).hexdigest())
+                with self.assertRaisesRegex(RuntimeError, 'power policy'):
+                    frozen(root)
+            source.assert_not_called()
+
     def test_frozen_accepts_both_exact_arm_orders_and_rejects_invalid_arrays(self):
         with tempfile.TemporaryDirectory() as folder, patch("research.container_generation.unchanged"):
             root = Path(folder)

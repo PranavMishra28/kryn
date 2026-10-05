@@ -260,7 +260,7 @@ def recover(campaign, arm, *, admit=None):
                     "reason": "insufficient_recovery_export_headroom", "retained_worker": candidates[0]})
             guard_directory = attempt / "guard"
             guard_directory.mkdir(mode=0o700)
-            guard = HostGuard(guard_directory)
+            guard = HostGuard(guard_directory, power_policy=manifest.get("power_policy", "ac-only"))
             try:
                 guard.__enter__()
             except Exception as error:
@@ -288,8 +288,6 @@ def recover(campaign, arm, *, admit=None):
                     docker.export = capture
                 data = export_source(docker, candidates[0], Path(manifest["baseline"]), manifest, artifact, guard)
                 guard.check()
-                exported = _seal(root / "export.json", {"directory": str(artifact), "files": inventory(artifact),
-                                                         "evidence": data, "unscored": True})
             except Exception as error:
                 if guard.reason or guard.memory.cancel.is_set():
                     return _seal(attempt / "waiting.json", {"waiting": True, "unscored": True,
@@ -297,6 +295,14 @@ def recover(campaign, arm, *, admit=None):
                 raise
             finally:
                 guard.__exit__(None, None, None)
+            # Preserve partial exports, but never seal one after a final guard failure.
+            try:
+                guard.check()
+            except Exception as error:
+                return _seal(attempt / "waiting.json", {"waiting": True, "unscored": True,
+                    "reason": str(error), "retained_worker": candidates[0]})
+            exported = _seal(root / "export.json", {"directory": str(artifact), "files": inventory(artifact),
+                                                     "evidence": data, "unscored": True})
         _clear(docker, journal, manifest["image"], root)
         return _seal(result, {"recovery_complete": True, "cleanup_settled": True, "unscored": True,
                               "export_sha256": file_sha(root / "export.json"),

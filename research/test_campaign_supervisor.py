@@ -31,6 +31,38 @@ class SupervisorTests(unittest.TestCase):
         self.assertIsNone(supervisor.power_problem({**good, "battery_percent": 30}, False))
         self.assertIsNotNone(supervisor.power_problem({**good, "battery_percent": 25}, False))
 
+    def test_explicit_battery_policy_preserves_floors_and_rejects_unknowns(self):
+        battery = {"ac": False, "adapter_watts": None, "battery_percent": 90}
+        self.assertEqual(supervisor.power_problem(battery, True), "battery_power")
+        self.assertIsNone(supervisor.power_problem(battery, True, "battery-capable"))
+        self.assertIsNone(supervisor.power_problem({**battery, "battery_percent": 40}, True, "battery-capable"))
+        self.assertEqual(supervisor.power_problem({**battery, "battery_percent": 39}, True, "battery-capable"),
+                         "battery_below_resume_floor")
+        self.assertIsNone(supervisor.power_problem({**battery, "battery_percent": 26}, False, "battery-capable"))
+        self.assertEqual(supervisor.power_problem({**battery, "battery_percent": 25}, False, "battery-capable"),
+                         "battery_stop_floor")
+        self.assertIsNone(supervisor.power_problem({**battery, "ac": True, "adapter_watts": 65},
+                                                   True, "battery-capable"))
+        for bad in (None, {}, {**battery, "battery_percent": None}, {**battery, "battery_percent": True},
+                    {**battery, "battery_percent": -1}, {**battery, "battery_percent": 101},
+                    {**battery, "ac": None}, {**battery, "adapter_watts": "65"}):
+            with self.subTest(bad=bad), self.assertRaises(RuntimeError):
+                supervisor.power_problem(bad, True, "battery-capable")
+        for policy in ("unknown", [], None):
+            with self.assertRaises(ValueError):
+                supervisor.power_problem(battery, True, policy)
+
+    def test_power_source_must_be_explicit(self):
+        for source in ("Now drawing from 'Unknown'\n", "Now drawing from 'AC Power' and 'Battery Power'\n",
+                       "Now drawing from 'Battery Power', 101%\n"):
+            with self.subTest(source=source), patch.object(supervisor, "command",
+                    side_effect=[source, "Wattage (W): 65"]), self.assertRaisesRegex(
+                        RuntimeError, "battery_telemetry_unavailable"):
+                supervisor.power()
+        with patch.object(supervisor, "command", side_effect=[
+                "Now drawing from 'Battery Power', 90%\n", ""]):
+            self.assertEqual(supervisor.power(), {"ac": False, "battery_percent": 90, "adapter_watts": None})
+
     def test_runtime_absence_recovers_but_check_is_read_only_and_drift_fails(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

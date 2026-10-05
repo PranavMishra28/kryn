@@ -60,8 +60,17 @@ def validate_worker(info, image_id, network, *, grader=False):
 class HostGuard:
     """Existing memory guard plus independent pressure/power/disk admission."""
 
-    def __init__(self, evidence):
+    POWER_ROWS = 2048
+    POWER_BYTES = 512 * 1024
+
+    def __init__(self, evidence, power_policy="ac-only"):
+        if type(power_policy) is not str or power_policy not in {"ac-only", "battery-capable"}:
+            raise ValueError("unknown_power_policy")
         self.evidence = Path(evidence)
+        self.power_policy = power_policy
+        self.power_evidence = self.evidence / "power.jsonl"
+        self.power_count = 0
+        self.power_lock = threading.Lock()
         self.samples = []
         self.memory = NativeResourceGuard(self.evidence, self.samples)
         self.stop = threading.Event()
@@ -72,6 +81,33 @@ class HostGuard:
     def check(self):
         if self.reason or self.memory.cancel.is_set():
             raise RuntimeError(self.reason or self.memory.guard.reason or "resource_guard")
+
+    def _power_row(self, value, starting, reason, final=False):
+        value = value or {}
+        row = {"unix": time.time(), "power_policy": self.power_policy,
+               "ac": value.get("ac"), "battery_percent": value.get("battery_percent"),
+               "adapter_watts": value.get("adapter_watts"),
+               "starting": starting, "final": final, "reason": reason}
+        line = (json.dumps(row, sort_keys=True) + "\n").encode()
+        with self.power_lock:
+            if (self.power_count >= self.POWER_ROWS
+                    or self.power_evidence.stat().st_size + len(line) > self.POWER_BYTES):
+                raise RuntimeError("power_evidence_limit")
+            with self.power_evidence.open("ab") as stream:
+                stream.write(line)
+                stream.flush()
+                os.fsync(stream.fileno())
+            self.power_count += 1
+
+    def _observe_power(self, starting, final=False):
+        try:
+            value = power()
+            issue = power_problem(value, starting, self.power_policy)
+        except Exception:
+            self._power_row(None, starting, "power_telemetry_unavailable", final)
+            raise
+        self._power_row(value, starting, issue, final)
+        return issue
 
     def _watch(self, probe, interval):
         while not self.stop.is_set():
@@ -85,14 +121,16 @@ class HostGuard:
             self.stop.wait(interval)
 
     def __enter__(self):
+        descriptor = os.open(self.power_evidence, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(descriptor)
         try:
-            issue = power_problem(power(), True)
+            issue = self._observe_power(True)
             if issue or memory_pressure() != 1 or shutil.disk_usage(self.evidence).free < DISK_FLOOR:
                 raise RuntimeError(issue or "host_memory_or_disk_admission")
             self.memory.start()
             self.awake = subprocess.Popen(["/usr/bin/caffeinate", "-i", "-w", str(os.getpid())])
             def slow():
-                return (power_problem(power(), False) or
+                return (self._observe_power(False) or
                         ("disk_floor" if shutil.disk_usage(self.evidence).free < DISK_FLOOR else None))
             for probe, interval in ((lambda: "host_memory_pressure" if memory_pressure() != 1 else None, .5),
                                     (slow, 2)):
@@ -108,12 +146,21 @@ class HostGuard:
         self.stop.set()
         for thread in self.threads:
             thread.join(timeout=25)
+        if any(thread.is_alive() for thread in self.threads):
+            self.reason = self.reason or "power_or_pressure_watch_join_timeout"
         try:
             self.memory.close()
         finally:
-            if self.awake:
-                self.awake.terminate()
-                self.awake.wait(timeout=5)
+            try:
+                try:
+                    issue = self._observe_power(False, final=True)
+                    self.reason = self.reason or issue
+                except Exception:
+                    self.reason = self.reason or "power_telemetry_unavailable"
+            finally:
+                if self.awake:
+                    self.awake.terminate()
+                    self.awake.wait(timeout=5)
 
 
 class DockerWorker:

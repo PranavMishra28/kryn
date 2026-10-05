@@ -58,6 +58,27 @@ class CandidateGraderTests(unittest.TestCase):
                 self.assertIs(driver["completed"], completed)
                 self.assertEqual(docker.call_count, 2)
 
+    def test_candidate_policy_must_match_generation_and_driver(self):
+        with tempfile.TemporaryDirectory() as folder:
+            campaign, generation, manifest = self.fixture(folder)
+            manifest['power_policy'] = 'battery-capable'
+            with self.assertRaisesRegex(RuntimeError, 'generation power policy drift'):
+                generation_settled(campaign, manifest)
+            path = Path(folder) / 'manifest.json'
+            gm = json.loads(path.read_text())
+            gm['power_policy'] = 'battery-capable'
+            path.write_text(json.dumps(gm))
+            manifest['generation_manifest_sha256'] = digest(path)
+            with self.assertRaisesRegex(RuntimeError, 'driver power policy drift'):
+                generation_settled(campaign, manifest)
+            path = generation / 'driver.json'
+            driver = json.loads(path.read_text())
+            driver.update(power_policy='battery-capable', manifest_sha256=manifest['generation_manifest_sha256'])
+            path.write_text(json.dumps(driver))
+            manifest['generation_sha256']['driver.json'] = digest(path)
+            with patch('research.container_grader.subprocess.check_output', return_value=''):
+                self.assertEqual(generation_settled(campaign, manifest)['power_policy'], 'battery-capable')
+
     def test_changed_or_live_generation_evidence_cannot_enter_grader(self):
         with tempfile.TemporaryDirectory() as root:
             campaign, generation, manifest = self.fixture(root)

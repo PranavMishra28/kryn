@@ -2,13 +2,55 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from research.container_controller import argv_for, stage, eligible, once, wait_ready
+from research.container_controller import argv_for, stage, eligible, once, wait_ready, problem, prepare_grade
 from research.campaign_supervisor import digest
 
 
 class ControllerTests(unittest.TestCase):
+    def test_battery_admission_is_explicit_and_does_not_relax_memory(self):
+        with tempfile.TemporaryDirectory() as root, patch('research.container_controller.power',
+                return_value={'ac': False, 'battery_percent': 88, 'adapter_watts': None}), patch(
+                'research.container_controller.memory_pressure', return_value=1) as pressure, patch(
+                'shutil.disk_usage', return_value=Mock(free=20 * 1024**3)):
+            self.assertEqual(problem(Path(root)), 'battery_power')
+            self.assertIsNone(problem(Path(root), 'battery-capable'))
+            pressure.return_value = 2
+            self.assertEqual(problem(Path(root), 'battery-capable'), 'host_memory_not_green')
+
+    def test_final_parent_guard_failure_cannot_seal_success(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'state').mkdir()
+            (root / 'manifest.json').write_text('{}')
+            guard = Mock()
+            guard.__enter__ = Mock(return_value=guard)
+            def close(*_):
+                guard.check.side_effect = RuntimeError('battery_floor')
+            guard.__exit__ = Mock(side_effect=close)
+            child = Mock(returncode=0, pid=123)
+            child.poll.return_value = 0
+            with patch('research.container_controller.wait_ready', return_value=True), patch(
+                    'research.container_controller.frozen'), patch('research.container_controller.problem',
+                    return_value=None), patch('research.container_controller.runtime_ready', return_value=True), patch(
+                    'research.container_controller.HostGuard', return_value=guard) as host, patch(
+                    'research.container_controller.subprocess.Popen', return_value=child):
+                result = stage(root, {'power_policy': 'battery-capable', 'wall_seconds': 90},
+                               'native', 'generation', [False])
+                self.assertEqual(result['reason'], 'battery_floor')
+                self.assertEqual(host.call_args.kwargs, {'power_policy': 'battery-capable'})
+                self.assertTrue((root / 'state/cooldown.json').is_file())
+
+    def test_grader_template_cannot_relabel_power_policy(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'grader-template.json').write_text('{}')
+            with self.assertRaisesRegex(RuntimeError, 'power policy differ'):
+                prepare_grade(root, {'power_policy': 'battery-capable',
+                    'grader_template_sha256': digest(root / 'grader-template.json')}, 'native')
+            self.assertFalse((root / 'grading').exists())
+
     def fixture(self, root):
         root = Path(root)
         (root / 'state').mkdir()

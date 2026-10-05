@@ -44,9 +44,9 @@ def pin(path):
     return {"path": str(path.resolve()), "sha256": digest(path)} if path.is_file() else None
 
 
-def problem(campaign):
+def problem(campaign, power_policy="ac-only"):
     import shutil
-    issue = power_problem(power(), True)
+    issue = power_problem(power(), True, power_policy)
     if memory_pressure() != 1:
         issue = "host_memory_not_green"
     if shutil.disk_usage(campaign).free < MIN_FREE or size(campaign) > MAX_RAW:
@@ -75,7 +75,7 @@ def wait_ready(campaign, manifest, stopping):
     while not stopping[0]:
         frozen(campaign)
         try:
-            issue = problem(campaign)
+            issue = problem(campaign, manifest.get("power_policy", "ac-only"))
         except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
             issue = "safety_telemetry: " + str(error)
         cooldown = state / "cooldown.json"
@@ -84,7 +84,7 @@ def wait_ready(campaign, manifest, stopping):
         stable = stable + 1 if issue is None else 0
         if stable >= 3:
             try:
-                if runtime_ready(manifest) and not problem(campaign):
+                if runtime_ready(manifest) and not problem(campaign, manifest.get("power_policy", "ac-only")):
                     return True
                 issue = "owned_runtime_busy"
             except (OSError, urllib.error.URLError, subprocess.TimeoutExpired) as error:
@@ -144,10 +144,10 @@ def stage(campaign, manifest, arm, phase, stopping):
     reason = None
     code = None
     try:
-        with HostGuard(directory) as guard:
+        with HostGuard(directory, power_policy=manifest.get("power_policy", "ac-only")) as guard:
             # No arm is spent by an earlier unsafe/busy runtime admission.
             frozen(campaign)
-            if not runtime_ready(manifest) or problem(campaign):
+            if not runtime_ready(manifest) or problem(campaign, manifest.get("power_policy", "ac-only")):
                 raise Waiting("runtime_or_safety_changed_before_launch")
             once(started, {"arm": arm, "phase": phase, "argv": argv,
                           "manifest_sha256": digest(campaign / "manifest.json"), "started_unix": time.time()})
@@ -175,6 +175,7 @@ def stage(campaign, manifest, arm, phase, stopping):
                         stop_stage(argv)
                         child.wait(timeout=15)
             guard.check()
+        guard.check()  # A final power/resource failure cannot become a successful stage.
     except Exception as error:
         if not started.exists():
             # HostGuard re-admission can race a transient power/memory switch.
@@ -195,6 +196,9 @@ def prepare_grade(campaign, manifest, arm):
     template = campaign / "grader-template.json"
     if digest(template) != manifest["grader_template_sha256"]:
         raise RuntimeError("Frozen grader template drift")
+    value = read(template)
+    if value.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+        raise RuntimeError("Generation and grading power policy differ")
     directory = campaign / "grading" / arm
     directory.mkdir(parents=True, exist_ok=True)
     generation = campaign / arm
@@ -206,8 +210,8 @@ def prepare_grade(campaign, manifest, arm):
         with target.open("xb") as output:
             output.write(patch)
             output.flush(); os.fsync(output.fileno())
-    value = read(template)
     value.update(kind="swe_container_development_grade", patch_role="candidate", expected_resolved=None,
+        power_policy=manifest.get("power_policy", "ac-only"),
         source_sha256=manifest["source_sha256"], synthetic_inference=manifest["kind"] == "swe_container_generation_canary",
         task=manifest["task"], arm=arm, generation_root=str(generation), patch_sha256=digest(target),
         generation_manifest_sha256=digest(campaign / "manifest.json"),
@@ -286,6 +290,8 @@ def validate_protocol(campaign):
     if lock["evaluator_package_sha256"] != manifest["evaluator_package_sha256"]:
         raise RuntimeError("Frozen official evaluator changed")
     template = read(campaign / "grader-template.json")
+    if template.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+        raise RuntimeError("Generation and grading power policy differ")
     for key in ("task", "evaluator_archive_sha256", "evaluator_commit", "evaluator_package_sha256",
                 "official_image_digest", "official_image_id", "wheelhouse", "wheel_sha256", "datasets"):
         if template[key] != manifest[key]:

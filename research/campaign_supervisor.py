@@ -111,16 +111,25 @@ def power():
     details = command(["/usr/sbin/system_profiler", "SPPowerDataType"], timeout=20)
     percent = re.search(r"(\d+)%", battery)
     watts = re.search(r"Wattage \(W\):\s*(\d+)", details)
-    if not percent:
+    ac, on_battery = "AC Power" in battery, "Battery Power" in battery
+    if not percent or ac == on_battery or not 0 <= int(percent[1]) <= 100:
         raise RuntimeError("battery_telemetry_unavailable")
-    return {"ac": "AC Power" in battery, "battery_percent": int(percent[1]),
+    return {"ac": ac, "battery_percent": int(percent[1]),
             "adapter_watts": int(watts[1]) if watts else None}
 
 
-def power_problem(value, starting):
-    if not value["ac"]:
+def power_problem(value, starting, power_policy="ac-only"):
+    if type(power_policy) is not str or power_policy not in {"ac-only", "battery-capable"}:
+        raise ValueError("unknown_power_policy")
+    if (not isinstance(value, dict) or type(value.get("ac")) is not bool
+            or type(value.get("battery_percent")) is not int
+            or not 0 <= value["battery_percent"] <= 100
+            or (value.get("adapter_watts") is not None
+                and (type(value["adapter_watts"]) is not int or value["adapter_watts"] < 0))):
+        raise RuntimeError("battery_telemetry_unavailable")
+    if power_policy == "ac-only" and not value["ac"]:
         return "battery_power"
-    if value["adapter_watts"] is None or value["adapter_watts"] < MIN_WATTS:
+    if power_policy == "ac-only" and (value["adapter_watts"] is None or value["adapter_watts"] < MIN_WATTS):
         return "adapter_below_120w"
     below_floor = value["battery_percent"] < START_BATTERY if starting else value["battery_percent"] <= STOP_BATTERY
     if below_floor:

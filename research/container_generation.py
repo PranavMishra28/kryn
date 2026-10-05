@@ -51,6 +51,8 @@ def frozen(campaign):
             or manifest.get("kind") not in {"swe_container_development", "swe_container_generation_canary"}):
         raise RuntimeError("Unsealed container experiment")
     baseline = Path(manifest["baseline"])
+    if manifest.get("power_policy", "ac-only") not in ("ac-only", "battery-capable"):
+        raise RuntimeError("Unknown generation power policy")
     unchanged(manifest, baseline)
     if file_sha(campaign / "prompt.txt") != manifest["prompt_sha256"]:
         raise RuntimeError("Frozen prompt changed")
@@ -78,6 +80,8 @@ def frozen(campaign):
                 raise RuntimeError("Image admission covers another worker")
             if name == "generation" and receipt.get("source_sha256") != manifest["source_sha256"]:
                 raise RuntimeError("Generation admission covers different source")
+            if name == "generation" and receipt.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+                raise RuntimeError("Generation admission covers different power policy")
         if manifest["image_preparation_sha256"] != admission["image"]["sha256"]:
             raise RuntimeError("Worker image preparation identity drift")
         wire = manifest["wire_controls"]
@@ -150,6 +154,7 @@ def run(campaign, arm):
     directory.mkdir(mode=0o700)  # Existing, partial and interrupted arms cannot replay.
     synthetic = manifest["kind"] == "swe_container_generation_canary"
     report = {"kind": "swe_container_generation", "arm": arm, "synthetic_inference": synthetic,
+              "power_policy": manifest.get("power_policy", "ac-only"),
               "manifest_sha256": file_sha(campaign / "manifest.json"), "task_id": manifest["task"]["instance_id"],
               "prompt_sha256": manifest["prompt_sha256"], "local_only": None, "generation": {},
               "completed": False, "cli_exit_code": None, "intervention": None,
@@ -157,7 +162,7 @@ def run(campaign, arm):
     start = time.monotonic()
     worker = server = session = guard = docker = relay = None
     try:
-        with inference(manifest) as (relay, port), HostGuard(directory) as guard:
+        with inference(manifest) as (relay, port), HostGuard(directory, power_policy=manifest.get("power_policy", "ac-only")) as guard:
             docker = DockerWorker(directory, guard)
             retain = []
             try:

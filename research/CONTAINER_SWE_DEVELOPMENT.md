@@ -43,9 +43,17 @@ IPv6 address is recorded explicitly, not counted as a successful positive
 control. The worker must reach the intended canned endpoint and deny the other
 destinations.
 
-The existing memory guard is retained. Independent pressure sampling, the
-120-W/40%-battery admission rule, AC/25%-battery stops, 12-GiB disk floor,
-4-GiB writable-container cap and 8-GiB evidence cap also apply. Caffeinate is
+The existing memory guard is retained. An omitted or `ac-only` frozen
+`power_policy` retains the 120-W/40%-battery admission rule and AC-loss/25%-battery
+stops. A separately frozen `battery-capable` profile accepts known AC or battery
+power, admits at 40% or above, and stops at 25% or below. Unknown telemetry fails
+closed. This prospective option requires its own no-model pipeline admission
+and model preregistration; it cannot relabel an existing campaign.
+Generation, controller, recovery and grading use the same policy. Bounded power
+receipts include admission, runtime and final observations; battery-capable
+adjudication requires them to cover resource sampling and satisfy the frozen
+thresholds. All profiles retain independent pressure sampling, the 12-GiB disk
+floor, 4-GiB writable-container cap and 8-GiB evidence cap. Caffeinate is
 owned only during active work. Docker stdout/stderr share a strict streaming
 8-MiB cap. Interrupted creation is reconciled by reserved owner/name; uncertain
 ownership fails cleanup rather than claiming success.

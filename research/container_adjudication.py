@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.metadata
 import json
+import math
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -22,6 +23,7 @@ import sys
 from urllib.parse import unquote, urlparse
 
 from research.container_admission import source_inputs
+from research.campaign_supervisor import power_problem
 from research.container_policy import parse_log, policy_during_tools
 from research.local_only import (FORWARD_TARGET, MODEL, check_environment)
 from tools.native_client import product_plugin_files
@@ -107,12 +109,42 @@ def owned_absent(owner, query=None):
         require(not query(kind, owner), "owned_resource_remains")
 
 
-def guard_samples(folder, summary):
+def guard_samples(folder, summary, *, power_policy="ac-only"):
+    require(power_policy in ("ac-only", "battery-capable"), "guard_power_policy")
     lines = data(folder / "resources.jsonl").splitlines()
     samples = [json.loads(line) for line in lines if line]
     require(len(samples) >= 2 and summary.get("sample_count") == len(samples), "guard_samples_missing")
-    require(all(sample.get("pressure_level") == 1 and sample.get("power_source") == "AC Power"
+    sources = ("AC Power", "Battery Power") if power_policy == "battery-capable" else ("AC Power",)
+    require(all(sample.get("pressure_level") == 1 and sample.get("power_source") in sources
+                and not sample.get("guard_reason")
                 for sample in samples), "guard_pressure_or_power")
+    if power_policy == "battery-capable":
+        power = [json.loads(line) for line in data(folder / "power.jsonl").splitlines() if line]
+        require(len(power) >= 2 and power[0].get("starting") is True
+                and all(row.get("starting") is False for row in power[1:]), "guard_power_admission")
+        require(power[-1].get("final") is True and all(row.get("final") is False for row in power[:-1]),
+                "guard_power_final")
+        require(all(type(row.get("unix")) in (int, float) and math.isfinite(row["unix"])
+                    and row["unix"] > 0 for row in power)
+                and all(before["unix"] <= after["unix"] for before, after in zip(power, power[1:])),
+                "guard_power_clock")
+        try:
+            clocks = [datetime.fromisoformat(sample["utc"]) for sample in samples]
+            require(all(clock.tzinfo is not None and clock.utcoffset() is not None for clock in clocks),
+                    "guard_resource_clock")
+            observed = [clock.timestamp() for clock in clocks]
+        except (ValueError, TypeError, KeyError, OverflowError) as error:
+            raise InvalidEvidence("guard_resource_clock") from error
+        require(all(math.isfinite(value) and value > 0 for value in observed)
+                and power[0]["unix"] <= min(observed) + 2
+                and power[-1]["unix"] >= max(observed) - 2, "guard_power_coverage")
+        try:
+            valid = all({"unix", "power_policy", "ac", "battery_percent", "adapter_watts", "starting", "reason"}
+                        <= row.keys() and row.get("power_policy") == power_policy and row.get("reason") is None
+                        and power_problem(row, row["starting"], power_policy) is None for row in power)
+        except (RuntimeError, ValueError, TypeError, KeyError) as error:
+            raise InvalidEvidence("guard_power_telemetry") from error
+        require(valid, "guard_power_policy")
     swaps = [sample.get("swap_used_bytes") for sample in samples]
     require(all(type(value) is int for value in swaps) and max(swaps) <= swaps[0], "guard_swap_growth")
     require(summary.get("telemetry_complete") is True
@@ -253,6 +285,8 @@ def generation(campaign, arm, manifest, *, owner_query=None):
             and driver.get("manifest_sha256") == digest_file(campaign / "manifest.json")
             and driver.get("task_id") == manifest["task"]["instance_id"]
             and driver.get("prompt_sha256") == manifest["prompt_sha256"], "generation_identity")
+    require(driver.get("power_policy", "ac-only") == manifest.get("power_policy", "ac-only"),
+            "generation_power_policy")
     require(driver.get("cleanup_settled") is True and driver.get("inference_relay_settled") is True
             and driver.get("worker_exported") is True and not driver.get("settlement_errors")
             and driver.get("retained_for_safe_export") == []
@@ -276,7 +310,7 @@ def generation(campaign, arm, manifest, *, owner_query=None):
             and set(driver["routes"]["observed"]) ==
             {"dns_denied", "docker_socket_denied", "external_denied", "host_denied", "host_file_denied"}
             and all(driver["routes"]["observed"].values()), "generation_routes")
-    guard_samples(folder, driver["resources"])
+    guard_samples(folder, driver["resources"], power_policy=manifest.get("power_policy", "ac-only"))
     policy_log(folder, driver["session_id"], require_tool=driver.get("completed") is True)
     require(driver.get("policy_restored") is True and driver.get("policy_mutations") == [], "policy_receipt")
     for before_after in ("plugin_before", "plugin_after"):
@@ -397,6 +431,8 @@ def grade(campaign, arm, manifest, generation_result, state, *, owner_query=None
             and finish.get("returncode") == 0 and finish.get("reason") is None,
             "controller_grader_provenance")
     gm, gm_sha = sealed(root)
+    require(gm.get("power_policy", "ac-only") == manifest.get("power_policy", "ac-only"),
+            "grade_power_policy")
     driver, patch = generation_result["driver"], generation_result["patch"]
     require(gm.get("kind") == "swe_container_development_grade"
             and gm.get("patch_role") == "candidate" and gm.get("expected_resolved", "missing") is None
@@ -433,6 +469,7 @@ def grade(campaign, arm, manifest, generation_result, state, *, owner_query=None
                 and digest_file(wheels / name, 8 * 1024**2) == expected, "wheel_pin")
     result = load(root / "grade/result.json")
     require(result.get("kind") == gm["kind"] and result.get("grade_valid") is True
+            and result.get("power_policy", "ac-only") == manifest.get("power_policy", "ac-only")
             and result.get("passed") is True and result.get("cleanup_settled") is True
             and result.get("synthetic_inference") is False
             and result.get("generation_completed") is driver["completed"]
@@ -450,7 +487,7 @@ def grade(campaign, arm, manifest, generation_result, state, *, owner_query=None
     require(not (folder / "output-budget.json").exists()
             and load(folder / "official-child.json") == {"completed": True, "test_evidence": True},
             "official_child_or_output_budget")
-    guard_samples(folder, result["resources"])
+    guard_samples(folder, result["resources"], power_policy=manifest.get("power_policy", "ac-only"))
     ownership, control = load(folder / "ownership.json"), load(folder / "control.json")
     require(ownership.get("owner") == control.get("owner")
             and ownership.get("cleanup_errors") == []
@@ -559,6 +596,8 @@ def classify_arm(campaign, arm, manifest, state, *, owner_query=None, coverage=o
 
 def campaign_manifest(campaign):
     manifest, manifest_sha = sealed(campaign, prompt=True)
+    require(manifest.get("power_policy", "ac-only") in ("ac-only", "battery-capable"),
+            "campaign_power_policy")
     require(manifest.get("kind") == "swe_container_development"
             and manifest.get("arm_order") in (["native", "kryn"], ["kryn", "native"])
             and manifest.get("wall_seconds") == 900 and manifest.get("request_seconds") == 360
@@ -574,6 +613,8 @@ def campaign_manifest(campaign):
             and isinstance(manifest.get("official_image_id"), str)
             and manifest["official_image_id"].startswith("sha256:"), "frozen_grader_template_or_image")
     template = load(template_path)
+    require(template.get("power_policy", "ac-only") == manifest.get("power_policy", "ac-only"),
+            "generation_grader_power_policy")
     for key in ("task", "evaluator_archive_sha256", "evaluator_commit", "evaluator_package_sha256",
                 "official_image_digest", "official_image_id", "wheelhouse", "wheel_sha256", "datasets"):
         require(template.get(key) == manifest.get(key), "generation_grader_protocol_drift")
