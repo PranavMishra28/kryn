@@ -2189,3 +2189,78 @@ CI 37341589860 at `cb47595` passed; full job/step JSON is retained. Product code
 is unchanged this checkpoint. PR #242 remains draft, with broader development,
 valid fresh/protected validation, sustained coding/UI, full-context reasoning,
 endurance and truthful final production scope still open.
+
+## Canned repair workflow settled; local-model duration diagnostic launched
+
+The repair control V1 passed with 12 canned responses and zero model requests.
+Agent loaded the skill, wrote the before revision, received the first Browse
+report, resumed and wrote the after revision, then delegated a distinct Browse
+child. Both children observed their respective revisions through completed
+navigation and snapshot calls. Exact delivered child contexts, returned reports,
+role catalogs and native timestamps matched the declared workflow. The CLI took
+10.479 seconds; the three-phase barrier took 20.383 seconds. The sole 317-byte
+index patch matched capture, and the final 119-byte canned page matched the
+artifact callback. This establishes the canned mechanism, not model repair
+ability or an independent functional grade.
+
+Runtime 85947 remained unloaded and idle at 76 requests, 388,387 prompt and
+14,921 completion units, with no runtime operation. All 13 parent, six native
+and four capture resource samples were normal, with zero sampled swap growth
+and nonzero absolute swap. Eleven power observations were on battery, minimum
+71%, including finals. This is not loaded-model or endurance evidence.
+
+Separate settlement preserved all 63 files, both whole detached images and
+three empty owned mount paths, verified exact browser ID/name/broker absence
+and port closure, and removed only the inactive exit-0 job. The original
+acceptance function was not replayed. A first read-only review hit a historical
+Docker CLI inventory timeout; its failure and separate successful bounded API
+health check are retained, with no causal diagnosis. A later negative fixture
+selected a terminal message without content and failed in the review itself.
+A corrected review selected the assistant message and passed 15 author checks
+before separate settlement execution. The runner and original outcome were
+unchanged; neither failed review performed cleanup mutation.
+
+| Repair control V1 terminal evidence | SHA-256 |
+| --- | --- |
+| Result | `e8beb7f63094bcf911184603465fd34fd6777e980fbb96b3f78519f4f47f4105` |
+| Driver | `656da610413f561594a7a136f3249f635ebd1b4d35d5cc1b7edbc7705ff74cab` |
+| Barrier | `8dca59c879b64bf56dce7cf2f86c88da55ce1fa4490bd68ce52a423ea17d7362` |
+| Settlement review | `db544906842417af045eab59e474b20406723b8fc63280e343f1ec8cfee2634e` |
+| Settlement | `a7bc76eabb0002ae56038a619c77f4196069be1e603943f07ba83a9668dfc3ff` |
+
+The fresh duration diagnostic supplies a blank page and public requirements,
+with implementation left entirely to local OpenCode/oMLX. It requires empty-input
+failure, conversion of 90 minutes to `Status: 1h 30m`, then reset of status and
+input. Its prospective protocol permits one to three Browse inspections, with
+an actual intervening code revision before each repeated inspection. The final
+child must inspect after the latest edit and demonstrate every required state.
+Earlier functional discrepancies may be repaired within this new protocol;
+all native tools must still complete. The old counter and form failures remain
+failed under their unchanged original predicates. A chronological revision count
+alone does not prove diagnosis, causal repair or model reasoning.
+
+Nineteen groups of author checks covered full source/prior-chain admission,
+actual intercepted trial and main paths, exact usage, one/two/three-child
+fixtures, state/context/ownership/chronology negatives and rejection of a fourth
+child. The original model controller, status, admission, query and trial AST
+remain unchanged apart from report metadata; current counters are forwarded to
+the original historical check without changing fixed settlement facts. Nine
+launcher checks preceded one bootstrap with verified process 79200. The same
+frozen `4a35ab0` source, 300-second CLI/request limits, canonical role schemas,
+local relay, resource emergency stops, browser isolation and APFS phases remain.
+
+| Fresh duration V1 artifact | SHA-256 |
+| --- | --- |
+| Runner | `7d4751c750491cd631a055ff8f101c4fcb6aed0b04cdfce1329deba4c5b94ab2` |
+| Predeclaration | `d4e69908e070f64bb72502eaf2a686a1990ff3281e42e0a1b4c66b6ac0e9cb06` |
+| Manifest | `6e37c07f8cb691354ba1be49e95c826a8c038a2b865baaa3bb999b3ae7889ea5` |
+| Author review | `dba904f0997199071bf5d41778a0675fc29509b593970e6e1991e17b75c7261d` |
+| Launcher review | `cac7476eb6c5e65a53254da93b08e9e1e47ad9824b8d655bd9b366fd7f86e2e1` |
+| Launch | `dc293e01b4abd167dca973d8e1ba2f2e94b4d14485367e03bf059900208a4536` |
+| Activation | `3cc45f354c0d4eb17db9aa91ec2e3a819f7593bb6527a38f7caf60ea8b37cc65` |
+
+Outcome is unknown at launch. CI 37343403861 at `6709576` passed, with full
+job/step JSON retained. No product code, release, version or install changed.
+PR #242 remains draft; broader development, valid fresh/protected validation,
+sustained coding/UI, full-context reasoning, endurance and final production
+scope remain open. This launch continues the campaign and is not completion.
