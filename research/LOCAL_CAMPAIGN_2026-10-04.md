@@ -2657,3 +2657,56 @@ once. The next prospective control will isolate native shell exit/output
 reporting without a browser, using a fresh fixed public probe rather than
 replaying the failed workflow. It will not demonstrate model repairability or
 benchmark quality. PR #242 remains draft; broader gates and final scope are open.
+
+## Fresh native shell exit control launched
+
+The guard-reason reporting fix at `4a37ce8` passed 220 setup checks, 215 research
+checks (two skips), 87 Node checks, native and frozen offline checks, clean-source
+package smoke, 17 documentation entry-point/link checks and one-commit secret
+scanning with zero findings. The receipt writer initially expected one package
+JSON record; the successful log contains separate build and package-check
+records. That writer failure is retained. The corrected writer used the retained
+successful output without rerunning any check.
+
+A fresh frozen source retains all 414 tracked files and pins the 98 research
+runtime files. Only the driver reporting assignment and its regression differ
+in that runtime map; all five packaged plugin assets remain identical. The new
+control isolates root shell exit/output reporting without starting a browser.
+It uses a fresh public trusted probe that writes distinct stdout/stderr markers
+and exits seven. Two canned responses request that exact command once, then
+stop. The native shell tool must complete with integer exit seven and both exact
+output lines; the patch must be empty, the trusted probe unchanged, and no skill,
+subagent or browser action may occur. Full canonical Agent request metadata,
+owned-session settlement and all existing guard finals remain required.
+
+This is a different prospective mechanism, not a replay of the failed
+write/check/revise/check control. The artifact callback reads and hashes the
+trusted probe; it never executes candidate code. The existing native engine,
+Agent catalog, permissions, admission, local-only boundary and three APFS phases
+remain unchanged. Runtime must stay unloaded and idle at 103/520655/21219.
+There is no model forwarding, benchmark task, independent functional grade,
+model-repair claim or quality score.
+
+Seven groups of author checks passed, including the full preflight and prior
+chain, exact source compatibility, original dispatcher/main/guard operations,
+fixed public probe outputs, complete synthetic native evidence with negative
+cases, actual capped two-response HTTP/SSE dispatch and failure preservation.
+Nine launcher checks passed separately. The job was bootstrapped once; process
+40084 was verified with proc_pidpath, exact arguments and executable hash.
+
+| Shell exit control V1 artifact | SHA-256 |
+| --- | --- |
+| Code validation | `e1af7c32da3631e663d5ff649a423cb3d71903fa5037f9a0ed040c6458227123` |
+| Frozen source proof | `8ddc0ef3ccbeb9c1c5d51ba1d5af7e9ce6c66cb907df4128f353bd60494e57d8` |
+| Runner | `d14b095ccec869896203a0392f1c7ba79ec4a29b391c615bcb94043d9a5986da` |
+| Predeclaration | `e18816194fe0df06d461486458e260d1337cba19dda7e3d865d86274d8a5dcd9` |
+| Manifest | `388011c879f7006c2b1d3726a2a21dc3d9280570757d55a5090eae1850c1e79f` |
+| Author review | `a284f6e0bac9ff130acb7021695d18051d13de7884d8d60dc8f979e52aa0aea4` |
+| Launcher review | `83e9e5f784cf05ae8b75f3a97eab0da046bd758d84a982470d02327760e7a216` |
+| Launch | `51b62704dadaf87949af167d2a9632c6b4fb9e0d55d73b3dad96eb0a193dfb64` |
+| Activation | `1fda410c1515b9556d293319c50c45d2b7e5aa4541e46c94134d0000739841d8` |
+
+Outcome is unknown at launch. The next wake will inspect compact state and leave
+an active or safely waiting worker alone. Code and launch-document CI will be
+inspected once at the next meaningful terminal. PR #242 remains draft, all old
+failures remain failed, and broader research gates and final scope remain open.
