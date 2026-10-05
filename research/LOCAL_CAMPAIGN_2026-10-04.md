@@ -855,11 +855,37 @@ Root static review
 `2aa4fe8f45f1bb2abf03fa8e3eb37a2ad300495e4b5b3dea1c5552e3a87d7062`
 checked exact source/input pins, unchanged auditor predicates and the existing
 admission loop; it is not an independent-author review. The one-shot native job
-waits for 60 seconds and three green observations before invoking the unchanged
-guarded official grader. Its result remains pending. Positive coverage and
-resource settlement are required before repository grader readiness is complete;
-loaded-model memory readiness and separate preregistration remain required for
-any real comparison.
+waited for 60 seconds and three green observations before invoking the unchanged
+guarded official grader. The reference grade passed in 14.244 seconds, with full
+two fail-to-pass and 86 pass-to-pass coverage. The once-only audit
+`007fe3cf040f0cf2966d33829402ce68a7ee2feaf3b1fc46b5cd20bc718b9b2e`
+verified eight normal resource samples, six valid AC power observations and all
+final guards. Settlement
+`e5ccc90c5c71c8bb53dbe7477af8d6311c520da18934faa5ece55d940082149f`
+verified 57 pinned files unchanged and actual owned-resource absence before
+removing the inactive job. This establishes repository control validity only.
+The unchanged official grader runs as root inside its offline container;
+candidate workers use UID 10001. No grade, auditor or control was replayed.
+
+The prospective no-generation loaded-idle diagnostic then passed: one local
+model load, 180.214 seconds of idle observations and one unload. All 13 loaded
+status records preserved request/token counters and reported 8,597,826,742 bytes
+of model memory. All 87 resource observations had normal pressure and zero
+sampled swap growth; all 75 power observations were valid and on AC at 90%.
+Result `cf9e53fefad5eb88036233bde094bd421130b99b6a1e2c17a2dd9817a95f34cb`
+and settlement
+`7dcc20887f2dcffde355d68f9e330446e8a1b1ed95bb5d9048b1f409a7bd4be8`
+bind the complete interval, unchanged source/runtime inputs and 61 pinned files.
+The original runtime was idle and unloaded; only the inactive diagnostic job was
+removed. No settings, inference requests or unrelated apps were changed.
+
+The next separately frozen diagnostic sends one fixed synthetic text request to
+local oMLX with the existing sampler, 8,192 output-token limit and 3,072 thinking
+budget. Its actual input usage must be between 8,192 and 24,576 tokens. It retains
+the existing guards, safe admission, bounded transport and exact owned-runtime
+emergency stop, with no retries. It includes no benchmark or coding task and
+cannot establish task quality, container concurrency, full-context readiness or
+endurance. Loaded-idle success alone does not admit another real comparison.
 
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`

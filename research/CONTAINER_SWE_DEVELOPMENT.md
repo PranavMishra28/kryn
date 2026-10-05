@@ -313,8 +313,20 @@ normal, and all 77 power observations were on AC. The 256 evidence receipts
 remained unchanged through verified ownership settlement and inactive-job removal.
 These controls establish pipeline validity, with no model-quality score.
 
-A separately preregistered positive reference control is pending under the same
-source and image. Its one-shot native runner uses the existing cooldown, healthy
-idle-runtime admission and guarded official grader. The reference patch remains
-private. Positive coverage and resource settlement, followed by loaded-model
-memory readiness, remain necessary before another real comparison.
+The separate positive reference control passed under the same source and image
+in 14.244 seconds, with full two fail-to-pass and 86 pass-to-pass coverage. Its
+preregistered audit and settlement verified eight normal resource observations,
+six valid power observations, final guards, 57 unchanged pinned files and actual
+owned-resource absence before removing the inactive job. The reference patch
+remains private. The official grader runs as root inside its offline container;
+candidate workers use UID 10001. Neither control provides a model-quality score.
+
+A subsequent no-generation diagnostic loaded the local model, observed it idle
+for 180.214 seconds and unloaded it. All 13 loaded-status observations preserved
+the inference counters and reported 8,597,826,742 bytes of model memory. The 87
+resource observations had normal pressure and no sampled swap growth; all 75
+power observations were on AC. Settlement verified unchanged inputs and receipts,
+the original runtime idle and unloaded, and removal of the inactive job. This
+qualifies only the observed idle interval. A separately frozen single synthetic
+text request is the next guarded readiness step; inference load, container
+concurrency, full context and endurance remain unqualified.
