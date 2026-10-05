@@ -335,3 +335,21 @@ The scoped CLI confirmation receipt is
 Recovery with this correction needs a separately pinned, unscored adapter;
 the frozen failed source and original receipts remain unchanged. Neither that
 cleanup nor read-only telemetry qualifies the next model comparison.
+
+That separately pinned recovery has now passed independent verification: both
+98-file source maps, all 13 original/prior receipts, 6,881 exported entries and
+10,092 TAR members match. All recorded container/network IDs, reserved names
+and owner labels are absent. Native never started; the original failures remain
+unchanged and unscored. The independent settlement receipt is
+`4a3a52d6dd9412bfb3b6e5a9ec88dbf303ea931ee47b2a06919fbc1d4e6b7e41`.
+The inactive recovery job was removed after verification.
+
+A new reverse-order no-model controller admission is sealed at source `ff2ff5a`.
+Its manifest is `4ecdb6c40f6590c77326046617bc61d7b20b25f656c2fc5ba2a986e296d0c478`;
+independent prelaunch review verifies inherited canned root/child actions,
+prompt, image, wire controls, budgets and grader template, plus explicit failed
+attempt and unscored-settlement provenance. It is a new prospective control,
+not a replay or a successful admission yet. Source `ff2ff5a` passes full checks
+(216 setup, 189 research with two skips, 87 Node), evaluator Python 3.11 research
+checks, clean package smoke and GitHub CI. A 46-commit branch scan has no Gitleaks
+findings. No additional model quality claim follows from these checks.
