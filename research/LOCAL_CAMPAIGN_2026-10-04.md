@@ -1810,3 +1810,42 @@ CI **37328203434** passed at `1963cc4`. Earlier failed CI and research runs rema
 failed without replay. Broader development, valid fresh/protected validation,
 sustained coding/UI, full-context reasoning, endurance and final scope stay open;
 PR #242 remains draft.
+
+## Local-model native UI execution completed; strict protocol failed
+
+Model V2 completed its native CLI in 86.601 seconds with nine local requests,
+three successful owned sessions and a sole 322-byte page patch. Readonly capture
+and the fresh synthetic marker check passed; all three APFS phases detached.
+The declared diagnostic nevertheless **failed**: its pure acceptance function
+requires one Browse child, while execution created two. Root tools were write,
+subagent, skill (`opencode`), subagent; one child used no tools and the other
+navigated and took a snapshot. The write used the exact absolute workspace path,
+which also differs from the protocol's later literal relative-path predicate.
+Neither completed execution nor settlement upgrades that failed result.
+
+Nine native assistant usages exactly matched runtime increases of 38,721 prompt
+and 2,984 completion tokens. One original guarded unload left the same runtime
+unloaded and idle at 45 requests, 248,165 prompt and 6,301 completion tokens.
+No resource stop occurred. All 49 parent, 42 native and four capture samples
+were normal; 43 power observations were AC/90%, with zero sampled swap growth
+and nonzero absolute swap. Separate settlement verified all 70 files unchanged,
+actual browser/mount absence and both preserved images before removing only the
+inactive exit-1 job. Its receipt is
+`87a1915c5257011ae56252e7c456431cbe2dcc6194f52160457eae148e197b3a`.
+A static correction to the new settlement script's receipt-field lookup was
+retained before review or mutation; 15 author checks then passed before separate
+execution. No task, grader or runtime operation was replayed, and original
+acceptance was not upgraded.
+
+Fresh V3 declares skill loading before write/delegation and permits only
+`index.html` or that exact file beneath the recorded candidate workspace. It
+still requires one Browse child, the declared tool sequence, exact page bytes,
+all original ownership/isolation/accounting checks and unchanged resource stops.
+Eighteen author checks included rejection of an outside path and wrong skill;
+nine launcher checks preceded one bootstrap. This is a new synthetic fixture,
+not a repair of V2's score. Outcome remains unknown at launch.
+
+CI **37329916187** passed at `8289c25`. Full pins and the native evidence
+limitations remain in the [container record](CONTAINER_SWE_DEVELOPMENT.md).
+Broader development, fresh/protected validation, sustained coding/UI,
+full-context reasoning, endurance and final scope remain open. PR #242 is draft.

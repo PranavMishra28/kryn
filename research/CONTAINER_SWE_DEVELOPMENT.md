@@ -1251,3 +1251,81 @@ observation `dc32564d28bd1b5486670145daea4c05eacab968812b42e647084af009662fa7`.
 Previous failures remain unchanged. Broader development, fresh/protected
 validation, sustained coding/UI, full-context reasoning, long-duration endurance
 and final production scope remain open. The single PR stays draft.
+
+## Native local-model V2 strict failure, settlement and fresh skill-first V3
+
+The V2 CLI exited 0 after 86.601 seconds; nine local requests produced one Agent
+root and two Browse children, all with successful native completion. The
+three-phase barrier completed in 96.357 seconds, captured the sole 322-byte
+`index.html` patch and passed the fresh synthetic marker check. This is not an
+official benchmark grade. The original diagnostic remains **failed**: its first
+failing assertion requires exactly one child. Root tool order was write,
+subagent, skill (`opencode`), subagent. One Browse child used no tools; the other
+completed navigation and snapshot with the declared public marker visible.
+The write content matched exactly, but its absolute workspace path also differs
+from the original literal relative-path predicate. A separate read-only check
+reproduced the original assertion failure without changing its acceptance.
+
+The nine native assistant usages reconcile exactly to 38,721 prompt and 2,984
+completion tokens. After one original guarded unload, runtime PID 85947 was
+unloaded and idle at 45 requests, 248,165 prompt and 6,301 completion tokens.
+No emergency stop or resource intervention occurred. Forty-nine parent, 42
+native and four capture resource samples were normal; 43 power observations
+were AC/90%. Sampled swap growth was zero, with nonzero absolute swap.
+
+Separate settlement verified all 70 retained files unchanged before and after
+removing only the exact inactive exit-1 launch job. Both images remain preserved
+and detached; three owned mount directories are empty on the host device. The
+actual browser name and broker process are absent. The original close predicate
+proves listener closure; exact browser ID/port were not retained. Source, seed,
+plugin, tool, image, exported ownership, initial inventories, request metadata,
+usage and all guard finals were checked. Continuous native policy snapshots,
+full wire receipts and absence of private event gaps are not claimed.
+
+A copied receipt-field name in the first settlement script was corrected during
+static inspection before review/execution. The original script and correction
+receipt remain pinned. The corrected script passed 15 author checks with only
+job removal/output intercepted, then executed separately. No model request,
+task, grader, APFS operation or runtime mutation occurred during settlement.
+
+| Failed V2 artifact | SHA-256 |
+| --- | --- |
+| Result | `c29dce497a9d0d57d4936c26f0da9bd02c31c1b7d7d1fa3814a09b8e919be6df` |
+| Driver | `3603c1aaafd9517137aa78e291e87ebc8fca9d6bdae27ece2363a28c34f374e5` |
+| Barrier | `4eac860713e3e6f262775ce2155057c2d07b72381d0239492f983dc1dd2cdb70` |
+| Settlement | `87a1915c5257011ae56252e7c456431cbe2dcc6194f52160457eae148e197b3a` |
+| Settlement review | `ec88db6e7058da9ae734fb8ce51973eb85f2553fea73af4c605982b5f1aabfbe` |
+| Retained static correction | `5cc578fed7197557486014b19bae2834ca58d71429a0e970fc86773762fe159b` |
+
+Fresh model V3 prospectively declares loading the `opencode` skill first,
+followed by write and exactly one Browse delegation. The only accepted write
+paths are `index.html` or the exact absolute `index.html` beneath the recorded
+candidate workspace. Exact page content, one child, navigation/snapshot order,
+wire schemas, sampler, original guards, native ownership, APFS isolation and
+usage accounting remain required. The old V2 result remains failed. This new
+public fixture is bounded by the same 300-second CLI/request limits and
+128-request cap. Original admission, relay, query and main behavior are
+structurally unchanged apart from descriptive scope text and the explicit
+accounting baseline; no native engine, image, dependency or guard changed.
+
+Eighteen author checks exercised the actual acceptance against synthetic native
+exports, including outside-path and wrong-skill rejection, and the original
+success/unload, generation-failure/stop and concurrency-conflict paths. Nine
+separate launcher checks passed before one bootstrap. Actual framework-app
+executable hash, `proc_pidpath` and exact argv verified PID 31363. No result is
+claimed at launch.
+
+| Prospective V3 artifact | SHA-256 |
+| --- | --- |
+| Runner | `03cbfd479fbed2b4d722e0465b867df786f0e3d9acca68bfded76e05e55d0f12` |
+| Predeclaration | `4332ecd00875e87a777df2e473a9e8099721674e355510b262e658ac7a08ea24` |
+| Manifest | `e9cf111c07187322878bb9549660cdd00dccf98cd6db9f9c1087246066a1c679` |
+| Author review | `10ee3aad87abc73801910bab7bed1d541f5a59e2c4ff1a4e37e2ea5da1899914` |
+| Launch | `451a4d83b3b5f18501ba60d0d07a6154284506a1f50632671837e6a8166c6986` |
+| Activation | `f1f9ab04e4c03b32bfc60c4dd8a83b7423d5366afdafb14e1d87bdb16cadae9c` |
+
+CI **37329916187** passed at `8289c25`, with full job/step conclusions pinned by
+observation `8c72364b43e599cbda9d9534c5d7aee7804eb415650620e59214f20f5d684d76`.
+Earlier failed research and CI remain failed. Broader development, valid fresh
+protected validation, sustained coding/UI, full-context reasoning, long-duration
+endurance and final production scope remain open; PR #242 stays draft.
