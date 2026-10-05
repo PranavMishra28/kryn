@@ -176,6 +176,8 @@ def apply_patch(workspace, private, patch):
         temporary = Path(temporary)
         source = temporary / "model.patch"
         shutil.copyfile(patch, source)
+        if source.stat().st_size == 0:
+            return
         git_command, env = isolated_git(workspace, temporary, [], GIT, None)
         for operation in ("--check", ""):
             argv = git_command + ["apply"] + ([operation] if operation else []) + [str(source)]

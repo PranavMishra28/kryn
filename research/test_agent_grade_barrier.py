@@ -20,6 +20,30 @@ from ui_gateway.preflight import broker_request, broker_start
 @unittest.skipUnless(sys.platform == "darwin" and barrier.GIT.is_file(),
                      "Requires macOS disk images and Command Line Tools Git")
 class AgentGradeBarrierTest(unittest.TestCase):
+    def test_empty_patch_preserves_baseline_and_nonempty_patches_still_use_git(self):
+        with tempfile.TemporaryDirectory(prefix="kryn-patch-test-", dir="/private/tmp") as temp:
+            root = Path(temp)
+            workspace, private = root / "workspace", root / "private"
+            workspace.mkdir()
+            private.mkdir()
+            subprocess.run([str(barrier.GIT), "init", "-q", str(workspace)], check=True)
+            source = workspace / "source.py"
+            source.write_text("value = 1\n")
+            artifact = root / "model.patch"
+            artifact.write_bytes(b"")
+            barrier.apply_patch(workspace, private, artifact)
+            self.assertEqual(source.read_text(), "value = 1\n")
+            for invalid in [b"not a patch\n", b" \n"]:
+                artifact.write_bytes(invalid)
+                with self.assertRaises(subprocess.CalledProcessError):
+                    barrier.apply_patch(workspace, private, artifact)
+                self.assertEqual(source.read_text(), "value = 1\n")
+            artifact.write_text("diff --git a/source.py b/source.py\n"
+                                "--- a/source.py\n+++ b/source.py\n"
+                                "@@ -1 +1 @@\n-value = 1\n+value = 2\n")
+            barrier.apply_patch(workspace, private, artifact)
+            self.assertEqual(source.read_text(), "value = 2\n")
+
     def test_detach_retries_only_transient_busy_mount(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp:
             mount = Path(temp) / "mount"

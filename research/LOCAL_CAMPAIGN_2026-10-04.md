@@ -2710,3 +2710,37 @@ Outcome is unknown at launch. The next wake will inspect compact state and leave
 an active or safely waiting worker alone. Code and launch-document CI will be
 inspected once at the next meaningful terminal. PR #242 remains draft, all old
 failures remain failed, and broader research gates and final scope remain open.
+
+## Empty-patch barrier failure and prospective correction
+
+The browser-free shell control remains a strict failure. Its one native shell
+call completed with integer exit seven and both exact public stdout/stderr
+markers. Two canned responses completed in 8.068 seconds; no model request or
+browser occurred. The captured patch was exactly zero bytes. All three volume
+phases detached, but the later Git `apply --check` returned 128 on that empty
+file, so the artifact callback never ran. Runtime remained unloaded and idle at
+103/520655/21219. The 12 parent, five native and four capture resource samples
+were normal with zero sampled swap growth and complete telemetry.
+
+The barrier now treats only a zero-byte copied patch as an unchanged baseline.
+It still validates and applies every nonempty patch with the original sandboxed
+Git commands. A regression uses real sandboxed Git to check an empty patch,
+malformed and whitespace-only patches, and a valid edit. This changes artifact
+application, not task acceptance, tests, grading or emergency stops. Original
+frozen sources and the failed control remain unchanged.
+
+The frozen control also had three unexercised evidence-checker mistakes. Its
+synthetic fixture omitted native model `variant: default`, invented a top-level
+driver `session_id`, and copied the nine-tool UI catalog into a browser-free
+protocol. The actual non-UI catalog contains ten tools, including `webfetch`;
+the existing UI configuration explicitly denies that tool. The first settlement
+review caught that catalog mismatch before any cleanup mutation. Its failure
+and original settler are retained. Separate failure projection requires the
+actual ten-tool metadata and exact recorded native shape; it cannot upgrade the
+original failure. Future protocols must declare the correct shapes before they
+run. No permission or tool-catalog behavior changed.
+
+CI 37353184466 for code `4a37ce8` and CI 37354190481 for docs `5a92cf3`
+passed and their full job/step records were retained once. No task, grader or
+original acceptance function was replayed. PR #242 remains draft; native shell
+observations do not establish model repairability or broader product quality.
