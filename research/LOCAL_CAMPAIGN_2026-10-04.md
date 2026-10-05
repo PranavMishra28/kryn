@@ -2869,3 +2869,81 @@ an active or safely waiting worker alone.
 PR #242 remains draft. Broader development, fresh protected validation, sustained
 coding/UI, full-context reasoning, endurance and final truthful production scope
 remain open. No merge, release, tag, version or owner-install change follows.
+
+### Rollup workflow failure and bounded native feedback control (2026-10-05)
+
+The fresh local-model Python rollup workflow **strictly failed**. The native
+session finished and later public test runs reported success, but the retained
+trace contains six file-tool errors, extra shell commands, concurrent tool
+starts contrary to its declared chronology, and truncated baseline test output.
+The first two reads omitted the leading slash from a complete project path;
+three further reads and one write used `/workspace` and were denied. The model
+subsequently wrote through a shell command outside the declared command scope.
+Those failures remain failures. The implementation and model answer were not
+judged by Codex, and no task, grader or original acceptance function was replayed.
+
+The 17 native tool records include a baseline test exit of 1 with seven errors
+and `truncated=true`, then two test exits of 0 with seven tests and `OK`.
+The sole 2,118-byte module patch matched capture. The data-only callback observed
+unchanged public test/requirement files and a 1,877-byte implementation; it did
+not execute candidate code or provide an independent functional grade. Thirteen
+local requests reconciled exactly to 97,771 prompt and 2,595 completion tokens.
+The original controller unloaded the model once, leaving the same runtime
+unloaded and idle at 116 requests, 618,426 prompt tokens and 23,814 completion
+tokens. All 64 parent, 56 native and four capture resource samples were complete
+with normal sampled pressure and no sampled swap growth. All 58 power samples
+reported AC power with a minimum battery level of 90 percent. This is not
+endurance evidence.
+
+A separate settlement required the exact failed tool records and checked the
+remaining boundary, metadata, ownership, context, patch, guard and usage
+predicates. Seven author-review groups and 19 negative cases passed before the
+sole inactive exit-1 job was removed. All 69 pinned evidence files and both whole
+disk images remained unchanged; all three owned mounts were empty and the owned
+native process, broker and relay were absent. The settlement is a cleanup and
+evidence result, not a diagnostic pass. Its SHA256 is
+`912d5fd29e0d12db600e3869daa51798a21918411093ee7d9f4ecabd18204380`;
+the separate review SHA256 is
+`be6195fa8c2ee723d530af368a7153773683ebdc1594b71caa75e243954e7857`.
+Documentation CI run `37357709462` passed; its complete job and step record was
+inspected and retained once.
+
+The next declared mechanism control addresses relative file paths and bounded
+test feedback directly. A fresh public fixture contains 40 pending records and
+a trusted standard-library unittest checker. Five canned native tool actions
+read `./records.txt`, run `python3 -B check_records.py`, write the fixed ready
+records through the native write tool, rerun the same check, and read the same
+relative path. A sixth canned response stops the session. The checker reports
+all 40 failing or passing record identifiers in one bounded summary, without
+changing native output limits. Both check outputs must be nontruncated with exact
+exit codes and summaries. Every tool must complete in the declared order.
+The data-only artifact callback checks the final public bytes and unchanged
+checker, and never executes candidate code. This control uses no model inference,
+no browser, no benchmark, no candidate implementation and no independent grade.
+
+The control retains the existing native engine, full ten-tool non-UI catalog,
+sampler metadata, permission policy, resource and power emergency stops, query
+deadlines, local-only boundary and APFS capture phases. Runtime counters must
+remain at 116 throughout, with no start, load, unload, stop or restart. The full
+prior evidence chain is checked with explicit current counters while historical
+counter facts remain unchanged. This is a fresh fixture and protocol; the failed
+rollup task and earlier failed test-feedback tasks will not be replayed.
+
+Seven protocol-review groups and nine separately reviewed launcher checks passed
+before one launchd bootstrap. The protocol review exercised the trusted public
+checker against fixed pending, ready and invalid data; full synthetic native
+exports, bounded HTTP/SSE dispatch, negative cases and the data-only callback
+were checked without running a native task, browser, APFS trial or model.
+The durable job is `dev.kryn.native-bounded-feedback-control-20261005-v1`;
+its outcome is **unknown at launch**. The runner SHA256 is
+`fed8fe032564aba93af738ae91754888c6f3f0b7922c6f8c88d664c11e10775d`,
+protocol review SHA256 is
+`aa7180853b45c216ff069b0c932c42120fca72a877fb0a88d26023cf3ef41d47`,
+and launcher review SHA256 is
+`ccb181f1440fb188d62e86b7574ac61660e299ddec0a9617d9a64faa4a9460c8`.
+
+No product code, version or owner-install change accompanies this checkpoint.
+Broader development, valid fresh/protected validation, sustained coding and UI,
+full-context reasoning, endurance and final truthful production scope remain
+open. PR #242 remains draft; none of these observations qualify a merge or a
+frontier-quality claim.
