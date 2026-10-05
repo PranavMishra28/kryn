@@ -244,8 +244,11 @@ def extract_worktree(tar_path, destination, expected_git_config_sha256, *,
                 seen_links = set()
                 spellings, kinds, explicit = {}, {}, set()
                 with tarfile.open(fileobj=_BoundedReader(source), mode="r:",
-                                  stream=True, encoding="utf-8", errors="strict") as archive:
-                    for member in archive:
+                                  encoding="utf-8", errors="strict") as archive:
+                    while (member := archive.next()) is not None:
+                        # Python 3.11 lacks stream=True. Explicit iteration keeps
+                        # metadata bounded without retaining prior TarInfo objects.
+                        archive.members.clear()
                         members += 1
                         if members > MAX_MEMBERS:
                             raise ExportError("TAR member count exceeds limit")

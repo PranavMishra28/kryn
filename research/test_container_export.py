@@ -52,6 +52,20 @@ def linked_entries():
 
 
 class ContainerExportTest(unittest.TestCase):
+    def test_metadata_iteration_does_not_accumulate_tar_members(self):
+        original = tarfile.TarFile.next
+        counts = []
+        def bounded_next(archive):
+            counts.append(len(archive.members))
+            return original(archive)
+        entries = base_entries() + [
+            ("testbed/item" + str(i), tarfile.REGTYPE, b"x") for i in range(100)]
+        archive(self.tar, entries)
+        with patch.object(tarfile.TarFile, "next", bounded_next):
+            result = export.extract_worktree(self.tar, self.destination, CONFIG_SHA)
+        self.assertEqual(result["files"], 101)
+        self.assertLessEqual(max(counts), 1)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="kryn-container-export-", dir="/private/tmp")
         self.addCleanup(self.temporary.cleanup)

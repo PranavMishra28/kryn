@@ -216,9 +216,24 @@ be promoted by an official patch result.
 
 The separately frozen generation/hand-off control results and their independent
 receipt are recorded in the campaign report. No real model generation is admitted
-by canned controls alone. Before real development work, finish and freeze the
-small sequential controller and independent adjudicator, including append-only
-recovery of retained exports and crashes without replay. Existing completed v3
-supervisor state must remain untouched. Empty patches need an explicit terminal
-no-change outcome. Freeze all new execution source and prospective controls before
-a model arm; this path is not yet a durable campaign or a quality result.
+by canned controls alone.
+
+`container_controller.py` sequences one native/KRYN pair with durable stage
+receipts and the existing power, memory, disk and runtime admission. An interrupted
+stage is never launched again. `container_recovery.py` stops only resources whose
+recorded ownership and image match, exports stopped candidate work when safe, and
+records interruption as unscored. Recovery does not change the original receipt.
+A clean empty patch is a terminal no-change failure. `container_adjudication.py`
+independently checks native root/child completion, actual wire settings, policy
+events, official grader evidence and resource absence. A resolved patch cannot
+upgrade an incomplete agent run. Synthetic controls have a distinct terminal
+receipt and cannot enter real-model scoring.
+
+The first controller canary exposed a Python-version mismatch in TAR import and
+an omitted route-control container in the recovery ownership rules. That failed
+attempt is retained. The importer now clears member metadata during explicit
+iteration on Python 3.11; recovery recognizes the route-control's exact pinned
+image. CI also runs research regressions under the evaluator's Python version.
+Controller crash admission and separate real-development preregistration remain
+required before model generation. The completed v3 supervisor remains untouched;
+new Linux development cannot be mixed with its scores or called protected work.
