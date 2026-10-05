@@ -540,7 +540,52 @@ and first-turn failure paths:
 `29b9cc09e2bb367fe810e388549522ef4f9dc1048a14a598165b96cc5f4dab9b`.
 The prospective manifest is
 `59a0f1544af3844e50c54b5ce65212c8fc020ee91cb66cf88f6d03cf6a6b1882`.
-No result is claimed yet. This can validate the wrapper boundary only; model
-continuity, broader development, fresh/protected validation, sustained coding/UI,
-endurance and final production scope remain open. These checks are author
-review, not independent-author review.
+These were prospective author checks, not independent-author review or proof
+of application acceptance. The actual outcome follows.
+
+## Canned CLI turns completed, but exact prompt delivery failed
+
+Both native CLI invocations exited zero and completed on the same owned root.
+The driver recorded two canned replies, no tools, an empty patch and settled
+export/cleanup in 28.321 seconds. Runtime counters remained unchanged and the
+model remained unloaded. The wrapper nevertheless failed its original exact
+user-message hash check; that result remains failed:
+`2f3c76a2fcca0815783263678273b5757d54f6fb1e5e48e5792d9ef52f616070`.
+
+Each exported user message contains two quoted copies of its submitted input.
+The retained native CLI handler appends arguments following `--` to its parsed
+message list, and its formatter quotes message parts containing spaces. These
+source observations support the mechanism; they do not establish an isolated
+parser execution result. A separate deterministic diagnosis confirms the exact
+retained-byte relation and all remaining original pure acceptance predicates.
+It does not replace the failed prompt predicate or upgrade this control.
+
+Settlement passed after separate author review with job removal intercepted:
+`bd7225dae13466d5679b4f03b9fbc87e7946f6800a7df613929b284eed1d2e6b`.
+It verified 1,349 unchanged files, the complete 5,751,808-byte archive and member
+map, both CLI receipts/exports, source and prior pins, unchanged unloaded runtime
+and actual owned-resource absence. All 31 parent/worker resource observations
+were normal, with zero sampled swap growth; all 26 power observations were AC
+at 90%, and all final checks passed. Only the exact inactive job was removed.
+Neither model inference nor grading occurred, and the started control was not
+replayed.
+
+The next no-model control sends two new UTF-8 fixtures through native CLI stdin,
+with Docker stdin enabled and no positional prompt arguments or `--` separator.
+Each includes internal line breaks and quotes; exact exported bytes are required.
+The existing 4,096-byte worker stdin bound remains enforced, so this does not
+yet establish a general transport for arbitrarily long task prompts. Two canned
+stop replies, no tools/patch, both direct CLI exits and new native completions,
+owned settlement, unchanged runtime counters and all guard finals remain required.
+The per-CLI 30-second and combined 60-second bounds are unchanged.
+
+Its author review passed 43 checks, including exact stdin forwarding, rejection
+of oversized inputs and the prior duplicated prompt form, preserved candidate
+binding and no continuation after first-turn failure:
+`48e163548b52d35b85570753a1a7d08566014fde25d7da8985e8e415364248e6`.
+The prospective manifest is
+`fca8c43b254eeb88a5d9deb34126863af7efd197ac12a00515bc57639d06cec9`.
+No outcome is claimed yet. Frozen product source, policies, resource stops and
+runtime settings remain unchanged. Model continuity, broader development,
+fresh/protected validation, sustained coding/UI, endurance and final production
+scope remain open.
