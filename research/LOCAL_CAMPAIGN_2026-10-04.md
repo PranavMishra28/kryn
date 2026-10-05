@@ -1520,5 +1520,67 @@ Author review passed 68 checks, including actual hook tests, unchanged acceptanc
 and guard control flow, cold-start success/failure mocks and refusal of wrong
 identity, profile or busy state:
 `2f791d7953d8230cdf6e173c1d8df328bc7c8b389c6d3bd022216fd22bcaa4d4`.
-No control outcome is claimed at launch. Model continuity and all broader
-production gates remain open; the earlier model policy failure is unchanged.
+No outcome was claimed at launch; the failed outcome and separate settlement
+are recorded below. Model continuity and broader production gates remain open.
+
+## Agent option omission still failed; native prompt API control
+
+Agent reuse V2 completed both actual CLIs and native generations, preserving
+both exact stdin messages, the one 279-byte fixture patch and three canned calls.
+It nevertheless **failed** the original policy gate: one `session.agent.selected`
+event selected `agent` from `agent` after the first turn's tool completed. The
+second CLI had omitted `--agent agent`, so omission alone does not prevent this
+native event. Policy snapshots remained unchanged. The retained CLI source passes
+a resolved target agent into its noninteractive routine, which contains an agent
+switch call; the partial source snapshot does not establish every resolution
+step. No classifier exception, policy change or acceptance upgrade was made.
+
+Result:
+`2ebf604ad2742305d761bddec46385984d47169770a039acaaf22ede964abc2f`.
+Driver:
+`96ef24f4d01da273f813673a45094bbeaa9e760bb959dee6f8c45ea5a7aa5573`.
+The safely admitted cold start established a fresh owned runtime, which remained
+unloaded idle with zero request, prompt-token and completion-token counters.
+There was no model inference, load, unload or emergency stop in this control.
+
+Separate settlement verified 1,356 unchanged files, the complete 5,753,856-byte
+archive with 1,322 members and 561 capture entries, both exact per-turn exports,
+stdin and agent-option receipts, source/baseline/prior evidence, and actual owned
+container/network IDs, names and labels absent. All 33 resource samples were
+normal with zero sampled swap growth; all 28 power samples were AC at 90%, with
+final guards checked. The fresh owned runtime still had unloaded idle zero
+counters. A separate 13-check author review preceded removal of the exact
+inactive exit-one job. Settlement:
+`4067868c60c301a420e67a19541366c721aa8a2b11000f83a4dbf04291049687`.
+The original failure remains frozen and is never replayed.
+
+The next control changes the continuation transport. One native CLI creates a
+new synthetic fixture and completes. After the original owned-session settlement,
+export and generation checks, one bounded POST to OpenCode's native
+`/api/session/:sessionID/prompt` endpoint admits the follow-up. This is the same
+prompt endpoint used by the CLI. The adapter rechecks the owned session's agent,
+model, permissions, directory and project before submission, sends no policy
+selection request, and leaves both generations to the existing native engine.
+It restores the actual first CLI receipt; it does not claim a second CLI ran.
+
+Acceptance requires exactly three canned calls, zero actual model requests, two
+exact native user messages, tool order `[shell]` then `[]`, the new 256-byte
+single-file patch, both native generation completions, unchanged snapshots and
+zero events rejected by the original continuous through-end policy gate. The
+first CLI has 30 seconds, prompt submission five seconds, and calls plus
+intermediate checks share 60 seconds, without retries. Existing settlement bounds,
+parent/child/final guards, 60-second cooldown, three green observations and all
+resource limits remain unchanged. The current owned runtime must remain unloaded
+with unchanged zero counters; no start, stop, load or unload is planned.
+
+Manifest:
+`a827733fab0b434924c824760897d546e78c41fc4201d0ccc6b51c72437980ba`.
+Predeclaration:
+`a42d9b67c1f15dd38cf6118c8dd6661c8b70b40594e7ffd40806ac1b73dbfa22`.
+The protocol passed 59 author checks, including actual scoped-hook failure cases,
+real retained container ordering, exact request transport, prior failure rejection
+and unchanged main/admission guard control flow:
+`814680e08ff050bdfe4c14b48f8dedeccbc3e7e736fa891c5e0e5f9997298f45`.
+This prospective no-model API mechanism control establishes no model continuity,
+second-CLI compatibility, endurance, benchmark quality or production qualification.
+All broader gates and truthful final scope remain open.
