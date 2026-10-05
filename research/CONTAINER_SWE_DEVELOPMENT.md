@@ -1664,3 +1664,83 @@ CI 37339605406 (`4a35ab0`) and 37340011501 (`ab2929d`) passed; full job/step
 JSON is retained. Broader quality, valid fresh/protected validation, sustained
 coding/UI, full-context reasoning, endurance and final production scope remain
 open. PR #242 stays draft; this launch is a continuation checkpoint.
+
+## Form failure settled; canned parent repair workflow launched
+
+The local-model form V1 finished its native CLI in 99.934 seconds with 12 local
+requests, but failed its original strict protocol. Agent wrote the page before
+loading the required `opencode` skill, attempted unavailable skill `browse`, then
+delegated Browse. The root skill call failed. All seven Browse calls completed:
+initial navigation, snapshot, empty submission, filling River, valid submission,
+clear and final snapshot. The greeting was `Status: Hello, River`, omitting the
+period required by the declared checker. The original result remains failed.
+
+Both native sessions reported succeeded. The full 2,881-byte child user prompt
+matched the declared inspection framing and complete parent request. Browse used
+only browser tools. These observations do not establish that the handoff prompt
+change caused better behavior. The 3,338-byte page passed the artifact callback,
+and the sole 3,666-byte index patch matched capture; neither upgrades the failed
+functional/protocol checks or establishes an independent functional grade.
+
+Exact native usage reconciled 12 requests, 52,505 prompt and 3,263 completion
+units. After the original single unload, runtime 85947 was unloaded and idle at
+76 requests, 388,387 prompt and 14,921 completion units. All 55 parent, 48 native
+and four capture resource samples were normal, with zero sampled swap growth
+and nonzero absolute swap. Fifty power observations were on battery, minimum
+74%, including all finals. This is a bounded observation, not endurance evidence.
+
+Separate settlement required the exact failed root sequence, failed skill input
+and greeting mismatch while verifying the remaining evidence. It did not invoke
+the original acceptance function. The first review rejected an incomplete
+expected skill-call record; the second hit a five-second exact Docker API query
+timeout. Both failures were retained before cleanup mutation. A separate bounded
+health check verified the local endpoint and exact browser ID/name absence; the
+timeout's cause remains unknown. A new review passed 16 author checks before
+separate settlement execution. All 67 files, both whole detached images and
+three empty owned mount paths were preserved. Browser ID/name/broker absence
+and port closure were verified, and only the inactive exit-1 job was removed.
+
+| Form V1 terminal evidence | SHA-256 |
+| --- | --- |
+| Failed result | `a25bfab4d082e98232b29fa1fbeccbed3460bc0ac57ea48a46846b5ab01a53fd` |
+| Driver | `476a7f91888da9aeca62bfe688bd5b57114d870a64934b50b954b3764cab4dab` |
+| Barrier | `a4c9c0f0149dc5ab71737da26cc2c95c8b1b3059b3fd746918787d01211d2bc5` |
+| Settlement review | `629a8256d896897c51c5beac79473fd078c76d650cacb6f71e1b09e49504c3fa` |
+| Settlement | `764ea30b5204f65f9942b605ac734bcf599c27f5ec2de39e7a6c80aabf503953` |
+
+The next diagnostic changes approach to the native repair workflow. A fresh
+fixed canned fixture requires skill loading, writing `Revision: before`, a
+Browse inspection and repair request, parent resumption and a second write, then
+a distinct Browse child navigating again and observing `Revision: after`.
+Acceptance requires both exact child contexts, native tool completion, returned
+reports, timestamps placing the second write after the first handoff, fresh
+browser observations, complete role catalogs and the captured final fixture.
+There are 12 canned HTTP responses and zero real model requests. This tests the
+transport and repair mechanism, not whether a model can diagnose or fix a task.
+
+The same frozen `4a35ab0` source, native engine, 120-second canned CLI, browser
+isolation, APFS phases and original resource stops remain. Runtime identity and
+all three counters must remain unchanged; no runtime start/load/unload/stop is
+allowed. Eight groups of author checks covered full preflight, original
+controller AST, actual local canned HTTP/SSE responses, 13 negative native
+acceptance cases and intercepted trial/failure paths. An initial review client
+hit BrokenPipe when sending an oversized body after the server rejected its
+length; the failure was retained, and a new review verified the original 413
+response by sending only the oversized length header. The runner was unchanged.
+Nine launcher checks preceded one bootstrap with verified process 70773.
+
+| Fresh repair control V1 artifact | SHA-256 |
+| --- | --- |
+| Runner | `9d932cc07ff685916eb09e4eedcf603bc574d564586772a50e5652e955e19039` |
+| Predeclaration | `da9ba2310705ca40be2f81560b15718eb2827616bf04d1688a8d44d43aaa4410` |
+| Manifest | `68f43e1b307d8ba47a9fd5331134a0e424f9062b9baf884ab79001dfeda9e138` |
+| Author review | `08df00b0f348ae56e0d415d4947fc44f210a7f0dad97fe4719e8d4c13ffc4b46` |
+| Launcher review | `981017a61da931a3538f90bfa59943f8f25c6a5e3eb95d5c90a091f574856679` |
+| Launch | `1b58952a11cfed652f44375bb18fa3bb45b690376496dcbf189f077d9e098de0` |
+| Activation | `7984f34ecca31232a2c819f70f20ca322de6706495cf8fa65da9cde846471279` |
+
+Outcome is unknown at launch. No original task, grader or control was replayed.
+CI 37341589860 at `cb47595` passed; full job/step JSON is retained. Product code
+is unchanged this checkpoint. PR #242 remains draft, with broader development,
+valid fresh/protected validation, sustained coding/UI, full-context reasoning,
+endurance and truthful final production scope still open.
