@@ -1329,3 +1329,49 @@ observation `8c72364b43e599cbda9d9534c5d7aee7804eb415650620e59214f20f5d684d76`.
 Earlier failed research and CI remain failed. Broader development, valid fresh
 protected validation, sustained coding/UI, full-context reasoning, long-duration
 endurance and final production scope remain open; PR #242 stays draft.
+
+
+## Local-model native UI V3 completed; prospective browser receipt fix
+
+The fresh skill-first V3 protocol passed unchanged: one Agent root with
+skill/write/subagent, one Browse child with navigation/snapshot, exact prompt,
+page and bounded workspace path, CLI exit 0 and seven locally routed requests.
+The native driver took 60.795 seconds; the full three-phase APFS barrier took
+70.748 seconds. Its sole 322-byte index patch exactly matched readonly capture,
+and the fresh synthetic marker grader passed. This is no official benchmark
+score, UI quality judgment, full-context reasoning or endurance claim.
+
+Usage was exactly seven requests, 31,406 prompt and 1,824 completion tokens,
+matching counters 45 → 52, 248,165 → 279,571 and 6,301 → 8,125. The original
+single unload left PID 85947 unloaded and idle. All 37 parent, 30 native and
+four capture samples were normal; 33 AC/90% power observations covered both
+children and final samples. Sampled swap growth was zero; absolute swap was
+nonzero. Separate reviewed settlement verified all 67 files unchanged, both
+preserved detached images, three empty owned mount paths on the actual host
+device and exact browser/broker absence, then removed the sole inactive exit-0
+job. The runner, review and settlement were each executed once.
+
+| Completed V3 artifact | SHA-256 |
+| --- | --- |
+| Result | `1fea49626e8cde9e8deb0b4b44f762998148279c6a78ee585668eaf1861a21f6` |
+| Driver | `71da250f4acf48feb7f9022f50db012ef904594f54d34be8d6d333dea136b81d` |
+| Barrier | `0e65426a1d17ec91f339d6fbbbf11d54576cb6507bb3e6a9c7e3f9d9c79f0caa` |
+| Patch | `64c7581336ee916a3cc52f227d584c8e5b0c31b7891396b7689dd74b49fbeb85` |
+| Settlement review | `7e67bd0b137bf99db2c12ce211d0e3600afc9d8e0254f77130b109428a7da889` |
+| Settlement | `5e731774b26c9402a13999121626c5a08fad1da9a1d6b686f6e5438801be5280` |
+
+The browser ID and port were not retained by this frozen source; only the exact
+name and original shutdown/listener-close predicate are available. The new
+prospective source retains Docker's inspected full container ID in the boundary
+receipt and the broker port in the native driver. It requires one inspected
+object with the requested exact name and a full ID. The explicit public receipt
+field list still excludes authentication credentials. Tests reject empty or
+ambiguous inventories, wrong names and missing/truncated IDs. Native engine,
+permissions, isolation, resource guards, cleanup and grading are unchanged.
+No frozen evidence is rewritten or upgraded.
+
+CI **37331355910** passed at `5874201`; full job/step conclusions are pinned by
+observation `5327a00f09d830e4e95a3158ab7c838beac92bde572b75f595300156a1fb789c`.
+All prior failures remain retained. Broader development, fresh/protected
+validation, sustained coding/UI, full-context reasoning, long-duration endurance
+and final production scope remain open; PR #242 stays draft.

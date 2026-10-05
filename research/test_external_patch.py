@@ -12,6 +12,7 @@ import unittest
 from types import SimpleNamespace
 
 from unittest.mock import patch
+from ui_gateway.broker import inspect_container
 
 from run_external_patch import (PatchBudgetExceeded, benchmark_tools, bounded_output,
                                 collect_patch, drive, prepare, quiet_command, sandbox_tool_preflight,
@@ -19,6 +20,31 @@ from run_external_patch import (PatchBudgetExceeded, benchmark_tools, bounded_ou
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_browser_receipt_binds_inspected_id_to_requested_name(self):
+        name, image = "kryn-ui-" + "a" * 32, "sha256:" + "b" * 64
+        item = {"Id": "c" * 64, "Name": "/" + name, "Image": image, "Mounts": [],
+                "Config": {"User": "10001:10001"},
+                "NetworkSettings": {"Networks": {"none": {}}},
+                "HostConfig": {"NetworkMode": "none", "ReadonlyRootfs": True,
+                    "Privileged": False, "CapDrop": ["ALL"],
+                    "SecurityOpt": ["no-new-privileges"], "PidMode": "", "IpcMode": "private",
+                    "CgroupnsMode": "private", "UsernsMode": "", "Devices": [],
+                    "DeviceCgroupRules": [], "CapAdd": [], "Binds": [], "VolumesFrom": [],
+                    "PortBindings": {}, "PublishAllPorts": False, "PidsLimit": 128,
+                    "Memory": 512 * 1024 * 1024}}
+        def inspected(items):
+            return patch("ui_gateway.broker.subprocess.run", return_value=
+                         subprocess.CompletedProcess([], 0, stdout=json.dumps(items)))
+        with inspected([item]):
+            receipt = inspect_container(name, image)
+        self.assertEqual(receipt["container_id"], item["Id"])
+        self.assertEqual(receipt["image_id"], image)
+        for items in ([], [item, item], [dict(item, Name="/different")],
+                      [dict(item, Id=None)], [dict(item, Id="c" * 12)]):
+            with self.subTest(items=items), inspected(items):
+                with self.assertRaisesRegex(RuntimeError, "identity differs"):
+                    inspect_container(name, image)
+
     @unittest.skipUnless(sys.platform == "darwin", "Requires macOS kqueue")
     def test_git_commands_wait_without_waitid(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:

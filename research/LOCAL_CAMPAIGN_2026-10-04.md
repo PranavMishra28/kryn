@@ -1849,3 +1849,34 @@ CI **37329916187** passed at `8289c25`. Full pins and the native evidence
 limitations remain in the [container record](CONTAINER_SWE_DEVELOPMENT.md).
 Broader development, fresh/protected validation, sustained coding/UI,
 full-context reasoning, endurance and final scope remain open. PR #242 is draft.
+
+
+## Native local-model UI V3 passed and settled
+
+Fresh V3 passed its declared skill/write/delegate and Browse navigation/snapshot
+protocol: native CLI exit 0, seven local requests, one successful Agent root and
+one successful Browse child, 60.795 seconds and a sole 322-byte page patch.
+Readonly capture matched that patch; the fresh synthetic marker check passed
+and all three APFS phases detached. This is bounded synthetic tool-use evidence,
+not official benchmark quality or sustained UI qualification. Earlier V2 remains
+failed under its original protocol.
+
+Exact native usage reconciled seven requests, 31,406 prompt and 1,824 completion
+tokens. One original guarded unload left the same runtime unloaded and idle at
+52 requests, 279,571 prompt and 8,125 completion tokens. All 37 parent, 30 native
+and four capture resource samples were normal; 33 AC/90% power observations
+covered the work and finals, with zero sampled swap growth and nonzero absolute
+swap. Separate settlement preserved all 67 files and both images, verified actual
+owned mount/browser absence and removed only the inactive exit-0 job. Fifteen
+author checks passed before separate settlement execution; no task, grader or
+runtime operation was replayed.
+
+This successful run still lacked the browser container ID and broker port in
+its native receipt. The prospective reporting fix retains the ID from Docker's
+boundary inspection and the broker port, checks the inspected name/ID, and
+continues to omit the authentication credential. Existing cleanup, isolation,
+native engine, accounting and emergency stops are unchanged. Old receipts are
+not backfilled. Full evidence pins are in the [container record](CONTAINER_SWE_DEVELOPMENT.md).
+CI **37331355910** passed at `5874201`. Broader development, valid fresh/protected
+validation, sustained coding/UI, full-context reasoning, endurance and final
+scope remain open; PR #242 stays draft.

@@ -681,7 +681,7 @@ def run(args, *, defer_patch=False):
                     cancel=monitor.cancel.is_set)
                 ui_gateway = broker
                 report["browser_gateway"] = {key: broker[key] for key in
-                                             ("image", "container", "boundary")}
+                                             ("image", "container", "port", "boundary")}
             if monitor.cancel.is_set():
                 raise RuntimeError("Resource guard interrupted browser startup")
             if ui_gateway is not None:
