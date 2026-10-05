@@ -1486,3 +1486,59 @@ Both pending CI runs passed: 37332655393 at `37f2ed0`, and 37336300276 at
 valid fresh/protected validation, sustained coding/UI, full-context reasoning,
 long-duration endurance and final truthful production scope remain open. PR
 #242 remains draft; no release, version, tag, owner install or merge change.
+
+
+## Counter interaction failure, settlement and Browse handoff clarification
+
+The counter interaction V1 remains a strict failure. Both native sessions
+finished and CLI exited 0 in 102.431 seconds, but Browse first attempted an
+unavailable `write` and a permission-denied project `read`. It then completed
+the five declared browser operations with visible counts 0, 1, 2, 0, 0.
+Those observations do not satisfy the original all-tools-completed and exact
+Browse-sequence predicates. The 775-byte model-authored page and sole 1,012-byte
+patch passed only the separately scoped applied-artifact callback; no official
+quality score or independent functional grade is claimed.
+
+Separate settlement required both exact rejected tool errors and checked the
+remaining retained predicates, without invoking the original acceptance or
+replaying the task, browser or grader. Twelve local requests used 56,311 prompt
+and 3,533 completion units, exactly reconciling counters 52/279,571/8,125 to
+64/335,882/11,658. One original unload left the same owned runtime unloaded and
+idle. All 55 parent, 48 native and four capture resource samples were normal;
+50 battery power observations covered the stages and finals, with a minimum of
+84%. Sampled swap growth was zero; absolute swap was nonzero. This bounded
+battery observation is not endurance qualification.
+
+The exact browser ID/name and recorded port were absent/closed on the bound
+local Docker endpoint, and its broker was absent. Both whole images were
+preserved, detached, with three empty owned mount paths on the host device.
+Sixteen author checks, including failure-preserving negative cases, preceded
+separate settlement execution. All 67 files remained unchanged across removal
+of only the inactive exit-1 launch job.
+
+| Counter interaction V1 artifact | SHA-256 |
+| --- | --- |
+| Failed result | `aaddf8b546de715251db0bcd5cfbf195915c593830f45624b147a1c5dda22e21` |
+| Driver | `bced0763ff5f4f20a1d6f248bc77b57e85d3c2460a74e0ea9eaeeb49ad9e2513` |
+| Barrier | `3d578c7216d6354f253c0aacdb9e7aec23d762b9cf52a35a4e84ef7638bd9e93` |
+| Patch | `96422c53fef975c80ab8336382dcaf01e51cfe71b0f2b5a1844a9e3b32d9f226` |
+| Settlement review | `e4eb0b7a43448d60e1cebb8046db3981c454188f45cf188c7215dc98b385d40d` |
+| Settlement | `26000b749c9425ecfca28e3f3b85f662bd50cd4098543a622a60b076cbda7666` |
+| CI 37337972945 observation | `366136de0771cac3ecb9c055850a922caf5044862849f83e814951060c6d527c` |
+
+Static inspection identified ambiguous role framing in the product: Browse's
+handoff appends the complete parent coding request to the inspection prompt.
+The plugin now identifies that request as reference context, closes that block
+with an explicit inspection-only instruction, and returns implementation and
+repair work to Agent. Browse guidance also explains that `read` is restricted
+to saved tool output permitted by native policy. The full user criteria remain
+present. Tool catalogs, permissions, native engine, resource guards and scoring
+are unchanged. This is a prospective clarity fix; causation of the model's two
+rejected calls and improvement in future model behavior are not established.
+The existing hook regression now checks both sides of the reference context,
+restricted guidance, unchanged tool filtering and private metadata exclusion.
+
+CI 37337972945 at `30a5d10` passed, with full job/step JSON retained. Earlier
+failed results remain failed. Broader development, valid fresh/protected
+validation, sustained coding/UI, full-context reasoning, long-duration endurance
+and final truthful production scope remain open. PR #242 remains draft.

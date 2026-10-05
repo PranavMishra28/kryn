@@ -1797,7 +1797,7 @@ test('new sessions remain available after 500 saved pins while old pins and trac
 test('Browse handoff retains current user criteria without putting prompt text in metadata reports', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    const request = 'Private acceptance: valid login shows Welcome; invalid login shows an error.';
+    const request = 'Build index.html. Private acceptance: valid login shows Welcome; invalid login shows an error.';
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: request } });
     f.call('session.compaction', { sessionID: 'ses_1', agent: 'build', system: [] });
     const event = { sessionID: 'ses_1', agent: 'build', tool: 'subagent', id: 'call_1',
@@ -1805,6 +1805,12 @@ test('Browse handoff retains current user criteria without putting prompt text i
     f.call('tool.execute.before', event);
     assert.ok(event.input.prompt.includes(request));
     assert.ok(event.input.prompt.startsWith('Check the layout.'));
+    assert.ok(event.input.prompt.indexOf('reference context for inspection only') < event.input.prompt.indexOf(request));
+    assert.ok(event.input.prompt.indexOf('Do not implement the parent request or read or change project files.') > event.input.prompt.indexOf(request));
+    const browse = { sessionID: 'browse_1', agent: 'browse', system: [], tools: { read: {}, write: {} } };
+    f.call('session.context', browse);
+    assert.ok(browse.system.some(part => part.text.includes('read is limited to saved tool output permitted by the native policy')));
+    assert.equal(browse.tools.write, undefined);
     assert.equal(event.input.background, false);
     f.call('tool.execute.after', { ...event, messageID: 'msg_1', status: 'completed' });
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Only inspect layout; do not submit forms.' } });
