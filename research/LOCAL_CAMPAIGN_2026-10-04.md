@@ -976,9 +976,59 @@ an immediate process-verification assertion failed after successful bootstrap,
 and a separate observation verified the exact running command without another
 bootstrap. Both receipts are retained.
 
-No benchmark problem, reference patch, official grade or comparison is part of
-this synthetic diagnostic. Child shell approval, task quality, full context,
-endurance, general agent readiness and real-comparison admission remain open.
+The read-only-child run then completed both owned native sessions and direct
+CLI execution in 51.744 seconds, with five local requests and the exact sole
+258-byte fixture patch. Its **original literal acceptance failed** because the
+root changed Python literal quote style in the shell command. Result
+`489ed2dd8636f566c3cdb8100a5c4a6421fc6c2c5175cf402926c4b4dc589315`
+remains failed. All 23,809 prompt tokens including native cache accounting and
+626 completion tokens reconciled before one model unload. Both parent and child
+guard finals passed: 53 normal resource observations, 45 valid AC power
+observations and zero sampled swap growth. Separate settlement and quotation
+diagnosis
+`a9f38b68dc22078552d7282afc502c592eca318007071bd043385badd565450c`
+verified canonical shell arguments and identical Python AST, the complete export,
+1,301 unchanged files, current runtime idle and actual owned-resource absence,
+then removed the inactive job. That diagnosis does not upgrade the exact-text
+protocol or general readiness. No task was replayed.
+
+A new larger-input synthetic text diagnostic then passed with an idle isolated
+OpenCode/KRYN container present. Its actual usage was 57,406 prompt tokens with
+zero cached tokens, 3,080 completion tokens and 60,486 total tokens, taking
+148.345 seconds. It made one loopback request and exercised no agent session or
+tool. Result
+`2100a61a1bc61b44f4795c92ed92cc2b62ea24d03eabcdf712fc55fc1d8f529e`
+keeps real-campaign admission false. The exact request and token deltas
+reconciled; one unload returned the original runtime to unloaded idle. All 74
+resource observations had normal pressure and zero sampled swap growth; all 64
+power observations were valid and on AC. The sampled runtime physical-footprint
+peak was 15,756,926,152 bytes, a process-wide observation rather than a per-model
+or KV-memory measurement.
+
+Separate settlement
+`5db5a66ae10bdcaa5796b7a217e4bfcdf13eaa34f2e10ee76a3190d6a2631bcb`
+verified full raw-response equality privately, actual usage and receipt hashes,
+worker readiness bracketing, isolation and protected plugin, current runtime
+identity and idle counters, prior evidence and 107 unchanged pinned files. The
+owned container's ID, name and label were absent. Only the inactive job derived
+from its pinned plist and exact arguments was removed. The prior wake's compact
+observer encountered an empty in-progress output file; it did not alter the
+runner or imply a diagnostic failure.
+
+The next preregistered request increases only the fixed synthetic input, requiring
+81,920–90,112 actual prompt tokens and zero cached tokens. The upper input bound
+plus the unchanged 8,192-token output limit fits the existing 98,304-token
+context. Manifest
+`80e69f4feffda7d3514f51291d6263e78bf217cd700ecca9b363663929ca661a`
+binds the unchanged profile and limits, completed prior settlement, exact input
+and initial counters. The author's review passed 47 static/mocked checks,
+including unchanged function AST after the declared identity/input-bound
+substitutions, counter conflicts, runtime identity changes and cleanup failures;
+it is not independent-author review. One durable runner was launched with
+unchanged automatic admission and emergency stops. It performs no task inference,
+agent tools, benchmark, reference patch, official grade or answer judging.
+Child shell approval, task quality, exact full-context consumption, endurance,
+general agent readiness and real-comparison admission remain open.
 
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`

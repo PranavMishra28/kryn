@@ -362,12 +362,30 @@ All guard finals passed, the runtime remained unloaded idle with zero requests,
 and settlement preserved 1,286 files plus the complete export before removing
 the inactive job. Neither failure was replayed or upgraded.
 
-The next local-model diagnostic narrows delegation to a read-only child, a flow
-already covered by the successful canned controls. The root creates and hashes
-one in-project fixture; the child reads it and finishes. Mechanical acceptance
-requires the exact fixture as the sole patch, completed owned sessions and the
-unchanged policy, wire and resource checks. The wrapper now reconciles owned
-usage before accepting either loaded idle or already-unloaded idle, unloading
-once only when needed. Concurrent activity or counter drift refuses cleanup.
-Child shell approval, task quality, full context, endurance and admission to a
-new real comparison remain unqualified.
+The read-only-child local-model diagnostic completed both owned sessions and
+returned CLI success in 51.744 seconds. All five local requests reconciled to
+23,809 prompt and 626 completion tokens, and only the exact 258-byte fixture
+patch remained. Its original acceptance still **failed**: the root changed
+Python literal quote style in the shell command, violating the declared exact
+text predicate. Separate diagnosis verified canonical shell arguments and
+identical Python AST; it does not upgrade the original result. Settlement
+verified 1,301 unchanged files, the complete export, 53 normal resource and 45
+valid AC power observations, and exact resource absence. The runtime was
+unloaded idle and the inactive job was removed.
+
+A subsequent fixed synthetic text request with an idle isolated worker passed
+at 57,406 actual input tokens, zero cached tokens and 3,080 completion tokens in
+148.345 seconds. Runtime counters reconciled exactly; one unload returned the
+same runtime to idle. All 74 resource observations had normal pressure and zero
+sampled swap growth, and all 64 power observations were valid and on AC.
+Settlement verified the full raw response privately, worker isolation and
+protected plugin, 107 unchanged pinned files and actual container absence before
+removing the inactive job. This qualifies one larger-input memory observation.
+
+The next single synthetic request keeps the same worker, model, sampling and
+resource limits. Acceptance requires 81,920–90,112 actual input tokens with zero
+cached tokens; its upper input bound plus the unchanged 8,192-token output limit
+fits the existing 98,304-token context. Static and mocked review passed 47 checks
+before one durable launch. It runs no agent tools or benchmark and judges no
+answer. Child shell approval, task quality, exact full-context consumption,
+endurance and admission to a new real comparison remain unqualified.
