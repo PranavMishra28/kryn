@@ -1100,3 +1100,77 @@ in this control. It qualifies neither UI task quality nor production readiness.
 CI **37324458958** passed at `fabcf06`; observation SHA-256 is
 `68bd0e43c9a9734ad5c695b09031b0fcae4b2de42c19db6069db576bc08b23fc`.
 Earlier failed CI and controls remain failed without reruns.
+
+## Native UI interpreter failure settled; supported-runtime control launched
+
+V3 failed before a native OpenCode process or model request started. The research
+launcher used Python 3.11, but the native engine requires Python >=3.13 and uses
+`TemporaryDirectory(delete=False)` to retain scratch when shutdown is unproved.
+The native driver, barrier, trial result and wrapper consistently retained the
+unsupported `delete` argument error. This is a controller-interpreter mismatch;
+the native retention mechanism was not changed.
+
+A browser container had started and its original cleanup reported success,
+including container absence and listener closure. The candidate image detached;
+no session export, capture or grading phase started. The browser ID/port and an
+explicit relay-settlement field were not retained, so no replacement receipts
+are invented. Zero canned requests and unchanged unloaded runtime counters
+(36 requests, 209,444 prompt, 3,317 completion) are preserved. Original result:
+`3034f952b1da6bd7ba8f3a5a80ba927bd0db1f1ea47d6056a6d638a2595865b7`;
+driver: `8a242beaab8632726578edd9bebcf7375caef86f7aa7013409f4de579c490a6a`.
+
+Separate settlement
+`3c3f695aa2cb31737cee356e5524f9522cad80fb19301dd268e270edc1b83e44`
+verified 38 unchanged files, actual browser-name/process and image/mount absence,
+the preserved candidate image, eight normal parent and four normal child
+resource samples, and six AC/90% power samples. Original power predicates ran in
+an isolated process with their original frozen source binding. Sampled swap
+growth was zero; absolute swap remained nonzero. Fifteen author checks preceded
+separate execution removing only the inactive job. The first review's copied
+launch-directory error failed before mutation and remains retained. A separate
+15-second Docker inventory timeout is also preserved; a local API ping and exact
+browser-name query subsequently completed in 0.011 seconds. Its cause remains
+unproven. Settlement does not upgrade the failed control.
+
+A supported-interpreter mechanism preflight exercised real native background
+preparation under existing Python 3.14.6 through retained-directory allocation,
+isolated configuration, Seatbelt generation and log setup, intercepting only
+process creation. It also checked that garbage collection preserves a
+`delete=False` directory and that original cleanup removes owned scratch when
+no process started. No native process, browser, APFS trial or model ran.
+The first preflight failed because historical evaluator package metadata was
+unavailable in Python 3.14; the second failed on an invalid synthetic broker-token
+length. Both are retained. The final preflight uses the existing Python 3.11
+venv solely for isolated read-only historical evaluator checks, and a fixture
+matching the original broker's original identity-length requirement. The mechanism preflight
+receipt has SHA-256:
+`9881c06c643469b3a9acbf549a233f9f4d8d74ffc6f256a8043c7641ce2d3753`.
+No dependencies were installed or owner settings changed.
+
+Fresh V4 binds the native controller, browser and adapter to the existing pinned
+Python 3.14.6 executable and keeps historical evaluator checks isolated in their
+original environment. It uses a new seed and receipt, the same frozen Git-source
+runtime/plugin bytes, exact browser image, six-call canned sequence, 120-second
+CLI bound, original APFS barrier, acceptance and linked guards. Nineteen author
+checks and a separate nine-check launcher review passed before one bootstrap.
+The immediate activation comparison failed because macOS executes framework
+Python through its sibling `Python.app` binary. A separate observation verified
+actual argv, `proc_pidpath`, both executable hashes and the one registered PID;
+no second bootstrap occurred. Both observations remain retained.
+
+| V4 artifact | SHA-256 |
+| --- | --- |
+| Runner | `810c5d498133b2aabed835420b173c1753d3efd15b896938a7cfe1215691191f` |
+| Predeclaration | `a95c9eeffa89c251d9d0bd3efeb51af57a21bb32a4369e562a7b84ea40732a5c` |
+| Manifest | `cba06ff4a090400deb3321d41ccb3bbe97d5f1b701cf9e2416551b8cbd5ad7cf` |
+| Author review | `9b3552e8ef7cd02c56e78e4d400329a9f5ae3d0cc24e70366c38c4278934c356` |
+| Launch | `dd73ca85bb175178d422b482a22a77ab127271b0e5f5b6c2de51a50f8ff622ca` |
+| Separate activation observation | `3cf5e08fcd4b6ece7aa7173341ee96ff2c15bec57a02c82f7cbc22072cf778b7` |
+
+The worker was verified active at launch; no outcome is claimed here. This is a
+no-model boundary control, not UI quality, benchmark or production qualification.
+CI **37326329635** passed at `0aab7ce`; compact terminal observation:
+`f09d192253ca629ca8ca5b05685e6105f3295bc6017fc8602f21d6fd4b533243`.
+Earlier failed CI remains failed. Broader development, fresh/protected validation,
+coding/UI, full-context reasoning, long-duration endurance and final scope stay
+open; the single PR remains draft.

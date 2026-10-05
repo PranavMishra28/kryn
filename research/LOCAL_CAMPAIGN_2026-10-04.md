@@ -1737,3 +1737,41 @@ prospective control retains six canned calls, zero model inference, one KRYN
 arm, the original 120-second CLI and APFS/browser boundaries. No outcome is
 claimed at launch; no broad UI, endurance, benchmark or production claim follows.
 CI **37324458958** passed at `fabcf06`; older failed CI remains failed.
+
+
+## Native UI interpreter mismatch and supported-runtime control
+
+V3 failed before native OpenCode process launch because the research controller
+used Python 3.11 while the native engine requires >=3.13 for retained temporary
+directories. The driver preserved the actual error; browser cleanup completed,
+the candidate image detached, and no model request, session export, capture or
+grading occurred. Zero canned calls and unchanged unloaded runtime counters are
+retained. Separate settlement verified 38 unchanged files and actual owned
+browser/mount absence, then removed only the inactive job. Its receipt is
+`3c3f695aa2cb31737cee356e5524f9522cad80fb19301dd268e270edc1b83e44`.
+The first settlement review's copied-directory error and a Docker inventory
+timeout remain preserved. Normal samples and settlement do not upgrade the
+original failed control.
+
+A mechanism preflight now exercises actual native background preparation under
+existing Python 3.14.6 through intercepted process creation, including original
+temporary-directory retention and cleanup. Historical evaluator checks run
+read-only in their original Python 3.11 environment. Two preflight failures
+(missing evaluator metadata and malformed synthetic broker identity) remain
+retained. No engine, guard, dependency installation or owner setting changed.
+The successful mechanism receipt is
+`9881c06c643469b3a9acbf549a233f9f4d8d74ffc6f256a8043c7641ce2d3753`.
+
+Fresh V4 passed 19 author checks and nine launcher checks before one bootstrap.
+The launcher's immediate process-name comparison failed on macOS framework
+Python's distinct process executable; a separate actual argv/proc_pidpath and
+hash observation verified the active worker. It was not bootstrapped again.
+This new fixture retains original six-call canned sequence, native engine,
+APFS/browser boundaries, acceptance and resource stops. No outcome or quality
+claim is made at launch. Full pins and retained limitations are in the
+[container record](CONTAINER_SWE_DEVELOPMENT.md).
+
+CI **37326329635** passed at `0aab7ce`; earlier failures are not replayed or
+upgraded. Broader development, valid fresh/protected validation, coding/UI,
+full-context reasoning, long-duration endurance and final scope remain open.
+PR #242 stays draft.
