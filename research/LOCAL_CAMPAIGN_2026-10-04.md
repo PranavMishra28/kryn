@@ -1078,6 +1078,58 @@ ownership/source rejection and failure retention in the actual wrapper. It ran
 no container or inference. Earlier failed controls are not replayed or upgraded;
 this diagnostic cannot qualify general agent readiness or task quality.
 
+The child-shell V2 diagnostic completed with result
+`0eb6574bf4448dcb4d7d73c5fae86de32d8266b976d814cec8ba8ca02e2e6c19`
+and driver
+`1eeabae1e457c9a962e1ad5fbc55ab620c71f37094375608c27e5887d2e7109c`.
+The GET-only observation captured one owned child shell permission whose source
+call and message match the exact unfinished tool. Root creation and child read
+completed; the shell and parent delegation were interrupted at the declared
+60-second timeout. Four canned calls left only the exact 280-byte fixture patch.
+No permission reply, policy edit, model request or grade occurred. Existing
+runtime counters stayed at seven requests, 167,293 prompt tokens and 4,735 output
+tokens, with the original process unloaded idle. All 80 parent/child resource
+observations were normal, all 69 power observations were valid AC at 90%, and
+sampled swap growth was zero. This establishes this control's pending permission,
+not the exact cause of earlier failures or successful child-shell execution.
+
+Separate once-only settlement
+`421b8f9560afee9042212f3508748fe4a89d53e51dd5afe10eb02332996bd500`
+verified the permission/export link, full policy/catalog/plugin/wire evidence,
+all guard finals, the 5,753,856-byte archive and exact member map, 1,295 unchanged
+files, and actual owned IDs/names/labels absent. It removed only the exact
+inactive job derived from the pinned plist and arguments. Author review passed
+11 checks with the actual settlement prechecks and intercepted job removal;
+no old runner, review, task or grader was replayed.
+
+The next prospective local-model diagnostic extends the supported read-only
+child path to parent resumption. A new synthetic parent creates a unique fixture,
+delegates one read to a general child, then verifies the fixture and writes a
+completion receipt. Only the exact 538-byte two-file patch is accepted. Shell
+acceptance requires exactly `python -c` with one code argument and the same full
+Python AST, permitting equivalent quotation/whitespace prospectively. Added
+commands, paths, values and shell syntax fail. The old literal-match failure is
+unchanged. No repository coding problem, reference patch or grader is involved.
+
+Predeclaration
+`4813b9213d72c5f9af7b5004b8e3a2cd198c8b580d32b910be74f0e904db2666`
+and manifest
+`81a4383b9e913afb4fa736a222fa3443c12ad11849a3a8b84144cef42c8d915c`
+bind the new task, current source/runtime, prior settlements and exact fixtures.
+Runner
+`90b184f7ce0aed0dc61300034dc9ff510e18ae947719b4d9c5d01977b60e547c`
+retains the unchanged generation path, native policy, wire, 900-second task and
+360-second request limits, 60-second/three-green admission and resource stops.
+Actual owned request/token counters must reconcile before at most one unload;
+concurrent requests, counter drift or identity changes withhold settlement and
+refuse conflicting runtime actions. Author review
+`e388cc925f991c97903e4d197f9810c5f301766c727d0da1a7de69901626451e`
+passed 53 static/mocked checks, including actual fixed commands in isolated
+temporary files, AST-equivalence acceptance and injection rejection, owned
+parent/child tool order and wrapper failure cases. No live inference or container
+ran during review. This remains a synthetic agent diagnostic, not broad task
+quality, child-shell approval, endurance or real-campaign admission.
+
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`
 compared the retained pressure logs with current host/runtime metadata. Both affected arms recorded warning

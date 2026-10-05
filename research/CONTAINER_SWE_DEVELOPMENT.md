@@ -391,16 +391,27 @@ boundaries, 114 unchanged files and actual container absence before removing
 only the pinned inactive job. This remains a single synthetic memory observation;
 it does not establish useful reasoning across the configured context or endurance.
 
-The next control targets the unresolved child shell stall. The pinned native CLI
-source handles automatic permission replies only for its root session. One new
-60-second canned root/general-child flow will use the existing bounded GET-only
-observer to capture a pending child shell request, then require its source call
-and message to match the exact unfinished shell tool. It sends no permission
-reply, changes no policy and makes no model request. The exact known fixture must
-be the sole patch; timeout is expected for this diagnostic. Parent/child guards,
-source, image, wire and runtime settings remain unchanged. The first preparation
-failed review on a prior-module attribute reference before any launch and was
-retired unrun. The separately prepared correction passed 25 author checks; this
-is not independent-author review. Earlier failures remain failed. Child shell
-execution, task quality, sustained coding/UI, continuity/endurance and admission
-to a new real comparison remain open.
+The separate child-shell control captured one pending shell permission on its
+owned general child and linked the request to the exact unfinished native tool
+call and message. The root creation and child read completed; the shell and
+parent delegation were interrupted at the declared 60-second timeout. Four
+canned calls left the exact 280-byte fixture patch. No permission was answered,
+policy changed or model request made. The original runtime stayed unloaded idle
+with unchanged counters. All 80 resource and 69 power observations passed on AC
+with zero sampled swap growth. Settlement verified the complete export, 1,295
+unchanged files and actual owned-resource absence, then removed only the pinned
+inactive job. This diagnoses this new control; historical failures stay failed.
+The first preparation's review failure remains preserved as retired unrun.
+
+The next local-model diagnostic exercises parent resumption after a read-only
+child: the parent creates one unique fixture, delegates its read, then verifies
+its hash and writes one completion receipt. Only the exact two-file patch is
+allowed. Acceptance prospectively requires the same `python -c` arguments and
+complete Python AST, allowing equivalent quotation and whitespace. It rejects
+added operations, changed paths and shell syntax; the earlier literal-match
+failure remains failed. All native tools must complete, both owned sessions must
+succeed, and actual local usage must reconcile before conditional model unload.
+The unchanged frozen runner, policy, wire, model profile and emergency stops
+apply. Static/mocked author review passed 53 checks; it is not independent-author
+review. Child shell execution, task quality, sustained coding/UI,
+continuity/endurance and admission to a new real comparison remain open.
