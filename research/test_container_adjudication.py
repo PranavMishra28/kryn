@@ -214,6 +214,7 @@ class AdjudicationTests(unittest.TestCase):
                     audit, "classify_arm", return_value={"category": "accepted", "accepted": True}) as classify:
                 result = audit.adjudicate(campaign)
             self.assertEqual(result["arms"]["native"]["category"], "unscored")
+            self.assertEqual(result["arms"]["native"]["evidence_error"], "terminal_pin_drift")
             self.assertEqual(result["arms"]["kryn"]["category"], "accepted")
             self.assertFalse(result["pair_comparable"])
             classify.assert_called_once()
@@ -339,6 +340,16 @@ class AdjudicationTests(unittest.TestCase):
                 result = audit.classify_arm(Path("/unused"), "native", {}, state)
             self.assertEqual(result["category"], "unscored")
             self.assertIsNone(result["accepted"])
+            self.assertEqual(result["reason"], "evidence_invalid")
+            self.assertEqual(result["evidence_error"], reason)
+
+    def test_external_exception_text_is_not_exposed_in_compact_evidence(self):
+        state = {"generation": {"path": "present"}, "recovery": None}
+        with patch.object(audit, "generation", side_effect=OSError("private exception detail")):
+            result = audit.classify_arm(Path("/unused"), "native", {}, state)
+        self.assertEqual(result["category"], "unscored")
+        self.assertIsNone(result["evidence_error"])
+        self.assertNotIn("private exception detail", json.dumps(result))
 
     def test_no_change_is_strict_failure_only_with_clean_state(self):
         with tempfile.TemporaryDirectory() as folder:

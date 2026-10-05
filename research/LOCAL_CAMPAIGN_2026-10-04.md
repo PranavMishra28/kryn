@@ -1186,8 +1186,8 @@ mocked execution of normal, strict-failure and unscored runner paths. The future
 deterministic auditor
 `888f3b548a896f4213155c6dd4bb13712a01efcd00bfa4cbe98c29727e976a43`
 retains the established raw evidence predicates with explicit current-source,
-arm-order and admission changes. It will run once only after a complete pair;
-a safety stop that prevents a complete pair retires it unrun. A clean timeout
+arm-order and admission changes. It was eligible to run once only after a complete
+pair; the incomplete integrity-excluded outcome below retired it unrun. A clean timeout
 remains a strict failure; safety, integrity, ownership, recovery and missing
 evidence remain unscored. These reviews are not independent-author review.
 No result, fresh/protected validation, broad headroom, endurance, production
@@ -1203,3 +1203,82 @@ unknown. Two failed operator metadata probes are retained. No unrelated apps,
 runtime settings or emergency stops changed. The separate bounded pytest
 admission above follows later loaded-model and agent evidence; it does not
 explain historical pressure or qualify arbitrary real workloads.
+
+
+## Bounded pytest pair: incomplete and settled
+
+The exposed pytest pair stopped after both 900-second CLI timeouts. KRYN made
+56 relay requests and took 920.759 seconds including settlement. Its candidate
+patch resolved the official tests with complete 2 fail-to-pass and 86
+pass-to-pass coverage, but the unchanged completion rule makes this a strict
+failure. Native made 48 relay requests and took 920.153 seconds including
+settlement. It edited one existing test, so the unchanged integrity rule excludes
+it and its official grader never started. The private wrapper stopped with
+`needs_action`; no campaign adjudication was synthesized. This pair has no
+matched score or comparative uplift. The preregistered pair audit is retired
+unrun, and neither arm nor grader may be replayed.
+
+Runner failure receipt:
+`c7e6414e88ca74374279b9ac80b45726925c850e5c4ba5bcc685bacdb3cd963e`.
+The original source, budgets, policies, test exclusion and resource stops remain
+unchanged. Six parent/worker/grader logs contain 1,720 normal resource samples
+and 1,496 valid AC power observations, with zero sampled swap growth within
+each stage and all final checks present. These observations do not explain
+historical pressure or establish endurance.
+
+Settlement
+`c3533510d5aa9e1dc2b14ed4a906a37d80bfe5dd3672018af0ff6c6dcc60509c`
+verified 4,492 unchanged files, both full TAR/member maps, exact source and
+baseline, native policies/catalogs, wire controls, raw grade coverage and actual
+owned IDs/names/labels absent. Of 104 relay requests, the exports contain 102
+token-accounted assistant messages and two terminal provider-error messages
+without token records. The 102 counted requests, 2,328,338 prompt tokens and
+16,795 completion tokens exactly reconcile the runtime counter increases.
+After this reconciliation, one guarded unload returned the same runtime to
+unloaded idle; only the exact inactive controller job was removed.
+
+The first settlement review rejected a copied whole-catalog equality check:
+native initializes 84 built-ins after an initially empty inventory. Its final
+catalog exactly matches the settled native control and excludes `kryn.product`.
+A new settler retains that observation and uses the frozen arm-specific rule.
+A second review fixture failed when hashing its deliberately intercepted output;
+a new review models the in-memory output consistently. Both failed reviews are
+retained. The successful review performed actual read-only checks with unload,
+job removal and output intercepted; it is author review, not independent-author
+review. Settlement does not upgrade the incomplete comparison.
+
+Future compact adjudication receipts now retain the internal validation reason
+in `evidence_error`, for example `existing_tests_changed` or
+`terminal_pin_drift`. External exception text is omitted. This is a reporting
+change only: acceptance, exclusions, resource guards and existing frozen
+campaigns are unchanged. Targeted regressions cover both reason propagation and
+private exception suppression. Broader development, fresh/protected validation,
+coding/UI, continuity/endurance and final production scope remain open.
+
+
+## Next bounded diagnostic: two CLI invocations in one session
+
+The next synthetic diagnostic uses one KRYN root session and two separate native
+CLI invocations. The first creates a unique fixture and finishes. Only after
+exit zero, owned-session settlement and new native-generation completion may
+the second CLI submit its follow-up to that same session. The follow-up must
+use instructions retained from the first message to read the fixture and create
+a second exact receipt. Both invocations must finish successfully; fixture
+hashes, the complete two-file patch, tool sequence, command argv/Python AST,
+native usage counters, ownership and all resource finals determine acceptance.
+
+Each CLI has a 300-second deadline, with a 600-second combined bound including
+intermediate checks. A private scoped hook wraps the existing worker command;
+all frozen generation, relay, export, policy and resource-stop code remains
+unchanged. It uses source `59ce852` explicitly; the later compact-reporting
+change is outside this frozen runtime. No benchmark or grader is involved.
+This tests one continuation across CLI processes only, without compaction or
+server restart, and cannot establish broad continuity, endurance or production
+readiness. Any started diagnostic is never replayed.
+
+The V1 bundle was retired before execution after static review found an
+incorrect copied server URL. V2 imports the existing authoritative constant and
+preserves V1's sealed inputs. Its author review passed 45 static, synthetic and
+mocked checks, including no continuation after an incomplete first invocation:
+`06cb413d36dbe14f3bb7b4bd650faf0eca5b42cc208de64a3130f331792fbfbe`.
+This is not independent-author review or a diagnostic result.

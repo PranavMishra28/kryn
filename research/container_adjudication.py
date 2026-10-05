@@ -603,7 +603,8 @@ def classify_arm(campaign, arm, manifest, state, *, owner_query=None, coverage=o
     except (InvalidEvidence, OSError, KeyError, IndexError, AttributeError, TypeError,
             ValueError, UnicodeError, subprocess.SubprocessError) as error:
         return {"category": "unscored", "accepted": None, "reason": "evidence_invalid",
-                "error_type": type(error).__name__}
+                "error_type": type(error).__name__,
+                "evidence_error": str(error) if isinstance(error, InvalidEvidence) else None}
 
 
 def campaign_manifest(campaign):
@@ -665,7 +666,8 @@ def adjudicate(campaign, *, owner_query=None, coverage=official_coverage):
         except (InvalidEvidence, OSError, KeyError, IndexError, AttributeError,
                 TypeError, ValueError, UnicodeError) as error:
             arms[arm] = {"category": "unscored", "accepted": None,
-                         "reason": "terminal_evidence_invalid", "error_type": type(error).__name__}
+                         "reason": "terminal_evidence_invalid", "error_type": type(error).__name__,
+                         "evidence_error": str(error) if isinstance(error, InvalidEvidence) else None}
     if len(states) == 2 and states[order[0]]["terminal_unix"] > states[order[1]]["_controller_start"]["started_unix"]:
         for arm in order:
             arms[arm] = {"category": "unscored", "accepted": None, "reason": "arm_order_invalid"}
