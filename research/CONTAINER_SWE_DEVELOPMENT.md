@@ -1584,3 +1584,83 @@ model compliance or general UI quality. The failed counter run remains failed.
 The heartbeat will inspect the next meaningful terminal checkpoint and continue
 eligible engineering. Broader research and production gates remain open; this
 launch is not completion, and PR #242 remains draft.
+
+## Handoff delivery passed; fresh model-authored form admitted prospectively
+
+The no-model handoff V1 control passed in 9.844 seconds with six canned calls
+and zero real model requests. Its actual native Browse user prompt contained
+all 713 declared bytes, including the complete parent criteria and the
+inspection-only framing before and after them. Agent write/delegate and Browse
+navigate/snapshot all completed. This establishes delivered user context only;
+it does not establish full system-prompt provenance or better model compliance.
+
+The three APFS phases detached; the sole 307-byte index patch matched capture.
+All 13 parent, six native and four capture resource samples were normal, with
+zero sampled swap growth and nonzero absolute swap. Eleven battery observations
+covered the stages and finals at a minimum of 81%. The same runtime stayed
+unloaded and idle at 64 requests, 335,882 prompt and 11,658 completion units;
+there was no loaded-model battery observation in this canned control.
+
+The first settlement review stopped on a 20-second historical Docker CLI
+inventory timeout before any cleanup mutation. The separately bounded, locally
+bound Docker API health/absence check passed; the timeout's cause remains
+unknown. A new settlement script pinned that failure and the original unexecuted
+script, retained all original preflight checks, and passed 16 author checks
+before separate execution. All 65 evidence files, including two whole detached
+images, remained unchanged across removal of only the inactive exit-0 job.
+Exact browser ID/name and broker absence, recorded-port closure, and three empty
+owned mount directories were verified. No original task, grader or acceptance
+function was replayed.
+
+| Handoff V1 terminal artifact | SHA-256 |
+| --- | --- |
+| Passed result | `6aa3a6d787c94db6393c72a1e0e968f2b70ead8226375d8ae03332dba3a2e21d` |
+| Driver | `53192d8dc2af9166e6b09d99981423633ab349c6afbbf906f7b3fec46710a0a4` |
+| Barrier | `03ed4696b1a9cb799bf2649e186a28a850d1f22637c2e5e540e2e535e5e58dd1` |
+| Exact delivered child prompt | `47ffe861874e95a8ca5de80c27676a15c7d50949f8fb4f781206721f08282d9f` |
+| First settlement review failure | `47137737f881903a771998e8bcaee4c18a583a6028bcf2459f83e55989507bc9` |
+| Separate Docker health check | `42579671ffa37866031c10cf0ea4de3923ce0511ce8706cdbaaec9c207cdea0f` |
+| Revised settlement review | `bdd6c7b0d87bc6abd543c46fb76097339275e9e0bf21de414ee744983e184faf` |
+| Settlement | `a674f05a7abc9c54c6b5d521887855daaa6c48a21cb73f2a6781835bdbcce43c` |
+
+The next prospective task is a different public name-entry form, with a blank
+seed and requirements only. Local OpenCode/oMLX must author the implementation.
+Native Browse observations must demonstrate empty-submit failure, a valid River
+submission, then clearing both the accessible input and status. The prospective
+state checker permits extra snapshots within 12 browser calls; it rejects
+wrong origins, selectors, values, stale/duplicate states, truncated observations,
+missing flows, file tools and failed calls. All original tool-completion,
+identity, isolation, usage, resource and cleanup gates remain. The failed
+counter's exact-sequence protocol and result are unchanged.
+
+The new runner also checks the exact delivered child user context. Its applied
+artifact callback checks bounded regular UTF-8 page bytes and public-marker
+integrity; it is not an independent functional grade. One 300-second CLI,
+300-second requests, the original 128-request cap, exact before-forward sampler
+and complete role schemas, the same frozen `4a35ab0` source and plugin bytes,
+and unchanged battery-capable admission and emergency stops bound the task.
+Historical prior-chain checks retain every predicate while receiving the
+explicit current counter expectation after legitimate new generation.
+
+Twenty-three author checks covered actual preflight, intercepted trial bindings,
+positive and negative native evidence, counter binding, and success/unload,
+failure/owned-stop and concurrency/no-operation branches. Nine launcher checks
+preceded one bootstrap, with actual framework-app PID 63837 verified. These
+reviews are not independent-author reviews. A missing local alias was corrected
+in the unsealed draft before preparation/review/execution, with both hashes
+retained. Outcome is unknown at launch; no original task was replayed.
+
+| Fresh form V1 artifact | SHA-256 |
+| --- | --- |
+| Runner | `e6474db3762cdabbbf097dec2f3dcd88e3dedc02ac6e848150c20eedac19ddfd` |
+| Predeclaration | `d6f4a8622063a00bbb69073b5bef2a439a98402ca95d4cdaddc1014f088c9bf3` |
+| Manifest | `09c11847faaa0f8f5ee6a4d814514c554aee2b6ee89f605decac61bd9b3bb72f` |
+| Author review | `6bdc311234c0b80a2de380e1afc71cfe14e1931eb1aca173614e79429451e1e6` |
+| Launcher review | `f64fa0f9d25d43f8d1cd059e72d18e3c2c132149553e48c7d9ee0d248b5f1139` |
+| Launch | `5e34251c216a9a4ad24c6e8e5b9c42b7081ecfe844264ed5819252003c8dffda` |
+| Activation | `cc1460cfe6ea7b363c9fbe912031f902db4a071519dd87ff0e8ad383b6925c04` |
+
+CI 37339605406 (`4a35ab0`) and 37340011501 (`ab2929d`) passed; full job/step
+JSON is retained. Broader quality, valid fresh/protected validation, sustained
+coding/UI, full-context reasoning, endurance and final production scope remain
+open. PR #242 stays draft; this launch is a continuation checkpoint.
