@@ -1375,3 +1375,47 @@ observation `5327a00f09d830e4e95a3158ab7c838beac92bde572b75f595300156a1fb789c`.
 All prior failures remain retained. Broader development, fresh/protected
 validation, sustained coding/UI, full-context reasoning, long-duration endurance
 and final production scope remain open; PR #242 stays draft.
+
+
+The new code at `37f2ed0` passed 220 setup, 214 research (two skips), 87 Node
+and native/frozen offline checks; evaluator Python 3.11 passed 214 research
+checks (one skip). Clean-source package smoke, documentation/link/diff checks
+and one-commit secret scanning passed. Code validation is
+`2a7bdf812882da11882d69f3bfb84a6399ffa19d6abdc77c27e8f21491226f32`.
+A new authentic detached Git copy verifies all 414 tracked blobs and 98 source
+hashes. Only the browser receipt implementation/test and the previously
+validated unscored-reason implementation/test differ from the prior frozen
+runtime; exact reversal proves all surrounding browser/driver code unchanged.
+Source proof: `6f274c78ec3756d000ac8efcdaee194ebe9ca6190c773cbfd43a49afa88bbd99`.
+
+A fresh canned native browser identity V3 control was bootstrapped once with
+RunAtLoad true/KeepAlive false and verified framework-app process PID 40230.
+It schedules six canned calls, no real model requests, a 120-second CLI and the
+same three-phase APFS barrier, image, linked guards and battery-capable safe
+admission. The original runtime must stay unloaded and idle at counters
+52/279,571/8,125. In addition to the unchanged original acceptance, the new
+control requires a credential-free receipt with full inspected container ID
+and integer broker port, exact ID/name absence and closed listener. The CLI
+Docker endpoint must match the known local Unix endpoint at admission and
+absence checks; environment endpoint overrides are rejected. Twenty-one author
+checks and nine separate launcher checks passed. Outcome is unknown at launch;
+no qualification is claimed from activation.
+
+Two drafts were retired before any attempt, native process, browser, APFS or
+model operation. V1 copied stale final scope prose despite the explicit source
+delta; V2 passed 19 author checks but later static review found that its absence
+API endpoint lacked explicit binding to the CLI-selected endpoint. Fresh V3
+adds that binding and negative checks, preserving both unrun drafts. No started
+task or grader was replayed and no safety predicate was relaxed.
+
+| Prospective browser identity control artifact | SHA-256 |
+| --- | --- |
+| Runner | `85894fc4113c84ed4cdef78612b9be8778dd957064e3b4385bb283c67cb27b85` |
+| Predeclaration | `74daa840fa6fcae7308f64c8dfa58a8b1abada6a199f37ce0ffaf6f83b9708a7` |
+| Manifest | `fa9bddc549cc262d4bfc164ed1901244102d349da3219319c971eed15b33559c` |
+| Author review | `4df189842b3192a1d961efc739390bd47b32c50725af3d36e7f8e5314dffcc77` |
+| Launcher review | `604f424801ff57032fc4d3e0dfbc4d616b516e7d9a6d4f4fd5845acbf50e0935` |
+| Launch | `0b762c8adebda41fd3d21270871698a37aa69263b0baba5065fbf57f234773e2` |
+| Activation | `f84f8748e0f1ff422beba37773dbcf579d0548ce5c0e5aaac6f4d903921630cb` |
+| V1 retirement | `10de1a8f1f559bd8dccc083b0b1ff7d5bc25548d6cb20eaa4f4bbc48995fe716` |
+| V2 retirement | `b3b70a7e3004ac50f90b8e2e0f58d489da312f550fb61bbdc3d3cf7eabd6b1b7` |

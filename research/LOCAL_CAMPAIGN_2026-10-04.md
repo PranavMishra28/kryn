@@ -1880,3 +1880,15 @@ not backfilled. Full evidence pins are in the [container record](CONTAINER_SWE_D
 CI **37331355910** passed at `5874201`. Broader development, valid fresh/protected
 validation, sustained coding/UI, full-context reasoning, endurance and final
 scope remain open; PR #242 stays draft.
+
+
+A fresh canned browser receipt control is now launched once against frozen
+`37f2ed0`. It retains the six-call Agent/Browse sequence, original APFS barrier,
+120-second CLI, browser image and emergency stops; no real model request is
+scheduled. It additionally requires the actual full container ID, safe broker
+port and exact ID/name/listener absence on the verified local Docker endpoint.
+The original runtime must remain unloaded at 52/279,571/8,125. Twenty-one author
+checks and nine launcher checks passed; exact process identity was verified.
+Outcome is unknown at launch. Two earlier drafts were retired unrun: copied
+scope text, then an API/CLI endpoint binding gap missed by the first review.
+Both are preserved. This new control does not replay any prior native task.
