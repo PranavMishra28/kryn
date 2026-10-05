@@ -46,12 +46,24 @@ def prompt(units, nonce, version="A"):
     )}]
 
 
-def command(argv):
+def command(argv, *, observation=None):
+    started = time.monotonic() if observation is not None else None
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=3)
+        if observation is not None:
+            observation.update(status="ok" if p.returncode == 0 else "nonzero_exit",
+                               returncode=p.returncode,
+                               stdout_bytes=len(p.stdout.encode()), stderr_bytes=len(p.stderr.encode()))
         return p.stdout.strip() if p.returncode == 0 else None
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired) as error:
+        if observation is not None:
+            observation.update(status="timeout" if isinstance(error, subprocess.TimeoutExpired) else "os_error",
+                               returncode=None, errno=getattr(error, "errno", None))
         return None
+    finally:
+        if observation is not None:
+            # Retain query outcome, never command output or exception text.
+            observation["elapsed_seconds"] = round(time.monotonic() - started, 6)
 
 
 def swap_bytes(text):
@@ -86,14 +98,19 @@ def resources(base):
         result["unavailable"] = "macOS resource commands only"
         return result
     _, port = protocol.endpoint(base)
-    swap = command(["/usr/sbin/sysctl", "-n", "vm.swapusage"])
-    pressure = command(["/usr/sbin/sysctl", "-n", "kern.memorystatus_vm_pressure_level"])
-    power = command(["/usr/bin/pmset", "-g", "batt"])
+    queries = {name: {} for name in ("swap", "pressure", "power", "listener")}
+    result["resource_queries"] = queries
+    swap = command(["/usr/sbin/sysctl", "-n", "vm.swapusage"], observation=queries["swap"])
+    pressure = command(["/usr/sbin/sysctl", "-n", "kern.memorystatus_vm_pressure_level"], observation=queries["pressure"])
+    power = command(["/usr/bin/pmset", "-g", "batt"], observation=queries["power"])
     result.update(swap_raw=swap, swap_used_bytes=swap_bytes(swap),
                   pressure_level=int(pressure) if pressure and pressure.isdigit() else None,
                   power_source=power_source(power))
-    pids = command(["/usr/sbin/lsof", "-nP", "-a", f"-iTCP:{port}", "-sTCP:LISTEN", "-t"])
+    listener_query = queries["listener"]
+    pids = command(["/usr/sbin/lsof", "-nP", "-a", f"-iTCP:{port}", "-sTCP:LISTEN", "-t"],
+                   observation=listener_query)
     ids = sorted({int(x) for x in (pids or "").split() if x.isdigit()})
+    listener_query.update(pid_count=len(ids), invalid_token_count=sum(not x.isdigit() for x in (pids or "").split()))
     processes = {pid: {"pid": pid, "rss_bytes": None, "phys_footprint_bytes": None,
                       "lifetime_max_phys_footprint_bytes": None} for pid in ids}
     if ids:

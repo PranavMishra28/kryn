@@ -353,3 +353,24 @@ not a replay or a successful admission yet. Source `ff2ff5a` passes full checks
 (216 setup, 189 research with two skips, 87 Node), evaluator Python 3.11 research
 checks, clean package smoke and GitHub CI. A 46-commit branch scan has no Gitleaks
 findings. No additional model quality claim follows from these checks.
+
+The new reverse-order control also failed admission. Both canned agents
+completed their root/child actions, but the parent guard stopped their source
+exports after missing telemetry. The KRYN interruption recorded no listener;
+the native interruption recorded neither power nor a listener in both samplers.
+Adjacent samples had normal pressure, unchanged swap and the same runtime PID.
+A bounded power-log inspection found no corresponding sleep/wake transition;
+this does not establish uninterrupted execution or the missing commands' cause.
+The original query exit status and timing were not retained. Native diagnosis
+receipt: `5667f9fe81f782230eee5afe245b4f106494c93aa61378c5c16bc5837040704a`.
+These arms remain unscored and are not replayed. Recovery preserves their source
+and settles only their owned resources. No grader or real model ran.
+
+Prospective resource samples now record bounded command status, return code,
+elapsed time and output byte counts for the four existing telemetry queries.
+They capture no new raw output, command arguments or exception text. Each query
+still runs once with the same three-second timeout; missing telemetry still
+stops immediately and stays latched. This closes an observability gap, not a
+proven runtime fix. The next diagnostic isolates export and resource sampling
+without running another agent or grader; another unchanged full control is
+not justified. Further real development remains gated.
