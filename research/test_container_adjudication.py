@@ -40,7 +40,7 @@ class AdjudicationTests(unittest.TestCase):
             native = self.terminal(campaign, "native", 1, 2, 3)
             self.terminal(campaign, "kryn", 4, 5, 6)
             Path(native["path"]).write_text('{"completed":false}')
-            with patch.object(audit, "campaign_manifest", return_value=({}, "frozen")), patch.object(
+            with patch.object(audit, "campaign_manifest", return_value=({"arm_order": ["native", "kryn"]}, "frozen")), patch.object(
                     audit, "classify_arm", return_value={"category": "accepted", "accepted": True}) as classify:
                 result = audit.adjudicate(campaign)
             self.assertEqual(result["arms"]["native"]["category"], "unscored")
@@ -55,10 +55,46 @@ class AdjudicationTests(unittest.TestCase):
             campaign = Path(folder).resolve()
             write(campaign / "manifest.json", {})
             self.terminal(campaign, "native", 1, 2, 3)
-            with patch.object(audit, "campaign_manifest", return_value=({}, "frozen")):
+            with patch.object(audit, "campaign_manifest", return_value=({"arm_order": ["native", "kryn"]}, "frozen")):
                 with self.assertRaises(OSError):
                     audit.adjudicate(campaign)
             self.assertFalse((campaign / "adjudication.json").exists())
+
+    def test_campaign_order_contract_keeps_other_frozen_checks_required(self):
+        manifest = {"kind": "swe_container_development", "wall_seconds": 900,
+                    "request_seconds": 360, "task": {}, "source_sha256": {"changed": "source"}}
+        for order in (["native", "kryn"], ["kryn", "native"], [], ["native"],
+                      ["native", "native"], ["kryn", "kryn"], ["other", "kryn"],
+                      ["native", "kryn", "native"], None, "native,kryn"):
+            with self.subTest(order=order), patch.object(audit, "sealed",
+                    return_value=({**manifest, "arm_order": order}, "frozen")), patch.object(
+                    audit, "source_inputs", return_value={}) as source:
+                valid = order in (["native", "kryn"], ["kryn", "native"])
+                with self.assertRaisesRegex(audit.InvalidEvidence,
+                        "frozen_source_drift" if valid else "campaign_contract"):
+                    audit.campaign_manifest(Path("/unused"))
+                self.assertEqual(source.call_count, 1 if valid else 0)
+
+    def test_adjudication_uses_declared_order_and_unscored_actual_order_mismatch(self):
+        for order in (["native", "kryn"], ["kryn", "native"]):
+            for actual in (order, order[::-1]):
+                with self.subTest(declared=order, actual=actual), tempfile.TemporaryDirectory() as folder:
+                    campaign = Path(folder).resolve()
+                    manifest = {"arm_order": order}
+                    write(campaign / "manifest.json", manifest)
+                    self.terminal(campaign, actual[0], 1, 2, 3)
+                    self.terminal(campaign, actual[1], 4, 5, 6)
+                    with patch.object(audit, "campaign_manifest", return_value=(manifest, "frozen")), patch.object(
+                            audit, "classify_arm", return_value={"category": "accepted", "accepted": True}) as classify:
+                        result = audit.adjudicate(campaign)
+                    if actual == order:
+                        self.assertTrue(result["pair_comparable"])
+                        self.assertEqual([call.args[1] for call in classify.call_args_list], order)
+                    else:
+                        classify.assert_not_called()
+                        self.assertFalse(result["pair_comparable"])
+                        self.assertTrue(all(row == {"category": "unscored", "accepted": None,
+                            "reason": "arm_order_invalid"} for row in result["arms"].values()))
 
     def test_false_session_completion_is_unscored(self):
         with tempfile.TemporaryDirectory() as folder:

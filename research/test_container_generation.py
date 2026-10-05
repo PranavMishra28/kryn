@@ -10,6 +10,26 @@ from research.container_worker import DockerWorker, LABEL
 
 
 class GenerationTests(unittest.TestCase):
+    def test_frozen_accepts_both_exact_arm_orders_and_rejects_invalid_arrays(self):
+        with tempfile.TemporaryDirectory() as folder, patch("research.container_generation.unchanged"):
+            root = Path(folder)
+            (root / "prompt.txt").write_text("unused")
+            manifest = {"kind": "swe_container_generation_canary", "baseline": folder,
+                "prompt_sha256": hashlib.sha256(b"unused").hexdigest(),
+                "wall_seconds": 90, "request_seconds": 360}
+            for order in (["native", "kryn"], ["kryn", "native"], [], ["native"],
+                          ["native", "native"], ["kryn", "kryn"], ["other", "kryn"],
+                          ["native", "kryn", "native"], None, "native,kryn"):
+                with self.subTest(order=order):
+                    raw = json.dumps({**manifest, "arm_order": order}).encode()
+                    (root / "manifest.json").write_bytes(raw)
+                    (root / "manifest.sha256").write_text(hashlib.sha256(raw).hexdigest())
+                    if order in (["native", "kryn"], ["kryn", "native"]):
+                        self.assertEqual(frozen(root)["arm_order"], order)
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, "Unreviewed development arm order"):
+                            frozen(root)
+
     def test_full_wire_must_match_and_canonical_fake_hash_is_used(self):
         wire = {"body_controls_sha256": "a", "tool_schema_sha256": "b"}
         rows = [{"tools": ["read"], "body_controls_sha256": "a",

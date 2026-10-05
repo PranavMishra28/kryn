@@ -244,3 +244,38 @@ replay. Native and KRYN each receive one 900-second local 9B arm. Clean timeouts
 remain strict failures even if patches resolve; safety, ownership, wire and test
 integrity failures remain unscored. No new release or autonomous quality claim
 is admitted by these infrastructure checks.
+
+## First real container development result
+
+The separately preregistered pair above completed. Both native OpenCode and
+KRYN achieved strict acceptance: native completion, an exact exported patch,
+valid official resolution, full recorded test coverage, unchanged wire/policy
+controls and settled ownership. Native took 310.144 seconds and 28 requests;
+KRYN took 540.470 seconds and 38 requests. All recorded samples had normal
+host pressure and AC power, with zero swap growth. This is one exposed
+development task and an acceptance tie, **not demonstrated KRYN uplift**.
+The observed time difference does not establish a causal plugin cost.
+
+The frozen adjudication SHA-256 is
+`a58d5fe8d7295e7f5cdb5d5f6dcb4ed9a745c19e7a82f87e6e617134506338a1`.
+Independent completion review rehashed the 98 source inputs, evaluator, sealed
+protocol, both arm receipts and raw official results, and independently parsed
+coverage of all expected tests. Its receipt is
+`b54485c3d2a66e109219da6e6dfc71665351afd4ac7d2bf2454debfa1a985a70`.
+The inactive launchd job was removed after confirming resource absence;
+329 campaign JSON receipts and all frozen source hashes remained unchanged.
+Neither the final auditor nor benchmark tests were rerun.
+
+The next bounded development comparisons are a reverse-order repetition of this
+completed task, followed by two already exposed public tasks from different
+cached repositories. Selection is for order coverage and dependency diversity,
+not historical outcomes or presumed prompt difficulty. Each needs its own
+sealed provenance and admitted worker/grader environment before inference.
+They are development work, not fresh validation or protected holdout.
+
+The runner now accepts either exact two-arm order and verifies actual chronology
+against the frozen order. An order mismatch remains unscored. This changes no
+model, product policy, safety limit or acceptance predicate. A reverse-order
+canned control must pass before a reverse-order real pair starts. The earlier
+macOS v3 result stays separate and unchanged; broader validation, sustained
+coding/UI and truthful final product scope remain open.

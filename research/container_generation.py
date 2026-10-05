@@ -54,7 +54,7 @@ def frozen(campaign):
     unchanged(manifest, baseline)
     if file_sha(campaign / "prompt.txt") != manifest["prompt_sha256"]:
         raise RuntimeError("Frozen prompt changed")
-    if manifest["arm_order"] != ["native", "kryn"]:
+    if manifest.get("arm_order") not in (["native", "kryn"], ["kryn", "native"]):
         raise RuntimeError("Unreviewed development arm order")
     if not 5 <= manifest["wall_seconds"] <= 900 or manifest["request_seconds"] != 360:
         raise RuntimeError("Unreviewed generation budget")

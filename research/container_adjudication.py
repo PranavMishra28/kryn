@@ -560,7 +560,7 @@ def classify_arm(campaign, arm, manifest, state, *, owner_query=None, coverage=o
 def campaign_manifest(campaign):
     manifest, manifest_sha = sealed(campaign, prompt=True)
     require(manifest.get("kind") == "swe_container_development"
-            and manifest.get("arm_order") == ["native", "kryn"]
+            and manifest.get("arm_order") in (["native", "kryn"], ["kryn", "native"])
             and manifest.get("wall_seconds") == 900 and manifest.get("request_seconds") == 360
             and "sequence" not in manifest and isinstance(manifest.get("task"), dict),
             "campaign_contract")
@@ -601,9 +601,10 @@ def adjudicate(campaign, *, owner_query=None, coverage=official_coverage):
     campaign = Path(campaign).resolve(strict=True)
     require(not (campaign / "adjudication.json").exists(), "adjudication_already_final")
     manifest, manifest_sha = campaign_manifest(campaign)
+    order = manifest["arm_order"]
     # Incomplete controller state is not a final campaign and must remain resumable.
     states, arms = {}, {}
-    for arm in ("native", "kryn"):
+    for arm in order:
         require(load(campaign / "state" / f"{arm}.json").get("status") == "terminal",
                 "arm_not_terminal")
         try:
@@ -612,14 +613,14 @@ def adjudicate(campaign, *, owner_query=None, coverage=official_coverage):
                 TypeError, ValueError, UnicodeError) as error:
             arms[arm] = {"category": "unscored", "accepted": None,
                          "reason": "terminal_evidence_invalid", "error_type": type(error).__name__}
-    if len(states) == 2 and states["native"]["terminal_unix"] > states["kryn"]["_controller_start"]["started_unix"]:
-        for arm in ("native", "kryn"):
+    if len(states) == 2 and states[order[0]]["terminal_unix"] > states[order[1]]["_controller_start"]["started_unix"]:
+        for arm in order:
             arms[arm] = {"category": "unscored", "accepted": None, "reason": "arm_order_invalid"}
     else:
         for arm, state in states.items():
             arms[arm] = classify_arm(campaign, arm, manifest, state,
                                      owner_query=owner_query, coverage=coverage)
-    comparable = all(arms[arm]["category"] != "unscored" for arm in ("native", "kryn"))
+    comparable = all(arms[arm]["category"] != "unscored" for arm in order)
     receipt = {"kind": "swe_container_development_adjudication", "schema": 1,
                "manifest_sha256": manifest_sha, "created_utc": datetime.now(timezone.utc).isoformat(),
                "arms": arms, "pair_comparable": comparable,

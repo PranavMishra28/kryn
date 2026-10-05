@@ -241,3 +241,12 @@ kill or arm replay. The separate real-development preregistration and dedicated
 launchd controller are recorded in the campaign report. No quality result follows
 from admission. The completed v3 supervisor remains untouched; new Linux
 development cannot be mixed with its scores or called protected work.
+
+The first real development pair subsequently passed strict independent acceptance
+in both arms, with complete official test coverage and settled resources. It was
+a tie; KRYN took longer in this single run. The campaign report records the
+receipts and limits. Prospective pairs can freeze either native/KRYN order;
+adjudication checks the observed chronology and excludes order violations.
+Repetitions and reused public tasks remain explicitly exposed development work.
+No general uplift, frontier equivalence or production promotion follows from
+this one accepted pair.
