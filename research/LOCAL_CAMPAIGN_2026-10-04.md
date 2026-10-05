@@ -926,14 +926,59 @@ removed only the inactive job. Settlement does not upgrade readiness.
 The frozen general-agent policy asks permission for external directories. The
 retained CLI source handles permission replies for the root session; the failed
 run did not capture the child's pending permission inventory, so the exact
-cause remains unproven. A new no-model diagnostic is prepared to capture that
-inventory using canned tool calls and read-only native APIs. It schedules only
-KRYN, expects a bounded 60-second timeout, and neither replies to permission
-requests nor changes policy. A separately declared cold start restores the same
-owned runtime only after settlement; the probe requires unloaded idle and
-unchanged counters throughout. No failed task, request or grader is replayed.
-Full-context, endurance, agent readiness and real-comparison admission remain
-open.
+cause remains unproven. A separate no-model diagnostic captured an actual
+pending external-directory approval on its owned general child and linked it
+to the unfinished read tool. The 60-second timeout and three canned calls were
+expected for this diagnostic; no permission reply or policy change occurred.
+The separately declared cold start restored a fresh owned runtime with the same
+profile. It remained unloaded idle with zero request and token counters. All
+79 parent/child resource observations were normal, all 69 power observations
+were valid and on AC, and sampled swap growth was zero. Result
+`3d0fc451132e86ce2286049083e740ea79712787d956193e3fa81f855f6c6f60`
+passed this narrow diagnosis. Settlement
+`41071b17d4a76101180a64b21a13b4517a39ad990129b216dbb0f0cbedf7888a`
+preserved 1,297 files, verified the complete archive and actual resource absence,
+then removed the inactive job. A copied-label settlement precheck failed before
+removal and remains retained. The correction derives the exact job from its
+pinned launch plist and verifies its program arguments.
+
+The next in-project canned control **failed**. Its root created the fixture and
+the child read completed, but the child's shell hash/delete action remained
+unfinished at the 90-second timeout. Four canned calls left exactly the known
+257-byte synthetic fixture patch, with no test edits. This attempt captured no
+pending permission request. Global shell approval and the CLI's root-only reply
+handling support an approval hypothesis; the exact cause is unproven. The
+runtime remained unloaded idle with zero request/token counters, and all parent
+and child resource/power finals passed with normal pressure and zero sampled
+swap growth. Result
+`73f72f89eb7f114100556081d9a7e2cba880e838007a16ebd03b1dc852e134b7`
+remains failed. Separate settlement
+`6aa29037a27af861b31434f0ed963371520092b0b2be9d4358fd37611b6f92ee`
+verified 1,286 unchanged files, the complete 1,322-member export archive, the
+sole known fixture patch and actual owned-resource absence before removing the
+inactive job. No task or diagnostic was replayed.
+
+A new local-model protocol narrows the task to a root shell creating and
+hash-verifying one in-project fixture, followed by a general child that only
+reads it. The earlier successful canned controls covered root writes plus a
+read-only child, not child shell execution. This protocol deliberately retains
+the fixture and requires its exact 258-byte patch as the sole change, exact tool
+sequence, two completed owned sessions, direct CLI success and unchanged wire,
+policy, routes and resource limits. Predeclaration
+`6d8025f62f8d66ca3f9f737c4b9cb2daad65e5d2e0f9f244cd25498a178767fb`
+pins the new prompt and mechanical acceptance. The root author's static/mock
+review passed 44 checks; it is not independent-author review. The wrapper
+reconciles all owned request and cache-inclusive token deltas before accepting
+either loaded idle or already-unloaded idle. It unloads at most once when
+loaded, refuses unload and stop on concurrent activity or counter drift, and
+retains exact-ownership emergency stops. The single durable job was launched;
+an immediate process-verification assertion failed after successful bootstrap,
+and a separate observation verified the exact running command without another
+bootstrap. Both receipts are retained.
+
+No benchmark problem, reference patch, official grade or comparison is part of
+this synthetic diagnostic. Child shell approval, task quality, full context,
+endurance, general agent readiness and real-comparison admission remain open.
 
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`

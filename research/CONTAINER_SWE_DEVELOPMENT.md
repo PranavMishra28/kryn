@@ -348,7 +348,26 @@ files and actual resource absence before removing the inactive job. The failed
 result remains failed.
 
 External-directory approval is a supported hypothesis; the failed run did not
-capture the child's pending permission request. A new canned-response diagnostic
-is prepared to observe that request without model inference, policy changes or
-permission replies. Full context, endurance, agent readiness and admission to a
+capture the child's pending permission request. A separate canned diagnostic
+captured an external-directory approval on its exact owned child, linked to the
+unfinished read. It changed no policy and sent no permission reply. Its declared
+cold start restored the same runtime profile; request and token counters stayed
+zero. Settlement preserved 1,297 files and removed the inactive job.
+
+A subsequent in-project canned control failed at its 90-second timeout. The
+child read completed, but its shell hash/delete action remained unfinished. Four
+canned calls left only the known synthetic fixture patch. No pending permission
+was captured for this attempt, so shell approval remains a supported hypothesis.
+All guard finals passed, the runtime remained unloaded idle with zero requests,
+and settlement preserved 1,286 files plus the complete export before removing
+the inactive job. Neither failure was replayed or upgraded.
+
+The next local-model diagnostic narrows delegation to a read-only child, a flow
+already covered by the successful canned controls. The root creates and hashes
+one in-project fixture; the child reads it and finishes. Mechanical acceptance
+requires the exact fixture as the sole patch, completed owned sessions and the
+unchanged policy, wire and resource checks. The wrapper now reconciles owned
+usage before accepting either loaded idle or already-unloaded idle, unloading
+once only when needed. Concurrent activity or counter drift refuses cleanup.
+Child shell approval, task quality, full context, endurance and admission to a
 new real comparison remain unqualified.
