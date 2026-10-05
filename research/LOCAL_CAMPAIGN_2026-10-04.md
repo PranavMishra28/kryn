@@ -2318,3 +2318,49 @@ CI 37345477604 at `266d06f` passed; full job/step JSON is retained. The code
 clarification needs its own prospective evidence. PR #242 remains draft, with
 broader quality, valid fresh/protected validation, sustained coding/UI,
 full-context reasoning, endurance and final production scope still open.
+
+## Fresh no-model native skill-routing delivery control launched
+
+The Agent/Build routing clarification at `e576633` passed 220 setup, 214 research
+(two skips), 87 Node and native/frozen offline checks, targeted hook checks,
+clean-source package smoke, documentation/link/diff checks and one-commit secret
+scanning. A fresh authentic Git clone freezes that code; all 98 research runtime
+files match the earlier source, while the five packaged plugin assets are pinned
+separately. Reversing the single guidance line exactly restores the old plugin.
+The old source copies, failed duration/form/counter results and receipts remain
+unchanged.
+
+A fresh canned native control now exercises the original six write, delegate,
+navigate and snapshot responses. It performs no model forwarding. A read-only
+metadata wrapper records the exact new guidance occurrence count and system-text
+hash without changing the request payload or original inference controls. The
+prospective gate requires one copy in each of three Agent system requests and
+none in the three Browse system requests. It also retains the exact child user
+context, patch/capture, browser identity, APFS, resource and cleanup predicates.
+This tests delivery of routing guidance; it does not test model compliance,
+repair ability, benchmark quality or full system-prompt provenance.
+
+Twenty-six author review checks passed, including the actual six-request local
+HTTP/SSE control with intercepted trial boundary, unchanged original controls,
+role/content/duplicate negatives and full source/prior-chain validation. Nine
+launcher checks preceded one bootstrap with verified process 87108. Runtime
+85947 must remain unloaded and idle at 87 requests, 436,948 prompt and 18,102
+completion units before and after; no runtime operation is permitted. The same
+native engine, role catalogs, permissions, browser image, guard thresholds and
+three APFS phases remain unchanged.
+
+| Skill-routing control V1 artifact | SHA-256 |
+| --- | --- |
+| Frozen source proof | `7ac03c64fc66cc5c6b12ed33117c5e31b87eb89a02f90510d1f674f2797cd779` |
+| Runner | `11ad58608ba1a6b64bade8ac0e8fd5ec8be27e7c8f8f57e184517b2ba755ce18` |
+| Predeclaration | `6a25675e1e197a216a0c2ce1e6c9061094a770f8f17955a6a8e751912f1db93c` |
+| Manifest | `03bbccf3b313b1a980137284cfa169e0eac2b19c9e00a51597e509d049975de7` |
+| Author review | `25b72dd876c640cdeee225b1412ae3c101ce2ad7758027fdd91d624c3c8e0198` |
+| Launcher review | `7a90ce5b46a25dea24b35171b867fcfc898e3637fb392e3da7a3347c96dcfaa7` |
+| Launch | `da31ca1944edb479ef7026f70fbee15dbdeecb5919259dd804bf4dfd11d3e644` |
+| Activation | `1fb58d57bde692bf0399215507d771b737c6baebca5f664f9fc2b4977db5f936` |
+
+Outcome is unknown at launch. Code and launch-doc CI will be inspected once at
+the next meaningful terminal. PR #242 remains draft. Broader development, valid
+fresh/protected validation, sustained coding/UI, full-context reasoning,
+endurance and final production scope remain open; this launch is not completion.
