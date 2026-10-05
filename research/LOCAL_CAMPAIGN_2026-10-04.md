@@ -2264,3 +2264,57 @@ job/step JSON retained. No product code, release, version or install changed.
 PR #242 remains draft; broader development, valid fresh/protected validation,
 sustained coding/UI, full-context reasoning, endurance and final production
 scope remain open. This launch continues the campaign and is not completion.
+
+## Duration strict failure settled; native skill and agent routing clarified
+
+The duration diagnostic completed its native CLI in 97.097 seconds with 11 local
+requests. Browse completed all six calls and observed the exact required states:
+Ready, empty-input error, unchanged error after filling 90, `Status: 1h 30m`, then
+reset and final Ready with empty input. It used one child and made no intervening
+revision; this provides no model repair observation. The original strict run
+still failed: Agent wrote first, then called unavailable `skill` with `id: browse`
+instead of loading `opencode` initially. That skill call failed before a correct
+`subagent` call. Both native sessions reported succeeded; session outcome alone
+does not override the failed tool and protocol predicates.
+
+The complete 3,123-byte child user context was delivered exactly. The sole
+3,117-byte index patch matched capture, and the 2,784-byte page passed the marker
+artifact callback. That callback is not an independent functional grade. Exact
+usage reconciled 11 requests, 48,561 prompt and 3,181 completion units. After the
+original single unload, runtime 85947 was unloaded and idle at 87 requests,
+436,948 prompt and 18,102 completion units. All 53 parent, 46 native and four
+capture resource samples were normal, with zero sampled swap growth and nonzero
+absolute swap. All 46 power observations were AC, minimum battery 73%, with
+complete finals; this is not endurance evidence.
+
+Separate settlement required the exact failed root sequence and complete failed
+skill input while preserving every remaining original predicate, including all
+six functional states. It did not invoke the original acceptance function or
+replay a task. Six negative projection checks rejected changed failure facts and
+altered functional/context evidence. Sixteen author checks passed before separate
+settlement preserved all 67 files, both whole detached images and three empty
+owned mount paths, verified exact browser ID/name/broker absence and port closure,
+and removed only the inactive exit-1 job. No settlement review or mutation failed.
+
+| Duration V1 terminal evidence | SHA-256 |
+| --- | --- |
+| Failed result | `de7362bc0e7d4dda6c7592616456615871920adff99a19c21a7b436e7ddd6200` |
+| Driver | `978d65c8c864c10b2bde397d5424698d1af535c902e91fd20e80e18ab021bc64` |
+| Barrier | `0c136635c9e3c2280d69ab311153b438c33621cfbb94d609c2ee01a4fa3034d2` |
+| Settlement review | `f3d2e4b1c5059d38ad5179c4cd40aa462ad90f5e74b21648bb8a09b6274e110c` |
+| Settlement | `2a7ea55beac27b91b65d8a2b1c90e4a9450c6fbeb2fe4433a4d5e48daa7fb337` |
+
+The repeated skill/agent confusion motivates a prospective clarification in the
+existing Agent/Build guidance. It now directs loading native instructions with
+`skill` and `id: opencode` before acting, distinguishes agent names from skill
+IDs, and names the actual Browse route: `subagent` with `agent: browse`. The
+existing hook regression verifies that both Agent and Build receive this guidance
+while their edit, shell, skill and subagent catalog entries remain present.
+Only the guidance string and regression change; native tools, permissions,
+execution, guards and failed diagnostic criteria remain unchanged. Causal
+attribution and improved model compliance remain unproven.
+
+CI 37345477604 at `266d06f` passed; full job/step JSON is retained. The code
+clarification needs its own prospective evidence. PR #242 remains draft, with
+broader quality, valid fresh/protected validation, sustained coding/UI,
+full-context reasoning, endurance and final production scope still open.

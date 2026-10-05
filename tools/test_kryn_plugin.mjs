@@ -1249,7 +1249,7 @@ test('native child failure releases only its own foreground slot', async () => {
   try {
     const prompt = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
     f.call('session.context', prompt);
-    assert.ok(prompt.system.some(item => item.text.includes('Explore, Browse and Reviewer are agent names, not tool names')));
+    assert.ok(prompt.system.some(item => item.text.includes('Explore, Browse and Reviewer are agent names, not tool names or skill IDs')));
     const child = id => ({ agent: 'build', tool: 'subagent', sessionID: 'ses_1', id,
       input: { agent: 'explore', prompt: 'Inspect the project.' } });
     f.call('tool.execute.before', child('child_1'));
@@ -1312,10 +1312,14 @@ test('Ask denies mutations even under auto and Agent retains coding guidance', a
       }));
     }
     for (const agent of ['agent', 'build']) {
-      const context = { sessionID: 'ses_' + agent, agent, system: [], tools: { edit: {}, shell: {} } };
+      const context = { sessionID: 'ses_' + agent, agent, system: [], tools: { edit: {}, shell: {}, skill: {}, subagent: {} } };
       f.call('session.context', context);
-      assert.ok(context.tools.edit && context.tools.shell);
-      assert.match(context.system.map(part => part.text).join('\n'), /Build one runnable vertical slice/);
+      assert.deepEqual(Object.keys(context.tools).sort(), ['edit', 'shell', 'skill', 'subagent']);
+      const guidance = context.system.map(part => part.text).join('\n');
+      assert.match(guidance, /skill using id opencode before acting/);
+      assert.match(guidance, /not tool names or skill IDs/);
+      assert.match(guidance, /For Browse, call subagent with agent browse/);
+      assert.match(guidance, /Build one runnable vertical slice/);
     }
     const plan = { sessionID: 'ses_plan', agent: 'plan', system: [], tools: {} };
     f.call('session.context', plan);
