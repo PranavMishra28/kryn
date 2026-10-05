@@ -3423,3 +3423,41 @@ code, version, installation and resource stops are unchanged. Broader developmen
 fresh protected validation, sustained coding/UI, full-context reasoning, endurance
 and truthful final scope remain open. PR #242 remains draft; this checkpoint is
 not completion or production qualification.
+
+### Stopped-host result and conservative retry admission (2026-10-05)
+
+The stopped-host observer completed 21 samples across 312.330 seconds with the
+runtime stopped, normal pressure, green original host checks, AC power and a
+minimum battery of 88%. Swap did not grow. Raw free pages ranged from 366,411,776
+to 3,520,348,160 bytes; compressed memory ranged from 11,557,076,992 to
+12,486,230,016 bytes. These are separate occupancy observations, not available
+memory or proof that loading the model is safe. Separate review rejected 17
+negative projections and settlement preserved 17 evidence files before removing
+only the inactive observer job. Settlement SHA256:
+`ffa18cdce02b589e8705e36cc7879cda63e836cb93c4261ab73d74d2c1196feb`.
+
+A new durable admission worker requires at least 21 samples over five minutes
+with normal pressure, green original host/power/disk checks, no swap increase in
+the qualifying window and raw free pages of at least 10,574,847,176 bytes. That
+reserve equals the maximum **current physical footprint sampled** across the two
+aborted loads; it excludes lifetime peaks and adds no invented safety margin.
+This conservative retry condition can reject otherwise usable cached memory and
+does not guarantee that generation will fit. It never adds overlapping VM
+categories. The wait is bounded to three hours and does not keep the Mac awake.
+Only after qualification may it make one original bounded runtime start and
+verify at least 60 seconds of unloaded zero-counter idle with the unchanged
+strict guard. No model load or task is part of this worker. Its outcome is
+unknown at launch. Protocol review passed six groups, including mocked lifecycle
+success/failure/concurrency and admission boundaries; launcher review passed nine
+checks. Runner SHA256:
+`da7a128243683300fb1b4510f7c47ab33196b5d65385d26a9cbc24266857ef0a`.
+
+The installed 9B model is the smallest cached candidate found. Its fitness under
+the present occupied-host conditions remains unproven; neither a new model nor
+an owner setting was installed. The next decisive gates are a few representative
+coding/UI trials if admission permits, then continuity, active sustained use,
+independent review and final-artifact install/rollback. If these cannot pass,
+retain the measured supervised ceiling and disclose the unqualified capability.
+Unattended/frontier claims remain unsupported. Documentation CI 37376406938
+passed its full job and all 13 steps, inspected once. Product checks were not
+replayed. PR #242 remains draft; the campaign is not complete.
