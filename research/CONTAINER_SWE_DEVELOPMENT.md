@@ -618,7 +618,7 @@ The corrected settler derives the sole plist and verifies its label, pins the
 failed review and original script, and passed 12 separate author checks before
 execution. No diagnostic, request, original review or settlement was replayed.
 
-The next prospective diagnostic uses local OpenCode/oMLX with one new synthetic
+The subsequently executed diagnostic used local OpenCode/oMLX with one new synthetic
 root session, two distinct native CLI invocations and new fixture identities.
 The first invocation creates one fixture and finishes; the follow-up contains
 neither command nor fixture bytes and asks for the read/finalization procedure
@@ -643,5 +643,65 @@ first-turn rejection paths and unchanged admission, usage accounting, unload
 and emergency-stop control flow. Frozen source remains `59ce852`; the editable
 reporting change is not part of this diagnostic. This is a new protocol, not a
 replay or upgrade of the failed earlier continuity attempt. No local-model
-continuity outcome is claimed at launch, and broader production gates remain
-open.
+continuity outcome was claimed at launch; its failed outcome and settlement are
+recorded below. Broader production gates remain open.
+
+## Model stdin continuity failed at the policy gate; agent reuse control
+
+Both native CLI invocations completed with exit zero and new owned generation
+completions. The first turn used `shell`; the second used `read` then `shell`.
+Both exported inputs and the exact 599-byte two-file fixture patch matched the
+prospective protocol. The driver nevertheless remains **failed**: the unchanged
+through-end policy gate recorded `session.agent.selected` with both previous
+and selected values equal to `agent`, after the first turn's tools had finished.
+The event had no active tool. Agent/model/permission snapshots and the other
+policy inventories were unchanged. The gate intentionally records selection
+events after tools begin; no exception was added after seeing this result.
+Native CLI source contains an explicit agent-switch call when an agent is
+supplied. This supports testing omission of redundant selection; it does not
+upgrade the original failure or establish model continuity.
+
+Result:
+`9f9838308a4f7830a2b5e232fec1f3405e77b03b8697584e0defe7573096bdc9`.
+Driver:
+`a528127378776650a4981f51a7bccb2b81b66ca3598ca053f05317975eb5c8c8`.
+The wrapper's original usage admission requires a completed driver, so it
+failed before accounting and executed its unchanged exact-owned emergency
+stop. The original runtime PID and port are now absent. Separate deterministic
+settlement reconciled five native requests, 26,482 prompt tokens and 959 output
+tokens against retained runtime counters. It verified the remaining exact
+transport/fixture predicates separately while requiring the original policy
+failure. No result, driver, task or grader was rewritten or replayed.
+
+Settlement verified 1,363 unchanged files, the complete 5,754,880-byte archive
+with 1,323 members, all 562 capture entries, actual owned IDs/names/labels absent,
+source/baseline/prior evidence and both per-turn exports. All 61 resource samples
+were normal with zero sampled swap growth; all 53 power samples were AC at 90%,
+and final guards passed. Existing absolute swap was nonzero. A separate author
+review passed 13 checks before the exact inactive exit-one job was removed.
+Settlement:
+`836fa0b1f73a5c0489bfe48a50315208157d254bc151a2aa1ccc677dfccf85f1`.
+
+The next prospective control uses a new synthetic fixture and **no model**.
+Its first actual CLI call receives a canned fixture tool followed by a stop;
+the second receives one canned stop. Only the second invocation omits the
+redundant `--agent agent` pair. All other native CLI arguments, exact stdin,
+candidate identity, first-turn completion requirements and the full unchanged
+policy gate remain enforced. Acceptance requires three canned calls, one exact
+279-byte fixture patch, two exact native input hashes, both CLI/native
+completions, unchanged policy snapshots, zero recorded policy mutations and
+all resource finals. Each CLI has 30 seconds; calls and intermediate checks
+share 60 seconds, with no retries. The prior runtime PID and port must remain
+absent throughout admission and at both boundaries; the control performs no
+runtime start, stop, load, unload or model inference.
+
+Manifest:
+`f14fd748d81168e4fc9497123a9f372fca9e0424648d1c60a1d382a8e879fc4c`.
+Predeclaration:
+`b2d9b7be1f1d57d0e2e58911ace05addf2b26bceb468e252e3af3955359775b8`.
+Author review passed 55 checks:
+`1c5d304551f6ad2ead3933ba9e9412f83c91da3b5e4677353cc0808e59439146`.
+This is a prospective CLI mechanism control, not an accepted continuity result,
+benchmark or production qualification. Frozen source remains `59ce852`; no
+policy classifier, resource stop or released product scope changed. Broader
+development, fresh/protected validation, coding/UI and endurance remain open.
