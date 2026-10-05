@@ -35,6 +35,7 @@ MIN_START_BATTERY = 40
 STOP_BATTERY = 25
 PINNED_FILES = ("research/local_campaign.py", "research/local_only.py",
                 "research/run_harbor_calibration.py", "research/harbor_kryn_agent.py",
+                "research/container_config.py",
                 "setup/opencode.template.json", "tools/learning.py",
                 "tools/native_client.py")
 

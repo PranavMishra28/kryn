@@ -7,6 +7,10 @@ agent runtime and not a product setting. Released v1.0.0 remains installed.
 completed local campaign: three independently scoreable pairs, KRYN 0/native 2,
 with eight attrition pairs and no demonstrated uplift. It also records the
 verified power/memory recovery path and the prospective aggregate correction.
+[CONTAINER_SWE_DEVELOPMENT.md](CONTAINER_SWE_DEVELOPMENT.md) records the next
+dependency-ready worker boundary and its no-model admission. It keeps Linux
+development experiments separate from the completed macOS campaign; model
+generation and promotion still require their own frozen gates.
 `campaign_supervisor.py` supervises an unchanged frozen SWE-bench controller from
 a private, pinned copy under a per-user launchd job. It waits for stable AC of at
 least 120 W and 40% battery, interrupts work on power loss or the existing resource

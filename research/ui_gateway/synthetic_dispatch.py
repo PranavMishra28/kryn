@@ -76,13 +76,15 @@ class Handler(BaseHTTPRequestHandler):
                                   "tool_schema_sha256": hashlib.sha256(json.dumps(
                                       payload.get("tools", []), sort_keys=True).encode()).hexdigest(),
                                   "stream": payload.get("stream")})
-        number = len(self.server.calls)
+        # Standalone OpenCode can request a title/summary without tools. Those
+        # auxiliary requests must not consume a canned primary tool action.
+        number = sum(bool(call["tools"]) for call in self.server.calls)
         if (payload.get("model") != MODEL or
-                (number <= len(self.server.sequence) and
+                (tools and number <= len(self.server.sequence) and
                  self.server.sequence[number - 1][0] not in tools)):
             self.send_error(400)
             return
-        if number <= len(self.server.sequence):
+        if tools and number <= len(self.server.sequence):
             name, arguments = self.server.sequence[number - 1]
             delta = {"role": "assistant", "tool_calls": [{"index": 0,
                 "id": "call_kryn_browser_" + str(number), "type": "function",

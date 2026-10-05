@@ -117,9 +117,14 @@ and no swap growth. The first diagnostic lost its terminal receipt to a private
 cleanup-argument error and is retained as failed; the corrected no-model
 diagnostic has receipt SHA-256
 `8ae0d3a46be5622e7b54a17320fe4405548a37f1953d3cc9d0bca1f3cfb2e80c`.
-This establishes one image's environment readiness, not a usable container Agent
-or an acceptance result. A container-native worker would change execution OS and
-tools and needs separate provenance, isolation and paired admission before use.
+That import screen alone did not establish a usable container Agent or an
+acceptance result. The subsequent
+[container worker screen](CONTAINER_SWE_DEVELOPMENT.md) passed a frozen, canned
+OpenCode turn in both arms, including dependency use, observed route isolation,
+bounded stopped-worker export and matching tool schemas. Independent admission
+passed 29 raw-evidence checks; the separate official-grader handoff and a new
+preregistration still precede model generation.
+This changes execution OS and tools and retains separate development provenance.
 Preregister any subsequent environment or termination experiment separately on
 development tasks. Preserve the completed campaign;
 do not replay its interrupted arms or reinterpret it as a new candidate result.
