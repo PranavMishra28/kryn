@@ -3096,3 +3096,62 @@ Launcher review SHA256:
 PR #242 remains draft. Broader development, fresh/protected validation, sustained
 coding/UI, full-context reasoning, endurance and final truthful production scope
 remain open. No merge, release, tag, version or owner-install change is qualified.
+
+### Runtime epoch settled; fresh interval-union workflow (2026-10-05)
+
+The no-model runtime admission **passed** and was separately settled. One original
+owned-app start established PID 57046. Five retained idle-status observations span
+over 60 seconds, with zero requests, prompt tokens and completion tokens, no loaded
+model and the declared profile. All 31 resource and 26 power samples were complete
+and normal, with no sampled swap growth and 90-percent battery on AC. HostGuard
+covered the verified-listener idle interval; the unavailable-listener start interval
+had the original host admission checks immediately before and after the bounded
+start command. No task, model load, inference, browser or candidate code ran.
+Six settlement-review groups and 17 negative projections passed before removing
+only the exact inactive exit-0 supervisor job. All 26 settlement pins remained
+unchanged; the admitted runtime remained unloaded and idle. Old PID 85947 and its
+124-request history remain historical. Settlement SHA256:
+`f798317889ed7cdd8c92dedd3605a096c6ea10e975ce9cd5be76dd4e42ef9c8d`.
+Review SHA256:
+`896045ca44824041d5344c64359411c3c022949b2ca1e4b8b3f29bf50582032f`.
+
+Product `d3b8bfe` and documentation `ab7647b` CI runs `37364623661` and
+`37364768213` passed; each full job/step record was retained once. A new authentic
+frozen source copy contains the current-read guidance. All 98 Python runtime
+inputs are byte-identical to the preceding source; only the plugin guidance and
+its existing delivery-test assertion differ as code. The old source remains
+unchanged. A preparer receipt-field error occurred before cloning and is retained;
+its corrected successor used the actual `source_revision` field without rerunning
+passed product checks. New source proof SHA256:
+`cf2b50a2a0de4cef9709673e55556adabc06ecc856c4aac8d82ddd48d1ab437e`.
+
+A fresh local-model interval-union task now uses one public function stub, eight
+public tests, explicit relative paths and a trusted bounded-summary checker.
+Only local OpenCode/oMLX supplies the implementation. It must observe the failing
+baseline before changing code, preserve all public tests, use task-relevant native
+read/write/edit tools and the sole declared checker command, and finish with a
+successful native test after its latest write. The artifact callback reads bytes
+and hashes only; it never executes candidate code or independently grades it.
+
+The new protocol prospectively binds the new source, plugin hash and PID 57046
+runtime epoch. Original status, query, usage, exact-owned stop and linked resource
+guard functions retain their original AST. Historical settlement and input pins
+remain checked without invoking old live-PID/counter predicates. The first unrun
+preparation was retired when review caught a relay module-identity mismatch;
+no admission, task or inference occurred. V2 binds the exact relay module used by
+the native driver, retaining the full non-UI ten-tool catalog and sampler checks
+before local forwarding. Seven protocol-review groups and nine launcher checks
+passed, including synthetic task-order, output, ownership, accounting and failure
+cases. Job `dev.kryn.native-spans-readiness-20261005-v2` was bootstrapped once and
+has an **unknown outcome at launch**. Runner SHA256:
+`fb90a8af4e81b2ebb07542f64d294e3057c2e83074ebad41afd0a7eb324ee6f4`.
+Review SHA256:
+`ff111b37141a1075dde5dd990c5f4c8731e9f424d9add922bc642793cfccd4db`.
+Launcher review SHA256:
+`50dec409edb6bde754ae05619089e040231a2177bb627cdbf04d9a61036c29e2`.
+
+No product code, version or owner installation changed at this checkpoint.
+All earlier task failures remain failed. Native public-test observations are not
+independent grading, causal repairability, benchmark uplift or frontier quality.
+Broader development, fresh/protected validation, sustained coding/UI, full-context
+reasoning, endurance and final production scope remain open. PR #242 stays draft.
