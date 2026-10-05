@@ -75,10 +75,14 @@ execution and verifies that the worker cannot rewrite KRYN policy files or
 their parent directory. It uses an owned native OpenCode server and checks its
 project-scoped plugin registry before and after the turn: `kryn.product` is
 active from the admitted `/opt` path in KRYN and absent in the native control.
-The source manifest binds the complete local Python tree and plugin payloads. An earlier frozen screen also passed 29 independent
-checks, with audit receipt
-`87e114df1f0a5222fc54f895b9e99f4adfb07eb67a730e48264338003a3a85a6`;
-its stricter tool predicate was replayed independently before the final screen.
+The source manifest binds the complete local Python tree and plugin payloads.
+Independent admission review passed 40 checks and all 84 frozen source hashes;
+its receipt is
+`31d12772133995ed2f13ca01c31d54a7daf699514d87313f7ca648c299e3c74b`.
+It does not qualify model generation, official grading, or resistance to an
+agent altering the native server through its same-UID loopback API. Later
+bounded server-log retention is covered by offline tests and must be pinned
+in any new live execution.
 
 Unsuccessful preparation and admission receipts remain retained. They exposed an
 incorrect assumption about the image's initial HEAD, Docker warnings corrupting
