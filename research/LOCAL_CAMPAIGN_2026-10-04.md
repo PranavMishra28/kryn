@@ -121,9 +121,12 @@ That import screen alone did not establish a usable container Agent or an
 acceptance result. The subsequent
 [container worker screen](CONTAINER_SWE_DEVELOPMENT.md) passed a frozen, canned
 OpenCode turn in both arms, including dependency use, observed route isolation,
-bounded stopped-worker export and matching tool schemas. Independent admission
-passed 29 raw-evidence checks; the separate official-grader handoff and a new
-preregistration still precede model generation.
+bounded stopped-worker export, active protected plugin bytes and matching tool
+schemas. Independent worker admission passed 40 raw-evidence checks. A separate
+official-grader handoff now passes negative and reference controls with exact
+patch and parsed-test evidence; an earlier offline-build dependency failure is
+retained. Arbitrary-output/API controls and a new development preregistration
+still precede model generation.
 This changes execution OS and tools and retains separate development provenance.
 Preregister any subsequent environment or termination experiment separately on
 development tasks. Preserve the completed campaign;

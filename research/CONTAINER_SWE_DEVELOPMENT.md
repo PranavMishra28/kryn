@@ -99,8 +99,33 @@ shell exit; successful tool calls alone cannot satisfy application acceptance.
 
 ## Remaining gates
 
-Before any generation, exercise the exported-patch handoff to the isolated
-official grader, then freeze
+The isolated official-grader handoff now passes two separately frozen no-model
+controls. The exact exported canary remains unresolved, and the official
+reference patch resolves; both have zero official infrastructure/errors, parsed
+coverage of every expected test, normal sampled host memory and no swap growth.
+Owned containers settled. Their manifest SHA-256 values are respectively
+`5d40c467b99182dbe71333e4377a87f09cf9c8927edbdf4333e90518a0080c57`
+and `262c78b5a17e659e4cbcbbbc02a5c4b32a4bdb061b450fc64f65ad58d10c16d3`.
+
+`container_grader.py` reuses the pinned official evaluator's patch application,
+tests, parser and score. Its parent supplies and settles an owned container;
+the upstream default networking and extra capability are not used. The grader
+has no network or mounts, drops all capabilities, and keeps the fixed 2-GiB,
+two-CPU and PID limits. Only this trusted grader runs as root; the Agent stays
+UID 10001. Evaluator package bytes must match an independently frozen map before
+grading, and worker/relay absence is checked against pinned ownership receipts.
+
+The first preparation failed because a mutable image tag was absent; the pinned
+registry digest is now used. The first executed negative control failed with an
+official infrastructure error: setup's isolated pip build tried to fetch
+setuptools. Both failures remain retained. The correction supplies hash-verified
+offline wheels matching the image's installed setuptools 75.1.0 and wheel 0.44.0,
+with `PIP_NO_INDEX` and a fixed local wheel directory. No network access, official
+test edit or score override was introduced. These controls qualify transport
+and grading readiness only, not a successful model-generated repair.
+
+Before generation, bound the official SDK's in-memory test-output stream for
+arbitrary candidate code, qualify effective native API/policy controls, and freeze
 a separate development experiment's source, exposed task selection, image,
 prompt, arm order, sampler, complete wire controls, budgets and adjudication.
 Record the actual OpenCode exit code directly. An interrupted or unsafe arm

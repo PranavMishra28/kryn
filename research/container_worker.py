@@ -33,10 +33,14 @@ def pinned_image(value):
     return value
 
 
-def validate_worker(info, image_id, network):
+def validate_worker(info, image_id, network, *, grader=False):
+    if grader and network != "none":
+        raise RuntimeError("Official grading must have no network")
     host, config = info["HostConfig"], info["Config"]
+    if grader and not {"PIP_NO_INDEX=1", "PIP_FIND_LINKS=/opt/kryn-wheels"}.issubset(config.get("Env") or []):
+        raise RuntimeError("Official grader offline dependency route drifted")
     if (info["Image"] != image_id or info.get("Mounts") or host.get("Binds")
-            or config.get("User") != "10001:10001" or host.get("Privileged")
+            or config.get("User") != ("root" if grader else "10001:10001") or host.get("Privileged")
             or host.get("CapAdd") or host.get("CapDrop") != ["ALL"]
             or host.get("Devices") or host.get("DeviceRequests")
             or host.get("DeviceCgroupRules") or host.get("UTSMode")
@@ -207,17 +211,22 @@ class DockerWorker:
         self.save()
         return identity
 
-    def create(self, label, image, arguments, *, network="none", worker=False):
+    def create(self, label, image, arguments, *, network="none", worker=False, grader=False):
+        if grader and (worker or network != "none"):
+            raise ValueError("Grader must be separate from the worker and have no network")
         pinned_image(image)
         name = self.owner + "-" + label
         self.expected["container"][name] = None
         self.save()
         flags = ["--label", LABEL + "=" + self.owner, "--name", name,
                  "--network", network, "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
-                 "--memory", "2g" if worker else "64m", "--memory-swap", "2g" if worker else "64m",
-                 "--cpus", "2" if worker else "1", "--pids-limit", "256" if worker else "64"]
-        if worker:
-            flags += ["--platform", "linux/amd64", "--user", "10001:10001", "--dns", "127.0.0.1", "--ipc", "private"]
+                 "--memory", "2g" if worker or grader else "64m", "--memory-swap", "2g" if worker or grader else "64m",
+                 "--cpus", "2" if worker or grader else "1", "--pids-limit", "256" if worker or grader else "64"]
+        if worker or grader:
+            flags += ["--platform", "linux/amd64", "--user", "root" if grader else "10001:10001",
+                      "--dns", "127.0.0.1", "--ipc", "private"]
+            if grader:
+                flags += ["--env", "PIP_NO_INDEX=1", "--env", "PIP_FIND_LINKS=/opt/kryn-wheels"]
         else:
             flags += ["--read-only"]
         identity = self.command("create", *flags, image, *arguments).strip()

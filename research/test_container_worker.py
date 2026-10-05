@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -14,9 +15,109 @@ from research.container_config import worker_environment
 from research.local_only import check_environment
 from research.local_campaign import PINNED_FILES
 from research.ui_gateway.synthetic_dispatch import FakeInference, MODEL
+from research.container_grader import frozen, require_owned, worker_settled, require_test_evidence, wheel_paths
 
 
 class ContainerControlsTests(unittest.TestCase):
+    def test_grading_cannot_self_seal_an_unverified_evaluator(self):
+        with tempfile.TemporaryDirectory() as root:
+            campaign = Path(root)
+            manifest = {"kind": "swe_container_grader_no_model_admission", "source_sha256": {},
+                        "evaluator_package_sha256": {"grader.py": "expected"}}
+            data = json.dumps(manifest).encode()
+            (campaign / "manifest.json").write_bytes(data)
+            (campaign / "manifest.sha256").write_text(hashlib.sha256(data).hexdigest())
+            with patch("research.container_grader.source_inputs", return_value={}), patch(
+                    "research.container_grader.source_lock", return_value={
+                        "evaluator_package_sha256": {"grader.py": "modified"}}) as lock:
+                with self.assertRaisesRegex(RuntimeError, "sealed before grading"):
+                    frozen(campaign, manifest)
+                lock.assert_not_called()
+                (campaign / "execution-lock.json").write_text('{}')
+                with self.assertRaisesRegex(RuntimeError, "independently pinned"):
+                    frozen(campaign, manifest)
+
+    def test_offline_wheels_are_exact_bounded_regular_inputs(self):
+        with tempfile.TemporaryDirectory() as root:
+            wheel = Path(root) / "example.whl"
+            wheel.write_bytes(b"pinned")
+            manifest = {"wheelhouse": root, "wheel_sha256": {wheel.name: hashlib.sha256(b"pinned").hexdigest()}}
+            self.assertEqual(wheel_paths(manifest), [wheel])
+            wheel.write_bytes(b"changed")
+            with self.assertRaisesRegex(RuntimeError, "identity drift"):
+                wheel_paths(manifest)
+            wheel.unlink()
+            wheel.symlink_to('/etc/hosts')
+            with self.assertRaises(RuntimeError):
+                wheel_paths(manifest)
+
+    def test_unresolved_without_real_test_evidence_is_not_grader_admission(self):
+        expected = {"FAIL_TO_PASS": ["regression"], "PASS_TO_PASS": ["existing"]}
+        report = {"patch_successfully_applied": True, "tests_status": {
+            "FAIL_TO_PASS": {"success": [], "failure": ["regression"]},
+            "PASS_TO_PASS": {"success": ["existing"], "failure": []}}}
+        parsed = {"regression": "FAILED", "existing": "PASSED"}
+        require_test_evidence(report, expected, parsed)
+        with self.assertRaisesRegex(RuntimeError, "observe every expected"):
+            require_test_evidence(report, expected, {"existing": "PASSED"})
+        for changed in ({**report, "patch_successfully_applied": False},
+                        {**report, "tests_status": {}},
+                        {**report, "tests_status": {"FAIL_TO_PASS": {"success": [], "failure": []}}}):
+            with self.assertRaises(RuntimeError):
+                require_test_evidence(changed, expected, parsed)
+
+    def test_grader_requires_network_none_without_weakening_worker_identity(self):
+        info = self.fixture()
+        info["Id"] = "container"
+        info["Config"].update(User="root", Labels={LABEL: "owner"})
+        info["Config"]["Env"] = ["PIP_NO_INDEX=1", "PIP_FIND_LINKS=/opt/kryn-wheels"]
+        info["HostConfig"]["NetworkMode"] = "none"
+        info["NetworkSettings"]["Networks"] = {"none": {}}
+        control = {"container": "container", "owner": "owner", "image_id": info["Image"]}
+        require_owned(info, control)
+        with self.assertRaises(RuntimeError):
+            validate_worker(info, info["Image"], "none")
+        for field, value in (("NetworkMode", "bridge"), ("CapAdd", ["SYS_ADMIN"]),
+                             ("Binds", ["/host:/host"])):
+            changed = copy.deepcopy(info)
+            changed["HostConfig"][field] = value
+            with self.assertRaises(RuntimeError):
+                require_owned(changed, control)
+        for field, value in (("owner", "foreign"), ("container", "foreign")):
+            with self.assertRaises(RuntimeError):
+                require_owned(info, {**control, field: value})
+        with tempfile.TemporaryDirectory() as root:
+            worker = DockerWorker(root, Mock())
+            worker.command = Mock()
+            for options in ({"worker": True}, {"network": "bridge"}):
+                with self.assertRaises(ValueError):
+                    worker.create("grader", info["Image"], [], grader=True, **options)
+            worker.command.assert_not_called()
+
+    def test_unsettled_worker_or_relay_blocks_grading(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            (base / "result.json").write_text('{"passed":true}')
+            for name in ("native", "kryn"):
+                (base / name).mkdir()
+                (base / name / "ownership.json").write_text(json.dumps({"owner": name, "cleanup_errors": []}))
+                (base / name / "result.json").write_text('{"passed":true}')
+            (base / "manifest.json").write_text('{}')
+            (base / "kryn/model.patch").write_text('canary')
+            manifest = {"admission_root": root, "admission_sha256": {
+                p.relative_to(base).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in base.rglob('*') if p.is_file()}}
+            with self.assertRaisesRegex(RuntimeError, "completely pinned"):
+                worker_settled({**manifest, "admission_sha256": {}})
+            with patch("research.container_grader.subprocess.check_output", return_value=""):
+                worker_settled(manifest)
+            with patch("research.container_grader.subprocess.check_output", return_value="still-live"):
+                with self.assertRaisesRegex(RuntimeError, "remains"):
+                    worker_settled(manifest)
+            with patch("research.container_grader.subprocess.check_output", side_effect=OSError("Docker absent")):
+                with self.assertRaises(OSError):
+                    worker_settled(manifest)
+
     def test_failed_extra_tool_or_nonzero_shell_never_passes(self):
         parts = [{"type": "tool", "tool": "read", "state": {"status": "completed"}},
                  {"type": "tool", "tool": "shell", "state": {"status": "completed", "metadata": {"metadata": {"exit": 0}}}}]
