@@ -2843,34 +2843,57 @@ Documentation CI `37369987295` passed; its full job and 13 steps were inspected
 once. Prior failures remain failed. Broader research and final scope gates remain
 open, and PR #242 stays draft. No version or owner installation change.
 
-### Fresh native Git and syntax feedback control (2026-10-05)
+### Native Git feedback passed; fresh quantity workflow launched (2026-10-05)
 
-Product commit `e9bec02` passed 220 setup checks, 216 research checks (two
-skips), 88 Node checks, native self-checks, frozen offline checks and a clean-source
-isolated package smoke test (version 1.0.0, 23 payload files). Documentation,
-local-link, diff and secret checks passed. The shim-unavailable regression failed
-before the fix and passed afterward. Validation receipt SHA256:
-`d847aeef6a201c229b3ab8aec696e5ff1dfb1ad23d507e8af174f17194013e7f`.
+Product commit `e9bec02` passed 220 setup, 216 research (two skips) and 88 Node
+checks, native/frozen offline checks, clean-source package smoke (version 1.0.0,
+23 files), docs/links/diff and zero-finding secret scanning. Product CI
+`37371297330` and documentation CI `37371739401` also passed; their complete jobs
+and 13 steps each were inspected and retained once. Product checks were not
+replayed for this documentation update.
 
-A separate authentic frozen clone preserves this product revision, all 414 tracked
-files, 98 unchanged runtime files and five plugin assets. Only the plugin server
-asset differs from the preceding frozen source. Source proof SHA256:
-`1d9e9cdf5e20f5b0a363de79b5f556444ccb9b7ab8d545850d9cb78f9c8fb9c7`.
+The fresh no-model Git/syntax feedback control **passed**. Its three native tools
+wrote fixed broken JavaScript bytes, restored fixed valid bytes, and read the
+result. Bounded, nontruncated output reported the syntax error only for the broken
+file; no repository-inspection warning appeared. Four canned responses produced
+no model inference or runtime operation. The 147-byte captured patch matched the
+fixed final file and trusted fixture files stayed unchanged. Initial and final
+runtime counters remained 23 requests, 241,328 prompt and 10,194 completion tokens,
+unloaded and idle. All 12 parent, five native and four capture resource samples
+and ten power samples were complete and normal; sampled swap did not grow.
 
-A fresh no-model native control was launched once against that source. Three
-canned tools change fixed JavaScript bytes to a syntax error, restore fixed valid
-bytes and read the result. The declared gate requires bounded, nontruncated native
-syntax feedback on the broken file, no syntax failure after repair, no incomplete
-repository-inspection warning and a sole captured patch matching the fixed final
-file. Four canned responses must leave runtime counters unchanged. No model
-forwarding, candidate implementation, JavaScript execution, benchmark or independent
-grade is involved; the product's JavaScript check parses syntax only.
+Separate settlement review passed seven groups and 21 negative projections. It
+preserved all 72 evidence pins, both detached images and three empty mounts, then
+removed only the inactive exit-0 job. The first review referred to a nonexistent
+settler filename and failed before loading the evidence checker; that failure and
+the unexecuted first settler remain preserved. The corrected review passed without
+replaying the original control, acceptance or grader. Settlement SHA256:
+`d1cf2ff688e9a12265460a2a6ad59a65f862452b8af5198195fc98ad21fb7ea1`.
+Review SHA256:
+`91626a2a62205aebcba878b6bfcfdae02b07283c094fcb7055345ce7c1aa51eb`.
+This verifies the observed fixed syntax-feedback mechanism, not model repair,
+independent functional grading or sustained production quality.
 
-Seven protocol-review groups with 39 negative projections and nine launcher checks
-passed. Protocol review SHA256:
-`065059ecbab957ec66236b7f10d323884b5a597eaeaa763aea915aa33a5517e4`.
+A fresh public grouped-quantity Python workflow was launched once on the same
+separately frozen `e9bec02` source. Only local OpenCode/oMLX implements the stub.
+Its declared native workflow requires eight bounded baseline errors before any
+write and a successful final public check after the latest code change, one owned
+root and only the declared file/tool paths and exact checker command. The artifact
+callback checks bytes and unchanged trusted files without executing candidate code.
+Original 300-second limits, exact before-forward catalog/sampler checks, usage
+reconciliation, unload/owned-stop policy and all resource gates remain unchanged.
+
+Seven protocol-review groups and nine launcher checks passed. Two separate
+counter-check copies exactly reverse to their frozen predecessors after removing
+qualified module references and the prospective counter argument; historical
+23/5/0 counters stay unchanged. Synthetic future-counter review exercises the full
+historical checks with only review-time live-status interception. The initial
+builder selected Python 3.14's annotation symbol table instead of the function
+symbol table and failed before writing either runner or bridge; that failure is
+preserved. The corrected builder and first protocol review passed.
+Protocol review SHA256:
+`b2c4aa61ae3e63fe08d1139d2d6a919930b25d8621e7cd6d94c32bb29c103684`.
 Launcher review SHA256:
-`b0e1f564f7c231ef16011dbb27eb3d911b181f8d860dde23a2da5ed58eec5a29`.
-Outcome remains unknown at launch. Original resource stops and isolated native
-boundaries remain in place; prior failed observations remain failed. Broader gates
-and final production scope remain open, and PR #242 remains draft.
+`7ff46bd177b9a05245d003c44d41b1a91146af04e687fe4282ccec12d6462e1f`.
+Outcome remains unknown at launch. Prior failed tasks remain failed. Broader
+research and truthful final scope gates remain open; PR #242 remains draft.
