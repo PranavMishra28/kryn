@@ -552,3 +552,45 @@ tests changed, exercise both classifiers and reclassify the retained canned
 patches before another real pair is frozen. The completed pipeline's execution,
 resource and ownership evidence can be cited for unchanged mechanisms; its old
 readiness receipt cannot stand alone as admission for the new source map.
+
+
+The separate source-delta assessment passed against the corrected source:
+`12161a53fd3d16c537abab8405dfb621063de98c98c11f7401571fd4546dc262`.
+It verified the exact four-file difference and unchanged AST outside the two
+classifiers, plus 67 non-Python runtime assets. Real synthetic Git controls
+reproduced the old rename miss and confirmed the correction in both classifiers;
+the two archived canned patches remained unchanged and free of test edits.
+This is a new, narrowly scoped source admission using the unchanged execution
+controls. It does not relabel or rerun any previous audit or campaign.
+
+A separate historical path-only impact screen found neither exact archived patch
+from the first completed real pair affected:
+`9ffacc252802ae08a70a09bc775dbd91b6d4429c69073ddefd09171440a4bcc2`.
+No official tests or original auditors ran, and no previous score changed.
+
+
+The corrected-source real development protocol passed independent static review:
+`29c21e6c0aaaa2f67bb5433ec278c0e2fef829116ba64de905561602a7fa19df`.
+It was prepared once, validated against the pinned evaluator and image, and
+installed under the existing native launchd controller. Its frozen 98-input source
+map is `c042c4c079f28d3bcfb3cc2063e5e0b2ed0b7e84b05c089a90c4dfbd5bfd78fe`;
+manifest `7d496c4f56f6a13ba2a26dcc2e005b72c4bf816c5814b59f338918a156c36070`.
+Initial activation verified a live controller stabilizing safety admission before
+any arm started, receipt
+`952ab4c046e3ff662212e3824c6f2ae0af13b76a800b79b61d1a875ea7d467a2`.
+
+This is one exposed public development repetition, KRYN then native, with the
+unchanged task, image, model sampler and 900-second arm/360-second request budgets.
+It uses the separately frozen battery-capable policy and corrected test exclusion;
+interrupted or invalid arms remain unscored. A clean timeout remains a strict
+failure even if its patch resolves. The preregistered independent outcome audit
+will run once after terminal product adjudication. Activation is not a task-quality
+or battery-at-load result; broader validation and release qualification remain open.
+
+An additional root static identity check failed because the new auditor uses a
+more specific failure-receipt label. The failed check is retained separately;
+exact AST comparison found only that metadata literal changed in the compared
+writer, with the guard and request predicates unchanged. The protocol review and
+separate diagnosis preserve that distinction. Code `dfe6912` passed the full local
+checks, Python 3.11 research compatibility, clean package smoke and GitHub CI run
+`37272670062` before this launch.
