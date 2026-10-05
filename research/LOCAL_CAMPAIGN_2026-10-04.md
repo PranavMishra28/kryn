@@ -779,9 +779,41 @@ verified all source/input pins and five synthetic Git cases, including missing,
 changed, symlinked and tracked metadata rejection. It is not an independent-author
 review. An initial synthetic fixture omitted the tracked package directory; its
 failure is retained separately and the sealed builder was unchanged. The one-shot
-native job is installed with automatic 60-second cooldown and three green
+native job was installed with automatic 60-second cooldown and three green
 observations, fixed resource guards and no model, task tests or grader. Launch
-is not a successful preparation result.
+alone was not a successful preparation result.
+
+Preparation v4 then passed,
+`67423e37d83e064960865586cfa855114ec9b0656588b867f88e6761220a04f4`.
+Settlement `812ed0c8fe547f84921bb42164c846da337b176fcfa2d5fabbdc785a26d46c14`
+verified the exact original Git tree, all 1,007 baseline files, unchanged runtime
+metadata, the immutable nonroot image, 18 normal resource samples, 16 power
+observations and actual owned-resource absence. All 66 evidence/admission files
+remained unchanged when the inactive build job was removed. This qualifies
+artifact preparation only.
+
+The separately frozen pytest canned controls v2 exhausted both arms but failed
+before any model request or official grade. Each worker could not read the policy
+probe: the host's sealed source had mode `0400`, which Docker preserved when
+copying it into a nonroot container. Neither native completion nor negative-grade
+coverage was established. The preregistered audit ran once and withheld admission,
+`1938b6819780372ab90136eb2fd5baeb13207a890a44d88fbc527236b137ac42`.
+The `canary_complete` sequence status does not mean the control passed.
+
+Settlement `b43665b00a2f4e0c658cb23cf45a493b3fd7a61192c409ec14bf740e8bac2d73`
+verified 126 unchanged JSON/JSONL receipts, both complete exports and archive
+member maps, all four resource/power logs and final observations, and actual
+owned container/network ID, name and label absence. Only the exact inactive
+controller job was removed. Neither arm, grader nor auditor was replayed.
+
+The prospective fix shares policy-probe installation between admission and
+generation: it stages the same bytes with mode `0444` before Docker copies them,
+leaving the sealed source unchanged. An owner-only-source regression and the full
+220 setup / 212 research / 87 Node checks passed; evaluator Python 3.11 also passed
+212 research tests. The prospective source and an isolated no-model permission
+diagnostic are frozen separately. The first read-only prelaunch check timed out
+querying Docker before any diagnostic attempt; its failure is retained. No new
+control or quality admission follows from these code checks.
 
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`

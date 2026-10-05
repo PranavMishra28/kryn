@@ -15,7 +15,7 @@ import time
 
 from research import local_only
 from research.container_admission import (ROOT, PYTHON, SERVER, environment, start_server,
-    plugin_inventory, source_inputs, unchanged, routes)
+    plugin_inventory, source_inputs, unchanged, routes, PROBE, install_policy_probe)
 from research.container_export import extract_worktree
 from research.container_policy import parse_log, policy_during_tools
 from research.container_worker import DockerWorker, HostGuard, validate_worker
@@ -27,9 +27,6 @@ from tools.context_probe import summarize_resources
 from tools.learning import InferenceRelay
 from tools.run_native_trial import (settle_owned_sessions, export_owned_sessions,
                                     generation_completion)
-
-PROBE = "/opt/kryn-policy-probe.py"
-
 
 class ContainerServer:
     """JSON transport adapter for existing native ownership/export functions."""
@@ -178,7 +175,7 @@ def run(campaign, arm):
                     raise RuntimeError("Frozen model sampler differs from actual config")
                 if not synthetic:
                     report["local_only"] = local_only.attest(env, "/tmp/kryn", "http://127.0.0.1:18765/v1")
-                docker.command("cp", str(ROOT / "research/container_policy.py"), worker + ":" + PROBE)
+                install_policy_probe(docker, worker)
                 server = ContainerServer(docker, worker, env["OPENCODE_PASSWORD"])
                 session = server.request("POST", "/api/session", {"title": "Frozen container development",
                     "agent": "agent", "permissions": [], "model": {"providerID": "local", "id": "qwen", "variant": "default"},

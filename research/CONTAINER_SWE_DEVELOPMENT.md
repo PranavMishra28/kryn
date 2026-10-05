@@ -289,3 +289,16 @@ A separately reviewed no-model preparation now preserves just that measured file
 across cleanup, keeps the original Git tree exact and checks the package import.
 It does not reinstall or regenerate metadata. Repository controls and loaded-model
 memory readiness remain required before another real comparison.
+
+That preparation passed with the exact original Git tree, all 1,007 baseline
+files and the preserved version metadata. The subsequent pytest canned controls
+failed in both arms before a model request or official grade: Docker copied the
+sealed host policy probe's owner-only mode into a nonroot worker. The independent
+audit withheld admission. Complete exports and unchanged receipts were verified,
+owned resources were absent, and the inactive controller job was removed.
+
+Admission and generation now share one installer that stages identical probe
+bytes with read-only access for all users before copying into the worker. The
+sealed host source stays unchanged. A regression covers an owner-only source;
+separate container verification is required before any new control protocol.
+The failed controls remain failed and cannot supply negative-grader admission.

@@ -10,7 +10,7 @@ import urllib.request
 from unittest.mock import Mock, patch
 
 from research.container_worker import DockerWorker, HostGuard, pinned_image, validate_worker, container_usage, LABEL
-from research.container_admission import environment, tool_acceptance, source_inputs
+from research.container_admission import environment, tool_acceptance, source_inputs, install_policy_probe, PROBE
 from research.container_config import worker_environment
 from research.local_only import check_environment
 from research.local_campaign import PINNED_FILES
@@ -19,6 +19,29 @@ from research.container_grader import frozen, require_owned, worker_settled, req
 
 
 class ContainerControlsTests(unittest.TestCase):
+    def test_policy_probe_copy_is_readable_but_not_writable_from_sealed_source(self):
+        with tempfile.TemporaryDirectory() as root:
+            source = Path(root) / "research/container_policy.py"
+            source.parent.mkdir()
+            source.write_bytes(b"# synthetic policy probe\n")
+            source.chmod(0o400)
+            copied = []
+
+            def copy(command, path, destination):
+                staged = Path(path)
+                self.assertEqual((command, destination), ("cp", "worker:" + PROBE))
+                self.assertEqual(staged.read_bytes(), source.read_bytes())
+                self.assertEqual(staged.stat().st_mode & 0o777, 0o444)
+                copied.append(staged)
+
+            docker = Mock()
+            docker.command.side_effect = copy
+            with patch("research.container_admission.ROOT", Path(root)):
+                install_policy_probe(docker, "worker")
+            docker.command.assert_called_once()
+            self.assertFalse(copied[0].exists())
+            self.assertEqual(source.stat().st_mode & 0o777, 0o400)
+
     def test_host_guard_records_explicit_battery_admission_and_final_sample(self):
         with tempfile.TemporaryDirectory() as root:
             with self.assertRaises(ValueError):

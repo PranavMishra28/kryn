@@ -28,6 +28,7 @@ from tools.run_native_trial import plugin_active, plugin_absent
 
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON = "/opt/miniconda3/envs/testbed/bin/python"
+PROBE = "/opt/kryn-policy-probe.py"
 CANARY = "\nKRYN synthetic worker admission.\n"
 CONTROL_IMAGE = "python@sha256:399babc8b49529dabfd9c922f2b5eea81d611e4512e3ed250d75bd2e7683f4b0"
 SERVER = "http://127.0.0.1:18767"
@@ -200,6 +201,16 @@ print(json.dumps(r))
             marker.shutdown()
 
 
+def install_policy_probe(docker, worker):
+    # Docker preserves source mode bits; sealed owner-only files must still be
+    # readable by the nonroot worker, without making the probe writable.
+    with tempfile.TemporaryDirectory(prefix="kryn-policy-") as temporary:
+        path = Path(temporary) / "probe.py"
+        path.write_bytes((ROOT / "research/container_policy.py").read_bytes())
+        path.chmod(0o444)
+        docker.command("cp", str(path), worker + ":" + PROBE)
+
+
 def start_server(docker, worker, native, directory, ip, report):
     # No configuration or credentials from the owner's environment.
     docker.command("exec", worker, "mkdir", "-p", "/tmp/kryn-state",
@@ -272,8 +283,8 @@ def arm(image, directory, native, baseline, baseline_symlinks, *, policy_probe=F
                 session_args = []
                 if policy_probe:
                     from research.container_policy import parse_log, policy_during_tools
-                    probe_path = "/opt/kryn-policy-probe.py"
-                    docker.command("cp", str(ROOT / "research/container_policy.py"), worker + ":" + probe_path)
+                    probe_path = PROBE
+                    install_policy_probe(docker, worker)
                     def probe(mode, *args):
                         return docker.command("exec", "-e", "OPENCODE_PASSWORD=" + env["OPENCODE_PASSWORD"],
                                               worker, PYTHON, "-I", probe_path, mode, *args, timeout=45)
