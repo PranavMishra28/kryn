@@ -299,3 +299,20 @@ controls, plus explicit hashes of the interrupted attempt. Its handoff must
 verify the prior terminal receipts and actual owned-resource absence before
 starting. No further repetition is automatic. A passing independent admission
 and new real-pair preregistration still precede any additional model generation.
+
+Safe power returned during recovery, but the stopped worker's ownership/size
+check then rejected an inspection. The frozen check did not retain that response,
+so the historical cause is unknown. Subsequent read-only observations show the
+expected owner, stopped state and 4-KiB writable layer; they do not explain or
+erase the failed check. The queued control correctly refused to advance when
+its predecessor entered `needs_action`. That queue failed closed, and its
+unstarted replacement control is retired. No additional model arm ran.
+
+The prospective worker change closes this diagnostic gap: a failed usage check
+now retains bounded ID/owner/size metadata and distinguishes ownership mismatch,
+invalid or missing size telemetry, and exceeding the existing 4-GiB cap. Unknown
+sizes still fail; negative sizes also fail as unknown. There is no automatic
+retry or cap increase. Credential/environment fields are excluded. Separately
+guarded recovery preserves stopped work as unscored; it cannot turn the failed
+admission into a pass. A new source-frozen no-model admission is required before
+the next real comparison.

@@ -198,9 +198,28 @@ class DockerWorker:
             value = subprocess.run(["docker", "container", "inspect", "--size", identity],
                                    capture_output=True, text=True, timeout=5, check=True)
             info = json.loads(value.stdout)[0]
-            if (info["Config"]["Labels"].get(LABEL) != self.owner
-                    or type(info.get("SizeRw")) is not int or info["SizeRw"] > 4 * 1024**3):
-                raise RuntimeError("Owned container identity or 4 GiB work cap failed")
+            owner = (info["Config"].get("Labels") or {}).get(LABEL)
+            size_rw = info.get("SizeRw")
+            reason = None
+            if owner != self.owner:
+                reason = "owner_mismatch"
+            elif type(size_rw) is not int or size_rw < 0:
+                reason = "size_telemetry_missing_or_invalid"
+            elif size_rw > 4 * 1024**3:
+                reason = "work_cap_exceeded"
+            if reason:
+                # Failure-only selected fields: never retain unrelated Config.Env
+                # or raw inspect/stderr output, and bound malformed field values.
+                atomic(self.evidence / ("usage-failure-" + uuid.uuid4().hex + ".json"), {
+                    "reason": reason, "expected_container_id": identity,
+                    "observed_container_id": str(info.get("Id"))[:128],
+                    "expected_owner": self.owner, "observed_owner": str(owner)[:128],
+                    "size_rw_present": "SizeRw" in info, "size_rw_type": type(size_rw).__name__,
+                    "size_rw": size_rw if type(size_rw) is int and -(2**63) <= size_rw < 2**63 else None,
+                    "size_rw_repr": repr(size_rw)[:128], "limit_bytes": 4 * 1024**3,
+                    "inspect_returncode": value.returncode,
+                    "inspect_stdout_bytes": len(value.stdout.encode())})
+                raise RuntimeError("Owned container usage check failed: " + reason)
 
     def inspect(self, kind, identity, *, cleanup=False):
         return json.loads(self.command(kind, "inspect", identity, cleanup=cleanup))[0]

@@ -187,6 +187,59 @@ class ContainerControlsTests(unittest.TestCase):
                     worker.export("owned", Path(root) / "out.tar")
                 capture.assert_not_called()
 
+    def test_usage_failures_record_bounded_selected_evidence_without_retry(self):
+        missing = object()
+        cases = [(missing, "size_telemetry_missing_or_invalid"),
+                 (None, "size_telemetry_missing_or_invalid"),
+                 (True, "size_telemetry_missing_or_invalid"),
+                 (4096.0, "size_telemetry_missing_or_invalid"),
+                 ("4096", "size_telemetry_missing_or_invalid"),
+                 (-1, "size_telemetry_missing_or_invalid"),
+                 (4 * 1024**3 + 1, "work_cap_exceeded"),
+                 (2**128, "work_cap_exceeded"),
+                 (4096, "owner_mismatch")]
+        for size_rw, reason in cases:
+            with self.subTest(size=size_rw, reason=reason), tempfile.TemporaryDirectory() as root:
+                worker = DockerWorker(root, Mock())
+                worker.containers = ["a" * 64]
+                owner = "foreign" * 10000 if reason == "owner_mismatch" else worker.owner
+                info = {"Id": worker.containers[0], "Config": {
+                    "Labels": {LABEL: owner}, "Env": ["SECRET=must-not-be-recorded"]}}
+                if size_rw is not missing:
+                    info["SizeRw"] = size_rw
+                with patch("research.container_worker.subprocess.run", return_value=Mock(
+                        stdout=json.dumps([info]), stderr="unrelated-secret", returncode=0)) as inspect:
+                    with self.assertRaisesRegex(RuntimeError, reason):
+                        worker.check_usage()
+                inspect.assert_called_once_with(["docker", "container", "inspect", "--size", "a" * 64],
+                    capture_output=True, text=True, timeout=5, check=True)
+                receipts = list(Path(root).glob("usage-failure-*.json"))
+                self.assertEqual(len(receipts), 1)
+                raw = receipts[0].read_bytes()
+                self.assertLess(len(raw), 8192)
+                self.assertNotIn(b"must-not-be-recorded", raw)
+                self.assertNotIn(b"unrelated-secret", raw)
+                evidence = json.loads(raw)
+                self.assertEqual(evidence["reason"], reason)
+                self.assertEqual(evidence["inspect_returncode"], 0)
+                self.assertEqual(evidence["expected_container_id"], "a" * 64)
+                self.assertEqual(evidence["observed_container_id"], "a" * 64)
+                self.assertEqual(evidence["expected_owner"], worker.owner)
+                self.assertEqual(evidence["size_rw_present"], size_rw is not missing)
+                self.assertEqual(evidence["limit_bytes"], 4 * 1024**3)
+
+    def test_valid_usage_including_exact_cap_produces_no_failure_receipt(self):
+        with tempfile.TemporaryDirectory() as root:
+            worker = DockerWorker(root, Mock())
+            worker.containers = ["a" * 64]
+            for size_rw in (0, 4096, 4 * 1024**3):
+                info = {"Id": "a" * 64, "Config": {"Labels": {LABEL: worker.owner}}, "SizeRw": size_rw}
+                with patch("research.container_worker.subprocess.run", return_value=Mock(
+                        stdout=json.dumps([info]), returncode=0)) as inspect:
+                    worker.check_usage()
+                    inspect.assert_called_once()
+            self.assertFalse(list(Path(root).glob("usage-failure-*.json")))
+
     def test_cleanup_refuses_changed_owner(self):
         with tempfile.TemporaryDirectory() as root:
             worker = DockerWorker(root, Mock())
