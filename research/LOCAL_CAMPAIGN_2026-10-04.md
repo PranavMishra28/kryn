@@ -1676,3 +1676,30 @@ CI **37320571511** passed the changed commit `0442f5b`; earlier failed
 **37319186002** remains retained without replay or a proven cause. PR #242 stays
 draft. Broader development, fresh protected validation, coding/UI, full-context
 reasoning, long-duration endurance and truthful final production scope are open.
+
+## Sixteen-turn result and transition to the UI boundary
+
+The 16-turn local model diagnostic passed all declared checks in 185.682 seconds:
+one CLI, fifteen native API continuations, exact inputs/exports, shell then fifteen
+reads, 32 reconciled local requests and a sole 264-byte fixture patch. The original
+policy and resource gates passed. Separate settlement verified 3,125 files
+unchanged, all owned objects absent and the same unloaded runtime, then removed
+only the inactive job. Settlement:
+`a1154a9e176c4e8e484e4141dd5716ff61eaf88a7a73e917f23c40ffdee5cad6`.
+
+The next prospective no-model control moves to the native Agent/Browse path,
+separate browser container and existing APFS barrier on a new public fixture.
+It keeps native engine/guards and uses the frozen candidate plugin, with parent
+HostGuard cancellation propagated to both native monitors. It is a boundary
+control, not a model UI score. Full evidence and protocol limits are in the
+[container record](CONTAINER_SWE_DEVELOPMENT.md).
+
+CI **37322172389** passed at `7aa1d42`. The earlier failed mount-identity CI run
+remains failed without a proven cause or replay. Bounded read continuity does
+not close coding/UI, fresh/protected validation, full-context reasoning,
+long-duration endurance or final production scope. The single PR remains draft.
+
+The first UI-control review's 15-second Docker inventory timeout is retained.
+A separate local API health observation found no owned worker containers; the
+unchanged runner subsequently passed a separate 13-check author review and a
+nine-check launcher review. It was launched once with no outcome claimed.

@@ -955,3 +955,75 @@ Changed-commit CI run **37320571511** passed at `0442f5b`. The earlier failed
 The single PR stays draft. Broader development, fresh protected validation,
 coding/UI, full-context reasoning, long-duration endurance and final production
 scope remain open. Neither synthetic result establishes comparative uplift.
+
+## Sixteen-turn continuity passed; native UI boundary is the next gate
+
+The preregistered 16-turn diagnostic passed in 185.682 seconds: one actual CLI,
+15 native API prompts, all exact inputs and completed native generations,
+`shell` then 15 reads, the sole 264-byte fixture patch, and no recorded policy
+mutations or compaction. All 32 local requests reconciled with 190,611 prompt
+and 3,026 completion tokens. Runtime counters advanced from 4/18,833/291 to
+36/209,444/3,317; one guarded unload left the same runtime unloaded and idle.
+Parent/worker logs contain 91/88 normal resource samples and 80/79 valid power
+samples, all AC at 90%, with zero sampled swap growth and final checks present.
+
+Separate settlement verified 3,125 retained files unchanged, the full archive
+and exact capture, all 16 per-turn exports, frozen source/baseline/prior pins,
+current runtime counters, and all owned container/network IDs, names and labels
+absent. Only the exact inactive successful job was removed. The 13-check author
+review intercepted output and job removal before separate execution. It was not
+independent-author review. No started task or original runner was replayed.
+
+| Private evidence | SHA-256 |
+| --- | --- |
+| 16-turn result | `2fdad85d519d45134559adba47f9b1d51f69ac97c12229946b1ee236b0608556` |
+| Native driver | `38824cdb5e2a3cef3ffe21b2cb1a36b6e2e22c46cd0785e5c9c9983a0e34840a` |
+| Settlement | `a1154a9e176c4e8e484e4141dd5716ff61eaf88a7a73e917f23c40ffdee5cad6` |
+| Settlement author review | `f756c7b0e7d2a9d66874b27116f91c60726cdf338423eed978ff1aa35d2f26fe` |
+
+This is bounded synthetic read continuity. It does not establish coding/UI
+quality, second-CLI compatibility, reasoning across the configured context,
+long-duration endurance, benchmark improvement or production qualification.
+More read-only turns would not close those gates.
+
+The next prospective control exercises the existing native macOS Agent→Browse
+path and separate Chromium container, using a new public fixture and six canned
+requests with zero model inference. It reuses the original write/delegate/
+navigate/snapshot sequence, native engine, browser image and three-phase APFS
+barrier. The frozen candidate source supplies the KRYN plugin. A battery-capable
+parent HostGuard additionally propagates cancellation into both existing native
+resource monitors, retaining their memory thresholds and latched failures.
+Admission retains 60 seconds of cooldown and three green observations; the native
+CLI remains bounded at 120 seconds. No benchmark or official grader is involved;
+the existing synthetic marker callback checks boundary mechanics only. This
+control cannot establish live model UI quality or explain the earlier CI failure.
+
+CI **37322172389** passed at `7aa1d42`; observation SHA-256
+`81b4d449e5eb277308d6cc977d15e735da12b682ec3971ae7783c18bdc45b169`.
+The earlier failed CI remains failed, with an unproven cause and no replay.
+PR #242 remains draft, with broader development, fresh/protected validation,
+coding/UI, full-context reasoning, long-duration endurance and final scope open.
+
+The first UI-control author review stopped before a trial or container started:
+a retained-prior read-only `docker ps` timed out at 15 seconds. Failure receipt:
+`974ee5f94c6c202acf2f7224d75dad7dcd6752d8e7e579df938eea0aa18d9711`.
+A separate local Docker API ping and owner-filtered list completed in 1.596
+seconds, finding no owned worker containers; receipt:
+`0e6711ff880bc8d2648b039771040bc7e6f19a434d37c372be7424a1a2679156`.
+The runner was unchanged. This later observation does not establish the cause
+of the timeout or upgrade the failed review.
+
+A separate review after that health observation passed 13 author checks,
+including actual linked-guard normal/stop/latch behavior, the boundary wrapper's
+fixed receipt/source selection, and rejection of incomplete generation, browser,
+relay or detach evidence. The first failed review is pinned. A separate launcher
+review passed nine checks before one `RunAtLoad=true`, `KeepAlive=false` bootstrap.
+The control is now launched; no outcome is claimed at launch.
+
+| Native UI control | SHA-256 |
+| --- | --- |
+| Runner | `ea526362fb2102d35ad545d1efe3a3d225a99f158d8c0866d3976e8bff2e76fb` |
+| Manifest | `9f3e7edbd813f774262c4eac3761daac92e19c7e447a2295c0b781655a1cb756` |
+| Predeclaration | `5a1569b49fde99d3855bd98530c8d51941c5669411494a86b0ad901c709498d8` |
+| Separate author review | `e6b1259e5341f18d1afcd32dd59aaa18a91d00723aad957a5be69235a2b9fce3` |
+| Launcher review | `dc7d3cb3caf6f6be93fd2f72ee6c27789c2fb2a3bbb166e0afda42439ea1ba08` |
