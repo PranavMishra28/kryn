@@ -1775,3 +1775,38 @@ CI **37326329635** passed at `0aab7ce`; earlier failures are not replayed or
 upgraded. Broader development, valid fresh/protected validation, coding/UI,
 full-context reasoning, long-duration endurance and final scope remain open.
 PR #242 stays draft.
+
+## Native UI boundary passed; fresh local-model diagnostic launched
+
+Supported-runtime V4 passed its canned protocol with native CLI exit 0, one
+Agent root/Browse child, six calls, exact 75-byte native input and a sole 320-byte
+page patch. The readonly capture and fresh synthetic marker grader passed, and
+all three volume phases detached. No model inference or official benchmark
+score was involved. Separate settlement verified 68 unchanged files, both
+preserved images, actual owned mount/browser absence, normal final resource
+samples and the same unloaded runtime counters before removing only the inactive
+job. Settlement:
+`42322ae4a36807199e7b1971be79acc975ffda79d27dc8dddea43c7970c0e365`.
+The cleanup script's static correction and two failed reviews are retained;
+none mutated the job. The corrected review passed before separate execution.
+Browser ID/port and continuous native policy snapshots were not retained, so
+those stronger evidence claims remain unavailable.
+
+A new local-model V2 diagnostic is now launched once on a fresh fixture under
+the same native/browser/APFS boundaries and unchanged emergency stops. It asks
+local OpenCode/oMLX to write a declared public page and delegate navigation and
+snapshot to Browse. Exact admitted sampler and both role schemas are enforced
+by the existing local relay before forwarding. The original guard and usage
+accounting must pass before unloading the owned runtime. One 300-second CLI,
+128-request cap and automatic safe admission bound this diagnostic.
+
+The first model draft was retired unrun after static review found it selected
+the canned recorder's different JSON hash format. V2 uses the retained canonical
+hashes from the shared digest function. Sixteen author checks and a separate
+nine-check launcher review passed; actual process identity was verified after
+one bootstrap. No outcome or broad model/UI quality claim is made at launch.
+Protocol and primary hashes are in the [container record](CONTAINER_SWE_DEVELOPMENT.md).
+CI **37328203434** passed at `1963cc4`. Earlier failed CI and research runs remain
+failed without replay. Broader development, valid fresh/protected validation,
+sustained coding/UI, full-context reasoning, endurance and final scope stay open;
+PR #242 remains draft.

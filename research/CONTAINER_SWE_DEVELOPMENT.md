@@ -1174,3 +1174,80 @@ CI **37326329635** passed at `0aab7ce`; compact terminal observation:
 Earlier failed CI remains failed. Broader development, fresh/protected validation,
 coding/UI, full-context reasoning, long-duration endurance and final scope stay
 open; the single PR remains draft.
+
+## Native UI control passed and settled; first local-model UI diagnostic
+
+The supported-runtime V4 control passed: native CLI exit 0, one successful Agent
+root and one owned Browse child, six canned calls, completed write/delegate/
+navigate/snapshot actions and a sole 320-byte `index.html` patch. The full native
+user input matched the 75-byte prompt, including its final newline. The readonly
+capture matched the patch hash, and the fresh synthetic marker grader accepted.
+Candidate, capture and grader phases all detached. This used **zero model
+inference** and no official benchmark grader.
+
+Separate settlement verified all 68 retained files unchanged, including both
+sparse images, three empty owned mount directories on the host device, actual
+browser-name and broker-process absence, and the original listener-close
+predicate. The browser's exact ID and port were not retained. Thirteen parent,
+six native and four capture resource samples were normal; all eleven parent
+power observations were AC/90%. Sampled swap growth was zero, with nonzero
+absolute swap. Runtime PID 85947 remained unloaded and idle at exactly 36
+requests, 209,444 prompt and 3,317 completion tokens. Only the inactive exit-0
+launch job was removed.
+
+The initial plugin-directory argument correction and two settlement-review
+failures (a copied trial path and a check incorrectly stripping the prompt's
+newline) are retained. None executed the settlement mutation. The corrected
+settler passed 15 author checks with only job removal/output intercepted before
+separate execution. The original control was neither replayed nor regraded.
+
+| Completed V4 artifact | SHA-256 |
+| --- | --- |
+| Result | `5d6a534548c5173718a83bdcb9755cfbb731c6c951271fca6763e52514a3be8f` |
+| Native driver | `277048a362dfedd0b75a83aba5d7791d73f85e0b1a1a79838845e64329ea0614` |
+| Barrier | `a8c038f996d105cf87529a3e4910f31ab471c93dd98a1c2ca3f78446ebb29fed` |
+| Patch | `cda756570193e12b84ebd197ac8e3d08a3eea22c8e4769c1403cf0fad851d649` |
+| Settlement | `42322ae4a36807199e7b1971be79acc975ffda79d27dc8dddea43c7970c0e365` |
+| Settlement author review | `c8733199e84a546a83f2eea28d5ba8213101a8b5a9d981518425e37cda8dcdbb` |
+
+This native path retains initial agent/plugin policy inventories, complete
+request metadata and exported session chronology. It does not retain the
+container path's continuous policy snapshots or full wire records, nor prove
+absence of private event gaps. The pass qualifies this canned boundary only.
+
+A fresh local-model Agent/Browse V2 diagnostic now uses a new public fixture,
+existing native engine/plugin and browser image, Python 3.14, original three-phase
+APFS barrier and parent-to-child guard cancellation. One CLI is bounded to 300
+seconds; the original 128-request limit, 300-second request timeout, 8,192-token
+output limit and complete admitted sampler/tool-schema digests remain enforced.
+The original relay rejects mismatched control or either role's schema digest
+before forwarding to the fixed local oMLX endpoint. Exact native usage must
+reconcile runtime counters before one guarded unload; failures retain the
+original exact-owned emergency stop. Concurrent inference conflicts prevent
+unload or stop of potentially shared work. No benchmark task or old UI arm is
+replayed, and no resource stop is weakened.
+
+The first prospective model draft was retired **unrun** during static review:
+the canned recorder's spaced-JSON schema digest differs from the real relay's
+compact canonical digest. V2 binds the already-retained canonical digest from
+the same shared function; no schema or acceptance exception was added. Sixteen
+author checks covered actual boundary argument binding, exact synthetic grader,
+acceptance rejection cases, native usage accounting, successful unload, failure
+stop and conflict handling. A separate nine-check launcher review preceded one
+bootstrap; actual framework-app executable hash, `proc_pidpath` and exact argv
+verified PID 26951. No outcome is claimed at launch.
+
+| Prospective model V2 artifact | SHA-256 |
+| --- | --- |
+| Runner | `983f5004794e9b8058096de562495b9a77cf47e214f68a5e074b4ac05d6fcc7d` |
+| Predeclaration | `6d26de956148141a4217992db0f2ef0607db69d43fd7b97d2479f7923a34593c` |
+| Manifest | `11de1823269056138c86a0141581eb6face0a8edeb80076303375ab600880fb2` |
+| Author review | `beafff1c147a885c49ad3993e8bbdfa33263abf644a7904ab6b8de2cd78cc8f9` |
+| Launch | `d736786c92c55c318a256c57c9d334be0d39d1f7aa1987f09ab74137fcf6100a` |
+| Activation | `013c4b834b0179b842fa68ddf6f86ece3b23d72fb5b59e6b585488a14417dec6` |
+
+CI **37328203434** passed at `1963cc4`; all job/step conclusions are archived by
+observation `dc32564d28bd1b5486670145daea4c05eacab968812b42e647084af009662fa7`.
+Previous failures remain unchanged. Broader development, fresh/protected
+validation, sustained coding/UI, full-context reasoning, long-duration endurance
+and final production scope remain open. The single PR stays draft.
