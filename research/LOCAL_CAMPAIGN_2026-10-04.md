@@ -742,3 +742,53 @@ Repeated pressure stops in Django and Sphinx require a prospective host-memory
 readiness diagnosis before any new real campaign. Their underlying cause remains
 unknown. Resource emergency stops, the normally occupied host, local-only task
 inference and the remaining research and release gates are unchanged.
+
+
+The separate Sphinx salvage v2 completed without model or grader execution,
+result `7a64659becd4259fd67da2b488790ce4bf8ce7c11704675566913284bbfe2188`.
+Settlement `c99fdfc9a703c53334ca11c8f70cb71471d622ec0aa6b8bf40bf6e1142931a2f`
+verified all 220 original files unchanged, 3,099 exported inventory files, the
+24,472,064-byte archive and exact members, all parent/child/final resource and
+power evidence, and actual owned ID/name/label absence. The successful recovery
+had five normal resource and four power samples. Only then were the original
+failed controller and both inactive salvage jobs removed. The original campaign
+still says `needs_action`; it is not adjudicated or accepted. The unstarted KRYN
+arm and original unused terminal auditor are retired without execution.
+
+The original pytest layout diagnostic was retired unrun because its gate required
+an adjudicated Sphinx pair. Its separately reviewed successor instead binds the
+actual unscored settlement and removed jobs. Layout v2 passed,
+`57f3b9f4fd44847b848ed2cafc92036436a5baa9d009c099c1d086c6e6e3e42c`:
+`src/_pytest/_version.py` is a regular, ignored, untracked 590-byte file with SHA-256
+`8098cb642e5cc65d2a29f240915ee3dcba4ed432d932992582ef0e402d9131d9`.
+The cached package imports from `/testbed/src`; `setuptools-scm` is absent.
+Five normal resource samples and four power observations passed the full guard
+checks. Settlement `88256c545a00951ae6354cc1de7122bdb344bd781fd3bde603ed052dc1b13c2d`
+verified 44 unchanged evidence/admission files, the frozen source, actual resource
+absence and removal of the inactive diagnostic job. This is a metadata diagnostic,
+not worker or model-quality admission.
+
+The new guarded pytest preparation v4 preserves only that measured file across
+cleanup, verifies its exact bytes, stages only the original tracked roster and
+requires the original Git tree plus matching package import. It removes the
+unsuccessful metadata-reinstallation step. Script and manifest are respectively
+`2e390d98bb33c579e9bc39d42c5314126a12420f667ed9bf87311ad6b29ddd21` and
+`921bb804657e7f1e2176dcdbd2aa50acd20647b9f5fbe3228aa8aea8650dbca9`.
+Root review `0564f02a334544807dacb58232d7e27b2ba7bb0797d33807e011965019b7da09`
+verified all source/input pins and five synthetic Git cases, including missing,
+changed, symlinked and tracked metadata rejection. It is not an independent-author
+review. An initial synthetic fixture omitted the tracked package directory; its
+failure is retained separately and the sealed builder was unchanged. The one-shot
+native job is installed with automatic 60-second cooldown and three green
+observations, fixed resource guards and no model, task tests or grader. Launch
+is not a successful preparation result.
+
+The bounded host-memory observation
+`9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`
+compared the retained pressure logs with current host/runtime metadata. Both affected arms recorded warning
+pressure and zero sampled swap growth. The recorded runtime physical footprints
+do not identify the cause or establish exhaustion of the model-memory ceiling. The later idle observation had no loaded model and
+cannot establish safe memory headroom during inference. The cause remains
+unknown. Two failed operator metadata probes are retained. No unrelated apps,
+runtime settings or emergency stops changed; new real comparisons remain gated
+on prospective loaded-model readiness.

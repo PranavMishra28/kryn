@@ -270,4 +270,22 @@ filters. It requires exactly one matching identity and an explicit nonnegative
 integer byte count. Missing or invalid values still fail closed; the 4-GiB limit
 and every other guard remain unchanged. No absent size is interpreted as zero.
 Original interrupted and failed recovery attempts remain unscored. See the
-campaign report for the read-only receipts and remaining live admission gate.
+campaign report for the read-only receipts, completed unscored salvage and
+remaining prospective admission gates.
+
+
+The separate Sphinx salvage subsequently preserved the stopped worker's complete
+export and settled its resources. Settlement verified the original 220 campaign
+files, the export member inventory and archive, all resource and power records,
+and actual owned-resource absence before removing the three inactive jobs.
+The original campaign remains `needs_action` and unscored; KRYN and the unused
+terminal auditor are retired. Cleanup does not create a matched result.
+
+A later guarded pytest layout screen measured the cached image's ignored,
+untracked 590-byte runtime version file and its exact hash. The installed
+package imports from the repository; `setuptools-scm` is absent. The screen passed
+with normal resources and verified cleanup, but qualifies only package metadata.
+A separately reviewed no-model preparation now preserves just that measured file
+across cleanup, keeps the original Git tree exact and checks the package import.
+It does not reinstall or regenerate metadata. Repository controls and loaded-model
+memory readiness remain required before another real comparison.
