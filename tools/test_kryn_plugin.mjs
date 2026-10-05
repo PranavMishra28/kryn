@@ -1316,7 +1316,10 @@ test('Ask denies mutations even under auto and Agent retains coding guidance', a
       f.call('session.context', context);
       assert.deepEqual(Object.keys(context.tools).sort(), ['edit', 'shell', 'skill', 'subagent']);
       const guidance = context.system.map(part => part.text).join('\n');
-      assert.match(guidance, /skill using id opencode before acting/);
+      assert.match(guidance, /Load a skill only when its description matches the task/);
+      assert.match(guidance, /opencode skill documents OpenCode configuration and integrations/);
+      assert.match(guidance, /Neither is a prerequisite for ordinary project work/);
+      assert.doesNotMatch(guidance, /skill using id opencode before acting/);
       assert.match(guidance, /not tool names or skill IDs/);
       assert.match(guidance, /For Browse, call subagent with agent browse/);
       assert.match(guidance, /Build one runnable vertical slice/);

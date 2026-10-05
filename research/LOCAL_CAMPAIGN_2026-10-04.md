@@ -2430,3 +2430,61 @@ Outcome is unknown at launch. No product code, version or owner install changed
 in this checkpoint. PR #242 remains draft. Broader development, valid
 fresh/protected validation, sustained coding/UI, full-context reasoning,
 endurance and final truthful production scope remain open; this is not completion.
+
+## Length UI failure settled; skill relevance correction
+
+The text-length run completed its native CLI in 106.364 seconds with 16 local
+requests, but its original strict protocol **failed**. Agent loaded `opencode`
+first, wrote the page, then loaded `report`, called `skill` with subagent arguments
+(missing `id`), attempted nonexistent skill `browse`, and finally delegated Browse.
+The two skill errors remain failures. Browse completed seven permitted observations
+with the exact empty-error, five-character and reset states, then added a screenshot.
+That eighth action violates the declared action set and final-snapshot rule. Neither
+correct functional observations nor a completed native session upgrades the result.
+There was one child and no intervening repair. The artifact callback only checked
+the retained 1,262-byte page; it was not an independent functional grade.
+
+Separate settlement explicitly requires the observed root sequence, both exact
+errors and the extra screenshot, then checks the seven preceding observations and
+all remaining context, chronology, ownership and isolation predicates. Sixteen
+author checks, including ten negative projection cases, passed. All 67 files and
+both whole images remained unchanged; the exact inactive exit-one job was removed.
+Browser ID/name/broker absence, closed port, two detached images and three empty
+owned mount paths were verified. All 58 parent, 51 native and four capture resource
+samples were normal; 49 power samples were AC at 90%, with complete finals and
+zero sampled swap growth. Absolute swap remained nonzero. The 16 requests account
+for 83,707 prompt and 3,117 completion units. One original unload left runtime
+85947 idle at 103 requests, 520,655 prompt and 21,219 completion units.
+
+The first settlement review failed before mutation because its copied comparison
+used spaced JSON serialization for a compact-JSON digest; the exact error also
+contains literal newline escapes. The new settlement fixes those representations,
+pins the old script/review failure and retains all evidence predicates. The old
+settler was never executed. This is a review failure, not a task replay.
+
+| Length UI V1 terminal evidence | SHA-256 |
+| --- | --- |
+| Strict failed result | `1abd07434e4998e9591fd392e1ec07e9d6fd3a0e11986e6d843816c88f7ed10c` |
+| Driver | `4985ef30b4bfb1c815373fe4c936d8af8d7e5ca89d0f954b26c00cfe728bd9ba` |
+| Barrier | `cf2faa95ff1223078611997e2c4c9a758f636f23118178fd47768a944cf9dab6` |
+| Retained first settlement review failure | `1d0436c77955f8c5cb0f86db073058e19787d4c07866c18643f85b3b44a85cd5` |
+| Passed settlement review | `9561541d43cc2736bc683963177ee5c6bba2246d072eb61518de5bc16a8b93d9` |
+| Settlement | `750d350f8d7b7b051c64963d9d07e66e112cd99b10c1f8c547cd17bb5035721f` |
+
+The retained native skill outputs expose a concrete product guidance error:
+`opencode` is documentation for configuring and integrating OpenCode, and `report`
+prepares OpenCode issue reports. The preceding instruction to load `opencode`
+before ordinary coding therefore forced irrelevant documentation. One existing
+Agent/Build guidance string now says to use skills only when their descriptions
+match the task and explains those two built-in scopes. It retains the explicit
+`subagent`/`agent: browse` routing guidance. The existing regression checks the
+corrected instruction and unchanged tool availability. This does not establish
+that the earlier instruction caused the later skill errors or screenshot, or
+that the correction improves model compliance.
+
+CI 37348333380 at `b339736` passed; full job/step JSON is retained. The next
+prospective control will check delivery of the corrected guidance in actual native
+system requests without forwarding to oMLX. All prior task predicates and failures
+remain frozen. No engine, catalog, permission, resource guard, browser boundary,
+relay, APFS, scoring, version or owner-install change is involved. PR #242 remains
+draft; broader research and final production scope remain open.
