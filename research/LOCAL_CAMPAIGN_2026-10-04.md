@@ -1335,7 +1335,7 @@ at 90%, and all final checks passed. Only the exact inactive job was removed.
 Neither model inference nor grading occurred, and the started control was not
 replayed.
 
-The next no-model control sends two new UTF-8 fixtures through native CLI stdin,
+The separately preregistered no-model control sends two new UTF-8 fixtures through native CLI stdin,
 with Docker stdin enabled and no positional prompt arguments or `--` separator.
 Each includes internal line breaks and quotes; exact exported bytes are required.
 The existing 4,096-byte worker stdin bound remains enforced, so this does not
@@ -1350,7 +1350,63 @@ binding and no continuation after first-turn failure:
 `48e163548b52d35b85570753a1a7d08566014fde25d7da8985e8e415364248e6`.
 The prospective manifest is
 `fca8c43b254eeb88a5d9deb34126863af7efd197ac12a00515bc57639d06cec9`.
-No outcome is claimed yet. Frozen product source, policies, resource stops and
+Its outcome is recorded below. Frozen product source, policies, resource stops and
 runtime settings remain unchanged. Model continuity, broader development,
 fresh/protected validation, sustained coding/UI, endurance and final production
 scope remain open.
+
+
+## Exact stdin control passed; new local model continuity protocol
+
+The preregistered stdin control passed without relaxing its exact input hashes.
+Two distinct native CLI processes completed on one owned root session, preserving
+both UTF-8 inputs (130 and 125 bytes), including internal line breaks, quotes and
+Unicode. The driver completed in 28.947 seconds with two canned stop replies,
+zero tools, zero patch bytes and no model inference. Result:
+`cb1b7f123aaaa4cb73fc8824e4f411b23c38ef3a75f3e60cd7981fdac45d5055`.
+This establishes only the measured bounded native stdin path. The earlier
+positional-input control remains failed; arbitrary long-input transport and
+model continuity are not established by canned replies.
+
+Separate settlement verified 1,351 unchanged evidence files, the complete
+5,751,808-byte archive with 1,319 members, exact capture/member equality, both
+CLI receipts and per-turn exports, source/baseline/prior pins, actual owned-resource
+absence and unchanged unloaded runtime counters. All 31 resource observations
+were normal with zero sampled swap growth; all 26 power observations were AC at
+90%, and final guards passed. The exact inactive exit-zero job was removed.
+Settlement:
+`9d18a5e491579bcd7d6e705e787e86f25b921de34f42436fe35fcca064e6a7ce`.
+The first settlement review failed before execution because a copied plist
+filename still named the preceding control. That failure is retained as
+`e88c1a38564e7f795ef743fc71a9f4deb89f9a4698310c46dac1f28c8bff2f37`.
+The corrected settler derives the sole plist and verifies its label, pins the
+failed review and original script, and passed 12 separate author checks before
+execution. No diagnostic, request, original review or settlement was replayed.
+
+The next prospective diagnostic uses local OpenCode/oMLX with one new synthetic
+root session, two distinct native CLI invocations and new fixture identities.
+The first invocation creates one fixture and finishes; the follow-up contains
+neither command nor fixture bytes and asks for the read/finalization procedure
+from the first message. Mechanical acceptance requires exact exported inputs,
+completed tools in the declared order, an exact 599-byte two-file patch, both
+native CLI exits and new generation completions, full owned usage accounting,
+settled ownership and all resource finals. No model answer judging is used.
+The 1,806- and 137-byte inputs fit the unchanged 4,096-byte stdin bound. Each CLI
+has a 300-second limit; both calls and intermediate checks share 600 seconds.
+The second invocation cannot start after first-turn failure or incomplete
+ownership/completion evidence. No retry, benchmark, grader, comparison,
+compaction, server restart or permission change is included.
+
+Manifest:
+`576a1e9a3fdfc3435c51d4152b1a786a9977abc2735fc8fc8bbed3f60618d579`.
+Predeclaration:
+`cb49c2ffd251e8d9754ac896a70517e7a7cf95fd81d264b87f61cb304580b216`.
+Author review passed 52 checks:
+`7a14509695e139cf76be30bf1efcf097bd0160e6737c96fa9707dc8982a6aa6c`.
+These include the actual retained three-container ordering, exact stdin bytes,
+first-turn rejection paths and unchanged admission, usage accounting, unload
+and emergency-stop control flow. Frozen source remains `59ce852`; the editable
+reporting change is not part of this diagnostic. This is a new protocol, not a
+replay or upgrade of the failed earlier continuity attempt. No local-model
+continuity outcome is claimed at launch, and broader production gates remain
+open.
