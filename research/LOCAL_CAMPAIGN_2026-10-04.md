@@ -474,3 +474,14 @@ parent/child generation/grader resource sample, including a final latched guard
 failure. It admits accepted outcomes or clean strict failures only when all
 validity requirements pass; unscored evidence cannot enter a matched result.
 No result, uplift or production qualification is claimed before completion.
+
+Independent preparation continued while that comparison waited safely for AC.
+The next image metadata probe now writes exclusive UTF-8 JSON receipts; a pure
+check covered successful and failed results and rejected existing files. Its
+new manifests bind the preserved failed/unrun attempts and unchanged source,
+image, command and 60-second limits. Prelaunch review receipt:
+`e811d58e79ebb5a202ab668f48c746345308911d307cc0f78174659bdce612a4`.
+Both probes remain unrun. They may execute only after the real comparison has
+settled, safe admission passes and each fresh evidence directory still contains
+only its sealed manifest. This preparation establishes no dependency or coding
+acceptance result.
