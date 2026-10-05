@@ -1030,6 +1030,54 @@ agent tools, benchmark, reference patch, official grade or answer judging.
 Child shell approval, task quality, exact full-context consumption, endurance,
 general agent readiness and real-comparison admission remain open.
 
+The near-context request completed with **86,078 actual input tokens**, zero
+cached tokens, 1,029 completion tokens and 87,107 total tokens in 160.914 seconds.
+Result
+`18147057f01726a91ceba8fd9eaf5348648edc4b6b998f46b112379ccfd69470`
+is passed for this single synthetic memory observation only. All runtime deltas
+matched the response; one unload returned the same process to unloaded idle.
+All 80 resource observations were normal, all 69 power observations were valid
+and on AC, and sampled swap growth was zero. No agent tools, benchmark or answer
+judging ran. This does not establish exact full-context consumption, useful
+reasoning at that length, endurance or real-campaign admission.
+
+Separate settlement
+`e52ab1d3660d0440e03fbe080dc34704ab961a54fd93d3e53e3df142f3d1aa8c`
+verified raw-response equality privately, actual usage and operation hashes,
+worker readiness/isolation and protected plugin, current runtime identity and
+idle counters, prior pins and 114 unchanged files. Actual owned container ID,
+name and label were absent before removing the exact inactive job derived from
+its pinned plist and arguments. Settlement review passed 11 author checks;
+neither review nor settlement is labeled independent-author evidence.
+
+The next no-model diagnostic isolates the unresolved child shell stall. The
+retained native CLI source filters automatic permission handling to its root
+session. A new fixed root/general-child sequence will create and read one known
+in-project fixture, then request a shell hash check. The unchanged bounded
+GET-only observer must capture one pending child shell permission whose source
+call and message match the exact unfinished tool. The declared 60-second timeout
+is expected; the sole exact fixture patch, owned interruption/export/cleanup,
+unchanged policy/full wire and unchanged runtime counters are required. It
+sends no permission reply, changes no native policy and performs no inference.
+Initial counters are seven requests, 167,293 prompt tokens and 4,735 completion
+tokens on the existing unloaded idle runtime. Resource limits and automatic
+60-second/three-green admission remain unchanged.
+
+The first preparation failed author review on a mistaken prior-module attribute
+before any attempt or worker existed. Failure/retirement
+`963c8161030ca32451f2fcc811f22a3e33a2a7dc86ecd56012c600d3c18a2569`
+preserves that version unrun. The separately prepared V2 uses the explicit
+pinned prior-manifest path. Its predeclaration
+`f786e5e67d3d2fb767ce16b3ac143f3c8b48a2965705ac86504990dfe8f41e47`
+and manifest
+`b5b8f810a072f72a87d417c8e18fb5698a19fbec769a9ba15dc526d7a26b691a`
+bind this prospective control. Author review
+`50da89a1cad83fe7c90b581def2c888872f0968ec0822d2a56309aaaf231e5fd`
+passed 25 static/mocked checks, including the actual GET-only observer, foreign
+ownership/source rejection and failure retention in the actual wrapper. It ran
+no container or inference. Earlier failed controls are not replayed or upgraded;
+this diagnostic cannot qualify general agent readiness or task quality.
+
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`
 compared the retained pressure logs with current host/runtime metadata. Both affected arms recorded warning

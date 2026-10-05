@@ -382,10 +382,25 @@ Settlement verified the full raw response privately, worker isolation and
 protected plugin, 107 unchanged pinned files and actual container absence before
 removing the inactive job. This qualifies one larger-input memory observation.
 
-The next single synthetic request keeps the same worker, model, sampling and
-resource limits. Acceptance requires 81,920–90,112 actual input tokens with zero
-cached tokens; its upper input bound plus the unchanged 8,192-token output limit
-fits the existing 98,304-token context. Static and mocked review passed 47 checks
-before one durable launch. It runs no agent tools or benchmark and judges no
-answer. Child shell approval, task quality, exact full-context consumption,
-endurance and admission to a new real comparison remain unqualified.
+The near-context request also passed: 86,078 actual input tokens, zero cached
+tokens and 1,029 completion tokens in 160.914 seconds. Exact counters reconciled,
+one unload returned the same runtime to idle, and all 80 resource and 69 power
+observations were normal and on AC, with zero sampled swap growth. Separate
+settlement verified full response equality privately, all worker/plugin
+boundaries, 114 unchanged files and actual container absence before removing
+only the pinned inactive job. This remains a single synthetic memory observation;
+it does not establish useful reasoning across the configured context or endurance.
+
+The next control targets the unresolved child shell stall. The pinned native CLI
+source handles automatic permission replies only for its root session. One new
+60-second canned root/general-child flow will use the existing bounded GET-only
+observer to capture a pending child shell request, then require its source call
+and message to match the exact unfinished shell tool. It sends no permission
+reply, changes no policy and makes no model request. The exact known fixture must
+be the sole patch; timeout is expected for this diagnostic. Parent/child guards,
+source, image, wire and runtime settings remain unchanged. The first preparation
+failed review on a prior-module attribute reference before any launch and was
+retired unrun. The separately prepared correction passed 25 author checks; this
+is not independent-author review. Earlier failures remain failed. Child shell
+execution, task quality, sustained coding/UI, continuity/endurance and admission
+to a new real comparison remain open.
