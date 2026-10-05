@@ -2710,3 +2710,52 @@ All earlier task failures remain failed. Native public-test observations are not
 independent grading, causal repairability, benchmark uplift or frontier quality.
 Broader development, fresh/protected validation, sustained coding/UI, full-context
 reasoning, endurance and final production scope remain open. PR #242 stays draft.
+
+### Interval-union settled; fresh two-module workflow (2026-10-05)
+
+The public interval-union workflow **passed its declared diagnostic** and was
+separately settled. One native root completed four reads, the failing baseline
+check, one implementation write and the final successful check. Both bounded
+summaries were nontruncated: all eight public tests initially errored and all eight
+passed after the write. Five local model requests and the native usage totals
+reconciled exactly to 32,347 prompt and 1,342 completion tokens in the new runtime
+epoch. The original controller then unloaded the model once. This does not prove
+that the new guidance caused success or establish independent functional grading.
+
+The callback inspected only artifact bytes and the unchanged public README,
+tests and checker. It did not execute the submitted code. The sole 2,154-byte
+patch matched the captured patch. All 30 parent, 23 native and four capture
+resource samples were complete and normal with no sampled swap growth; all 27
+power samples showed AC and 90-percent battery. Seven separate settlement-review
+groups and 22 negative projections passed before removing the exact inactive
+exit-0 job. All 73 evidence pins, including both whole detached images, remained
+unchanged; three owned mount directories were empty. The runtime remained
+unloaded and idle at five requests. Settlement SHA256:
+`5f620bdd352e1555e147cd2657e17100dd4d9f89b5d1e937685d64b3c0578963`.
+Review SHA256:
+`76acd931907d36cafff4b2501707ab9ef116e73a634520315e184bfb08825bb2`.
+
+A fresh public **two-module slug rules and batch allocation** workflow has been
+bootstrapped once. Local OpenCode/oMLX alone implements both stubs. The declared
+workflow requires a failing baseline, changes to both implementation files,
+unchanged public tests and a successful final bounded native test after the latest
+write. The callback checks only the two artifacts and trusted-file hashes.
+Seven protocol-review groups and nine separate launcher checks passed, including
+synthetic two-file patch, missing/invalid artifact, test-order, accounting and
+emergency-stop cases. The source, native guard, tool catalog, sampler, resource
+stops and 300-second task deadline are unchanged. Job
+`dev.kryn.native-slugs-readiness-20261005-v1` has an **unknown outcome at launch**.
+Runner SHA256:
+`b0fa9779fe2c3369ae4759bf481fe8d33cc84532128496bf31cfa2c5e64401f9`.
+Protocol review SHA256:
+`ba84fa3deffb1101a93b6724b54e7f161cd3352e42018c71803d4eaf80bc7892`.
+Launcher review SHA256:
+`74b8612dc59453f9c6d0866555e005f046100d4d65f7eb000d87f0c580167064`.
+
+Documentation CI run `37366560264` was observed queued once; complete jobs and
+steps have not yet been inspected. Previously passed product checks were not
+replayed. No product code, version or owner installation changed here. Earlier
+failures remain failed. Broader development, fresh/protected validation, sustained
+coding/UI, full-context reasoning, endurance and final production scope remain
+open. No independent grade, causal repairability, benchmark uplift or frontier
+quality is claimed. PR #242 remains draft.
