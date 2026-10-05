@@ -2502,3 +2502,77 @@ Broader development, valid fresh/protected validation, sustained coding and UI,
 full-context reasoning, endurance and final truthful production scope remain
 open. PR #242 remains draft; none of these observations qualify a merge or a
 frontier-quality claim.
+
+### Bounded feedback passed; fresh local Python codec workflow (2026-10-05)
+
+The fixed no-model relative-path and bounded-feedback control **passed**. One
+native root completed `read ./records.txt`, the fixed checker, a native write to
+`./records.txt`, the same checker and the same read. Six canned responses produced
+no model requests. Both native check outputs were nontruncated: the first exited
+1 with all 40 failed record identifiers; the second exited 0 with all 40 tests
+passing. Their retained outputs were 740 and 133 bytes. The 805-byte sole data
+patch matched capture, and the data-only callback verified the fixed final bytes
+and unchanged trusted checker. It never executed candidate code. This establishes
+an observed mechanism, not model repairability or an independent functional grade.
+
+All 13 parent, five native and four capture resource samples were complete with
+normal sampled pressure and zero sampled swap growth. Absolute swap remained
+nonzero. All 11 power samples reported AC power and a minimum battery level of
+90 percent. Runtime stayed unloaded and idle at 116 requests, 618,426 prompt tokens
+and 23,814 completion tokens, without any runtime operation. No browser started.
+A separate settlement review passed six author-check groups and 20 negative
+projections before removal of the exact inactive exit-0 job. All 62 pinned files
+and both whole disk images remained unchanged, three owned mounts were empty,
+and the owned native process, broker and relay were absent. Settlement SHA256:
+`1681622e80956ba9929ec073dae938ae8a891e27183f9f25a09411ece4745721`.
+Review SHA256:
+`b892eef7214719962531cfe7a72af996c4fd45d0e44283b78f117fd947589bb5`.
+No task, grader or original acceptance function was replayed. Documentation CI
+run `37360022367` passed and its full job/step record was inspected and retained once.
+
+A fresh local-model project now asks OpenCode/oMLX to implement a small Python
+escaped line codec from public requirements and two unimplemented function stubs.
+Ten public tests and a trusted standard-library checker are supplied. The checker
+reports every failed and errored test ID in one bounded JSON summary, without
+changing native output limits. The prompt gives explicit `./` paths. The baseline
+check must run before any write, all ten tests must initially error, only the
+implementation module may change, and the final native tool must be a successful
+check after the latest write. Concurrent reads are prospectively allowed; writes
+and checks must be ordered after every preceding tool. This criterion follows the
+native tool behavior and the dependencies of this new task. It does not alter the
+failed rollup protocol or upgrade its result.
+
+The candidate tests run only inside the existing native candidate boundary.
+The artifact callback checks regular UTF-8 module bytes and unchanged
+README/test/checker hashes without executing candidate code. Separate evidence
+checks require the sole module patch to match capture. Native
+public-test observations are distinct from independent functional grading. Codex
+does not supply an implementation or judge the model answer. There is no benchmark,
+hidden validation, quality score, causal repairability or endurance claim.
+
+The same source, native engine, ten-tool non-UI catalog, sampler, permissions,
+resource stops, query deadlines and APFS boundaries remain in use. The existing
+controller reconciles exact native usage and request counters before one unload
+if needed; owned-generation failures retain the original emergency stop, and
+concurrent-inference conflicts permit no runtime operation. A small isolated
+counter adapter retains the entire original source/evidence chain and changes
+only explicit live-counter arguments; historical counter facts stay unchanged.
+
+Eight protocol-review groups and nine separate launcher checks passed before one
+launchd bootstrap. Synthetic exports cover bounded summaries, exact commands,
+relative paths, concurrent-read behavior, ordered writes/tests, ownership,
+metadata and failure handling. The trusted checker was exercised with fixed
+synthetic unittest results only; no native task, browser, APFS trial, model or
+candidate implementation ran during review. Job
+`dev.kryn.native-linecodec-readiness-20261005-v1` has an **unknown outcome at launch**.
+Runner SHA256:
+`acce7ba5c781ec8ad1f78b4049502b68bfacf5cb9e49eb27ab040c2c0192f50d`.
+Protocol review SHA256:
+`b912265098f7ef96abe9518d88bfcd13f469c82009e0a1e59b1c61c2db9f8dda`.
+Launcher review SHA256:
+`0c38f5a32cffc69922de4d6699a3da525e3f571b6d405f3bc2eb09927274bd77`.
+
+No product code, version or owner-install change accompanies this checkpoint.
+All earlier failures remain recorded. Broader development, fresh/protected
+validation, sustained coding/UI, full-context reasoning, endurance and final
+truthful production scope remain open. PR #242 remains draft.
