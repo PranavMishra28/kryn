@@ -106,6 +106,10 @@ coverage of every expected test, normal sampled host memory and no swap growth.
 Owned containers settled. Their manifest SHA-256 values are respectively
 `5d40c467b99182dbe71333e4377a87f09cf9c8927edbdf4333e90518a0080c57`
 and `262c78b5a17e659e4cbcbbbc02a5c4b32a4bdb061b450fc64f65ad58d10c16d3`.
+Independent handoff review passed 59 checks, including re-parsing observed test
+IDs and verifying the evaluator, wheel, source, submitted/applied patch and
+ownership hashes. Its private receipt is
+`66758d20ed582edd04a0b88ad2f4029c2c6aa0060107a2fd7889ef26c929c047`.
 
 `container_grader.py` reuses the pinned official evaluator's patch application,
 tests, parser and score. Its parent supplies and settles an owned container;
@@ -130,6 +134,15 @@ a separate development experiment's source, exposed task selection, image,
 prompt, arm order, sampler, complete wire controls, budgets and adjudication.
 Record the actual OpenCode exit code directly. An interrupted or unsafe arm
 remains unscored and cannot be silently replayed.
+
+Read-only review found that the shell inherits the native server's authentication
+environment and can reach its loopback session-mutation API. This is shared
+OpenCode behavior, not a demonstrated container-specific escape. Protecting
+plugin files alone does not freeze agent, model or session permissions. Reuse
+native plugin/agent/session inventories and actual relay model records; a canned
+mutation control must establish their detection limits. Final snapshots cannot
+exclude a transient change followed by restoration. Do not claim that stronger
+boundary without evidence or replace the native framework to assume it.
 
 The first study should test whether ready dependencies reduce observed tool
 failures and timeouts. A reused public task is development-only. Require genuine

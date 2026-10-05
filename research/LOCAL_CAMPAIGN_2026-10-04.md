@@ -106,9 +106,9 @@ roster remains retired/unsealed. No fresh protected validation, autonomous
 long-horizon qualification, frontier comparison or new release is admitted by
 this result.
 
-Keep the single research PR in draft. The Python tool preflight now passes;
-historical repository environment readiness is the next prerequisite. A separate
-no-inference diagnostic checks public imports and the existing test-runner entry
+Keep the single research PR in draft. Python tool and historical-environment
+readiness now pass the bounded development screens below. A separate
+no-inference diagnostic checked public imports and the existing test-runner entry
 point in a pinned official image, with no network, model turn or gold/test patch.
 It cannot revise the frozen campaign or establish an agent-quality score.
 The exposed Django image passed that import/test-entry screen with network
