@@ -507,3 +507,48 @@ including a final observation, and rejects mismatched policy or invalid charge
 data. The pipeline must pass a separately frozen no-model control before a new
 real preregistration. An AC-only observation cannot establish battery-at-load
 operation, and neither is evidence of model quality or uplift.
+
+
+The new battery-profile canned pair completed both root/general-child sessions
+and both expected unresolved official grades without model inference. Its
+original one-shot independent audit failed during ownership observation because
+Docker exposes network `Name`, whereas containers expose `Names`. That audit
+remains failed and unqualified:
+`c93dc17da34f2a00d4cf0ad623679cc1a52c0ccda70d309574819091fc5fc033`.
+No controller, arm, grader or original auditor was replayed.
+
+A separately reviewed read-only observer verified absence of eight owned
+container IDs/names, two network IDs/names and four owner labels, with all
+361 campaign JSON/JSONL files unchanged:
+`ddc00c14dc11dd584a7540eb062245799c10bc7613fae3ad2c9fdb9e92a2cf55`.
+It qualifies ownership absence only. The inactive launchd job was then removed,
+again preserving all 361 files:
+`5e7e68f297d0a71cab76530b8dcf63f103b8d428f261ea69b85ac3a2c9d34dc3`.
+The separate prospective readiness assessment passed:
+`334b696347b761f30ae8e9b17e1ba4d38abec0f6d7085e167a843894c655dd59`.
+It rechecked native root/child completion, the exact candidate patch and official
+negative grades with one fail-to-pass and nine pass-to-pass tests per arm, all
+four process stages, and eight guard logs. All 105 resource samples and 89 power
+observations were valid; charge stayed at 90% on AC. Each parent guard was bound
+to its process start, launch event and exit. The original failed audit remains
+failed. This new assessment permits preparation of one separately preregistered
+exposed development pair, with no task-quality or battery-at-load claim.
+
+
+Final prelaunch review then found a separate test-integrity defect: both patch
+classifiers inspected only a diff's destination. A synthetic Git rename of an
+existing test to a non-test path escaped both exclusions. The failed review is
+retained as `7be69ec862a33f8452aa4ebf37374d3c4d003c068052b02ed15af5064dacdf69`.
+The new real-pair preregistration was retired before its campaign directory was
+created; no model or grader ran. Its retirement receipt is
+`f523a8ab383bcd504e05dba13a8d0f3e8cc1dd7f0bd1351d3f15bd02520853c5`.
+
+Prospective classifiers now validate both old and new paths, deduplicate matching
+test paths and continue to allow genuinely new test files. Synthetic Git
+regressions cover renames into and out of tests, deletion, modification, new
+tests and an invalid old path. Frozen earlier source and receipts stay unchanged.
+A new source-specific admission must prove that only these classifiers and their
+tests changed, exercise both classifiers and reclassify the retained canned
+patches before another real pair is frozen. The completed pipeline's execution,
+resource and ownership evidence can be cited for unchanged mechanisms; its old
+readiness receipt cannot stand alone as admission for the new source map.

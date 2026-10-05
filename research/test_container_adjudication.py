@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -18,6 +19,43 @@ def write(path, value):
 
 
 class AdjudicationTests(unittest.TestCase):
+    def test_git_rename_delete_and_new_test_paths(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+
+            def git(*args):
+                return subprocess.run(["git", "-C", str(root), *args], check=True,
+                                      capture_output=True, text=True).stdout
+
+            git("init", "-q")
+            (root / "tests").mkdir()
+            for name, content in {
+                    "tests/test_alpha.py": "assert 1 == 1\n",
+                    "helper_old.py": "class Example: pass\n",
+                    "tests/test_deleted.py": "def test_deleted(): assert True\n",
+                    "tests/test_same.py": "def test_same(): assert True\n"}.items():
+                (root / name).write_text(content)
+            git("add", ".")
+            git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                "commit", "-qm", "base")
+            git("mv", "tests/test_alpha.py", "helper.py")
+            git("mv", "helper_old.py", "tests/test_beta.py")
+            git("rm", "-q", "tests/test_deleted.py")
+            (root / "tests/test_same.py").write_text("def test_same(): assert False\n")
+            (root / "tests/test_new.py").write_text("def test_new(): assert True\n")
+            git("add", ".")
+            patch = git("diff", "--cached", "--find-renames=100%")
+            rename = next(section for section in patch.split("diff --git ")
+                          if section.startswith("a/tests/test_alpha.py b/helper.py"))
+            self.assertIn("similarity index 100%", rename)
+            self.assertNotIn("@@ ", rename)
+            edits = audit.test_edits(patch)
+            self.assertEqual(set(edits), {"tests/test_alpha.py", "tests/test_beta.py",
+                                          "tests/test_deleted.py", "tests/test_same.py"})
+            self.assertEqual(len(edits), 4)
+            with self.assertRaisesRegex(audit.InvalidEvidence, "patch_path_escape"):
+                audit.test_edits("diff --git a/../tests/test_alpha.py b/helper.py\n")
+
     def guard_evidence(self, root, source="Battery Power"):
         sample = {"pressure_level": 1, "power_source": source, "swap_used_bytes": 20,
                   "utc": "1970-01-01T00:00:01.100000+00:00"}

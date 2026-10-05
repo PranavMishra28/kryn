@@ -171,21 +171,33 @@ def test_edits(patch):
         elif sections:
             sections[-1].append(line)
     changed = []
+    seen = set()
     for section in sections:
         pair = shlex.split(section[0][len("diff --git "):])
-        require(len(pair) == 2 and pair[1].startswith("b/"), "patch_path_syntax")
-        path = PurePosixPath(pair[1][2:])
-        require(not path.is_absolute() and not ({"..", "\\"} & set(path.parts)), "patch_path_escape")
+        require(len(pair) == 2 and pair[0].startswith("a/") and pair[1].startswith("b/"),
+                "patch_path_syntax")
+        section_paths = []
+        for prefixed in pair:
+            raw = prefixed[2:]
+            require(raw and "\\" not in raw and
+                    not any(part in {"", ".", ".."} for part in raw.split("/")), "patch_path_escape")
+            path = PurePosixPath(raw)
+            require(not path.is_absolute(), "patch_path_escape")
+            section_paths.append(path)
         header = section[1:next((i for i, line in enumerate(section)
                                  if line.startswith("@@ ")), len(section))]
         if any(line.startswith("new file mode ") or line == "--- /dev/null" for line in header):
             continue
-        parts = {part.lower() for part in path.parts}
-        name = path.name.lower()
-        if ({"test", "tests", "testing"} & parts or name.startswith("test_")
-                or name in {"test.py", "tests.py"}
-                or name.endswith(("_test.py", "_tests.py", ".test.js", ".spec.js", ".test.ts", ".spec.ts"))):
-            changed.append(str(path))
+        for path in section_paths:
+            parts = {part.lower() for part in path.parts}
+            name = path.name.lower()
+            is_test = ({"test", "tests", "testing"} & parts or name.startswith("test_")
+                       or name in {"test.py", "tests.py"}
+                       or name.endswith(("_test.py", "_tests.py", ".test.js", ".spec.js",
+                                         ".test.ts", ".spec.ts")))
+            if is_test and path not in seen:
+                changed.append(str(path))
+                seen.add(path)
     return changed
 
 
