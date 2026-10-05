@@ -72,7 +72,10 @@ class Handler(BaseHTTPRequestHandler):
         except (KeyError, TypeError, ValueError, json.JSONDecodeError):
             self.send_error(400)
             return
+        from tools.learning import digest, inference_controls
         self.server.calls.append({"model": payload.get("model"), "tools": tools,
+                                  **inference_controls(payload),
+                                  "tool_schema_canonical_sha256": digest(payload.get("tools", [])),
                                   "tool_schema_sha256": hashlib.sha256(json.dumps(
                                       payload.get("tools", []), sort_keys=True).encode()).hexdigest(),
                                   "stream": payload.get("stream")})

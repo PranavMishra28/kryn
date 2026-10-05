@@ -139,3 +139,41 @@ do not replay its interrupted arms or reinterpret it as a new candidate result.
 Fresh validation follows only a positive development screen. The remaining
 research ladder is not exhausted, so this checkpoint is not the overall Goal's
 completion or a demonstrated hard ceiling.
+
+## Container generation handoff checkpoint
+
+The prospective Linux path now preserves direct OpenCode exit status, native
+root/child ownership and completion, exact stopped-worker source export, full
+primary request controls, and separate official candidate grading. Frozen canned
+controls at source-map SHA-256
+`21d7859b227875a09b66f899930b714978723b4b0c283d1fa9f1cac22c772a64`
+cover 92 source files. They do not perform model inference or qualify coding.
+
+Both arms completed a parent/general-subagent run with two verified native
+sessions, identical exported patches and matching sampler/tool-schema controls.
+Their 14 and 15 resource samples were normal with zero swap growth. A third
+control timed out deliberately: its direct exit remains absent, native generation
+remains incomplete, and the exact partial patch was preserved before resource
+cleanup. Its 16 resource samples were normal with zero swap growth.
+
+The exact timeout patch entered the official candidate grader under manifest
+`b25f4bb050621570345e7d9a57330fe3570bd6639d78ce217382605f4171f2c8`.
+Grading was valid and unresolved, with zero infrastructure/errors, eight normal
+resource samples, zero swap growth and settled ownership. The result retains
+`generation_completed=false`, `generation_intervention=timeout` and
+`model_generation=false`; official grading does not emit agent acceptance.
+
+The first child controls remain failed: their checker incorrectly required one
+tool schema for both root and native general child. The corrected source pins
+the exact two observed catalogs and rejects unknown catalogs or sampler drift.
+It also closes supplied/missing token-cap and multiple-choice budget gaps,
+detects observed root-policy changes between tool calls, and continues other
+owned cleanup when retained-worker inspection fails.
+
+Real development work still requires a frozen sequential controller and
+independent adjudicator. It must recover retained source through append-only
+receipts after safe admission, settle exact owned resources after crashes, and
+never rerun a started arm or grader. Empty patches need a terminal no-change
+outcome. These remaining mechanics must be tested before local generation;
+the completed v3 supervisor and evidence remain untouched. A positive accepted
+model-generated repair is still required before fresh validation or promotion.

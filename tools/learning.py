@@ -51,6 +51,20 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def inference_controls(value):
+    """Content-free receipt for every non-message, non-tool request control."""
+    controls = {key: item for key, item in value.items() if key not in {"messages", "tools"}}
+    sampler = {key: value[key] for key in (
+        "max_tokens", "max_completion_tokens", "temperature", "top_p", "top_k", "min_p",
+        "presence_penalty", "frequency_penalty", "repetition_penalty", "thinking_budget",
+        "stream", "parallel_tool_calls", "n", "seed")
+        if type(value.get(key)) in {int, float, bool}}
+    sampler.update({key: {"sha256": digest(value[key])} for key in
+                    ("tool_choice", "response_format", "stop") if key in value})
+    return {"body_control_keys": sorted(controls), "body_controls_sha256": digest(controls),
+            "sampler": sampler}
+
+
 def root(directory):
     return state._directory(Path(directory) / "learning")
 
@@ -436,8 +450,23 @@ def grade(workspace, family, protected=False, *, prefix=(), cancel=lambda: False
 
 class InferenceRelay:
     """Security-only forwarding: two routes, one pinned model, one request at a time."""
-    def __init__(self, model, max_tokens=4096, request_timeout=360, tools_allowed=True):
+    def __init__(self, model, max_tokens=4096, request_timeout=360, tools_allowed=True, expected_wire=None):
         self.model, self.max_tokens = model, max_tokens
+        self.expected_wire = dict(expected_wire) if expected_wire is not None else None
+        if self.expected_wire is not None and "tool_schema_sha256s" in self.expected_wire:
+            hashes = self.expected_wire["tool_schema_sha256s"]
+            body_hash = self.expected_wire.get("body_controls_sha256")
+            if (set(self.expected_wire) != {"body_controls_sha256", "tool_schema_sha256s"}
+                    or type(body_hash) is not str or len(body_hash) != 64
+                    or any(char not in "0123456789abcdef" for char in body_hash)
+                    or type(hashes) is not list or not hashes
+                    or any(type(value) is not str or len(value) != 64
+                           or any(char not in "0123456789abcdef" for char in value) for value in hashes)
+                    or len(set(hashes)) != len(hashes)):
+                raise ValueError("Expected tool wire requires an exact nonempty digest allowlist")
+            self.expected_wire["tool_schema_sha256s"] = list(hashes)
+        self.wire_rejection = None
+        self.request_rejection = None
         self.cancelled = threading.Event()
         self.gate = threading.Lock()
         self.connections = set()
@@ -468,13 +497,35 @@ class InferenceRelay:
                             self.send_error(403); return
                         if not tools_allowed and value.get("tools"):
                             self.send_error(403); return
-                        tokens = value.get("max_tokens", value.get("max_completion_tokens", owner.max_tokens))
-                        if type(tokens) is not int or not 1 <= tokens <= owner.max_tokens:
+                        if (any(type(value[key]) is not int or not 1 <= value[key] <= owner.max_tokens
+                                for key in ("max_tokens", "max_completion_tokens") if key in value)
+                                or ("n" in value and (type(value["n"]) is not int or value["n"] != 1))):
+                            rejected = inference_controls(value)
+                            owner.request_rejection = {key: rejected[key] for key in
+                                                       ("body_control_keys", "body_controls_sha256")}
+                            owner.cancelled.set()
                             self.send_error(403); return
+                        if "max_tokens" not in value and "max_completion_tokens" not in value:
+                            value["max_tokens"] = owner.max_tokens
+                            body = json.dumps(value).encode()
+                        controls = inference_controls(value)
+                        tokens = value.get("max_tokens", value.get("max_completion_tokens", owner.max_tokens))
                         numeric = {key: value[key] for key in ("max_tokens", "temperature", "top_p", "top_k", "min_p", "presence_penalty", "repetition_penalty") if type(value.get(key)) in {int, float}}
                         owner.records.append({"model": owner.model, "max_tokens": tokens, "started": time.time(),
                                               "numeric": numeric, "thinking": value.get("chat_template_kwargs", {}),
-                                              "tool_count": len(value.get("tools", [])), "tool_schema_sha256": digest(value.get("tools", []))})
+                                              "tool_count": len(value.get("tools", [])), "tool_schema_sha256": digest(value.get("tools", [])),
+                                              **controls})
+                        if value.get("tools") and owner.expected_wire is not None:
+                            observed = {key: owner.records[-1][key] for key in
+                                        ("body_controls_sha256", "tool_schema_sha256")}
+                            expected = owner.expected_wire
+                            matched = (observed["body_controls_sha256"] == expected["body_controls_sha256"]
+                                       and observed["tool_schema_sha256"] in expected["tool_schema_sha256s"]
+                                       if "tool_schema_sha256s" in expected else observed == expected)
+                            if not matched:
+                                owner.wire_rejection = {"expected": owner.expected_wire, "observed": observed}
+                                owner.cancelled.set()
+                                self.send_error(403); return
                     conn = http.client.HTTPConnection("127.0.0.1", 8000, timeout=2)
                     owner.connections.add(conn)
                     conn.connect()

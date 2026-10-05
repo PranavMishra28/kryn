@@ -180,3 +180,45 @@ failures and timeouts. A reused public task is development-only. Require genuine
 accepted work before fresh validation, holdout or long-horizon promotion. Do not
 combine this profile with the v3 macOS score, infer general uplift from a canary,
 or treat worker admission as production/autonomous qualification.
+
+## Native generation and candidate handoff
+
+`container_generation.py` now drives one frozen native OpenCode arm using the
+admitted worker. It records the direct CLI exit, exports the root and owned
+child sessions, and checks their native completion and settlement. Timeout is a
+separate failure even when the CLI wrapper can be stopped cleanly. The stopped
+worker's partial source is exported before disposal when safety permits. An
+unsafe export retains the exact stopped worker and ownership receipt; it does
+not claim cleanup or permit official grading.
+
+The relay records every actual inference control, including `thinking_budget`.
+Primary requests must match the frozen sampler digest and exact tool-schema
+allowlist. OpenCode's root and general child have different native catalogs;
+both are pinned, with the same sampler. Unknown catalogs or sampler changes
+fail closed. Every supplied output-token limit is bounded; a request with neither
+token field receives an explicit bounded default before forwarding and hashing.
+Only one generated choice is allowed. Rejection receipts prevent a valid earlier
+request from making a later rejected run appear complete.
+
+The first canned child controls failed the new single-catalog predicate even
+though both native sessions completed. They remain failed evidence. The corrected
+controls use the two observed catalogs. Policy capture now detects root-session
+changes from the first tool input through the final watermark, including changes
+restored between tool calls, and checks the final agent/model/permissions snapshot.
+It retains the public-stream and same-UID limitations above. Retention-inspection
+errors are persisted while cleanup of other owned resources continues.
+
+Candidate grading binds the exact generation manifest, task, prompt, arm,
+completion receipt, ownership receipt and patch before using the same official
+evaluator. A valid grade and a resolved patch are separate fields. The grader
+never emits strict agent acceptance: interrupted or timed-out generation cannot
+be promoted by an official patch result.
+
+The separately frozen generation/hand-off control results and their independent
+receipt are recorded in the campaign report. No real model generation is admitted
+by canned controls alone. Before real development work, finish and freeze the
+small sequential controller and independent adjudicator, including append-only
+recovery of retained exports and crashes without replay. Existing completed v3
+supervisor state must remain untouched. Empty patches need an explicit terminal
+no-change outcome. Freeze all new execution source and prospective controls before
+a model arm; this path is not yet a durable campaign or a quality result.

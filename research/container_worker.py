@@ -129,11 +129,15 @@ class DockerWorker:
         self.sequence = 0
         self.cleanup_errors = []
         self.last_usage_check = 0
+        self.last_command = None
+        self.retained = []
 
     def save(self):
         atomic(self.evidence / "ownership.json", {
             "owner": self.owner, "containers": self.containers,
             "networks": self.networks, "expected_names": self.expected,
+            "retained_containers": self.retained,
+            "retained_networks": self.networks if self.retained else [],
             "cleanup_errors": self.cleanup_errors})
 
     def command(self, *args, timeout=60, cleanup=False, stdin=None):
@@ -181,6 +185,8 @@ class DockerWorker:
                     child.wait(timeout=5)
                 child.stdout.close()
                 child.stderr.close()
+                self.last_command = {"returncode": child.returncode, "stdout": str(log), "stderr": str(stderr)}
+                atomic(log.with_suffix(".result.json"), self.last_command)
         return log.read_text()
 
     def check_usage(self):
@@ -268,7 +274,22 @@ class DockerWorker:
                               cwd=self.evidence, cancelled=lambda: bool(self.guard.reason or self.guard.memory.cancel.is_set()),
                               timeout=120)
 
-    def close(self):
+    def close(self, *, retain=()):
+        if any(identity not in self.containers for identity in retain):
+            raise RuntimeError("Can retain only an owned, stopped worker for later safe export")
+        self.retained = list(retain)
+        for identity in retain:
+            try:
+                info = self.inspect("container", identity, cleanup=True)
+                if info["Config"]["Labels"].get(LABEL) != self.owner:
+                    raise RuntimeError("Retained worker ownership changed")
+                if info["State"]["Running"] or info["State"]["Pid"]:
+                    self.settle(identity)
+                    raise RuntimeError("Retained worker was not already owned, stopped")
+            except Exception as error:
+                # Preserve the exact candidate identity, but continue settling
+                # other owned resources. Uncertain retention cannot pass cleanup.
+                self.cleanup_errors.append(str(error))
         for kind, identities in (("container", self.containers), ("network", self.networks)):
             # A cancelled create can succeed on the daemon before the CLI yields
             # an ID. Names were durably reserved first, so reconcile the exact
@@ -297,6 +318,10 @@ class DockerWorker:
                 except Exception as error:
                     self.cleanup_errors.append(str(error))
             for identity in reversed(identities):
+                if kind == "container" and identity in self.retained:
+                    continue
+                if kind == "network" and self.retained:
+                    continue
                 try:
                     info = self.inspect(kind, identity, cleanup=True)
                     labels = info["Config"]["Labels"] if kind == "container" else info["Labels"]

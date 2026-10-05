@@ -200,6 +200,40 @@ print(json.dumps(r))
             marker.shutdown()
 
 
+def start_server(docker, worker, native, directory, ip, report):
+    # No configuration or credentials from the owner's environment.
+    docker.command("exec", worker, "mkdir", "-p", "/tmp/kryn-state",
+                   "/tmp/kryn/home", "/tmp/kryn/xdg/config", "/tmp/kryn/xdg/data",
+                   "/tmp/kryn/xdg/cache", "/tmp/kryn/xdg/state")
+    if not native:
+        with tempfile.TemporaryDirectory(prefix="kryn-plugin-") as temporary:
+            path = Path(temporary)
+            path.chmod(0o755)
+            for name, data in product_plugin_files(ROOT).items():
+                (path / name).write_bytes(data)
+                (path / name).chmod(0o644)
+            # The copied files retain a non-worker owner. The agent
+            # cannot replace policy bytes beneath unwritable /opt.
+            docker.command("cp", str(path), worker + ":/opt/kryn-plugin")
+        report["plugin_protection"] = json.loads(docker.command("exec", worker, PYTHON, "-I", "-c",
+            "import pathlib,os,json; p=pathlib.Path('/opt/kryn-plugin'); "
+            "v={'directory_owner':p.stat().st_uid,'agent_uid':os.geteuid(),"
+            "'parent_writable':os.access(p.parent,os.W_OK),'writable':os.access(p,os.W_OK),"
+            "'files_writable':any(os.access(f,os.W_OK) for f in p.iterdir())}; "
+            "print(json.dumps(v)); assert v['directory_owner']!=v['agent_uid'] and not v['parent_writable'] and not v['writable'] and not v['files_writable']"))
+    docker.command("exec", "-d", worker, "socat",
+                   "TCP-LISTEN:18765,bind=127.0.0.1,reuseaddr,fork", f"TCP:{ip}:18766")
+    env = environment(native)
+    env["OPENCODE_PASSWORD"] = secrets.token_urlsafe(24)
+    atomic(directory / "environment.json", env)
+    server_command = shlex.join(["/usr/bin/env", "-i", *[k + "=" + v for k, v in sorted(env.items())],
+                                "/usr/local/bin/opencode", "serve", "--hostname", "127.0.0.1", "--port", "18767"])
+    docker.command("exec", "-d", "-w", "/testbed", worker, "/bin/sh", "-c",
+                   "exec " + server_command + " > /tmp/kryn-server.log 2>&1")
+    report["plugin_before"] = plugin_inventory(docker, worker, native, env["OPENCODE_PASSWORD"])
+    return env
+
+
 def arm(image, directory, native, baseline, baseline_symlinks, *, policy_probe=False):
     from research.container_export import extract_worktree
     directory.mkdir(mode=0o700)
@@ -234,36 +268,7 @@ def arm(image, directory, native, baseline, baseline_symlinks, *, policy_probe=F
                 validate_worker(info, image, docker.owner)
                 atomic(directory / "worker-inspect.json", info)
                 report["routes"] = routes(docker, worker, side, ip)
-                # No configuration or credentials from the owner's environment.
-                docker.command("exec", worker, "mkdir", "-p", "/tmp/kryn-state",
-                               "/tmp/kryn/home", "/tmp/kryn/xdg/config", "/tmp/kryn/xdg/data",
-                               "/tmp/kryn/xdg/cache", "/tmp/kryn/xdg/state")
-                if not native:
-                    with tempfile.TemporaryDirectory(prefix="kryn-plugin-") as temporary:
-                        path = Path(temporary)
-                        path.chmod(0o755)
-                        for name, data in product_plugin_files(ROOT).items():
-                            (path / name).write_bytes(data)
-                            (path / name).chmod(0o644)
-                        # The copied files retain a non-worker owner. The agent
-                        # cannot replace policy bytes beneath unwritable /opt.
-                        docker.command("cp", str(path), worker + ":/opt/kryn-plugin")
-                    report["plugin_protection"] = json.loads(docker.command("exec", worker, PYTHON, "-I", "-c",
-                        "import pathlib,os,json; p=pathlib.Path('/opt/kryn-plugin'); "
-                        "v={'directory_owner':p.stat().st_uid,'agent_uid':os.geteuid(),"
-                        "'parent_writable':os.access(p.parent,os.W_OK),'writable':os.access(p,os.W_OK),"
-                        "'files_writable':any(os.access(f,os.W_OK) for f in p.iterdir())}; "
-                        "print(json.dumps(v)); assert v['directory_owner']!=v['agent_uid'] and not v['parent_writable'] and not v['writable'] and not v['files_writable']"))
-                docker.command("exec", "-d", worker, "socat",
-                               "TCP-LISTEN:18765,bind=127.0.0.1,reuseaddr,fork", f"TCP:{ip}:18766")
-                env = environment(native)
-                env["OPENCODE_PASSWORD"] = secrets.token_urlsafe(24)
-                atomic(directory / "environment.json", env)
-                server_command = shlex.join(["/usr/bin/env", "-i", *[k + "=" + v for k, v in sorted(env.items())],
-                                            "/usr/local/bin/opencode", "serve", "--hostname", "127.0.0.1", "--port", "18767"])
-                docker.command("exec", "-d", "-w", "/testbed", worker, "/bin/sh", "-c",
-                               "exec " + server_command + " > /tmp/kryn-server.log 2>&1")
-                report["plugin_before"] = plugin_inventory(docker, worker, native, env["OPENCODE_PASSWORD"])
+                env = start_server(docker, worker, native, directory, ip, report)
                 session_args = []
                 if policy_probe:
                     from research.container_policy import parse_log, policy_during_tools

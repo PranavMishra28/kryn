@@ -20,13 +20,13 @@ WATCH = Path("/tmp/kryn-policy-watch.sse")
 END_TITLE = "Synthetic policy observer complete"
 
 
-def connection(method, path, body=None):
+def connection(method, path, body=None, *, timeout=20):
     headers = {"Authorization": "Basic " + base64.b64encode(
         ("opencode:" + os.environ["OPENCODE_PASSWORD"]).encode()).decode(),
         "x-opencode-directory": "%2Ftestbed", "Content-Type": "application/json"}
     req = urllib.request.Request("http://127.0.0.1:18767" + path,
         data=None if body is None else json.dumps(body).encode(), headers=headers, method=method)
-    return urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req, timeout=20)
+    return urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req, timeout=timeout)
 
 
 def request(method, path, body=None, *, raw=False):
@@ -81,7 +81,9 @@ def parse_log(text, session):
 def watch(session):
     """Subscribe before CLI launch; a parent-issued rename closes the capture."""
     total, block, ready = 0, [], False
-    with connection("GET", "/api/event") as response, WATCH.open("xb") as output:
+    # Native SSE heartbeats arrive every 15 seconds; the parent owns the arm
+    # deadline. Leave scheduling headroom while retaining a finite read timeout.
+    with connection("GET", "/api/event", timeout=60) as response, WATCH.open("xb") as output:
         while True:
             line = response.readline(min(64 * 1024, LIMIT + 1 - total))
             total += len(line)
@@ -113,12 +115,14 @@ def watch(session):
                 return
 
 
-def policy_during_tools(events):
+def policy_during_tools(events, *, through_end=False):
     """Keep CLI selection outside tools distinct from API changes inside tools."""
     names, active, mutations = {}, {}, []
+    started = False
     for event in events:
         kind, data = event["type"], event.get("data", {})
         if kind == "session.tool.input.started":
+            started = True
             names[data["id"]] = data["name"]
         elif kind == "session.tool.called":
             # Native `executed` means provider-executed, not local completion.
@@ -126,7 +130,7 @@ def policy_during_tools(events):
                 active[data["id"]] = names.get(data["id"], "unknown")
         elif kind in {"session.tool.success", "session.tool.failed"}:
             active.pop(data["id"], None)
-        elif kind in POLICY and active:
+        elif kind in POLICY and (active or (through_end and started)):
             mutations.append({"type": kind, "seq": event["durable"]["seq"],
                               "tools": dict(active), "data": data})
     if active:
@@ -170,6 +174,8 @@ def main():
             "location": {"directory": "/testbed"}})
     elif mode == "mutate":
         value = mutate(sys.argv[2])
+    elif mode == "request":
+        value = request(sys.argv[2], sys.argv[3], json.loads(sys.argv[4]))
     elif mode == "snapshot":
         value = {"session": request("GET", "/api/session/" + sys.argv[2]),
                  "agents": request("GET", "/api/agent"), "plugins": request("GET", "/api/plugin"),

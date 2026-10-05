@@ -29,6 +29,17 @@ class NativePolicyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unfinished"):
             policy_during_tools(parsed[:-2])
 
+    def test_generation_observer_catches_changes_after_tool_returns(self):
+        events, _ = self.log([
+            ("session.agent.selected", {"agent": "agent"}),
+            ("session.tool.input.started", {"id": "t", "name": "shell"}),
+            ("session.tool.called", {"id": "t", "executed": False}),
+            ("session.tool.success", {"id": "t"}),
+            ("session.agent.selected", {"agent": "plan"}),
+            ("session.agent.selected", {"agent": "agent"})])
+        self.assertEqual(policy_during_tools(events), [])
+        self.assertEqual(len(policy_during_tools(events, through_end=True)), 2)
+
     def test_incomplete_duplicate_foreign_and_post_sync_logs_fail(self):
         _, raw = self.log([("session.created", {}), ("session.agent.selected", {"agent": "agent"})])
         for broken in (raw[:-1], raw[:raw.rindex('data: {"type": "log.synced"')],

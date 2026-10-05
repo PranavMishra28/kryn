@@ -1,13 +1,15 @@
-"""No-model exported-patch admission through isolated official SWE-bench grading.
+"""Isolated official SWE-bench grading of pinned no-model or candidate patches.
 
 The official evaluator owns patch application, tests and scoring. Only container
 creation and cleanup are supplied by our guarded parent; no upstream files change.
-This screen cannot generate model responses or qualify accepted engineering work.
+This process never generates model responses. Candidate acceptance requires a
+separate adjudicator after grading and all other trial controls.
 """
 
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
@@ -15,6 +17,7 @@ import time
 from research.container_admission import source_inputs
 from research.container_worker import DockerWorker, HostGuard, LABEL, validate_worker
 from research.local_campaign import atomic, controlled_env, file_sha
+from research.local_only import MODEL as PINNED_MODEL
 from research.run_external_patch import bounded_output
 from research.swebench_controller import source_lock
 from research import swebench_local
@@ -174,11 +177,89 @@ def worker_settled(manifest):
                 raise RuntimeError("Worker or inference relay remains before grading")
 
 
+def generation_settled(campaign, manifest):
+    """Admit exact parent-owned generation evidence only after its resources settle."""
+    root = Path(manifest["generation_root"])
+    pins = manifest["generation_sha256"]
+    required = {"driver.json", "ownership.json", "model.patch"}
+    if not root.is_absolute() or root.is_symlink() or not root.is_dir() or set(pins) != required:
+        raise RuntimeError("Candidate generation evidence is not exactly pinned")
+    generation_manifest_path = root.parent / "manifest.json"
+    if (generation_manifest_path.is_symlink() or not generation_manifest_path.is_file()
+            or generation_manifest_path.stat().st_size > 8 * 1024**2
+            or file_sha(generation_manifest_path) != manifest["generation_manifest_sha256"]):
+        raise RuntimeError("Candidate generation manifest drift")
+    generation_manifest = json.loads(generation_manifest_path.read_text())
+    task_id = manifest["task"]["instance_id"]
+    prompt = root.parent / "prompt.txt"
+    prompt_sha = generation_manifest.get("prompt_sha256")
+    if (generation_manifest.get("kind") not in
+            {"swe_container_development", "swe_container_generation_canary"}
+            or generation_manifest.get("task") != manifest["task"]
+            or prompt.is_symlink() or not prompt.is_file() or prompt.stat().st_size > 1024 * 1024
+            or file_sha(prompt) != prompt_sha
+            or (generation_manifest.get("kind") == "swe_container_generation_canary")
+            is not manifest["synthetic_inference"]):
+        raise RuntimeError("Candidate generation task or prompt drift")
+    for name in required:
+        path = root / name
+        limit = 16 * 1024**2 if name == "model.patch" else 8 * 1024**2
+        if path.is_symlink() or not path.is_file() or not 0 < path.stat().st_size <= limit:
+            raise RuntimeError("Candidate generation evidence is not bounded regular data")
+        if file_sha(path) != pins[name]:
+            raise RuntimeError("Candidate generation evidence drift")
+    driver = json.loads((root / "driver.json").read_text())
+    ownership = json.loads((root / "ownership.json").read_text())
+    if (driver.get("kind") != "swe_container_generation"
+            or driver.get("manifest_sha256") != manifest["generation_manifest_sha256"]
+            or driver.get("prompt_sha256") != prompt_sha
+            or driver.get("task_id") != task_id
+            or manifest.get("arm") not in ("native", "kryn")
+            or root.name != manifest["arm"]
+            or driver.get("arm") != manifest["arm"]
+            or type(manifest.get("synthetic_inference")) is not bool
+            or type(driver.get("synthetic_inference")) is not bool
+            or driver["synthetic_inference"] is not manifest["synthetic_inference"]
+            or type(driver.get("completed")) is not bool
+            or type(driver.get("cleanup_settled")) is not bool
+            or type(driver.get("inference_relay_settled")) is not bool
+            or type(driver.get("worker_exported")) is not bool
+            or not driver["cleanup_settled"] or not driver["inference_relay_settled"]
+            or not driver["worker_exported"]
+            or driver.get("patch_sha256") != manifest["patch_sha256"]
+            or driver.get("intervention") not in (None, "timeout", "resource_guard", "cli_error", "error")
+            or type(driver.get("cli_exit_code")) not in (int, type(None))
+            or not {"resources", "local_only", "requests", "generation"}.issubset(driver)):
+        raise RuntimeError("Candidate generation did not produce settled, pinned evidence")
+    if (root / "model.patch").read_bytes() != (campaign / "model.patch").read_bytes():
+        raise RuntimeError("Candidate grader patch differs from generation export")
+    owner = ownership.get("owner")
+    if (not isinstance(owner, str) or not re.fullmatch(r"kryn-worker-[0-9a-f]{16}", owner)
+            or ownership.get("cleanup_errors") != []
+            or ownership.get("retained_containers") != []
+            or ownership.get("retained_networks") != []
+            or not ownership.get("containers") or not ownership.get("networks")):
+        raise RuntimeError("Candidate generation ownership receipt is incomplete")
+    for kind in ("container", "network"):
+        found = subprocess.check_output(
+            ["docker", kind, "ls", *(["-a"] if kind == "container" else []),
+             "-q", "--filter", "label=" + LABEL + "=" + owner], timeout=15, text=True)
+        if found.strip():
+            raise RuntimeError("Candidate worker or inference relay remains before grading")
+    return driver
+
+
 def frozen(campaign, manifest):
+    kind = manifest["kind"]
+    candidate = kind == "swe_container_development_grade"
     if (file_sha(campaign / "manifest.json") != (campaign / "manifest.sha256").read_text().strip()
-            or manifest["kind"] != "swe_container_grader_no_model_admission"
+            or kind not in {"swe_container_grader_no_model_admission", "swe_container_development_grade"}
             or source_inputs() != manifest["source_sha256"]):
         raise RuntimeError("Grader admission source or manifest drift")
+    if candidate and (manifest.get("patch_role") != "candidate"
+                      or type(manifest.get("synthetic_inference")) is not bool
+                      or "expected_resolved" not in manifest or manifest["expected_resolved"] is not None):
+        raise RuntimeError("Candidate grader role or open outcome changed")
     if not (campaign / "execution-lock.json").is_file():
         raise RuntimeError("Official evaluator lock must be sealed before grading")
     locked = source_lock(manifest, campaign)
@@ -195,7 +276,7 @@ def frozen(campaign, manifest):
     if file_sha(patch) != manifest["patch_sha256"]:
         raise RuntimeError("Exported patch drift")
     wheel_paths(manifest)
-    worker_settled(manifest)
+    return generation_settled(campaign, manifest) if candidate else worker_settled(manifest)
 
 
 def require_owned(info, control):
@@ -221,6 +302,28 @@ def require_test_evidence(report, expected_tests, parsed):
         raise RuntimeError("Grader admission requires nonempty fail-to-pass checks")
 
 
+def official_grade_valid(manifest, official, oom_killed):
+    return (official.get("graded") is True
+            and type(official.get("resolved")) is bool
+            and (manifest["kind"] == "swe_container_development_grade"
+                 or official["resolved"] is manifest["expected_resolved"])
+            and type(official.get("infra_failure_instances")) is int
+            and official["infra_failure_instances"] == 0
+            and type(official.get("error_instances")) is int
+            and official["error_instances"] == 0
+            and oom_killed is False)
+
+
+def model_generation_proven(driver):
+    requests = driver.get("requests")
+    local = driver.get("local_only")
+    return (driver.get("synthetic_inference") is False
+            and driver.get("completed") is True and driver.get("intervention") is None
+            and isinstance(local, dict) and local.get("generation_proven") is True
+            and isinstance(requests, list) and bool(requests)
+            and all(isinstance(row, dict) and row.get("model") == PINNED_MODEL for row in requests))
+
+
 def official_child(campaign):
     # This process runs only the pinned official evaluator after the worker and
     # inference relay have settled. Parent retains cleanup ownership on any exit.
@@ -234,7 +337,10 @@ def official_child(campaign):
     frozen(campaign, manifest)
     control = json.loads((campaign / "grade/control.json").read_text())
     row, _ = swebench_local.row_for(manifest, manifest["task"])
-    if manifest["patch_role"] == "exported_canary":
+    if manifest["kind"] == "swe_container_development_grade":
+        expected = (Path(manifest["generation_root"]) / "model.patch").read_bytes()
+        expected_resolved = None
+    elif manifest["patch_role"] == "exported_canary":
         expected = (Path(manifest["admission_root"]) / "kryn/model.patch").read_bytes()
         expected_resolved = False
     elif manifest["patch_role"] == "official_gold_control":
@@ -269,7 +375,8 @@ def official_child(campaign):
 
     evaluator.create_container = create
     evaluator.cleanup_container = cleanup
-    prediction = {"instance_id": spec.instance_id, "model_name_or_path": "kryn-no-model-admission",
+    prediction = {"instance_id": spec.instance_id,
+                  "model_name_or_path": "kryn-container-development" if expected_resolved is None else "kryn-no-model-admission",
                   "model_patch": (campaign / "model.patch").read_text()}
     result = evaluator.run_instance(spec, prediction, client, control["run_id"], timeout=1800)
     reject_output_breach(campaign / "grade")
@@ -292,10 +399,17 @@ def official_child(campaign):
 def grade(campaign):
     campaign = campaign.resolve(strict=True)
     manifest = json.loads((campaign / "manifest.json").read_text())
-    frozen(campaign, manifest)
+    generation = frozen(campaign, manifest)
     evidence = campaign / "grade"
     evidence.mkdir(mode=0o700)  # An interrupted or failed attempt is never replayed.
+    candidate = manifest["kind"] == "swe_container_development_grade"
     report = {"passed": False, "kind": manifest["kind"], "model_generation": False}
+    if candidate:
+        report.update(generation_completed=generation["completed"],
+                      generation_intervention=generation["intervention"],
+                      synthetic_inference=manifest["synthetic_inference"],
+                      model_generation=model_generation_proven(generation),
+                      grade_valid=False, resolved=None)
     start = time.monotonic()
     try:
         with HostGuard(evidence) as guard:
@@ -338,11 +452,9 @@ def grade(campaign):
                 atomic(evidence / "container-after.json", info)
                 report.update(official=official, patch_sha256=file_sha(campaign / "model.patch"),
                               oom_killed=info["State"]["OOMKilled"])
-                report["passed"] = (official.get("graded") is True
-                                    and official.get("resolved") is manifest["expected_resolved"]
-                                    and official.get("infra_failure_instances") == 0
-                                    and official.get("error_instances") == 0
-                                    and not info["State"]["OOMKilled"])
+                report["passed"] = official_grade_valid(manifest, official, info["State"]["OOMKilled"])
+                if candidate:
+                    report["resolved"] = official.get("resolved")
                 guard.check()
             finally:
                 docker.close()
@@ -362,6 +474,8 @@ def grade(campaign):
             report["output_budget"] = json.loads(breach.read_text())
         except (OSError, ValueError):
             report["output_budget"] = {"receipt_unreadable": True}
+    if candidate:
+        report["grade_valid"] = report["passed"]
     report["wall_seconds"] = round(time.monotonic() - start, 3)
     atomic(evidence / "result.json", report)
     return report
