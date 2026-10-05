@@ -1554,7 +1554,7 @@ inactive exit-one job. Settlement:
 `4067868c60c301a420e67a19541366c721aa8a2b11000f83a4dbf04291049687`.
 The original failure remains frozen and is never replayed.
 
-The next control changes the continuation transport. One native CLI creates a
+The following control changed the continuation transport. One native CLI creates a
 new synthetic fixture and completes. After the original owned-session settlement,
 export and generation checks, one bounded POST to OpenCode's native
 `/api/session/:sessionID/prompt` endpoint admits the follow-up. This is the same
@@ -1581,6 +1581,70 @@ The protocol passed 59 author checks, including actual scoped-hook failure cases
 real retained container ordering, exact request transport, prior failure rejection
 and unchanged main/admission guard control flow:
 `814680e08ff050bdfe4c14b48f8dedeccbc3e7e736fa891c5e0e5f9997298f45`.
-This prospective no-model API mechanism control establishes no model continuity,
+This no-model API mechanism control establishes no model continuity,
 second-CLI compatibility, endurance, benchmark quality or production qualification.
 All broader gates and truthful final scope remain open.
+
+## Native CLI/API control passed; local model continuity remains prospective
+
+The no-model CLI/API control passed its original predicates. One actual CLI
+completed the fixture shell and stopped; one subsequent native prompt API call
+completed a second generation on the same owned root. Both exact inputs (99 and
+92 UTF-8 bytes), the sole 256-byte fixture patch and three canned calls matched.
+There were zero model requests and zero recorded policy mutations under the
+unchanged continuous through-end classifier. Driver wall time was 28.877 seconds.
+Result:
+`6e38c46bacc5cf532d7c7861a7b466129144ef1cd49fd27c61742390bbc43e8a`.
+Driver:
+`f65d6754fc0c8d87de508c682194b7e7b7ade94cb0ce1e19aca79fd8e6e95e6a`.
+This establishes this canned transport path only, not second-CLI compatibility
+or local-model continuity.
+
+Separate settlement verified all 1,357 pinned files unchanged, the complete
+5,753,856-byte archive (1,322 members; 482 regular files, 79 directories, no
+symlinks), exact native exports and CLI/API receipts, frozen source and baseline,
+prior evidence, and actual owned IDs, names and labels absent. All 31 resource
+samples were normal with zero sampled swap growth; all 27 power samples were AC
+at 90%, with both final guards checked. The same fresh owned runtime remained
+unloaded idle with zero counters. A separate 13-check author review preceded
+removal of the exact inactive exit-zero job. Settlement:
+`01db87cdf672afbaac4afc41adfbc7469406c2a7aac32b865aef8596ed668b14`.
+No task, inference, runner or original review was replayed.
+
+The next local-model diagnostic uses a new root and fixture. The first native
+CLI is instructed to create the fixture and retain a future read-only instruction.
+The second user input, delivered by the native prompt API, omits the path and
+contents. Acceptance requires exact tool order `[shell]` then `[read]`, a sole
+248-byte fixture patch, both exact user messages, four fully reconciled local
+model requests, two native generation completions, unchanged snapshots and the
+original through-end policy gate. There is one actual CLI and one prompt POST;
+the native engine owns both generations. No second-turn shell or permission
+change is planned. The first CLI has 300 seconds, the combined operations and
+intermediate checks 600 seconds, and prompt submission five seconds. The native
+owned-session settlement retains its existing 30-second bound. All admission,
+resource, accounting, emergency-stop and conditional unload behavior is unchanged.
+
+Manifest:
+`bf0ce98bca05aa0cf96d87d0e4c4d819c22d49c2e879de047331aa6236fa1b9e`.
+Predeclaration:
+`6be2855a5ce47c73db144ff10ecfbec09e8bdf12d67511ed2844b8226dd7e452`.
+The first author review failed before launch because its source comparison did
+not normalize the new predeclaration filename. That review failure is retained:
+`7e4c17fb2ef9f3048a68b2722caf152e78891ed0dd78ade9b7b7e0198cf1dfb9`.
+A separate corrected review of the unchanged runner passed 67 checks:
+`ccccc5df6898d03ca586c834532850e0190869f2021936ae85d33b7134b020ce`.
+A separate nine-check launcher review preceded the single launch. No outcome
+is claimed here. Benchmark quality, second-CLI compatibility, sustained coding/UI,
+endurance and broader production gates remain open.
+
+CI run `37319186002` at documentation commit `35b2bdf` failed the evaluator-Python
+compatibility step: `test_uncertain_detach_prevents_grading` received “Expected
+disk image mount is missing or changed” before reaching its injected “detachment
+uncertain” error. Other offline checks and package smoke passed. The cause of
+the mount-identity failure is unproven, and the failed CI run was not replayed.
+One local invocation failed to import the test because `PYTHONPATH` was missing;
+that log is retained. The corrected local invocation passed eight barrier tests
+with one skip. This does not upgrade failed CI or justify weakening the mount or
+grading gates. Observation:
+`ad3d8440188595300fbb92d998238b99463456a9bb4a7da9f5ef91245e8c05a2`.
+The next changed-commit CI must pass independently.
