@@ -403,15 +403,38 @@ unchanged files and actual owned-resource absence, then removed only the pinned
 inactive job. This diagnoses this new control; historical failures stay failed.
 The first preparation's review failure remains preserved as retired unrun.
 
-The next local-model diagnostic exercises parent resumption after a read-only
-child: the parent creates one unique fixture, delegates its read, then verifies
-its hash and writes one completion receipt. Only the exact two-file patch is
-allowed. Acceptance prospectively requires the same `python -c` arguments and
-complete Python AST, allowing equivalent quotation and whitespace. It rejects
-added operations, changed paths and shell syntax; the earlier literal-match
-failure remains failed. All native tools must complete, both owned sessions must
-succeed, and actual local usage must reconcile before conditional model unload.
-The unchanged frozen runner, policy, wire, model profile and emergency stops
-apply. Static/mocked author review passed 53 checks; it is not independent-author
-review. Child shell execution, task quality, sustained coding/UI,
-continuity/endurance and admission to a new real comparison remain open.
+The parent-resume local-model diagnostic passed in 66.199 seconds. The parent
+created a fixture, delegated its read to one general child, then resumed its
+shell to verify the hash and write a completion receipt. CLI and both native
+sessions completed; only the exact 538-byte two-file patch remained. Both shell
+commands met the prospectively declared argument/Python-AST criterion. Six local
+requests reconciled exactly to 31,964 prompt and 928 completion tokens. One
+unload returned the original runtime to idle. All 66 resource observations were
+normal, all 57 power observations were valid AC, and sampled swap growth was
+zero. Separate settlement verified the complete archive, 1,301 unchanged files
+and actual resource absence, then removed only the inactive job. The earlier
+literal-match failure remains failed. This establishes this synthetic
+parent/child/parent path, not general child-shell execution or coding quality.
+
+A separate prospective admission decision now permits one bounded development
+pair on the previously exposed, preselected pytest task. It binds the settled
+repository negative/positive controls, source/image compatibility, synthetic
+memory observations through 86,078 input tokens and the completed parent-resume
+path. It rechecks 1,725 evidence files, current source/baseline and exact idle
+runtime counters. This is a limited author decision to gather development
+evidence; historical memory-pressure causes and broad workload headroom remain
+unknown. A failed review fixture is preserved; no inference ran during review.
+
+The prepared pair is KRYN then native, with the same model, original problem
+prompt, policies, wire controls, 900-second arms, 360-second requests and
+128-request limit. The frozen controller, worker, recovery and official grader
+remain unchanged. A small private wrapper only forbids runtime restart and
+stops before any subsequent arm after an unscored outcome. Initial admission
+retains at least 60 seconds of cooldown and three green observations; all
+resource emergency stops remain enforced. Started arms and graders are never
+replayed. A separate preregistered deterministic audit will decide score
+eligibility from raw execution, resource, ownership and official-grade evidence.
+The admission and protocol reviews passed 12 and 16 author checks respectively;
+these are not independent-author reviews. No outcome is claimed before execution
+and audit. Fresh/protected validation, sustained coding/UI, continuity/endurance
+and final production scope remain open.

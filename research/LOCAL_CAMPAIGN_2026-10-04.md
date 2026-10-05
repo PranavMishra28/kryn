@@ -1102,7 +1102,7 @@ inactive job derived from the pinned plist and arguments. Author review passed
 11 checks with the actual settlement prechecks and intercepted job removal;
 no old runner, review, task or grader was replayed.
 
-The next prospective local-model diagnostic extends the supported read-only
+The prospectively declared local-model diagnostic extended the supported read-only
 child path to parent resumption. A new synthetic parent creates a unique fixture,
 delegates one read to a general child, then verifies the fixture and writes a
 completion receipt. Only the exact 538-byte two-file patch is accepted. Shell
@@ -1130,6 +1130,69 @@ parent/child tool order and wrapper failure cases. No live inference or containe
 ran during review. This remains a synthetic agent diagnostic, not broad task
 quality, child-shell approval, endurance or real-campaign admission.
 
+The parent-resume diagnostic completed successfully with result
+`82b3e11471d4f5d20700983d80ed23d37279b160ffdbe42c937950dea9a07529`
+and driver
+`e198f916623b644f15fc7e4b460b30f034dbf2be63ff37fcc4a1f4e36af245e4`.
+The CLI and both sessions completed in 66.199 seconds. Root tools were shell,
+subagent, shell; the child performed only its declared read. Both shell commands
+met the prospective Python-AST criterion, and the exact 538-byte patch matched.
+Six local requests used 31,964 prompt and 928 completion tokens. Exact runtime
+counters advanced from 7/167,293/4,735 to 13/199,257/5,663; one unload returned
+the same process to idle. All 66 resource and 57 AC power observations passed,
+with zero sampled swap growth. The original literal-match failure stays failed.
+
+Once-only settlement
+`b5daef0998baa6195dcdbd48a2dda631bdbab74cd1fd8e4b8cf7080b3b505a84`
+verified all native tool, policy, wire, usage and guard evidence, the complete
+5,754,880-byte archive and member map, 1,301 unchanged files, and actual owned
+IDs/names/labels absent before removing only the inactive job. Settlement review
+`a7ca55f64dd3914cd136566d0b323416b4501d29b43f7ca184890ca4c3d52608`
+passed 12 author checks with actual prechecks and intercepted job removal. This
+is evidence for one synthetic parent-resume path, not task quality or endurance.
+
+A new, separate prospective readiness decision
+`f612870add66b5e68e65ddaf7ef5fad586fbc8ceb390ca1fee8317b847a6ed8f`
+permits exactly one bounded pytest development pair. It rechecks the settled
+repository controls, source/image compatibility, memory diagnostics and parent
+resumption, including 1,725 evidence files and the original unloaded idle
+runtime at exact counters. Review
+`86f765408711e1debe176fa64b0caf3a6239a7f9b685d1a2576811fb4f932e76`
+passed 12 author checks. Its first review failed in a mock fixture after the
+read-only verification, before campaign preparation or inference; failure
+`a4d0d312fc07d7277a81dc9783cf5571c69148bebab89d676433f0cf0665af93`
+is retained, and the corrected review used an explicit identity mock. No failed
+runner, arm, grader or review was replayed.
+
+The new pair uses the already exposed pytest task from the original slate,
+KRYN then native. Manifest
+`6ca2314801c517168a302b22bb1c3c4d8deba953874664a5df4e8a6eaf8e6aae`
+and predeclaration
+`55288be3a6857e299c6d6b697db485a92639dc750ab5a8e601dd1793d1aadb8a`
+pin the original problem prompt, current source, prepared V4 image/baseline,
+unchanged model/wire/policy, official grader and all admission evidence. The
+private wrapper
+`ee9e8f7044bfae4154f5cff58b668897d7c61330e402430e00c43ebfd01cd0c7`
+uses the frozen controller with two narrower gates: no runtime start/restart,
+and no subsequent arm after an unscored terminal outcome. All underlying
+stage, recovery, guard, grader and scoring functions remain unchanged. The
+900-second/360-second/128-request bounds, at least 60-second initial cooldown,
+three-green admission and resource emergency stops remain in force.
+
+Protocol review
+`8541010555ae4c6e424006648a2fcab0dbe122f930c12a9b38306fdceace35a8`
+passed 16 author checks, including actual read-only bundle preparation and
+mocked execution of normal, strict-failure and unscored runner paths. The future
+deterministic auditor
+`888f3b548a896f4213155c6dd4bb13712a01efcd00bfa4cbe98c29727e976a43`
+retains the established raw evidence predicates with explicit current-source,
+arm-order and admission changes. It will run once only after a complete pair;
+a safety stop that prevents a complete pair retires it unrun. A clean timeout
+remains a strict failure; safety, integrity, ownership, recovery and missing
+evidence remain unscored. These reviews are not independent-author review.
+No result, fresh/protected validation, broad headroom, endurance, production
+qualification or uplift is claimed by preparation or admission.
+
 The bounded host-memory observation
 `9403cd030e6e7c8360ec93b8c2e5924246f19db4159eb6eef1649a4ca5b9bd3d`
 compared the retained pressure logs with current host/runtime metadata. Both affected arms recorded warning
@@ -1137,5 +1200,6 @@ pressure and zero sampled swap growth. The recorded runtime physical footprints
 do not identify the cause or establish exhaustion of the model-memory ceiling. The later idle observation had no loaded model and
 cannot establish safe memory headroom during inference. The cause remains
 unknown. Two failed operator metadata probes are retained. No unrelated apps,
-runtime settings or emergency stops changed; new real comparisons remain gated
-on prospective loaded-model readiness.
+runtime settings or emergency stops changed. The separate bounded pytest
+admission above follows later loaded-model and agent evidence; it does not
+explain historical pressure or qualify arbitrary real workloads.
