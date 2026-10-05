@@ -279,3 +279,23 @@ model, product policy, safety limit or acceptance predicate. A reverse-order
 canned control must pass before a reverse-order real pair starts. The earlier
 macOS v3 result stays separate and unchanged; broader validation, sustained
 coding/UI and truthful final product scope remain open.
+
+At source `18f3988`, full checks pass 216 setup, 186 research (two skips) and
+87 Node tests. Evaluator Python 3.11 passes the same 186 research tests with one
+skip; clean-source package smoke passes. Independent order-change review found
+no blocker, and a 43-commit PR-range Gitleaks scan found no findings.
+
+The first reversed-order canned control did **not** pass admission. AC power
+dropped during KRYN startup before any synthetic inference request. The unchanged
+guard stopped generation, retained its stopped worker for safe export, and the
+existing controller waits to finish recovery. The failed independent receipt is
+`553704d18f3e6d64aceeb7e897443ceb106441557d7aa3d792d156ce2e9cc56a`.
+It remains failed even after cleanup; no coding capability or code defect is
+inferred from this power interruption. The unexecuted real-pair preparer that
+required this admission is retired.
+
+A separate prospective no-model control is sealed with the same source and
+controls, plus explicit hashes of the interrupted attempt. Its handoff must
+verify the prior terminal receipts and actual owned-resource absence before
+starting. No further repetition is automatic. A passing independent admission
+and new real-pair preregistration still precede any additional model generation.
