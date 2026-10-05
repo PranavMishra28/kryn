@@ -1256,29 +1256,56 @@ private exception suppression. Broader development, fresh/protected validation,
 coding/UI, continuity/endurance and final production scope remain open.
 
 
-## Next bounded diagnostic: two CLI invocations in one session
+## Two-CLI continuity attempt failed before inference; next control uses canned replies
 
-The next synthetic diagnostic uses one KRYN root session and two separate native
-CLI invocations. The first creates a unique fixture and finishes. Only after
-exit zero, owned-session settlement and new native-generation completion may
-the second CLI submit its follow-up to that same session. The follow-up must
-use instructions retained from the first message to read the fixture and create
-a second exact receipt. Both invocations must finish successfully; fixture
-hashes, the complete two-file patch, tool sequence, command argv/Python AST,
-native usage counters, ownership and all resource finals determine acceptance.
+The synthetic V1 bundle was retired unrun after static inspection found an
+incorrect copied server URL. V2 imported the authoritative server constant, but
+its private command hook assumed the candidate worker was the last owned
+container. The actual three-container journal and validated worker inspection
+identify the candidate in the middle; a later route probe is last. Reconstructing
+the frozen framework call against the hook reproduces the failed assertion.
+The earlier mock used only one container and missed this ordering.
 
-Each CLI has a 300-second deadline, with a 600-second combined bound including
-intermediate checks. A private scoped hook wraps the existing worker command;
-all frozen generation, relay, export, policy and resource-stop code remains
-unchanged. It uses source `59ce852` explicitly; the later compact-reporting
-change is outside this frozen runtime. No benchmark or grader is involved.
-This tests one continuation across CLI processes only, without compaction or
-server restart, and cannot establish broad continuity, endurance or production
-readiness. Any started diagnostic is never replayed.
+V2 stopped before either CLI started: no user message, model request, tool or
+patch was produced. Its original result remains failed
+(`0445f5648f008fe13465f57f1c9fc39fe42dc9688c14bb3ce85eaf3b9db25907`).
+The generation driver separately confirmed export and owned cleanup. A later
+settlement verified the complete 5,751,808-byte archive and member map, all
+1,261 pinned files unchanged, actual owned-resource absence and unchanged
+unloaded runtime counters. Parent/worker resource observations remained normal,
+with zero sampled swap growth and all power/final checks passing. Only the exact
+inactive job was removed. Settlement passed
+(`393a127e26c67198c73bbd2aa28d783b803505f075e9c22b7336927f5735474f`)
+and does not upgrade the failed diagnostic.
 
-The V1 bundle was retired before execution after static review found an
-incorrect copied server URL. V2 imports the existing authoritative constant and
-preserves V1's sealed inputs. Its author review passed 45 static, synthetic and
-mocked checks, including no continuation after an incomplete first invocation:
-`06cb413d36dbe14f3bb7b4bd650faf0eca5b42cc208de64a3130f331792fbfbe`.
-This is not independent-author review or a diagnostic result.
+The first settlement review rejected an overstrict whole-model metadata check
+because native metadata also includes its default variant. That review and
+unexecuted settler are retained. The corrected settler uses the frozen
+provider/model identity predicate; its separate author review passed 12 checks
+before execution. No task, runner or request was replayed.
+
+After these two wrapper faults, the next protocol tests the actual CLI boundary
+with the existing empty-sequence canned inference handler. One new root session
+receives two distinct CLI invocations and exactly two canned stop replies, with
+zero tools and an empty patch. Each CLI is bounded to 30 seconds; the combined
+CLI and intermediate-check interval is bounded to 60 seconds. First-turn exit
+zero, owned settlement and native completion are required before the second.
+The hook binds the candidate to the recorded inspection, validates its image and
+owner with the frozen worker validator, then checks that exact ID against both
+the owned set and the CLI target. It no longer relies on container order.
+
+This no-model control uses frozen source `59ce852`, the same prepared image,
+policy, relay, export and resource guards. Runtime access is status-only and
+must show unloaded idle with unchanged counters. There is no model load,
+unload, restart, benchmark, grading, compaction or server restart. Acceptance
+requires both exact native turns, direct exit/completion evidence, full exports,
+chronology, ownership and resource finals. Its author review passed 38 static,
+synthetic and mocked checks, including the retained three-container ordering
+and first-turn failure paths:
+`29b9cc09e2bb367fe810e388549522ef4f9dc1048a14a598165b96cc5f4dab9b`.
+The prospective manifest is
+`59a0f1544af3844e50c54b5ce65212c8fc020ee91cb66cf88f6d03cf6a6b1882`.
+No result is claimed yet. This can validate the wrapper boundary only; model
+continuity, broader development, fresh/protected validation, sustained coding/UI,
+endurance and final production scope remain open. These checks are author
+review, not independent-author review.
