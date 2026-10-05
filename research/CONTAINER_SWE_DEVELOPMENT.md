@@ -2357,3 +2357,70 @@ Outcome is unknown at launch. No model behavior, repairability, benchmark qualit
 or production qualification follows from this control. New code and launch-doc
 CI will be inspected once at the next meaningful terminal. PR #242 remains
 draft; broader gates and final truthful scope remain open.
+
+## Read-only capture passed; local Python test workflow launched
+
+The fresh read-only capture control passed. Its single native read returned the
+three declared public-data lines, and two canned responses completed with no
+model or browser. The zero-byte patch reached the unchanged-file callback; all
+three APFS phases detached. Separate evidence review verified the complete
+non-UI request metadata, root context/model/ownership, initial policy inventory,
+empty capture, callback result, all guard finals and exact runtime counters.
+All 62 pinned files stayed unchanged before and after removal of the inactive
+exit-zero job. Two whole images remain retained, three owned mounts are empty,
+and the owned native process and relay listener are absent. The 12 parent,
+five native and four capture samples were normal with zero sampled swap growth;
+ten power observations were AC at 90%. Runtime stayed unloaded and idle at
+103/520655/21219. This qualifies the observed empty-patch mechanism, not model
+quality or endurance. The earlier shell failure remains failed.
+
+Code CI 37355472376 (`f14be06`) and documentation CI 37356016340 (`fe175e6`)
+passed; their full job/step records were inspected and retained once. No product
+code changed in this checkpoint.
+
+A fresh ordinary Python project now tests a different workflow: read public
+requirements, run seven public tests against an intentionally unimplemented
+stub, implement only `rollup.py`, and finish with a successful test run after
+the latest write. Only local OpenCode/oMLX supplies implementation. The single
+root may read the three project files, write/edit the implementation, and run
+one exact unittest command. Tests and requirements must remain byte-identical.
+There is no browser or mandatory unrelated skill. The artifact callback only
+compares trusted file hashes and records implementation bytes; it never executes
+candidate code. Native test observations are public development evidence, not
+an independent functional grade or protected benchmark score.
+
+Static review retired the first unrun rollup declaration: it had copied canned
+request-record fields into the real-model checker. The new V2 declaration binds
+the original real relay's numeric/thinking fields, canonical ten-tool non-UI
+schema, sampler and timestamp shape. No task or admission ran under V1; its
+sealed files and retirement remain retained. Eight groups of author checks
+passed for V2, including a complete synthetic test sequence, 23 negative cases,
+data-only callback checks and actual controller success/failure/conflict paths
+with operations intercepted. Four isolated historical checks were exercised
+with prospective live counters; their source predicates reverse exactly to the
+original ASTs, while fixed historical counters and source bindings stay intact.
+These checks are not independent-author review or real task success.
+
+Nine separate launcher checks passed before one bootstrap. Process 83658 was
+verified by exact arguments, proc_pidpath and executable hash. The original
+300-second CLI/request limits, 128-call cap, 8192 output cap, before-forward
+sampler/schema validation, accounting before unload, exact owned emergency stop,
+resource and power stops, and safe admission remain unchanged. Outcome is
+unknown at launch. Inspect compact state on the next scheduled wake and leave
+an active or safely waiting worker alone.
+
+| Current evidence | SHA-256 |
+| --- | --- |
+| Read-only result | `1836b317b7955753c9aa3eaa9ea5ca8b52dd1e45750828da9e4e70936b0964eb` |
+| Read-only settlement | `21ec6e56f44d3a0c08c862de7974d6944b27fc8e21d514e644352749674cb9e7` |
+| Read-only settlement review | `9a5d0a9c01a47d8d0966765cb027173da044e3274e5d4782266eca02f1f3911e` |
+| Unrun rollup V1 retirement | `6586e33598c17455c36b7c57f2da7a2d918125e81f53e79fc70e974bd6ec06fb` |
+| Rollup V2 runner | `3f4b615281a9f6bb325c6dc3f8bba758e56158b42643e8110fa87f8c495f53ee` |
+| Rollup V2 predeclaration | `79e6ea48f011cf07fa6bf49c723783d2d04588e58189d0eee2de97d2c7fb5d26` |
+| Rollup V2 author review | `31584634e8fca205364e85f5a5926e82b89a27edb8e331a64e895903d0a6438d` |
+| Rollup V2 launcher review | `6a5e3f5f4a5bec6fe67b81fa21c53a7701189fded7f08d8408fe69cda7204936` |
+| Rollup V2 launch | `ec8679a98e0312272a5b2f360b58baf4298ebea4d1bc1a2f9f24521d23ca95aa` |
+
+PR #242 remains draft. Broader development, fresh protected validation, sustained
+coding/UI, full-context reasoning, endurance and final truthful production scope
+remain open. No merge, release, tag, version or owner-install change follows.
