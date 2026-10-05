@@ -2576,3 +2576,78 @@ No product code, version or owner-install change accompanies this checkpoint.
 All earlier failures remain recorded. Broader development, fresh/protected
 validation, sustained coding/UI, full-context reasoning, endurance and final
 truthful production scope remain open. PR #242 remains draft.
+
+### Codec timeout settled; current-read guidance and fresh runtime epoch (2026-10-05)
+
+The local-model line codec workflow **strictly failed** at its declared 300-second
+limit. The native CLI exited 130 after interruption. One root retained eleven tool
+calls: four initial reads, a failing baseline check, two writes and two subsequent
+failing checks, an edit rejected for a stale read, and a final read. All three
+bounded native test summaries were nontruncated. Their error/failure counts were
+10/0, 0/5 and 2/3; none reported success. The existing current-read edit guard
+worked as declared. No implementation or model answer was judged by Codex.
+
+Nine relay attempts produced eight completed native generations and one incomplete
+response. The eight completed generations account for 87,950 prompt tokens and
+13,284 completion tokens, matching retained runtime deltas from 116 to 124
+completed requests. The ninth interrupted attempt has no completed usage receipt;
+these observations do not establish complete nine-request accounting. The original
+controller invoked its exact-owned emergency stop. PID 85947 and the port-8000
+listener were subsequently absent. The result retains `cleanup_settled=false` and
+its unchanged baseline `final_expected_counters`; those fields are not rewritten
+as successful final accounting. No capture, grader, patch or artifact callback
+was reached. Only one candidate image and one owned mount existed.
+
+Separate failure settlement verified the complete retained root export, request
+metadata, initial policy inventory, failed test summaries, native chronology,
+three raw idle-status responses, all 150 parent and 146 native resource samples,
+and 136 power samples. Sampled pressure was normal, sampled swap growth was zero,
+and minimum battery was 90 percent on AC power. This is not an endurance result.
+The whole candidate image remains retained and detached, its sole mount is empty,
+and the owned native process, broker and relay are absent. Only the exact inactive
+exit-1 job was removed. All 69 settlement pins remained unchanged. Settlement:
+`f1d45c70f99f8310900609a99a469f62611675d234897ed6e443922f7e2b510b`.
+Review:
+`5d8a84bd51d8c1ca25809bc680d10fd2b9a08a0e3ced06d52d3ff54a7b9182df`.
+
+Four author-review failures remain retained: treating an empty historical artifact
+as JSON, treating an old editable-repository observation as a current immutable
+input, traversing a retired inaccessible preparation, and invoking a historical
+live-PID check after the intentional runtime stop. The final review changed the
+approach to current declared inputs, all immediate predecessor settlement pins,
+current frozen source, and a separate historical evaluator projection. The latter
+preserves every original predicate except the live PID assertion, which it replaces
+with the historical PID fact and actual stopped-runtime checks. AST reversal
+verified the exact difference. Original sources and receipts were not changed.
+Seven final review groups, including 23 negative evidence cases and a live-PID
+rejection, passed before cleanup. No original task, acceptance or grader replayed.
+
+Agent/Build guidance now states the existing requirement before editing: read the
+current file in this turn, and reread after a write or an outside change. The guard,
+permissions and catalogs are unchanged. Product commit `d3b8bfe` passed 220 setup
+checks, 216 research checks (two skips), 87 Node checks, native/frozen offline
+checks, clean-source isolated package smoke, documentation/link/diff checks and
+zero-finding secret scanning. The package remains version 1.0.0. Guidance delivery
+in offline hooks does not prove model compliance. CI run `37362043370` for the
+preceding documentation commit passed; full jobs and steps were retained once.
+
+A separate no-model control has been bootstrapped once to admit a **fresh owned
+runtime epoch**. It first requires the actual stopped app control state, absent
+old PID/listener, unchanged failure evidence and source/profile pins, plus the
+existing 60-second/three-green power, pressure and disk admission. It invokes the
+original bounded owned-app start once, then requires a newly verified PID,
+unloaded zero counters and at least 60 seconds under the unchanged HostGuard.
+This control runs no task, model inference, model load, browser or candidate code.
+The old failed coding task is not retried. Five protocol-review groups and nine
+launcher checks passed. Job
+`dev.kryn.native-runtime-epoch-admission-20261005-v1` has an **unknown outcome at
+launch**. Runner SHA256:
+`3045580c204a333e68bff720798fb20e673482b3cf60c31121c607caa6d93eca`.
+Review SHA256:
+`ff5723985086958e5fd4461cbe9739a9635c24ba6cdfd6b67cdb2c47bc14df6f`.
+Launcher review SHA256:
+`f3247f04fd68393b2942f6d8a7a0259d4a5c87cfe2f8cd399aa035e4cb4c12c3`.
+
+PR #242 remains draft. Broader development, fresh/protected validation, sustained
+coding/UI, full-context reasoning, endurance and final truthful production scope
+remain open. No merge, release, tag, version or owner-install change is qualified.
