@@ -2488,3 +2488,48 @@ system requests without forwarding to oMLX. All prior task predicates and failur
 remain frozen. No engine, catalog, permission, resource guard, browser boundary,
 relay, APFS, scoring, version or owner-install change is involved. PR #242 remains
 draft; broader research and final production scope remain open.
+
+## Relevant-skill guidance control launched
+
+Code `23815ca` passed 220 setup tests, 214 research tests (two skips), 87 Node
+tests, native/frozen offline checks, two targeted hooks, clean-source package
+smoke, 17 documentation entry points/link checks and one-commit secret scanning.
+The first validation-receipt writer looked for a nonexistent PASS string in the
+successful package output and stopped before writing a receipt. Its separate
+failure note is retained; the corrected writer checked the actual package JSON
+and exit-zero result without rerunning the package check.
+
+A new authentic, detached, read-only source contains 414 tracked files. Its
+98-file research runtime map is unchanged, and five packaged plugin assets are
+pinned separately. Reversing only the single changed guidance line reproduces
+the previous plugin. A fresh six-response canned native control reuses the same
+write/delegate/navigate/snapshot workflow, HTTP dispatcher, read-only system-text
+metadata hook, exact child context and original safety checks. It expects the
+corrected complete guidance once in each Agent request and absent from Browse
+requests. No model request is forwarded; this tests delivery, not model behavior.
+
+The control passed 26 author checks: full source/prior-chain/current-runtime
+validation, unchanged controller/trial/metadata/acceptance AST checks, actual
+canned HTTP/SSE dispatch under the metadata hook, role/context/guard/ownership
+negatives and failure preservation. Nine launcher checks preceded one bootstrap,
+with process 4387 verified by executable hash, proc_pidpath and exact arguments.
+Runtime must remain unloaded and idle at 103/520655/21219; no runtime operation
+is allowed. All resource stops, automatic admission, browser isolation and APFS
+phases remain unchanged. No task, acceptance function or grader was replayed.
+
+| Relevant-skill control V1 artifact | SHA-256 |
+| --- | --- |
+| Code validation | `28a72b07a6b140bd56e4c0c4a5a28e97a031a29ed9e86ad4f2066242a36b203e` |
+| Native skill-scope diagnosis | `95d862ed9178341a60424988ca5849bac54048a489ff9b46f0f8168455946c50` |
+| Source proof | `9e60288974dccc19d3b67dbb64d26325174d09af0d9c32074d989aad0a3a6586` |
+| Runner | `34315481c937c9dfb1c866c6259d237b8dde5130919375823a95691ed2db92e4` |
+| Predeclaration | `e4c1d5c8fbcca81e95e57e39aa77bcc662f15c3cc6f0672f2c88a6ae7429e22b` |
+| Manifest | `aab11fe8669b382ddd8bf9f0f0dd78ed86c924163a2e901786ec82dbb3d3f80a` |
+| Author review | `8c05eb73fdd2760f8aaa67ad83bde6f7db39580e87a839bdae43161cc0180e67` |
+| Launcher review | `cf5ff12b37fbd86cb18a52ecf9193205e7cb5f939910247b87c47ecd6b64e1ba` |
+| Launch | `fe6e3f37bd412b8491b9127ae646b3e6077bfdcbae7ad63ffa3b17ff4668544f` |
+| Activation | `59d2eeb8a8e49d8dd6a5abdf562a126c09b5f6b4984a8ee6b048ad31255bd86d` |
+
+Outcome is unknown at launch. Code and launch-doc CI will be inspected once at
+the next meaningful terminal. PR #242 remains draft; production scope and broader
+research gates remain open. This launch is not overall completion.
