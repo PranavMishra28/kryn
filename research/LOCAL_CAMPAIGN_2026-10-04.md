@@ -171,13 +171,11 @@ It also closes supplied/missing token-cap and multiple-choice budget gaps,
 detects observed root-policy changes between tool calls, and continues other
 owned cleanup when retained-worker inspection fails.
 
-Real development work still requires a frozen sequential controller and
-independent adjudicator. It must recover retained source through append-only
-receipts after safe admission, settle exact owned resources after crashes, and
-never rerun a started arm or grader. Empty patches need a terminal no-change
-outcome. These remaining mechanics must be tested before local generation;
-the completed v3 supervisor and evidence remain untouched. A positive accepted
-model-generated repair is still required before fresh validation or promotion.
+Real development work requires a frozen sequential controller and independent
+adjudicator. The subsequent checkpoint below implements these mechanics;
+their runtime admission precedes model generation. The completed v3 supervisor
+and evidence remain untouched. A positive accepted model-generated repair is
+still required before fresh validation or promotion.
 
 Independent no-model review passed nine composite checks across 166 cited raw
 and source hashes. It re-read the native root/child exports and policy events,
@@ -193,3 +191,56 @@ the pinned evaluator additionally passed 28 focused checks. Clean-source package
 smoke passed at `fe354db`. The 39-commit PR-range Gitleaks scan found no findings;
 the ten working-tree findings remain classified JSON SHA-256 mappings. These
 checks do not change the failed quality ladder or authorize publication.
+
+## Durable container controller checkpoint
+
+Source `b8ed5c4` adds sequential generation/grading, exclusive stage markers,
+append-only recovery exports, terminal no-change outcomes and independent strict
+adjudication. The frozen candidate covers 98 source files with canonical map
+SHA-256 `dc840994117144a4e17eb177020d3be225698a3418015f6c4c1da692eb2e13fe`.
+It uses the existing resource guards and native session engine. Controller exits
+cannot replay a started arm or grader. A recovered interruption remains unscored.
+
+The first controller canary failed before grading: Python 3.11 rejected the TAR
+importer's newer `stream` option, and recovery rejected a legitimate owned
+route-control container. Both causes were fixed prospectively. The failed source
+snapshot and receipts remain immutable; its retained work was separately exported
+and cleaned up as unscored. Explicit TAR iteration bounds retained member metadata
+on Python 3.11, which CI now tests as well as the package runtime.
+
+The revised normal canned pair completes both root/general-child runs, safe
+exports and valid unresolved official grades. An actual battery transition
+paused before the next arm; launchd ownership preserved the terminal native
+receipt and resumed the unstarted arm after safe power returned. No arm replayed.
+
+The forced-crash control recorded one controller SIGKILL. Launchd restarted it,
+recorded the interrupted native arm as unscored, recovered its stopped-worker
+export, and continued to the next arm. The original test observer failed because
+it queried the old PID while launchd still reported it during restart. This
+observer failure remains retained. A separate read-only observation bound the
+actual replacement identity and final recovery evidence. Independent current-source
+admission passed with receipt SHA-256
+`bc03b8ca59c6868aaa2a49d0fea900f1a5c65989ce5818375a896849e9dc1da1`.
+It explicitly retains `original_probe_passed=false`, verifies one SIGKILL and
+the replacement PID, three completed official grades, the interrupted arm's
+unscored export, and absence of seven owner labels and 19 recorded resource IDs.
+The original observer remains failed. Temporary control jobs were removed without
+changing their evidence.
+
+Full local checks at `b8ed5c4` passed 216 setup, 183 research (two skips) and 87 Node
+tests. The evaluator Python 3.11 passed all 182 research tests present before the
+route-control regression was added; that regression also passed independently.
+Clean-source package smoke and GitHub CI (including Python 3.11 research tests)
+passed. The 41-commit PR-range secret scan found zero findings.
+
+The separate real development pair was preregistered after this admission and
+independent protocol review, under manifest SHA-256
+`7622212c50dbefb91d6de47abc8b51b429cceb10d68d302dcc871cd6eb4fedbf`.
+Its dedicated launchd controller is installed to wait for safe admission,
+run each arm once, grade exact candidates, and apply the frozen adjudicator.
+It uses an explicitly exposed
+public canary outside the earlier six-task subset, never a protected task or v3
+replay. Native and KRYN each receive one 900-second local 9B arm. Clean timeouts
+remain strict failures even if patches resolve; safety, ownership, wire and test
+integrity failures remain unscored. No new release or autonomous quality claim
+is admitted by these infrastructure checks.

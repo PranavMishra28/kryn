@@ -234,6 +234,10 @@ an omitted route-control container in the recovery ownership rules. That failed
 attempt is retained. The importer now clears member metadata during explicit
 iteration on Python 3.11; recovery recognizes the route-control's exact pinned
 image. CI also runs research regressions under the evaluator's Python version.
-Controller crash admission and separate real-development preregistration remain
-required before model generation. The completed v3 supervisor remains untouched;
-new Linux development cannot be mixed with its scores or called protected work.
+Current-source normal controls and separately observed crash recovery now pass
+independent admission. The original crash observer's stale-PID lookup failed and
+remains failed; its read-only addendum verifies the actual restart without another
+kill or arm replay. The separate real-development preregistration and dedicated
+launchd controller are recorded in the campaign report. No quality result follows
+from admission. The completed v3 supervisor remains untouched; new Linux
+development cannot be mixed with its scores or called protected work.
