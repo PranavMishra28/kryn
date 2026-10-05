@@ -1648,3 +1648,31 @@ with one skip. This does not upgrade failed CI or justify weakening the mount or
 grading gates. Observation:
 `ad3d8440188595300fbb92d998238b99463456a9bb4a7da9f5ef91245e8c05a2`.
 The next changed-commit CI must pass independently.
+
+
+## CLI/API model continuity passed; bounded multi-turn continuation
+
+The new synthetic model continuity diagnostic passed one actual CLI and one
+native API continuation: both native generations completed in 45.705 seconds,
+with exact input hashes, `shell` then `read`, the sole 248-byte fixture patch,
+no recorded policy mutations and full original gates. Four local requests,
+18,833 prompt tokens and 291 completion tokens reconciled exactly before one
+guarded unload. Separate settlement retained 1,407 files unchanged, verified
+complete export and owned-object absence, and removed only the inactive job.
+Its receipt is `5cbcdde91e4b8bef7f86da1ff40c8195b4844faa5d36ded07373e1d9307b68dd`.
+This qualifies one bounded synthetic path, not second-CLI compatibility or
+coding quality. All resource observations were normal, with zero sampled swap
+growth; absolute swap was nonzero and all observations were on AC.
+
+A new prospective 16-turn run has been launched: one CLI and fifteen native API
+prompts on a fresh root/fixture, with distinct follow-ups retaining the initial
+read instruction. The original time/resource/policy/accounting gates remain.
+The first author review's identity-comparison failure is preserved; a corrected
+review of the unchanged runner passed 55 checks before separate launch review
+and one bootstrap. No new run outcome is claimed at launch. Full protocol,
+limits and pins are in the [container record](CONTAINER_SWE_DEVELOPMENT.md).
+
+CI **37320571511** passed the changed commit `0442f5b`; earlier failed
+**37319186002** remains retained without replay or a proven cause. PR #242 stays
+draft. Broader development, fresh protected validation, coding/UI, full-context
+reasoning, long-duration endurance and truthful final production scope are open.

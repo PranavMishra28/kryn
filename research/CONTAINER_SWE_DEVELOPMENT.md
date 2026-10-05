@@ -883,3 +883,75 @@ with one skip. This does not upgrade failed CI or justify weakening the mount or
 grading gates. Observation:
 `ad3d8440188595300fbb92d998238b99463456a9bb4a7da9f5ef91245e8c05a2`.
 The next changed-commit CI must pass independently.
+
+
+## Local model CLI/API continuity passed; bounded 16-turn protocol launched
+
+The new local model diagnostic passed: one actual native CLI followed by one
+native prompt API call on the same owned root completed in 45.705 seconds.
+The exact 952-byte first input created a new fixture and retained a future read
+instruction. The exact 135-byte follow-up omitted its path and contents; the
+native model used the required read tool. The two turns used `shell`, then
+`read`, produced only the declared 248-byte fixture patch, and completed both
+native generations with no compaction or recorded policy mutations. The original
+continuous policy classifier and snapshots passed. This establishes this bounded
+synthetic continuity path, not second-CLI compatibility or general coding quality.
+
+Four local requests and native usage exactly matched runtime counters:
+0 → 4 requests, 0 → 18,833 prompt tokens and 0 → 291 completion tokens. The same
+owned runtime was loaded and idle afterward, unloaded once by the original
+accounting guard, and verified unloaded and idle. Parent and worker logs contain
+25/22 normal resource samples and 21/19 valid power samples, all AC at 90%, with
+zero sampled swap growth and final checks present. Absolute swap was nonzero;
+this is neither a battery-at-load nor a long-duration memory qualification.
+
+A separate settlement verified all 1,407 retained files unchanged, the full
+5,753,856-byte archive and exact 561-entry capture, all owned container/network
+IDs, names and labels absent, all frozen source/baseline/prior pins, exact CLI/API
+receipts and exports, and current unloaded runtime counters. Only the exact
+inactive successful launchd job was removed. Its author review exercised the
+actual settlement with output and job removal intercepted before separate
+execution; it was not an independent-author review. No request, task or original
+runner was replayed.
+
+| Private evidence | SHA-256 |
+| --- | --- |
+| Model CLI/API result | `32bcad0b832739f90096a32d97115d2dc8d29b1cce5f5c0eb0ba0d43e3e17ad6` |
+| Native driver | `3361da81fe867b31fcdb9b8f1d1fe4d255ec5348a564f66841bd4fdb073a79b2` |
+| Separate settlement | `5cbcdde91e4b8bef7f86da1ff40c8195b4844faa5d36ded07373e1d9307b68dd` |
+| Settlement author review | `1d2caa48dee38fb49b0fe4a389d1c9b4d4ac1cdec3921f36864bae87a41b0280` |
+
+The next prospective protocol uses a new root and fixture, one actual CLI and
+15 sequential native API prompts. All 16 inputs are unique; each follow-up omits
+the fixture path/content and must perform one read from the first turn's retained
+instruction. Acceptance requires all 16 exports and native completions, exact
+input hashes, `shell` followed by 15 reads, 32 accounted local model requests,
+the sole declared 264-byte fixture patch, no compaction, unchanged full policy
+and resource gates, and settled ownership. Native OpenCode owns every generation.
+Only the private hook's input sequence and receipt directories changed; its
+CLI 300-second, combined 600-second, POST 5-second and native settlement
+30-second bounds are unchanged. Model accounting, guarded conditional unload,
+exact-owned emergency stop and automatic resource admission remain unchanged.
+
+The first author review failed before launch because its comparison treated the
+new admission receipt name as a logic change. That failure is retained; the
+runner did not change. A separate corrected review passed 55 checks, including
+all 15 mocked POSTs, exact 16-turn acceptance, middle-request failure, incomplete
+last generation, ownership, policy drift, input bounds and original runtime
+guards. No container or model ran during review. A separate launcher review
+passed nine checks; launchd was bootstrapped once with `KeepAlive=false`.
+No outcome for this 16-turn run is claimed at launch.
+
+| Prospective evidence | SHA-256 |
+| --- | --- |
+| 16-turn runner | `38c2f49a8525005bb92e23db88d585f340f50f75a02d2efe5951128da6c06112` |
+| Manifest | `326f99c8ffe0e137b615aaa1ae57d5f49b0b34972b48260e74b530eeba5e0459` |
+| Predeclaration | `11d342262b94cb68fdd6609eccc584f88f81227eb3511dfc61acc9e907290f8f` |
+| First review failure | `bda3d074570e4476ede388f42d6e9abe223f67fb3fa21751ba6e08b1d31bdef2` |
+| Corrected author review | `42cbdf607e67c3108bf927552aeaf36cb8a3587048acd60a3908b99007528836` |
+
+Changed-commit CI run **37320571511** passed at `0442f5b`. The earlier failed
+**37319186002** remains failed and was not rerun; its cause remains unproven.
+The single PR stays draft. Broader development, fresh protected validation,
+coding/UI, full-context reasoning, long-duration endurance and final production
+scope remain open. Neither synthetic result establishes comparative uplift.
