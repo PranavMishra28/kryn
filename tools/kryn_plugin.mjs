@@ -4,6 +4,9 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
+// Apple's Git shim consults developer-selection files unavailable in the native sandbox.
+const CLT_GIT = '/Library/Developer/CommandLineTools/usr/bin/git';
+const GIT_BINARY = process.platform === 'darwin' && fs.existsSync(CLT_GIT) ? CLT_GIT : '/usr/bin/git';
 const sha = text => createHash('sha256').update(text).digest('hex');
 const HASH = /^[a-f0-9]{64}$/;
 const MAX_OBSERVED_CHECKS = 64;
@@ -309,7 +312,7 @@ function checkpointSummary(item, current, directory) {
 }
 
 function repoEvidence(directory) {
-  const git = (...args) => execFileSync('/usr/bin/git',
+  const git = (...args) => execFileSync(GIT_BINARY,
     ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks', ...args],
     { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',
       env: { PATH: '/usr/bin:/bin', HOME: directory, GIT_CONFIG_NOSYSTEM: '1',
@@ -361,7 +364,7 @@ function repoFingerprint(directory) {
 
 function reviewDiffEvidence(directory) {
   try {
-    const diff = execFileSync('/usr/bin/git',
+    const diff = execFileSync(GIT_BINARY,
       ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks',
         'diff', '--no-ext-diff', '--no-textconv', '--unified=2', 'HEAD', '--', '.'],
       { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',

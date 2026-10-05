@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import childProcess, { execFileSync } from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
 import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
 import { completionLabel, permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -803,6 +804,44 @@ test('shell-written JavaScript receives syntax feedback before the Agent claims 
       fs.writeFileSync(untracked, 'const ready = true;\n');
     }), /JavaScript syntax check failed/);
   } finally { await cleanup(); f.remove(); }
+});
+
+
+test('repository observations survive an unavailable Apple Git shim', {
+  skip: process.platform !== 'darwin' || !fs.existsSync('/Library/Developer/CommandLineTools/usr/bin/git'),
+}, async t => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const execute = childProcess.execFileSync;
+  const git = (...args) => execute('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'const ready = true;\n');
+    git('add', '.gitignore', 'app.js');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'seed');
+    t.mock.method(childProcess, 'execFileSync', (binary, ...args) => {
+      if (binary === '/usr/bin/git') throw new Error('xcode-select: developer_dir: Operation not permitted');
+      return execute(binary, ...args);
+    });
+    syncBuiltinESMExports();
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'const = ;\n');
+    const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_check',
+      id: 'call_check', tool: 'shell', input: { command: 'inspect source' } };
+    f.call('tool.execute.before', event);
+    const after = { ...event, status: 'completed', result: {
+      output: { exit: 0, status: 'completed', output: '' }, content: [] } };
+    f.call('tool.execute.after', after);
+    const feedback = after.result.content.map(part => part.text).join('\n');
+    assert.match(feedback, /JavaScript syntax check failed/);
+    assert.doesNotMatch(feedback, /could not inspect every changed JavaScript file/);
+    const review = { sessionID: 'ses_review', agent: 'reviewer', system: [], tools: { read: {} } };
+    await f.call('session.context', review);
+    const context = review.system.map(part => part.text).join('\n');
+    assert.match(context, /Current Git snapshot for review/);
+    assert.match(context, /\+const = ;/);
+    assert.doesNotMatch(context, /Git (?:snapshot|diff) unavailable/);
+  } finally { t.mock.restoreAll(); syncBuiltinESMExports(); await cleanup(); f.remove(); }
 });
 
 test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {

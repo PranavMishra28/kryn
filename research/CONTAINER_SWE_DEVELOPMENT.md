@@ -2809,3 +2809,36 @@ Previously passed product checks were not replayed. All prior task failures rema
 failed. Broader development, fresh/protected validation, sustained coding/UI,
 full-context reasoning, endurance and final truthful scope remain open. PR #242
 stays draft; this checkpoint is not completion or frontier qualification.
+
+### Native Git shim denial and plugin fix (2026-10-05)
+
+The no-model Git observation control **strictly failed** because native shell
+output was truncated and its observation header was missing. Its frozen result
+remains failed. Eight complete retained command records showed all four Apple
+Git shim queries exiting 1 after access to `/var/select/developer_dir` was denied,
+while the same four direct Command Line Tools Git queries exited 0. The empty
+patch, unchanged trusted probe files, two canned requests, unchanged unloaded
+runtime counters and complete normal resource/power observations were preserved.
+No model inference, runtime operation or candidate implementation occurred.
+
+Separate settlement review preserved all 71 evidence pins, both detached images
+and three empty mounts, then removed only the inactive exit-1 job. A syntax error
+in the first settlement review prevented execution and remains preserved; the
+corrected second review passed seven groups and 21 negative projections. No probe,
+task, grader or original acceptance function was replayed. Settlement SHA256:
+`e745ef9c58fcd2f765cdb09b0d3979f05179bc539f0f9e934dbeb638144560a6`.
+Review SHA256:
+`a8e5dbcec6b1ae160a01d5bbe38cc5216992de621ca89d5d177651449f115342`.
+
+The plugin now uses the direct Command Line Tools Git binary when it exists on
+macOS, retaining `/usr/bin/git` elsewhere. Both repository snapshots and Reviewer
+diff excerpts share this selection. Git arguments, environment isolation, time
+and output limits, native permissions, emergency stops and failure disclosure
+remain unchanged. A regression that makes the Apple shim unavailable reproduced
+the inspection warning before the change and now verifies both JavaScript syntax
+feedback and Reviewer diff context. This check does not qualify the full native
+workflow; fresh validation of the changed frozen source remains required.
+
+Documentation CI `37369987295` passed; its full job and 13 steps were inspected
+once. Prior failures remain failed. Broader research and final scope gates remain
+open, and PR #242 stays draft. No version or owner installation change.
