@@ -1,5 +1,11 @@
 # Research workspace
 
+**For normal use and your own first test, start with the [owner testing guide](../docs/testing.md).**
+This directory preserves experiment protocols, instrumentation and negative
+results. Historical launch instructions describe those experiments; they are not
+an unattended quick start. [Current status](../plan.md) separates the published
+release from the candidate and lists the remaining live checks.
+
 [PROTOCOL.md](PROTOCOL.md) freezes the hypothesis, controls, acceptance rule and
 research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.

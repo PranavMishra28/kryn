@@ -1,12 +1,23 @@
 # KRYN
 
+[![Checks](https://github.com/PranavMishra28/kryn/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/PranavMishra28/kryn/actions/workflows/checks.yml)
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/PranavMishra28/kryn/releases/tag/v1.0.0)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A coding workspace for Apple Silicon: OpenCode's terminal and browser interfaces, a local Qwen model through oMLX, and coding, planning, review, browser and search tools. Other OpenCode providers are optional and selected by you.
 
 **KRYN 1.0.0 is a local-first, human-supervised coding workspace.** It combines native OpenCode sessions and tools with a guarded local 9B model and a configured 96K context window. Review generated changes and run project checks; KRYN does not claim unattended application engineering, reliable local Reviewer authority, frontier parity or useful reasoning across every configured context token. See [qualification evidence](plan.md).
 
+![Architecture overview: your project, OpenCode, and local oMLX inference, with KRYN installation, guards and recovery](docs/assets/workflow.svg)
+
+*Illustrated architecture, not an application screenshot. Browser/search tools can
+access the network; local model inference stays on your Mac.*
+
 | Start here | Contents |
 |---|---|
+| [Documentation map](docs/README.md) | A short reading order and plain-language glossary |
 | [Use KRYN](docs/usage.md) | Modes, permissions, models, terminal/GUI, sessions, diagnostics and recovery |
+| [Test it yourself](docs/testing.md) | Copyable OpenCode prompts, a 45–60 minute workflow, failure injection, benchmarks and remaining owner checks |
 | [Project skills](docs/usage.md#project-skills) | Add reviewed, reusable `SKILL.md` instructions through OpenCode's native skill tool |
 | [Current status](plan.md) · [Architecture](docs/architecture.md) | Supervised v1 gates, ownership and trust boundaries |
 | [Develop KRYN](CONTRIBUTING.md) · [Release runbook](docs/releasing.md) | Owning layers, focused checks and final-artifact release steps |
@@ -56,7 +67,7 @@ Requirements:
 
    If the pinned oMLX publisher asset returns 404/410, the installer reports the failure and tries the unaffiliated SourceForge mirror. Both locations must match the same pinned SHA256; a checksum failure stops installation. The mirror's complete 805,799,490-byte image was verified against that pin during release validation.
 
-2. Make the launcher available in this Terminal, check the installed version, then follow **Start coding** above:
+2. Make the launcher available in this Terminal, check the installed version, then follow **Quick start** above:
 
    ```sh
    export PATH="$HOME/.local/bin:$PATH"

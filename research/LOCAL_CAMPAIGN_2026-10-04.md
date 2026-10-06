@@ -81,15 +81,16 @@ of a false completion claim without checking its final statement.
 ## Current development decision, 2026-10-06 UTC
 
 The follow-up campaign has **not qualified the PR candidate for daily use or
-release**. PR #242 remains draft. The measured ceiling is supervised local work
+release**. Engineering is handed off in PR #242 for owner review and testing.
+The measured ceiling is supervised local work
 with intermittent public-test success and unresolved protocol, UI and resource
 failures. This is neither autonomous acceptance nor a general hardware/model
 ceiling. Released v1 qualification applies to its original artifact, not this PR.
 
 Two fresh 9B coding workflows stopped on host memory pressure before any completed
-model response, tool, test or write. The smallest installed candidate is already
-9B; the retained 35B cache is larger and previously unsuitable. No new model,
-context, owner setting or resource threshold was installed.
+model response, tool, test or write. A separate, private 4B model was subsequently
+downloaded and screened at 32K context with an 8-GiB ceiling and cache disabled.
+The installed 9B profile, owner settings and emergency stops stayed unchanged.
 
 The subsequent runtime-only reserve worker timed out after three hours without
 attempting a runtime start. Its 701 samples span 10,795.408 seconds. Raw free
@@ -133,10 +134,37 @@ No unrelated application may be closed to manufacture daily-use fitness.
 | Quantities and batches | One interrupted relay attempt each, zero completed responses; host-pressure stops. Detached candidate images and empty mounts retained; no grading or capture claimed. |
 | Stopped-host observer | 21 samples over 312.330 seconds passed observation-only predicates. No readiness or load-safety claim. |
 | Conservative reserve | Three-hour admission timeout, no runtime start; verified settlement above. |
+| Isolated 4B load/unload | Passed 65.43 seconds of loaded idle with zero inference and no swap growth; maximum sampled footprint 3.65 GB. Short fit only. |
+| 4B labels coding | Strict failure: unavailable bare Node command before the required absolute command. Recovered to eight public test passes; six requests. No autonomous acceptance. |
+| 4B parcel UI | Strict failure: two guessed selectors failed before two successful clicks. Browser observed Ready → Dispatched → Delivered; unchanged page, empty patch, eleven requests. |
+| 4B handoff continuity | Strict failure: report omitted the required UNVERIFIED label. Three requests; no compaction, restart or operator edit reached. |
+| 4B dispatch mechanics | Strict failure: four invented `/workspace` reads were denied before valid reads; test command also differed from the declared command. Seven requests; no compaction or restart reached. |
 
 All earlier failed preparations, interrupted attempts, missing usage receipts and
 failed review writers remain retained. Settlement verifies preservation and
 ownership; it never changes an experiment's outcome.
+
+All four 4B task attempts ended with verified owned runtime shutdown and preserved
+detached images. Their resource samples stayed at normal pressure with no swap
+growth; sampled inference footprints were approximately 6.2–6.4 GB. These are
+short-run observations, not daily-use or endurance qualification. Labels and
+parcel retained usage matched post-generation runtime counters; dispatch also
+preserved the complete first-stage export before checking. Handoff did not
+retain a complete export for usage reconciliation. None reached the worker's
+final successful reconciliation/unload sequence.
+
+Independent bounded mechanism reviews found no demonstrated product defect in
+the later tool/path failures. Model recovery does not upgrade the frozen strict
+outcomes. No further unchanged trials are scheduled. The owner can perform fresh
+[supervised tests](../docs/testing.md), preserving interventions and failed
+attempts separately. The research heartbeat is paused for this handoff.
+
+The final dispatch terminal review is bound by SHA-256
+`2a37c852c9a6ff964b9ccca28871cc5e60864bd99b645f20b34d276fc9b0b579`;
+its separate settlement preserved 81 evidence pins and removed the inactive job
+(`35093697d72542678a783e135873670d1f5b0340c6bddfc1a987ce86b9275b35`).
+Private source, model and owner-setting pins were rechecked. Full traces remain
+private; this summary is not a public reproduction bundle.
 
 The initial 65 W campaign reached a recorded 15% battery emergency stop. Later
 owned supervisor recovery was observed after power and memory interruptions.
@@ -148,12 +176,14 @@ power thresholds. Full per-phase receipts and policies remain in the archive.
 Product revision `e9bec021bcf85a43c12dbb27eea126e75e1e64ab` passed 220 setup
 checks, 216 research checks (two skips), 88 Node checks, native/frozen offline
 checks, a clean-source isolated package smoke and documentation/secret checks.
-The latest inspected documentation CI, run 37378335803 for `f712718`, passed its
-complete 13-step job once. These checks were not replayed for this settlement.
+CI run 37398929900 for `8d4581d` passed its complete 13-step job. An independent
+source review found no P1/P2 issue in the reviewed product/boundary paths; its
+sole trailing-newline finding was fixed. That review did not cover every research
+line or establish live acceptance. These checks were not replayed for settlement.
 Cancelled CI 37366560264 remains failed with zero executed steps and unknown cause.
 
-Fresh representative coding/UI acceptance, independent final review,
-compaction/restart continuity, 45–60 minutes of **active** supervised use and
+Fresh representative coding/UI acceptance, compaction/restart continuity,
+45–60 minutes of **active** supervised use and
 final-artifact install/rollback remain unmet for this candidate. The resource
 wait does not count as endurance. Keep version 1.0.0 and the owner installation
 unchanged. No merge, release, tag, benchmark uplift or frontier-quality claim.

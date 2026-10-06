@@ -1,5 +1,9 @@
 # KRYN evaluation and model decisions
 
+For copyable Terminal commands, OpenCode prompts, failure injection and a
+45–60 minute supervised workflow, start with [Test KRYN yourself](testing.md).
+This page explains comparison methodology and the limits of the evidence.
+
 ## Native stack decision
 
 OpenCode is the only agent harness: it owns sessions, Ask/Plan/Agent, model and effort selection, permission decisions, tools, background child sessions, [skills](https://opencode.ai/v2/docs/skills), [MCP servers](https://opencode.ai/v2/docs/mcp-servers), and [compaction](https://opencode.ai/v2/docs/compaction). The local provider sends OpenAI-compatible requests to oMLX, which owns model loading, inference, cache, and its process-memory guard. KRYN adds only the owned launch/install boundary, resource checks, bounded continuity and incident evidence. The configured `/call` and Reviewer/Browse children use [OpenCode's native agent and command mechanisms](https://opencode.ai/v2/docs/agents); they do not make one local model generate in parallel. Project skills and external providers remain OpenCode features, subject to the selected model, credentials, permissions and service availability.
