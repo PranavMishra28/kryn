@@ -63,4 +63,3 @@ def scrubbed_command(*, native=False):
     env = worker_environment(native=native)
     return "/usr/bin/env -i " + " ".join(
         shlex.quote(key + "=" + value) for key, value in sorted(env.items()))
-
