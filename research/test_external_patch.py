@@ -1,6 +1,7 @@
 """The external adapter refuses dirty or ambiguous benchmark workspaces."""
 from pathlib import Path
 import hashlib
+import json
 import os
 import shutil
 import socket
@@ -8,15 +9,104 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import ExitStack
 from types import SimpleNamespace
 
 from unittest.mock import patch
+from ui_gateway.broker import inspect_container
 
-from run_external_patch import (PatchBudgetExceeded, benchmark_tools, collect_patch,
-                                drive, prepare, stop_browser_broker)
+from run_external_patch import (PatchBudgetExceeded, benchmark_tools, bounded_output,
+                                collect_patch, drive, prepare, quiet_command, sandbox_tool_preflight,
+                                stop_browser_broker)
 
 
 class ExternalPreflightTest(unittest.TestCase):
+    def test_startup_guard_reason_survives_a_recovered_final_sample(self):
+        import run_external_patch as adapter
+        # Exercise the real monitor and driver's finally path without starting
+        # a native server, relay, browser, or model request.
+        sample = {"pressure_level": 1, "swap_used_bytes": 0,
+                  "listener_processes": [{"pid": 123, "rss_bytes": 1024}]}
+        for first, expected in [({}, "resource telemetry missing or listener identity ambiguous"),
+                                (sample, None)]:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / "setup").mkdir()
+                (root / "setup/accepted-profile.json").write_text(json.dumps({
+                    "repository": "local/" + adapter.MODEL_ID, "revision": "test"}))
+                binary = root / "binary"
+                binary.write_bytes(b"test binary")
+                prompt = root / "prompt"
+                prompt.write_text("Public fixture")
+                relay = SimpleNamespace(port=12345, records=[], cancel=lambda: None)
+                args = SimpleNamespace(workspace=root, prompt=prompt, evidence=root,
+                                       base_commit="test", task_id="guard-report", arm="native",
+                                       tool_venv=None, timeout=120)
+                with ExitStack() as stack:
+                    for target, value in [("ROOT", root), ("BINARY", binary)]:
+                        stack.enter_context(patch.object(adapter, target, value))
+                    stack.enter_context(patch.object(adapter, "prepare", return_value=
+                        (root, prompt, root, root, "test")))
+                    stack.enter_context(patch.object(adapter, "git", return_value="test"))
+                    stack.enter_context(patch.object(adapter, "configuration", return_value=({}, [], [])))
+                    mocked_relay = stack.enter_context(patch.object(adapter.learning, "InferenceRelay"))
+                    mocked_relay.return_value.__enter__.return_value = relay
+                    stack.enter_context(patch("run_native_trial.resources", side_effect=[first, sample]))
+                    stack.enter_context(patch.object(adapter, "runtime_is_idle", return_value=True))
+                    tools = stack.enter_context(patch.object(adapter, "benchmark_tools", return_value=(None, [], None)))
+                    if expected is None:
+                        tools.side_effect = ValueError("unrelated preflight failure")
+                    server = stack.enter_context(patch.object(adapter, "NativeServer"))
+                    with self.assertRaisesRegex((RuntimeError, ValueError),
+                            expected or "unrelated preflight failure"):
+                        adapter.run(args)
+                    server.assert_not_called()
+                report = json.loads((root / "driver.json").read_text())
+                self.assertFalse(report["completed"])
+                self.assertEqual(report["requests"], [])
+                self.assertEqual(report["guard_reason"], expected)
+                rows = [json.loads(line) for line in (root / "resources.jsonl").read_text().splitlines()]
+                if expected:
+                    self.assertEqual(rows[-1]["listener_processes"], sample["listener_processes"])
+                    self.assertEqual(rows[-1]["guard_reason"], expected)
+
+    def test_browser_receipt_binds_inspected_id_to_requested_name(self):
+        name, image = "kryn-ui-" + "a" * 32, "sha256:" + "b" * 64
+        item = {"Id": "c" * 64, "Name": "/" + name, "Image": image, "Mounts": [],
+                "Config": {"User": "10001:10001"},
+                "NetworkSettings": {"Networks": {"none": {}}},
+                "HostConfig": {"NetworkMode": "none", "ReadonlyRootfs": True,
+                    "Privileged": False, "CapDrop": ["ALL"],
+                    "SecurityOpt": ["no-new-privileges"], "PidMode": "", "IpcMode": "private",
+                    "CgroupnsMode": "private", "UsernsMode": "", "Devices": [],
+                    "DeviceCgroupRules": [], "CapAdd": [], "Binds": [], "VolumesFrom": [],
+                    "PortBindings": {}, "PublishAllPorts": False, "PidsLimit": 128,
+                    "Memory": 512 * 1024 * 1024}}
+        def inspected(items):
+            return patch("ui_gateway.broker.subprocess.run", return_value=
+                         subprocess.CompletedProcess([], 0, stdout=json.dumps(items)))
+        with inspected([item]):
+            receipt = inspect_container(name, image)
+        self.assertEqual(receipt["container_id"], item["Id"])
+        self.assertEqual(receipt["image_id"], image)
+        for items in ([], [item, item], [dict(item, Name="/different")],
+                      [dict(item, Id=None)], [dict(item, Id="c" * 12)]):
+            with self.subTest(items=items), inspected(items):
+                with self.assertRaisesRegex(RuntimeError, "identity differs"):
+                    inspect_container(name, image)
+
+    @unittest.skipUnless(sys.platform == "darwin", "Requires macOS kqueue")
+    def test_git_commands_wait_without_waitid(self):
+        with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:
+            output = Path(tmp) / "output"
+            with patch("run_external_patch.os.waitid", None, create=True):
+                size, _ = bounded_output(["/bin/echo", "ready"], output, 64,
+                                         env=os.environ.copy(), cwd=tmp,
+                                         cancelled=lambda: False)
+                quiet_command(["/usr/bin/true"], env=os.environ.copy(), cwd=tmp,
+                              cancelled=lambda: False)
+            self.assertEqual((size, output.read_text()), (6, "ready\n"))
+
     def test_browser_cleanup_requires_exact_container_absence_and_closed_listener(self):
         child = SimpleNamespace(poll=lambda: None)
         broker = {"container": "kryn-ui-test-exact", "port": 65431}
@@ -203,18 +293,35 @@ class ExternalPreflightTest(unittest.TestCase):
             (venv / "bin").mkdir(parents=True)
             for name in ("pyvenv.cfg", "bin/python3", "bin/rg", "bin/git"):
                 (venv / name).touch()
-            with patch("run_external_patch.subprocess.check_output", side_effect=[
-                "/private/tmp/python-base\n", "/private/tmp/venv/bin/rg:\n"
-                "    /usr/local/opt/pcre2/lib/libpcre2-8.0.dylib (compatibility version 1.0.0)\n"
-                "    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n",
-                "[[\"pytest\", \"8.3.3\"]]\n"]), patch(
+            base = Path(tmp) / "python-base"; base.mkdir()
+            libraries = Path(tmp) / "libraries"; libraries.mkdir()
+            for name in ("ssl.dylib", "crypto.dylib"):
+                (libraries / name).write_bytes(name.encode())
+            alias = Path(tmp) / "opt"; alias.symlink_to(libraries, target_is_directory=True)
+
+            def output(command, **_):
+                if command[0] == "/usr/bin/otool":
+                    if command[-1].endswith("ssl.dylib"):
+                        return "header\n    " + str(alias / "crypto.dylib") + " (version 1)\n"
+                    if command[-1].endswith("crypto.dylib"):
+                        return "header\n    /usr/lib/libSystem.B.dylib (version 1)\n"
+                    return "header\n    " + str(alias / "ssl.dylib") + " (version 1)\n"
+                if "import sys,json,ssl" in command[-1]:
+                    return json.dumps([str(base), "OpenSSL test", str(base / "_ssl.so"),
+                                       str(base / "_hashlib.so")])
+                return '[["pytest", "8.3.3"]]'
+
+            with patch("run_external_patch.subprocess.check_output", side_effect=output), patch(
                     "run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
                         [], 0, "pytest 8.3.3\n", "")):
                 bin_path, dependencies, manifest = benchmark_tools(venv)
             self.assertEqual(bin_path, venv / "bin")
-            self.assertEqual(dependencies[:2], [venv, Path("/private/tmp/python-base")])
-            self.assertEqual(len(dependencies), 4)
-            self.assertEqual(dependencies[2], venv / "bin/git")
+            self.assertEqual(dependencies[:3], [venv, base, venv / "bin/git"])
+            self.assertEqual(set(dependencies[3:]), {libraries / "ssl.dylib", libraries / "crypto.dylib"})
+            self.assertEqual(manifest["dependency_aliases"], {
+                str(alias / name): str(libraries / name) for name in ("ssl.dylib", "crypto.dylib")})
+            self.assertEqual(len(manifest["library_sha256"]), 2)
+            self.assertEqual(manifest["openssl_version"], "OpenSSL test")
             self.assertEqual(manifest["pytest_version"], "pytest 8.3.3")
             self.assertEqual(manifest["packages"], [["pytest", "8.3.3"]])
             with patch("run_external_patch.subprocess.run", return_value=subprocess.CompletedProcess(
@@ -225,6 +332,26 @@ class ExternalPreflightTest(unittest.TestCase):
             (venv / "bin/python3").symlink_to("/usr/bin/python3")
             with self.assertRaisesRegex(ValueError, "Python, rg and Git"):
                 benchmark_tools(venv)
+
+    def test_sandbox_tool_preflight_fails_closed_before_generation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            server = SimpleNamespace(background_prefix=["sandbox", "-p", "profile"],
+                                     directory=root, env={"PATH": "/safe/bin"})
+            manifest = {"openssl_version": "OpenSSL test", "pytest_version": "pytest 8.3.3"}
+            for result, passed in ((subprocess.CompletedProcess([], 1, "", "blocked"), False),
+                                   (subprocess.CompletedProcess([], 0, json.dumps({
+                                       "openssl": "changed", "pytest": "8.3.3"}), ""), False),
+                                   (subprocess.CompletedProcess([], 0, json.dumps({
+                                       "openssl": "OpenSSL test", "pytest": "8.3.3"}), ""), True)):
+                with patch("run_external_patch.subprocess.run", return_value=result) as run:
+                    if passed:
+                        sandbox_tool_preflight(server, root, manifest, root)
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, "no prompt sent"):
+                            sandbox_tool_preflight(server, root, manifest, root)
+                self.assertEqual(run.call_args.args[0][:3], server.background_prefix)
+                self.assertEqual(json.loads((root / "tool-preflight.json").read_text())["passed"], passed)
 
     def test_exact_clean_base_and_separate_oracle(self):
         with tempfile.TemporaryDirectory(prefix="kryn-external-test-", dir="/private/tmp") as tmp:

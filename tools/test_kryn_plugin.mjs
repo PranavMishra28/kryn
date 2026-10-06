@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import childProcess, { execFileSync } from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
 import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
 import { completionLabel, permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -805,6 +806,44 @@ test('shell-written JavaScript receives syntax feedback before the Agent claims 
   } finally { await cleanup(); f.remove(); }
 });
 
+
+test('repository observations survive an unavailable Apple Git shim', {
+  skip: process.platform !== 'darwin' || !fs.existsSync('/Library/Developer/CommandLineTools/usr/bin/git'),
+}, async t => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const execute = childProcess.execFileSync;
+  const git = (...args) => execute('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'const ready = true;\n');
+    git('add', '.gitignore', 'app.js');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'seed');
+    t.mock.method(childProcess, 'execFileSync', (binary, ...args) => {
+      if (binary === '/usr/bin/git') throw new Error('xcode-select: developer_dir: Operation not permitted');
+      return execute(binary, ...args);
+    });
+    syncBuiltinESMExports();
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'const = ;\n');
+    const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_check',
+      id: 'call_check', tool: 'shell', input: { command: 'inspect source' } };
+    f.call('tool.execute.before', event);
+    const after = { ...event, status: 'completed', result: {
+      output: { exit: 0, status: 'completed', output: '' }, content: [] } };
+    f.call('tool.execute.after', after);
+    const feedback = after.result.content.map(part => part.text).join('\n');
+    assert.match(feedback, /JavaScript syntax check failed/);
+    assert.doesNotMatch(feedback, /could not inspect every changed JavaScript file/);
+    const review = { sessionID: 'ses_review', agent: 'reviewer', system: [], tools: { read: {} } };
+    await f.call('session.context', review);
+    const context = review.system.map(part => part.text).join('\n');
+    assert.match(context, /Current Git snapshot for review/);
+    assert.match(context, /\+const = ;/);
+    assert.doesNotMatch(context, /Git (?:snapshot|diff) unavailable/);
+  } finally { t.mock.restoreAll(); syncBuiltinESMExports(); await cleanup(); f.remove(); }
+});
+
 test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {
   const run = (f, id) => {
     const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id,
@@ -1249,7 +1288,7 @@ test('native child failure releases only its own foreground slot', async () => {
   try {
     const prompt = { sessionID: 'ses_1', agent: 'agent', system: [], tools: {} };
     f.call('session.context', prompt);
-    assert.ok(prompt.system.some(item => item.text.includes('Explore, Browse and Reviewer are agent names, not tool names')));
+    assert.ok(prompt.system.some(item => item.text.includes('Explore, Browse and Reviewer are agent names, not tool names or skill IDs')));
     const child = id => ({ agent: 'build', tool: 'subagent', sessionID: 'ses_1', id,
       input: { agent: 'explore', prompt: 'Inspect the project.' } });
     f.call('tool.execute.before', child('child_1'));
@@ -1312,10 +1351,18 @@ test('Ask denies mutations even under auto and Agent retains coding guidance', a
       }));
     }
     for (const agent of ['agent', 'build']) {
-      const context = { sessionID: 'ses_' + agent, agent, system: [], tools: { edit: {}, shell: {} } };
+      const context = { sessionID: 'ses_' + agent, agent, system: [], tools: { edit: {}, shell: {}, skill: {}, subagent: {} } };
       f.call('session.context', context);
-      assert.ok(context.tools.edit && context.tools.shell);
-      assert.match(context.system.map(part => part.text).join('\n'), /Build one runnable vertical slice/);
+      assert.deepEqual(Object.keys(context.tools).sort(), ['edit', 'shell', 'skill', 'subagent']);
+      const guidance = context.system.map(part => part.text).join('\n');
+      assert.match(guidance, /Before editing an existing file, read its current contents in this turn; reread after a write or an outside change/);
+      assert.match(guidance, /Load a skill only when its description matches the task/);
+      assert.match(guidance, /opencode skill documents OpenCode configuration and integrations/);
+      assert.match(guidance, /Neither is a prerequisite for ordinary project work/);
+      assert.doesNotMatch(guidance, /skill using id opencode before acting/);
+      assert.match(guidance, /not tool names or skill IDs/);
+      assert.match(guidance, /For Browse, call subagent with agent browse/);
+      assert.match(guidance, /Build one runnable vertical slice/);
     }
     const plan = { sessionID: 'ses_plan', agent: 'plan', system: [], tools: {} };
     f.call('session.context', plan);
@@ -1797,7 +1844,7 @@ test('new sessions remain available after 500 saved pins while old pins and trac
 test('Browse handoff retains current user criteria without putting prompt text in metadata reports', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
-    const request = 'Private acceptance: valid login shows Welcome; invalid login shows an error.';
+    const request = 'Build index.html. Private acceptance: valid login shows Welcome; invalid login shows an error.';
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: request } });
     f.call('session.compaction', { sessionID: 'ses_1', agent: 'build', system: [] });
     const event = { sessionID: 'ses_1', agent: 'build', tool: 'subagent', id: 'call_1',
@@ -1805,6 +1852,12 @@ test('Browse handoff retains current user criteria without putting prompt text i
     f.call('tool.execute.before', event);
     assert.ok(event.input.prompt.includes(request));
     assert.ok(event.input.prompt.startsWith('Check the layout.'));
+    assert.ok(event.input.prompt.indexOf('reference context for inspection only') < event.input.prompt.indexOf(request));
+    assert.ok(event.input.prompt.indexOf('Do not implement the parent request or read or change project files.') > event.input.prompt.indexOf(request));
+    const browse = { sessionID: 'browse_1', agent: 'browse', system: [], tools: { read: {}, write: {} } };
+    f.call('session.context', browse);
+    assert.ok(browse.system.some(part => part.text.includes('read is limited to saved tool output permitted by the native policy')));
+    assert.equal(browse.tools.write, undefined);
     assert.equal(event.input.background, false);
     f.call('tool.execute.after', { ...event, messageID: 'msg_1', status: 'completed' });
     f.call('session.prompt', { sessionID: 'ses_1', prompt: { text: 'Only inspect layout; do not submit forms.' } });

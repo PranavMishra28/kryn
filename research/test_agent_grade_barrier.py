@@ -20,6 +20,74 @@ from ui_gateway.preflight import broker_request, broker_start
 @unittest.skipUnless(sys.platform == "darwin" and barrier.GIT.is_file(),
                      "Requires macOS disk images and Command Line Tools Git")
 class AgentGradeBarrierTest(unittest.TestCase):
+    def test_empty_patch_preserves_baseline_and_nonempty_patches_still_use_git(self):
+        with tempfile.TemporaryDirectory(prefix="kryn-patch-test-", dir="/private/tmp") as temp:
+            root = Path(temp)
+            workspace, private = root / "workspace", root / "private"
+            workspace.mkdir()
+            private.mkdir()
+            subprocess.run([str(barrier.GIT), "init", "-q", str(workspace)], check=True)
+            source = workspace / "source.py"
+            source.write_text("value = 1\n")
+            artifact = root / "model.patch"
+            artifact.write_bytes(b"")
+            barrier.apply_patch(workspace, private, artifact)
+            self.assertEqual(source.read_text(), "value = 1\n")
+            for invalid in [b"not a patch\n", b" \n"]:
+                artifact.write_bytes(invalid)
+                with self.assertRaises(subprocess.CalledProcessError):
+                    barrier.apply_patch(workspace, private, artifact)
+                self.assertEqual(source.read_text(), "value = 1\n")
+            artifact.write_text("diff --git a/source.py b/source.py\n"
+                                "--- a/source.py\n+++ b/source.py\n"
+                                "@@ -1 +1 @@\n-value = 1\n+value = 2\n")
+            barrier.apply_patch(workspace, private, artifact)
+            self.assertEqual(source.read_text(), "value = 2\n")
+
+    def test_detach_retries_only_transient_busy_mount(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp:
+            mount = Path(temp) / "mount"
+            mount.mkdir()
+            volume = barrier.Volume(Path(temp) / "image.sparseimage", mount,
+                                    mount.stat().st_dev)
+            entry = {"system-entities": [{"mount-point": str(mount)}]}
+            with patch.object(barrier, "image_entry", side_effect=[entry, entry, None]), patch.object(
+                    barrier, "command", side_effect=[barrier.BarrierError("Resource busy"), b""]
+            ) as command, patch.object(barrier.time, "sleep"):
+                barrier.detach(volume)
+            self.assertEqual(command.call_count, 2)
+            self.assertTrue(all("-force" not in call.args[0] for call in command.call_args_list))
+
+    def test_persistent_busy_detach_stays_failed(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp:
+            mount = Path(temp) / "mount"
+            mount.mkdir()
+            volume = barrier.Volume(Path(temp) / "image.sparseimage", mount,
+                                    mount.stat().st_dev)
+            entry = {"system-entities": [{"mount-point": str(mount)}]}
+            with patch.object(barrier, "image_entry", return_value=entry), patch.object(
+                    barrier, "command", side_effect=barrier.BarrierError("Resource busy")
+            ) as command, patch.object(barrier.time, "sleep"):
+                with self.assertRaisesRegex(barrier.BarrierError, "Resource busy"):
+                    barrier.detach(volume)
+            self.assertEqual(command.call_count, 4)
+
+    def test_busy_retry_refuses_changed_mount(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp:
+            mount = Path(temp) / "mount"
+            mount.mkdir()
+            volume = barrier.Volume(Path(temp) / "image.sparseimage", mount,
+                                    mount.stat().st_dev)
+            current = {"system-entities": [{"mount-point": str(mount)}]}
+            changed = {"system-entities": [{"mount-point": str(mount) + "-other"}]}
+            attached = [current]
+            with patch.object(barrier, "image_entry", side_effect=lambda _image: attached[0]), patch.object(
+                    barrier, "command", side_effect=barrier.BarrierError("Resource busy")
+            ) as command, patch.object(barrier.time, "sleep", side_effect=lambda _delay: attached.__setitem__(0, changed)):
+                with self.assertRaisesRegex(barrier.BarrierError, "mount is missing or changed"):
+                    barrier.detach(volume)
+            self.assertEqual(command.call_count, 1)
+
     def run_trial(self, uncertain_detach=False, cancel_capture=False, unsettled_browser=False,
                   live_browser_image=None):
         with tempfile.TemporaryDirectory(prefix="kryn-barrier-test-seed-", dir="/private/tmp") as temp:

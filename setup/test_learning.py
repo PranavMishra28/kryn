@@ -429,6 +429,33 @@ class LearningTests(unittest.TestCase):
         grading = native_client.background_boundary(workspace,private,[Path(sys.prefix).resolve()],None)[-1]
         self.assertNotIn('(allow network-outbound',grading)
 
+    def test_dependency_alias_metadata_is_bound_to_exact_admitted_file(self):
+        workspace, private, libs = (self.base / name for name in ('workspace', 'private', 'Cellar'))
+        for folder in (workspace, private, libs): folder.mkdir(mode=0o700)
+        target = libs / 'library.dylib'; target.write_bytes(b'library')
+        hidden = libs / 'secret'; hidden.write_bytes(b'hidden')
+        opt = self.base / 'opt'; opt.mkdir()
+        alias = opt / 'package'; alias.symlink_to(libs, target_is_directory=True)
+        self.enterContext(patch.object(native_client, 'PACKAGE_OPT_ROOTS', (opt,)))
+        aliases = {str(alias / target.name): str(target)}
+        profile = native_client.background_boundary(workspace, private, [target], None,
+                                                    dependency_aliases=aliases)[-1]
+        reads, metadata = profile.split('(allow file-read-metadata', 1)
+        self.assertNotIn(str(alias), reads)
+        self.assertIn('(literal ' + json.dumps(str(alias)) + ')', metadata)
+        self.assertNotIn('(subpath ' + json.dumps(str(alias)) + ')', profile)
+        outside = self.base / 'hidden-alias'; outside.symlink_to(libs, target_is_directory=True)
+        for invalid in ({str(outside / target.name): str(target)},
+                        {str(alias / hidden.name): str(hidden)},
+                        {str(alias / target.name): str(hidden)}, {str(alias): str(libs)}):
+            with self.assertRaises(RuntimeError):
+                native_client.background_boundary(workspace, private, [target], None,
+                                                  dependency_aliases=invalid)
+        alias.unlink(); alias.symlink_to(private, target_is_directory=True)
+        with self.assertRaises((RuntimeError, FileNotFoundError)):
+            native_client.background_boundary(workspace, private, [target], None,
+                                              dependency_aliases=aliases)
+
     @unittest.skipUnless(sys.platform == 'darwin', 'macOS Seatbelt runtime check')
     def test_whole_process_boundary_runs_python_but_denies_oracle_metadata(self):
         workspace, private, grader = (self.base / name for name in ('workspace', 'private', 'grader'))

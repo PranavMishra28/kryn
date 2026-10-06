@@ -9,14 +9,16 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 sys.path.insert(0, str(ROOT / "research"))
+from research import local_only  # noqa: E402
 import learning  # noqa: E402
 from native_client import BINARY, MODEL_ID, NativeServer  # noqa: E402
 from context_probe import summarize_resources  # noqa: E402
 from run_native_trial import (NativeResourceGuard, export_owned_sessions,
                               generation_completion, runtime_is_idle)  # noqa: E402
-from run_external_patch import benchmark_tools, configuration  # noqa: E402
+from run_external_patch import benchmark_tools, configuration, sandbox_tool_preflight  # noqa: E402
 from run_boundary_public import grade  # noqa: E402
 from staged_lifecycle_canned import (check_session, compact, create_volume, detach,
                                      export, image_entry, restart, turn, wait_arm_ready)  # noqa: E402
@@ -133,7 +135,7 @@ def effective_permission_hash(permissions, workspace, server_private):
     return sha(json_bytes(normalized))
 
 
-def seed_and_preflight(root):
+def seed_and_preflight(root, cancelled=lambda: False):
     seed = root / "seed"
     seed.mkdir(mode=0o700)
     (seed / "solve.py").write_text(SEED)
@@ -168,19 +170,20 @@ def seed_and_preflight(root):
     docker = {"image_id": command("docker", "image", "inspect", IMAGE,
                                   "--format", "{{.Id}}"),
               "seed_fails_stage1": functional_rejection(docker_grade(
-                  seed, seed, base, grader / "stage1.json", stage_root)),
+                  seed, seed, base, grader / "stage1.json", stage_root,
+                  cancelled=cancelled)),
               "reference": [], "stale_separator_fails_stage3": None}
     for stage in (1, 2):
-        docker["reference"].append(docker_grade(
-            seed, seed, base, grader / f"stage{stage}.json", stage_root,
-            source_override=grader / "reference.py")["passed"])
+            docker["reference"].append(docker_grade(
+                seed, seed, base, grader / f"stage{stage}.json", stage_root,
+                source_override=grader / "reference.py", cancelled=cancelled)["passed"])
     docker["stale_separator_fails_stage3"] = functional_rejection(docker_grade(
-        seed, seed, base, grader / "stage3.json", stage_root,
-        source_override=grader / "reference.py"))
+            seed, seed, base, grader / "stage3.json", stage_root,
+            source_override=grader / "reference.py", cancelled=cancelled))
     (seed / "rules.json").write_bytes(json_bytes({"separator": "_"}))
     docker["reference"].append(docker_grade(
         seed, seed, base, grader / "stage3.json", stage_root,
-        source_override=grader / "reference.py")["passed"])
+        source_override=grader / "reference.py", cancelled=cancelled)["passed"])
     (seed / "rules.json").write_bytes(json_bytes({"separator": "-"}))
     if not (docker["seed_fails_stage1"] and all(docker["reference"]) and
             docker["stale_separator_fails_stage3"]):
@@ -214,8 +217,10 @@ def arm(root, which, seed, grader, preflight, tools):
         tool_path, tool_deps, tool_manifest = tools
         result["tool_manifest"] = tool_manifest
         with learning.InferenceRelay(MODEL_ID, 8192, 360) as relay:
+            relay_url = f"http://127.0.0.1:{relay.port}/v1"
             config, products, dependencies = configuration(workspace, state, which,
-                f"http://127.0.0.1:{relay.port}/v1")
+                relay_url)
+            result["local_config_sha256"] = local_only.check_config(config, relay_url)
             dependencies += tool_deps
             result["permissions_sha256"] = sha(json_bytes(config["permissions"]))
             result["config_sha256"] = sha(json_bytes(config))
@@ -227,10 +232,14 @@ def arm(root, which, seed, grader, preflight, tools):
             guard.start()
             native_server = NativeServer(workspace, config, folder / "native.log", background={
                 "dependencies": dependencies, "inference_port": relay.port,
+                "dependency_aliases": tool_manifest.get("dependency_aliases", {}),
                 "private_parent": private, "tool_path": str(tool_path),
                 "cancel": guard.cancel.is_set})
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                sandbox_tool_preflight(server, tool_path, tool_manifest, folder)
+                result["local_only"] = local_only.attest(
+                    server.env, server.temporary.name, relay_url)
                 wait_arm_ready(server, which, products)
                 inventory = server.request("GET", "/api/agent", timeout=5)["data"]
                 agent = next((item for item in inventory if item.get("id") == "agent"), None)
@@ -286,6 +295,14 @@ def arm(root, which, seed, grader, preflight, tools):
                 result["server_pid_end"] = server.process.pid
             result["server_shutdown_proved"] = server.process.poll() is not None and not server.forced_shutdown
             result["requests"] = relay.records
+            local_receipt = result["local_only"]
+            local_receipt["runtime_same_after"] = local_only.same_runtime(local_receipt)
+            local_receipt["observed_requests"] = len(relay.records)
+            local_receipt["observed_local_model_only"] = bool(relay.records and all(
+                item.get("model") == MODEL_ID for item in relay.records))
+            local_receipt["generation_proven"] = bool(
+                local_receipt["runtime_same_after"] and
+                local_receipt["observed_local_model_only"])
             result["relay_settled"] = not relay.connections and not relay.gate.locked()
             result["wire_schema_stable"] = bool(relay.records and all(
                 item["tool_schema_sha256"] == relay.records[0]["tool_schema_sha256"]
@@ -298,6 +315,7 @@ def arm(root, which, seed, grader, preflight, tools):
             result["stored_compactions"] == result["compactions"] and
             all(result["stored_prompts"]) and result["server_shutdown_proved"] and
             result["relay_settled"] and result["wire_schema_stable"] and
+            result["local_only"]["generation_proven"] and
             result["rule_after_owner_edit_sha256"] ==
             sha(json_bytes({"separator": "_"})))
     except BaseException as error:
@@ -339,7 +357,23 @@ def main():
     if not args.preflight_only and command("git", "-C", str(ROOT), "status", "--porcelain"):
         parser.error("Commit the frozen runner/fixture before any model request")
     output.mkdir(mode=0o700)
-    seed, grader, preflight = seed_and_preflight(output)
+    preflight_samples = []
+    preflight_folder = output / "preflight-guard"
+    preflight_folder.mkdir(mode=0o700)
+    preflight_guard = NativeResourceGuard(preflight_folder, preflight_samples)
+    try:
+        preflight_guard.start()
+        seed, grader, preflight = seed_and_preflight(
+            output, cancelled=preflight_guard.cancel.is_set)
+    finally:
+        preflight_guard.close()
+        (output / "preflight-resources.json").write_text(json.dumps({
+            "guard_reason": preflight_guard.guard.reason,
+            "resources": summarize_resources(preflight_samples)}, indent=2) + "\n")
+    if (preflight_guard.guard.reason or
+            not summarize_resources(preflight_samples).get("telemetry_complete") or
+            preflight_guard.cancel.is_set()):
+        raise RuntimeError("Public staged oracle preflight failed resource safety")
     report = {"schema": 1, "kind": "public_staged_local_model_development",
               "source_commit": command("git", "-C", str(ROOT), "rev-parse", "HEAD"),
               "runner_sha256": sha(Path(__file__).read_bytes()),

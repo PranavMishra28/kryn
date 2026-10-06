@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import select
 import selectors
 import signal
 import socket
@@ -20,7 +21,9 @@ import sys
 import tempfile
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from research import local_only
 import learning
 from native_client import BINARY, MODEL_ID, NativeServer, background_boundary, owned_config, product_plugin_files
 from context_probe import summarize_resources
@@ -53,6 +56,23 @@ def git(workspace, *args):
                                    stderr=subprocess.STDOUT, timeout=20).strip()
 
 
+def exited_unreaped(child):
+    """Observe exit without freeing the PID before its process group is stopped."""
+    if callable(getattr(os, "waitid", None)):
+        return os.waitid(os.P_PID, child.pid,
+                         os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+    if not hasattr(select, "kqueue"):
+        raise RuntimeError("Cannot observe an unreaped Git process on this host")
+    queue = select.kqueue()
+    try:
+        event = select.kevent(child.pid, filter=select.KQ_FILTER_PROC,
+                              flags=select.KQ_EV_ADD | select.KQ_EV_ENABLE,
+                              fflags=select.KQ_NOTE_EXIT)
+        return bool(queue.control([event], 1, 0))
+    finally:
+        queue.close()
+
+
 def kill_group(child):
     # The leader has not yet been reaped. Its process-group ID cannot have been
     # reused, even when a Git filter has forked descendants holding stdout.
@@ -64,8 +84,7 @@ def kill_group(child):
     except PermissionError:
         # macOS can return EPERM for an already exited sandbox-exec leader
         # whose group has vanished; it permits the same kill while live.
-        if os.waitid(os.P_PID, child.pid,
-                     os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+        if not exited_unreaped(child):
             child.kill()
             failure = RuntimeError("Could not terminate live Git process group")
     status = child.wait()
@@ -100,8 +119,7 @@ def bounded_output(command, destination, limit, *, env, cwd, cancelled, timeout=
                 output.write(chunk)
                 digest.update(chunk)
                 total += len(chunk)
-        while os.waitid(os.P_PID, child.pid,
-                        os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+        while not exited_unreaped(child):
             if cancelled():
                 raise CaptureCancelled("Resource guard interrupted patch capture")
             if time.monotonic() >= deadline:
@@ -129,8 +147,7 @@ def quiet_command(command, *, env, cwd, cancelled, timeout=20, stdin_file=None):
                                  env=env, start_new_session=True)
         deadline = time.monotonic() + timeout
         try:
-            while os.waitid(os.P_PID, child.pid,
-                            os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            while not exited_unreaped(child):
                 if cancelled():
                     raise CaptureCancelled("Resource guard interrupted patch capture")
                 if time.monotonic() >= deadline:
@@ -466,25 +483,63 @@ def benchmark_tools(venv):
                             capture_output=True, text=True, timeout=10)
     if pytest.returncode:
         raise RuntimeError("Benchmark tool venv lacks runnable pytest; no prompt sent")
-    base = Path(subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
-        "import sys; print(sys.base_prefix)"], text=True, timeout=5).strip()).resolve()
-    linked = subprocess.check_output(["/usr/bin/otool", "-L", str(venv / "bin/rg")],
-                                     text=True, timeout=5)
-    libraries = []
-    for line in linked.splitlines()[1:]:
-        name = line.strip().split(" ", 1)[0]
-        if name.startswith("/") and not name.startswith(("/usr/lib/", "/System/")):
-            libraries.append(Path(name).resolve())
+    runtime = json.loads(subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
+        "import sys,json,ssl,_ssl,_hashlib; print(json.dumps([sys.base_prefix,"
+        "ssl.OPENSSL_VERSION,_ssl.__file__,_hashlib.__file__]))"], text=True, timeout=5))
+    base = Path(runtime[0]).resolve()
+    libraries, aliases, seen = set(), {}, set()
+    pending = [venv / "bin/rg", *(Path(name).resolve() for name in runtime[2:])]
+    while pending:
+        binary = pending.pop()
+        if binary in seen:
+            continue
+        seen.add(binary)
+        linked = subprocess.check_output(["/usr/bin/otool", "-L", str(binary)],
+                                         text=True, timeout=5)
+        for line in linked.splitlines()[1:]:
+            name = line.strip().split(" ", 1)[0]
+            if name.startswith(("/usr/lib/", "/System/")):
+                continue
+            if not name.startswith("/"):
+                raise RuntimeError("Benchmark tool has an unresolved library install name")
+            target = Path(name).resolve(strict=True)
+            if not target.is_file():
+                raise RuntimeError("Benchmark dependency is not a regular library")
+            libraries.add(target)
+            if str(target) != name:
+                aliases[name] = str(target)
+            pending.append(target)
     package_listing = subprocess.check_output([str(venv / "bin/python3"), "-I", "-c",
         "import importlib.metadata as m,json; print(json.dumps(sorted((d.metadata['Name'], d.version) for d in m.distributions())))"],
         text=True, timeout=10)
-    return venv / "bin", [venv, base, git_binary, *libraries], {
+    return venv / "bin", [venv, base, git_binary, *sorted(libraries)], {
         "pytest_version": pytest.stdout.strip(),
         "python_sha256": hashlib.sha256((venv / "bin/python3").resolve().read_bytes()).hexdigest(),
         "rg_sha256": hashlib.sha256((venv / "bin/rg").read_bytes()).hexdigest(),
         "git_sha256": hashlib.sha256(git_binary.read_bytes()).hexdigest(),
         "packages": json.loads(package_listing),
+        "openssl_version": runtime[1], "dependency_aliases": aliases,
+        "library_sha256": {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                           for path in sorted(libraries)},
     }
+
+
+def sandbox_tool_preflight(server, tool_path, manifest, evidence):
+    """Check the actual child boundary, not only the host interpreter."""
+    if tool_path is None:
+        return
+    result = subprocess.run(server.background_prefix + [str(tool_path / "python3"),
+        "-I", "-B", "-c", "import json,ssl,_hashlib,pytest; "
+        "print(json.dumps({'openssl':ssl.OPENSSL_VERSION,'pytest':pytest.__version__}))"],
+        cwd=server.directory, env=server.env, capture_output=True, text=True, timeout=10)
+    observed = json.loads(result.stdout) if result.returncode == 0 else None
+    passed = bool(observed and observed.get("openssl") == manifest["openssl_version"] and
+                  "pytest " + observed.get("pytest", "") == manifest["pytest_version"])
+    (evidence / "tool-preflight.json").write_text(json.dumps({
+        "passed": passed, "returncode": result.returncode, "observed": observed,
+        "stderr": result.stderr[-4096:]}, indent=2) + "\n")
+    if not passed:
+        raise RuntimeError("Sandboxed benchmark Python/SSL/pytest preflight failed; no prompt sent")
 
 
 def drive(child, prompt, timeout, cancelled):
@@ -598,8 +653,9 @@ def run(args, *, defer_patch=False):
     report["candidate_product_source"] = bool(candidate_product_source)
     samples = []
     with learning.InferenceRelay(MODEL_ID, 8192, min(args.timeout, 360)) as relay:
+        relay_url = f"http://127.0.0.1:{relay.port}/v1"
         config, products, dependencies = configuration(
-            workspace, state_dir, args.arm, f"http://127.0.0.1:{relay.port}/v1",
+            workspace, state_dir, args.arm, relay_url,
             source_file=source_file, candidate_package=candidate_package)
         ui_gateway = getattr(args, "ui_gateway", None)
         monitor = NativeResourceGuard(evidence, samples)
@@ -625,7 +681,7 @@ def run(args, *, defer_patch=False):
                     cancel=monitor.cancel.is_set)
                 ui_gateway = broker
                 report["browser_gateway"] = {key: broker[key] for key in
-                                             ("image", "container", "boundary")}
+                                             ("image", "container", "port", "boundary")}
             if monitor.cancel.is_set():
                 raise RuntimeError("Resource guard interrupted browser startup")
             if ui_gateway is not None:
@@ -635,8 +691,10 @@ def run(args, *, defer_patch=False):
                                          adapter=adapter, repo=workspace,
                                          port=ui_gateway["port"], token=ui_gateway["token"])
                 dependencies += [Path(sys.executable).resolve(), Path(sys.base_prefix).resolve(), adapter]
+            report["local_config_sha256"] = local_only.check_config(config, relay_url)
             report["config_sha256"] = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
             background = {"dependencies": dependencies, "inference_port": relay.port,
+                          "dependency_aliases": (tool_manifest or {}).get("dependency_aliases", {}),
                           "cancel": monitor.cancel.is_set}
             if ui_gateway is not None:
                 background["broker_port"] = ui_gateway["port"]
@@ -648,6 +706,11 @@ def run(args, *, defer_patch=False):
                                          background=background)
             native_server.env["GIT_CONFIG_NOSYSTEM"] = "1"
             with native_server as server:
+                sandbox_tool_preflight(server, tool_path, tool_manifest, evidence)
+                report["local_only"] = local_only.attest(
+                    server.env, server.temporary.name, relay_url)
+                (evidence / "local-only-preflight.json").write_text(
+                    json.dumps(report["local_only"], indent=2) + "\n")
                 if ui_gateway is not None:
                     for _ in range(100):
                         if monitor.cancel.is_set():
@@ -764,7 +827,20 @@ def run(args, *, defer_patch=False):
                     report["browser_cleanup_error"] = type(error).__name__ + ": " + str(error)
                     report["browser_settled"] = False
             monitor.close()
+            report["guard_reason"] = monitor.guard.reason
             report["requests"] = relay.records
+            local_receipt = report.get("local_only")
+            if local_receipt is not None:
+                try:
+                    local_receipt["runtime_same_after"] = local_only.same_runtime(local_receipt)
+                except (OSError, RuntimeError, ValueError):
+                    local_receipt["runtime_same_after"] = False
+                local_receipt["observed_requests"] = len(relay.records)
+                local_receipt["observed_local_model_only"] = bool(relay.records and all(
+                    item.get("model") == MODEL_ID for item in relay.records))
+                local_receipt["generation_proven"] = bool(
+                    local_receipt["runtime_same_after"] and
+                    local_receipt["observed_local_model_only"])
             report["resources"] = summarize_resources(samples)
             report["wall_seconds"] = round(time.monotonic() - started, 3)
             if source_file is not None:
@@ -780,6 +856,7 @@ def run(args, *, defer_patch=False):
                     for name, digest in report["candidate_plugin_files_sha256"].items())
             report["completed"] = bool(report["completed"] and not monitor.guard.reason
                                        and report["resources"].get("telemetry_complete")
+                                       and local_receipt and local_receipt["generation_proven"]
                                        and report["browser_settled"] and report["source_unchanged"]
                                        and report.get("candidate_plugin_unchanged", True))
             (evidence / "driver.json").write_text(json.dumps(report, indent=2) + "\n")
