@@ -4,6 +4,16 @@ KRYN v1.0.0 is [published](https://github.com/PranavMishra28/kryn/releases/tag/v
 
 OpenCode 2.0.10 owns sessions, agents, models, permissions, tools and the terminal/GUI interface. KRYN owns installation, local routing, guards, continuity and evidence. oMLX 0.6.4 serves Qwen3.5-9B-6bit with a **configured 96K limit** and one heavyweight local generation at a time. Other OpenCode providers remain explicit user choices. No paid provider is configured by KRYN.
 
+## Unreleased research candidate
+
+[PR #242](https://github.com/PranavMishra28/kryn/pull/242) remains draft. Its latest
+strict coding loads stopped on memory pressure, and a three-hour conservative
+reserve admission ended without starting the runtime. Candidate daily-use,
+continuity, active endurance and final-artifact lifecycle gates remain unmet.
+The installed release's passes below do not transfer to this candidate. See the
+[current campaign decision](research/LOCAL_CAMPAIGN_2026-10-04.md) for the measured
+supervised ceiling, preserved failures and exact settlement receipts.
+
 ## Released supervised gates
 
 The [final receipt](evals/history/2026-10-02-v1-final-qualification.json) is source and wheel bound. Raw private traces are retained outside Git. These outcomes include independent checks; model completion prose is never acceptance evidence.
