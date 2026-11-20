@@ -114,10 +114,7 @@ function projectSnapshot(directory, given) {
     const stat = fs.statSync(file);
     if (!stat.isFile() || stat.size > 1024 * 1024) return null;
     return { file, hash: sha(fs.readFileSync(file)) };
-  } catch (error) {
-    if (error.code === 'ENOENT') return null;
-    throw error;
-  }
+  } catch { return null; } // As in fileEvidence, a missing or unreadable (EACCES) file has no fingerprint.
 }
 
 function expectedEditHash(snapshot, input) {

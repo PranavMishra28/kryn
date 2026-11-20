@@ -844,6 +844,29 @@ test('shell syntax feedback covers unborn Git repos and discloses incomplete sca
   } finally { await truncatedCleanup(); truncated.remove(); }
 });
 
+test('an unreadable untracked JavaScript file does not stop shell syntax feedback', async () => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const tracked = path.join(f.root, 'app.js');
+  fs.writeFileSync(tracked, 'const ready = true;\n');
+  execFileSync('/usr/bin/git', ['init', '-q'], { cwd: f.root });
+  execFileSync('/usr/bin/git', ['add', 'app.js'], { cwd: f.root });
+  execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+    'commit', '-qm', 'seed'], { cwd: f.root });
+  const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_locked',
+    id: 'call_locked', tool: 'shell', input: { command: 'write source' } };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('tool.execute.before', event);
+    fs.writeFileSync(tracked, 'const = ;\n');
+    fs.writeFileSync(path.join(f.root, 'locked.js'), 'const ready = true;\n', { mode: 0o000 });
+    const after = { ...event, status: 'completed', result: { output: { exit: 0, status: 'completed', output: '' },
+      content: [{ type: 'text', text: 'Command exited with code 0.' }] } };
+    assert.doesNotThrow(() => f.call('tool.execute.after', after));
+    assert.match(after.result.content.map(part => part.text).join('\n'), /JavaScript syntax check failed/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('owned edit fingerprints cannot be refreshed through overlapping edits', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   const file = path.join(f.root, 'app.js'); fs.writeFileSync(file, 'let count = 0;\n');
