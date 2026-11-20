@@ -68,9 +68,16 @@ def _load(path):
 
 def _write_new(path, value):
     data = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode() + b"\n"
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
-    with os.fdopen(fd, "wb") as output:
-        output.write(data)
+    temporary = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    try:
+        with os.fdopen(fd, "wb") as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+        os.link(temporary, path)  # Publishes only complete bytes and, like O_EXCL, never replaces an existing name.
+    finally:
+        temporary.unlink()
 
 
 @contextlib.contextmanager
@@ -146,7 +153,10 @@ def _records(root):
     for path in sorted(folder.iterdir()):
         if not re.fullmatch(r"[0-9]{20}-[0-9a-f]{32}\.json", path.name):
             continue  # Unknown user files are never interpreted or removed.
-        item = _load(path)
+        try:
+            item = _load(path)
+        except ValueError:
+            continue  # A partial record left by an interrupted write is skipped, never removed.
         if set(item) != {"schema", "id", "unix", "outcome"} or item["schema"] != 1:
             raise RuntimeError("Changed outcome record")
         if path.stem.split("-", 1)[1] != item["id"]:
