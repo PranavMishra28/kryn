@@ -490,6 +490,129 @@ test('check scripts can mutate while stale historical observations never demand 
   } finally { await cleanup(); f.remove(); }
 });
 
+// A model request as OpenCode 2.0.10 hands it to the context hook: the conversation so far, ending in the latest
+// user prompt or tool result.
+const conversation = last => [
+  { id: 'msg_u', role: 'user', content: [{ type: 'text', text: 'Fix the failing test.' }] },
+  { role: 'assistant', content: [{ type: 'tool-call', id: 'call_1', name: 'shell', input: { command: 'npm test' } }] },
+  ...last ? [last] : [{ role: 'tool', content: [{ type: 'tool-result', id: 'call_1', name: 'shell',
+    result: { type: 'content', value: [{ type: 'text', text: '1 failing' }] } }] }]];
+const reminder = message => {
+  const part = message.content.at(-1);
+  return part.type === 'tool-result' ? part.result.value.at(-1).text : part.text;
+};
+
+test('check state goes at the end of the request so the prompt before it stays the same', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const request = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: conversation() });
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    shellRun(f, 'npm test', '1 failing', 1, {}, true, 1);
+    const first = request(); await f.call('session.context', first);
+    shellRun(f, 'npm test', 'ok', 2);
+    const second = request(); await f.call('session.context', second);
+    // A local runtime reuses its prompt cache only up to the first changed token: in the system prompt, each check
+    // sent the whole conversation back to be read again.
+    assert.deepEqual(second.system, first.system);
+    assert.deepEqual(second.messages.slice(0, -1), conversation().slice(0, -1));
+    assert.ok(first.system.some(part => part.text.startsWith('Observed-check ledger: its current counts and check ' +
+      'references are in the latest system reminder in the conversation.') &&
+      part.text.includes('never repeatedly run checks merely to clear counters')));
+    assert.ok(!first.system.some(part => /failed=\d|check references:/.test(part.text)));
+    assert.match(reminder(first.messages.at(-1)), new RegExp('^<system-reminder>\\nObserved-check ledger: ' +
+      'failed=1, pending=0, stale=0, passed=0\\.\\nUnresolved check references: test:failed #\\w{12} runner=npm ' +
+      'exit=1 output-hint=nonzero exit at msg_1\\.\\n</system-reminder>$'));
+    assert.match(reminder(second.messages.at(-1)), /^<system-reminder>\nObserved-check ledger: failed=0, pending=0, stale=0, passed=1\.\nEarlier failed checks with later exit observations/);
+    assert.equal(first.messages.at(-1).content.at(-1).result.value[0].text, '1 failing');
+    await f.call('session.generate', request());
+    const compaction = request(); await f.call('session.compaction', compaction);
+    assert.deepEqual(compaction.system.filter(part => part.text.startsWith('Observed-check ledger')),
+      first.system.filter(part => part.text.startsWith('Observed-check ledger')));
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('earlier check state stays on the message it was sent with, so each request only extends the last', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    const step = (n, text) => [
+      { role: 'assistant', content: [{ type: 'tool-call', id: 'call_' + n, name: 'shell', input: { command: 'npm test' } }] },
+      { role: 'tool', content: [{ type: 'tool-result', id: 'call_' + n, name: 'shell',
+        result: { type: 'content', value: [{ type: 'text', text }] } }] }];
+    const history = [{ id: 'msg_u', role: 'user', content: [{ type: 'text', text: 'Fix the failing test.' }] }];
+    const request = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: structuredClone(history) });
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    const first = request(); await f.call('session.context', first);
+    history.push(...step(1, '1 failing')); shellRun(f, 'npm test', '1 failing', 1, {}, true, 1);
+    const second = request(); await f.call('session.context', second);
+    history.push(...step(2, 'ok')); shellRun(f, 'npm test', 'ok', 2);
+    const third = request(); await f.call('session.context', third);
+    // Each request is the previous one, unchanged, plus new messages. A runtime that keeps the previous request's
+    // cache reuses all of it, even one that can't rewind its cache to an earlier token.
+    assert.deepEqual(second.messages.slice(0, first.messages.length), first.messages);
+    assert.deepEqual(third.messages.slice(0, second.messages.length), second.messages);
+    assert.deepEqual(third.system, first.system);
+    assert.match(reminder(first.messages[0]), /^<system-reminder>\nObserved-check ledger: failed=0, pending=0, stale=0, passed=0\./);
+    assert.match(reminder(second.messages.at(-1)), /^<system-reminder>\nObserved-check ledger: failed=1/);
+    assert.match(reminder(third.messages.at(-1)), /^<system-reminder>\nObserved-check ledger: failed=0, pending=0, stale=0, passed=1\./);
+    assert.equal(history[0].content.length, 1, 'stored history never carries the state, only requests do');
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('check state joins the user prompt that ends a request, and otherwise waits for the next one', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  try {
+    shellRun(f, 'npm test', '1 failing', 1, {}, true, 1);
+    const parts = { sessionID: 'ses_1', agent: 'build', system: [], tools: {},
+      messages: conversation({ id: 'msg_2', role: 'user', content: [{ type: 'text', text: 'Try again.' }] }) };
+    await f.call('session.context', parts);
+    assert.deepEqual(parts.messages.at(-1).content[0], { type: 'text', text: 'Try again.' });
+    assert.match(reminder(parts.messages.at(-1)), /^<system-reminder>\nObserved-check ledger: failed=1/);
+    const plain = { sessionID: 'ses_1', agent: 'build', system: [], tools: {},
+      messages: conversation({ id: 'msg_2', role: 'user', content: 'Try again.' }) };
+    await f.call('session.context', plain);
+    assert.match(plain.messages.at(-1).content, /^Try again\.\n\n<system-reminder>\nObserved-check ledger: failed=1/);
+    for (const last of [{ role: 'assistant', content: [{ type: 'text', text: 'Done.' }] },
+      { role: 'tool', content: [{ type: 'tool-result', id: 'call_1', name: 'shell', result: { type: 'json', value: {} } }] }]) {
+      const other = { sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: conversation(last) };
+      await f.call('session.context', other);
+      assert.deepEqual(other.messages, conversation(last));
+      // The system prompt stays exactly as it was: changing it would cost the prompt cache everything after it.
+      assert.deepEqual(other.system, parts.system);
+      assert.ok(!other.system.some(part => /failed=\d|check references:/.test(part.text)));
+    }
+  } finally { await cleanup(); f.remove(); }
+});
+
+test('after a checkpoint the repository observation goes at the end of the request too', async () => {
+  const f = fixture(); const cleanup = await plugin.setup(f.ctx);
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, stdio: 'ignore' });
+  try {
+    git('init', '-q');
+    fs.writeFileSync(path.join(f.root, '.gitignore'), 'learning/\n');
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 1;\n');
+    git('add', '.gitignore', 'app.js');
+    git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-q', '-m', 'seed');
+    f.nativeMessages.push({ id: 'msg_1', type: 'user', text: 'Keep value at 1 until tests pass.', time: { created: 1 } });
+    const request = () => ({ sessionID: 'ses_1', agent: 'build', system: [], tools: {}, messages: conversation() });
+    await f.call('session.context', request());
+    await f.emit('session.compaction.ended');
+    const before = request(); await f.call('session.context', before);
+    fs.writeFileSync(path.join(f.root, 'app.js'), 'export const value = 2;\n');
+    const after = request(); await f.call('session.context', after);
+    assert.deepEqual(after.system, before.system, 'an edit must not change the system prompt');
+    assert.ok(before.system.some(part => part.text.startsWith('User-authored request excerpts')));
+    assert.match(reminder(before.messages.at(-1)), /^<system-reminder>\nCurrent repository observation/);
+    assert.notEqual(reminder(after.messages.at(-1)), reminder(before.messages.at(-1)));
+    // Everything one request added to its last message comes back with that message, in order.
+    const next = { ...request(), messages: [...conversation(),
+      { role: 'assistant', content: [{ type: 'text', text: 'Checking the edit.' }] },
+      { id: 'msg_3', role: 'user', content: [{ type: 'text', text: 'Go on.' }] }] };
+    await f.call('session.context', next);
+    assert.deepEqual(next.messages.slice(0, after.messages.length), after.messages);
+    assert.match(reminder(next.messages.at(-1)), /^<system-reminder>\nCurrent repository observation/);
+  } finally { await cleanup(); f.remove(); }
+});
+
 test('check ledger bounds and incomplete native provenance fail closed', async () => {
   const f = fixture(); const cleanup = await plugin.setup(f.ctx);
   try {
