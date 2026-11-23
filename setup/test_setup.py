@@ -23,6 +23,15 @@ import native_client
 
 
 class SetupChecks(unittest.TestCase):
+    def test_non_json_runtime_reports_occupied_port(self):
+        with patch.object(localai, "runtime_metadata", side_effect=json.JSONDecodeError("bad", "<html>", 0)), \
+             patch.object(localai.socket, "socket") as sock, \
+             patch.object(localai, "runtime_command") as command:
+            sock.return_value.__enter__.return_value.connect_ex.return_value = 0
+            with self.assertRaisesRegex(RuntimeError, "Port 8000.*lsof -nP -iTCP:8000 -sTCP:LISTEN"):
+                localai.ensure_runtime()
+            command.assert_not_called()
+
     def test_daily_start_waits_for_mcp_and_reports_degraded_tools(self):
         for state in ("connected", "failed", "pending", "missing"):
             with self.subTest(state=state):

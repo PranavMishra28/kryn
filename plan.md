@@ -22,3 +22,7 @@ The [final receipt](evals/history/2026-10-02-v1-final-qualification.json) is sou
 This release does **not** qualify unattended application engineering, accurate independent local Reviewer judgment, frontier parity, or useful reasoning across every configured context token. Frozen autonomous/UI results remain separate [research evidence](docs/evaluation.md); Task12 needed human correction. The 35B model was unsuitable for the normally occupied 48-GiB daily-use envelope, a 14B/49K profile did not clear sustained UI work, and shorter context did not demonstrate enough accepted-work benefit to replace this guarded 96K configuration. [Model decision](evals/history/2026-10-01-daily-envelope-model-decision.json) · [Historical evidence](docs/history.md).
 
 Future improvements should follow a reproduced failure, a bounded fix, and independent acceptance rather than automatically rewriting the harness after each session. See [architecture](docs/architecture.md), [usage](docs/usage.md), [security](SECURITY.md), and [release procedure](docs/releasing.md).
+
+## Port conflict diagnostic follow-up
+
+Issue #252 has an offline regression for a non-JSON listener on port 8000. The occupied-port diagnostic and listener inspection command are covered on Linux. The full check suite has the same failures on unchanged upstream in this environment; native macOS qualification is still required.
