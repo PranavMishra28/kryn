@@ -1,5 +1,11 @@
 # Releasing KRYN
 
+The only current public release is **v1.0.0**. Keep its tag and checksum-bound
+assets immutable. PR #242 is a source candidate; pushing it does not update the
+published wheel. Do not replace a downloaded v1.0.0 asset with different bytes
+under the same URL. Any future public artifact change needs an explicit release
+decision and version, with the checks below.
+
 The public release gate is [supervised v1 qualification](v1-qualification.md). The [status table](../plan.md) must link actual final-artifact receipts for every required row. Frozen autonomous/UI research failures remain disclosed; they are not a supervised-v1 pass criterion.
 
 1. Screen the supervised coding, browser/search, continuity, guard and sustained-use gates on a clean, committed **private candidate**. Candidate results find defects; they do not qualify a later wheel. Keep the public version and tags unchanged. Review the tracked tree and Git history with a redacting secret scanner; inspect every finding without copying raw secrets into issues or commits. Review direct and transitive dependency resolutions, including the browser lock and optional install phases; a direct version pin alone is not a complete transitive lock.
@@ -7,7 +13,8 @@ The public release gate is [supervised v1 qualification](v1-qualification.md). T
 3. On the final clean `main` commit, build with `python3 -B build_package.py --out-dir dist`. Record the commit and `dist/SHA256SUMS`; inspect the wheel manifest and verify `(cd dist && shasum -a 256 -c SHA256SUMS)`. For the owner install **before publication**, stage that exact wheel in a retained private environment and invoke the package's supported `kryn install` operation:
 
    ```sh
-   wheel="$PWD/dist/kryn-1.0.0-py3-none-any.whl"
+   version="$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+   wheel="$PWD/dist/kryn-$version-py3-none-any.whl"
    wheel_sha="$(shasum -a 256 "$wheel" | cut -d ' ' -f1)"
    root="$HOME/Library/Application Support/LocalAI"
    candidate="$root/private-candidates/$wheel_sha"

@@ -20,6 +20,8 @@ from run_native_trial import NativeResourceGuard, runtime_is_idle  # noqa: E402
 from context_probe import summarize_resources  # noqa: E402
 from learning import InferenceRelay  # noqa: E402
 from native_client import MODEL_ID  # noqa: E402
+from research.harbor_kryn_agent import LOCAL_URL, worker_environment  # noqa: E402
+from research.local_only import MODEL, attest, same_runtime  # noqa: E402
 
 MIN_DATA_FREE_BYTES = 12 * 1024**3
 AGENT_WALL_SECONDS = 900
@@ -51,6 +53,10 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
                                      guard_gib=22)
     if not preflight_idle:
         raise RuntimeError("The guarded local model runtime is not idle")
+    if MODEL_ID != MODEL:
+        raise RuntimeError("Research gate and installed model IDs differ")
+    local_only = attest(worker_environment(native=arm == "native"), "/tmp/kryn", LOCAL_URL)
+    (evidence / "local-only-preflight.json").write_text(json.dumps(local_only, indent=2) + "\n")
     config = TrialConfig(
         task=TaskConfig(path=task), trial_name=name, trials_dir=trials_dir,
         install_only=install_only,
@@ -125,6 +131,16 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
     reward = ((result.verifier_result.rewards or {}).get("reward")
               if result is not None and result.verifier_result else None)
     reason = monitor.guard.reason if monitor is not None else None
+    try:
+        runtime_same = same_runtime(local_only)
+    except (OSError, RuntimeError, ValueError):
+        runtime_same = False
+    local_only["runtime_same_after"] = runtime_same
+    local_only["observed_requests"] = len(relay.records)
+    local_only["observed_local_model_only"] = bool(relay.records and all(
+        item.get("model") == MODEL_ID for item in relay.records))
+    local_only["generation_proven"] = bool(runtime_same and
+                                           local_only["observed_local_model_only"])
     (evidence / "inference.json").write_text(json.dumps(relay.records, indent=2) + "\n")
     report = {
         "harbor_trial": name, "arm": arm, "variant": variant,
@@ -143,10 +159,12 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
         "agent_wall_elapsed_seconds": agent_wall_elapsed,
         "wall_stopped": wall_stopped,
         "inference_requests": len(relay.records),
+        "local_only": local_only,
         "resources": summarize_resources(samples) if samples else None,
         "runtime_idle": runtime_is_idle(evidence, "final-idle"),
     }
-    report["strict_accepted"] = bool(not install_only and reward == 1 and relay.records and
+    report["strict_accepted"] = bool(not install_only and reward == 1 and
+                                     local_only["generation_proven"] and
                                      report["exception"] is None and reason is None and
                                      report["runtime_idle"] and report["guard_preflight_passed"] and
                                      clean_resource_evidence(report["resources"]) and
@@ -154,6 +172,7 @@ async def run_trial(task: Path, trials_dir: Path, name: str, arm: str, variant: 
     report["install_passed"] = bool(install_only and result is not None and
                                      report["exception"] is None and preflight_idle and
                                      report["runtime_idle"] and not relay.records and
+                                     runtime_same and
                                      not disk_stopped and not wall_stopped)
     (evidence / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, sort_keys=True))

@@ -38,5 +38,11 @@ jobs:
         run: make check
       - name: Curated wheel and outside-checkout smoke
         run: make package-smoke
+      - name: Evaluator Python compatibility
+        run: |
+          export UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/kryn-python"
+          uv python install --no-bin 3.11.15
+          kryn_evaluator_python="$(uv python find --managed-python 3.11.15)"
+          "$kryn_evaluator_python" -B -m unittest discover -s research -p 'test_*.py'
       - name: Tracked source remains unchanged
         run: git diff --exit-code

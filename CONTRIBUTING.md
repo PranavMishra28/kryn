@@ -1,5 +1,8 @@
 # Developing KRYN
 
+New here? Start with the [documentation map](docs/README.md). For a real OpenCode
+session and the owner checks that remain after CI, use [Test KRYN yourself](docs/testing.md).
+
 KRYN currently supports native Apple Silicon macOS 26/27. Use Python 3.13+ and Node. The pinned `uv` version is 0.11.16. Work on a branch and keep the installed application separate from the source checkout.
 
 From the repository root:

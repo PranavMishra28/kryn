@@ -116,10 +116,15 @@ def read_client(connection):
 def inspect_container(name, image):
     result = subprocess.run(["docker", "inspect", name], capture_output=True,
                             text=True, timeout=5, check=True)
-    return verify_boundary(json.loads(result.stdout)[0], image)
+    items = json.loads(result.stdout)
+    if len(items) != 1 or items[0].get("Name") != "/" + name:
+        raise RuntimeError("browser container identity differs")
+    return verify_boundary(items[0], image)
 
 
 def verify_boundary(item, image):
+    if not isinstance(item.get("Id"), str) or not re.fullmatch(r"[0-9a-f]{64}", item["Id"]):
+        raise RuntimeError("browser container identity differs")
     host = item["HostConfig"]
     networks = item["NetworkSettings"]["Networks"]
     if (item["Image"] != image or item["Mounts"] or host["NetworkMode"] != "none" or
@@ -139,7 +144,7 @@ def verify_boundary(item, image):
             not 0 < host["PidsLimit"] <= 128 or not 0 < host["Memory"] <= 512 * 1024 * 1024 or
             item["Config"]["User"] != "10001:10001"):
         raise RuntimeError("browser container boundary differs")
-    return {"image_id": item["Image"], "mounts": len(item["Mounts"]),
+    return {"container_id": item["Id"], "image_id": item["Image"], "mounts": len(item["Mounts"]),
             "network": host["NetworkMode"], "read_only": host["ReadonlyRootfs"],
             "privileged": host["Privileged"], "cap_drop": host["CapDrop"],
             "pid_mode": host["PidMode"], "ipc_mode": host["IpcMode"],

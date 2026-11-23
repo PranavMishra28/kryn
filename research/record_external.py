@@ -20,6 +20,7 @@ def sha(path):
 
 def edited_tests(patch):
     paths = []
+    seen = set()
     sections = []
     for line in patch.splitlines():
         if line.startswith("diff --git "):
@@ -28,22 +29,31 @@ def edited_tests(patch):
             sections[-1].append(line)
     for section in sections:
         pair = shlex.split(section[0][len("diff --git "):])
-        if len(pair) != 2 or not pair[1].startswith("b/"):
+        if len(pair) != 2 or not pair[0].startswith("a/") or not pair[1].startswith("b/"):
             raise ValueError("Cannot audit patch paths")
-        path = PurePosixPath(pair[1][2:])
-        if path.is_absolute() or any(part in {"..", "\\"} for part in path.parts):
-            raise ValueError("Cannot audit patch paths")
+        section_paths = []
+        for prefixed in pair:
+            raw = prefixed[2:]
+            if not raw or "\\" in raw or any(part in {"", ".", ".."} for part in raw.split("/")):
+                raise ValueError("Cannot audit patch paths")
+            path = PurePosixPath(raw)
+            if path.is_absolute():
+                raise ValueError("Cannot audit patch paths")
+            section_paths.append(path)
         header = section[1:next((i for i, line in enumerate(section)
                                   if line.startswith("@@ ")), len(section))]
         if any(line.startswith("new file mode ") or line == "--- /dev/null"
                for line in header):
             continue
-        name = path.name.lower()
-        if ({"test", "tests", "testing"} & {part.lower() for part in path.parts} or
-                name.startswith("test_") or
-                name in {"test.py", "tests.py"} or name.endswith(("_test.py", "_tests.py",
-                    ".test.js", ".spec.js", ".test.ts", ".spec.ts"))):
-            paths.append(str(path))
+        for path in section_paths:
+            name = path.name.lower()
+            is_test = ({"test", "tests", "testing"} & {part.lower() for part in path.parts} or
+                       name.startswith("test_") or name in {"test.py", "tests.py"} or
+                       name.endswith(("_test.py", "_tests.py", ".test.js", ".spec.js",
+                                      ".test.ts", ".spec.ts")))
+            if is_test and path not in seen:
+                paths.append(str(path))
+                seen.add(path)
     return paths
 
 

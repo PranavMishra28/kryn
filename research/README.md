@@ -1,8 +1,45 @@
 # Research workspace
 
+**For normal use and your own first test, start with the [owner testing guide](../docs/testing.md).**
+This directory preserves experiment protocols, instrumentation and negative
+results. Historical launch instructions describe those experiments; they are not
+an unattended quick start. [Current status](../plan.md) separates the published
+release from the candidate and lists the remaining live checks.
+
 [PROTOCOL.md](PROTOCOL.md) freezes the hypothesis, controls, acceptance rule and
 research ladder. This directory is **development instrumentation**, not a new
 agent runtime and not a product setting. Released v1.0.0 remains installed.
+[LOCAL_CAMPAIGN_2026-10-04.md](LOCAL_CAMPAIGN_2026-10-04.md) records the
+completed local campaign: three independently scoreable pairs, KRYN 0/native 2,
+with eight attrition pairs and no demonstrated uplift. It also records the
+verified power/memory recovery path and the prospective aggregate correction.
+[CONTAINER_SWE_DEVELOPMENT.md](CONTAINER_SWE_DEVELOPMENT.md) records the next
+dependency-ready worker boundary and its no-model admission. It keeps Linux
+development experiments separate from the completed macOS campaign; model
+generation and promotion still require their own frozen gates.
+`campaign_supervisor.py` supervises an unchanged frozen SWE-bench controller from
+a private, pinned copy under a per-user launchd job. It waits for stable AC of at
+least 120 W and 40% battery, interrupts work on power loss or the existing resource
+limits, and resumes only remaining valid arms. It retains interrupted candidates,
+partial writes and preparation state; interrupted arms and gold attempts remain
+unscored. Controller crashes are reconciled before restart, and two unexplained
+exits without progress require inspection. Its private JSON configuration binds
+the controller source, manifest, independent auditor and prior checkpoint files;
+`python3 -B research/campaign_supervisor.py CONFIG --check` is read-only. The
+supervisor's `status.json` and append-only `events.jsonl` record waiting, recovery,
+failure and adjudication. Adjudication completion is not a release qualification.
+Admission also requires normal host memory pressure across the stable samples.
+During execution an independent lightweight check conservatively pauses on any
+non-normal pressure, then persists a one-minute cooldown before safe admission.
+Slow power/disk probes cannot block this check; frozen worker guards are unchanged.
+The owned runtime can restart after a service outage; ownership, model, memory
+ceiling and idle checks still apply. Read-only `--check` never starts it, and
+safety is checked again after startup and recovery before launching a controller.
+On macOS, a background Python process reading a checkpoint in Documents needs
+its own Documents-folder permission. A launchd PID alone is not proof of startup:
+verify that `status.json` appears. If Python waits before executing the script,
+check the macOS permission prompt; Full Disk Access is not required. Keep the
+frozen paths and evidence unchanged while resolving the OS permission.
 [CACHE_ABLATION.md](CACHE_ABLATION.md) preregisters the first one-variable
 prompt-stability candidate before its implementation.
 [VERIFICATION_FEEDBACK.md](VERIFICATION_FEEDBACK.md) records the rejected
@@ -63,16 +100,15 @@ worker deleted its tracked test afterward. No product change was promoted.
 [CANDIDATE_PLUGIN_PROVENANCE.md](CANDIDATE_PLUGIN_PROVENANCE.md) records the
 research-runner correction that loads exact isolated candidate plugin bytes.
 Its no-model OpenCode boundary check passed; no product plugin was changed.
-The isolated [direct-Git candidate](https://github.com/PranavMishra28/kryn/tree/806e86f7d334f508ccbb8844c58df1564551cbf8)
-passed one public coding compatibility screen after that loader correction;
+An isolated direct-Git candidate passed one public coding compatibility screen
+after that loader correction;
 protected transfer and production promotion are open. A separate
 post-hoc native OpenCode control also passed that public task with the same
 model, sampler and full wire tool schema. It does not establish uplift; its
 selection after seeing the KRYN result and unrandomized host/cache state
 exclude it from H1. The compact receipt is in
-[development history](history/development.jsonl). A separate
-[real-model staged screen](https://github.com/PranavMishra28/kryn/tree/e8d55b97ad7272d1da6f0336c03d45cbd89e287a)
-passed three-turn/two-compaction/two-restart mechanics, but its frozen oracle
+[development history](history/development.jsonl). A separate real-model staged
+screen passed three-turn/two-compaction/two-restart mechanics, but its frozen oracle
 rejected an ambiguously specified parser edge. It is not a quality score.
 Both raw receipts are indexed in [development history](history/development.jsonl)
 and the unqualified code remains off `main`.

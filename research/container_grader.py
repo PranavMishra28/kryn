@@ -1,0 +1,502 @@
+"""Isolated official SWE-bench grading of pinned no-model or candidate patches.
+
+The official evaluator owns patch application, tests and scoring. Only container
+creation and cleanup are supplied by our guarded parent; no upstream files change.
+This process never generates model responses. Candidate acceptance requires a
+separate adjudicator after grading and all other trial controls.
+"""
+
+import argparse
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+from research.container_admission import source_inputs
+from research.container_worker import DockerWorker, HostGuard, LABEL, validate_worker
+from research.local_campaign import atomic, controlled_env, file_sha
+from research.local_only import MODEL as PINNED_MODEL
+from research.run_external_patch import bounded_output
+from research.swebench_controller import source_lock
+from research import swebench_local
+from tools.context_probe import summarize_resources
+
+EXEC_OUTPUT_LIMIT = 8 * 1024**2
+SOCKET_READ_LIMIT = 64 * 1024
+
+
+class ExecOutputBudgetExceeded(RuntimeError):
+    pass
+
+
+class BoundedExecStream:
+    """Keep one Docker SDK exec result bounded and close its HTTP stream."""
+
+    def __init__(self, source, receipt):
+        self.source = source
+        try:
+            # Docker 7.2.0's CancellableStream turns socket errors into EOF.
+            # Read its underlying frame iterator so transport errors fail closed.
+            self.iterator = iter(getattr(source, "_stream", source))
+        except BaseException:
+            close = getattr(source, "close", None)
+            if close:
+                try:
+                    close()
+                except Exception:
+                    pass
+            raise
+        self.receipt = Path(receipt)
+        self.bytes = 0
+        self.closed = False
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.closed:
+            raise StopIteration
+        try:
+            chunk = next(self.iterator)
+        except StopIteration:
+            self.close()
+            raise
+        except BaseException:
+            self.close()
+            raise
+        if self.closed:
+            raise StopIteration
+        if not isinstance(chunk, (bytes, bytearray, memoryview)):
+            self.close()
+            raise TypeError("Docker exec returned non-byte output")
+        observed = self.bytes + len(chunk)
+        if observed > EXEC_OUTPUT_LIMIT:
+            self.close()
+            atomic(self.receipt, {"kind": "docker_sdk_exec_output_limit",
+                                  "limit_bytes": EXEC_OUTPUT_LIMIT,
+                                  "observed_bytes": observed})
+            raise ExecOutputBudgetExceeded(f"Docker exec output exceeded {EXEC_OUTPUT_LIMIT} bytes")
+        self.bytes = observed
+        return bytes(chunk)
+
+    def close(self):
+        if self.closed:
+            return
+        self.closed = True
+        for owner in (self.source, getattr(self.source, "_response", None)):
+            close = getattr(owner, "close", None)
+            if close:
+                try:
+                    close()
+                except Exception:
+                    pass
+
+
+def install_exec_output_budget(client, receipt, *, socket_module=None):
+    """Stream every SDK exec result; cap socket reads before Docker frames grow."""
+    if socket_module is None:
+        from docker.utils import socket as socket_module
+    original_read = socket_module.read
+
+    def bounded_read(sock, n=4096):
+        if type(n) is not int or n <= 0:
+            raise RuntimeError("Unexpected Docker socket read size")
+        return original_read(sock, min(n, SOCKET_READ_LIMIT))
+
+    socket_module.read = bounded_read
+    original_start = client.api.exec_start
+
+    def bounded_start(exec_id, detach=False, tty=False, stream=False, socket=False, demux=False):
+        if tty or socket or demux:
+            raise RuntimeError("Unsupported Docker exec output mode")
+        if detach:
+            if stream:
+                raise RuntimeError("Detached Docker exec cannot stream")
+            return original_start(exec_id, detach=True)
+        source = original_start(exec_id, stream=True)
+        bounded = BoundedExecStream(source, receipt)
+        if stream:
+            return bounded
+        try:
+            return b"".join(bounded)
+        finally:
+            bounded.close()
+
+    client.api.exec_start = bounded_start
+
+
+def reject_output_breach(evidence):
+    if (Path(evidence) / "output-budget.json").exists():
+        raise ExecOutputBudgetExceeded("Docker exec output budget was exceeded")
+
+
+def wheel_paths(manifest):
+    root = Path(manifest["wheelhouse"])
+    pins = manifest["wheel_sha256"]
+    if not 1 <= len(pins) <= 8 or root.is_symlink() or {p.name for p in root.iterdir()} != set(pins):
+        raise RuntimeError("Offline wheel inventory differs from the frozen manifest")
+    paths = []
+    for name, digest in pins.items():
+        path = root / name
+        if (Path(name).name != name or not name.endswith(".whl") or path.is_symlink()
+                or not path.is_file() or not 0 < path.stat().st_size <= 8 * 1024**2
+                or file_sha(path) != digest):
+            raise RuntimeError("Offline wheel identity drift")
+        paths.append(path)
+    if sum(p.stat().st_size for p in paths) > 16 * 1024**2:
+        raise RuntimeError("Offline wheel byte budget exceeded")
+    return paths
+
+
+def worker_settled(manifest):
+    admission = Path(manifest["admission_root"])
+    required = {"manifest.json", "result.json", "native/result.json", "kryn/result.json",
+                "native/ownership.json", "kryn/ownership.json", "kryn/model.patch"}
+    if required != set(manifest["admission_sha256"]):
+        raise RuntimeError("Worker admission receipts are not completely pinned")
+    for name, digest in manifest["admission_sha256"].items():
+        if file_sha(admission / name) != digest:
+            raise RuntimeError("Worker admission evidence drift")
+    if json.loads((admission / "result.json").read_text()).get("passed") is not True:
+        raise RuntimeError("Worker admission did not pass")
+    for arm in ("native", "kryn"):
+        result = json.loads((admission / arm / "result.json").read_text())
+        if result.get("passed") is not True or result.get("cleanup_error") or result.get("guard_reason"):
+            raise RuntimeError("Worker arm admission or cleanup did not pass")
+        ownership = json.loads((admission / arm / "ownership.json").read_text())
+        if ownership.get("cleanup_errors"):
+            raise RuntimeError("Worker cleanup did not settle")
+        for kind in ("container", "network"):
+            found = subprocess.check_output(
+                ["docker", kind, "ls", *(["-a"] if kind == "container" else []),
+                 "-q", "--filter", "label=" + LABEL + "=" + ownership["owner"]],
+                timeout=15, text=True)
+            if found.strip():
+                raise RuntimeError("Worker or inference relay remains before grading")
+
+
+def generation_settled(campaign, manifest):
+    """Admit exact parent-owned generation evidence only after its resources settle."""
+    root = Path(manifest["generation_root"])
+    pins = manifest["generation_sha256"]
+    required = {"driver.json", "ownership.json", "model.patch"}
+    if not root.is_absolute() or root.is_symlink() or not root.is_dir() or set(pins) != required:
+        raise RuntimeError("Candidate generation evidence is not exactly pinned")
+    generation_manifest_path = root.parent / "manifest.json"
+    if (generation_manifest_path.is_symlink() or not generation_manifest_path.is_file()
+            or generation_manifest_path.stat().st_size > 8 * 1024**2
+            or file_sha(generation_manifest_path) != manifest["generation_manifest_sha256"]):
+        raise RuntimeError("Candidate generation manifest drift")
+    generation_manifest = json.loads(generation_manifest_path.read_text())
+    if generation_manifest.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+        raise RuntimeError("Candidate generation power policy drift")
+    task_id = manifest["task"]["instance_id"]
+    prompt = root.parent / "prompt.txt"
+    prompt_sha = generation_manifest.get("prompt_sha256")
+    if (generation_manifest.get("kind") not in
+            {"swe_container_development", "swe_container_generation_canary"}
+            or generation_manifest.get("task") != manifest["task"]
+            or prompt.is_symlink() or not prompt.is_file() or prompt.stat().st_size > 1024 * 1024
+            or file_sha(prompt) != prompt_sha
+            or (generation_manifest.get("kind") == "swe_container_generation_canary")
+            is not manifest["synthetic_inference"]):
+        raise RuntimeError("Candidate generation task or prompt drift")
+    for name in required:
+        path = root / name
+        limit = 16 * 1024**2 if name == "model.patch" else 8 * 1024**2
+        if path.is_symlink() or not path.is_file() or not 0 < path.stat().st_size <= limit:
+            raise RuntimeError("Candidate generation evidence is not bounded regular data")
+        if file_sha(path) != pins[name]:
+            raise RuntimeError("Candidate generation evidence drift")
+    driver = json.loads((root / "driver.json").read_text())
+    if driver.get("power_policy", "ac-only") != manifest.get("power_policy", "ac-only"):
+        raise RuntimeError("Candidate driver power policy drift")
+    ownership = json.loads((root / "ownership.json").read_text())
+    if (driver.get("kind") != "swe_container_generation"
+            or driver.get("manifest_sha256") != manifest["generation_manifest_sha256"]
+            or driver.get("prompt_sha256") != prompt_sha
+            or driver.get("task_id") != task_id
+            or manifest.get("arm") not in ("native", "kryn")
+            or root.name != manifest["arm"]
+            or driver.get("arm") != manifest["arm"]
+            or type(manifest.get("synthetic_inference")) is not bool
+            or type(driver.get("synthetic_inference")) is not bool
+            or driver["synthetic_inference"] is not manifest["synthetic_inference"]
+            or type(driver.get("completed")) is not bool
+            or type(driver.get("cleanup_settled")) is not bool
+            or type(driver.get("inference_relay_settled")) is not bool
+            or type(driver.get("worker_exported")) is not bool
+            or not driver["cleanup_settled"] or not driver["inference_relay_settled"]
+            or not driver["worker_exported"]
+            or driver.get("patch_sha256") != manifest["patch_sha256"]
+            or driver.get("intervention") not in (None, "timeout", "resource_guard", "cli_error", "error")
+            or type(driver.get("cli_exit_code")) not in (int, type(None))
+            or not {"resources", "local_only", "requests", "generation"}.issubset(driver)):
+        raise RuntimeError("Candidate generation did not produce settled, pinned evidence")
+    if (root / "model.patch").read_bytes() != (campaign / "model.patch").read_bytes():
+        raise RuntimeError("Candidate grader patch differs from generation export")
+    owner = ownership.get("owner")
+    if (not isinstance(owner, str) or not re.fullmatch(r"kryn-worker-[0-9a-f]{16}", owner)
+            or ownership.get("cleanup_errors") != []
+            or ownership.get("retained_containers") != []
+            or ownership.get("retained_networks") != []
+            or not ownership.get("containers") or not ownership.get("networks")):
+        raise RuntimeError("Candidate generation ownership receipt is incomplete")
+    for kind in ("container", "network"):
+        found = subprocess.check_output(
+            ["docker", kind, "ls", *(["-a"] if kind == "container" else []),
+             "-q", "--filter", "label=" + LABEL + "=" + owner], timeout=15, text=True)
+        if found.strip():
+            raise RuntimeError("Candidate worker or inference relay remains before grading")
+    return driver
+
+
+def frozen(campaign, manifest):
+    if manifest.get("power_policy", "ac-only") not in ("ac-only", "battery-capable"):
+        raise RuntimeError("Unknown grader power policy")
+    kind = manifest["kind"]
+    candidate = kind == "swe_container_development_grade"
+    if (file_sha(campaign / "manifest.json") != (campaign / "manifest.sha256").read_text().strip()
+            or kind not in {"swe_container_grader_no_model_admission", "swe_container_development_grade"}
+            or source_inputs() != manifest["source_sha256"]):
+        raise RuntimeError("Grader admission source or manifest drift")
+    if candidate and (manifest.get("patch_role") != "candidate"
+                      or type(manifest.get("synthetic_inference")) is not bool
+                      or "expected_resolved" not in manifest or manifest["expected_resolved"] is not None):
+        raise RuntimeError("Candidate grader role or open outcome changed")
+    if not (campaign / "execution-lock.json").is_file():
+        raise RuntimeError("Official evaluator lock must be sealed before grading")
+    locked = source_lock(manifest, campaign)
+    if locked["evaluator_package_sha256"] != manifest["evaluator_package_sha256"]:
+        raise RuntimeError("Installed evaluator differs from the independently pinned package")
+    parquet = swebench_local.DATASET_ROOT / manifest["task"]["dataset"] / "data/test-00000-of-00001.parquet"
+    if file_sha(parquet) != manifest["datasets"][manifest["task"]["dataset"]]["test_sha256"]:
+        raise RuntimeError("Official dataset drift")
+    if swebench_local.image_identity({"image_tag": manifest["official_image_digest"]})["Id"] != manifest["official_image_id"]:
+        raise RuntimeError("Official image drift")
+    patch = campaign / "model.patch"
+    if patch.is_symlink() or not patch.is_file() or not 0 < patch.stat().st_size <= 16 * 1024**2:
+        raise RuntimeError("Grader patch is not a bounded regular file")
+    if file_sha(patch) != manifest["patch_sha256"]:
+        raise RuntimeError("Exported patch drift")
+    wheel_paths(manifest)
+    return generation_settled(campaign, manifest) if candidate else worker_settled(manifest)
+
+
+def require_owned(info, control):
+    if (info["Id"] != control["container"]
+            or info["Config"]["Labels"].get(LABEL) != control["owner"]):
+        raise RuntimeError("Official grader container ownership drift")
+    validate_worker(info, control["image_id"], "none", grader=True)
+
+
+def require_test_evidence(report, expected_tests, parsed):
+    if report.get("patch_successfully_applied") is not True:
+        raise RuntimeError("Official grader found no parseable test output")
+    statuses = report.get("tests_status", {})
+    for group, expected in expected_tests.items():
+        if not set(expected).issubset(parsed):
+            raise RuntimeError("Official grader did not observe every expected test")
+        observed = statuses.get(group, {})
+        success, failure = observed.get("success"), observed.get("failure")
+        if (not isinstance(success, list) or not isinstance(failure, list)
+                or sorted(success + failure) != sorted(expected) or set(success) & set(failure)):
+            raise RuntimeError("Official grader test coverage differs from the frozen task")
+    if not expected_tests["FAIL_TO_PASS"]:
+        raise RuntimeError("Grader admission requires nonempty fail-to-pass checks")
+
+
+def official_grade_valid(manifest, official, oom_killed):
+    return (official.get("graded") is True
+            and type(official.get("resolved")) is bool
+            and (manifest["kind"] == "swe_container_development_grade"
+                 or official["resolved"] is manifest["expected_resolved"])
+            and type(official.get("infra_failure_instances")) is int
+            and official["infra_failure_instances"] == 0
+            and type(official.get("error_instances")) is int
+            and official["error_instances"] == 0
+            and oom_killed is False)
+
+
+def model_generation_proven(driver):
+    requests = driver.get("requests")
+    local = driver.get("local_only")
+    return (driver.get("synthetic_inference") is False
+            and driver.get("completed") is True and driver.get("intervention") is None
+            and isinstance(local, dict) and local.get("generation_proven") is True
+            and isinstance(requests, list) and bool(requests)
+            and all(isinstance(row, dict) and row.get("model") == PINNED_MODEL for row in requests))
+
+
+def official_child(campaign):
+    # This process runs only the pinned official evaluator after the worker and
+    # inference relay have settled. Parent retains cleanup ownership on any exit.
+    import docker
+    import swebench.harness.run_evaluation as evaluator
+
+    if docker.__version__ != "7.2.0":
+        raise RuntimeError("Unreviewed Docker SDK exec transport")
+
+    manifest = json.loads((campaign / "manifest.json").read_text())
+    frozen(campaign, manifest)
+    control = json.loads((campaign / "grade/control.json").read_text())
+    row, _ = swebench_local.row_for(manifest, manifest["task"])
+    if manifest["kind"] == "swe_container_development_grade":
+        expected = (Path(manifest["generation_root"]) / "model.patch").read_bytes()
+        expected_resolved = None
+    elif manifest["patch_role"] == "exported_canary":
+        expected = (Path(manifest["admission_root"]) / "kryn/model.patch").read_bytes()
+        expected_resolved = False
+    elif manifest["patch_role"] == "official_gold_control":
+        expected = row["patch"].encode()
+        expected_resolved = True
+    else:
+        raise RuntimeError("Unknown no-model admission patch role")
+    if (expected != (campaign / "model.patch").read_bytes()
+            or manifest["expected_resolved"] is not expected_resolved):
+        raise RuntimeError("No-model grader control patch or expected outcome drift")
+    spec = evaluator.make_test_spec(row)
+    if spec.image_assets:
+        raise RuntimeError("Offline grader screen does not admit asset downloads")
+    client = docker.from_env(timeout=30)
+    owned = client.containers.get(control["container"])
+    owned.reload()
+    require_owned(owned.attrs, control)
+    install_exec_output_budget(client, campaign / "grade/output-budget.json")
+
+    def create(test_spec, _client, run_id, _logger):
+        if (test_spec.instance_id != manifest["task"]["instance_id"]
+                or test_spec.image != manifest["task"]["image_tag"]
+                or run_id != control["run_id"]):
+            raise RuntimeError("Official grader requested different frozen task")
+        owned.reload()
+        require_owned(owned.attrs, control)
+        return owned
+
+    def cleanup(_client, container, _logger):
+        if container is not None and container.id != owned.id:
+            raise RuntimeError("Official grader cleanup requested another container")
+
+    evaluator.create_container = create
+    evaluator.cleanup_container = cleanup
+    prediction = {"instance_id": spec.instance_id,
+                  "model_name_or_path": "kryn-container-development" if expected_resolved is None else "kryn-no-model-admission",
+                  "model_patch": (campaign / "model.patch").read_text()}
+    result = evaluator.run_instance(spec, prediction, client, control["run_id"], timeout=1800)
+    reject_output_breach(campaign / "grade")
+    if not result or result[0] != spec.instance_id:
+        raise RuntimeError("Official grader did not produce an instance report")
+    expected_tests = {"FAIL_TO_PASS": spec.FAIL_TO_PASS, "PASS_TO_PASS": spec.PASS_TO_PASS}
+    from swebench.harness.grading import get_logs_eval
+    log = (evaluator.RUN_EVALUATION_LOG_DIR / control["run_id"] /
+           prediction["model_name_or_path"] / spec.instance_id / evaluator.LOG_TEST_OUTPUT)
+    parsed, found = get_logs_eval(spec, log)
+    if not found:
+        raise RuntimeError("Official grader found no parsed test run")
+    require_test_evidence(result[1][spec.instance_id], expected_tests, parsed)
+    evaluator.make_run_report({spec.instance_id: prediction}, [row], control["run_id"], client)
+    frozen(campaign, manifest)
+    atomic(campaign / "grade/official-child.json", {"completed": True, "test_evidence": True})
+    client.close()
+
+
+def grade(campaign):
+    campaign = campaign.resolve(strict=True)
+    manifest = json.loads((campaign / "manifest.json").read_text())
+    generation = frozen(campaign, manifest)
+    evidence = campaign / "grade"
+    evidence.mkdir(mode=0o700)  # An interrupted or failed attempt is never replayed.
+    candidate = manifest["kind"] == "swe_container_development_grade"
+    report = {"passed": False, "kind": manifest["kind"], "model_generation": False,
+              "power_policy": manifest.get("power_policy", "ac-only")}
+    if candidate:
+        report.update(generation_completed=generation["completed"],
+                      generation_intervention=generation["intervention"],
+                      synthetic_inference=manifest["synthetic_inference"],
+                      model_generation=model_generation_proven(generation),
+                      grade_valid=False, resolved=None)
+    start = time.monotonic()
+    try:
+        with HostGuard(evidence, power_policy=manifest.get("power_policy", "ac-only")) as guard:
+            docker = DockerWorker(evidence, guard)
+            try:
+                identity = docker.create("grader", manifest["official_image_id"],
+                                         ["tail", "-f", "/dev/null"], grader=True)
+                docker.command("exec", identity, "mkdir", "/opt/kryn-wheels")
+                for wheel in wheel_paths(manifest):
+                    target = "/opt/kryn-wheels/" + wheel.name
+                    docker.command("cp", str(wheel), identity + ":" + target)
+                    observed = docker.command("exec", identity, "sha256sum", target).split()[0]
+                    if observed != manifest["wheel_sha256"][wheel.name]:
+                        raise RuntimeError("Offline wheel changed during container copy")
+                control = {"container": identity, "owner": docker.owner,
+                           "image_id": manifest["official_image_id"], "run_id": docker.owner}
+                info = docker.inspect("container", identity)
+                require_owned(info, control)
+                atomic(evidence / "container-inspect.json", info)
+                atomic(evidence / "control.json", control)
+                env = controlled_env()
+                env.update(HF_HUB_OFFLINE="1", HF_DATASETS_OFFLINE="1")
+
+                def cancelled():
+                    guard.check()
+                    if time.monotonic() - docker.last_usage_check >= 5:
+                        docker.check_usage()
+                    return False
+
+                bounded_output([str(swebench_local.EVALUATOR_PYTHON), "-B", "-m",
+                                "research.container_grader", "--child", str(campaign)],
+                               evidence / "official.log", 8 * 1024**2, env=env, cwd=evidence,
+                               cancelled=cancelled, timeout=2100)
+                reject_output_breach(evidence)
+                frozen(campaign, manifest)
+                official = swebench_local.official_result(
+                    evidence, manifest["task"], control["run_id"], model_patch=campaign / "model.patch")
+                info = docker.inspect("container", identity)
+                require_owned(info, control)
+                atomic(evidence / "container-after.json", info)
+                report.update(official=official, patch_sha256=file_sha(campaign / "model.patch"),
+                              oom_killed=info["State"]["OOMKilled"])
+                report["passed"] = official_grade_valid(manifest, official, info["State"]["OOMKilled"])
+                if candidate:
+                    report["resolved"] = official.get("resolved")
+                guard.check()
+            finally:
+                docker.close()
+                report["cleanup_settled"] = True
+        guard.check()  # Include final resource samples taken by __exit__.
+        resources = summarize_resources(guard.samples)
+        report["resources"] = resources
+        report["passed"] = (report["passed"] and resources.get("telemetry_complete") is True
+                            and resources.get("warning_or_critical_observed") is False
+                            and resources.get("swap_peak_growth_bytes") == 0)
+    except Exception as error:
+        report.update(passed=False, error=str(error))
+    breach = evidence / "output-budget.json"
+    if breach.exists():
+        report["passed"] = False
+        try:
+            report["output_budget"] = json.loads(breach.read_text())
+        except (OSError, ValueError):
+            report["output_budget"] = {"receipt_unreadable": True}
+    if candidate:
+        report["grade_valid"] = report["passed"]
+    report["wall_seconds"] = round(time.monotonic() - start, 3)
+    atomic(evidence / "result.json", report)
+    return report
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--child", action="store_true")
+    parser.add_argument("campaign", type=Path)
+    args = parser.parse_args()
+    if args.child:
+        sys.stderr = sys.stdout
+        official_child(args.campaign)
+    else:
+        result = grade(args.campaign)
+        print(json.dumps(result))
+        raise SystemExit(0 if result["passed"] else 1)

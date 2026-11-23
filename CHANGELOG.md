@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — PR #242
+
+- Fix native Git inspection on macOS with the direct Command Line Tools binary;
+  preserve sandbox permissions, bounded output and command deadlines.
+- Improve current-read and project-skill guidance, retain resource-stop reasons,
+  and allow empty captured patches without unnecessary Git application.
+- Add guarded local-only research orchestration and preserve failed benchmark
+  attempts, interrupted runs and independent result exclusions.
+- Add a visual repository overview, contribution templates and an owner testing
+  guide for coding/UI, failure injection, continuity, endurance and lifecycle.
+
+These changes are in source review, not in the already published v1.0.0 wheel.
+The release version, artifact hashes and installed profile are unchanged.
+
 ## v1.0.0 — supervised local coding workspace
 
 - Keeps OpenCode as the native session, agent, permission, model and tool engine, with a local Qwen3.5-9B-6bit default through oMLX, configured guarded 96K context, terminal and authenticated loopback GUI, browser/search integrations and bounded child delegation.

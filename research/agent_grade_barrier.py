@@ -96,12 +96,23 @@ def create_volume(root, name, size="512m"):
 
 
 def detach(volume):
-    entry = image_entry(volume.image)
-    if entry is None or attached_mount(entry) != [str(volume.mount)]:
-        raise BarrierError("Expected disk image mount is missing or changed")
-    if volume.mount.stat().st_dev != volume.device:
-        raise BarrierError("Disk image device changed before detachment")
-    command(["hdiutil", "detach", str(volume.mount)])  # Never use -force.
+    # macOS can briefly retain a vnode after the grader closes its files.
+    # Retry only that transient busy result, while proving the same mount owns
+    # the image immediately before each attempt. A changed mount fails closed.
+    for attempt in range(4):
+        if attempt:
+            time.sleep(0.25 * 2**(attempt - 1))
+        entry = image_entry(volume.image)
+        if entry is None or attached_mount(entry) != [str(volume.mount)]:
+            raise BarrierError("Expected disk image mount is missing or changed")
+        if volume.mount.stat().st_dev != volume.device:
+            raise BarrierError("Disk image device changed before detachment")
+        try:
+            command(["hdiutil", "detach", str(volume.mount)])  # Never use -force.
+            break
+        except BarrierError as error:
+            if "resource busy" not in str(error).lower() or attempt == 3:
+                raise
     if (image_entry(volume.image) is not None or
             volume.mount.stat().st_dev != volume.mount.parent.stat().st_dev):
         raise BarrierError("Disk image detachment could not be proved")
@@ -165,6 +176,8 @@ def apply_patch(workspace, private, patch):
         temporary = Path(temporary)
         source = temporary / "model.patch"
         shutil.copyfile(patch, source)
+        if source.stat().st_size == 0:
+            return
         git_command, env = isolated_git(workspace, temporary, [], GIT, None)
         for operation in ("--check", ""):
             argv = git_command + ["apply"] + ([operation] if operation else []) + [str(source)]

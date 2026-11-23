@@ -112,7 +112,7 @@ def runtime_is_idle(folder, label, timeout=3, model_id=MODEL_ID, guard_gib=None)
 
 
 def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, cancel=None,
-                          model_id=MODEL_ID, guard_gib=None):
+                          model_id=MODEL_ID, guard_gib=None, idle_probe=None):
     """Metadata-first bounded traversal. Never interrupt unrelated native sessions."""
     result = {"interrupt_requested": interrupt, "verified_sessions": [], "interrupts": [], "idle": False}
     deadline, quiet, sent, previous = time.monotonic() + 30, 0, set(), None
@@ -170,7 +170,8 @@ def settle_owned_sessions(server, root_id, workspace, folder, interrupt=False, c
             active = request("GET", "/api/session/active")["data"]
             if not isinstance(active, dict):
                 raise RuntimeError("Unexpected native active-session response")
-            runtime_idle = runtime_is_idle(folder, f"{label}-{attempt:03}", remaining(), model_id, guard_gib)
+            runtime_idle = (idle_probe() if idle_probe is not None else
+                            runtime_is_idle(folder, f"{label}-{attempt:03}", remaining(), model_id, guard_gib))
             good = not found.intersection(active) and runtime_idle and found == previous
             quiet = quiet + 1 if good else 0
             result["active_owned_sessions"] = sorted(found.intersection(active))
