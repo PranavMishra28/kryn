@@ -1,0 +1,70 @@
+<svg width="720" height="470" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Helvetica, Arial, sans-serif" role="img" aria-labelledby="kryn-arch-title kryn-arch-desc">
+  <title id="kryn-arch-title">KRYN architecture: which layer owns what</title>
+  <desc id="kryn-arch-desc">A stack on one Mac. The developer works in OpenCode's terminal or loopback GUI. OpenCode owns sessions, the Ask, Plan and Agent modes, permissions, tools and compaction. It sends OpenAI-compatible requests over loopback to oMLX, which loads and serves the Qwen3.5-9B model. KRYN wraps the stack without replacing the agent loop: an installer with rollback, a launcher and resource guard that watches memory pressure, swap and the listener, and a plugin that records continuity checkpoints and check evidence. A development-only acceptance controller runs independent checks and sits outside the installed product.</desc>
+  <rect width="720" height="470" fill="#fafafa"/>
+
+  <text x="24" y="34" font-size="12" font-weight="600" fill="#0a0a0a">What KRYN owns, and what it deliberately does not</text>
+  <text x="24" y="52" font-size="11" fill="#71717a">one Mac, one model process, nothing leaves the machine unless a provider is chosen explicitly</text>
+
+  <!-- KRYN boundary -->
+  <rect x="24" y="72" width="672" height="318" rx="10" fill="none" stroke="#0a0a0a" stroke-dasharray="3 4"/>
+  <text x="40" y="94" font-size="10" font-weight="600" fill="#0a0a0a" letter-spacing="0.06em">KRYN (installed)</text>
+
+  <!-- Developer -->
+  <rect x="48" y="108" width="196" height="54" rx="8" fill="#ffffff" stroke="rgba(0,0,0,0.12)"/>
+  <text x="146" y="130" font-size="12" font-weight="600" fill="#0a0a0a" text-anchor="middle">Developer</text>
+  <text x="146" y="148" font-size="10" fill="#71717a" text-anchor="middle">terminal or loopback GUI</text>
+
+  <!-- OpenCode -->
+  <rect x="48" y="184" width="196" height="92" rx="8" fill="#ffffff" stroke="rgba(0,0,0,0.12)"/>
+  <text x="146" y="206" font-size="12" font-weight="600" fill="#0a0a0a" text-anchor="middle">OpenCode</text>
+  <text x="146" y="224" font-size="10" fill="#71717a" text-anchor="middle">sessions, Ask / Plan / Agent</text>
+  <text x="146" y="239" font-size="10" fill="#71717a" text-anchor="middle">permissions, tools, children</text>
+  <text x="146" y="254" font-size="10" fill="#71717a" text-anchor="middle">compaction</text>
+  <text x="146" y="268" font-size="9" font-weight="600" fill="#0a0a0a" text-anchor="middle">owns the agent loop</text>
+
+  <!-- oMLX -->
+  <rect x="48" y="298" width="196" height="76" rx="8" fill="#ffffff" stroke="rgba(0,0,0,0.12)"/>
+  <text x="146" y="320" font-size="12" font-weight="600" fill="#0a0a0a" text-anchor="middle">oMLX</text>
+  <text x="146" y="338" font-size="10" fill="#71717a" text-anchor="middle">Qwen3.5-9B, 96K configured</text>
+  <text x="146" y="353" font-size="10" fill="#71717a" text-anchor="middle">22 GiB ceiling, one generation</text>
+  <text x="146" y="366" font-size="9" font-weight="600" fill="#0a0a0a" text-anchor="middle">owns inference</text>
+
+  <!-- arrows in the stack -->
+  <line x1="146" y1="162" x2="146" y2="182" stroke="#0a0a0a" stroke-width="1.2"/>
+  <path d="M142 177 L146 183 L150 177" fill="none" stroke="#0a0a0a" stroke-width="1.2"/>
+  <line x1="146" y1="276" x2="146" y2="296" stroke="#0a0a0a" stroke-width="1.2"/>
+  <path d="M142 291 L146 297 L150 291" fill="none" stroke="#0a0a0a" stroke-width="1.2"/>
+  <text x="156" y="290" font-size="9" fill="#71717a">loopback, OpenAI-compatible</text>
+
+  <!-- KRYN-owned components -->
+  <rect x="300" y="108" width="380" height="58" rx="8" fill="#ffffff" stroke="#0a0a0a"/>
+  <text x="316" y="130" font-size="12" font-weight="600" fill="#0a0a0a">Installer</text>
+  <text x="316" y="148" font-size="10" fill="#71717a">verifies release hashes and pins, activates transactionally,</text>
+  <text x="316" y="160" font-size="10" fill="#71717a">keeps the previous activation for rollback</text>
+
+  <rect x="300" y="180" width="380" height="58" rx="8" fill="#ffffff" stroke="#0a0a0a"/>
+  <text x="316" y="202" font-size="12" font-weight="600" fill="#0a0a0a">Launcher and resource guard</text>
+  <text x="316" y="220" font-size="10" fill="#71717a">records warning pressure; stops the owned session on critical</text>
+  <text x="316" y="232" font-size="10" fill="#71717a">pressure, missing telemetry, 512 MiB of swap growth or a changed listener</text>
+
+  <rect x="300" y="252" width="380" height="58" rx="8" fill="#ffffff" stroke="#0a0a0a"/>
+  <text x="316" y="274" font-size="12" font-weight="600" fill="#0a0a0a">Continuity plugin</text>
+  <text x="316" y="292" font-size="10" fill="#71717a">checkpoints the goal, file hashes and observed check exits; marks</text>
+  <text x="316" y="304" font-size="10" fill="#71717a">completion unverified and flags stale evidence after edits or restart</text>
+
+  <rect x="300" y="324" width="380" height="50" rx="8" fill="#ffffff" stroke="rgba(0,0,0,0.12)"/>
+  <text x="316" y="345" font-size="12" font-weight="600" fill="#0a0a0a">Routing and diagnostics</text>
+  <text x="316" y="363" font-size="10" fill="#71717a">local model by default; other providers only by explicit choice</text>
+
+  <!-- connectors from KRYN components to the stack -->
+  <line x1="300" y1="209" x2="246" y2="335" stroke="rgba(0,0,0,0.25)" stroke-dasharray="2 3"/>
+  <line x1="300" y1="281" x2="246" y2="230" stroke="rgba(0,0,0,0.25)" stroke-dasharray="2 3"/>
+
+  <!-- outside: development-only controller -->
+  <rect x="300" y="404" width="380" height="50" rx="8" fill="#ffffff" stroke="rgba(0,0,0,0.12)" stroke-dasharray="4 3"/>
+  <text x="316" y="425" font-size="12" font-weight="600" fill="#0a0a0a">Acceptance controller (development only)</text>
+  <text x="316" y="443" font-size="10" fill="#71717a">runs independently supplied checks; the model's completion text never counts</text>
+  <text x="48" y="425" font-size="10" fill="#71717a">not installed, and not a judge</text>
+  <text x="48" y="439" font-size="10" fill="#71717a">for arbitrary user projects</text>
+</svg>

@@ -6,6 +6,7 @@ import io
 import json
 import os
 import plistlib
+import shlex
 import shutil
 from pathlib import Path
 import subprocess
@@ -184,6 +185,20 @@ class SetupChecks(unittest.TestCase):
 
         deploy(interpreters[0], True)
         manifest = json.loads((root / "client/deployment.json").read_text())
+        # Users launch from their project. -m puts the current directory first on sys.path, so a project
+        # kryn.py or json.py would run before KRYN; -I keeps it off the path.
+        words = shlex.split(manifest["launcher"].splitlines()[1])
+        self.assertEqual(words[:2] + words[4:], ["exec", str(interpreters[0]), "-m", "kryn", "$@"])
+        self.assertEqual(words[2:4], ["-I", "-B"])
+        project = self.root / "project"
+        project.mkdir()
+        (project / "json.py").write_text("raise SystemExit('project module imported')\n")
+        launched = subprocess.run([sys.executable, *words[2:4], "-m", "json.tool"], cwd=project, input="{}",
+                                  capture_output=True, text=True)
+        self.assertEqual((launched.returncode, launched.stdout.strip()), (0, "{}"), launched.stderr)
+        shadowed = subprocess.run([sys.executable, "-E", "-B", "-m", "json.tool"], cwd=project, input="{}",
+                                  capture_output=True, text=True)
+        self.assertNotEqual(shadowed.returncode, 0)  # The check above can see a shadowed import.
         backup_root = root / "backups" / ("client-" + manifest["release"])
         legacy = backup_root / "0-localai"
         setup.write_same(legacy, "# immutable earlier launcher backup\n")
@@ -378,7 +393,9 @@ class SetupChecks(unittest.TestCase):
         def fake_run(command, env):
             self.assertIn("--isolated", command)
             self.assertEqual(command[command.index("--python") + 1], "3.13")
-            self.assertEqual(command[command.index("--constraints") + 1], setup.HERE / "hf-download-constraints.txt")
+            constraints = Path(command[command.index("--constraints") + 1])
+            self.assertFalse(any(character.isspace() for character in str(constraints)))
+            self.assertEqual(constraints.read_bytes(), (setup.HERE / "hf-download-constraints.txt").read_bytes())
             start = command.index(profile["repository"]) + 1
             filenames = command[start:command.index("--revision")]
             self.assertEqual(len(filenames), 1)  # Multi-file CLI requests take the defective snapshot path.
@@ -401,6 +418,35 @@ class SetupChecks(unittest.TestCase):
             setup.download_model(Path("/fixture/uv"), directory, profile, {})
             self.assertEqual(run.call_count, len(payloads))
         self.assertEqual({name:(directory/name).read_bytes() for name in payloads}, payloads)
+
+    def test_model_download_constraints_path_has_no_whitespace(self):
+        # An installed payload lives under ~/Library/Application Support, and uv splits --constraints at spaces.
+        installed = self.root / "Application Support" / "setup"
+        installed.mkdir(parents=True)
+        shutil.copyfile(setup.HERE / "hf-download-constraints.txt", installed / "hf-download-constraints.txt")
+        profile = setup.load_profile()
+        profile["files"] = {"model.safetensors": hashlib.sha256(b"fixture weights").hexdigest()}
+        directory = self.root / "model"
+        directory.mkdir()
+        passed = []
+        def fake_run(command, env):
+            constraints = Path(command[command.index("--constraints") + 1])
+            self.assertFalse(any(character.isspace() for character in str(constraints)))
+            self.assertEqual(constraints.read_bytes(), (installed / "hf-download-constraints.txt").read_bytes())
+            passed.append(constraints)
+            (directory / "model.safetensors").write_bytes(b"fixture weights")
+        with patch.object(setup, "HERE", installed), patch.object(setup, "run", side_effect=fake_run):
+            setup.download_model(Path("/fixture/uv"), directory, profile, {})
+        self.assertEqual(len(passed), 1)
+        self.assertFalse(passed[0].exists())  # The private copy is removed after the download.
+        (directory / "model.safetensors").unlink()  # Remove only this test's tiny fixture file.
+        spaced = self.root / "temporary files"
+        spaced.mkdir()
+        with patch.object(setup, "HERE", installed), patch.object(setup.tempfile, "tempdir", str(spaced)), \
+             patch.object(setup, "run") as run, self.assertRaisesRegex(RuntimeError, "TMPDIR"):
+            setup.download_model(Path("/fixture/uv"), directory, profile, {})
+        run.assert_not_called()
+        self.assertEqual(list(spaced.iterdir()), [])
 
     def test_npm_preserves_existing_tree_before_any_write_or_command(self):
         changed = self.root / "browser/node_modules/example/index.js"
@@ -1019,6 +1065,12 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(env['NPM_CONFIG_CACHE'], str(self.native_root / 'xdg/cache/npm'))
         self.assertNotIn('npm_config_cache', env)
         self.assertEqual(json.loads(env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
+
+    def test_foreground_server_never_inherits_the_research_boundary_marker(self):
+        # The plugin skips its own Git sandbox only under this marker; a user shell cannot set it.
+        with patch.dict(os.environ, {'KRYN_WHOLE_PROCESS_BOUNDARY': '1'}):
+            env = native_client.environment({})
+        self.assertNotIn('KRYN_WHOLE_PROCESS_BOUNDARY', env)
 
     def test_shell_prefers_managed_native_node_over_ambient_node(self):
         managed = self.root / 'managed-node'

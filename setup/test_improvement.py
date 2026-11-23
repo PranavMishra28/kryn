@@ -1,4 +1,5 @@
 """Offline control checks; no model runs or claim of objective improvement."""
+import errno
 import hashlib
 import importlib.util
 import json
@@ -65,6 +66,34 @@ class ImprovementTests(unittest.TestCase):
                 improvement.record_outcome(self.state, self.outcome)
         self.assertEqual(len(list((self.state / "records").glob("*.json"))), 2)
         self.assertEqual(unknown.read_text(), "preserve")
+
+    def test_failed_write_publishes_no_partial_record(self):
+        real_fdopen = os.fdopen
+        class FullDisk:  # The write fails after the file was created, as on a full disk.
+            def __init__(self, fd, *args, **kwargs):
+                self.output = real_fdopen(fd, *args, **kwargs)
+            def __enter__(self):
+                return self
+            def __exit__(self, *error):
+                self.output.close()
+            def write(self, data):
+                raise OSError(errno.ENOSPC, os.strerror(errno.ENOSPC))
+        with patch.object(improvement.os, "fdopen", FullDisk), self.assertRaises(OSError):
+            improvement.record_outcome(self.state, self.outcome)
+        self.assertEqual(list((self.state / "records").iterdir()), [])
+        improvement.record_outcome(self.state, self.outcome)
+        self.assertEqual(improvement.status(self.state)["outcome_records"], 1)
+
+    def test_unparsable_record_is_skipped_and_kept(self):
+        improvement.record_outcome(self.state, self.outcome)
+        partial = self.state / "records" / f"{0:020d}-{'0' * 32}.json"
+        for data in (b"", b'{"schema":1,"id":'):  # Left by writes interrupted before atomic publication.
+            with self.subTest(data=data):
+                partial.write_bytes(data)
+                partial.chmod(0o600)
+                improvement.record_outcome(self.state, self.outcome)
+                self.assertEqual(partial.read_bytes(), data)
+        self.assertEqual(improvement.status(self.state)["outcome_records"], 3)
 
     def test_symlink_and_hardlink_refuse_without_touching_target(self):
         target = self.base / "target"

@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -32,6 +33,13 @@ class PackageTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp.cleanup()
+
+    def test_installer_module_launches_ignore_the_current_directory(self):
+        # The installer runs from the user's shell; -m with only -E would import a local kryn.py first.
+        source = (SOURCE / "install-kryn.py").read_text()
+        launches = re.findall(r'"(-[A-Z]+)", "-B", "-m", "kryn"', source)
+        self.assertEqual(set(launches), {"-I"})
+        self.assertEqual(len(launches), 3)
 
     def test_in_session_expected_digest_stops_changed_release_before_install(self):
         with patch.object(sys, 'argv', ['install-kryn.py', '--tag', 'v0.1.11',

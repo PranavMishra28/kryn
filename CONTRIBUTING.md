@@ -35,3 +35,14 @@ For a sole alternate local model, pass all four probe-only `--replacement-model-
 Older model-screen procedures and raw outcomes remain in [historical evidence](docs/history.md). Do not change the owner's runtime settings or weaken the resource guard for a v1 qualification run.
 
 For a change, identify the owning layer from [AGENTS.md](AGENTS.md), reproduce the behavior, add a targeted regression where it checks a real contract, run relevant checks, then inspect the actual diff. Update the user docs and [plan.md](plan.md) when the behavior or its qualification status changes. Follow the [release runbook](docs/releasing.md) for final-artifact checks, owner install/update/rollback, security review and publication. Do not publish capability claims beyond evidence.
+
+## First contributions
+
+You do not need a model running to help. Useful places to start:
+
+- **Hardware reports.** v1 was validated on one M4 Max with 48 GiB. A [hardware report](https://github.com/PranavMishra28/kryn/issues/new?template=hardware_report.yml) from any other Mac, including one where KRYN failed, tells us more than another run on the same machine.
+- **Good first issues.** Issues labeled [good first issue](https://github.com/PranavMishra28/kryn/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are scoped so that `make check` and one regression test are enough to verify them.
+- **Research candidates.** Changes to prompts, context, tools or agent behavior start as a [research candidate](https://github.com/PranavMishra28/kryn/issues/new?template=research_candidate.yml) and run as matched pairs under [research/PROTOCOL.md](research/PROTOCOL.md). A cleanly measured rejection is a welcome result.
+- **Questions and setups** go to [Discussions](https://github.com/PranavMishra28/kryn/discussions).
+
+Pull requests follow the [template](.github/PULL_REQUEST_TEMPLATE.md): what changed, the commands you ran and what they printed, and any limits that remain. Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).

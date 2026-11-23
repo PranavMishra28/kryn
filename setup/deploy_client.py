@@ -87,7 +87,11 @@ def main():
     if not python.is_file() or not os.access(python, os.X_OK):
         raise RuntimeError("Package interpreter is missing or not executable")
     target = "-m kryn" if args.entry_python else shlex.quote(str(destination / "tools/localai.py"))
-    script = "#!/bin/sh\nexec " + shlex.quote(str(python)) + " -E -B " + target + ' "$@"\n'
+    # `-m` puts the current directory first on sys.path, and users launch from their project, so a project-level
+    # kryn.py or json.py would run before any KRYN check. -I removes it. A script launch keeps -E: -I would also drop
+    # the script's own directory, which the source kit imports from.
+    flags = "-I -B" if args.entry_python else "-E -B"
+    script = "#!/bin/sh\nexec " + shlex.quote(str(python)) + " " + flags + " " + target + ' "$@"\n'
     manifest_path = root / "client/deployment.json"
     prior = json.loads(manifest_path.read_text()) if manifest_path.is_file() else None
     launchers = [root / "localai", Path.home() / ".local/bin/localai",

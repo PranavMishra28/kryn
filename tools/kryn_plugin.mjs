@@ -31,7 +31,22 @@ const BROWSE_TOOLS = new Set([...BROWSER_TOOLS, 'read', 'question', 'webfetch',
 const TRACKER_GUIDANCE = 'Keep the native checkpoint concise: objective and observable acceptance criteria; constraints and decisions; relevant file/symbol references; completed work; actual check commands and results; unresolved failures; disproven hypotheses; one next action. Separate observations from hypotheses. On continuation, reconcile the checkpoint with current Git, files and checks before trusting it. Do not create or overwrite TASK.md, tracker.md or other user files merely to record a checkpoint.';
 const WRITE_GUIDANCE = 'Use the current project directory for file paths. Keep each write below 12,000 UTF-8 bytes; split large components or use small edits. Build and check one runnable milestone before expanding scope. If output was cut off, inspect existing files first: an unfinished tool call shown as text did not execute.';
 const BUILD_GUIDANCE = "Build one runnable vertical slice before expanding features. Delegate with the native subagent tool; Explore, Browse and Reviewer are agent names, not tool names. For UI work, use browser tools directly or delegate Browse with the actual local URL and explicit acceptance criteria; fix observed failures. Use native background shell support for dev servers. If a port is occupied, choose a free port and update the browser URL; model-facing cancellation of native shell jobs is unavailable, so do not guess a PID. Check HTTP failures with curl --fail-with-body and validate required services. Do not disable a required database, replace requested features with placeholders, or weaken tests to obtain a green response. After two attempts with the same failure and no new evidence, change approach or report the blocker. Before claiming completion, report the actual checks and browser flows that passed, and every unverified requirement.";
-const PROCESS_SIGNAL = /^\s*(?:(?:command\s+)|(?:sudo(?:\s+(?:-[nEHS]|--|-(?:u|g)\s+\S+))*\s+))*(?:(?:\/(?:usr\/)?bin\/)?xargs(?:\s+-[^\s;&|]+)*\s+)?(?:\/(?:usr\/)?bin\/)?(?:killall|pkill|kill)(?=\s|[;&|]|$)/;
+// Words after which the shell still runs the next word as a command: keywords, assignments and
+// wrappers. Option sets that take an argument are disjoint from flag sets, so matching stays linear.
+const BIN = String.raw`(?:\/\S*\/)?`;
+const SIGNAL_PREFIX = '(?:' + [
+  String.raw`then|do|else|elif|if|while|until|!|builtin`,
+  String.raw`[A-Za-z_]\w*=(?:'[^']*'|"[^"]*"|[^\s'"])*`,
+  String.raw`command(?:\s+-p)?`,
+  String.raw`exec(?:\s+(?:-[cl]+|-a\s*\S+))*`,
+  BIN + String.raw`(?:nohup|time(?:\s+-p)?)`,
+  BIN + String.raw`sudo(?:\s+(?:-[nEHS]+|--|-[ug]\s*\S+))*`,
+  BIN + String.raw`env(?:\s+(?:-[iv0]+|-[uPS]\s*\S+|--[A-Za-z-]+(?:=\S*)?))*`,
+  BIN + String.raw`nice(?:\s+(?:-n\s*-?\d+|-\d+|--[A-Za-z-]+(?:=\S*)?))*`,
+  BIN + String.raw`g?timeout(?:\s+(?:-[ks]\s*\S+|-(?![ks])[A-Za-z]+|--[A-Za-z-]+(?:=\S*)?))*\s+\d+(?:\.\d+)?[smhd]?`,
+  BIN + String.raw`xargs(?:\s+(?:-[EIJLnPRSs]\s*\S+|-(?![EIJLnPRSs])\S+))*`,
+].join('|') + ')';
+const PROCESS_SIGNAL = new RegExp(String.raw`^\s*(?:${SIGNAL_PREFIX}\s+)*${BIN}(?:killall|pkill|kill)(?=\s|[;&|]|$)`);
 function directProcessSignal(command) {
   // A PID discovered by shell is not proof that the agent owns that process.
   // Quoted literals and heredoc bodies are data; this is not process isolation.
@@ -115,10 +130,7 @@ function projectSnapshot(directory, given) {
     const stat = fs.statSync(file);
     if (!stat.isFile() || stat.size > 1024 * 1024) return null;
     return { file, hash: sha(fs.readFileSync(file)) };
-  } catch (error) {
-    if (error.code === 'ENOENT') return null;
-    throw error;
-  }
+  } catch { return null; } // As in fileEvidence, a missing or unreadable (EACCES) file has no fingerprint.
 }
 
 function expectedEditHash(snapshot, input) {
@@ -336,12 +348,55 @@ function checkpointSummary(item, current, directory) {
   });
 }
 
-function repoEvidence(directory) {
-  const git = (...args) => execFileSync('/usr/bin/git',
-    ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks', ...args],
+// Agent shell writes inside the project can plant Git config and attributes, including clean
+// filters that Git runs during status and diff. Plugin Git runs the real git binary (resolved once,
+// not through the /usr/bin/git or xcrun shims) under Seatbelt with no network, no writes and exec
+// allowed for that one binary, so a planted filter cannot start a shell or an interpreter. KRYN's
+// research server already runs inside a whole-process boundary where macOS refuses a nested
+// profile; only there, marked by its launcher, the shim runs under that outer boundary. Any other
+// refusal fails closed.
+const SANDBOX = '/usr/bin/sandbox-exec';
+let gitCommand;
+export function gitBoundary() {
+  if (gitCommand !== undefined) return gitCommand;
+  const tool = (command, args) => execFileSync(command, args, { timeout: 3000, encoding: 'utf8',
+    env: { PATH: '/usr/bin:/bin' }, stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  let git = null;
+  for (const find of [() => tool('/usr/bin/xcrun', ['--find', 'git']),
+                      () => path.join(tool('/usr/bin/xcode-select', ['-p']), 'usr/bin/git'),
+                      () => '/Library/Developer/CommandLineTools/usr/bin/git']) {
+    try {
+      const file = fs.realpathSync(find());
+      const info = fs.statSync(file);
+      // Same ownership rule as research dependencies: root or this user, not group/world-writable.
+      if (info.isFile() && [0, process.getuid()].includes(info.uid) && !(info.mode & 0o022)) { git = file; break; }
+    } catch { /* Try the next location. */ }
+  }
+  try {
+    execFileSync(SANDBOX, ['-p', '(version 1)(allow default)', '/usr/bin/true'],
+      { timeout: 3000, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'] });
+    gitCommand = git === null ? null : [SANDBOX, '-p', '(version 1)(allow default)(deny network*)' +
+      '(deny file-write*)(allow file-write-data (literal "/dev/null"))(deny process-exec)' +
+      '(allow process-exec (literal ' + JSON.stringify(git) + '))', git];
+  } catch (error) {
+    gitCommand = process.env.KRYN_WHOLE_PROCESS_BOUNDARY === '1' && error?.status === 71 &&
+      /sandbox_apply: Operation not permitted/.test(error.stderr ?? '') ? ['/usr/bin/git'] : null;
+  }
+  return gitCommand;
+}
+function readGit(directory, ...args) {
+  const git = gitBoundary();
+  if (git === null) throw new Error('KRYN reads Git evidence only inside the macOS sandbox');
+  const command = [...git, '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null',
+    '--no-optional-locks', ...args];
+  return execFileSync(command[0], command.slice(1),
     { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',
       env: { PATH: '/usr/bin:/bin', HOME: directory, GIT_CONFIG_NOSYSTEM: '1',
         GIT_CONFIG_GLOBAL: '/dev/null', GIT_OPTIONAL_LOCKS: '0' }, stdio: ['ignore', 'pipe', 'ignore'] });
+}
+
+function repoEvidence(directory) {
+  const git = (...args) => readGit(directory, ...args);
   try {
     let head = null;
     try { head = git('rev-parse', '--verify', 'HEAD').trim(); }
@@ -389,12 +444,7 @@ function repoFingerprint(directory) {
 
 function reviewDiffEvidence(directory) {
   try {
-    const diff = execFileSync('/usr/bin/git',
-      ['-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '--no-optional-locks',
-        'diff', '--no-ext-diff', '--no-textconv', '--unified=2', 'HEAD', '--', '.'],
-      { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',
-        env: { PATH: '/usr/bin:/bin', HOME: directory, GIT_CONFIG_NOSYSTEM: '1',
-          GIT_CONFIG_GLOBAL: '/dev/null', GIT_OPTIONAL_LOCKS: '0' }, stdio: ['ignore', 'pipe', 'ignore'] });
+    const diff = readGit(directory, 'diff', '--no-ext-diff', '--no-textconv', '--unified=2', 'HEAD', '--', '.');
     const bytes = Buffer.from(diff);
     return bytes.length <= 8000 ? diff : bytes.subarray(0, 8000).toString('utf8') +
       '\n[Git diff excerpt truncated; inspect current files before reaching a conclusion.]';

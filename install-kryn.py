@@ -161,15 +161,15 @@ def main():
             if found.returncode: env["UV_PYTHON_INSTALL_DIR"] = str(root / "python")
             run([uv, "venv", "--python", python, venv], env=env)
             run([uv, "pip", "install", "--python", venv / "bin/python", "--no-index", "--no-deps", cached], env=env)
-            run([venv / "bin/python", "-E", "-B", "-m", "kryn", "--package-check"], env=env)
+            run([venv / "bin/python", "-I", "-B", "-m", "kryn", "--package-check"], env=env)
             complete_record.write_text(json.dumps(staging_receipt) + "\n")
             stage_record.unlink()
         else:
             receipt = json.loads((directory / "package.json").read_text())
             if receipt != {"schema": 1, "wheel": wheel.name, "sha256": expected, "tag": args.tag} or sha(directory / wheel.name) != expected:
                 raise RuntimeError("Preserving changed or incomplete package installation")
-            run([venv / "bin/python", "-E", "-B", "-m", "kryn", "--package-check"], env=env)
-        run([venv / "bin/python", "-E", "-B", "-m", "kryn", "install"], env=env)
+            run([venv / "bin/python", "-I", "-B", "-m", "kryn", "--package-check"], env=env)
+        run([venv / "bin/python", "-I", "-B", "-m", "kryn", "install"], env=env)
 
 
 if __name__ == "__main__":

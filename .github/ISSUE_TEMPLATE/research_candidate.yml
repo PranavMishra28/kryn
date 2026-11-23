@@ -1,0 +1,53 @@
+name: Research candidate
+description: Propose a change to agent behavior, prompts, context or tools, measured as matched pairs
+title: "Candidate: <one mechanism>"
+labels: ["research-candidate"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Behavior changes are measured, not argued. Read the [research protocol](https://github.com/PranavMishra28/kryn/blob/main/research/PROTOCOL.md) first: a candidate names one mechanism and one changed variable before any edit, then runs as matched pairs against plain OpenCode on the same model. Most candidates so far were rejected and reverted. A cleanly run rejection is a real result.
+  - type: textarea
+    id: mechanism
+    attributes:
+      label: Mechanism
+      description: What should change in how the agent works, and why would that produce more accepted work?
+    validations:
+      required: true
+  - type: textarea
+    id: variable
+    attributes:
+      label: The one variable you change
+      description: The file, setting or prompt section. Everything else stays fixed.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: The failure that motivates it
+      description: Link a receipt, run, trace excerpt or issue.
+    validations:
+      required: true
+  - type: textarea
+    id: prediction
+    attributes:
+      label: Prediction
+      description: What should move (acceptance, false completions, requests, tokens, time), and what must not get worse?
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: Trial plan
+      description: Which tasks and how many pairs. Development tasks first; the sealed holdout is not for tuning.
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Ground rules
+      options:
+        - label: I read research/PROTOCOL.md.
+          required: true
+        - label: I will not change graders, frozen definitions or decision thresholds.
+          required: true
+        - label: The result gets recorded even if the candidate is rejected.
+          required: true

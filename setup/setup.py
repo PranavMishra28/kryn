@@ -388,11 +388,18 @@ def download_model(uv, model_dir, profile, env):
                 raise RuntimeError(f"Preserving changed model file: {name}")
         else:
             missing.append(name)
-    for name in missing:
-        # One filename selects hf_hub_download; multi-file snapshot_download omitted a pinned dotfile.
-        run([uv, "tool", "run", "--isolated", "--python", "3.13", "--from", "huggingface-hub==1.32.0",
-             "--constraints", HERE / "hf-download-constraints.txt", "hf", "download",
-             profile["repository"], name, "--revision", profile["revision"], "--local-dir", model_dir], env)
+    if missing:
+        # uv splits a --constraints value at spaces, and an installed payload lives under "Application Support".
+        with tempfile.TemporaryDirectory(prefix="hf-constraints-") as temporary:
+            constraints = Path(temporary) / "hf-download-constraints.txt"
+            if any(character.isspace() for character in str(constraints)):
+                raise RuntimeError(f"uv splits --constraints at spaces; set TMPDIR to a path without them: {temporary}")
+            shutil.copyfile(HERE / "hf-download-constraints.txt", constraints)
+            for name in missing:
+                # One filename selects hf_hub_download; multi-file snapshot_download omitted a pinned dotfile.
+                run([uv, "tool", "run", "--isolated", "--python", "3.13", "--from", "huggingface-hub==1.32.0",
+                     "--constraints", constraints, "hf", "download",
+                     profile["repository"], name, "--revision", profile["revision"], "--local-dir", model_dir], env)
     for name, expected in profile["files"].items():
         if digest(model_dir / name, "sha256") != expected:
             raise RuntimeError(f"Model file integrity mismatch: {name}")

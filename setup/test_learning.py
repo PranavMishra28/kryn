@@ -477,6 +477,7 @@ class LearningTests(unittest.TestCase):
             self.assertEqual(server.env['OPENCODE_TEST_HOME'],server.temporary.name)
             self.assertEqual(server.env['HOME'],server.temporary.name)
             self.assertEqual(server.env['OPENCODE_CONFIG_PROJECT_DISABLE'],'true')
+            self.assertEqual(server.env['KRYN_WHOLE_PROCESS_BOUNDARY'],'1')
             self.assertEqual(server.env['PATH'],str(tools)+':/usr/bin:/bin')
             profile=server.background_prefix[-1]
             toolchain=Path('/Library/Developer/CommandLineTools')

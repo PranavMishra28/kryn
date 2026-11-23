@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+Security (reported privately by @kennysarnoski-jarvis):
+
+- Package launchers and the installer start KRYN with `python -I` instead of `-E`, so a `kryn.py` or stdlib-named file in the directory you launch from can no longer run before KRYN.
+- The plugin's own Git reads (status, changed files, review diffs) run under a Seatbelt profile with no network, no writes, and exec limited to the one git binary it resolves at startup (not the `/usr/bin/git` or `xcrun` shims). A clean filter planted in `.git/config` by an Agent shell step can no longer run outside the shell write boundary.
+- The direct process signal guard now sees `kill`, `pkill` and `killall` after shell keywords (`then`, `do`, `else`, `!`), variable assignments, wrappers (`env`, `timeout`, `nohup`, `exec`, `time`, `nice`, `builtin`) and `xargs` options that take an argument.
+
+Fixes from the same review (#243), by @kennysarnoski-jarvis:
+
+- Pass uv a constraints path without spaces during model download (#244).
+- Publish improvement records atomically and skip partial ones (#245).
+- Return no snapshot for an unreadable project file (#246).
+
 ## v1.0.0 — supervised local coding workspace
 
 - Keeps OpenCode as the native session, agent, permission, model and tool engine, with a local Qwen3.5-9B-6bit default through oMLX, configured guarded 96K context, terminal and authenticated loopback GUI, browser/search integrations and bounded child delegation.
