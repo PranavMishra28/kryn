@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/kryn-banner-dark.svg">
-  <img alt="KRYN, a local coding agent workspace for Apple Silicon. A terminal shows kryn --version printing KRYN 1.0.0 and an excerpt of kryn controls." src="docs/assets/kryn-banner-light.svg" width="100%">
+  <img alt="KRYN, a local coding agent workspace for Apple Silicon. A terminal shows kryn --version printing KRYN 1.0.1 and an excerpt of kryn controls." src="docs/assets/kryn-banner-light.svg" width="100%">
 </picture>
 
 <br>
