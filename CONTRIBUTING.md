@@ -36,6 +36,15 @@ Older model-screen procedures and raw outcomes remain in [historical evidence](d
 
 For a change, identify the owning layer from [AGENTS.md](AGENTS.md), reproduce the behavior, add a targeted regression where it checks a real contract, run relevant checks, then inspect the actual diff. Update the user docs and [plan.md](plan.md) when the behavior or its qualification status changes. Follow the [release runbook](docs/releasing.md) for final-artifact checks, owner install/update/rollback, security review and publication. Do not publish capability claims beyond evidence.
 
+## What is likely to be accepted
+
+- Bug fixes with a regression test that fails on `main`.
+- Installer, launcher and diagnostics fixes for Macs other than the maintainer's.
+- Results, tasks and tooling that make the benchmarks rerunnable by others (see the [roadmap](ROADMAP.md)).
+- Docs that match actual behavior.
+
+Changes to prompts, context, tools or agent behavior go through a [research candidate](https://github.com/PranavMishra28/kryn/issues/new?template=research_candidate.yml) first. Comment on an issue before starting larger work so two people don't build the same thing.
+
 ## First contributions
 
 You do not need a model running to help. Useful places to start:

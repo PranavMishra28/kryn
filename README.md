@@ -14,7 +14,7 @@
 [![macOS 26+ on Apple Silicon](https://img.shields.io/badge/macOS_26%2B-Apple_Silicon-0a0a0a?logo=apple)](#install)
 [![Discussions](https://img.shields.io/badge/community-discussions-0a0a0a)](https://github.com/PranavMishra28/kryn/discussions)
 
-**[Install](#install)** · **[Quick start](#quick-start)** · **[How it works](#how-it-works)** · **[Benchmarks](#where-it-stands)** · **[Contribute](#contributing)** · **[Case study](https://pranavmishra.app/case-studies/kryn)**
+**[Install](#install)** · **[Quick start](#quick-start)** · **[How it works](#how-it-works)** · **[Benchmarks](#where-it-stands)** · **[Roadmap](ROADMAP.md)** · **[Contribute](#contributing)** · **[Case study](https://pranavmishra.app/case-studies/kryn)**
 
 </div>
 
@@ -56,6 +56,9 @@ Agent can delegate Explore, Browse or Reviewer work. Local generations run one a
 ## Install
 
 The v1.0.0 installer fetches public release assets over HTTPS. No GitHub account is needed.
+
+> [!WARNING]
+> **Known issue in v1.0.0:** once Google Chrome updates past version 154, `kryn` stops at launch with "Chrome major differs from the tested compatibility lines". The fix (#256) is merged and ships in v1.0.1. Until then v1.0.0 only starts with Chrome 153 or 154.
 
 **Requirements**
 
@@ -196,7 +199,7 @@ Per-run incident capture keeps bounded private failure metadata and check receip
 
 ## Contributing
 
-KRYN is small, and outside help changes what it can prove. Good places to start:
+KRYN is small, and outside help changes what it can prove. The [roadmap](ROADMAP.md) lists the eight gates between v1 and the goal and which issues move each one. Good places to start:
 
 | You can | Start here |
 |---|---|
