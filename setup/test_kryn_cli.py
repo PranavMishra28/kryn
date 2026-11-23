@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import plistlib
 from pathlib import Path
 import subprocess
 import sys
@@ -62,9 +63,29 @@ class KrynChecks(unittest.TestCase):
 
     def test_chrome_compatibility_lines_are_explicit(self):
         for version in ('153.0.7499.170', '154.0.8037.58'):
+            self.assertEqual(localai.chrome_compatibility(version), 'tested')
+        # Chrome updates itself; a newer major must not stop every launch.
+        for version in ('155.0.0.0', '158.0.8127.37'):
+            self.assertEqual(localai.chrome_compatibility(version), 'newer')
             self.assertTrue(localai.supported_chrome_version(version))
-        for version in ('152.0.0.0', '155.0.0.0', '154.0.8037', '154.0.8037.58-dev', None):
+        for version in ('152.0.0.0', '154.0.8037', '154.0.8037.58-dev', '', None):
+            self.assertEqual(localai.chrome_compatibility(version), 'unsupported')
             self.assertFalse(localai.supported_chrome_version(version))
+
+    def test_newer_chrome_warns_and_older_chrome_stops(self):
+        with tempfile.TemporaryDirectory() as directory:
+            info = Path(directory) / 'Info.plist'
+            for version, expected in (('154.0.8037.58', 'tested'), ('158.0.8127.37', 'newer')):
+                info.write_bytes(plistlib.dumps({'CFBundleShortVersionString': version}))
+                errors = io.StringIO()
+                with redirect_stderr(errors):
+                    self.assertEqual(localai.chrome_status(info), (version, expected))
+                self.assertEqual('newer than the release-tested' in errors.getvalue(), expected == 'newer')
+            info.write_bytes(plistlib.dumps({'CFBundleShortVersionString': '152.0.0.0'}))
+            with self.assertRaisesRegex(RuntimeError, 'older than the tested'):
+                localai.chrome_status(info)
+            with self.assertRaisesRegex(RuntimeError, 'Chrome is missing'):
+                localai.chrome_status(Path(directory) / 'absent.plist')
 
     def guarded(self, samples, child, outcome=None, **options):
         outcome = {} if outcome is None else outcome

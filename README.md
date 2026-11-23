@@ -14,13 +14,13 @@
 [![macOS 26+ on Apple Silicon](https://img.shields.io/badge/macOS_26%2B-Apple_Silicon-0a0a0a?logo=apple)](#install)
 [![Discussions](https://img.shields.io/badge/community-discussions-0a0a0a)](https://github.com/PranavMishra28/kryn/discussions)
 
-**[Install](#install)** · **[Quick start](#quick-start)** · **[How it works](#how-it-works)** · **[Benchmarks](#where-it-stands)** · **[Contribute](#contributing)** · **[Case study](https://pranavmishra.app/case-studies/kryn)**
+**[Install](#install)** · **[Quick start](#quick-start)** · **[How it works](#how-it-works)** · **[Benchmarks](#where-it-stands)** · **[Roadmap](ROADMAP.md)** · **[Contribute](#contributing)** · **[Case study](https://pranavmishra.app/case-studies/kryn)**
 
 </div>
 
 KRYN is a coding agent workspace that runs on one Mac. It puts [OpenCode](https://github.com/anomalyco/opencode)'s agent loop in front of a local [Qwen3.5-9B](https://huggingface.co/mlx-community/Qwen3.5-9B-6bit) served by [oMLX](https://github.com/jundot/omlx), then adds what a laptop you also use for everything else needs: a checksum-verified installer with rollback, a memory guard, session evidence that survives compaction and restarts, and recovery when something stops.
 
-The goal is frontier-adjacent coding on a laptop. **v1.0.0 ships the part the release evidence proves today: supervised local coding.** You review changes and run checks; KRYN keeps the record of what actually happened. A preregistered [benchmark rig](#the-benchmark-rig) decides when it can claim more.
+The goal is frontier-adjacent coding on a laptop. **v1 ships the part the release evidence proves today: supervised local coding.** You review changes and run checks; KRYN keeps the record of what actually happened. A preregistered [benchmark rig](#the-benchmark-rig) decides when it can claim more.
 
 ## Why KRYN
 
@@ -55,7 +55,7 @@ Agent can delegate Explore, Browse or Reviewer work. Local generations run one a
 
 ## Install
 
-The v1.0.0 installer fetches public release assets over HTTPS. No GitHub account is needed.
+The v1.0.1 installer fetches public release assets over HTTPS. No GitHub account is needed.
 
 **Requirements**
 
@@ -72,9 +72,9 @@ The v1.0.0 installer fetches public release assets over HTTPS. No GitHub account
   trap 'rm -f "$kryn_installer"' EXIT
   curl --fail --location --proto '=https' --proto-redir '=https' \
     --output "$kryn_installer" \
-    https://github.com/PranavMishra28/kryn/releases/download/v1.0.0/install-kryn.py
-  printf '%s  %s\n' b66e4332b4951c4abbe37c59db6865f076117e4ebc8d4588ad6a180929bc55b5 "$kryn_installer" | shasum -a 256 -c -
-  python3 "$kryn_installer" --tag v1.0.0
+    https://github.com/PranavMishra28/kryn/releases/download/v1.0.1/install-kryn.py
+  printf '%s  %s\n' c96a15ae6b433bc161efc75b8f48120369bcf824b40cb7da12de2ec185fb35fc "$kryn_installer" | shasum -a 256 -c -
+  python3 "$kryn_installer" --tag v1.0.1
 )
 ```
 
@@ -89,7 +89,7 @@ export PATH="$HOME/.local/bin:$PATH"
 kryn --version
 ```
 
-Expected: `KRYN 1.0.0`. If a new Terminal cannot find `kryn`, run `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once. Then follow [Quick start](#quick-start).
+Expected: `KRYN 1.0.1`. If a new Terminal cannot find `kryn`, run `~/.local/bin/kryn` directly or add the export line to `~/.zshrc` once. Then follow [Quick start](#quick-start).
 
 ## How it works
 
@@ -196,7 +196,7 @@ Per-run incident capture keeps bounded private failure metadata and check receip
 
 ## Contributing
 
-KRYN is small, and outside help changes what it can prove. Good places to start:
+KRYN is small, and outside help changes what it can prove. The [roadmap](ROADMAP.md) lists the eight gates between v1 and the goal and which issues move each one. Good places to start:
 
 | You can | Start here |
 |---|---|
