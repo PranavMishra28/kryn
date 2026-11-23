@@ -321,41 +321,45 @@ function checkpointSummary(item, current, directory) {
 }
 
 // Agent shell writes inside the project can plant Git config and attributes, including clean
-// filters that Git runs during status and diff. Plugin Git runs under Seatbelt with no network,
-// no writes and exec only for the /usr/bin/git and xcrun shims and the git binary they select, so
-// a planted filter cannot start a shell or an interpreter. KRYN's research server already runs inside a
-// whole-process boundary where macOS refuses a nested profile; only there, marked by its
-// launcher, Git runs under that outer boundary. Any other refusal fails closed.
+// filters that Git runs during status and diff. Plugin Git runs the real git binary (resolved once,
+// not through the /usr/bin/git or xcrun shims) under Seatbelt with no network, no writes and exec
+// allowed for that one binary, so a planted filter cannot start a shell or an interpreter. KRYN's
+// research server already runs inside a whole-process boundary where macOS refuses a nested
+// profile; only there, marked by its launcher, the shim runs under that outer boundary. Any other
+// refusal fails closed.
 const SANDBOX = '/usr/bin/sandbox-exec';
-let gitPrefix;
+let gitCommand;
 export function gitBoundary() {
-  if (gitPrefix !== undefined) return gitPrefix;
-  const tool = (command, args) => execFileSync(command, args, { timeout: 1500, encoding: 'utf8',
+  if (gitCommand !== undefined) return gitCommand;
+  const tool = (command, args) => execFileSync(command, args, { timeout: 3000, encoding: 'utf8',
     env: { PATH: '/usr/bin:/bin' }, stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-  // The shim may run git directly or through xcrun; allow both and the real git binary, never a directory.
-  const allowed = new Set(['/usr/bin/git', '/usr/bin/xcrun']);
-  for (const find of [() => path.join(tool('/usr/bin/xcode-select', ['-p']), 'usr/bin/git'),
-                      () => tool('/usr/bin/xcrun', ['--find', 'git']),
+  let git = null;
+  for (const find of [() => tool('/usr/bin/xcrun', ['--find', 'git']),
+                      () => path.join(tool('/usr/bin/xcode-select', ['-p']), 'usr/bin/git'),
                       () => '/Library/Developer/CommandLineTools/usr/bin/git']) {
-    try { allowed.add(fs.realpathSync(find())); } catch { /* Not present on this Mac. */ }
+    try {
+      const file = fs.realpathSync(find());
+      const info = fs.statSync(file);
+      // Same ownership rule as research dependencies: root or this user, not group/world-writable.
+      if (info.isFile() && [0, process.getuid()].includes(info.uid) && !(info.mode & 0o022)) { git = file; break; }
+    } catch { /* Try the next location. */ }
   }
-  const profile = '(version 1)(allow default)(deny network*)(deny file-write*)' +
-    '(allow file-write-data (literal "/dev/null"))(deny process-exec)(allow process-exec' +
-    [...allowed].map(file => ' (literal ' + JSON.stringify(file) + ')').join('') + ')';
   try {
     execFileSync(SANDBOX, ['-p', '(version 1)(allow default)', '/usr/bin/true'],
-      { timeout: 1500, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'] });
-    gitPrefix = [SANDBOX, '-p', profile];
+      { timeout: 3000, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'] });
+    gitCommand = git === null ? null : [SANDBOX, '-p', '(version 1)(allow default)(deny network*)' +
+      '(deny file-write*)(allow file-write-data (literal "/dev/null"))(deny process-exec)' +
+      '(allow process-exec (literal ' + JSON.stringify(git) + '))', git];
   } catch (error) {
-    gitPrefix = process.env.KRYN_WHOLE_PROCESS_BOUNDARY === '1' && error?.status === 71 &&
-      /sandbox_apply: Operation not permitted/.test(error.stderr ?? '') ? [] : null;
+    gitCommand = process.env.KRYN_WHOLE_PROCESS_BOUNDARY === '1' && error?.status === 71 &&
+      /sandbox_apply: Operation not permitted/.test(error.stderr ?? '') ? ['/usr/bin/git'] : null;
   }
-  return gitPrefix;
+  return gitCommand;
 }
 function readGit(directory, ...args) {
-  const prefix = gitBoundary();
-  if (prefix === null) throw new Error('KRYN reads Git evidence only inside the macOS sandbox');
-  const command = [...prefix, '/usr/bin/git', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null',
+  const git = gitBoundary();
+  if (git === null) throw new Error('KRYN reads Git evidence only inside the macOS sandbox');
+  const command = [...git, '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null',
     '--no-optional-locks', ...args];
   return execFileSync(command[0], command.slice(1),
     { cwd: directory, timeout: 1500, maxBuffer: 32768, encoding: 'utf8',

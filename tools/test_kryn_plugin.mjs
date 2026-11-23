@@ -838,14 +838,16 @@ test('plugin Git evidence does not run repository clean filters', async () => {
   } finally { await cleanup(); f.remove(); fs.rmSync(outside, { recursive: true, force: true }); }
 });
 
-test('plugin Git sandbox runs git and refuses shells and interpreters', () => {
+test('plugin Git sandbox runs only the resolved git binary', () => {
   // Without shell metacharacters Git execs a filter directly, so the exec rule itself is the boundary.
-  const prefix = gitBoundary();
-  assert.equal(prefix?.[0], '/usr/bin/sandbox-exec');
-  const run = (...command) => execFileSync(prefix[0], [...prefix.slice(1), ...command],
+  const command = gitBoundary();
+  assert.equal(command?.[0], '/usr/bin/sandbox-exec');
+  const [sandbox, flag, profile, git] = command;
+  assert.ok(path.isAbsolute(git) && fs.realpathSync(git) === git);
+  const run = (...args) => execFileSync(sandbox, [flag, profile, ...args],
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-  assert.match(run('/usr/bin/git', '--version'), /^git version/);
-  // The same repository read the plugin makes, with its environment.
+  assert.match(run(git, '--version'), /^git version/);
+  // The same repository reads the plugin makes, with its environment.
   const repo = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-sandbox-git-')));
   try {
     const env = { PATH: '/usr/bin:/bin', HOME: repo, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null',
@@ -855,21 +857,19 @@ test('plugin Git sandbox runs git and refuses shells and interpreters', () => {
     for (const args of [['status', '--short'], ['ls-files', '--others', '--exclude-standard']]) {
       let output;
       try {
-        output = execFileSync(prefix[0], [...prefix.slice(1), '/usr/bin/git', '-c', 'core.fsmonitor=false',
-          '--no-optional-locks', ...args], { cwd: repo, env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-      } catch (error) { assert.fail('sandboxed git ' + args[0] + ' failed: ' + error.stderr); }
+        output = execFileSync(sandbox, [flag, profile, git, '-c', 'core.fsmonitor=false', '--no-optional-locks',
+          ...args], { cwd: repo, env, encoding: 'utf8', timeout: 1500, stdio: ['ignore', 'pipe', 'pipe'] });
+      } catch (error) { assert.fail('sandboxed git ' + args[0] + ' failed: ' + (error.stderr || error.message)); }
       assert.match(output, /a\.txt/);
     }
   } finally { fs.rmSync(repo, { recursive: true, force: true }); }
   const developer = fs.realpathSync(execFileSync('/usr/bin/xcode-select', ['-p'], { encoding: 'utf8' }).trim());
-  for (const command of ['/bin/sh', '/bin/zsh', '/usr/bin/python3', path.join(developer, 'usr/bin/python3')]
-    .filter(file => fs.existsSync(file))) {
-    assert.doesNotThrow(() => execFileSync(command, ['-c', ''], { stdio: 'ignore' }), command);  // Valid unsandboxed.
-    assert.throws(() => run(command, '-c', ''), undefined, command);
+  for (const [file, ...args] of [['/bin/sh', '-c', ''], ['/bin/zsh', '-c', ''], ['/usr/bin/python3', '-c', ''],
+                                 [path.join(developer, 'usr/bin/python3'), '-c', ''], ['/usr/bin/xcrun', 'python3', '-c', ''],
+                                 ['/usr/bin/git', '--version']].filter(([file]) => fs.existsSync(file))) {
+    assert.doesNotThrow(() => execFileSync(file, args, { stdio: 'ignore' }), file);  // Valid unsandboxed.
+    assert.throws(() => run(file, ...args), undefined, file);
   }
-  // xcrun is allowed for the git shim, but cannot launch anything else.
-  assert.doesNotThrow(() => execFileSync('/usr/bin/xcrun', ['python3', '-c', ''], { stdio: 'ignore' }));
-  assert.throws(() => run('/usr/bin/xcrun', 'python3', '-c', ''));
 });
 
 test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {
