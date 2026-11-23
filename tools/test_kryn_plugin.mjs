@@ -845,6 +845,22 @@ test('plugin Git sandbox runs git and refuses shells and interpreters', () => {
   const run = (...command) => execFileSync(prefix[0], [...prefix.slice(1), ...command],
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   assert.match(run('/usr/bin/git', '--version'), /^git version/);
+  // The same repository read the plugin makes, with its environment.
+  const repo = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-sandbox-git-')));
+  try {
+    const env = { PATH: '/usr/bin:/bin', HOME: repo, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null',
+      GIT_OPTIONAL_LOCKS: '0' };
+    execFileSync('/usr/bin/git', ['init', '-q'], { cwd: repo, env });
+    fs.writeFileSync(path.join(repo, 'a.txt'), 'a\n');
+    for (const args of [['status', '--short'], ['ls-files', '--others', '--exclude-standard']]) {
+      let output;
+      try {
+        output = execFileSync(prefix[0], [...prefix.slice(1), '/usr/bin/git', '-c', 'core.fsmonitor=false',
+          '--no-optional-locks', ...args], { cwd: repo, env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      } catch (error) { assert.fail('sandboxed git ' + args[0] + ' failed: ' + error.stderr); }
+      assert.match(output, /a\.txt/);
+    }
+  } finally { fs.rmSync(repo, { recursive: true, force: true }); }
   const developer = fs.realpathSync(execFileSync('/usr/bin/xcode-select', ['-p'], { encoding: 'utf8' }).trim());
   for (const command of ['/bin/sh', '/bin/zsh', '/usr/bin/python3', path.join(developer, 'usr/bin/python3')]
     .filter(file => fs.existsSync(file))) {
