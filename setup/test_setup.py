@@ -6,6 +6,7 @@ import io
 import json
 import os
 import plistlib
+import shlex
 import shutil
 from pathlib import Path
 import subprocess
@@ -184,6 +185,20 @@ class SetupChecks(unittest.TestCase):
 
         deploy(interpreters[0], True)
         manifest = json.loads((root / "client/deployment.json").read_text())
+        # Users launch from their project. -m puts the current directory first on sys.path, so a project
+        # kryn.py or json.py would run before KRYN; -I keeps it off the path.
+        words = shlex.split(manifest["launcher"].splitlines()[1])
+        self.assertEqual(words[:2] + words[4:], ["exec", str(interpreters[0]), "-m", "kryn", "$@"])
+        self.assertEqual(words[2:4], ["-I", "-B"])
+        project = self.root / "project"
+        project.mkdir()
+        (project / "json.py").write_text("raise SystemExit('project module imported')\n")
+        launched = subprocess.run([sys.executable, *words[2:4], "-m", "json.tool"], cwd=project, input="{}",
+                                  capture_output=True, text=True)
+        self.assertEqual((launched.returncode, launched.stdout.strip()), (0, "{}"), launched.stderr)
+        shadowed = subprocess.run([sys.executable, "-E", "-B", "-m", "json.tool"], cwd=project, input="{}",
+                                  capture_output=True, text=True)
+        self.assertNotEqual(shadowed.returncode, 0)  # The check above can see a shadowed import.
         backup_root = root / "backups" / ("client-" + manifest["release"])
         legacy = backup_root / "0-localai"
         setup.write_same(legacy, "# immutable earlier launcher backup\n")
@@ -1050,6 +1065,12 @@ class SetupChecks(unittest.TestCase):
         self.assertEqual(env['NPM_CONFIG_CACHE'], str(self.native_root / 'xdg/cache/npm'))
         self.assertNotIn('npm_config_cache', env)
         self.assertEqual(json.loads(env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
+
+    def test_foreground_server_never_inherits_the_research_boundary_marker(self):
+        # The plugin skips its own Git sandbox only under this marker; a user shell cannot set it.
+        with patch.dict(os.environ, {'KRYN_WHOLE_PROCESS_BOUNDARY': '1'}):
+            env = native_client.environment({})
+        self.assertNotIn('KRYN_WHOLE_PROCESS_BOUNDARY', env)
 
     def test_shell_prefers_managed_native_node_over_ambient_node(self):
         managed = self.root / 'managed-node'

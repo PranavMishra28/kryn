@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
+import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers,
+  gitBoundary } from './kryn_plugin.mjs';
 import { completionLabel, permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -805,6 +806,72 @@ test('shell-written JavaScript receives syntax feedback before the Agent claims 
   } finally { await cleanup(); f.remove(); }
 });
 
+test('plugin Git evidence does not run repository clean filters', async () => {
+  const f = fixture({ nodeBinary: process.execPath });
+  const cleanup = await plugin.setup(f.ctx);
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-filter-')));
+  const proof = path.join(outside, 'proof');
+  const tracked = path.join(f.root, 'app.js');
+  fs.writeFileSync(tracked, 'const ready = true;\n');
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, env: { PATH: '/usr/bin:/bin',
+    HOME: f.root, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
+  git('init', '-q');
+  git('add', 'app.js');
+  git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'seed');
+  // The Agent shell may write this config: it lives inside the project.
+  git('config', 'filter.kx.clean', `sh -c 'echo ran > "${proof}"; cat'`);
+  fs.writeFileSync(path.join(f.root, '.git', 'info', 'attributes'), '* filter=kx\n');
+  const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_filter',
+    id: 'call_filter', tool: 'shell', input: { command: 'write source' } };
+  try {
+    f.call('session.prompt', { sessionID: 'ses_1' });
+    f.call('tool.execute.before', event);
+    fs.writeFileSync(tracked, 'const = ;\n');
+    const future = new Date(Date.now() + 5000);
+    fs.utimesSync(tracked, future, future);
+    const after = { ...event, status: 'completed', result: { output: { exit: 0, status: 'completed', output: '' },
+      content: [{ type: 'text', text: 'Command exited with code 0.' }] } };
+    f.call('tool.execute.after', after);
+    assert.equal(fs.existsSync(proof), false);
+    // The sandboxed reads still produce evidence, so syntax feedback keeps working.
+    assert.match(after.result.content.map(part => part.text).join('\n'), /JavaScript syntax check failed/);
+  } finally { await cleanup(); f.remove(); fs.rmSync(outside, { recursive: true, force: true }); }
+});
+
+test('plugin Git sandbox runs only the resolved git binary', () => {
+  // Without shell metacharacters Git execs a filter directly, so the exec rule itself is the boundary.
+  const command = gitBoundary();
+  assert.equal(command?.[0], '/usr/bin/sandbox-exec');
+  const [sandbox, flag, profile, git] = command;
+  assert.ok(path.isAbsolute(git) && fs.realpathSync(git) === git);
+  const run = (...args) => execFileSync(sandbox, [flag, profile, ...args],
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  assert.match(run(git, '--version'), /^git version/);
+  // The same repository reads the plugin makes, with its environment.
+  const repo = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'kryn-sandbox-git-')));
+  try {
+    const env = { PATH: '/usr/bin:/bin', HOME: repo, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null',
+      GIT_OPTIONAL_LOCKS: '0' };
+    execFileSync('/usr/bin/git', ['init', '-q'], { cwd: repo, env });
+    fs.writeFileSync(path.join(repo, 'a.txt'), 'a\n');
+    for (const args of [['status', '--short'], ['ls-files', '--others', '--exclude-standard']]) {
+      let output;
+      try {
+        output = execFileSync(sandbox, [flag, profile, git, '-c', 'core.fsmonitor=false', '--no-optional-locks',
+          ...args], { cwd: repo, env, encoding: 'utf8', timeout: 1500, stdio: ['ignore', 'pipe', 'pipe'] });
+      } catch (error) { assert.fail('sandboxed git ' + args[0] + ' failed: ' + (error.stderr || error.message)); }
+      assert.match(output, /a\.txt/);
+    }
+  } finally { fs.rmSync(repo, { recursive: true, force: true }); }
+  const developer = fs.realpathSync(execFileSync('/usr/bin/xcode-select', ['-p'], { encoding: 'utf8' }).trim());
+  for (const [file, ...args] of [['/bin/sh', '-c', ''], ['/bin/zsh', '-c', ''], ['/usr/bin/python3', '-c', ''],
+                                 [path.join(developer, 'usr/bin/python3'), '-c', ''], ['/usr/bin/xcrun', 'python3', '-c', ''],
+                                 ['/usr/bin/git', '--version']].filter(([file]) => fs.existsSync(file))) {
+    assert.doesNotThrow(() => execFileSync(file, args, { stdio: 'ignore' }), file);  // Valid unsandboxed.
+    assert.throws(() => run(file, ...args), undefined, file);
+  }
+});
+
 test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {
   const run = (f, id) => {
     const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_' + id,
@@ -972,10 +1039,27 @@ test('direct process signals are refused before native shell execution', async (
                            'echo ready && /bin/kill -TERM 68115', 'command kill 68115',
                            'lsof -ti:62138 | xargs kill -9 2>/dev/null || true',
                            'lsof -ti:62138 | xargs -r /bin/kill -9',
-                           'cat <<EOF\nkill is only data\nEOF\nkill 68115'])
+                           'cat <<EOF\nkill is only data\nEOF\nkill 68115',
+                           // Keywords, assignments and wrappers still run the next word as a command.
+                           'if pgrep -f server.py; then pkill -f server.py; fi',
+                           'for p in $(lsof -ti:8000); do kill -9 $p; done',
+                           'lsof -ti:8000 | xargs -n 1 kill -9', 'lsof -ti:8000 | xargs -I % kill %',
+                           'env pkill -f server.py', 'VAR=1 pkill -f server.py', 'timeout 5 pkill -f server.py',
+                           'nohup pkill -f server.py', 'exec kill 68115', 'time kill 68115',
+                           'if ! kill -0 68115; then echo gone; fi', 'timeout -k 2 -s KILL 10 pkill -f server.py',
+                           '/usr/bin/env FOO=1 /bin/kill 68115', 'lsof -ti:8000 | xargs -n1 sudo kill'])
       assert.throws(() => call(command), /direct process signals/);
-    for (const command of ['echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test'])
+    for (const command of ['echo "killall python"', "cat <<'EOF'\nkillall python\nEOF", 'sudo -n echo pkill', 'npm test',
+                           'docker kill web', 'echo then kill', 'git commit -m "do kill"', 'timeout 5 npm test',
+                           'env NODE_ENV=test npm test', 'for f in *.py; do python3 -m py_compile $f; done',
+                           'pgrep -f server.py', 'command -v kill'])
       assert.doesNotThrow(() => call(command));
+    // Prefix matching stays linear on long option runs.
+    const started = Date.now();
+    for (const command of ['xargs ' + '-n1 '.repeat(4000) + 'echo', 'env A=1 '.repeat(1500) + 'echo',
+                           'timeout -k 5 '.repeat(1000) + 'echo'])
+      assert.doesNotThrow(() => call(command));
+    assert.ok(Date.now() - started < 2000);
   } finally { await cleanup(); f.remove(); }
 });
 
