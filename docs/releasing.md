@@ -16,8 +16,8 @@ The public release gate is [supervised v1 qualification](v1-qualification.md). T
    mkdir -p "$candidate"
    "$uv" venv --python 3.13 "$candidate/venv"
    "$uv" pip install --python "$candidate/venv/bin/python" --no-index --no-deps "$wheel"
-   "$candidate/venv/bin/python" -E -B -m kryn --package-check
-   "$candidate/venv/bin/python" -E -B -m kryn install
+   "$candidate/venv/bin/python" -I -B -m kryn --package-check
+   "$candidate/venv/bin/python" -I -B -m kryn install
    ```
 
    Keep `$candidate` intact through rollback and reactivation because the installed launcher references its interpreter. Run **all** [supervised-v1 qualification gates](v1-qualification.md) from this final wheel, including startup, coding, browser/search, compaction/restart, resource recovery, sustained use, saved-session migration, update/rollback and reactivation. Public `install-kryn.py --tag` cannot be tested before the release exists; its anonymous bootstrap is step 5. A prior private candidate pass is not a final-artifact pass. If any gate fails, fix it in a new PR and restart final-artifact checks from the new commit.

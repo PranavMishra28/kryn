@@ -6,6 +6,7 @@ import io
 import json
 import os
 import plistlib
+import shlex
 import shutil
 from pathlib import Path
 import subprocess
@@ -184,6 +185,20 @@ class SetupChecks(unittest.TestCase):
 
         deploy(interpreters[0], True)
         manifest = json.loads((root / "client/deployment.json").read_text())
+        # Users launch from their project. -m puts the current directory first on sys.path, so a project
+        # kryn.py or json.py would run before KRYN; -I keeps it off the path.
+        words = shlex.split(manifest["launcher"].splitlines()[1])
+        self.assertEqual(words[:2] + words[4:], ["exec", str(interpreters[0]), "-m", "kryn", "$@"])
+        self.assertEqual(words[2:4], ["-I", "-B"])
+        project = self.root / "project"
+        project.mkdir()
+        (project / "json.py").write_text("raise SystemExit('project module imported')\n")
+        launched = subprocess.run([sys.executable, *words[2:4], "-m", "json.tool"], cwd=project, input="{}",
+                                  capture_output=True, text=True)
+        self.assertEqual((launched.returncode, launched.stdout.strip()), (0, "{}"), launched.stderr)
+        shadowed = subprocess.run([sys.executable, "-E", "-B", "-m", "json.tool"], cwd=project, input="{}",
+                                  capture_output=True, text=True)
+        self.assertNotEqual(shadowed.returncode, 0)  # The check above can see a shadowed import.
         backup_root = root / "backups" / ("client-" + manifest["release"])
         legacy = backup_root / "0-localai"
         setup.write_same(legacy, "# immutable earlier launcher backup\n")
