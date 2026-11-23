@@ -1,0 +1,87 @@
+name: Hardware report
+description: Tell us how KRYN ran on your Mac, good or bad
+title: "Hardware report: <chip>, <memory> GB"
+labels: ["hardware-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        v1 was validated on one Mac: an M4 Max with 48 GiB. Reports from other chips, memory sizes and workloads are the fastest way to learn where the 22 GiB inference ceiling, the 96K context and the resource guard hold up. A failure report is as useful as a success.
+  - type: input
+    id: chip
+    attributes:
+      label: Chip
+      placeholder: M3 Pro
+    validations:
+      required: true
+  - type: dropdown
+    id: memory
+    attributes:
+      label: Unified memory
+      options:
+        - 48 GiB
+        - 64 GiB
+        - 96 GiB
+        - 128 GiB
+        - More than 128 GiB
+        - Less than 48 GiB (below the installer requirement)
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "26.1"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: KRYN version
+      description: Output of `kryn --version`.
+      placeholder: KRYN 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation
+      options:
+        - Installed cleanly
+        - Installed after a retry
+        - Failed (details below)
+    validations:
+      required: true
+  - type: dropdown
+    id: load
+    attributes:
+      label: What else was running?
+      options:
+        - Light (browser and an editor)
+        - A normal working day
+        - Heavy (Docker, many tabs, an IDE or two)
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: What did you ask it to do?
+      description: The kind of task and rough project size. No private code needed.
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: How did it end?
+      options:
+        - Finished and my checks passed
+        - Finished after I corrected it
+        - Stopped by the resource guard
+        - Failed another way
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Guard stops, swap, speed and how you measured it, surprises. Redacted `kryn report --brief` output is welcome.

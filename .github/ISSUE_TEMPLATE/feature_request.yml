@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an improvement to installing, running, updating or recovering KRYN
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For changes to how the agent reasons, prompts or uses tools, use the **Research candidate** form instead, since those get measured as matched pairs.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and where does KRYN get in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
