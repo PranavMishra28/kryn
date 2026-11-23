@@ -1,0 +1,51 @@
+<svg width="720" height="452" viewBox="0 0 720 452" xmlns="http://www.w3.org/2000/svg" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Helvetica, Arial, sans-serif" role="img" aria-labelledby="kr-title kr-desc">
+  <title id="kr-title">Strictly accepted trials, OpenCode with KRYN versus plain OpenCode</title>
+  <desc id="kr-desc">Six evaluation tracks, each showing accepted over attempted for KRYN and for native OpenCode with the same model. TaskboardLite development pilot: KRYN 3 of 4, native 3 of 4. Task03 matched pilot: KRYN 0 of 2, native 2 of 2. Staged three-turn task, counted by stage: KRYN 2 of 3, native 3 of 3. One retired private ledger task: KRYN 4 of 4, native 2 of 4. SWE-bench six-task subset: KRYN 0 of 6, native 1 of 6. Terminal-Bench subset, scoreable pairs: KRYN 1 of 2, native 1 of 2. All of it is development data; no protected holdout was run.</desc>
+  <rect width="720" height="452" fill="#fafafa"/>
+  <text x="24" y="34" font-size="12" font-weight="600" fill="#0a0a0a">Baseline: strictly accepted / attempted, same model, same Mac</text>
+  <g font-size="10" fill="#71717a">
+    <rect x="24" y="46" width="10" height="10" fill="#0a0a0a"/><text x="40" y="55">OpenCode + KRYN</text>
+    <rect x="140" y="46" width="10" height="10" fill="#fff" stroke="#0a0a0a"/><text x="156" y="55">native OpenCode</text>
+    <text x="696" y="55" text-anchor="end">bar length = share accepted</text>
+  </g>
+
+  <!-- axis guides: bars from x=300 to x=620 (320px = 100%) -->
+  <g stroke="rgba(0,0,0,0.08)">
+    <line x1="300" y1="72" x2="300" y2="404"/><line x1="460" y1="72" x2="460" y2="404"/><line x1="620" y1="72" x2="620" y2="404"/>
+  </g>
+  <g font-size="9" fill="#71717a" text-anchor="middle"><text x="300" y="420">0%</text><text x="460" y="420">50%</text><text x="620" y="420">100%</text></g>
+
+  <g font-size="11">
+    <!-- row 1 -->
+    <text x="24" y="92" font-weight="600" fill="#0a0a0a">TaskboardLite pilot</text>
+    <text x="24" y="107" font-size="10" fill="#71717a">seen tasks, not fully matched</text>
+    <rect x="300" y="80" width="240" height="12" fill="#0a0a0a"/><text x="632" y="90" fill="#0a0a0a">3/4</text>
+    <rect x="300" y="96" width="240" height="12" fill="#fff" stroke="#0a0a0a"/><text x="632" y="106" fill="#0a0a0a">3/4</text>
+    <!-- row 2 -->
+    <text x="24" y="146" font-weight="600" fill="#0a0a0a">Task03 matched pilot</text>
+    <text x="24" y="161" font-size="10" fill="#71717a">full provenance, both orders</text>
+    <rect x="300" y="134" width="1.5" height="12" fill="#0a0a0a"/><text x="632" y="144" fill="#0a0a0a">0/2</text>
+    <rect x="300" y="150" width="320" height="12" fill="#fff" stroke="#0a0a0a"/><text x="632" y="160" fill="#0a0a0a">2/2</text>
+    <!-- row 3 -->
+    <text x="24" y="200" font-weight="600" fill="#0a0a0a">Staged three-turn task</text>
+    <text x="24" y="215" font-size="10" fill="#71717a">by stage, compactions and restarts</text>
+    <rect x="300" y="188" width="213.3" height="12" fill="#0a0a0a"/><text x="632" y="198" fill="#0a0a0a">2/3</text>
+    <rect x="300" y="204" width="320" height="12" fill="#fff" stroke="#0a0a0a"/><text x="632" y="214" fill="#0a0a0a">3/3</text>
+    <!-- row 4 -->
+    <text x="24" y="254" font-weight="600" fill="#0a0a0a">Ledger task</text>
+    <text x="24" y="269" font-size="10" fill="#71717a">one retired private task, mixed matching</text>
+    <rect x="300" y="242" width="320" height="12" fill="#0a0a0a"/><text x="632" y="252" fill="#0a0a0a">4/4</text>
+    <rect x="300" y="258" width="160" height="12" fill="#fff" stroke="#0a0a0a"/><text x="632" y="268" fill="#0a0a0a">2/4</text>
+    <!-- row 5 -->
+    <text x="24" y="308" font-weight="600" fill="#0a0a0a">SWE-bench subset</text>
+    <text x="24" y="323" font-size="10" fill="#71717a">3 Lite + 3 Verified, official evaluator</text>
+    <rect x="300" y="296" width="1.5" height="12" fill="#0a0a0a"/><text x="632" y="306" fill="#0a0a0a">0/6</text>
+    <rect x="300" y="312" width="53.3" height="12" fill="#fff" stroke="#0a0a0a"/><text x="632" y="322" fill="#0a0a0a">1/6</text>
+    <!-- row 6 -->
+    <text x="24" y="362" font-weight="600" fill="#0a0a0a">Terminal-Bench subset</text>
+    <text x="24" y="377" font-size="10" fill="#71717a">Harbor, 2 scoreable pairs of 3</text>
+    <rect x="300" y="350" width="160" height="12" fill="#0a0a0a"/><text x="632" y="360" fill="#0a0a0a">1/2</text>
+    <rect x="300" y="366" width="160" height="12" fill="#fff" stroke="#0a0a0a"/><text x="632" y="376" fill="#0a0a0a">1/2</text>
+  </g>
+  <text x="24" y="440" font-size="10" fill="#71717a">All development data. No protected holdout was run, so the preregistered hypothesis was never formally tested.</text>
+</svg>

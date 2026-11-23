@@ -1,0 +1,61 @@
+<svg width="720" height="400" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Helvetica, Arial, sans-serif" role="img" aria-labelledby="ktp-title ktp-desc">
+  <title id="ktp-title">How one KRYN research trial is run and graded</title>
+  <desc id="ktp-desc">Seven steps. First the task, prompt, seed, tool schema and grader hashes are frozen. A seed hash decides which arm runs first. Each arm, plain OpenCode or OpenCode with KRYN, runs once in a disposable workspace on a separate encrypted volume, with a 900 second budget and the unchanged memory guard. The candidate volume is detached so no candidate process survives. The patch is captured in a networkless sandbox. A hidden oracle or the official evaluator grades the patch in a fresh volume. A receipt records whether the pair was matched, whether the work was strictly accepted, and whether the model claimed completion falsely. The model's own claim of completion is never an input to grading.</desc>
+  <rect width="720" height="400" fill="#fafafa"/>
+  <text x="24" y="34" font-size="12" font-weight="600" fill="#0a0a0a">One trial, from frozen task to receipt</text>
+  <text x="24" y="52" font-size="11" fill="#71717a">the same steps run once for native OpenCode and once for OpenCode + KRYN, same model, same tools</text>
+
+  <g font-size="10" fill="#71717a" text-anchor="middle">
+    <rect x="24" y="78" width="200" height="88" rx="8" fill="#fff" stroke="rgba(0,0,0,0.12)"/>
+    <text x="124" y="100" font-size="12" font-weight="600" fill="#0a0a0a">1 · Freeze</text>
+    <text x="124" y="119">task text, base commit, prompt</text>
+    <text x="124" y="133">tool schema hash, grader hash</text>
+    <text x="124" y="147">decision rule written first</text>
+
+    <rect x="260" y="78" width="200" height="88" rx="8" fill="#fff" stroke="rgba(0,0,0,0.12)"/>
+    <text x="360" y="100" font-size="12" font-weight="600" fill="#0a0a0a">2 · Order</text>
+    <text x="360" y="119">a seed hash picks which arm</text>
+    <text x="360" y="133">goes first; no same-task retry</text>
+    <text x="360" y="147">after a model request</text>
+
+    <rect x="496" y="78" width="200" height="88" rx="8" fill="#fff" stroke="#0a0a0a" stroke-width="1.5"/>
+    <text x="596" y="100" font-size="12" font-weight="600" fill="#0a0a0a">3 · Run one arm</text>
+    <text x="596" y="119">disposable workspace on a</text>
+    <text x="596" y="133">separate encrypted volume</text>
+    <text x="596" y="147">900 s budget, memory guard on</text>
+
+    <rect x="496" y="214" width="200" height="88" rx="8" fill="#fff" stroke="rgba(0,0,0,0.12)"/>
+    <text x="596" y="236" font-size="12" font-weight="600" fill="#0a0a0a">4 · Detach</text>
+    <text x="596" y="255">unmount the candidate volume</text>
+    <text x="596" y="269">so nothing the agent started</text>
+    <text x="596" y="283">is still running</text>
+
+    <rect x="260" y="214" width="200" height="88" rx="8" fill="#fff" stroke="rgba(0,0,0,0.12)"/>
+    <text x="360" y="236" font-size="12" font-weight="600" fill="#0a0a0a">5 · Capture</text>
+    <text x="360" y="255">take the patch inside a</text>
+    <text x="360" y="269">networkless sandbox, so repo</text>
+    <text x="360" y="283">hooks can't run on the host</text>
+
+    <rect x="24" y="214" width="200" height="88" rx="8" fill="#fff" stroke="#0a0a0a" stroke-width="1.5"/>
+    <text x="124" y="236" font-size="12" font-weight="600" fill="#0a0a0a">6 · Grade</text>
+    <text x="124" y="255">hidden oracle or the official</text>
+    <text x="124" y="269">SWE-bench / Harbor evaluator</text>
+    <text x="124" y="283">on a fresh copy of the patch</text>
+  </g>
+
+  <g stroke="#0a0a0a" stroke-width="1.2" fill="none">
+    <line x1="224" y1="122" x2="258" y2="122"/><path d="M253 118 L259 122 L253 126"/>
+    <line x1="460" y1="122" x2="494" y2="122"/><path d="M489 118 L495 122 L489 126"/>
+    <line x1="596" y1="166" x2="596" y2="212"/><path d="M592 207 L596 213 L600 207"/>
+    <line x1="496" y1="258" x2="462" y2="258"/><path d="M467 254 L461 258 L467 262"/>
+    <line x1="260" y1="258" x2="226" y2="258"/><path d="M231 254 L225 258 L231 262"/>
+    <line x1="124" y1="302" x2="124" y2="330"/><path d="M120 325 L124 331 L128 325"/>
+  </g>
+
+  <rect x="24" y="332" width="672" height="48" rx="8" fill="#fff" stroke="rgba(0,0,0,0.12)"/>
+  <text x="44" y="352" font-size="12" font-weight="600" fill="#0a0a0a">7 · Receipt</text>
+  <text x="44" y="369" font-size="10" fill="#71717a">matched? strictly accepted? false completion claimed? plus tokens, requests and memory pressure. Never edited afterward.</text>
+
+  <text x="596" y="196" font-size="9" fill="#71717a" text-anchor="end" transform="translate(-10 0)">the model's "done"</text>
+  <text x="596" y="207" font-size="9" fill="#71717a" text-anchor="end" transform="translate(-10 0)">is recorded, never graded</text>
+</svg>

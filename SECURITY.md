@@ -22,6 +22,10 @@ KRYN 1.0.0 is supported as a human-supervised local coding workspace. There is n
 
 ## Release integrity
 
-Use an exact release tag and verify the installer's pinned SHA256 before running it, as shown in the [README](README.md#first-installation). The installer downloads `SHA256SUMS`, verifies the wheel, and checks its curated payload and pinned dependencies. These checks trust the authenticated GitHub repository and its release assets. Checksums do not protect against a compromised publisher replacing both an artifact and its checksum. KRYN does not currently provide independent artifact signatures, notarization or hosted build attestations.
+Use an exact release tag and verify the installer's pinned SHA256 before running it, as shown in the [README](README.md#install). The installer downloads `SHA256SUMS`, verifies the wheel, and checks its curated payload and pinned dependencies. These checks trust the authenticated GitHub repository and its release assets. Checksums do not protect against a compromised publisher replacing both an artifact and its checksum. KRYN does not currently provide independent artifact signatures, notarization or hosted build attestations.
 
 Third-party components retain their own security policies and licenses; component identities and provenance are recorded in [Third-party notices](THIRD_PARTY_NOTICES.md).
+
+## Acknowledgements
+
+Thanks to [@kennysarnoski-jarvis](https://github.com/kennysarnoski-jarvis) for privately reporting three issues in October 2026: launcher imports from the current directory, plugin Git reads running repository filters outside the shell write boundary, and compound forms that slipped past the process signal guard. All three are fixed in [#250](https://github.com/PranavMishra28/kryn/pull/250).
