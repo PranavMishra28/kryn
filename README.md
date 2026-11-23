@@ -12,7 +12,7 @@
 [![Release](https://img.shields.io/github/v/release/PranavMishra28/kryn?color=0a0a0a&label=release)](https://github.com/PranavMishra28/kryn/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0a0a0a)](LICENSE)
 [![macOS 26+ on Apple Silicon](https://img.shields.io/badge/macOS_26%2B-Apple_Silicon-0a0a0a?logo=apple)](#install)
-[![Discussions](https://img.shields.io/github/discussions/PranavMishra28/kryn?color=0a0a0a)](https://github.com/PranavMishra28/kryn/discussions)
+[![Discussions](https://img.shields.io/badge/community-discussions-0a0a0a)](https://github.com/PranavMishra28/kryn/discussions)
 
 **[Install](#install)** · **[Quick start](#quick-start)** · **[How it works](#how-it-works)** · **[Benchmarks](#where-it-stands)** · **[Contribute](#contributing)** · **[Case study](https://pranavmishra.app/case-studies/kryn)**
 
@@ -24,12 +24,10 @@ The goal is frontier-adjacent coding on a laptop. **v1.0.0 ships the part the re
 
 ## Why KRYN
 
-| | |
-|---|---|
-| **Local by default** | Inference runs on your Mac through oMLX on loopback. No paid provider is needed. Other OpenCode providers are opt-in from `/models`; search (Exa) and browser tools reach the network. |
-| **Safe on a shared laptop** | A 22 GiB inference ceiling and one heavyweight generation at a time. The resource guard stops only the session it owns on critical memory pressure, missing telemetry or swap growth, and `kryn --continue` resumes it. |
-| **Evidence over claims** | A continuity plugin checkpoints the request, file hashes and observed check exits. After compaction or a restart, unverified work stays marked unverified. `/report` shows what the session observed, not what the model said. |
-| **Installs you can undo** | Every asset is pinned by SHA-256, activation is transactional, `kryn rollback` restores the previous install, and `kryn doctor --deep` re-hashes the model and browser files. |
+- **Local by default.** Inference runs on your Mac through oMLX on loopback. No paid provider is needed. Other OpenCode providers are opt-in from `/models`; search (Exa) and browser tools reach the network.
+- **Safe on a shared laptop.** A 22 GiB inference ceiling and one heavyweight generation at a time. The resource guard stops only the session it owns on critical memory pressure, missing telemetry or swap growth, and `kryn --continue` resumes it.
+- **Evidence over claims.** A continuity plugin checkpoints the request, file hashes and observed check exits. After compaction or a restart, unverified work stays marked unverified. `/report` shows what the session observed, not what the model said.
+- **Installs you can undo.** Every asset is pinned by SHA-256, activation is transactional, `kryn rollback` restores the previous install, and `kryn doctor --deep` re-hashes the model and browser files.
 
 ## Quick start
 
