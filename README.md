@@ -57,7 +57,6 @@ Agent can delegate Explore, Browse or Reviewer work. Local generations run one a
 
 The v1.0.1 installer fetches public release assets over HTTPS. No GitHub account is needed.
 
-
 **Requirements**
 
 - Native Apple Silicon, macOS 26 or 27, and at least **48 GiB unified memory**. Release validation used an M4 Max with 48 GiB. Run the installer from the logged-in macOS account with its normal `HOME`; a `HOME` override cannot isolate the oMLX app.
