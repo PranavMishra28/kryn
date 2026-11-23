@@ -1,0 +1,68 @@
+name: Bug report
+description: Something in KRYN broke, or behaved differently from the docs
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Security problems go through [private reporting](https://github.com/PranavMishra28/kryn/security/advisories/new), not here.
+        Before pasting any output, remove credentials, the temporary GUI password, private source and personal paths.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: The smallest steps that show it, ideally on a disposable project.
+      placeholder: |
+        1. Create an empty project folder
+        2. Run kryn
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: KRYN version
+      description: Output of `kryn --version`.
+      placeholder: KRYN 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: mac
+    attributes:
+      label: Mac
+      description: macOS version, chip and unified memory.
+      placeholder: macOS 26.1, M4 Max, 48 GiB
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where did it happen?
+      options:
+        - Installer, update or rollback
+        - Terminal interface
+        - Browser GUI (kryn --web)
+        - Agent behavior or tools
+        - Resource guard stop
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model and provider
+      description: Leave as is if you did not change it in /models.
+      value: Local Qwen3.5-9B through oMLX (default)
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Relevant output
+      description: "`kryn doctor`, `kryn report --brief`, a failing check, or the guard-stop reason. Redact first."
+      render: text

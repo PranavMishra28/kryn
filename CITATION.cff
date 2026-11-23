@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use KRYN or its benchmark protocol in your work, please cite it."
+title: "KRYN: a local coding agent workspace for Apple Silicon"
+type: software
+authors:
+  - family-names: Mishra
+    given-names: Pranav
+version: 1.0.0
+date-released: 2026-10-02
+license: MIT
+repository-code: "https://github.com/PranavMishra28/kryn"
+url: "https://pranavmishra.app/case-studies/kryn"
+keywords:
+  - coding-agent
+  - local-llm
+  - apple-silicon
+  - opencode
+  - evaluation

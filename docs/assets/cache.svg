@@ -1,0 +1,20 @@
+<svg width="720" height="250" viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Helvetica, Arial, sans-serif" role="img" aria-labelledby="kca-t kca-d">
+<title id="kca-t">Cache ablation: the mechanism worked and acceptance fell</title>
+<desc id="kca-d">Comparing the v1 layer with candidate C1, which kept the system prompt stable. System prompt changes fell from 31 to 0. New input tokens fell from 753,332 to 300,076, 60.2 percent fewer. Strict acceptance fell from 3 of 4 to 2 of 4, and one C1 failure was a false completion. C1 was rejected.</desc>
+<rect width="720" height="250" fill="#fafafa"/>
+<text x="24" y="34" font-size="12" font-weight="600" fill="#0a0a0a">Candidate C1, a stable prompt: cheaper, faster to cache, and worse</text>
+<g font-size="10" fill="#71717a"><rect x="24" y="46" width="10" height="10" fill="#0a0a0a"/><text x="40" y="55">v1 layer</text><rect x="150" y="46" width="10" height="10" fill="#fff" stroke="#0a0a0a"/><text x="166" y="55">C1 candidate</text></g>
+<text x="24" y="88" font-size="11" font-weight="600" fill="#0a0a0a">System prompt changes</text>
+<rect x="44" y="110.0" width="56" height="110.0" fill="#0a0a0a"/><text x="72" y="104.0" font-size="11" fill="#0a0a0a" text-anchor="middle">31</text>
+<rect x="116" y="218.5" width="56" height="1.5" fill="#fff" stroke="#0a0a0a"/><text x="144" y="212.5" font-size="11" fill="#0a0a0a" text-anchor="middle">0</text>
+<line x1="24" y1="220" x2="224" y2="220" stroke="rgba(0,0,0,0.2)"/>
+<text x="256" y="88" font-size="11" font-weight="600" fill="#0a0a0a">New input tokens</text>
+<rect x="276" y="110.0" width="56" height="110.0" fill="#0a0a0a"/><text x="304" y="104.0" font-size="11" fill="#0a0a0a" text-anchor="middle">753K</text>
+<rect x="348" y="176.2" width="56" height="43.8" fill="#fff" stroke="#0a0a0a"/><text x="376" y="170.2" font-size="11" fill="#0a0a0a" text-anchor="middle">300K</text>
+<line x1="256" y1="220" x2="456" y2="220" stroke="rgba(0,0,0,0.2)"/>
+<text x="488" y="88" font-size="11" font-weight="600" fill="#0a0a0a">Strictly accepted</text>
+<rect x="508" y="137.5" width="56" height="82.5" fill="#0a0a0a"/><text x="536" y="131.5" font-size="11" fill="#0a0a0a" text-anchor="middle">3/4</text>
+<rect x="580" y="165.0" width="56" height="55.0" fill="#fff" stroke="#0a0a0a"/><text x="608" y="159.0" font-size="11" fill="#0a0a0a" text-anchor="middle">2/4</text>
+<line x1="488" y1="220" x2="688" y2="220" stroke="rgba(0,0,0,0.2)"/>
+<text x="24" y="242" font-size="10" fill="#71717a">Four paired runs on two seen tasks. One C1 failure claimed completion; the graders rejected it. C1 was rejected and reverted.</text>
+</svg>

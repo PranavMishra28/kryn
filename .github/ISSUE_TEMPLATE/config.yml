@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and setups
+    url: https://github.com/PranavMishra28/kryn/discussions
+    about: Ask how something works, or share how you run KRYN.
+  - name: Security report
+    url: https://github.com/PranavMishra28/kryn/security/advisories/new
+    about: Report vulnerabilities privately, not in a public issue.
