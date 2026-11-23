@@ -507,8 +507,40 @@ def mcp_status(server, config):
         time.sleep(0.5)
 
 
+TESTED_CHROME_MAJORS = (153, 154)
+
+
+def chrome_compatibility(version):
+    """Release-tested majors, newer majors (allowed with a warning) or unsupported.
+
+    Chrome updates itself every few weeks, so refusing every newer major stopped
+    all launches, not only browser tools, soon after release.
+    """
+    matched = re.fullmatch(r"(\d+)\.\d+\.\d+\.\d+", version) if isinstance(version, str) else None
+    if matched is None:
+        return "unsupported"
+    major = int(matched[1])
+    if major in TESTED_CHROME_MAJORS:
+        return "tested"
+    return "newer" if major > max(TESTED_CHROME_MAJORS) else "unsupported"
+
+
 def supported_chrome_version(version):
-    return isinstance(version, str) and re.fullmatch(r"(?:153|154)\.\d+\.\d+\.\d+", version) is not None
+    return chrome_compatibility(version) != "unsupported"
+
+
+def chrome_status(info_plist=Path("/Applications/Google Chrome.app/Contents/Info.plist")):
+    require(info_plist.is_file(), "Google Chrome is missing; browser tools are unavailable")
+    with info_plist.open("rb") as stream:
+        version = plistlib.load(stream).get("CFBundleShortVersionString", "")
+    compatibility = chrome_compatibility(version)
+    require(compatibility != "unsupported",
+            "Google Chrome is older than the tested 153/154 lines or its version is unreadable; update Chrome")
+    if compatibility == "newer":
+        print("kryn: Chrome " + version.split(".")[0] + " is newer than the release-tested 153/154 lines;"
+              " browser tools may behave differently. Report problems with kryn doctor output.",
+              file=sys.stderr, flush=True)
+    return version, compatibility
 
 
 def dependency_report(config):
@@ -521,11 +553,7 @@ def dependency_report(config):
             "Installed oMLX app identity/version differs from this release")
     package = json.loads((BINARY.parents[1] / "package.json").read_text())
     require(package.get("version") == "2.0.10", "Expected OpenCode 2.0.10")
-    chrome = Path("/Applications/Google Chrome.app/Contents/Info.plist")
-    require(chrome.is_file(), "Google Chrome is missing; browser tools are unavailable")
-    with chrome.open("rb") as stream:
-        browser_version = plistlib.load(stream).get("CFBundleShortVersionString", "")
-    require(supported_chrome_version(browser_version), "Chrome major differs from the tested compatibility lines")
+    browser_version, compatibility = chrome_status()
     browser = config.get("mcp", {}).get("servers", {}).get("browser", {})
     node = browser.get("command", [None])[0]
     require(node is not None, "Browser Node executable is not configured")
@@ -536,7 +564,8 @@ def dependency_report(config):
     mcp_package = json.loads((ROOT / "browser/node_modules/@playwright/mcp/package.json").read_text())
     require(mcp_package.get("version") == "0.0.82", "Expected Playwright MCP 0.0.82")
     return {"disk_free_bytes": free, "opencode": "2.0.10", "omlx": "0.6.4",
-            "chrome": browser_version, "node": node_version, "playwright_mcp": "0.0.82"}
+            "chrome": browser_version, "chrome_compatibility": compatibility, "node": node_version,
+            "playwright_mcp": "0.0.82"}
 
 
 def interrupt_owned_sessions(server):
