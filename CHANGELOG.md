@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v1.0.1: security and launch fixes
+
+Update with `kryn update v1.0.1`. The supervised scope, supported hardware and profile are unchanged from v1.0.0.
 
 Security (reported privately by @kennysarnoski-jarvis):
 
