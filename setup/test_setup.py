@@ -378,7 +378,9 @@ class SetupChecks(unittest.TestCase):
         def fake_run(command, env):
             self.assertIn("--isolated", command)
             self.assertEqual(command[command.index("--python") + 1], "3.13")
-            self.assertEqual(command[command.index("--constraints") + 1], setup.HERE / "hf-download-constraints.txt")
+            constraints = Path(command[command.index("--constraints") + 1])
+            self.assertFalse(any(character.isspace() for character in str(constraints)))
+            self.assertEqual(constraints.read_bytes(), (setup.HERE / "hf-download-constraints.txt").read_bytes())
             start = command.index(profile["repository"]) + 1
             filenames = command[start:command.index("--revision")]
             self.assertEqual(len(filenames), 1)  # Multi-file CLI requests take the defective snapshot path.
@@ -401,6 +403,35 @@ class SetupChecks(unittest.TestCase):
             setup.download_model(Path("/fixture/uv"), directory, profile, {})
             self.assertEqual(run.call_count, len(payloads))
         self.assertEqual({name:(directory/name).read_bytes() for name in payloads}, payloads)
+
+    def test_model_download_constraints_path_has_no_whitespace(self):
+        # An installed payload lives under ~/Library/Application Support, and uv splits --constraints at spaces.
+        installed = self.root / "Application Support" / "setup"
+        installed.mkdir(parents=True)
+        shutil.copyfile(setup.HERE / "hf-download-constraints.txt", installed / "hf-download-constraints.txt")
+        profile = setup.load_profile()
+        profile["files"] = {"model.safetensors": hashlib.sha256(b"fixture weights").hexdigest()}
+        directory = self.root / "model"
+        directory.mkdir()
+        passed = []
+        def fake_run(command, env):
+            constraints = Path(command[command.index("--constraints") + 1])
+            self.assertFalse(any(character.isspace() for character in str(constraints)))
+            self.assertEqual(constraints.read_bytes(), (installed / "hf-download-constraints.txt").read_bytes())
+            passed.append(constraints)
+            (directory / "model.safetensors").write_bytes(b"fixture weights")
+        with patch.object(setup, "HERE", installed), patch.object(setup, "run", side_effect=fake_run):
+            setup.download_model(Path("/fixture/uv"), directory, profile, {})
+        self.assertEqual(len(passed), 1)
+        self.assertFalse(passed[0].exists())  # The private copy is removed after the download.
+        (directory / "model.safetensors").unlink()  # Remove only this test's tiny fixture file.
+        spaced = self.root / "temporary files"
+        spaced.mkdir()
+        with patch.object(setup, "HERE", installed), patch.object(setup.tempfile, "tempdir", str(spaced)), \
+             patch.object(setup, "run") as run, self.assertRaisesRegex(RuntimeError, "TMPDIR"):
+            setup.download_model(Path("/fixture/uv"), directory, profile, {})
+        run.assert_not_called()
+        self.assertEqual(list(spaced.iterdir()), [])
 
     def test_npm_preserves_existing_tree_before_any_write_or_command(self):
         changed = self.root / "browser/node_modules/example/index.js"
