@@ -843,7 +843,7 @@ test('plugin Git sandbox runs git and refuses shells and interpreters', () => {
   const prefix = gitBoundary();
   assert.equal(prefix?.[0], '/usr/bin/sandbox-exec');
   const run = (...command) => execFileSync(prefix[0], [...prefix.slice(1), ...command],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   assert.match(run('/usr/bin/git', '--version'), /^git version/);
   const developer = fs.realpathSync(execFileSync('/usr/bin/xcode-select', ['-p'], { encoding: 'utf8' }).trim());
   for (const command of ['/bin/sh', '/bin/zsh', '/usr/bin/python3', path.join(developer, 'usr/bin/python3')]
@@ -851,6 +851,9 @@ test('plugin Git sandbox runs git and refuses shells and interpreters', () => {
     assert.doesNotThrow(() => execFileSync(command, ['-c', ''], { stdio: 'ignore' }), command);  // Valid unsandboxed.
     assert.throws(() => run(command, '-c', ''), undefined, command);
   }
+  // xcrun is allowed for the git shim, but cannot launch anything else.
+  assert.doesNotThrow(() => execFileSync('/usr/bin/xcrun', ['python3', '-c', ''], { stdio: 'ignore' }));
+  assert.throws(() => run('/usr/bin/xcrun', 'python3', '-c', ''));
 });
 
 test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {
