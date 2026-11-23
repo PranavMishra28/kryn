@@ -396,6 +396,9 @@ class NativeServer:
         # Its explicit home hook keeps discovery inside the disposable boundary.
         self.env["OPENCODE_TEST_HOME"] = str(private)
         self.env["OPENCODE_CONFIG_PROJECT_DISABLE"] = "true"
+        # macOS refuses a nested Seatbelt profile inside this boundary. The plugin
+        # runs its Git reads directly only when this launcher marks the boundary.
+        self.env["KRYN_WHOLE_PROCESS_BOUNDARY"] = "1"
         self.env["PATH"] = str(tool_path) + ":/usr/bin:/bin"
         for key in ("TMPDIR", "TMP", "TEMP", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"):
             dest = private / key.lower()

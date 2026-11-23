@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers } from './kryn_plugin.mjs';
+import plugin, { validatedOptions, assertLocal, isCheck, masksCheckFailure, BROWSER_TOOLS, pruneTrackers,
+  gitBoundary } from './kryn_plugin.mjs';
 import { completionLabel, permissionLabel } from './permission_display.mjs';
 const digest = value => createHash('sha256').update(value).digest('hex');
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -812,12 +813,13 @@ test('plugin Git evidence does not run repository clean filters', async () => {
   const proof = path.join(outside, 'proof');
   const tracked = path.join(f.root, 'app.js');
   fs.writeFileSync(tracked, 'const ready = true;\n');
-  execFileSync('/usr/bin/git', ['init', '-q'], { cwd: f.root });
-  execFileSync('/usr/bin/git', ['add', 'app.js'], { cwd: f.root });
-  execFileSync('/usr/bin/git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
-    'commit', '-qm', 'seed'], { cwd: f.root });
+  const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: f.root, env: { PATH: '/usr/bin:/bin',
+    HOME: f.root, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
+  git('init', '-q');
+  git('add', 'app.js');
+  git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'seed');
   // The Agent shell may write this config: it lives inside the project.
-  execFileSync('/usr/bin/git', ['config', 'filter.kx.clean', `sh -c 'echo ran > "${proof}"; cat'`], { cwd: f.root });
+  git('config', 'filter.kx.clean', `sh -c 'echo ran > "${proof}"; cat'`);
   fs.writeFileSync(path.join(f.root, '.git', 'info', 'attributes'), '* filter=kx\n');
   const event = { sessionID: 'ses_1', agent: 'agent', messageID: 'msg_filter',
     id: 'call_filter', tool: 'shell', input: { command: 'write source' } };
@@ -834,6 +836,21 @@ test('plugin Git evidence does not run repository clean filters', async () => {
     // The sandboxed reads still produce evidence, so syntax feedback keeps working.
     assert.match(after.result.content.map(part => part.text).join('\n'), /JavaScript syntax check failed/);
   } finally { await cleanup(); f.remove(); fs.rmSync(outside, { recursive: true, force: true }); }
+});
+
+test('plugin Git sandbox runs git and refuses shells and interpreters', () => {
+  // Without shell metacharacters Git execs a filter directly, so the exec rule itself is the boundary.
+  const prefix = gitBoundary();
+  assert.equal(prefix?.[0], '/usr/bin/sandbox-exec');
+  const run = (...command) => execFileSync(prefix[0], [...prefix.slice(1), ...command],
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  assert.match(run('/usr/bin/git', '--version'), /^git version/);
+  const developer = fs.realpathSync(execFileSync('/usr/bin/xcode-select', ['-p'], { encoding: 'utf8' }).trim());
+  for (const command of ['/bin/sh', '/bin/zsh', '/usr/bin/python3', path.join(developer, 'usr/bin/python3')]
+    .filter(file => fs.existsSync(file))) {
+    assert.doesNotThrow(() => execFileSync(command, ['-c', ''], { stdio: 'ignore' }), command);  // Valid unsandboxed.
+    assert.throws(() => run(command, '-c', ''), undefined, command);
+  }
 });
 
 test('shell syntax feedback covers unborn Git repos and discloses incomplete scans', async () => {

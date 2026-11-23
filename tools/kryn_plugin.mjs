@@ -322,11 +322,13 @@ function checkpointSummary(item, current, directory) {
 
 // Agent shell writes inside the project can plant Git config and attributes, including clean
 // filters that Git runs during status and diff. Plugin Git runs under Seatbelt with no network,
-// no writes and exec only for the Git toolchain, so a planted filter cannot start. A research
-// server already inside a whole-process boundary cannot nest a profile; that boundary contains Git.
+// no writes and exec only for the /usr/bin/git shim and the git binary it selects, so a planted
+// filter cannot start a shell or an interpreter. KRYN's research server already runs inside a
+// whole-process boundary where macOS refuses a nested profile; only there, marked by its
+// launcher, Git runs under that outer boundary. Any other refusal fails closed.
 const SANDBOX = '/usr/bin/sandbox-exec';
 let gitPrefix;
-function gitBoundary() {
+export function gitBoundary() {
   if (gitPrefix !== undefined) return gitPrefix;
   let developer = '/Library/Developer/CommandLineTools';
   try {
@@ -335,15 +337,15 @@ function gitBoundary() {
   } catch { /* /usr/bin/git falls back to the Command Line Tools. */ }
   const profile = '(version 1)(allow default)(deny network*)(deny file-write*)' +
     '(allow file-write-data (literal "/dev/null"))(deny process-exec)' +
-    '(allow process-exec (literal "/usr/bin/git") (literal "/usr/bin/xcrun") (subpath ' +
-    JSON.stringify(developer) + '))';
+    '(allow process-exec (literal "/usr/bin/git") (literal ' +
+    JSON.stringify(path.join(developer, 'usr/bin/git')) + '))';
   try {
     execFileSync(SANDBOX, ['-p', '(version 1)(allow default)', '/usr/bin/true'],
       { timeout: 1500, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'] });
     gitPrefix = [SANDBOX, '-p', profile];
   } catch (error) {
-    gitPrefix = error?.status === 71 && /sandbox_apply: Operation not permitted/.test(error.stderr ?? '') ?
-      [] : null;
+    gitPrefix = process.env.KRYN_WHOLE_PROCESS_BOUNDARY === '1' && error?.status === 71 &&
+      /sandbox_apply: Operation not permitted/.test(error.stderr ?? '') ? [] : null;
   }
   return gitPrefix;
 }

@@ -1066,6 +1066,12 @@ class SetupChecks(unittest.TestCase):
         self.assertNotIn('npm_config_cache', env)
         self.assertEqual(json.loads(env['OPENCODE_CLI_CONFIG_CONTENT'])['session']['permissions'], 'prompt')
 
+    def test_foreground_server_never_inherits_the_research_boundary_marker(self):
+        # The plugin skips its own Git sandbox only under this marker; a user shell cannot set it.
+        with patch.dict(os.environ, {'KRYN_WHOLE_PROCESS_BOUNDARY': '1'}):
+            env = native_client.environment({})
+        self.assertNotIn('KRYN_WHOLE_PROCESS_BOUNDARY', env)
+
     def test_shell_prefers_managed_native_node_over_ambient_node(self):
         managed = self.root / 'managed-node'
         ambient = self.root / 'ambient-node'
