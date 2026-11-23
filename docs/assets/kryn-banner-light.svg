@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" role="img" aria-labelledby="t d">
 <title id="t">KRYN: a local coding agent workspace for Apple Silicon</title>
-<desc id="d">The KRYN wordmark with the tagline "A local coding agent workspace for Apple Silicon Macs", the stack "OpenCode, Qwen3.5-9B on oMLX, 96K context", and a terminal showing real output of kryn --version (KRYN 1.0.0) and an excerpt of kryn controls.</desc>
+<desc id="d">The KRYN wordmark with the tagline "A local coding agent workspace for Apple Silicon Macs", the stack "OpenCode, Qwen3.5-9B on oMLX, 96K context", and a terminal showing real output of kryn --version (KRYN 1.0.1) and an excerpt of kryn controls.</desc>
 <rect width="1280" height="440" fill="#fafafa"/>
 <rect x="0.5" y="0.5" width="1279" height="439" rx="20" fill="none" stroke="#e4e4e7"/>
-<text x="72" y="118" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="17" fill="#71717a">v1.0.0  ·  MIT  ·  macOS on Apple Silicon</text>
+<text x="72" y="118" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="17" fill="#71717a">v1.0.1  ·  MIT  ·  macOS on Apple Silicon</text>
 <text x="66" y="242" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="140" font-weight="800" letter-spacing="2" fill="#0a0a0a">KRYN</text>
 <text x="72" y="298" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="27" font-weight="600" fill="#0a0a0a">A local coding agent workspace</text>
 <text x="72" y="334" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="27" font-weight="600" fill="#0a0a0a">for Apple Silicon Macs.</text>
@@ -15,7 +15,7 @@
 <circle cx="714" cy="82" r="5.5" fill="#3f3f46"/>
 <text x="936.0" y="87" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#a1a1aa">~/code/your-project</text>
 <text x="684" y="134" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" xml:space="preserve"><tspan fill="#a1a1aa">$ </tspan><tspan fill="#fafafa">kryn --version</tspan></text>
-<text x="684" y="161" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" fill="#fafafa">KRYN 1.0.0</text>
+<text x="684" y="161" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" fill="#fafafa">KRYN 1.0.1</text>
 <text x="684" y="198" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" xml:space="preserve"><tspan fill="#a1a1aa">$ </tspan><tspan fill="#fafafa">kryn controls</tspan></text>
 <text x="684" y="225" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" xml:space="preserve"><tspan fill="#fafafa">  /agents</tspan><tspan x="793.2" fill="#a1a1aa">Choose Ask, Plan or Agent</tspan></text>
 <text x="684" y="252" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" xml:space="preserve"><tspan fill="#fafafa">  /report</tspan><tspan x="793.2" fill="#a1a1aa">Inspect the latest project session's evidence</tspan></text>

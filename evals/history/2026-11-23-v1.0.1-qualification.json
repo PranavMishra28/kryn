@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "date": "2026-11-23",
+  "product_scope": "Human-supervised local coding workspace on native Apple Silicon macOS 26/27 with at least 48 GiB unified memory",
+  "source_commit": "82708969b47bfe64cc3dc1739925f5a375525e66",
+  "release_tag": "v1.0.1",
+  "wheel_sha256": "03d4f606852418e4e430ee92c7819da23e3e65e8f2cb7cb39bb65d851b8d7ee1",
+  "installer_sha256": "c96a15ae6b433bc161efc75b8f48120369bcf824b40cb7da12de2ec185fb35fc",
+  "installed_runtime": {
+    "model": "Qwen3.5-9B-6bit",
+    "configured_context": "96K",
+    "opencode": "2.0.10",
+    "omlx": "0.6.4",
+    "chrome": "158.0.8127.37 (newer than the 153/154 lines tested for v1.0.0)",
+    "machine": "Apple M4 Max, 48 GiB unified memory",
+    "power": "AC and battery were both sampled across stages"
+  },
+  "gates": {
+    "offline_and_package": {
+      "status": "PASS",
+      "result": "make check on the release commit: 221 + 40 Python and 90 Node tests, docs links. Package smoke outside the checkout rebuilt the same wheel SHA-256."
+    },
+    "coding_edit_test": {
+      "status": "PASS_SUPERVISED",
+      "run_id": "v101-coding-01",
+      "result": "Agent read before editing, then edited and ran checks; frozen Task02 grader 2/2 and the independent date probe passed in 107.6 s. A saved-session follow-up re-ran the tests and inspected the current Git diff. No operator code correction."
+    },
+    "unsupported_claims": {
+      "status": "PASS_REFUSAL_MECHANISM",
+      "run_id": "v101-claim-01",
+      "result": "A deliberately failing check exited 7 in three controller rounds; state stayed blocked and accepted=false despite model completion. The driver marked the negative test incomplete, as expected."
+    },
+    "compaction_restart": {
+      "status": "PASS_SUPERVISED",
+      "run_id": "v101-coding-01 and v101-sustained-01",
+      "result": "Two native compactions with fresh server/client processes in each project. After the operator reverted the fix outside the session, the checkpoint recorded repository_changed_since_previous_checkpoint=true, kept the failed check, marked the earlier unittest pass stale and kept completion unverified. The resumed Agent stated the goal, failing check and unverified status, took the correct next action, and the grader and probe passed again. In its first resume the model itself misreported 'no files changed' because Git was clean; the checkpoint was correct."
+    },
+    "browser_search": {
+      "status": "PASS_SUPERVISED",
+      "run_id": "v101-sustained-01",
+      "result": "Native Browse added a zero-minute row, reloaded and saw it (confirmed in the disposable DB), exercised the duplicate-ID error at 390x844, inspected console and network and took a screenshot; native search returned and opened https://opencode.ai/docs/compaction/. Browser and search MCP servers connected in doctor --deep on Chrome 158. The independent browser check passed 11/11 at 390x844 and 1280x800."
+    },
+    "resource_safety": {
+      "status": "PASS_WITH_PHYSICAL_LIMIT",
+      "result": "2,161 daily-use guard samples across 10 stages: all normal pressure, zero swap growth in every stage, no guard stop. Critical pressure was not forced; offline regressions cover critical, missing-telemetry, swap and listener paths."
+    },
+    "sustained_supervised_use": {
+      "status": "PASS_SUPERVISED_AFTER_CORRECTION",
+      "run_id": "v101-sustained-01",
+      "active_minutes": 50.9,
+      "active_accounting": "Disjoint native turns: plan 77.974 s, build 1506.859 s, UI repair 1206.928 s, browse 135.889 s, handoff 125.813 s. Operator checks and corrections are excluded.",
+      "result": "Build and UI-repair stages reached their 1,500 s and 1,200 s limits without finishing their turns. The operator restored the original 503 injection path the Agent had broken (hand-built response with Content-Length 31 for a 30-byte body); the backend grader then passed 2/2. After a compaction and fresh process, the Agent's UI repair passed the independent browser check 11/11. In the read-only handoff stage the Agent wrote HANDOFF.md and claimed no next action was required. Tracked as #276 and #277."
+    },
+    "final_artifact_lifecycle": {
+      "status": "PASS_OWNER_PATH",
+      "result": "Clean-main wheel and installer hashes verified and installed. kryn rollback restored 1.0.0; reinstalling the exact wheel reactivated 1.0.1; kryn uninstall removed the launcher with data retained; reinstall reactivated 1.0.1. Both trial sessions (220 messages) were retained. doctor --deep verified every model and browser file; kryn bench protocol smoke passed; the authenticated GUI server answered 401 without credentials. Published release assets downloaded anonymously matched SHA256SUMS, and the README install command from a clean shell verified the installer pin and reported 1.0.1 active with integrity checked."
+    }
+  },
+  "open_issues": [
+    "#276 Task12 Agent stages hit the time limit with working code",
+    "#277 Agent wrote a file in a read-only handoff and claimed 'none required'",
+    "#278 Mark Chrome 158 as tested"
+  ],
+  "research_only_failures": [
+    "Autonomous Task12 completion within stage limits is still not repeatable.",
+    "Fresh local Reviewer accuracy is insufficient for acceptance authority.",
+    "Useful reasoning throughout the full configured 96K context is not established.",
+    "No matched frontier-model comparison exists under the local/free-only constraint."
+  ],
+  "raw_evidence": "Ignored evals/runs/v101-coding-01, v101-claim-01 and v101-sustained-01, with lifecycle and public-install logs, are retained on the owner's qualification Mac; user data and raw transcripts are not published."
+}
