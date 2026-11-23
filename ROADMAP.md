@@ -12,7 +12,7 @@ Collected from the [research protocol](research/PROTOCOL.md) and [evaluation gui
 
 | Gate | Passing means | Today |
 |---|---|---|
-| 1. Supervised daily use | The [v1 qualification](docs/v1-qualification.md) on the final release wheel | **Passed** for v1.0.0 ([receipt](evals/history/2026-10-02-v1-final-qualification.json)). v1.0.1 re-runs it. |
+| 1. Supervised daily use | The [v1 qualification](docs/v1-qualification.md) on the final release wheel | **Passed** for v1.0.0 ([receipt](evals/history/2026-10-02-v1-final-qualification.json)) and v1.0.1 ([receipt](evals/history/2026-11-23-v1.0.1-qualification.json)), with one disclosed operator correction each time. |
 | 2. Same-model uplift | At least 15 points more strictly accepted work than plain OpenCode on the same model, 95% lower bound above zero, no rise in false completions, at least 1.1x accepted work per hour | **Not shown.** No measurable uplift on the public subsets; eight single-mechanism candidates so far, all reverted. |
 | 3. Sealed holdout | 30 fresh tasks across ten categories, graded outside the candidate's reach | **Not started.** The first 30 drafts were exposed before sealing and [demoted to development data](research/HOLDOUT_BOUNDARY.md). |
 | 4. External transfer | Pinned SWE-bench Verified and Lite subsets and Terminal-Bench 2.0 tasks through their official evaluators | **First subsets run.** SWE-bench 0/6 vs native 1/6 ([EXTERNAL.md](research/EXTERNAL.md)); Terminal-Bench 1/2 each ([HARBOR_SUBSET.md](research/HARBOR_SUBSET.md)). |
@@ -25,7 +25,7 @@ Collected from the [research protocol](research/PROTOCOL.md) and [evaluation gui
 
 Each milestone is a [GitHub milestone](https://github.com/PranavMishra28/kryn/milestones) with its issues.
 
-1. **[v1.0.1: launchable on today's Macs](https://github.com/PranavMishra28/kryn/milestone/1).** Ship the security fixes (#250) and the newer-Chrome fix (#256) with a full owner qualification. Owner-only.
+1. **[v1.0.1: launchable on today's Macs](https://github.com/PranavMishra28/kryn/milestone/1).** Done: [v1.0.1](https://github.com/PranavMishra28/kryn/releases/tag/v1.0.1) shipped the security fixes (#250) and the newer-Chrome fix (#256) after a full owner qualification.
 2. **[More Macs](https://github.com/PranavMishra28/kryn/milestone/2).** A shareable results block (#257), a 32 to 36 GB profile (#258), 27B-class models on 64 GB+ (#259), a real demo (#260), the oMLX port (#248, #252).
 3. **[Benchmarks anyone can rerun](https://github.com/PranavMishra28/kryn/milestone/3).** One-command Terminal-Bench reruns (#261), a results table that accepts PRs (#262), community development tasks (#263), docs checks (#253). The sealed holdout comes after these, written by people who have never seen the candidate.
 4. **[Research ladder](https://github.com/PranavMishra28/kryn/milestone/4).** One mechanism at a time: context selection (#264, with #247 as the open candidate), verifier-driven repair (#265), continuity (#266), adaptive reasoning (#267), cross-project memory (#268, after #249), and test integrity (#269).

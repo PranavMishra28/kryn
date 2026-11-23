@@ -1,4 +1,6 @@
-# KRYN v1.0.0 status
+# KRYN v1.0.1 status
+
+**v1.0.1** ([release](https://github.com/PranavMishra28/kryn/releases/tag/v1.0.1), [qualification receipt](evals/history/2026-11-23-v1.0.1-qualification.json)) is the current release: the three privately reported boundary fixes and a launch fix for Chrome newer than 154, re-qualified on the owner Mac with Chrome 158 from wheel `03d4f606852418e4e430ee92c7819da23e3e65e8f2cb7cb39bb65d851b8d7ee1` (commit `8270896`). The model profile and supervised scope are unchanged. Every gate passed under supervision; the sustained project again needed one disclosed operator correction, two Agent stages hit their time limits with working code (#276), and a read-only handoff wrote a file and overstated completion (#277). The v1.0.0 record below is unchanged.
 
 KRYN v1.0.0 is [published](https://github.com/PranavMishra28/kryn/releases/tag/v1.0.0), anonymously installable, and active on the qualification Mac. It is a local-first **human-supervised coding workspace** for native Apple Silicon macOS 26/27 with at least 48 GiB unified memory. The released wheel came from commit `4038a77ebea5f421b08b055c9aa768dcf12a890b` and has SHA-256 `3356318cc8335c65e14d88d8c0acd64bbf49ed288f34ab342c83f09caaeb54b1`. [Install and use it](README.md) · [Qualification contract](docs/v1-qualification.md) · [Final bounded receipt](evals/history/2026-10-02-v1-final-qualification.json).
 
