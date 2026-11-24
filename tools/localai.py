@@ -410,11 +410,11 @@ def runtime_identity():
 def ensure_runtime():
     try:
         return runtime_metadata()
-    except (OSError, urllib.error.URLError):
+    except (OSError, urllib.error.URLError, json.JSONDecodeError):
         with socket.socket() as connection:
             connection.settimeout(1)
             require(connection.connect_ex(("127.0.0.1", 8000)) != 0,
-                    "Port 8000 is occupied but runtime metadata failed; inspect it before starting oMLX")
+                    "Port 8000 is occupied but runtime metadata failed; inspect it with lsof -nP -iTCP:8000 -sTCP:LISTEN before starting oMLX")
     print("Starting the owned oMLX app…", file=sys.stderr, flush=True)
     runtime_command("start")
     return runtime_metadata()

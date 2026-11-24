@@ -29,6 +29,8 @@ protected uplift.
 [PUBLIC_UI_RESOURCE_PROBE.md](PUBLIC_UI_RESOURCE_PROBE.md) records a one-turn
 public Task06 browser/resource diagnostic: initial browser dispatch worked,
 but strict guard and UI acceptance failed.
+[FALSE_COMPLETIONS.md](FALSE_COMPLETIONS.md) indexes every false completion
+recorded in these notes, with the line that records each one.
 [PRESERVED_TESTS.md](PRESERVED_TESTS.md) records the rejected explicit
 preserved-test guard screen: the functional grader passed, but the Agent timed
 out and the candidate guard never fired. Its code was reverted.
