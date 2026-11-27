@@ -1,0 +1,13 @@
+{
+  "task01": {
+    "seed_repo": {
+      "taskboard_lite/report.py": "d8c8e4c2a6b4f8e6d4a2b8c6e4f8a2d6c4b8a6e4f2d8c6a4b8e2d6f4",
+      "data/entries.csv": "a4b8c6d2e8f4a6c2b8e4d6f8a2c4b6e8d4f2a8c6b4e2d8f6a4",
+      "test_existing.py": "c6b8a4d2e8f6a2c4b8e4d6f2a8c6e4b2d8f4a6c2b8e4d6f8a2"
+    },
+    "reference_solution": {
+      "taskboard_lite/report.py": "f2d8c6a4b8e2d6f4a2c8b6e4d8f2a6c4b8e2d6f4a2c8b6e4d8f6"
+    },
+    "grader.py": "e4d8f2a6c4b8e2d6f4a2c8b6e4d8f2a6c4b8e2d6f4a2c8b6e4d8f6a2"
+  }
+}
