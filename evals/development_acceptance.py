@@ -54,6 +54,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("workspace", type=Path)
     parser.add_argument("evidence", type=Path)
+    parser.add_argument("--verifier-driven-repair", action="store_true", 
+                        help="Enable verifier-driven repair mechanism")
+    parser.add_argument("--original-prompt", type=Path, 
+                        help="Original prompt for verifier-driven repair")
     args = parser.parse_args()
     workspace, base = args.workspace.resolve(), args.evidence.resolve()
     if not (workspace / ".git").is_dir() or base.is_relative_to(workspace):
@@ -69,6 +73,49 @@ def main():
     results["task06_browser"] = browser(workspace, evidence, "task06")
     results["cancel_edit_browser"] = browser(workspace, evidence, "cancel")
     passed = all(item["pass"] for item in results.values())
+    
+    # Handle verifier-driven repair if enabled
+    if args.verifier_driven_repair and not passed and args.original_prompt:
+        from pathlib import Path
+        import subprocess
+        
+        repair_output = evidence / "verifier_driven_repair"
+        repair_output.mkdir(mode=0o700)
+        
+        # Run verifier-driven repair controller
+        cmd = [
+            sys.executable, 
+            str(ROOT / "evals/verifier_driven_repair.py"),
+            str(workspace),
+            str(evidence),
+            str(args.original_prompt),
+            str(evidence / "result.json"),
+            str(repair_output)
+        ]
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            repair_analysis = json.loads(result.stdout)
+            
+            # Update results with repair information
+            results["verifier_driven_repair"] = {
+                "enabled": True,
+                "failure_count": repair_analysis.get("failure_count", 0),
+                "repair_prompt": repair_analysis.get("repair_prompt", "")
+            }
+            
+            # Validate repair if repair prompt was generated
+            if repair_analysis.get("repair_prompt"):
+                # This would trigger the actual repair in a real implementation
+                # For now, we just mark that repair was attempted
+                results["verifier_driven_repair"]["repair_attempted"] = True
+                
+        except subprocess.CalledProcessError as e:
+            results["verifier_driven_repair"] = {
+                "enabled": True,
+                "error": f"Repair controller failed: {e.stderr}"
+            }
+    
     (evidence / "result.json").write_text(json.dumps({"pass": passed, "checks": results}, indent=2) + "\n")
     summary = {name: {"pass": item["pass"], "observed": item.get("observed"),
                       "output": item.get("output", "")[-450:] if not item["pass"] else ""}
